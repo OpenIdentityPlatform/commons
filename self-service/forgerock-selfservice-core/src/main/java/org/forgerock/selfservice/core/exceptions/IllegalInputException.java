@@ -25,6 +25,8 @@ import org.forgerock.json.resource.BadRequestException;
  */
 public final class IllegalInputException extends BadRequestException {
 
+    private static final long serialVersionUID = 1L;
+
     /**
      * Creates a new exception instance.
      *

@@ -16,15 +16,12 @@
 
 package org.forgerock.selfservice.example;
 
-import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
-
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.StageType;
 import org.forgerock.selfservice.core.exceptions.IllegalInputException;
-import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 
@@ -35,11 +32,18 @@ import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
  */
 public class ResetStage implements ProgressStage<ResetConfig> {
 
-    private static final String RESET_TAG = "reset";
+    @Override
+    public JsonValue gatherInitialRequirements(ProcessContext context,
+                                               ResetConfig config) throws IllegalInputException {
+        return RequirementsBuilder
+                .newInstance("Reset password")
+                .addRequireProperty("password", "Password")
+                .build();
+    }
 
     @Override
-    public StageResponse advance(ProcessContext context, SnapshotAuthor snapshotAuthor,
-                                 ResetConfig config) throws IllegalInputException {
+    public StageResponse advance(ProcessContext context, ResetConfig config,
+                                 SnapshotAuthor snapshotAuthor) throws IllegalInputException {
 
         String emailAddress = context.getState("mail");
 
@@ -47,34 +51,17 @@ public class ResetStage implements ProgressStage<ResetConfig> {
             throw new IllegalInputException("Missing email address");
         }
 
-        switch (context.getStageTag()) {
-            case EMPTY_TAG:
-                JsonValue requirements = RequirementsBuilder
-                        .newInstance("Reset password")
-                        .addRequireProperty("password", "Password")
-                        .build();
+        String password = context.getInput().get("password").asString();
 
-                return StageResponse
-                        .newBuilder()
-                        .setRequirements(requirements)
-                        .setStageTag(RESET_TAG)
-                        .build();
-
-            case RESET_TAG:
-                String password = context.getInput().get("password").asString();
-
-                if (password == null || password.isEmpty()) {
-                    throw new IllegalInputException("Missing password");
-                }
-
-                System.out.println("Reset password for " + emailAddress + " to " + password);
-
-                return StageResponse
-                        .newBuilder()
-                        .build();
+        if (password == null || password.isEmpty()) {
+            throw new IllegalInputException("Missing password");
         }
 
-        throw new IllegalStageTagException(context.getStageTag());
+        System.out.println("Reset password for " + emailAddress + " to " + password);
+
+        return StageResponse
+                .newBuilder()
+                .build();
     }
 
     @Override

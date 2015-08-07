@@ -1,3 +1,19 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015 ForgeRock AS.
+ */
+
 package org.forgerock.selfservice.stages.email;
 
 import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
@@ -5,9 +21,9 @@ import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
-import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.StageType;
+import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
@@ -19,38 +35,31 @@ import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
  */
 public class EmailStage implements ProgressStage<EmailStageConfig> {
 
-    private static final String SEND_EMAIL_TAG = "sendEmail";
     private static final String VALIDATE_LINK_TAG = "validateLinkTag";
 
     @Override
-    public StageResponse advance(ProcessContext context, SnapshotAuthor snapshotAuthor,
-                                 EmailStageConfig config) throws IllegalInputException {
+    public JsonValue gatherInitialRequirements(ProcessContext context, EmailStageConfig config) {
+        return RequirementsBuilder
+                .newInstance("Reset your password")
+                .addRequireProperty("mail", "Email address for account")
+                .build();
+    }
+
+    @Override
+    public StageResponse advance(ProcessContext context, EmailStageConfig config,
+                                 SnapshotAuthor snapshotAuthor) throws IllegalInputException {
         switch (context.getStageTag()) {
-            case EMPTY_TAG:
-                return requestEmail();
-            case SEND_EMAIL_TAG:
-                return sendEmail(context, snapshotAuthor);
-            case VALIDATE_LINK_TAG:
-                return validateLink(context);
+        case EMPTY_TAG:
+            return sendEmail(context, snapshotAuthor);
+        case VALIDATE_LINK_TAG:
+            return validateLink(context);
         }
 
         throw new IllegalStageTagException(context.getStageTag());
     }
 
-    private StageResponse requestEmail() {
-        JsonValue requirements = RequirementsBuilder
-                .newInstance("Reset your password")
-                .addRequireProperty("mail", "Email address for account")
-                .build();
-
-        return StageResponse
-                .newBuilder()
-                .setRequirements(requirements)
-                .setStageTag(SEND_EMAIL_TAG)
-                .build();
-    }
-
-    private StageResponse sendEmail(ProcessContext context, SnapshotAuthor snapshotAuthor) throws IllegalInputException {
+    private StageResponse sendEmail(ProcessContext context,
+                                    SnapshotAuthor snapshotAuthor) throws IllegalInputException {
         String emailAddress = context
                 .getInput()
                 .get("mail")

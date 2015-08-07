@@ -14,34 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.example;
-
-import org.forgerock.selfservice.core.ProcessStore;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
- * Simple local stores in memory.
- *
- * @since 0.1.0
+ * This package contains a basic example implementation that can be used to exercise the framework.
  */
-public class BasicLocalStorage implements ProcessStore {
-
-    private final Map<String, Map<String, String>> localStore;
-
-    public BasicLocalStorage() {
-        localStore = new ConcurrentHashMap<>();
-    }
-
-    @Override
-    public Map<String, String> remove(String key) {
-        return localStore.remove(key);
-    }
-
-    @Override
-    public void add(String key, Map<String, String> state) {
-        localStore.put(key, state);
-    }
-
-}
+package org.forgerock.selfservice.example;

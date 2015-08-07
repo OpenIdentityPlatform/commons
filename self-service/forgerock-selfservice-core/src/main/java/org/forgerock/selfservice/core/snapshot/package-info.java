@@ -14,27 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.stages.email;
-
-import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.StageType;
-
 /**
- * Configuration for the email stage.
- *
- * @since 0.1.0
+ * This package contains the implementation for creating and management of snapshots.
  */
-public class EmailStageConfig implements StageConfig {
-
-    /**
-     * Email stage type.
-     */
-    public static final StageType<EmailStageConfig> TYPE =
-            StageType.valueOf("emailValidation", EmailStageConfig.class);
-
-    @Override
-    public StageType<?> getStageType() {
-        return TYPE;
-    }
-
-}
+package org.forgerock.selfservice.core.snapshot;

@@ -39,14 +39,29 @@ public final class ProcessInstanceConfig {
         storageType = builder.storageType;
     }
 
+    /**
+     * Gets the ordered list of stage configurations.
+     *
+     * @return stage configurations
+     */
     public List<StageConfig> getStageConfigs() {
         return stageConfigs;
     }
 
+    /**
+     * Gets the snapshot token type.
+     *
+     * @return snapshot token type
+     */
     public SnapshotTokenType getTokenType() {
         return tokenType;
     }
 
+    /**
+     * Gets the storage type, whether local or stateless.
+     *
+     * @return the storage type
+     */
     public StorageType getStorageType() {
         return storageType;
     }
@@ -64,29 +79,66 @@ public final class ProcessInstanceConfig {
             stageConfigs = new ArrayList<>();
         }
 
+        /**
+         * Add a new stage config.
+         *
+         * @param stageConfig
+         *         stage config
+         *
+         * @return this builder
+         */
         public Builder addStageConfig(StageConfig stageConfig) {
             Reject.ifNull(stageConfig);
             stageConfigs.add(stageConfig);
             return this;
         }
 
+        /**
+         * Add a list of new stage configs.
+         *
+         * @param stageConfigs
+         *         stage configs
+         *
+         * @return this builder
+         */
         public Builder addStageConfigs(List<StageConfig> stageConfigs) {
             Reject.ifNull(stageConfigs);
             this.stageConfigs.addAll(stageConfigs);
             return this;
         }
 
+        /**
+         * Defines the snapshot token type to use.
+         *
+         * @param tokenType
+         *         the snapshot token type
+         *
+         * @return this builder
+         */
         public Builder setTokenType(SnapshotTokenType tokenType) {
             Reject.ifNull(tokenType);
             this.tokenType = tokenType;
             return this;
         }
 
+        /**
+         * The store type, whether local or stateless.
+         *
+         * @param storageType
+         *         the storage type
+         *
+         * @return this builder
+         */
         public Builder setStorageType(StorageType storageType) {
             this.storageType = storageType;
             return this;
         }
 
+        /**
+         * Builds a config instance.
+         *
+         * @return a new config instance
+         */
         public ProcessInstanceConfig build() {
             Reject.ifTrue(stageConfigs.isEmpty());
             Reject.ifNull(tokenType, storageType);
@@ -103,7 +155,15 @@ public final class ProcessInstanceConfig {
      * a local store and the returning token will be used to key that state.
      */
     public enum StorageType {
-        LOCAL, STATELESS
+        /**
+         * State should be preserved locally.
+         */
+        LOCAL,
+
+        /**
+         * State is serialised into request/response to avoid server-side state management.
+         */
+        STATELESS
     }
 
     /**

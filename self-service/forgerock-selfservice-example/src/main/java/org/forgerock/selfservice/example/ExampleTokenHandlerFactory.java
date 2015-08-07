@@ -16,24 +16,30 @@
 
 package org.forgerock.selfservice.example;
 
+import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenType;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
-import org.forgerock.json.jose.jws.JwsAlgorithm;
-import org.forgerock.json.jose.jws.SigningManager;
 
 /**
  * Basic token handler factory that always returns the same handler.
  *
  * @since 0.1.0
  */
-public class BasicSnapshotTokenHandlerFactory implements SnapshotTokenHandlerFactory {
+public final class ExampleTokenHandlerFactory implements SnapshotTokenHandlerFactory {
 
     private final byte[] sharedKey;
 
-    public BasicSnapshotTokenHandlerFactory(byte[] sharedKey) {
+    /**
+     * Creates a new snapshot token handler factory.
+     *
+     * @param sharedKey
+     *         shared key used by the underlying token handler
+     */
+    public ExampleTokenHandlerFactory(byte[] sharedKey) {
         this.sharedKey = sharedKey;
     }
 

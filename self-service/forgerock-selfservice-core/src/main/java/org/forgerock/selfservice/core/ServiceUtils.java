@@ -28,6 +28,9 @@ import org.forgerock.json.JsonValue;
  */
 public final class ServiceUtils {
 
+    /**
+     * Represents an empty stage tag.
+     */
     public static final String EMPTY_TAG = "";
 
     private ServiceUtils() {

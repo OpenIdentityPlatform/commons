@@ -16,24 +16,36 @@
 
 package org.forgerock.selfservice.example;
 
+import org.forgerock.selfservice.core.ProgressStage;
+import org.forgerock.selfservice.core.ProgressStageFactory;
 import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.core.config.StageConfig;
+import org.forgerock.selfservice.stages.email.EmailStage;
+import org.forgerock.selfservice.stages.email.EmailStageConfig;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Configuration for the password reset stage.
+ * Basic progress stage factory.
  *
  * @since 0.1.0
  */
-public class ResetConfig implements StageConfig {
+public final class ExampleProgressStageFactory implements ProgressStageFactory {
+
+    private final Map<StageType<?>, ProgressStage<?>> progressStages;
 
     /**
-     * Reset password stage type.
+     * Creates a new basic progress stage factory.
      */
-    public static final StageType<ResetConfig> TYPE = StageType.valueOf("resetStage", ResetConfig.class);
+    public ExampleProgressStageFactory() {
+        progressStages = new HashMap<>();
+        progressStages.put(EmailStageConfig.TYPE, new EmailStage());
+        progressStages.put(ResetConfig.TYPE, new ResetStage());
+    }
 
     @Override
-    public StageType<?> getStageType() {
-        return TYPE;
+    public ProgressStage<?> get(StageType<?> type) {
+        return progressStages.get(type);
     }
 
 }

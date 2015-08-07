@@ -16,33 +16,35 @@
 
 package org.forgerock.selfservice.example;
 
-import org.forgerock.selfservice.core.ProgressStage;
-import org.forgerock.selfservice.core.ProgressStageFactory;
-import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.stages.email.EmailStage;
-import org.forgerock.selfservice.stages.email.EmailStageConfig;
+import org.forgerock.selfservice.core.ProcessStore;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Basic progress stage factory.
+ * Simple local stores in memory.
  *
  * @since 0.1.0
  */
-public class BasicProgressStageFactory implements ProgressStageFactory {
+public final class SimpleInMemoryStore implements ProcessStore {
 
-    private final Map<StageType<?>, ProgressStage<?>> progressStages;
+    private final Map<String, Map<String, String>> localStore;
 
-    public BasicProgressStageFactory() {
-        progressStages = new HashMap<>();
-        progressStages.put(EmailStageConfig.TYPE, new EmailStage());
-        progressStages.put(ResetConfig.TYPE, new ResetStage());
+    /**
+     * Creates a new basic local storage instance.
+     */
+    public SimpleInMemoryStore() {
+        localStore = new ConcurrentHashMap<>();
     }
 
     @Override
-    public ProgressStage<?> get(StageType<?> type) {
-        return progressStages.get(type);
+    public Map<String, String> remove(String key) {
+        return localStore.remove(key);
+    }
+
+    @Override
+    public void add(String key, Map<String, String> state) {
+        localStore.put(key, state);
     }
 
 }
