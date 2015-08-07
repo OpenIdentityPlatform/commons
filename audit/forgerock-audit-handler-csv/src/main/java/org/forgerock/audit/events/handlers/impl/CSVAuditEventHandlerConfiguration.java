@@ -78,7 +78,7 @@ public class CSVAuditEventHandlerConfiguration {
 
         private char quoteChar = '"';
         private char delimiterChar = ',';
-        private String endOfLineSymbols = "\r\n";
+        private String endOfLineSymbols = System.getProperty("line.separator");
 
         public char getQuoteChar() {
             return quoteChar;
