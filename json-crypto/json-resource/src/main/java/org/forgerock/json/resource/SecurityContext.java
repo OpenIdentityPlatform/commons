@@ -24,6 +24,7 @@ import java.util.Map;
 
 import org.forgerock.http.context.AbstractContext;
 import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 
 /**
  * A {@link Context} containing information about the client performing the
@@ -46,6 +47,25 @@ import org.forgerock.http.Context;
  * <pre>
  * Context context = ...;
  * String realm = (String) context.asContext(SecurityContext.class).getAuthorizationId(AUTHZID_REALM);
+ * </pre>
+ *
+ * <pre>
+ * {
+ *   "id"     : "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+ *   "class"  : "org.forgerock.json.resource.SecurityContext",
+ *   "parent" : {
+ *       ...
+ *   },
+ *   "authenticationId" : "bjensen@example.com",
+ *   "authorizationId" : {
+ *       "id"        : "1230fb7e-f83b-464d-19ef-789b6af66456",
+ *       "component" : "users",
+ *       "roles"     : [
+ *           "administrators"
+ *       ],
+ *       "dn"        : "cn=bjensen,ou=people,dc=example,dc=com"
+ *   }
+ * }
  * </pre>
  */
 public final class SecurityContext extends AbstractContext {
@@ -79,8 +99,9 @@ public final class SecurityContext extends AbstractContext {
      */
     public static final String AUTHZID_ROLES = "roles";
 
-    private final String authenticationId;
-    private final Map<String, Object> authorizationId;
+    // Persisted attribute names
+    private static final String ATTR_AUTHENTICATION_ID = "authenticationId";
+    private static final String ATTR_AUTHORIZATION_ID = "authorizationId";
 
     /**
      * Creates a new security context having the provided parent and an ID
@@ -129,10 +150,23 @@ public final class SecurityContext extends AbstractContext {
     public SecurityContext(final String id, final Context parent,
             final String authenticationId, final Map<String, Object> authorizationId) {
         super(id, "security", checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
-        this.authenticationId = authenticationId != null ? authenticationId : "";
-        this.authorizationId = authorizationId != null
-                ? Collections.unmodifiableMap(new LinkedHashMap<>(authorizationId))
-                : Collections.<String, Object>emptyMap();
+        data.put(ATTR_AUTHENTICATION_ID, authenticationId != null ? authenticationId : "");
+        data.put(ATTR_AUTHORIZATION_ID, authorizationId != null
+                ? Collections.unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
+                : Collections.<String, Object>emptyMap());
+    }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    SecurityContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
     }
 
     /**
@@ -146,7 +180,7 @@ public final class SecurityContext extends AbstractContext {
      *         is unauthenticated.
      */
     public String getAuthenticationId() {
-        return authenticationId;
+        return data.get(ATTR_AUTHENTICATION_ID).asString();
     }
 
     /**
@@ -169,6 +203,6 @@ public final class SecurityContext extends AbstractContext {
      *         user.
      */
     public Map<String, Object> getAuthorizationId() {
-        return authorizationId;
+        return data.get(ATTR_AUTHORIZATION_ID).asMap();
     }
 }
