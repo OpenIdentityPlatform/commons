@@ -19,7 +19,7 @@ package org.forgerock.json.resource.http;
 import java.util.Map;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.context.HttpContext;
+import org.forgerock.http.context.HttpRequestContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;
@@ -131,13 +131,13 @@ public final class SecurityContextFactory implements HttpContextFactory {
      *             If one of the attributes was present but had the wrong type.
      */
     public SecurityContext createContext(Context parent) throws ResourceException {
-        HttpContext httpContext = parent.asContext(HttpContext.class);
-        String authcid = getAuthenticationIdAttribute(ATTRIBUTE_AUTHCID, httpContext);
-        Map<String, Object> authzid = getAuthorizationIdAttribute(ATTRIBUTE_AUTHZID, httpContext);
+        HttpRequestContext httpRequestContext = parent.asContext(HttpRequestContext.class);
+        String authcid = getAuthenticationIdAttribute(ATTRIBUTE_AUTHCID, httpRequestContext);
+        Map<String, Object> authzid = getAuthorizationIdAttribute(ATTRIBUTE_AUTHZID, httpRequestContext);
         return new SecurityContext(parent, authcid, authzid);
     }
 
-    private String getAuthenticationIdAttribute(String attributeName, HttpContext context)
+    private String getAuthenticationIdAttribute(String attributeName, HttpRequestContext context)
             throws InternalServerErrorException {
         try {
             return (String) context.getAttributes().get(attributeName);
@@ -152,7 +152,7 @@ public final class SecurityContextFactory implements HttpContextFactory {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> getAuthorizationIdAttribute(String attributeName,
-            HttpContext context) throws InternalServerErrorException {
+            HttpRequestContext context) throws InternalServerErrorException {
         try {
             return (Map<String, Object>) context.getAttributes().get(attributeName);
         } catch (final ClassCastException e) {
