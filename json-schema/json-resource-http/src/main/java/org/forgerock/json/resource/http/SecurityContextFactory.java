@@ -174,6 +174,8 @@ public final class SecurityContextFactory implements HttpContextFactory {
      * {@link ResourceException} will be thrown if they are present but have the
      * wrong type.
      *
+     * @param context
+     *            The parent context.
      * @param request
      *            The HTTP request from which the authentication ID and
      *            authorization ID attributes should be obtained.
@@ -187,5 +189,4 @@ public final class SecurityContextFactory implements HttpContextFactory {
             throws ResourceException {
         return createContext(context);
     }
-
 }

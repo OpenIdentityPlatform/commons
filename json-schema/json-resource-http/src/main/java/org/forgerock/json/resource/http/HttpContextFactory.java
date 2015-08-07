@@ -22,7 +22,7 @@ import org.forgerock.json.resource.ResourceException;
 /**
  * A factory which is responsible for creating new request {@code Context}s for
  * each JSON request. The returned context must include a
- * {@link org.forgerock.http.RootContext} as its root and may include
+ * {@link org.forgerock.http.context.RootContext} as its root and may include
  * zero or more sub-contexts.
  * <p>
  * As an example, a context factory may return a context chain which includes
@@ -33,6 +33,8 @@ public interface HttpContextFactory {
     /**
      * Returns the context which should be used for the provided HTTP request.
      *
+     * @param parent
+     *            The parent context.
      * @param request
      *            The HTTP request which is about to be processed.
      * @return The context which should be used for the provided HTTP request.

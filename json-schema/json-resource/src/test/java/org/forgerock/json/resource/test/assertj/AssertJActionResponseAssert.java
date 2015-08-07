@@ -18,7 +18,6 @@ package org.forgerock.json.resource.test.assertj;
 
 import org.assertj.core.api.AbstractAssert;
 import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert.AbstractJsonValueAssert;
 import org.forgerock.util.promise.Promise;
@@ -48,7 +47,8 @@ public class AssertJActionResponseAssert extends AbstractAssert<AssertJActionRes
     }
 
     public static class AssertJResourcePromiseAssert
-            extends AbstractAssertJPromiseAssert<ActionResponse, AssertJResourcePromiseAssert, AssertJActionResponseAssert> {
+            extends AbstractAssertJPromiseAssert<ActionResponse, AssertJResourcePromiseAssert,
+            AssertJActionResponseAssert> {
 
         protected AssertJResourcePromiseAssert(Promise<ActionResponse, ?> promise) {
             super(promise, AssertJResourcePromiseAssert.class);

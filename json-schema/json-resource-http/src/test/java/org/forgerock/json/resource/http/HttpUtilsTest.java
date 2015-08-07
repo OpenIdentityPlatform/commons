@@ -285,10 +285,10 @@ public class HttpUtilsTest {
     }
 
     @DataProvider
-    public Object[][] ValidGetMethodContentTypeCombination() {
+    public Object[][] validGetMethodContentTypeCombination() {
         return new Object[][]{
-                { HttpUtils.METHOD_GET, HttpUtils.MIME_TYPE_APPLICATION_JSON, HttpUtils.MIME_TYPE_APPLICATION_JSON },
-                { HttpUtils.METHOD_GET, HttpUtils.MIME_TYPE_TEXT_PLAIN, HttpUtils.MIME_TYPE_TEXT_PLAIN }
+            { HttpUtils.METHOD_GET, HttpUtils.MIME_TYPE_APPLICATION_JSON, HttpUtils.MIME_TYPE_APPLICATION_JSON },
+            { HttpUtils.METHOD_GET, HttpUtils.MIME_TYPE_TEXT_PLAIN, HttpUtils.MIME_TYPE_TEXT_PLAIN }
         };
     }
 
@@ -300,7 +300,7 @@ public class HttpUtilsTest {
         httpRequest.getUri().setQuery(HttpUtils.PARAM_MIME_TYPE + "=" + contentType);
     }
 
-    @Test(dataProvider = "ValidGetMethodContentTypeCombination")
+    @Test(dataProvider = "validGetMethodContentTypeCombination")
     public void testShouldSetResponseContentType(final String method, final String contentType, final String result)
             throws Exception {
         //given
@@ -337,17 +337,17 @@ public class HttpUtilsTest {
     }
 
     @DataProvider
-    public Object[][] ValidPostMethodContentTypeCombination() {
+    public Object[][] validPostMethodContentTypeCombination() {
         return new Object[][]{
-                { HttpUtils.METHOD_POST, HttpUtils.MIME_TYPE_APPLICATION_JSON, HttpUtils.MIME_TYPE_APPLICATION_JSON },
-                { HttpUtils.METHOD_POST, HttpUtils.MIME_TYPE_TEXT_PLAIN, HttpUtils.MIME_TYPE_APPLICATION_JSON },
-                { HttpUtils.METHOD_POST, "Unknown content Type", HttpUtils.MIME_TYPE_APPLICATION_JSON }
+            { HttpUtils.METHOD_POST, HttpUtils.MIME_TYPE_APPLICATION_JSON, HttpUtils.MIME_TYPE_APPLICATION_JSON },
+            { HttpUtils.METHOD_POST, HttpUtils.MIME_TYPE_TEXT_PLAIN, HttpUtils.MIME_TYPE_APPLICATION_JSON },
+            { HttpUtils.METHOD_POST, "Unknown content Type", HttpUtils.MIME_TYPE_APPLICATION_JSON }
         };
     }
 
-    @Test(dataProvider = "ValidPostMethodContentTypeCombination")
-    public void testShouldSetResponseContentTypeForPostMethod(final String method, final String contentType, final String result)
-            throws Exception {
+    @Test(dataProvider = "validPostMethodContentTypeCombination")
+    public void testShouldSetResponseContentTypeForPostMethod(final String method, final String contentType,
+            final String result) throws Exception {
         //given
         org.forgerock.http.protocol.Request httpRequest = newRequest();
 
@@ -365,15 +365,15 @@ public class HttpUtilsTest {
     }
 
     @DataProvider
-    public Object[][] BadJsonContent() {
-        return new Object[][] { 
-                { "" }, // No JSON content
-                { "{{{" }, // Invalid JSON content
-                { "{ \"test\" : \"value\" }garbage" } // trailing garbage JSON content
+    public Object[][] badJsonContent() {
+        return new Object[][] {
+            { "" }, // No JSON content
+            { "{{{" }, // Invalid JSON content
+            { "{ \"test\" : \"value\" }garbage" } // trailing garbage JSON content
         };
     }
 
-    @Test(dataProvider = "BadJsonContent", expectedExceptions = BadRequestException.class)
+    @Test(dataProvider = "badJsonContent", expectedExceptions = BadRequestException.class)
     public void testBadJsonContent(final String badContent) throws Exception {
         // given
         request = newRequest();

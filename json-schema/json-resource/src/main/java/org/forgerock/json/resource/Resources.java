@@ -153,15 +153,15 @@ public final class Resources {
         final Router router = new Router();
 
         // Create a route for the collection.
-        final RequestHandler collectionHandler = fromInterface ?
-                new InterfaceCollectionHandler((CollectionResourceProvider) provider) :
-                new AnnotatedCollectionHandler(provider);
+        final RequestHandler collectionHandler = fromInterface
+                ? new InterfaceCollectionHandler((CollectionResourceProvider) provider)
+                : new AnnotatedCollectionHandler(provider);
         router.addRoute(requestUriMatcher(EQUALS, ""), collectionHandler);
 
         // Create a route for the instances within the collection.
-        final RequestHandler instanceHandler = fromInterface ?
-                new InterfaceCollectionInstance((CollectionResourceProvider) provider) :
-                new AnnotationCollectionInstance(provider);
+        final RequestHandler instanceHandler = fromInterface
+                ? new InterfaceCollectionInstance((CollectionResourceProvider) provider)
+                : new AnnotationCollectionInstance(provider);
         router.addRoute(requestUriMatcher(EQUALS, "{id}"), instanceHandler);
 
         return router;

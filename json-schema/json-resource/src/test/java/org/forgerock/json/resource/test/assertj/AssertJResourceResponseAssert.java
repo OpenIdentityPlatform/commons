@@ -48,7 +48,8 @@ public class AssertJResourceResponseAssert extends AbstractAssert<AssertJResourc
     }
 
     public static class AssertJResourcePromiseAssert
-            extends AbstractAssertJPromiseAssert<ResourceResponse, AssertJResourcePromiseAssert, AssertJResourceResponseAssert> {
+            extends AbstractAssertJPromiseAssert<ResourceResponse, AssertJResourcePromiseAssert,
+            AssertJResourceResponseAssert> {
 
         protected AssertJResourcePromiseAssert(Promise<ResourceResponse, ?> promise) {
             super(promise, AssertJResourcePromiseAssert.class);

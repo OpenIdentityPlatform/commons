@@ -122,7 +122,7 @@ final class HttpAdapter implements Handler {
     public HttpAdapter(ConnectionFactory connectionFactory, final Context parentContext) {
         this(connectionFactory, new HttpContextFactory() {
             @Override
-            public Context createContext(Context parent, org.forgerock.http.protocol.Request request) throws ResourceException {
+            public Context createContext(Context parent, org.forgerock.http.protocol.Request request) {
                 return parentContext;
             }
         });
@@ -153,7 +153,8 @@ final class HttpAdapter implements Handler {
      * @return Promise containing a {@code Response} or {@code ResponseException}.
      */
     @Override
-    public Promise<Response, NeverThrowsException> handle(Context context, org.forgerock.http.protocol.Request request) {
+    public Promise<Response, NeverThrowsException> handle(Context context,
+            org.forgerock.http.protocol.Request request) {
 
         // Dispatch the request based on method, taking into account \
         // method override header.
@@ -516,7 +517,8 @@ final class HttpAdapter implements Handler {
     /**
      * Gets the raw (still url-encoded) resource name from the request. Removes leading and trailing forward slashes.
      */
-    private ResourcePath getResourcePath(Context context, org.forgerock.http.protocol.Request req) throws ResourceException {
+    private ResourcePath getResourcePath(Context context, org.forgerock.http.protocol.Request req)
+            throws ResourceException {
         try {
             if (context.containsContext(UriRouterContext.class)) {
                 ResourcePath reqPath = ResourcePath.valueOf(req.getUri().getRawPath());
@@ -532,7 +534,8 @@ final class HttpAdapter implements Handler {
     private ResourcePath getMatchedUri(Context context) {
         List<ResourcePath> matched = new ArrayList<>();
         if (context.containsContext(UriRouterContext.class)) {
-            for (Context ctx = context.asContext(UriRouterContext.class); ctx != null && ctx.containsContext(UriRouterContext.class); ctx = ctx.getParent()) {
+            for (Context ctx = context.asContext(UriRouterContext.class); ctx != null
+                    && ctx.containsContext(UriRouterContext.class); ctx = ctx.getParent()) {
                 matched.add(ResourcePath.valueOf(ctx.asContext(UriRouterContext.class).getMatchedUri()));
             }
         }

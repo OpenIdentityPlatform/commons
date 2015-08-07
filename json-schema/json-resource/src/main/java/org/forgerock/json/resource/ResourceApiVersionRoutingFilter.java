@@ -31,7 +31,8 @@ import org.forgerock.util.promise.ResultHandler;
  * sets the {@literal Warning} and {@literal Content-API-Version} headers on
  * the response.
  */
-public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.ResourceApiVersionRoutingFilter implements Filter {
+public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.ResourceApiVersionRoutingFilter
+        implements Filter {
 
     ResourceApiVersionRoutingFilter(ResourceApiVersionBehaviourManager behaviourManager) {
         super(behaviourManager);
