@@ -20,6 +20,7 @@ import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.http.context.AbstractContext;
 import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 /**
@@ -31,7 +32,10 @@ import org.forgerock.util.Reject;
  */
 public final class AcceptAPIVersionContext extends AbstractContext {
 
-    private final String protocolName;
+    private static final String ATTR_PROTOCOL_NAME = "protocolName";
+    private static final String ATTR_PROTOCOL_VERSION = "protocolVersion";
+    private static final String ATTR_RESOURCE_VERSION = "resourceVersion";
+
     private final AcceptAPIVersion acceptVersion;
 
     /**
@@ -53,18 +57,46 @@ public final class AcceptAPIVersionContext extends AbstractContext {
         Reject.ifNull(protocolName, "Cannot instantiate AcceptAPIVersionContext with null protocolName");
         Reject.ifNull(acceptVersion.getProtocolVersion(),
                 "Cannot instantiate AcceptAPIVersionContext with null protocolVersion");
-        this.protocolName = protocolName;
-        this.acceptVersion = acceptVersion;
 
+        // Cache locally to avoid unnecessary string parsing.
+        this.acceptVersion = acceptVersion;
+        final Version protocolVersion = acceptVersion.getProtocolVersion();
+        final Version resourceVersion = acceptVersion.getResourceVersion();
+
+        data.put(ATTR_PROTOCOL_NAME,
+                checkNotNull(protocolName, "Cannot instantiate AcceptAPIVersionContext with null protocolName"));
+        data.put(ATTR_PROTOCOL_VERSION,
+                checkNotNull(protocolVersion, "Cannot instantiate AcceptAPIVersionContext with null protocolVersion").toString());
+        if (resourceVersion != null) {
+            data.put(ATTR_RESOURCE_VERSION, resourceVersion.toString());
+        }
     }
 
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    AcceptAPIVersionContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
+        acceptVersion = AcceptAPIVersion
+                .newBuilder()
+                .withDefaultProtocolVersion(data.get(ATTR_PROTOCOL_VERSION).asString())
+                .withDefaultResourceVersion(data.get(ATTR_RESOURCE_VERSION).asString())
+                .expectsProtocolVersion()
+                .build();
+    }
     /**
      * Get the protocol name.
      *
      * @return The protocol name
      */
     public String getProtocolName() {
-        return protocolName;
+        return data.get(ATTR_PROTOCOL_NAME).asString();
     }
 
     /**

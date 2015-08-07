@@ -26,6 +26,7 @@ import java.util.TreeMap;
 import org.forgerock.http.context.AbstractContext;
 import org.forgerock.http.context.ClientInfoContext;
 import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ClientContext;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
@@ -38,9 +39,12 @@ public final class HttpContext extends AbstractContext implements ClientContext 
 
     // TODO: security parameters such as user name, etc?
 
-    private final String method;
-    private final String path;
-    private final String remoteAddress;
+    private static final String ATTR_METHOD = "method";
+    private static final String ATTR_PATH = "path";
+    private static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
+    private static final String ATTR_HEADERS = "headers";
+    private static final String ATTR_PARAMETERS = "parameters";
+
     private final Map<String, List<String>> headers;
     private final Map<String, List<String>> parameters;
 
@@ -53,9 +57,9 @@ public final class HttpContext extends AbstractContext implements ClientContext 
 
     HttpContext(Context parent, final org.forgerock.http.protocol.Request req) {
         super(parent, "http");
-        this.method = HttpUtils.getMethod(req);
-        this.path = getRequestPath(req);
-        this.remoteAddress = getRemoteAddress(parent);
+        data.put(ATTR_METHOD, HttpUtils.getMethod(req));
+        data.put(ATTR_PATH, getRequestPath(req));
+        data.put(ATTR_REMOTE_ADDRESS, getRemoteAddress(parent));
         this.headers = Collections.unmodifiableMap(new LazyMap<>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
@@ -70,6 +74,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                         return result;
                     }
                 }));
+        data.put(ATTR_HEADERS, headers);
         this.parameters = Collections.unmodifiableMap(new LazyMap<>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
@@ -84,6 +89,23 @@ public final class HttpContext extends AbstractContext implements ClientContext 
                         return result;
                     }
                 }));
+        data.put(ATTR_PARAMETERS, parameters);
+    }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public HttpContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
+        this.headers = (Map) data.get(ATTR_HEADERS).required().asMap();
+        this.parameters = (Map) data.get(ATTR_PARAMETERS).required().asMap();
     }
 
     private String getRequestPath(org.forgerock.http.protocol.Request req) {
@@ -147,7 +169,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      *         {@code X-HTTP-Method-Override} header.
      */
     public String getMethod() {
-        return method;
+        return data.get(ATTR_METHOD).asString();
     }
 
     /**
@@ -159,7 +181,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      * @return The address of the client or proxy making the request.
      */
     public String getRemoteAddress() {
-        return remoteAddress;
+        return data.get(ATTR_REMOTE_ADDRESS).asString();
     }
 
     /**
@@ -205,6 +227,6 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      * @return The HTTP request path.
      */
     public String getPath() {
-        return path;
+        return data.get(ATTR_PATH).asString();
     }
 }

@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
 
 import org.forgerock.http.context.AbstractContext;
 import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 /**
@@ -37,6 +38,12 @@ import org.forgerock.util.Reject;
  * @since 2.4.0
  */
 public class AdviceContext extends AbstractContext {
+
+    /** the persisted attribute name for the advices */
+    private static final String ADVICE_ATTR = "advice";
+
+    /** The persisted attribute name for the restricted advice names. */
+    private static final String RESTRICTED_ADVICE_NAMES_ATTR = "restrictedAdviceNames";
 
     private static final Pattern ALLOWED_RFC_CHARACTERS = Pattern.compile("^[\\x20-\\x7E]*$");
 
@@ -54,6 +61,23 @@ public class AdviceContext extends AbstractContext {
     public AdviceContext(Context parent, Collection<String> restrictedAdviceNames) {
         super(parent, "advice");
         this.restrictedAdviceNames.addAll(restrictedAdviceNames);
+        data.put(RESTRICTED_ADVICE_NAMES_ATTR, restrictedAdviceNames);
+        data.put(ADVICE_ATTR, advice);
+    }
+
+    /**
+     * Restore from JSON representation.
+     *
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
+    AdviceContext(final JsonValue savedContext, final ClassLoader classLoader) {
+        super(savedContext, classLoader);
+        restrictedAdviceNames.addAll(data.get(RESTRICTED_ADVICE_NAMES_ATTR).asSet(String.class));
+        advice.putAll(data.get(ADVICE_ATTR).asMapOfList(String.class));
     }
 
     /**
