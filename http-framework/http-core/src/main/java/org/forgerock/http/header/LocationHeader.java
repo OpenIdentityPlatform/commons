@@ -11,12 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2014 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseSingleValuedHeader;
+import static org.forgerock.http.header.HeaderUtil.*;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.forgerock.http.protocol.Header;
 import org.forgerock.http.protocol.Message;
@@ -26,7 +29,7 @@ import org.forgerock.http.protocol.Message;
  * information see <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>
  * §14.30.
  */
-public final class LocationHeader implements Header {
+public final class LocationHeader extends Header {
 
     /**
      * Constructs a new header, initialized from the specified message.
@@ -90,7 +93,15 @@ public final class LocationHeader implements Header {
     }
 
     @Override
-    public String toString() {
-        return locationUri;
+    public List<String> getValues() {
+        return locationUri != null ? Collections.singletonList(locationUri) : Collections.<String>emptyList();
+    }
+
+    static class Factory extends AbstractSingleValuedHeaderFactory<LocationHeader> {
+
+        @Override
+        public LocationHeader parse(String value) {
+            return valueOf(value);
+        }
     }
 }

@@ -16,7 +16,10 @@
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseSingleValuedHeader;
+import static java.util.Collections.*;
+import static org.forgerock.http.header.HeaderUtil.*;
+
+import java.util.List;
 
 import org.forgerock.http.protocol.Header;
 import org.forgerock.http.protocol.Message;
@@ -28,7 +31,7 @@ import org.forgerock.util.Reject;
  * Processes the <strong>{@code Content-API-Version}</strong> message header.
  * Represents the protocol and resource versions of the returned content.
  */
-public final class ContentApiVersionHeader implements Header {
+public final class ContentApiVersionHeader extends Header {
 
     /**
      * Constructs a new header, initialized from the specified message.
@@ -37,7 +40,18 @@ public final class ContentApiVersionHeader implements Header {
      * @return The parsed header.
      */
     public static ContentApiVersionHeader valueOf(Message message) {
-        Pair<Version, Version> parsedValue = AcceptApiVersionHeader.parse(parseSingleValuedHeader(message, NAME));
+        String headerValue = parseSingleValuedHeader(message, NAME);
+        return valueOf(headerValue);
+    }
+
+    /**
+     * Constructs a new header, initialized from the specified string.
+     *
+     * @param headerValue The value to initialize the header from.
+     * @return The parsed header.
+     */
+    public static ContentApiVersionHeader valueOf(String headerValue) {
+        Pair<Version, Version> parsedValue = AcceptApiVersionHeader.parse(headerValue);
         return new ContentApiVersionHeader(parsedValue.getFirst(), parsedValue.getSecond());
     }
 
@@ -87,34 +101,19 @@ public final class ContentApiVersionHeader implements Header {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ContentApiVersionHeader that = (ContentApiVersionHeader) o;
-        return !(protocolVersion != null ? !protocolVersion.equals(that.protocolVersion) : that.protocolVersion != null)
-                && resourceVersion.equals(that.resourceVersion);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = protocolVersion != null ? protocolVersion.hashCode() : 0;
-        result = 31 * result + resourceVersion.hashCode();
-        return result;
-    }
-
-    @Override
-    public String toString() {
+    public List<String> getValues() {
         if (protocolVersion == null) {
-            return String.format(RESOURCE + "=%s",
-                    resourceVersion.toString());
+            return singletonList(String.format(RESOURCE + "=%s", resourceVersion));
         } else {
-            return String.format(PROTOCOL + "=%s," + RESOURCE + "=%s",
-                    protocolVersion.toString(),
-                    resourceVersion.toString());
+            return singletonList(String.format(PROTOCOL + "=%s," + RESOURCE + "=%s", protocolVersion, resourceVersion));
+        }
+    }
+
+    static class Factory extends AbstractSingleValuedHeaderFactory<ContentApiVersionHeader> {
+
+        @Override
+        public ContentApiVersionHeader parse(String value) {
+            return valueOf(value);
         }
     }
 }

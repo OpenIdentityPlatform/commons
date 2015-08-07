@@ -16,10 +16,11 @@
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseSingleValuedHeader;
-import static org.forgerock.http.routing.Version.version;
+import static java.util.Collections.*;
+import static org.forgerock.http.header.HeaderUtil.*;
+import static org.forgerock.http.routing.Version.*;
 
-import java.util.Objects;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +33,7 @@ import org.forgerock.util.Pair;
  * Processes the <strong>{@code Accept-API-Version}</strong> message header.
  * Represents the accepted protocol and resource versions.
  */
-public final class AcceptApiVersionHeader implements Header {
+public final class AcceptApiVersionHeader extends Header {
 
     /**
      * Constructs a new header, initialized from the specified message.
@@ -188,25 +189,7 @@ public final class AcceptApiVersionHeader implements Header {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        AcceptApiVersionHeader that = (AcceptApiVersionHeader) o;
-        return Objects.equals(protocolVersion, that.protocolVersion)
-                && Objects.equals(resourceVersion, that.resourceVersion);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(protocolVersion, resourceVersion);
-    }
-
-    @Override
-    public String toString() {
+    public List<String> getValues() {
         StringBuilder sb = new StringBuilder();
         if (protocolVersion != null) {
             sb.append(PROTOCOL).append(EQUALS).append(protocolVersion.toString());
@@ -217,6 +200,16 @@ public final class AcceptApiVersionHeader implements Header {
         if (resourceVersion != null) {
             sb.append(RESOURCE).append(EQUALS).append(resourceVersion.toString());
         }
-        return sb.toString();
+        return singletonList(sb.toString());
     }
+
+    static class Factory extends AbstractSingleValuedHeaderFactory<AcceptApiVersionHeader> {
+
+        @Override
+        public AcceptApiVersionHeader parse(String value) {
+            return valueOf(value);
+        }
+
+    }
+
 }

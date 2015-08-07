@@ -12,14 +12,15 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseSingleValuedHeader;
+import static org.forgerock.http.header.HeaderUtil.*;
 
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,7 @@ import org.forgerock.http.protocol.Message;
  * information, see <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>
  * §14.17.
  */
-public class ContentTypeHeader implements Header {
+public class ContentTypeHeader extends Header {
 
     /**
      * Constructs a new header, initialized from the specified message.
@@ -141,7 +142,7 @@ public class ContentTypeHeader implements Header {
     }
 
     @Override
-    public String toString() {
+    public List<String> getValues() {
         if (type == null || type.isEmpty()) {
             return null;
         }
@@ -153,6 +154,14 @@ public class ContentTypeHeader implements Header {
         if (boundary != null) {
             sb.append("; boundary=").append(boundary);
         }
-        return sb.length() > 0 ? sb.toString() : null;
+        return sb.length() > 0 ? Collections.singletonList(sb.toString()) : Collections.<String>emptyList();
+    }
+
+    static class Factory extends AbstractSingleValuedHeaderFactory<ContentTypeHeader> {
+
+        @Override
+        public ContentTypeHeader parse(String value) {
+            return valueOf(value);
+        }
     }
 }

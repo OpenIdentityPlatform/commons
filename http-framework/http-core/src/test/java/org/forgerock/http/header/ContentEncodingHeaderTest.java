@@ -65,14 +65,14 @@ public class ContentEncodingHeaderTest {
     @Test(dataProvider = "nullOrEmptyDataProvider", dataProviderClass = StaticProvider.class)
     public void testContentEncodingHeaderAllowsNullOrEmptyString(final String cheader) {
         final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf(cheader);
-        assertThat(ceh.toString()).isNull();
+        assertThat(ceh.getValues()).isNullOrEmpty();
     }
 
     @Test(dataProvider = "contentEncodingHeaders")
-    public void testContentEncodingHeaderFromMessageResponse(final String cheader) {
+    public void testContentEncodingHeaderFromMessageResponse(final String cheader) throws Exception {
         final Response response = new Response();
         assertThat(response.getHeaders().get(NAME)).isNull();
-        response.getHeaders().putSingle(NAME, cheader);
+        response.getHeaders().put(NAME, cheader);
 
         final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf(response);
         assertThat(ceh.getName()).isEqualTo(NAME);
@@ -84,7 +84,7 @@ public class ContentEncodingHeaderTest {
     public void testContentEncodingHeaderFromMessageRequest(final String cheader) {
         final Request request = new Request();
         assertThat(request.getHeaders().get(NAME)).isNull();
-        request.getHeaders().putSingle(NAME, cheader);
+        request.getHeaders().put(NAME, cheader);
 
         final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf(request);
         assertThat(ceh.getCodings().size()).isEqualTo(1);
@@ -104,11 +104,11 @@ public class ContentEncodingHeaderTest {
     @Test(dataProvider = "contentEncodingHeaders")
     public void testContentEncodingHeaderToMessageRequest(final String cheader) {
         final Request request = new Request();
-        assertThat(request.getHeaders().getFirst(NAME)).isNull();
+        assertThat(request.getHeaders().get(NAME)).isNull();
         final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf(cheader);
-        request.getHeaders().putSingle(ceh);
+        request.getHeaders().add(ceh);
 
-        assertThat(request.getHeaders().getFirst(NAME)).isEqualTo(cheader);
+        assertThat(request.getHeaders().get(NAME).getValues()).containsOnly(cheader);
     }
 
     @Test(dataProvider = "nullOrEmptyDataProvider", dataProviderClass = StaticProvider.class)
@@ -117,7 +117,7 @@ public class ContentEncodingHeaderTest {
         assertThat(response.getHeaders().get(NAME)).isNull();
 
         final ContentEncodingHeader ceh = ContentEncodingHeader.valueOf(cheader);
-        response.getHeaders().putSingle(ceh);
+        response.getHeaders().add(ceh);
 
         assertThat(response.getHeaders().get(NAME)).isNull();
     }

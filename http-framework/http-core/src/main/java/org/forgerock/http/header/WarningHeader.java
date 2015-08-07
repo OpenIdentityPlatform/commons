@@ -16,7 +16,7 @@
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseMultiValuedHeader;
+import static org.forgerock.http.header.HeaderUtil.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ import org.forgerock.util.Reject;
  * information, see <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>
  * 14.46.
  */
-public final class WarningHeader implements Header {
+public final class WarningHeader extends Header {
 
     /**
      * Constructs a new header, initialized from the specified message.
@@ -196,11 +196,25 @@ public final class WarningHeader implements Header {
     }
 
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
+    public List<String> getValues() {
+        List<String> headerValues = new ArrayList<>();
         for (Warning warning : warnings) {
-            sb.append(warning.toString()).append("; ");
+            headerValues.add(warning.toString().trim());
         }
-        return sb.toString().trim();
+        return headerValues;
     }
+
+    static class Factory extends HeaderFactory<WarningHeader> {
+
+        @Override
+        public WarningHeader parse(String value) {
+            return valueOf(value);
+        }
+
+        @Override
+        public WarningHeader parse(List<String> values) {
+            return new WarningHeader(toWarnings(values));
+        }
+    }
+
 }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 package org.forgerock.http.header;
 
@@ -57,7 +57,7 @@ public class ContentTypeHeaderTest {
         assertThat(cth.getType()).isNull();
         assertThat(cth.getCharset()).isNull();
         assertThat(cth.getBoundary()).isNull();
-        assertThat(cth.toString()).isNull();
+        assertThat(cth.getValues()).isNullOrEmpty();
     }
 
     @Test
@@ -66,7 +66,7 @@ public class ContentTypeHeaderTest {
         assertThat(cth.getType()).isNull();
         assertThat(cth.getCharset()).isNull();
         assertThat(cth.getBoundary()).isNull();
-        assertThat(cth.toString()).isNull();
+        assertThat(cth.getValues()).isNullOrEmpty();
     }
 
     @Test(dataProvider = "contentTypeHeaderProvider")
@@ -84,9 +84,9 @@ public class ContentTypeHeaderTest {
         final Request request = new Request();
         assertThat(request.getHeaders().get(NAME)).isNull();
         final ContentTypeHeader cth = ContentTypeHeader.valueOf(cheader);
-        request.getHeaders().putSingle(cth);
-        assertThat(request.getHeaders().get(NAME)).isNotEmpty();
-        assertThat(request.getHeaders().getFirst(NAME)).isEqualTo(cheader);
+        request.getHeaders().put(cth);
+        assertThat(request.getHeaders().get(NAME)).isNotNull();
+        assertThat(request.getHeaders().get(NAME).getValues()).containsOnly(cheader);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class ContentTypeHeaderTest {
         // Creates response.
         final Response response = new Response();
         assertThat(response.getHeaders().get(NAME)).isNull();
-        response.getHeaders().putSingle(NAME, cheader);
+        response.getHeaders().put(NAME, cheader);
         assertThat(response.getHeaders().get(NAME)).isNotNull();
 
         // Creates content-type header from response.
@@ -119,7 +119,7 @@ public class ContentTypeHeaderTest {
         // Creates request.
         final Request request = new Request();
         assertThat(request.getHeaders().get(NAME)).isNull();
-        request.getHeaders().putSingle(NAME, cheader);
+        request.getHeaders().put(NAME, cheader);
         assertThat(request.getHeaders().get(NAME)).isNotNull();
 
         // Creates content-type header from request.

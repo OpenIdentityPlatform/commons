@@ -11,10 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 package org.forgerock.http.header;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.header.LocationHeader.NAME;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -64,7 +65,7 @@ public class LocationHeaderTest {
     public void testLocationHeaderFromMessage(final String lHeader) {
         final Response response = new Response();
         assertNull(response.getHeaders().get(NAME));
-        response.getHeaders().putSingle(NAME, lHeader);
+        response.getHeaders().put(NAME, lHeader);
         assertNotNull(response.getHeaders().get(NAME));
 
         final LocationHeader lh = LocationHeader.valueOf(response);
@@ -81,7 +82,7 @@ public class LocationHeaderTest {
     }
 
     @Test(dataProvider = "locationHeaderProvider")
-    public void testLocationHeaderFromString(final String lHeader) {
+    public void testLocationHeaderFromString(final String lHeader) throws Exception {
         final LocationHeader lh = LocationHeader.valueOf(lHeader);
         assertEquals(lh.getLocationUri(), lHeader);
         assertEquals(lh.getName(), NAME);
@@ -92,9 +93,9 @@ public class LocationHeaderTest {
         final Request request = new Request();
         assertNull(request.getHeaders().get(NAME));
         final LocationHeader lh = LocationHeader.valueOf(lHeader);
-        request.getHeaders().putSingle(lh);
+        request.getHeaders().put(lh);
         assertNotNull(request.getHeaders().get(NAME));
-        assertEquals(request.getHeaders().getFirst(NAME), lHeader);
+        assertThat(request.getHeaders().get(NAME).getValues()).containsOnly(lHeader);
     }
 
     @Test(dataProvider = "locationHeaderProvider")
@@ -103,15 +104,15 @@ public class LocationHeaderTest {
         assertNull(response.getHeaders().get(NAME));
 
         final LocationHeader lh = LocationHeader.valueOf(lHeader);
-        response.getHeaders().putSingle(lh);
+        response.getHeaders().put(lh);
 
         assertNotNull(response.getHeaders().get(NAME));
-        assertEquals(response.getHeaders().get(NAME).get(0), lHeader);
+        assertThat(response.getHeaders().get(NAME).getValues()).containsOnly(lHeader);
     }
 
     @Test(dataProvider = "locationHeaderProvider")
     public void testLocationHeaderToString(final String lHeader) {
         final LocationHeader lh = LocationHeader.valueOf(lHeader);
-        assertEquals(lh.toString(), lHeader);
+        assertThat(lh.getValues()).containsOnly(lHeader);
     }
 }

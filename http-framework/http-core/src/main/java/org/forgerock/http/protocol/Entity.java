@@ -371,11 +371,10 @@ public final class Entity implements Closeable {
      */
     public void setBytes(final byte[] value) {
         if (value == null || value.length == 0) {
-            message.getHeaders().putSingle(ContentLengthHeader.NAME, "0");
+            message.getHeaders().put(ContentLengthHeader.NAME, 0);
             setEmpty();
         } else {
-            message.getHeaders()
-                    .putSingle(ContentLengthHeader.NAME, Integer.toString(value.length));
+            message.getHeaders().put(ContentLengthHeader.NAME, value.length);
             setRawContentInputStream(IO.newBranchingInputStream(value));
         }
     }
@@ -394,7 +393,7 @@ public final class Entity implements Closeable {
      *            entity.
      */
     public void setJson(final Object value) {
-        message.getHeaders().putSingle(ContentTypeHeader.NAME, APPLICATION_JSON_CHARSET_UTF_8);
+        message.getHeaders().put(ContentTypeHeader.NAME, APPLICATION_JSON_CHARSET_UTF_8);
         try {
             setBytes(writeJson(value));
         } catch (IOException e) {

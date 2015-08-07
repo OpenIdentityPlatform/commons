@@ -55,7 +55,6 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RequestAuditContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Factory;
-import org.forgerock.util.i18n.PreferredLocales;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -185,7 +184,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
         final SessionContext sessionContext = new SessionContext(new RootContext(), session);
         final AttributesContext attributesContext = new AttributesContext(new RequestAuditContext(sessionContext));
 
-
         /* TODO
          * add comment on why this was added as probably shouldn't stick around as
          * only to fix AM's case of forwarding the request from a different servlet?....
@@ -248,7 +246,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
         // populate request
         Request request = new Request();
         request.setMethod(req.getMethod());
-        request.setPreferredLocales(new PreferredLocales(list(req.getLocales())));
         try {
             request.setUri(Uris.create(req.getScheme(), null, req.getServerName(),
                                        req.getServerPort(), req.getRequestURI(), req.getQueryString(), null));
@@ -259,7 +256,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         // request headers
         for (Enumeration<String> e = req.getHeaderNames(); e.hasMoreElements();) {
             String name = e.nextElement();
-            request.getHeaders().addAll(name, list(req.getHeaders(name)));
+            request.getHeaders().add(name, list(req.getHeaders(name)));
         }
 
         // include request entity if appears to be provided with request
@@ -289,28 +286,25 @@ public final class HttpFrameworkServlet extends HttpServlet {
         return new UriRouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
     }
 
-    private void writeResponse(final Request request,
-                               final Response response,
-                               final HttpServletResponse servletResponse,
-                               final SessionContext sessionContext,
-                               final ServletSynchronizer synchronizer) {
+    private void writeResponse(Request request, Response response, HttpServletResponse servletResponse,
+            SessionContext sessionContext, ServletSynchronizer synchronizer) {
         try {
-            /*
-             * Support for OPENIG-94/95 - The wrapped servlet may have already
-             * committed its response w/o creating a new OpenIG Response instance in
-             * the exchange.
-             */
-            if (response != null) {
-                // response status-code (reason-phrase deprecated in Servlet API)
+        /*
+         * Support for OPENIG-94/95 - The wrapped servlet may have already
+         * committed its response w/o creating a new OpenIG Response instance in
+         * the exchange.
+         */
+        if (response != null) {
+            // response status-code (reason-phrase deprecated in Servlet API)
                 servletResponse.setStatus(response.getStatus().getCode());
 
-                // ensure that the session has been written back to the response
+            // ensure that the session has been written back to the response
                 sessionContext.getSession().save(response);
 
-                // response headers
-                for (String name : response.getHeaders().keySet()) {
-                    for (String value : response.getHeaders().get(name)) {
-                        if (value != null && value.length() > 0) {
+            // response headers
+            for (String name : response.getHeaders().keySet()) {
+                for (String value : response.getHeaders().get(name).getValues()) {
+                    if (value != null && value.length() > 0) {
                             servletResponse.addHeader(name, value);
                         }
                     }

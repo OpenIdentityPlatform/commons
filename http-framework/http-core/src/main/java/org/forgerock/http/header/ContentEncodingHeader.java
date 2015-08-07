@@ -17,12 +17,14 @@
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseMultiValuedHeader;
+import static java.util.Collections.*;
+import static org.forgerock.http.header.HeaderUtil.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -35,7 +37,7 @@ import org.forgerock.http.protocol.Message;
  * more information, see <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC
  * 2616</a> §14.11.
  */
-public class ContentEncodingHeader implements Header {
+public class ContentEncodingHeader extends Header {
     /** The name of this header. */
     public static final String NAME = "Content-Encoding";
 
@@ -121,8 +123,22 @@ public class ContentEncodingHeader implements Header {
     }
 
     @Override
-    public String toString() {
+    public List<String> getValues() {
         // will return null if empty
-        return HeaderUtil.join(codings, ',');
+        final String joined = HeaderUtil.join(codings, ',');
+        return joined == null ? Collections.<String>emptyList() : singletonList(joined);
+    }
+
+    static class Factory extends HeaderFactory<ContentEncodingHeader> {
+
+        @Override
+        public ContentEncodingHeader parse(String value) {
+            return valueOf(value);
+        }
+
+        @Override
+        public ContentEncodingHeader parse(List<String> values) {
+            return valueOf(join(values, ','));
+        }
     }
 }

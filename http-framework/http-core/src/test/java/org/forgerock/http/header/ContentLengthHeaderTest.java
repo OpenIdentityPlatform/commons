@@ -56,11 +56,11 @@ public class ContentLengthHeaderTest {
     public void testContentLengthHeaderAllowsNullOrEmptyString(final String cheader) {
         final ContentLengthHeader clh = ContentLengthHeader.valueOf(cheader);
         assertThat(clh.getLength()).isEqualTo(-1);
-        assertThat(clh.toString()).isNull();
+        assertThat(clh.getValues()).isNullOrEmpty();
     }
 
     @Test
-    public void testContentLengthHeaderSucceedParsingStringValue() {
+    public void testContentLengthHeaderSucceedParsingStringValue() throws Exception {
         final ContentLengthHeader clh = ContentLengthHeader.valueOf("1024");
         assertThat(clh.getLength()).isEqualTo(1024);
         assertThat(clh.getName()).isEqualTo(NAME);
@@ -70,14 +70,14 @@ public class ContentLengthHeaderTest {
     public void testContentLengthHeaderFailsParsingStringValue() {
         final ContentLengthHeader clh = ContentLengthHeader.valueOf("invalidContentLengthHeader");
         assertThat(clh.getLength()).isEqualTo(-1);
-        assertThat(clh.toString()).isNull();
+        assertThat(clh.getValues()).isNullOrEmpty();
     }
 
     @Test
-    public void testContentLengthHeaderFromMessageResponse() {
+    public void testContentLengthHeaderFromMessageResponse() throws Exception {
         final Response response = new Response();
         assertThat(response.getHeaders().get(NAME)).isNull();
-        response.getHeaders().putSingle(NAME, String.valueOf(LENGTH_DEFAULT_VALUE));
+        response.getHeaders().put(NAME, String.valueOf(LENGTH_DEFAULT_VALUE));
 
         final ContentLengthHeader clh = ContentLengthHeader.valueOf(response);
         assertThat(clh.getName()).isEqualTo(NAME);
@@ -85,48 +85,48 @@ public class ContentLengthHeaderTest {
     }
 
     @Test
-    public void testContentLengthHeaderFromMessageResponseFails() {
+    public void testContentLengthHeaderFromMessageResponseFails() throws Exception {
         final Response response = new Response();
         assertThat(response.getHeaders().get(NAME)).isNull();
-        response.getHeaders().putSingle(NAME, "invalid");
+        response.getHeaders().put(NAME, "invalid");
 
         final ContentLengthHeader clh = ContentLengthHeader.valueOf(response);
         assertThat(clh.getName()).isEqualTo(NAME);
         assertThat(clh.getLength()).isEqualTo(-1);
-        assertThat(clh.toString()).isNull();
+        assertThat(clh.getValues()).isNullOrEmpty();
     }
 
     @Test
     public void testContentLengthHeaderToMessageRequest() {
         final Request request = new Request();
-        assertThat(request.getHeaders().getFirst(NAME)).isNull();
+        assertThat(request.getHeaders().get(NAME)).isNull();
         final ContentLengthHeader clh =
                 ContentLengthHeader.valueOf(String.valueOf(LENGTH_DEFAULT_VALUE));
         // Inserts the content length header to the request header.
-        request.getHeaders().putSingle(clh);
-        assertThat(request.getHeaders().getFirst(NAME)).isEqualTo(String.valueOf(LENGTH_DEFAULT_VALUE));
+        request.getHeaders().put(clh);
+        assertThat(request.getHeaders().get(NAME).getValues()).containsOnly(String.valueOf(LENGTH_DEFAULT_VALUE));
     }
 
     @Test
     public void testContentLengthHeaderToMessageRequestFails() {
         final Request request = new Request();
-        assertThat(request.getHeaders().getFirst(NAME)).isNull();
+        assertThat(request.getHeaders().get(NAME)).isNull();
         final ContentLengthHeader clh = ContentLengthHeader.valueOf("invalid_value");
         // Inserts the content length header to the request header.
-        request.getHeaders().putSingle(clh);
-        assertThat(request.getHeaders().getFirst(NAME)).isNullOrEmpty();
+        request.getHeaders().put(clh);
+        assertThat(request.getHeaders().get(NAME)).isNull();
     }
 
     @Test(dataProvider = "validDataProvider")
     public void testContentLengthHeaderToStringSucceed(final Object cth) {
         final ContentLengthHeader clh = ContentLengthHeader.valueOf(String.valueOf(cth));
-        assertThat(clh.toString()).isEqualTo(String.valueOf(cth));
+        assertThat(clh.getValues()).containsOnly(String.valueOf(cth));
     }
 
     @Test(dataProvider = "invalidDataProvider")
     public void testContentLengthHeaderToStringIsNullWithInvalidValues(final Object cth) {
         final ContentLengthHeader clh = ContentLengthHeader.valueOf(String.valueOf(cth));
         assertThat(clh.getLength()).isEqualTo(-1);
-        assertThat(clh.toString()).isNull();
+        assertThat(clh.getValues()).isNullOrEmpty();
     }
 }

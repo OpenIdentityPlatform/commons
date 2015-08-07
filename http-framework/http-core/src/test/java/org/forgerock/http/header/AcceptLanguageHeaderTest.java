@@ -1,6 +1,7 @@
 /*
  * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the License.
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
  * specific language governing permission and limitations under the License.
@@ -36,7 +37,7 @@ public class AcceptLanguageHeaderTest {
         )));
 
         // When
-        String languageHeader = header.toString();
+        String languageHeader = header.getValues().iterator().next();
 
         // Then
         assertThat(languageHeader).isEqualTo("en;q=1,fr-FR;q=0.9,fr;q=0.8");

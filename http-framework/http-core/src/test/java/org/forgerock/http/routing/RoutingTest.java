@@ -88,7 +88,7 @@ public class RoutingTest {
                 .setMethod("GET")
                 .setUri(URI.create("authenticate"));
         if (requestedResourceApiVersion != null) {
-            request.getHeaders().putSingle(AcceptApiVersionHeader.valueOf("resource=" + requestedResourceApiVersion));
+            request.getHeaders().put(AcceptApiVersionHeader.valueOf("resource=" + requestedResourceApiVersion));
         }
 
         resourceApiVersionBehaviourManager.setDefaultVersionBehaviour(defaultVersionBehaviour);
@@ -98,15 +98,16 @@ public class RoutingTest {
 
         //Then
         if (expectedContentResourceApiVersion != null) {
-            assertThat(response.getHeaders().getFirst(ContentApiVersionHeader.NAME)).isEqualTo("resource="
+            assertThat(response.getHeaders().get(ContentApiVersionHeader.NAME)).isNotNull();
+            assertThat(response.getHeaders().get(ContentApiVersionHeader.NAME).getValues()).containsOnly("resource="
                     + expectedContentResourceApiVersion);
         } else {
-            assertThat(response.getHeaders().getFirst(ContentApiVersionHeader.NAME)).isNull();
+            assertThat(response.getHeaders().get(ContentApiVersionHeader.NAME)).isNull();
         }
         if (isWarningExcepted) {
-            assertThat(response.getHeaders().getFirst(WarningHeader.NAME)).isNotNull();
+            assertThat(response.getHeaders().get(WarningHeader.NAME)).isNotNull();
         } else {
-            assertThat(response.getHeaders().getFirst(WarningHeader.NAME)).isNull();
+            assertThat(response.getHeaders().get(WarningHeader.NAME)).isNull();
         }
     }
 

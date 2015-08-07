@@ -17,17 +17,21 @@
 
 package org.forgerock.http.header;
 
+import static java.util.Collections.*;
+
+import java.util.List;
+
 import org.forgerock.http.protocol.Header;
 
 /**
- * An undecoded HTTP message header.
+ * An undecoded HTTP message header. Values are always immutable.
  */
-public class GenericHeader implements Header {
+public class GenericHeader extends Header {
     /** The header name. */
     private String name;
 
-    /** The header value. */
-    private String value;
+    /** The header values. */
+    private List<String> values;
 
     /**
      * Constructs a new header with the provided name and value.
@@ -38,8 +42,20 @@ public class GenericHeader implements Header {
      *            The header value.
      */
     public GenericHeader(String name, String value) {
+        this(name, singletonList(value));
+    }
+
+    /**
+     * Constructs a new header with the provided name and values.
+     *
+     * @param name
+     *            The header name.
+     * @param values
+     *            The header values.
+     */
+    public GenericHeader(String name, List<String> values) {
         this.name = name;
-        this.value = value;
+        this.values = unmodifiableList(values);
     }
 
     @Override
@@ -47,8 +63,12 @@ public class GenericHeader implements Header {
         return name;
     }
 
+    /**
+     * {@inheritDoc}
+     * @return An immutable list of values for this header name.
+     */
     @Override
-    public String toString() {
-        return value;
+    public List<String> getValues() {
+        return values;
     }
 }

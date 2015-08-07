@@ -16,10 +16,11 @@
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseSingleValuedHeader;
+import static java.util.Collections.*;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -38,7 +39,7 @@ import org.forgerock.http.protocol.Response;
  * Note: This implementation is designed to be forgiving when parsing malformed
  * cookies.
  */
-public class SetCookieHeader implements Header {
+public class SetCookieHeader extends Header {
 
     /** The name of this header. */
     public static final String NAME = "Set-Cookie";
@@ -51,6 +52,10 @@ public class SetCookieHeader implements Header {
      * @return The parsed header.
      */
     public static SetCookieHeader valueOf(String value) {
+        return new SetCookieHeader(singletonList(parseCookie(value)));
+    }
+
+    private static Cookie parseCookie(String value) {
         List<String> parts = Arrays.asList(value.split(";"));
         Cookie cookie = new Cookie();
         for (String part : parts) {
@@ -73,9 +78,9 @@ public class SetCookieHeader implements Header {
             }
         }
         if (cookie.getName() == null || cookie.getName().isEmpty()) {
-            return new SetCookieHeader(new Cookie());
+            cookie = new Cookie();
         }
-        return new SetCookieHeader(cookie);
+        return cookie;
     }
 
     /**
@@ -86,7 +91,28 @@ public class SetCookieHeader implements Header {
      * @return The parsed header.
      */
     public static SetCookieHeader valueOf(Response response) {
-        return valueOf(parseSingleValuedHeader(response, NAME));
+        if (response == null || !response.getHeaders().containsKey(NAME)) {
+            return null;
+        }
+        return valueOf(response.getHeaders().get(NAME).getValues());
+    }
+
+    /**
+     * Constructs a new header, initialized from the specified list of Set-Cookie values.
+     *
+     * @param values
+     *            The values to initialize the header from.
+     * @return The parsed header.
+     */
+    public static SetCookieHeader valueOf(List<String> values) {
+        if (values == null) {
+            return null;
+        }
+        List<Cookie> cookies = new ArrayList<>();
+        for (String headerValue : values) {
+            cookies.add(parseCookie(headerValue));
+        }
+        return new SetCookieHeader(unmodifiableList(cookies));
     }
 
     private static Integer parseInteger(String s) {
@@ -113,15 +139,24 @@ public class SetCookieHeader implements Header {
         }
     }
 
-    private final Cookie cookie;
+    private final List<Cookie> cookies;
+    private final List<String> values;
 
     /**
-     * Constructs a new header with the provided cookie.
+     * Constructs a new header with the provided cookies.
      *
-     * @param cookie The cookie.
+     * @param cookies The cookies.
      */
-    public SetCookieHeader(Cookie cookie) {
-        this.cookie = cookie;
+    public SetCookieHeader(List<Cookie> cookies) {
+        this.cookies = cookies;
+        if (cookies != null) {
+            this.values = new ArrayList<>();
+            for (Cookie cookie : cookies) {
+                values.add(toString(cookie));
+            }
+        } else {
+            values = null;
+        }
     }
 
     @Override
@@ -129,17 +164,21 @@ public class SetCookieHeader implements Header {
         return NAME;
     }
 
-    /**
-     * Returns the cookie.
-     *
-     * @return The cookie.
-     */
-    public Cookie getCookie() {
-        return cookie;
+    @Override
+    public List<String> getValues() {
+        return values;
     }
 
-    @Override
-    public String toString() {
+    /**
+     * Returns the cookies.
+     *
+     * @return The cookies.
+     */
+    public List<Cookie> getCookies() {
+        return cookies;
+    }
+
+    private String toString(Cookie cookie) {
         StringBuilder sb = new StringBuilder();
         if (cookie.getName() != null) {
             sb.append(cookie.getName()).append("=").append(cookie.getValue());
@@ -163,5 +202,18 @@ public class SetCookieHeader implements Header {
             }
         }
         return sb.toString();
+    }
+
+    static class Factory extends HeaderFactory<SetCookieHeader> {
+
+        @Override
+        public SetCookieHeader parse(String value) {
+            return valueOf(value);
+        }
+
+        @Override
+        public SetCookieHeader parse(List<String> values) {
+            return valueOf(values);
+        }
     }
 }

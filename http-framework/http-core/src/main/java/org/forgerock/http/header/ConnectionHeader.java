@@ -12,12 +12,12 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseMultiValuedHeader;
+import static org.forgerock.http.header.HeaderUtil.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ import org.forgerock.http.protocol.Message;
  * information, see <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>
  * §14.10.
  */
-public class ConnectionHeader implements Header {
+public class ConnectionHeader extends Header {
     /**
      * Constructs a new header, initialized from the specified message.
      *
@@ -91,8 +91,20 @@ public class ConnectionHeader implements Header {
     }
 
     @Override
-    public String toString() {
-        // will return null if empty
-        return HeaderUtil.join(tokens, ',');
+    public List<String> getValues() {
+        return tokens;
+    }
+
+    static class Factory extends HeaderFactory<ConnectionHeader> {
+
+        @Override
+        public ConnectionHeader parse(String value) {
+            return valueOf(value);
+        }
+
+        @Override
+        public ConnectionHeader parse(List<String> values) {
+            return valueOf(join(values, ','));
+        }
     }
 }

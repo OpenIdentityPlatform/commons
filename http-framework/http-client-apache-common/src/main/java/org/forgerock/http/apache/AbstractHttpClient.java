@@ -18,6 +18,7 @@ package org.forgerock.http.apache;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
@@ -85,8 +86,16 @@ public abstract class AbstractHttpClient implements HttpClient {
             final InputStreamEntity entity =
                     new InputStreamEntity(request.getEntity().getRawContentInputStream(),
                             ContentLengthHeader.valueOf(request).getLength());
-            entity.setContentType(ContentTypeHeader.valueOf(request).toString());
-            entity.setContentEncoding(ContentEncodingHeader.valueOf(request).toString());
+            final List<String> contentType = ContentTypeHeader.valueOf(request).getValues();
+            if (contentType != null && contentType.size() > 1) {
+                throw new IllegalArgumentException("Content-Type configured with multiple values");
+            }
+            entity.setContentType(contentType == null || contentType.size() == 0 ? null : contentType.get(0));
+            final List<String> encoding = ContentEncodingHeader.valueOf(request).getValues();
+            if (encoding != null && encoding.size() > 1) {
+                throw new IllegalArgumentException("Content-Encoding configured with multiple values");
+            }
+            entity.setContentEncoding(encoding == null || encoding.size() == 0 ? null : encoding.get(0));
             setEntity(entity);
         }
 
@@ -135,7 +144,7 @@ public abstract class AbstractHttpClient implements HttpClient {
         // Populates request headers
         for (String name : request.getHeaders().keySet()) {
             if (!SUPPRESS_REQUEST_HEADERS.contains(name) && !removableHeaderNames.contains(name)) {
-                for (final String value : request.getHeaders().get(name)) {
+                for (final String value : request.getHeaders().get(name).getValues()) {
                     clientRequest.addHeader(name, value);
                 }
             }

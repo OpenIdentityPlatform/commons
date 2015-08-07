@@ -20,6 +20,7 @@ package org.forgerock.http.header;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -273,7 +274,8 @@ public final class HeaderUtil {
      *         which may be empty if the header was not present in the message.
      */
     public static List<String> parseMultiValuedHeader(Message message, String name) {
-        final List<String> values = message != null ? message.getHeaders().get(name) : null;
+        final Collection<String> values = message != null && message.getHeaders().containsKey(name)
+                ? message.getHeaders().get(name).getValues() : null;
         return parseMultiValuedHeader(join(values, ','));
     }
 
@@ -301,6 +303,12 @@ public final class HeaderUtil {
      *         in the message.
      */
     public static String parseSingleValuedHeader(Message message, String name) {
-        return message != null ? message.getHeaders().getFirst(name) : null;
+        if (message == null || !message.getHeaders().containsKey(name)) {
+            return null;
+        }
+        final Iterator<String> iterator = message.getHeaders().get(name).getValues().iterator();
+        final String header = iterator.hasNext()
+                ? iterator.next() : null;
+        return header != null ? header : null;
     }
 }

@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -27,6 +27,8 @@ import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.forgerock.http.header.ContentLengthHeader;
+import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.util.MultiValueMap;
 
 /**
@@ -155,7 +157,7 @@ public class Form extends MultiValueMap<String, String> {
         if (request != null
                 && request.getEntity() != null
                 && "application/x-www-form-urlencoded".equalsIgnoreCase(request.getHeaders()
-                        .getFirst("Content-Type"))) {
+                        .getFirst(ContentTypeHeader.class))) {
             fromString(request.getEntity().getString());
         }
         return this;
@@ -171,8 +173,8 @@ public class Form extends MultiValueMap<String, String> {
     public void toRequestEntity(Request request) {
         String form = toString();
         request.setMethod("POST");
-        request.getHeaders().putSingle("Content-Type", "application/x-www-form-urlencoded");
-        request.getHeaders().putSingle("Content-Length", Integer.toString(form.length()));
+        request.getHeaders().put(ContentTypeHeader.NAME, "application/x-www-form-urlencoded");
+        request.getHeaders().put(ContentLengthHeader.NAME, form.length());
         request.getEntity().setString(form);
     }
 }

@@ -68,11 +68,10 @@ public class ResourceApiVersionRoutingFilter implements Filter {
                         Version protocolVersion = apiVersionRouterContext.getProtocolVersion();
                         Version resourceVersion = apiVersionRouterContext.getResourceVersion();
                         if (resourceVersion != null) {
-                            response.getHeaders()
-                                    .putSingle(new ContentApiVersionHeader(protocolVersion, resourceVersion));
+                            response.getHeaders().add(new ContentApiVersionHeader(protocolVersion, resourceVersion));
                         }
                         if (apiVersionRouterContext.isWarningEnabled() && requestedResourceVersion == null) {
-                            response.getHeaders().putSingle(WarningHeader.newWarning("chf",
+                            response.getHeaders().add(WarningHeader.newWarning("chf",
                                     "%s should be included in the request.", AcceptApiVersionHeader.NAME));
                         }
                     }

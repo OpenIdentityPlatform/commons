@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 package org.forgerock.http.header;
 
@@ -52,10 +52,10 @@ public class ConnectionHeaderTest {
     }
 
     @Test(dataProvider = "connectionHeaders")
-    public void testConnectionHeaderFromMessageResponse(final String cheader) {
+    public void testConnectionHeaderFromMessageResponse(final String cheader) throws Exception {
         final Response response = new Response();
         assertNull(response.getHeaders().get(NAME));
-        response.getHeaders().putSingle(NAME, cheader);
+        response.getHeaders().put(NAME, cheader);
         assertNotNull(response.getHeaders().get(NAME));
 
         final ConnectionHeader ch = ConnectionHeader.valueOf(response);
@@ -65,10 +65,10 @@ public class ConnectionHeaderTest {
     }
 
     @Test(dataProvider = "connectionHeaders")
-    public void testConnectionHeaderFromMessageRequest(final String cheader) {
+    public void testConnectionHeaderFromMessageRequest(final String cheader) throws Exception {
         final Request request = new Request();
         assertNull(request.getHeaders().get(NAME));
-        request.getHeaders().putSingle(NAME, cheader);
+        request.getHeaders().put(NAME, cheader);
         assertNotNull(request.getHeaders().get(NAME));
 
         final ConnectionHeader ch = ConnectionHeader.valueOf(request);
@@ -86,7 +86,7 @@ public class ConnectionHeaderTest {
     }
 
     @Test(dataProvider = "connectionHeaders")
-    public void testConnectionHeaderFromString(final String connectionHeader) {
+    public void testConnectionHeaderFromString(final String connectionHeader) throws Exception {
         final ConnectionHeader ch = ConnectionHeader.valueOf(connectionHeader);
         assertEquals(ch.getTokens().size(), 1);
         assertEquals(ch.getTokens().get(0), connectionHeader);
@@ -94,7 +94,7 @@ public class ConnectionHeaderTest {
     }
 
     @Test
-    public void testConnectionHeaderFromEscapedString() {
+    public void testConnectionHeaderFromEscapedString() throws Exception {
         final ConnectionHeader ch = ConnectionHeader.valueOf(ESCAPED_KEEP_ALIVE_VALUE);
         assertEquals(ch.getTokens().size(), 1);
         assertEquals(ch.getTokens().get(0), ESCAPED_KEEP_ALIVE_VALUE);
@@ -102,7 +102,7 @@ public class ConnectionHeaderTest {
     }
 
     @Test
-    public void testConnectionHeaderFromQuotedString() {
+    public void testConnectionHeaderFromQuotedString() throws Exception {
         final ConnectionHeader ch = ConnectionHeader.valueOf(QUOTED_KEEP_ALIVE_VALUE);
         assertEquals(ch.getTokens().size(), 1);
         assertEquals(ch.getTokens().get(0), QUOTED_KEEP_ALIVE_VALUE);
@@ -114,9 +114,9 @@ public class ConnectionHeaderTest {
         final Request request = new Request();
         assertNull(request.getHeaders().get(NAME));
         final ConnectionHeader ch = ConnectionHeader.valueOf(connectionHeader);
-        request.getHeaders().putSingle(ch);
+        request.getHeaders().put(ch);
         assertNotNull(request.getHeaders().get(NAME));
-        assertEquals(request.getHeaders().getFirst(NAME), connectionHeader);
+        assertThat(request.getHeaders().get(NAME).getValues()).containsOnly(connectionHeader);
     }
 
     @Test(dataProvider = "nullOrEmptyDataProvider", dataProviderClass = StaticProvider.class)
@@ -124,7 +124,7 @@ public class ConnectionHeaderTest {
         final Response response = new Response();
         assertNull(response.getHeaders().get(NAME));
         final ConnectionHeader ch = ConnectionHeader.valueOf(cheader);
-        response.getHeaders().putSingle(ch);
+        response.getHeaders().put(ch);
         assertNull(response.getHeaders().get(NAME));
     }
 
@@ -133,8 +133,8 @@ public class ConnectionHeaderTest {
         final Response response = new Response();
         assertNull(response.getHeaders().get(NAME));
         final ConnectionHeader ch = ConnectionHeader.valueOf(connectionHeader);
-        response.getHeaders().putSingle(ch);
+        response.getHeaders().put(ch);
         assertNotNull(response.getHeaders().get(NAME));
-        assertEquals(response.getHeaders().getFirst(NAME), connectionHeader);
+        assertThat(response.getHeaders().get(NAME).getValues()).containsOnly(connectionHeader);
     }
 }

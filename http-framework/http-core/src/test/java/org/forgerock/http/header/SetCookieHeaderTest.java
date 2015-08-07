@@ -16,7 +16,8 @@
 
 package org.forgerock.http.header;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Collections.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Date;
 
@@ -43,10 +44,10 @@ public class SetCookieHeaderTest {
                 .setValue("VALUE");
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEqualTo("NAME=VALUE");
+        assertThat(setCookieHeader.getValues()).containsOnly("NAME=VALUE");
     }
 
     @Test
@@ -59,10 +60,10 @@ public class SetCookieHeaderTest {
                 .setExpires(EXPIRES_DATE);
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEqualTo("NAME=VALUE; Expires=" + EXPIRES_DATE_STRING);
+        assertThat(setCookieHeader.getValues()).containsOnly("NAME=VALUE; Expires=" + EXPIRES_DATE_STRING);
     }
 
     @Test
@@ -75,10 +76,10 @@ public class SetCookieHeaderTest {
                 .setMaxAge(100);
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEqualTo("NAME=VALUE; Max-Age=100");
+        assertThat(setCookieHeader.getValues()).containsOnly("NAME=VALUE; Max-Age=100");
     }
 
     @Test
@@ -91,10 +92,10 @@ public class SetCookieHeaderTest {
                 .setPath("/path");
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEqualTo("NAME=VALUE; Path=/path");
+        assertThat(setCookieHeader.getValues()).containsOnly("NAME=VALUE; Path=/path");
     }
 
     @Test
@@ -107,10 +108,10 @@ public class SetCookieHeaderTest {
                 .setDomain("DOMAIN");
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEqualTo("NAME=VALUE; Domain=DOMAIN");
+        assertThat(setCookieHeader.getValues()).containsOnly("NAME=VALUE; Domain=DOMAIN");
     }
 
     @Test
@@ -123,10 +124,10 @@ public class SetCookieHeaderTest {
                 .setSecure(true);
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEqualTo("NAME=VALUE; Secure");
+        assertThat(setCookieHeader.getValues()).containsOnly("NAME=VALUE; Secure");
     }
 
     @Test
@@ -139,10 +140,10 @@ public class SetCookieHeaderTest {
                 .setHttpOnly(true);
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEqualTo("NAME=VALUE; HttpOnly");
+        assertThat(setCookieHeader.getValues()).containsOnly("NAME=VALUE; HttpOnly");
     }
 
     @Test
@@ -160,10 +161,10 @@ public class SetCookieHeaderTest {
                 .setHttpOnly(true);
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEqualTo("NAME=VALUE; Expires=" + EXPIRES_DATE_STRING
+        assertThat(setCookieHeader.getValues()).containsOnly("NAME=VALUE; Expires=" + EXPIRES_DATE_STRING
                 + "; Max-Age=100; Path=/path; Domain=DOMAIN; Secure; HttpOnly");
     }
 
@@ -181,10 +182,10 @@ public class SetCookieHeaderTest {
                 .setHttpOnly(true);
 
         //When
-        SetCookieHeader setCookieHeader = new SetCookieHeader(cookie);
+        SetCookieHeader setCookieHeader = new SetCookieHeader(singletonList(cookie));
 
         //Then
-        assertThat(setCookieHeader.toString()).isEmpty();
+        assertThat(setCookieHeader.getValues()).containsOnly("");
     }
 
     @Test
@@ -197,14 +198,15 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isEqualTo("NAME");
-        assertThat(setCookieHeader.getCookie().getValue()).isEqualTo("VALUE");
-        assertThat(setCookieHeader.getCookie().getExpires()).isNull();
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isNull();
-        assertThat(setCookieHeader.getCookie().getPath()).isNull();
-        assertThat(setCookieHeader.getCookie().getDomain()).isNull();
-        assertThat(setCookieHeader.getCookie().isSecure()).isFalse();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isFalse();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("VALUE");
+        assertThat(cookie.getExpires()).isNull();
+        assertThat(cookie.getMaxAge()).isNull();
+        assertThat(cookie.getPath()).isNull();
+        assertThat(cookie.getDomain()).isNull();
+        assertThat(cookie.isSecure()).isFalse();
+        assertThat(cookie.isHttpOnly()).isFalse();
     }
 
     @Test
@@ -217,14 +219,15 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isEqualTo("NAME");
-        assertThat(setCookieHeader.getCookie().getValue()).isEqualTo("VALUE");
-        assertThat(setCookieHeader.getCookie().getExpires()).isEqualTo(EXPIRES_DATE);
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isNull();
-        assertThat(setCookieHeader.getCookie().getPath()).isNull();
-        assertThat(setCookieHeader.getCookie().getDomain()).isNull();
-        assertThat(setCookieHeader.getCookie().isSecure()).isFalse();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isFalse();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("VALUE");
+        assertThat(cookie.getExpires()).isEqualTo(EXPIRES_DATE);
+        assertThat(cookie.getMaxAge()).isNull();
+        assertThat(cookie.getPath()).isNull();
+        assertThat(cookie.getDomain()).isNull();
+        assertThat(cookie.isSecure()).isFalse();
+        assertThat(cookie.isHttpOnly()).isFalse();
     }
 
     @Test
@@ -237,14 +240,15 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isEqualTo("NAME");
-        assertThat(setCookieHeader.getCookie().getValue()).isEqualTo("VALUE");
-        assertThat(setCookieHeader.getCookie().getExpires()).isNull();
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isEqualTo(100);
-        assertThat(setCookieHeader.getCookie().getPath()).isNull();
-        assertThat(setCookieHeader.getCookie().getDomain()).isNull();
-        assertThat(setCookieHeader.getCookie().isSecure()).isFalse();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isFalse();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("VALUE");
+        assertThat(cookie.getExpires()).isNull();
+        assertThat(cookie.getMaxAge()).isEqualTo(100);
+        assertThat(cookie.getPath()).isNull();
+        assertThat(cookie.getDomain()).isNull();
+        assertThat(cookie.isSecure()).isFalse();
+        assertThat(cookie.isHttpOnly()).isFalse();
     }
 
     @Test
@@ -257,14 +261,15 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isEqualTo("NAME");
-        assertThat(setCookieHeader.getCookie().getValue()).isEqualTo("VALUE");
-        assertThat(setCookieHeader.getCookie().getExpires()).isNull();
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isNull();
-        assertThat(setCookieHeader.getCookie().getPath()).isEqualTo("/path");
-        assertThat(setCookieHeader.getCookie().getDomain()).isNull();
-        assertThat(setCookieHeader.getCookie().isSecure()).isFalse();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isFalse();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("VALUE");
+        assertThat(cookie.getExpires()).isNull();
+        assertThat(cookie.getMaxAge()).isNull();
+        assertThat(cookie.getPath()).isEqualTo("/path");
+        assertThat(cookie.getDomain()).isNull();
+        assertThat(cookie.isSecure()).isFalse();
+        assertThat(cookie.isHttpOnly()).isFalse();
     }
 
     @Test
@@ -277,14 +282,15 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isEqualTo("NAME");
-        assertThat(setCookieHeader.getCookie().getValue()).isEqualTo("VALUE");
-        assertThat(setCookieHeader.getCookie().getExpires()).isNull();
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isNull();
-        assertThat(setCookieHeader.getCookie().getPath()).isNull();
-        assertThat(setCookieHeader.getCookie().getDomain()).isEqualTo("DOMAIN");
-        assertThat(setCookieHeader.getCookie().isSecure()).isFalse();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isFalse();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("VALUE");
+        assertThat(cookie.getExpires()).isNull();
+        assertThat(cookie.getMaxAge()).isNull();
+        assertThat(cookie.getPath()).isNull();
+        assertThat(cookie.getDomain()).isEqualTo("DOMAIN");
+        assertThat(cookie.isSecure()).isFalse();
+        assertThat(cookie.isHttpOnly()).isFalse();
     }
 
     @Test
@@ -297,14 +303,15 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isEqualTo("NAME");
-        assertThat(setCookieHeader.getCookie().getValue()).isEqualTo("VALUE");
-        assertThat(setCookieHeader.getCookie().getExpires()).isNull();
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isNull();
-        assertThat(setCookieHeader.getCookie().getPath()).isNull();
-        assertThat(setCookieHeader.getCookie().getDomain()).isNull();
-        assertThat(setCookieHeader.getCookie().isSecure()).isTrue();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isFalse();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("VALUE");
+        assertThat(cookie.getExpires()).isNull();
+        assertThat(cookie.getMaxAge()).isNull();
+        assertThat(cookie.getPath()).isNull();
+        assertThat(cookie.getDomain()).isNull();
+        assertThat(cookie.isSecure()).isTrue();
+        assertThat(cookie.isHttpOnly()).isFalse();
     }
 
     @Test
@@ -317,14 +324,15 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isEqualTo("NAME");
-        assertThat(setCookieHeader.getCookie().getValue()).isEqualTo("VALUE");
-        assertThat(setCookieHeader.getCookie().getExpires()).isNull();
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isNull();
-        assertThat(setCookieHeader.getCookie().getPath()).isNull();
-        assertThat(setCookieHeader.getCookie().getDomain()).isNull();
-        assertThat(setCookieHeader.getCookie().isSecure()).isFalse();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isTrue();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("VALUE");
+        assertThat(cookie.getExpires()).isNull();
+        assertThat(cookie.getMaxAge()).isNull();
+        assertThat(cookie.getPath()).isNull();
+        assertThat(cookie.getDomain()).isNull();
+        assertThat(cookie.isSecure()).isFalse();
+        assertThat(cookie.isHttpOnly()).isTrue();
     }
 
     @Test
@@ -338,14 +346,15 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isEqualTo("NAME");
-        assertThat(setCookieHeader.getCookie().getValue()).isEqualTo("VALUE");
-        assertThat(setCookieHeader.getCookie().getExpires()).isEqualTo(EXPIRES_DATE);
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isEqualTo(100);
-        assertThat(setCookieHeader.getCookie().getPath()).isEqualTo("/path");
-        assertThat(setCookieHeader.getCookie().getDomain()).isEqualTo("DOMAIN");
-        assertThat(setCookieHeader.getCookie().isSecure()).isTrue();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isTrue();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("VALUE");
+        assertThat(cookie.getExpires()).isEqualTo(EXPIRES_DATE);
+        assertThat(cookie.getMaxAge()).isEqualTo(100);
+        assertThat(cookie.getPath()).isEqualTo("/path");
+        assertThat(cookie.getDomain()).isEqualTo("DOMAIN");
+        assertThat(cookie.isSecure()).isTrue();
+        assertThat(cookie.isHttpOnly()).isTrue();
     }
 
     @Test
@@ -359,13 +368,14 @@ public class SetCookieHeaderTest {
         SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
 
         //Then
-        assertThat(setCookieHeader.getCookie().getName()).isNullOrEmpty();
-        assertThat(setCookieHeader.getCookie().getValue()).isNull();
-        assertThat(setCookieHeader.getCookie().getExpires()).isNull();
-        assertThat(setCookieHeader.getCookie().getMaxAge()).isNull();
-        assertThat(setCookieHeader.getCookie().getPath()).isNull();
-        assertThat(setCookieHeader.getCookie().getDomain()).isNull();
-        assertThat(setCookieHeader.getCookie().isSecure()).isFalse();
-        assertThat(setCookieHeader.getCookie().isHttpOnly()).isFalse();
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isNullOrEmpty();
+        assertThat(cookie.getValue()).isNull();
+        assertThat(cookie.getExpires()).isNull();
+        assertThat(cookie.getMaxAge()).isNull();
+        assertThat(cookie.getPath()).isNull();
+        assertThat(cookie.getDomain()).isNull();
+        assertThat(cookie.isSecure()).isFalse();
+        assertThat(cookie.isHttpOnly()).isFalse();
     }
 }

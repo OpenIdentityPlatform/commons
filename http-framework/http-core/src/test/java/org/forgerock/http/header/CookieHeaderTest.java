@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 package org.forgerock.http.header;
 
@@ -40,7 +40,7 @@ public class CookieHeaderTest {
             + "$Domain=\"example.com\"";
 
     @Test
-    public void testCookieHeaderFromString() {
+    public void testCookieHeaderFromString() throws Exception {
         final CookieHeader ch = CookieHeader.valueOf(CHEADER_1);
         assertEquals(ch.getCookies().size(), 1);
         final Cookie cookie = ch.getCookies().get(0);
@@ -54,7 +54,7 @@ public class CookieHeaderTest {
     }
 
     @Test
-    public void testCookieHeaderFromString2() {
+    public void testCookieHeaderFromString2() throws Exception {
         final CookieHeader ch = CookieHeader.valueOf(CHEADER_2);
         assertEquals(ch.getCookies().size(), 1);
         final Cookie cookie = ch.getCookies().get(0);
@@ -67,7 +67,7 @@ public class CookieHeaderTest {
     }
 
     @Test
-    public void testCookieHeaderFromStringAllowsNullVersion() {
+    public void testCookieHeaderFromStringAllowsNullVersion() throws Exception {
         final CookieHeader ch = CookieHeader.valueOf("Customer=\"BAB_JENSEN\"; $Path=\"/example\"");
         assertEquals(ch.getCookies().size(), 1);
         final Cookie cookie = ch.getCookies().get(0);
@@ -77,7 +77,7 @@ public class CookieHeaderTest {
     }
 
     @Test
-    public void testCookieHeaderFromStringAllowsInvalidVersion() {
+    public void testCookieHeaderFromStringAllowsInvalidVersion() throws Exception {
         final CookieHeader ch =
                 CookieHeader
                         .valueOf("$Version=invalid; Customer=\"BAB_JENSEN\"; $Path=\"/example\"");
@@ -102,7 +102,7 @@ public class CookieHeaderTest {
 
     @Test
     public void testCookieHeaderToString() {
-        assertEquals(CookieHeader.valueOf(CHEADER_1).toString(), CHEADER_1);
+        assertThat(CookieHeader.valueOf(CHEADER_1).getValues()).containsOnly(CHEADER_1);
     }
 
 
@@ -114,15 +114,15 @@ public class CookieHeaderTest {
 
         ch = CookieHeader.valueOf("Customer=\"SAM_CARTER\"; $Path=\"/example\"");
         assertNull(ch.getCookies().get(0).getVersion());
-        assertThat(ch.toString()).contains("$Version=1;");
+        assertThat(ch.getValues().iterator().next()).contains("$Version=1;");
 
         ch = CookieHeader.valueOf("Customer=\"SAM_CARTER\"; $Domain=\"example.com\"");
         assertNull(ch.getCookies().get(0).getVersion());
-        assertThat(ch.toString()).contains("$Version=1;");
+        assertThat(ch.getValues().iterator().next()).contains("$Version=1;");
 
         ch = CookieHeader.valueOf("Customer=\"SAM_CARTER\"; $Domain=\"example.com\"; $Version=2");
         assertEquals(ch.getCookies().get(0).getVersion().intValue(), 2);
-        assertThat(ch.toString()).doesNotContain("$Version=1;");
+        assertThat(ch.getValues().iterator().next()).doesNotContain("$Version=1;");
     }
 
     @Test
@@ -131,10 +131,10 @@ public class CookieHeaderTest {
         assertNull(response.getHeaders().get("cookie"));
         assertNull(response.getHeaders().get("Customer"));
         final CookieHeader ch = CookieHeader.valueOf(CHEADER_1);
-        response.getHeaders().putSingle(ch);
+        response.getHeaders().add(ch);
         assertNotNull(response.getHeaders().get("cookie"));
         assertNull(response.getHeaders().get("Customer"));
-        assertEquals(response.getHeaders().get("cookie").get(0), CHEADER_1);
+        assertThat(response.getHeaders().get("cookie").getValues()).containsOnly(CHEADER_1);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class CookieHeaderTest {
         assertNull(request.getCookies().get("cookie"));
         assertNull(request.getCookies().get("Customer"));
         final CookieHeader ch = CookieHeader.valueOf(CHEADER_1);
-        request.getHeaders().putSingle(ch);
+        request.getHeaders().add(ch);
         assertNotNull(request.getCookies());
         assertNull(request.getCookies().get("cookie"));
         assertNotNull(request.getCookies().get("Customer"));

@@ -12,12 +12,16 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseSingleValuedHeader;
+import static java.util.Collections.*;
+import static org.forgerock.http.header.HeaderUtil.*;
+
+import java.util.Collections;
+import java.util.List;
 
 import org.forgerock.http.protocol.Header;
 import org.forgerock.http.protocol.Message;
@@ -27,7 +31,7 @@ import org.forgerock.http.protocol.Message;
  * more information, see <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC
  * 2616</a> §14.13.
  */
-public class ContentLengthHeader implements Header {
+public class ContentLengthHeader extends Header {
     /**
      * Constructs a new header, initialized from the specified message.
      *
@@ -100,7 +104,23 @@ public class ContentLengthHeader implements Header {
     }
 
     @Override
-    public String toString() {
-        return length >= 0 ? Long.toString(length) : null;
+    public List<String> getValues() {
+        return length >= 0 ? singletonList(Long.toString(length)) : Collections.<String>emptyList();
+    }
+
+    static class Factory extends AbstractSingleValuedHeaderFactory<ContentLengthHeader> {
+
+        @Override
+        public ContentLengthHeader parse(String value) {
+            return valueOf(value);
+        }
+
+        @Override
+        public ContentLengthHeader parse(Object value) throws MalformedHeaderException {
+            if (value instanceof Number) {
+                return new ContentLengthHeader(((Number) value).longValue());
+            }
+            return super.parse(value);
+        }
     }
 }

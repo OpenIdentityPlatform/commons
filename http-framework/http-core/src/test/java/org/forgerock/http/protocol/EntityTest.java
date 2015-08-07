@@ -16,11 +16,17 @@
 
 package org.forgerock.http.protocol;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
-import static org.forgerock.http.protocol.Entity.APPLICATION_JSON_CHARSET_UTF_8;
-import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.http.protocol.Entity.*;
+import static org.mockito.AdditionalAnswers.*;
 import static org.mockito.Mockito.*;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.forgerock.http.header.ContentLengthHeader;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -28,14 +34,6 @@ import org.forgerock.http.io.BranchingInputStream;
 import org.forgerock.http.io.IO;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @SuppressWarnings("javadoc")
 public class EntityTest {
@@ -316,21 +314,23 @@ public class EntityTest {
     }
 
     private void assertThatContentLengthHeaderIsNotPresent() {
-        assertThat(message.getHeaders().get(ContentLengthHeader.NAME)).isNullOrEmpty();
+        assertThat(message.getHeaders().get(ContentLengthHeader.NAME)).isNull();
     }
 
     private void assertThatContentLengthHeaderIsPresentForJsonContent2() {
-        assertThat(message.getHeaders()).containsEntry(ContentLengthHeader.NAME,
-                Arrays.asList(String.valueOf(JSON_CONTENT2.length())));
+        assertThat(message.getHeaders()).containsKey(ContentLengthHeader.NAME);
+        assertThat(message.getHeaders().get(ContentLengthHeader.NAME).getValues())
+                .containsOnly(String.valueOf(JSON_CONTENT2.length()));
     }
 
     private void assertThatContentTypeHeaderIsPresent() {
-        assertThat(message.getHeaders()).containsEntry(ContentTypeHeader.NAME,
-                Arrays.asList(APPLICATION_JSON_CHARSET_UTF_8));
+        assertThat(message.getHeaders()).containsKey(ContentTypeHeader.NAME);
+        assertThat(message.getHeaders().get(ContentTypeHeader.NAME).getValues())
+                .containsOnly(APPLICATION_JSON_CHARSET_UTF_8);
     }
 
     private void assertThatContentyTypeHeaderIsNotPresent() {
-        assertThat(message.getHeaders().get(ContentTypeHeader.NAME)).isNullOrEmpty();
+        assertThat(message.getHeaders().get(ContentTypeHeader.NAME)).isNull();
     }
 
     private byte[] bytes(final String s) throws UnsupportedEncodingException {

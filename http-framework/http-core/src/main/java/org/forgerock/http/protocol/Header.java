@@ -12,15 +12,18 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * An HTTP message header.
  */
-public interface Header {
+public abstract class Header {
 
     /**
      * Returns the name of the header, as it would canonically appear within an
@@ -29,13 +32,61 @@ public interface Header {
      * @return The name of the header, as it would canonically appear within an
      *         HTTP message.
      */
-    String getName();
+    public abstract String getName();
 
     /**
-     * Returns the header as a single string value. If the header is empty, this
-     * method will return {@code null}.
+     * Returns the header as a list of strings. Each {@code String} should
+     * represent the value component of the key-value pair that makes up the
+     * HTTP header - as such, for some {@code Header} implementations each
+     * String in this {@code List} may contain multiple token-separated values.
+     * <p>
+     * The {@code List} returned from this method should not be expected to be
+     * mutable. However, some subclasses of {@code Header} may choose to
+     * implement it as such.
      *
-     * @return The header as a single string value or {@code null} if empty.
+     * @return The header as a list of string values.
      */
-    String toString();
+    public abstract List<String> getValues();
+
+    /**
+     * Gets the first value of this header instance. As with {@link #getValues},
+     * the returned {@code String} may contain multiple token-separated values.
+     *
+     * @return The first value, or null if none exist.
+     */
+    public String getFirstValue() {
+        List<String> values = getValues();
+        return values == null || values.size() == 0 ? null : values.get(0);
+    }
+
+    @Override
+    public String toString() {
+        List<String> strings = new ArrayList<>();
+        for (String value : getValues()) {
+            strings.add(getName() + ": " + value);
+        }
+        return strings.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || !(o instanceof Header)) {
+            return false;
+        }
+
+        Header that = (Header) o;
+
+        return getName().equals(that.getName()) && getValues().equals(that.getValues());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getName().hashCode();
+        result = 31 * result + getValues().hashCode();
+        return result;
+    }
+
 }

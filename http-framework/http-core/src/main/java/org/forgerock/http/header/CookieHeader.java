@@ -17,9 +17,11 @@
 
 package org.forgerock.http.header;
 
-import static org.forgerock.http.header.HeaderUtil.parseMultiValuedHeader;
+import static java.util.Collections.*;
+import static org.forgerock.http.header.HeaderUtil.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.http.protocol.Cookie;
@@ -37,7 +39,7 @@ import org.forgerock.http.protocol.Request;
  * Note: This implementation is designed to be forgiving when parsing malformed
  * cookies.
  */
-public class CookieHeader implements Header {
+public class CookieHeader extends Header {
     private static CookieHeader valueOf(final List<String> values) {
         List<Cookie> cookies = new ArrayList<>(values.size());
         Integer version = null;
@@ -151,7 +153,7 @@ public class CookieHeader implements Header {
     }
 
     @Override
-    public String toString() {
+    public List<String> getValues() {
         boolean quoted = false;
         Integer version = null;
         for (Cookie cookie : cookies) {
@@ -186,7 +188,7 @@ public class CookieHeader implements Header {
             }
         }
         // return null if empty
-        return sb.length() > 0 ? sb.toString() : null;
+        return sb.length() > 0 ? singletonList(sb.toString()) : Collections.<String>emptyList();
     }
 
     private String portList(List<Integer> ports) {
@@ -198,5 +200,18 @@ public class CookieHeader implements Header {
             sb.append(port.toString());
         }
         return sb.toString();
+    }
+
+    static class Factory extends HeaderFactory<CookieHeader> {
+
+        @Override
+        public CookieHeader parse(String value) {
+            return valueOf(value);
+        }
+
+        @Override
+        public CookieHeader parse(List<String> values) {
+            return valueOf(values);
+        }
     }
 }

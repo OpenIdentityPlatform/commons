@@ -9,24 +9,26 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyright [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.protocol;
+package org.forgerock.http.header;
 
-import static org.assertj.core.api.Assertions.*;
+import java.util.List;
 
-import org.testng.annotations.Test;
+import org.forgerock.http.protocol.Header;
 
-@SuppressWarnings("javadoc")
-public class RequestTest {
+/**
+ * Convenience {@link HeaderFactory} for headers that can only have a single value.
+ * @param <H> The type of {@link Header} produced by the factory.
+ */
+abstract class AbstractSingleValuedHeaderFactory<H extends Header> extends HeaderFactory<H> {
 
-    @Test
-    public void testMethodChaining() {
-        Request request = new Request().setVersion("123").setMethod("GET");
-        assertThat(request.getVersion()).isEqualTo("123");
-        assertThat(request.getMethod()).isEqualTo("GET");
+    @Override
+    protected final H parse(List<String> values) throws MalformedHeaderException {
+        return values.size() == 1 ? parse(values.get(0)) : null;
     }
+
 }
