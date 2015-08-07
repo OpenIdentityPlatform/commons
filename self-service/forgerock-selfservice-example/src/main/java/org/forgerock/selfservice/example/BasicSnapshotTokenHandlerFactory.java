@@ -16,6 +16,7 @@
 
 package org.forgerock.selfservice.example;
 
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenType;
@@ -40,10 +41,8 @@ public class BasicSnapshotTokenHandlerFactory implements SnapshotTokenHandlerFac
     public SnapshotTokenHandler get(SnapshotTokenType tokenType) {
         if (tokenType == JwtTokenHandler.TYPE) {
             SigningManager signingManager = new SigningManager();
-            return new JwtTokenHandler(
-                    JwsAlgorithm.HS256,
-                    signingManager.newHmacSigningHandler(sharedKey),
-                    signingManager.newHmacSigningHandler(sharedKey));
+            SigningHandler signingHandler = signingManager.newHmacSigningHandler(sharedKey);
+            return new JwtTokenHandler(JwsAlgorithm.HS256, signingHandler, signingHandler);
         }
 
         throw new IllegalArgumentException("Unknown type " + tokenType.getName());

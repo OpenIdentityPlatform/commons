@@ -16,10 +16,10 @@
 
 package org.forgerock.selfservice.core;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 
 /**
  * General utility class.

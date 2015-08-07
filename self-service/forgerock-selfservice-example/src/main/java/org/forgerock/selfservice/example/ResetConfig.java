@@ -17,7 +17,7 @@
 package org.forgerock.selfservice.example;
 
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.config.StageType;
+import org.forgerock.selfservice.core.StageType;
 
 /**
  * Configuration for the password reset stage.

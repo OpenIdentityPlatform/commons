@@ -16,12 +16,12 @@
 
 package org.forgerock.selfservice.core;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ReadRequest;
@@ -30,7 +30,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig.StorageType;
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.config.StageType;
 import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.exceptions.StageConfigException;
 import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
@@ -61,7 +60,6 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     private static final String STATUS_FIELD = "status";
     private static final String SUCCESS_FIELD = "success";
     private static final String REQUIREMENTS_FIELD = "requirements";
-    private static final String REASON_FIELD = "reason";
     private static final String END_VALUE = "end";
 
     private static final int INITIAL_STAGE_INDEX = 0;
@@ -262,13 +260,13 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         @Override
         public String captureSnapshotOf(ProcessContext context) {
             String snapshotToken = snapshotTokenHandler.generate(Collections.<String, String>emptyMap());
-            processStore.push(snapshotToken, context.asFlattenedMap());
+            processStore.add(snapshotToken, context.toFlattenedMap());
             return snapshotToken;
         }
 
         @Override
         public Map<String, String> retrieveSnapshotState(String snapshotToken) {
-            return processStore.pop(snapshotToken);
+            return processStore.remove(snapshotToken);
         }
     }
 
@@ -276,7 +274,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
         @Override
         public String captureSnapshotOf(ProcessContext context) {
-            return snapshotTokenHandler.generate(context.asFlattenedMap());
+            return snapshotTokenHandler.generate(context.toFlattenedMap());
         }
 
         @Override

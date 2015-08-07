@@ -14,7 +14,9 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
+package org.forgerock.selfservice.core;
+
+import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
  * The stage type provides some relationship between a stage config and a progress stage.
@@ -31,7 +33,7 @@ public final class StageType<C extends StageConfig> {
         this.configClass = configClass;
     }
 
-    public String getName() {
+    String getName() {
         return name;
     }
 
@@ -42,8 +44,11 @@ public final class StageType<C extends StageConfig> {
      *         a generic stage config
      *
      * @return a typed stage config
+     *
+     * @throws ClassCastException
+     *         if the configClass is not a subtype represented by the passed config
      */
-    public C getTypedConfig(StageConfig config) {
+    C getTypedConfig(StageConfig config) {
         return configClass.cast(config);
     }
 

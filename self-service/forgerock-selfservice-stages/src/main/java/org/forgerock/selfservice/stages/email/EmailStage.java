@@ -2,12 +2,12 @@ package org.forgerock.selfservice.stages.email;
 
 import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.StageResponse;
-import org.forgerock.selfservice.core.config.StageType;
+import org.forgerock.selfservice.core.StageType;
 import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;

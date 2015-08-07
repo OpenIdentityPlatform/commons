@@ -16,6 +16,8 @@
 
 package org.forgerock.selfservice.core.config;
 
+import org.forgerock.selfservice.core.StageType;
+
 /**
  * Represents the configuration for a given progress stage.
  *

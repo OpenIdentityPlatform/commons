@@ -19,7 +19,7 @@ package org.forgerock.selfservice.core;
 import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
 import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 import java.util.Collections;
@@ -59,6 +59,9 @@ public final class StageResponse {
         return Collections.unmodifiableMap(state);
     }
 
+    /**
+     * Builder assists with the creation of {@link StageResponse} instances.
+     */
     public static final class Builder {
 
         private String stageTag;

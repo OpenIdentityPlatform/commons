@@ -7,6 +7,12 @@ package org.forgerock.selfservice.core.exceptions;
  */
 public final class StageConfigException extends RuntimeException {
 
+    /**
+     * Creates an exception instance.
+     *
+     * @param message
+     *         should detail the cause of the error
+     */
     public StageConfigException(String message) {
         super(message);
     }

@@ -26,23 +26,23 @@ import java.util.Map;
 public interface ProcessStore {
 
     /**
-     * Pushes the state into the store against the key.
+     * Adds the state into the store against the key.
      *
      * @param key
      *         key used to index the state
      * @param state
      *         the state
      */
-    void push(String key, Map<String, String> state);
+    void add(String key, Map<String, String> state);
 
     /**
-     * Pops the state out of the store.
+     * Removes the state out of the store.
      *
      * @param key
      *         key used to index the state
      *
      * @return the state
      */
-    Map<String, String> pop(String key);
+    Map<String, String> remove(String key);
 
 }

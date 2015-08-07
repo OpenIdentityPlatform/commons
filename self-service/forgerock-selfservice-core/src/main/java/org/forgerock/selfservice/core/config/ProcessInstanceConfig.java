@@ -51,6 +51,9 @@ public final class ProcessInstanceConfig {
         return storageType;
     }
 
+    /**
+     * Builder for assisting with the construction of {@link ProcessInstanceConfig}.
+     */
     public static final class Builder {
 
         private List<StageConfig> stageConfigs;
@@ -92,6 +95,13 @@ public final class ProcessInstanceConfig {
 
     }
 
+    /**
+     * Indicates whether the service should operate in stateless or stateful mode.
+     * <b/>
+     * Stateless means that all process state will be pushed into the token that
+     * is returned to the client. Whereas stateful (local) will push all state to
+     * a local store and the returning token will be used to key that state.
+     */
     public enum StorageType {
         LOCAL, STATELESS
     }

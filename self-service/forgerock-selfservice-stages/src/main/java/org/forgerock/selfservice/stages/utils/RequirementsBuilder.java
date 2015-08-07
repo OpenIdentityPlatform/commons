@@ -1,11 +1,11 @@
 package org.forgerock.selfservice.stages.utils;
 
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 import java.util.ArrayList;
@@ -32,7 +32,7 @@ public final class RequirementsBuilder {
 
         jsonValue = json(
                 object(
-                        field("schema", JSON_SCHEMA),
+                        field("$schema", JSON_SCHEMA),
                         field("type", "object"),
                         field("description", description),
                         field("required", requiredProperties),

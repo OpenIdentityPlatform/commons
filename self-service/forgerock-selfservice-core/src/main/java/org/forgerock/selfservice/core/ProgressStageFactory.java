@@ -16,8 +16,6 @@
 
 package org.forgerock.selfservice.core;
 
-import org.forgerock.selfservice.core.config.StageType;
-
 /**
  * Factory responsible for providing progress stage instances based on the requested type.
  *

@@ -1,7 +1,7 @@
 package org.forgerock.selfservice.stages.email;
 
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.config.StageType;
+import org.forgerock.selfservice.core.StageType;
 
 /**
  * Configuration for the email stage.

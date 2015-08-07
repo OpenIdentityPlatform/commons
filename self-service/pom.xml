@@ -54,6 +54,7 @@
 
     <properties>
         <commons.forgerock-rest.version>3.0.0-SNAPSHOT</commons.forgerock-rest.version>
+        <commons.forgerock-util.version>2.0.0-SNAPSHOT</commons.forgerock-util.version>
         <commons.json-web-token.version>3.0.0-SNAPSHOT</commons.json-web-token.version>
         <commons.chf-http-servlet.version>0.0.1-SNAPSHOT</commons.chf-http-servlet.version>
         <javax.inject.version>1</javax.inject.version>
@@ -73,6 +74,11 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>json-web-token</artifactId>
                 <version>${commons.json-web-token.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-util</artifactId>
+                <version>${commons.forgerock-util.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.http</groupId>

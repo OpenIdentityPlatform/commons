@@ -16,18 +16,23 @@
 
 package org.forgerock.selfservice.core.exceptions;
 
-import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.BadRequestException;
 
 /**
- * Stage exception represents some interaction error for
- * which some error needs to be returned to the client.
+ * Exception to represent illegal/invalid input from the client.
  *
  * @since 0.1.0
  */
-public final class IllegalInputException extends ResourceException {
+public final class IllegalInputException extends BadRequestException {
 
+    /**
+     * Creates a new exception instance.
+     *
+     * @param message
+     *         the message should refer to what is illegal about the input
+     */
     public IllegalInputException(String message) {
-        super(ResourceException.BAD_REQUEST, message);
+        super(message);
     }
 
 }

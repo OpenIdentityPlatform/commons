@@ -35,12 +35,12 @@ public class BasicLocalStorage implements ProcessStore {
     }
 
     @Override
-    public Map<String, String> pop(String key) {
+    public Map<String, String> remove(String key) {
         return localStore.remove(key);
     }
 
     @Override
-    public void push(String key, Map<String, String> state) {
+    public void add(String key, Map<String, String> state) {
         localStore.put(key, state);
     }
 

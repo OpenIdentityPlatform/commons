@@ -17,7 +17,6 @@
 package org.forgerock.selfservice.core;
 
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.config.StageType;
 import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 

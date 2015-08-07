@@ -19,7 +19,7 @@ package org.forgerock.selfservice.core;
 import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
 import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 import java.util.Collections;
@@ -68,13 +68,16 @@ public final class ProcessContext {
         return Collections.unmodifiableMap(state);
     }
 
-    Map<String, String> asFlattenedMap() {
-        Map<String, String> flattenedMap = new HashMap<>(state);
-        flattenedMap.put(STAGE_INDEX_KEY, String.valueOf(stageIndex));
-        flattenedMap.put(STAGE_TAG_KEY, stageTag);
-        return flattenedMap;
+    Map<String, String> toFlattenedMap() {
+        Map<String, String> flattenedContext = new HashMap<>(state);
+        flattenedContext.put(STAGE_INDEX_KEY, String.valueOf(stageIndex));
+        flattenedContext.put(STAGE_TAG_KEY, stageTag);
+        return flattenedContext;
     }
 
+    /**
+     * Builder assists with the creation of {@link ProcessContext} instance.
+     */
     public static final class Builder {
 
         private final int stageIndex;
