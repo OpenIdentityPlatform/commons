@@ -64,29 +64,66 @@ public final class ProcessInstanceConfig {
             stageConfigs = new ArrayList<>();
         }
 
+        /**
+         * Add a new stage config.
+         *
+         * @param stageConfig
+         *         stage config
+         *
+         * @return this builder
+         */
         public Builder addStageConfig(StageConfig stageConfig) {
             Reject.ifNull(stageConfig);
             stageConfigs.add(stageConfig);
             return this;
         }
 
+        /**
+         * Add a list of new stage configs.
+         *
+         * @param stageConfigs
+         *         stage configs
+         *
+         * @return this builder
+         */
         public Builder addStageConfigs(List<StageConfig> stageConfigs) {
             Reject.ifNull(stageConfigs);
             this.stageConfigs.addAll(stageConfigs);
             return this;
         }
 
+        /**
+         * Defines the snapshot token type to use.
+         *
+         * @param tokenType
+         *         the snapshot token type
+         *
+         * @return this builder
+         */
         public Builder setTokenType(SnapshotTokenType tokenType) {
             Reject.ifNull(tokenType);
             this.tokenType = tokenType;
             return this;
         }
 
+        /**
+         * The store type, whether local or stateless.
+         *
+         * @param storageType
+         *         the storage type
+         *
+         * @return this builder
+         */
         public Builder setStorageType(StorageType storageType) {
             this.storageType = storageType;
             return this;
         }
 
+        /**
+         * Builds a config instance.
+         *
+         * @return a new config instance
+         */
         public ProcessInstanceConfig build() {
             Reject.ifTrue(stageConfigs.isEmpty());
             Reject.ifNull(tokenType, storageType);

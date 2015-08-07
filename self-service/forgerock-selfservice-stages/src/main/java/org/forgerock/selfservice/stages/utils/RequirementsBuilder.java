@@ -3,7 +3,7 @@ package org.forgerock.selfservice.stages.utils;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-
+import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
@@ -61,6 +61,10 @@ public final class RequirementsBuilder {
 
     public static RequirementsBuilder newInstance(String description) {
         return new RequirementsBuilder(description);
+    }
+
+    public static JsonValue newEmptyRequirements() {
+        return emptyJson();
     }
 
 }

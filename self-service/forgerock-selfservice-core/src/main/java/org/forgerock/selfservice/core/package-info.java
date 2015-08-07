@@ -15,6 +15,6 @@
  */
 
 /**
- * This package contains the core implementation for self service.
+ * This package contains the core implementation for the anonymous process service.
  */
 package org.forgerock.selfservice.core;

@@ -48,18 +48,35 @@ public final class ProcessContext {
         state = builder.state;
     }
 
+    /**
+     * @return the current index in the flow
+     */
     public int getStageIndex() {
         return stageIndex;
     }
 
+    /**
+     * @return the current stage tag defined by the stage
+     */
     public String getStageTag() {
         return stageTag;
     }
 
+    /**
+     * @return input provided by the client, empty json object if none
+     */
     public JsonValue getInput() {
         return input;
     }
 
+    /**
+     * Allows retrieval of state persisted throughout the flow.
+     *
+     * @param key
+     *         the state key
+     *
+     * @return the corresponding value
+     */
     public String getState(String key) {
         return state.get(key);
     }
@@ -103,10 +120,7 @@ public final class ProcessContext {
 
         private Builder(Map<String, String> flattenedContext) {
             Reject.ifNull(flattenedContext);
-
-            if (!flattenedContext.containsKey(STAGE_INDEX_KEY)) {
-                throw new IllegalArgumentException("Stage index missing");
-            }
+            Reject.ifFalse(flattenedContext.containsKey(STAGE_INDEX_KEY), "Stage index missing");
 
             Map<String, String> localCopy = new HashMap<>(flattenedContext);
             stageIndex = Integer.parseInt(localCopy.remove(STAGE_INDEX_KEY));
@@ -117,25 +131,51 @@ public final class ProcessContext {
             input = emptyJson();
         }
 
+        /**
+         * Set the stage tag.
+         *
+         * @param stageTag
+         *         the stage tag
+         *
+         * @return this builder
+         */
         public Builder setStageTag(String stageTag) {
             Reject.ifNull(stageTag);
             this.stageTag = stageTag;
             return this;
         }
 
+        /**
+         * Add state that should be preserved throughout the flow.
+         *
+         * @param state
+         *         state to be preserved
+         *
+         * @return this builder
+         */
         public Builder addState(Map<String, String> state) {
             Reject.ifNull(state);
             this.state.putAll(state);
             return this;
         }
 
+        /**
+         * Add state that should be preserved throughout the flow.
+         *
+         * @param key
+         *         state key
+         * @param value
+         *         corresponding state value
+         *
+         * @return this builder
+         */
         public Builder addState(String key, String value) {
             Reject.ifNull(key, value);
             this.state.put(key, value);
             return this;
         }
 
-        public Builder setInput(JsonValue input) {
+        Builder setInput(JsonValue input) {
             Reject.ifNull(input);
             this.input = input;
             return this;
@@ -155,6 +195,14 @@ public final class ProcessContext {
         return new Builder(flattenedContext);
     }
 
+    /**
+     * Creates a new process context builder based of a previous context.
+     *
+     * @param previous
+     *         the previous context
+     *
+     * @return a new builder
+     */
     public static Builder newBuilder(ProcessContext previous) {
         return new Builder(previous);
     }

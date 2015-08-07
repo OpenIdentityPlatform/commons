@@ -35,6 +35,7 @@ import org.forgerock.selfservice.core.exceptions.StageConfigException;
 import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
+import org.forgerock.util.Pair;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -97,125 +98,159 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
     @Override
     public Promise<Resource, ResourceException> handleRead(ServerContext context, ReadRequest request) {
-        return initiateProcess();
+        try {
+            JsonValue clientResponse = initiateProcess();
+            return Promises.newResultPromise(new Resource("1", "1.0", clientResponse));
+        } catch (ResourceException rE) {
+            return Promises.newExceptionPromise(rE);
+        } catch (RuntimeException rE) {
+            ResourceException resourceException = ResourceException
+                    .getException(ResourceException.INTERNAL_ERROR, "Internal error intercepted", rE)
+                    .includeCauseInJsonValue();
+            return Promises.newExceptionPromise(resourceException);
+        }
     }
 
     @Override
     public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
         if (SUBMIT_ACTION.equals(request.getAction())) {
-            return progressProcess(request.getContent());
+            try {
+                JsonValue clientResponse = progressProcess(request.getContent());
+                return Promises.newResultPromise(clientResponse);
+            } catch (ResourceException rE) {
+                return Promises.newExceptionPromise(rE);
+            } catch (RuntimeException rE) {
+                ResourceException resourceException = ResourceException
+                        .getException(ResourceException.INTERNAL_ERROR, "Internal error intercepted", rE)
+                        .includeCauseInJsonValue();
+                return Promises.newExceptionPromise(resourceException);
+            }
         }
 
         return Promises.newExceptionPromise(
-                ResourceException.getException(ResourceException.NOT_SUPPORTED, "Unknown action " + request.getAction()));
+                ResourceException.getException(ResourceException.NOT_SUPPORTED,
+                        "Unknown action " + request.getAction()));
     }
 
-    /**
-     * Responsible for kicking off the process flow.
-     *
-     * @return promise encapsulating the response
+    /*
+     * Responsible for retrieving the requirements from the first stage in the flow.
      */
-    private Promise<Resource, ResourceException> initiateProcess() {
-        try {
-            ProcessContext context = ProcessContext
-                    .newBuilder(INITIAL_STAGE_INDEX)
-                    .build();
+    private JsonValue initiateProcess() throws IllegalInputException {
+        ProcessContext context = ProcessContext
+                .newBuilder(INITIAL_STAGE_INDEX)
+                .build();
 
-            JsonValue feedback = enactContext(context);
-            Resource resource = new Resource("1", "1.0", feedback);
-            return Promises.newResultPromise(resource);
-        } catch (ResourceException rE) {
-            return Promises.newExceptionPromise(rE);
-        } catch (RuntimeException rE) {
-            ResourceException resourceException = ResourceException
-                    .getException(ResourceException.INTERNAL_ERROR, "Internal error intercepted", rE)
-                    .includeCauseInJsonValue();
-            return Promises.newExceptionPromise(resourceException);
-        }
+        Pair<? extends ProgressStage<?>, StageConfig> stagePair = retrieveStage(context);
+        JsonValue requirements = gatherInitialRequirements(context, stagePair.getFirst(), stagePair.getSecond());
 
+        return renderRequirements(
+                context,
+                stagePair.getFirst().getStageType(),
+                StageResponse
+                        .newBuilder()
+                        .setRequirements(requirements)
+                        .build());
     }
 
-    /**
-     * With the process flow already kicked off, progresses to the next stage.
-     *
-     * @param interaction
-     *         json value representing the response from the client
-     *
-     * @return promise encapsulating the response
+    /*
+     * With the process flow already kicked off, progresses to the flow by processing the client input.
      */
-    private Promise<JsonValue, ResourceException> progressProcess(JsonValue interaction) {
-        try {
-            String snapshotToken = interaction.get(TOKEN_FIELD).asString();
+    private JsonValue progressProcess(JsonValue clientInput) throws IllegalInputException {
+        JsonValue snapshotTokenValue = clientInput.get(TOKEN_FIELD);
+        ProcessContext.Builder contextBuilder;
 
+        if (snapshotTokenValue.isNotNull()) {
+            String snapshotToken = snapshotTokenValue.asString();
             if (!snapshotTokenHandler.validate(snapshotToken)) {
-                return Promises.newExceptionPromise(ResourceException
-                        .getException(ResourceException.BAD_REQUEST, "Invalid token"));
-            }
-
-            JsonValue input = interaction.get(INPUT_FIELD);
-
-            if (input.isNull()) {
-                return Promises.newExceptionPromise(ResourceException
-                        .getException(ResourceException.BAD_REQUEST, "No input provided"));
+                throw new IllegalInputException("Invalid token");
             }
 
             Map<String, String> stageState = snapshotAuthor.retrieveSnapshotState(snapshotToken);
-            ProcessContext context = ProcessContext
-                    .newBuilder(stageState)
-                    .setInput(input)
-                    .build();
-
-            JsonValue feedback = enactContext(context);
-            return Promises.newResultPromise(feedback);
-        } catch (ResourceException rE) {
-            return Promises.newExceptionPromise(rE);
-        } catch (RuntimeException rE) {
-            ResourceException resourceException = ResourceException
-                    .getException(ResourceException.INTERNAL_ERROR, "Internal error intercepted", rE)
-                    .includeCauseInJsonValue();
-            return Promises.newExceptionPromise(resourceException);
+            contextBuilder = ProcessContext.newBuilder(stageState);
+        } else {
+            contextBuilder = ProcessContext.newBuilder(INITIAL_STAGE_INDEX);
         }
+
+        JsonValue input = clientInput.get(INPUT_FIELD);
+
+        if (input.isNull()) {
+            throw new IllegalInputException("No input provided");
+        }
+
+        ProcessContext context = contextBuilder
+                .setInput(input)
+                .build();
+
+        Pair<? extends ProgressStage<?>, StageConfig> stagePair = retrieveStage(context);
+        return enactContext(context, stagePair.getFirst(), stagePair.getSecond());
     }
 
-    private JsonValue enactContext(ProcessContext context) throws IllegalInputException {
-        StageConfig config = stageConfigs.get(context.getStageIndex());
-        ProgressStage<?> stage = progressStageFactory.get(config.getStageType());
-
-        if (stage == null) {
-            throw new StageConfigException("Unknown progress stage " + config.getStageType().getName());
-        }
-
-        StageResponse response = advanceProgress(stage, context, config);
+    private JsonValue enactContext(ProcessContext context, ProgressStage<?> stage,
+                                   StageConfig config) throws IllegalInputException {
+        StageResponse response = advanceProgress(context, stage, config);
 
         if (response.hasRequirements()) {
-            return renderRequirements(context, config.getStageType(), response);
+            // Stage has additional requirements, render response.
+            return renderRequirementsWithSnapshot(context, config.getStageType(), response);
         }
 
         return handleProgression(context, config.getStageType(), response);
     }
 
-    private <C extends StageConfig> StageResponse advanceProgress(
-            ProgressStage<C> stage, ProcessContext context, StageConfig config) throws IllegalInputException {
-
-        if (!stage.getStageType().equals(config.getStageType())) {
-            throw new StageConfigException("Type for progress stage and config should be equivalent");
+    private JsonValue handleProgression(ProcessContext context, StageType<?> stageType,
+                                       StageResponse response) throws IllegalInputException {
+        if (context.getStageIndex() + 1 == stageConfigs.size()) {
+            // Flow complete, render completion response.
+            return renderCompletion(stageType);
         }
 
-        return stage.advance(context, snapshotAuthor, stage.getStageType().getTypedConfig(config));
+        // Stage satisfied, move onto the next stage.
+        ProcessContext nextContext = ProcessContext
+                .newBuilder(context.getStageIndex() + 1)
+                .addState(context.getState())
+                .addState(response.getState())
+                .build();
+
+        Pair<? extends ProgressStage<?>, StageConfig> stagePair = retrieveStage(nextContext);
+        JsonValue requirements = gatherInitialRequirements(nextContext, stagePair.getFirst(), stagePair.getSecond());
+
+        if (requirements.size() > 0) {
+            // Stage has some initial requirements, render response.
+            return renderRequirementsWithSnapshot(
+                    nextContext,
+                    stagePair.getFirst().getStageType(),
+                    StageResponse
+                            .newBuilder()
+                            .setRequirements(requirements)
+                            .build());
+        }
+
+        return enactContext(nextContext, stagePair.getFirst(), stagePair.getSecond());
     }
 
-    public JsonValue handleProgression(ProcessContext context, StageType<?> stageType,
-                                       StageResponse response) throws IllegalInputException {
-        if (context.getStageIndex() + 1 < stageConfigs.size()) {
-            // Move onto the next progress stage
-            return enactContext(ProcessContext
-                    .newBuilder(context.getStageIndex() + 1)
-                    .addState(context.getState())
-                    .addState(response.getState())
-                    .build());
-        }
+    private JsonValue renderRequirementsWithSnapshot(ProcessContext context,
+                                                     StageType<?> stageType, StageResponse response) {
+        String snapshotToken = snapshotAuthor
+                .captureSnapshotOf(ProcessContext
+                        .newBuilder(context)
+                        .setStageTag(response.getStageTag())
+                        .addState(response.getState())
+                        .build());
 
-        // Process is complete
+        return renderRequirements(context, stageType, response)
+                .add(TOKEN_FIELD, snapshotToken);
+    }
+
+    private JsonValue renderRequirements(ProcessContext context, StageType<?> stageType, StageResponse response) {
+        return json(
+                object(
+                        field(TYPE_FIELD, stageType.getName()),
+                        field(STAGE_FIELD, context.getStageIndex()),
+                        field(REQUIREMENTS_FIELD, response.getRequirements().asMap())
+                ));
+    }
+
+    private JsonValue renderCompletion(StageType<?> stageType) {
         return json(
                 object(
                         field(TYPE_FIELD, stageType.getName()),
@@ -228,20 +263,49 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 ));
     }
 
-    private JsonValue renderRequirements(ProcessContext context, StageType<?> stageType, StageResponse response) {
-        String snapshotToken = snapshotAuthor.captureSnapshotOf(ProcessContext
-                .newBuilder(context)
-                .setStageTag(response.getStageTag())
-                .addState(response.getState())
-                .build());
+    /*
+     * Enables a typed stage config to be passed to the stage.
+     * <b />
+     * Type safety is checked during the stage retrieval.
+     */
+    private <C extends StageConfig> JsonValue gatherInitialRequirements(
+            ProcessContext context, ProgressStage<C> stage, StageConfig config) throws IllegalInputException {
+        return stage.gatherInitialRequirements(context, stage.getStageType().getTypedConfig(config));
+    }
 
-        return json(
-                object(
-                        field(TOKEN_FIELD, snapshotToken),
-                        field(TYPE_FIELD, stageType.getName()),
-                        field(STAGE_FIELD, context.getStageIndex()),
-                        field(REQUIREMENTS_FIELD, response.getRequirements().asMap())
-                ));
+    /*
+     * Enables a typed stage config to be passed to the stage.
+     * <b />
+     * Type safety is checked during the stage retrieval.
+     */
+    private <C extends StageConfig> StageResponse advanceProgress(
+            ProcessContext context, ProgressStage<C> stage, StageConfig config) throws IllegalInputException {
+        return stage.advance(context, stage.getStageType().getTypedConfig(config), snapshotAuthor);
+    }
+
+    /*
+     * Retrieves the stage and its corresponding config based on the context stage index.
+     * <b />
+     * This method also validates the expected subtype of the config.
+     */
+    private Pair<? extends ProgressStage<?>, StageConfig> retrieveStage(ProcessContext context) {
+        if (context.getStageIndex() >= stageConfigs.size()) {
+            throw new StageConfigException("Invalid stage index " + context.getStageIndex());
+        }
+
+        StageConfig config = stageConfigs.get(context.getStageIndex());
+        ProgressStage<?> stage = progressStageFactory.get(config.getStageType());
+
+        if (stage == null) {
+            throw new StageConfigException("Unknown progress stage " + config.getStageType().getName());
+        }
+
+        if (!stage.getStageType().equals(config.getStageType())) {
+            // Implicit enforcement of the expected subtype of the stage config.
+            throw new StageConfigException("Type for progress stage and config should be equivalent");
+        }
+
+        return Pair.of(stage, config);
     }
 
     private InternalSnapshotAuthor newSnapshotAuthor(StorageType type) {
@@ -255,6 +319,9 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         }
     }
 
+    /*
+     * Snapshot author that stores state locally to the server.
+     */
     private final class LocalSnapshotAuthor implements InternalSnapshotAuthor {
 
         @Override
@@ -270,6 +337,9 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         }
     }
 
+    /*
+     * Snapshot author that stores state within the token returned to the client.
+     */
     private final class StatelessSnapshotAuthor implements InternalSnapshotAuthor {
 
         @Override

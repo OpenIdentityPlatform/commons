@@ -43,19 +43,19 @@ public final class StageResponse {
         state = builder.state;
     }
 
-    public String getStageTag() {
+    String getStageTag() {
         return stageTag;
     }
 
-    public boolean hasRequirements() {
+    boolean hasRequirements() {
         return requirements.size() > 0;
     }
 
-    public JsonValue getRequirements() {
+    JsonValue getRequirements() {
         return requirements;
     }
 
-    public Map<String, String> getState() {
+    Map<String, String> getState() {
         return Collections.unmodifiableMap(state);
     }
 
@@ -74,30 +74,66 @@ public final class StageResponse {
             state = new HashMap<>();
         }
 
+        /**
+         * Sets the stage tag.
+         *
+         * @param stageTag
+         *         the stage tag
+         *
+         * @return this builder
+         */
         public Builder setStageTag(String stageTag) {
             Reject.ifNull(stageTag);
             this.stageTag = stageTag;
             return this;
         }
 
+        /**
+         * Sets the json requirements.
+         *
+         * @param requirements
+         *         the json requirements
+         *
+         * @return this builder
+         */
         public Builder setRequirements(JsonValue requirements) {
             Reject.ifNull(requirements);
             this.requirements = requirements;
             return this;
         }
 
+        /**
+         * Adds state to be preserved throughout the flow.
+         *
+         * @param key
+         *         state key
+         * @param value
+         *         corresponding state value
+         *
+         * @return this builder
+         */
         public Builder addState(String key, String value) {
             Reject.ifNull(key, value);
             state.put(key, value);
             return this;
         }
 
+        /**
+         * Builds a stage response instance.
+         *
+         * @return a stage response instance
+         */
         public StageResponse build() {
             return new StageResponse(this);
         }
 
     }
 
+    /**
+     * New builder to help construct a stage response.
+     *
+     * @return new builder
+     */
     public static Builder newBuilder() {
         return new Builder();
     }

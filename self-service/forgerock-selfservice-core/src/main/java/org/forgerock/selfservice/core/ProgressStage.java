@@ -16,33 +16,59 @@
 
 package org.forgerock.selfservice.core;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 
 /**
  * Progress stage represents a single stage within the overall advance flow.
+ * <b />
+ * The method {@link ProgressStage#gatherInitialRequirements(ProcessContext, StageConfig)} is invoke first and provides
+ * an opportunity for the stage to return some initial requirements. The method
+ * {@link ProgressStage#advance(ProcessContext, StageConfig, SnapshotAuthor)} is repeatedly after for every
+ * {@link StageResponse} that is returned containing some requirements. Stage tags can be used in the stage response to
+ * help track progress in the stage itself. State can also be added to the stage response to pass data throughout the flow.
  *
  * @since 0.1.0
  */
 public interface ProgressStage<C extends StageConfig> {
 
     /**
-     * Advance the progress stage.
+     * Response for defining any initial requirements the stage may have.
+     * <b />
+     * An empty json object implies no initial requirements.
      *
      * @param context
      *         the current process context
-     * @param snapshotAuthor
-     *         the snapshot author
      * @param config
      *         the stage configuration
+     *
+     * @return json value representing the requirements or empty json object for no requirements
+     *
+     * @throws IllegalInputException
+     *         if some expected state is invalid
+     */
+    JsonValue gatherInitialRequirements(ProcessContext context, C config) throws IllegalInputException;
+
+    /**
+     * Advance the progress stage.
+     * <b />
+     * The snapshot author can be used to take a snapshot of the current flow state.
+     *
+     * @param context
+     *         the current process context
+     * @param config
+     *         the stage configuration
+     * @param snapshotAuthor
+     *         the snapshot author
      *
      * @return the result of invoking this stage
      *
      * @throws IllegalInputException
-     *         if some input data is invalid
+     *         if some expected state or input is invalid
      */
-    StageResponse advance(ProcessContext context, SnapshotAuthor snapshotAuthor, C config) throws IllegalInputException;
+    StageResponse advance(ProcessContext context, C config, SnapshotAuthor snapshotAuthor) throws IllegalInputException;
 
     /**
      * Gets the stage type.

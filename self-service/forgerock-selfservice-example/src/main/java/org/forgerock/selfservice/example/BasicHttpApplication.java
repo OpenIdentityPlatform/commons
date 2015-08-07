@@ -48,7 +48,6 @@ public class BasicHttpApplication implements HttpApplication {
         Router router = new Router();
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/reset"), initialiseHandler());
         return router;
-
     }
 
     private Handler initialiseHandler() {
