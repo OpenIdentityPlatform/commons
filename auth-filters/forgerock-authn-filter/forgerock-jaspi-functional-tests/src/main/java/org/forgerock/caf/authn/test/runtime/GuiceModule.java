@@ -16,8 +16,8 @@
 
 package org.forgerock.caf.authn.test.runtime;
 
-import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder;
+import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.forgerock.json.resource.Resources.newSingleton;
@@ -36,8 +36,8 @@ import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.caf.authn.test.configuration.ConfigurationResource;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,7 +93,7 @@ public class GuiceModule extends AbstractModule {
     public AsyncServerAuthModule getSessionAuthModule(ConfigurationResource configurationResource, Injector injector)
             throws ResourceException, ClassNotFoundException {
 
-        Resource configuration = newInternalConnection(newSingleton(configurationResource))
+        ResourceResponse configuration = newInternalConnection(newSingleton(configurationResource))
                 .read(new RootContext(), newReadRequest("configuration"));
         JsonValue sessionModuleConfig = configuration.getContent().get("serverAuthContext").get("sessionModule");
         if (!sessionModuleConfig.isNull()) {
@@ -121,7 +121,7 @@ public class GuiceModule extends AbstractModule {
 
         List<AsyncServerAuthModule> authModules = new ArrayList<>();
 
-        Resource configuration = newInternalConnection(newSingleton(configurationResource))
+        ResourceResponse configuration = newInternalConnection(newSingleton(configurationResource))
                 .read(new RootContext(), newReadRequest("configuration"));
         JsonValue authModulesConfig = configuration.getContent().get("serverAuthContext").get("authModules");
         for (JsonValue authModuleConfig : authModulesConfig) {

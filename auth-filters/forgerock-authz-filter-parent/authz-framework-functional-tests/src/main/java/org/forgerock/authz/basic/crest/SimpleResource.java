@@ -17,21 +17,22 @@
 package org.forgerock.authz.basic.crest;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
 
@@ -46,70 +47,70 @@ public class SimpleResource implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<JsonValue, ResourceException> actionCollection(ServerContext context, ActionRequest request) {
-        return newResultPromise(json(object(field("operation", "actionCollection"))));
+    public Promise<ActionResponse, ResourceException> actionCollection(ServerContext context, ActionRequest request) {
+        return newResultPromise(newActionResponse(json(object(field("operation", "actionCollection")))));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<JsonValue, ResourceException> actionInstance(ServerContext context, String resourceId,
+    public Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, String resourceId,
             ActionRequest request) {
-        return newResultPromise(json(object(field("operation", "action"))));
+        return newResultPromise(newActionResponse(json(object(field("operation", "action")))));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> createInstance(ServerContext context, CreateRequest request) {
-        return newResultPromise(new Resource("0", "0", json(object(field("operation", "create")))));
+    public Promise<ResourceResponse, ResourceException> createInstance(ServerContext context, CreateRequest request) {
+        return newResultPromise(newResourceResponse("0", "0", json(object(field("operation", "create")))));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> deleteInstance(ServerContext context, String resourceId,
+    public Promise<ResourceResponse, ResourceException> deleteInstance(ServerContext context, String resourceId,
             DeleteRequest request) {
-        return newResultPromise(new Resource("0", "0", json(object(field("operation", "delete")))));
+        return newResultPromise(newResourceResponse("0", "0", json(object(field("operation", "delete")))));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> patchInstance(ServerContext context, String resourceId,
+    public Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, String resourceId,
             PatchRequest request) {
-        return newResultPromise(new Resource("0", "0", json(object(field("operation", "patch")))));
+        return newResultPromise(newResourceResponse("0", "0", json(object(field("operation", "patch")))));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResult, ResourceException> queryCollection(ServerContext context, QueryRequest request,
+    public Promise<QueryResponse, ResourceException> queryCollection(ServerContext context, QueryRequest request,
             QueryResourceHandler handler) {
-        handler.handleResource(new Resource("0", "0", json(object(field("operation", "queryCollection")))));
-        return newResultPromise(new QueryResult());
+        handler.handleResource(newResourceResponse("0", "0", json(object(field("operation", "queryCollection")))));
+        return newResultPromise(newQueryResponse());
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> readInstance(ServerContext context, String resourceId,
+    public Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, String resourceId,
             ReadRequest request) {
-        return newResultPromise(new Resource("0", "0", json(object(field("operation", "read")))));
+        return newResultPromise(newResourceResponse("0", "0", json(object(field("operation", "read")))));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> updateInstance(ServerContext context, String resourceId,
+    public Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, String resourceId,
             UpdateRequest request) {
-        return newResultPromise(new Resource("0", "0", json(object(field("operation", "update")))));
+        return newResultPromise(newResourceResponse("0", "0", json(object(field("operation", "update")))));
     }
 }

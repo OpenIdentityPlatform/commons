@@ -24,8 +24,8 @@ import java.util.List;
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.api.CrestAuthorizationModule;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -34,11 +34,11 @@ import org.forgerock.json.resource.FilterChain;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
@@ -176,12 +176,12 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<JsonValue, ResourceException> filterAction(final ServerContext context,
+        public Promise<ActionResponse, ResourceException> filterAction(final ServerContext context,
                 final ActionRequest request, final RequestHandler next) {
             return module.authorizeAction(context, request)
-                    .thenAsync(new AsyncFunction<AuthorizationResult, JsonValue, ResourceException>() {
+                    .thenAsync(new AsyncFunction<AuthorizationResult, ActionResponse, ResourceException>() {
                         @Override
-                        public Promise<JsonValue, ResourceException> apply(AuthorizationResult result) {
+                        public Promise<ActionResponse, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
                                 return next.handleAction(context, request);
                             } else {
@@ -204,12 +204,12 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<Resource, ResourceException> filterCreate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterCreate(final ServerContext context,
                 final CreateRequest request, final RequestHandler next) {
             return module.authorizeCreate(context, request)
-                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
+                    .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
                         @Override
-                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
+                        public Promise<ResourceResponse, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
                                 return next.handleCreate(context, request);
                             } else {
@@ -232,12 +232,12 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<Resource, ResourceException> filterDelete(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterDelete(final ServerContext context,
                 final DeleteRequest request, final RequestHandler next) {
             return module.authorizeDelete(context, request)
-                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
+                    .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
                         @Override
-                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
+                        public Promise<ResourceResponse, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
                                 return next.handleDelete(context, request);
                             } else {
@@ -260,12 +260,12 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<Resource, ResourceException> filterPatch(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterPatch(final ServerContext context,
                 final PatchRequest request, final RequestHandler next) {
             return module.authorizePatch(context, request)
-                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
+                    .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
                         @Override
-                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
+                        public Promise<ResourceResponse, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
                                 return next.handlePatch(context, request);
                             } else {
@@ -289,12 +289,12 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<QueryResult, ResourceException> filterQuery(final ServerContext context,
+        public Promise<QueryResponse, ResourceException> filterQuery(final ServerContext context,
                 final QueryRequest request, final QueryResourceHandler handler, final RequestHandler next) {
             return module.authorizeQuery(context, request)
-                    .thenAsync(new AsyncFunction<AuthorizationResult, QueryResult, ResourceException>() {
+                    .thenAsync(new AsyncFunction<AuthorizationResult, QueryResponse, ResourceException>() {
                         @Override
-                        public Promise<QueryResult, ResourceException> apply(AuthorizationResult result) {
+                        public Promise<QueryResponse, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
                                 return next.handleQuery(context, request, handler);
                             } else {
@@ -317,12 +317,12 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<Resource, ResourceException> filterRead(final ServerContext context, final ReadRequest request,
+        public Promise<ResourceResponse, ResourceException> filterRead(final ServerContext context, final ReadRequest request,
                 final RequestHandler next) {
             return module.authorizeRead(context, request)
-                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
+                    .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
                         @Override
-                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
+                        public Promise<ResourceResponse, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
                                 return next.handleRead(context, request);
                             } else {
@@ -345,12 +345,12 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<Resource, ResourceException> filterUpdate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterUpdate(final ServerContext context,
                 final UpdateRequest request, final RequestHandler next) {
             return module.authorizeUpdate(context, request)
-                    .thenAsync(new AsyncFunction<AuthorizationResult, Resource, ResourceException>() {
+                    .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
                         @Override
-                        public Promise<Resource, ResourceException> apply(AuthorizationResult result) {
+                        public Promise<ResourceResponse, ResourceException> apply(AuthorizationResult result) {
                             if (result.isAuthorized()) {
                                 return next.handleUpdate(context, request);
                             } else {

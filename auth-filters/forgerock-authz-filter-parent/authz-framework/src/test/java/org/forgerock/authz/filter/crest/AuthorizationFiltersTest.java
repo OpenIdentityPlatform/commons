@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -28,8 +29,8 @@ import static org.testng.Assert.*;
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.api.CrestAuthorizationModule;
 import org.forgerock.http.context.ServerContext;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -37,12 +38,12 @@ import org.forgerock.json.resource.FilterChain;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
@@ -226,7 +227,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeAction(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<JsonValue, ResourceException> promise = chain.handleAction(context, request);
+        Promise<ActionResponse, ResourceException> promise = chain.handleAction(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -261,7 +262,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeAction(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<JsonValue, ResourceException> promise = chain.handleAction(context, request);
+        Promise<ActionResponse, ResourceException> promise = chain.handleAction(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -318,7 +319,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeCreate(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handleCreate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleCreate(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -353,7 +354,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeCreate(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handleCreate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleCreate(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -410,7 +411,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeDelete(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handleDelete(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleDelete(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -445,7 +446,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeDelete(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handleDelete(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleDelete(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -502,7 +503,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizePatch(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handlePatch(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handlePatch(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -537,7 +538,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizePatch(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handlePatch(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handlePatch(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -571,7 +572,7 @@ public class AuthorizationFiltersTest {
         chain.handleQuery(context, request, handler);
 
         //Then
-        verify(target).queryCollection(eq(context), Matchers.<QueryRequest>anyObject(), eq(handler));
+        verify(target).queryCollection(eq(context), any(QueryRequest.class), any(QueryResourceHandler.class));
     }
 
     @Test
@@ -594,7 +595,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeQuery(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<QueryResult, ResourceException> promise = chain.handleQuery(context, request, handler);
+        Promise<QueryResponse, ResourceException> promise = chain.handleQuery(context, request, handler);
 
         //Then
         assertThat(promise).failedWithException();
@@ -629,7 +630,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeQuery(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<QueryResult, ResourceException> promise = chain.handleQuery(context, request, handler);
+        Promise<QueryResponse, ResourceException> promise = chain.handleQuery(context, request, handler);
 
         //Then
         assertThat(promise).failedWithException();
@@ -686,7 +687,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeRead(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleRead(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -721,7 +722,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeRead(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handleRead(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleRead(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -778,7 +779,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeUpdate(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handleUpdate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleUpdate(context, request);
 
         //Then
         assertThat(promise).failedWithException();
@@ -813,7 +814,7 @@ public class AuthorizationFiltersTest {
         given(module.authorizeUpdate(context, request)).willReturn(authorizePromise);
 
         //When
-        Promise<Resource, ResourceException> promise = chain.handleUpdate(context, request);
+        Promise<ResourceResponse, ResourceException> promise = chain.handleUpdate(context, request);
 
         //Then
         assertThat(promise).failedWithException();

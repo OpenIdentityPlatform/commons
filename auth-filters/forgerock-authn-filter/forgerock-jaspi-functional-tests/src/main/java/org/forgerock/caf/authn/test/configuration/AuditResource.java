@@ -19,6 +19,8 @@ package org.forgerock.caf.authn.test.configuration;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -28,10 +30,11 @@ import org.forgerock.caf.authn.test.runtime.TestAuditApi;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
@@ -66,11 +69,11 @@ public class AuditResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<JsonValue, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
         if ("readAndClear".equalsIgnoreCase(request.getAction())) {
             JsonValue jsonAuditRecords = getAuditRecords();
             auditApi.clear();
-            return newResultPromise(jsonAuditRecords);
+            return newResultPromise(newActionResponse(jsonAuditRecords));
         } else {
             return newExceptionPromise(newNotSupportedException());
         }
@@ -84,7 +87,7 @@ public class AuditResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
         return newExceptionPromise(newNotSupportedException());
     }
 
@@ -96,9 +99,9 @@ public class AuditResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> readInstance(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, ReadRequest request) {
         JsonValue jsonAuditRecords = getAuditRecords();
-        return newResultPromise(new Resource("AuditRecords", Integer.toString(jsonAuditRecords.hashCode()),
+        return newResultPromise(newResourceResponse("AuditRecords", Integer.toString(jsonAuditRecords.hashCode()),
                 jsonAuditRecords));
     }
 
@@ -110,7 +113,7 @@ public class AuditResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
         return newExceptionPromise(newNotSupportedException());
     }
 
