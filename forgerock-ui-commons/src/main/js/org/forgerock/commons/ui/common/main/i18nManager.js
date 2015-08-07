@@ -18,10 +18,11 @@
 
 define( "org/forgerock/commons/ui/common/main/i18nManager", [
     "jquery",
+    "underscore",
     "require",
     "handlebars",
     "i18next"
-], function($, require, Handlebars, i18next) {
+], function($, _, require, Handlebars, i18next) {
 
     var obj = {};
 
@@ -42,13 +43,13 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
      */
     obj.init = function(options) {
 
-        Handlebars.registerHelper("t", function(i18nKey) {
+        Handlebars.registerHelper("t", function(key) {
             var params = {
-                postProcess: "sprintf",
-                sprintf: _.map(_.toArray(arguments).slice(1, -1),
-                Handlebars.Utils.escapeExpression)
-            },
-            result = i18n.t(i18nKey, params);
+                    postProcess: "sprintf",
+                    sprintf: _.map(_.toArray(arguments).slice(1, -1),
+                    Handlebars.Utils.escapeExpression)
+                },
+                result = $.i18n.t(key, params);
             return new Handlebars.SafeString(result);
         });
 
