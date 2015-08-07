@@ -74,8 +74,8 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private final Request request;
     private final JsonGenerator writer;
 
-    RequestRunner(Context context, Request request, org.forgerock.http.protocol.Request httpRequest, Response httpResponse)
-            throws Exception {
+    RequestRunner(Context context, Request request, org.forgerock.http.protocol.Request httpRequest,
+            Response httpResponse) throws Exception {
         this.context = context;
         this.request = request;
         this.httpRequest = httpRequest;
@@ -260,7 +260,8 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         });
     }
 
-    private void writeHeader(org.forgerock.json.resource.Response response, AtomicBoolean isFirstResult) throws IOException {
+    private void writeHeader(org.forgerock.json.resource.Response response, AtomicBoolean isFirstResult)
+            throws IOException {
         if (isFirstResult.compareAndSet(true, false)) {
             writeApiVersionHeaders(response);
             writeAdvice();

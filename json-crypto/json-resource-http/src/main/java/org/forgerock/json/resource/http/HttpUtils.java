@@ -89,6 +89,7 @@ public final class HttpUtils {
     static final String HEADER_IF_UNMODIFIED_SINCE = "If-Unmodified-Since";
     static final String HEADER_LOCATION = "Location";
     static final String HEADER_X_HTTP_METHOD_OVERRIDE = "X-HTTP-Method-Override";
+    /** the HTTP header for {@literal Content-Disposition}. */
     public static final String CONTENT_DISPOSITION = "Content-Disposition";
     static final Collection<String> RESTRICTED_HEADER_NAMES = Arrays.asList(
             ContentTypeHeader.NAME,
@@ -137,12 +138,12 @@ public final class HttpUtils {
     public static final String PARAM_QUERY_ID = param(QueryRequest.FIELD_QUERY_ID);
     /** the HTTP request parameter to specify the sort keys. */
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
-    /** The policy used for counting total paged results */
+    /** The policy used for counting total paged results. */
     public static final String PARAM_TOTAL_PAGED_RESULTS_POLICY = param(QueryRequest.FIELD_TOTAL_PAGED_RESULTS_POLICY);
 
-    /** The name of the protocol in use */
+    /** The name of the protocol in use. */
     public static final String PROTOCOL_NAME = "crest";
-    /** The version of the named protocol */
+    /** The version of the named protocol. */
     public static final Version PROTOCOL_VERSION = version("1.0");
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();

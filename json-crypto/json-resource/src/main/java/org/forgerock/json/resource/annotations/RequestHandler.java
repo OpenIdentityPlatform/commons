@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *     <li>{@code query} for query methods.</li>
  * </ul>
  * Note that action methods do not have a convention and MUST be annotated using the {@link Action} annotation.
- * 
+ *
  * @see Create
  * @see Read
  * @see Update

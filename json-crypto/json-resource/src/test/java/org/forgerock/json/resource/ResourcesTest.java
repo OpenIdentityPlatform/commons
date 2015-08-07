@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import static org.forgerock.http.routing.RoutingMode.EQUALS;
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
@@ -62,110 +63,110 @@ public final class ResourcesTest {
         // @formatter:off
         return new Object[][] {
 
-                // Null content
-                {
-                        filter(),
-                        content(null),
-                        expected(null)
-                },
+            // Null content
+            {
+                    filter(),
+                    content(null),
+                    expected(null)
+            },
 
-                {
-                        filter("/"),
-                        content(null),
-                        expected(null)
-                },
+            {
+                    filter("/"),
+                    content(null),
+                    expected(null)
+            },
 
-                {
-                        filter("/a/b"),
-                        content(null),
-                        expected(null)
-                },
+            {
+                    filter("/a/b"),
+                    content(null),
+                    expected(null)
+            },
 
-                {
-                        filter("/1"),
-                        content(null),
-                        expected(null)
-                },
+            {
+                    filter("/1"),
+                    content(null),
+                    expected(null)
+            },
 
-                // Empty object
-                {
-                        filter(),
-                        content(object()),
-                        expected(object())
-                },
+            // Empty object
+            {
+                    filter(),
+                    content(object()),
+                    expected(object())
+            },
 
-                {
-                        filter("/"),
-                        content(object()),
-                        expected(object())
-                },
+            {
+                    filter("/"),
+                    content(object()),
+                    expected(object())
+            },
 
-                {
-                        filter("/a/b"),
-                        content(object()),
-                        expected(object())
-                },
+            {
+                    filter("/a/b"),
+                    content(object()),
+                    expected(object())
+            },
 
-                {
-                        filter("/1"),
-                        content(object()),
-                        expected(object())
-                },
+            {
+                    filter("/1"),
+                    content(object()),
+                    expected(object())
+            },
 
-                // Miscellaneous
-                {
-                        filter(),
-                        content(object(field("a", "1"), field("b", "2"))),
-                        expected(object(field("a", "1"), field("b", "2")))
-                },
+            // Miscellaneous
+            {
+                    filter(),
+                    content(object(field("a", "1"), field("b", "2"))),
+                    expected(object(field("a", "1"), field("b", "2")))
+            },
 
-                {
-                        filter("/"),
-                        content(object(field("a", "1"), field("b", "2"))),
-                        expected(object(field("a", "1"), field("b", "2")))
-                },
+            {
+                    filter("/"),
+                    content(object(field("a", "1"), field("b", "2"))),
+                    expected(object(field("a", "1"), field("b", "2")))
+            },
 
-                {
-                        filter("/a"),
-                        content(object(field("a", "1"), field("b", "2"))),
-                        expected(object(field("a", "1")))
-                },
+            {
+                    filter("/a"),
+                    content(object(field("a", "1"), field("b", "2"))),
+                    expected(object(field("a", "1")))
+            },
 
-                {
-                        filter("/a/b"),
-                        content(object(field("a", "1"), field("b", "2"))),
-                        expected(object())
-                },
+            {
+                    filter("/a/b"),
+                    content(object(field("a", "1"), field("b", "2"))),
+                    expected(object())
+            },
 
-                {
-                        filter("/a"),
-                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                        expected(object(field("a", object(field("b", "1"), field("c", "2")))))
-                },
+            {
+                    filter("/a"),
+                    content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                    expected(object(field("a", object(field("b", "1"), field("c", "2")))))
+            },
 
-                {
-                        filter("/a/b"),
-                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                        expected(object(field("b", "1")))
-                },
+            {
+                    filter("/a/b"),
+                    content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                    expected(object(field("b", "1")))
+            },
 
-                {
-                        filter("/a/b", "/d"),
-                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                        expected(object(field("b", "1"), field("d", "3")))
-                },
+            {
+                    filter("/a/b", "/d"),
+                    content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                    expected(object(field("b", "1"), field("d", "3")))
+            },
 
-                {
-                        filter("/a/b", "/a"),
-                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                        expected(object(field("b", "1"), field("a", object(field("b", "1"), field("c", "2")))))
-                },
+            {
+                    filter("/a/b", "/a"),
+                    content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                    expected(object(field("b", "1"), field("a", object(field("b", "1"), field("c", "2")))))
+            },
 
-                {
-                        filter("/a", "/a/b"),
-                        content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                        expected(object(field("a", object(field("b", "1"), field("c", "2"))), field("b", "1")))
-                },
+            {
+                    filter("/a", "/a/b"),
+                    content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
+                    expected(object(field("a", object(field("b", "1"), field("c", "2"))), field("b", "1")))
+            },
 
         };
         // @formatter:on
@@ -181,11 +182,11 @@ public final class ResourcesTest {
     public Object[][] testCollectionResourceProviderData() {
         // @formatter:off
         return new Object[][] {
-                { "test", "test" },
-                { "test%2fuser", "test/user" },
-                { "test user", "test user" },
-                { "test%20user", "test user" },
-                { "test+%2buser", "test++user" }
+            { "test", "test" },
+            { "test%2fuser", "test/user" },
+            { "test user", "test user" },
+            { "test%20user", "test user" },
+            { "test+%2buser", "test++user" }
         };
         // @formatter:on
     }
@@ -208,22 +209,21 @@ public final class ResourcesTest {
     public Object[][] annotatedRequestHandlerData() {
         // @formatter:off
         return new Object[][]{
-                // Class                    | Collection | Create | Read  | Update | Delete | Patch | RAction | CAction | Query |
-                { NoMethods.class,                 false ,  false , false ,  false ,  false , false ,   false ,   false , false },
-                { NoMethods.class,                  true ,  false , false ,  false ,  false , false ,   false ,   false , false },
-                { AnnotationCollection.class,       true ,   true ,  true ,   true ,   true ,  true ,    true ,    true ,  true },
-                { AnnotationSingleton.class,       false ,  false ,  true ,   true ,  false ,  true ,    true ,   false , false },
-                { ConventionCollection.class,       true ,   true ,  true ,   true ,   true ,  true ,   false ,   false ,  true },
-                { ConventionSingleton.class,       false ,  false ,  true ,   true ,  false ,  true ,   false ,   false , false },
+            // Class                    | Collection| Create| Read | Update| Delete| Patch| RAction| CAction| Query|
+            { NoMethods.class,                 false,  false, false,  false,  false, false,   false,   false, false},
+            { NoMethods.class,                  true,  false, false,  false,  false, false,   false,   false, false},
+            { AnnotationCollection.class,       true,   true,  true,   true,   true,  true,    true,    true,  true},
+            { AnnotationSingleton.class,       false,  false,  true,   true,  false,  true,    true,   false, false},
+            { ConventionCollection.class,       true,   true,  true,   true,   true,  true,   false,   false,  true},
+            { ConventionSingleton.class,       false,  false,  true,   true,  false,  true,   false,   false, false},
         };
         // @formatter:on
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testCreateAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testCreateAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+            boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -244,10 +244,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testReadAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testReadAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+            boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -268,10 +267,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testReadCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testReadCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+            boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -292,10 +290,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testUpdateAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testUpdateAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+            boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -316,10 +313,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testUpdateCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testUpdateCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+            boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -340,10 +336,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testDeleteCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testDeleteCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+            boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -364,10 +359,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testPatchAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testPatchAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+            boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -388,10 +382,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testPatchCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testPatchCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+            boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -412,10 +405,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testActionAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testActionAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+            boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -440,10 +432,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testActionCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testActionCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+            boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -469,10 +460,9 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testQueryCollectionAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create, boolean read,
-            boolean update, boolean delete, boolean patch, boolean resourceAction, boolean collectionAction,
-            boolean query)
-            throws Exception {
+    public void testQueryCollectionAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+            boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
+            boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
@@ -480,7 +470,8 @@ public final class ResourcesTest {
         QueryRequest req = Requests.newQueryRequest("/test");
 
         // When
-        Promise<QueryResponse, ResourceException> promise = connection.queryAsync(new RootContext(), req, mock(QueryResourceHandler.class));
+        Promise<QueryResponse, ResourceException> promise = connection.queryAsync(new RootContext(), req,
+                mock(QueryResourceHandler.class));
 
         // Then
         if (query && collection) {
@@ -529,19 +520,19 @@ public final class ResourcesTest {
         }
         @Action("instanceAction1")
         public Promise<ActionResponse, ResourceException> instAction1(String id) {
-            return newResultPromise(Responses.newActionResponse(json(object(field("result", "instanceAction1-" + id)))));
+            return newResultPromise(newActionResponse(json(object(field("result", "instanceAction1-" + id)))));
         }
         @Action
         public Promise<ActionResponse, ResourceException> instanceAction2(String id) {
-            return newResultPromise(Responses.newActionResponse(json(object(field("result", "instanceAction2-" + id)))));
+            return newResultPromise(newActionResponse(json(object(field("result", "instanceAction2-" + id)))));
         }
         @Action("collectionAction1")
         public Promise<ActionResponse, ResourceException> action1() {
-            return newResultPromise(Responses.newActionResponse(json(object(field("result", "collectionAction1")))));
+            return newResultPromise(newActionResponse(json(object(field("result", "collectionAction1")))));
         }
         @Action
         public Promise<ActionResponse, ResourceException> collectionAction2() {
-            return newResultPromise(Responses.newActionResponse(json(object(field("result", "collectionAction2")))));
+            return newResultPromise(newActionResponse(json(object(field("result", "collectionAction2")))));
         }
         @Query
         public Promise<QueryResponse, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
@@ -565,11 +556,11 @@ public final class ResourcesTest {
         }
         @Action("instanceAction1")
         public Promise<ActionResponse, ResourceException> action1() {
-            return newResultPromise(Responses.newActionResponse(json(object(field("result", "instanceAction1")))));
+            return newResultPromise(newActionResponse(json(object(field("result", "instanceAction1")))));
         }
         @Action
         public Promise<ActionResponse, ResourceException> instanceAction2() {
-            return newResultPromise(Responses.newActionResponse(json(object(field("result", "instanceAction2")))));
+            return newResultPromise(newActionResponse(json(object(field("result", "instanceAction2")))));
         }
     }
 

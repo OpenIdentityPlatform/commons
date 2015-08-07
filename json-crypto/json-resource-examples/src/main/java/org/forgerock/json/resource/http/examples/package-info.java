@@ -15,9 +15,6 @@
  */
 
 /**
- * The annotations are made available to allow a POJO annotated with
- * {@link org.forgerock.json.resource.annotations.RequestHandler} to be used as
- * a CREST resource, with the necessary methods then being annotated to
- * indicate which operations are available, and the method that handles them.
+ * Examples illustrating usage of commons rest HTTP integration.
  */
-package org.forgerock.json.resource.annotations;
+package org.forgerock.json.resource.http.examples;

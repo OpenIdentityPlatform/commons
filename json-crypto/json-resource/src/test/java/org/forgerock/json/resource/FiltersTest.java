@@ -57,13 +57,13 @@ public final class FiltersTest {
     public Object[][] booleanData() {
         // @formatter:off
         return new Object[][] {
-                { cl(),             true,  false },
-                { cl(false),        false, false },
-                { cl(true),         true,  true },
-                { cl(false, false), false, false },
-                { cl(false, true),  false, true },
-                { cl(true,  false), false, true },
-                { cl(true,  true),  true,  true },
+            { cl(),             true,  false },
+            { cl(false),        false, false },
+            { cl(true),         true,  true },
+            { cl(false, false), false, false },
+            { cl(false, true),  false, true },
+            { cl(true,  false), false, true },
+            { cl(true,  true),  true,  true },
         };
         // @formatter:on
     }
@@ -206,20 +206,20 @@ public final class FiltersTest {
     private <R> Promise<R, ResourceException> invokeFilter(final Context context, final RequestType type,
             final Filter filter, final QueryResourceHandler handler, final RequestHandler next) {
         switch (type) {
-            case ACTION:
-                return (Promise<R, ResourceException>) filter.filterAction(context, ACTION_REQUEST, next);
-            case CREATE:
-                return (Promise<R, ResourceException>) filter.filterCreate(context, CREATE_REQUEST, next);
-            case DELETE:
-                return (Promise<R, ResourceException>) filter.filterDelete(context, DELETE_REQUEST, next);
-            case PATCH:
-                return (Promise<R, ResourceException>) filter.filterPatch(context, PATCH_REQUEST, next);
-            case QUERY:
-                return (Promise<R, ResourceException>) filter.filterQuery(context, QUERY_REQUEST, handler, next);
-            case READ:
-                return (Promise<R, ResourceException>) filter.filterRead(context, READ_REQUEST, next);
-            case UPDATE:
-                return (Promise<R, ResourceException>) filter.filterUpdate(context, UPDATE_REQUEST, next);
+        case ACTION:
+            return (Promise<R, ResourceException>) filter.filterAction(context, ACTION_REQUEST, next);
+        case CREATE:
+            return (Promise<R, ResourceException>) filter.filterCreate(context, CREATE_REQUEST, next);
+        case DELETE:
+            return (Promise<R, ResourceException>) filter.filterDelete(context, DELETE_REQUEST, next);
+        case PATCH:
+            return (Promise<R, ResourceException>) filter.filterPatch(context, PATCH_REQUEST, next);
+        case QUERY:
+            return (Promise<R, ResourceException>) filter.filterQuery(context, QUERY_REQUEST, handler, next);
+        case READ:
+            return (Promise<R, ResourceException>) filter.filterRead(context, READ_REQUEST, next);
+        case UPDATE:
+            return (Promise<R, ResourceException>) filter.filterUpdate(context, UPDATE_REQUEST, next);
         }
         throw new IllegalStateException("Unknown operation! " + type.toString());
     }
@@ -228,20 +228,20 @@ public final class FiltersTest {
     private <R> Promise<R, ResourceException> invokeRequestHandler(final Context context, final RequestType type,
             final RequestHandler handler) {
         switch (type) {
-            case ACTION:
-                return (Promise<R, ResourceException>) handler.handleAction(context, ACTION_REQUEST);
-            case CREATE:
-                return (Promise<R, ResourceException>) handler.handleCreate(context, CREATE_REQUEST);
-            case DELETE:
-                return (Promise<R, ResourceException>) handler.handleDelete(context, DELETE_REQUEST);
-            case PATCH:
-                return (Promise<R, ResourceException>) handler.handlePatch(context, PATCH_REQUEST);
-            case QUERY:
-                return (Promise<R, ResourceException>) handler.handleQuery(context, QUERY_REQUEST, null);
-            case READ:
-                return (Promise<R, ResourceException>) handler.handleRead(context, READ_REQUEST);
-            case UPDATE:
-                return (Promise<R, ResourceException>) handler.handleUpdate(context, UPDATE_REQUEST);
+        case ACTION:
+            return (Promise<R, ResourceException>) handler.handleAction(context, ACTION_REQUEST);
+        case CREATE:
+            return (Promise<R, ResourceException>) handler.handleCreate(context, CREATE_REQUEST);
+        case DELETE:
+            return (Promise<R, ResourceException>) handler.handleDelete(context, DELETE_REQUEST);
+        case PATCH:
+            return (Promise<R, ResourceException>) handler.handlePatch(context, PATCH_REQUEST);
+        case QUERY:
+            return (Promise<R, ResourceException>) handler.handleQuery(context, QUERY_REQUEST, null);
+        case READ:
+            return (Promise<R, ResourceException>) handler.handleRead(context, READ_REQUEST);
+        case UPDATE:
+            return (Promise<R, ResourceException>) handler.handleUpdate(context, UPDATE_REQUEST);
         }
         throw new IllegalStateException("Unknown operation! " + type.toString());
     }
@@ -253,31 +253,31 @@ public final class FiltersTest {
 
     private Request request(final RequestType type) {
         switch (type) {
-            case ACTION:
-                return ACTION_REQUEST;
-            case CREATE:
-                return CREATE_REQUEST;
-            case DELETE:
-                return DELETE_REQUEST;
-            case PATCH:
-                return PATCH_REQUEST;
-            case QUERY:
-                return QUERY_REQUEST;
-            case READ:
-                return READ_REQUEST;
-            default: // UPDATE
-                return UPDATE_REQUEST;
+        case ACTION:
+            return ACTION_REQUEST;
+        case CREATE:
+            return CREATE_REQUEST;
+        case DELETE:
+            return DELETE_REQUEST;
+        case PATCH:
+            return PATCH_REQUEST;
+        case QUERY:
+            return QUERY_REQUEST;
+        case READ:
+            return READ_REQUEST;
+        default: // UPDATE
+            return UPDATE_REQUEST;
         }
     }
 
     private Object result(final RequestType type) {
         switch (type) {
-            case ACTION:
-                return JSON;
-            case QUERY:
-                return QUERY_RESULT;
-            default:
-                return RESOURCE1;
+        case ACTION:
+            return JSON;
+        case QUERY:
+            return QUERY_RESULT;
+        default:
+            return RESOURCE1;
         }
     }
 }

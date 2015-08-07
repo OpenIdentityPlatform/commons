@@ -170,7 +170,7 @@ public final class MemoryBackendTest {
     }
 
     @Test
-    public void testQueryCollectionEstimateCountWithoutPaging() throws Exception{
+    public void testQueryCollectionEstimateCountWithoutPaging() throws Exception {
         final Connection connection = getConnectionWithAliceAndBob();
         final Collection<ResourceResponse> results = new ArrayList<ResourceResponse>();
 
@@ -182,7 +182,7 @@ public final class MemoryBackendTest {
     }
 
     @Test
-    public void testQueryCollectionExactCountWithoutPaging() throws Exception{
+    public void testQueryCollectionExactCountWithoutPaging() throws Exception {
         final Connection connection = getConnectionWithAliceAndBob();
         final Collection<ResourceResponse> results = new ArrayList<ResourceResponse>();
 

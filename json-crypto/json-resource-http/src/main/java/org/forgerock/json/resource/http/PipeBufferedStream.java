@@ -28,9 +28,8 @@ import org.forgerock.http.io.IO;
 import org.forgerock.util.Factory;
 
 /**
- * Represents a pipe for transferring bytes from an {@link java.io.OutputStream} to a {@link org.forgerock.http.io.BranchingInputStream}.
- *
- * @since 3.0.0
+ * Represents a pipe for transferring bytes from an {@link java.io.OutputStream} to a
+ * {@link org.forgerock.http.io.BranchingInputStream}.
  */
 final class PipeBufferedStream {
 

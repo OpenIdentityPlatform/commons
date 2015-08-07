@@ -101,7 +101,8 @@ public final class FilterChain implements RequestHandler {
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest request) {
+        public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
+                final ReadRequest request) {
             if (hasNext()) {
                 return get().filterRead(context, request, next());
             } else {

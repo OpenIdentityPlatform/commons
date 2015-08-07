@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -142,7 +143,7 @@ public final class FilterChainTest {
             inOrder.verify(filter1).filterAction(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(filter2).filterAction(same(context), same(request), any(RequestHandler.class));
             inOrder.verify(target).handleAction(context, request);
-            assertThat(promise).succeeded().withObject().isEqualTo(Responses.newActionResponse(JSON));
+            assertThat(promise).succeeded().withObject().isEqualTo(newActionResponse(JSON));
         }
     }
 
@@ -314,27 +315,34 @@ public final class FilterChainTest {
                 List<Promise<R, ResourceException>> promises = new ArrayList<>();
                 for (int i = 0; i < count; i++) {
                     switch (request.getRequestType()) {
-                        case ACTION:
-                            promises.add((Promise<R, ResourceException>) next.handleAction(context, (ActionRequest) request));
-                            break;
-                        case CREATE:
-                            promises.add((Promise<R, ResourceException>) next.handleCreate(context, (CreateRequest) request));
-                            break;
-                        case DELETE:
-                            promises.add((Promise<R, ResourceException>) next.handleDelete(context, (DeleteRequest) request));
-                            break;
-                        case PATCH:
-                            promises.add((Promise<R, ResourceException>) next.handlePatch(context, (PatchRequest) request));
-                            break;
-                        case QUERY:
-                            promises.add((Promise<R, ResourceException>) next.handleQuery(context, (QueryRequest) request, handler));
-                            break;
-                        case READ:
-                            promises.add((Promise<R, ResourceException>) next.handleRead(context, (ReadRequest) request));
-                            break;
-                        case UPDATE:
-                            promises.add((Promise<R, ResourceException>) next.handleUpdate(context, (UpdateRequest) request));
-                            break;
+                    case ACTION:
+                        promises.add((Promise<R, ResourceException>) next.handleAction(context,
+                                (ActionRequest) request));
+                        break;
+                    case CREATE:
+                        promises.add((Promise<R, ResourceException>) next.handleCreate(context,
+                                (CreateRequest) request));
+                        break;
+                    case DELETE:
+                        promises.add((Promise<R, ResourceException>) next.handleDelete(context,
+                                (DeleteRequest) request));
+                        break;
+                    case PATCH:
+                        promises.add((Promise<R, ResourceException>) next.handlePatch(context,
+                                (PatchRequest) request));
+                        break;
+                    case QUERY:
+                        promises.add((Promise<R, ResourceException>) next.handleQuery(context,
+                                (QueryRequest) request, handler));
+                        break;
+                    case READ:
+                        promises.add((Promise<R, ResourceException>) next.handleRead(context,
+                                (ReadRequest) request));
+                        break;
+                    case UPDATE:
+                        promises.add((Promise<R, ResourceException>) next.handleUpdate(context,
+                                (UpdateRequest) request));
+                        break;
                     }
                 }
                 return when(promises)
@@ -351,7 +359,7 @@ public final class FilterChainTest {
     private RequestHandler target() {
         final RequestHandler target = mock(RequestHandler.class);
         given(target.handleAction(any(Context.class), any(ActionRequest.class)))
-                .willReturn(Promises.<ActionResponse, ResourceException>newResultPromise(Responses.newActionResponse(JSON)));
+                .willReturn(Promises.<ActionResponse, ResourceException>newResultPromise(newActionResponse(JSON)));
         given(target.handleCreate(any(Context.class), any(CreateRequest.class)))
                 .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         given(target.handleDelete(any(Context.class), any(DeleteRequest.class)))

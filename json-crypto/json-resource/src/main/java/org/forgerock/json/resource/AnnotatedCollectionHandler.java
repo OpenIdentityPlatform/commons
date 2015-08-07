@@ -41,8 +41,8 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
     public AnnotatedCollectionHandler(Object requestHandler) {
         super(null);
         if (!requestHandler.getClass().isAnnotationPresent(RequestHandler.class)) {
-            throw new IllegalArgumentException("RequestHandler missing from class: " +
-                    requestHandler.getClass().getName());
+            throw new IllegalArgumentException("RequestHandler missing from class: "
+                    + requestHandler.getClass().getName());
         }
         this.createMethod = AnnotatedMethod.findMethod(requestHandler, Create.class, false);
         this.queryMethod = AnnotatedMethod.findMethod(requestHandler, Query.class, false);

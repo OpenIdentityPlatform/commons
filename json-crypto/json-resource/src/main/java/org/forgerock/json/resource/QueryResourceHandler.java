@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource;
 
-
 /**
  * A completion handler for consuming the results of a query request.
  * <p>
