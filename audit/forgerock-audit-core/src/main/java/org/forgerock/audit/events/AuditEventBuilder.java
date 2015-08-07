@@ -15,12 +15,12 @@
  */
 package org.forgerock.audit.events;
 
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 
 import org.forgerock.audit.util.DateUtil;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.JsonValue;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.forgerock.util.Reject;
 

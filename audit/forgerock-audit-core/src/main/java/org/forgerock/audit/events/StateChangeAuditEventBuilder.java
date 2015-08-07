@@ -16,9 +16,9 @@
 package org.forgerock.audit.events;
 
 import static org.forgerock.audit.events.AuditEventBuilderUtil.*;
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Request;
 

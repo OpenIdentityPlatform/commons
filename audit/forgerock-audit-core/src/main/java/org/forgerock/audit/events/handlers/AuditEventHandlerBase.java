@@ -20,13 +20,15 @@ import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.context.ServerContext;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 
 /**
  * Abstract AuditEventHandler class.
@@ -55,36 +57,33 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      * {@inheritDoc}
      */
     @Override
-    public void deleteInstance(
+    public Promise<Resource, ResourceException> deleteInstance(
             final ServerContext context,
             final String resourceId,
-            final DeleteRequest request,
-            final ResultHandler<Resource> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+            final DeleteRequest request) {
+        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void patchInstance(
+    public Promise<Resource, ResourceException> patchInstance(
             final ServerContext context,
             final String resourceId,
-            final PatchRequest request,
-            final ResultHandler<Resource> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+            final PatchRequest request) {
+        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void updateInstance(
+    public Promise<Resource, ResourceException> updateInstance(
             final ServerContext context,
             final String resourceId,
-            final UpdateRequest request,
-            final ResultHandler<Resource> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+            final UpdateRequest request) {
+        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**

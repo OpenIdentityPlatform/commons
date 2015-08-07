@@ -23,9 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.http.Context;
+import org.forgerock.json.JsonValue;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.resource.SecurityContext;
 import org.testng.annotations.Test;
 

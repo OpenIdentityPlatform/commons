@@ -16,7 +16,13 @@
 
 package org.forgerock.audit.util;
 
-import org.forgerock.json.fluent.JsonValue;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
+import org.forgerock.audit.AuditException;
+import org.forgerock.audit.events.handlers.AuditEventHandler;
+import org.forgerock.json.JsonValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -37,8 +43,8 @@ public final class JsonSchemaUtils {
     }
 
     /**
-     * Generates the Set of {@link org.forgerock.json.fluent.JsonPointer JsonPointer}s in a given JsonSchema.
-     * @param schema the JsonSchema to generate the {@link org.forgerock.json.fluent.JsonPointer JsonPointer}s for
+     * Generates the Set of {@link org.forgerock.json.JsonPointer JsonPointer}s in a given JsonSchema.
+     * @param schema the JsonSchema to generate the {@link org.forgerock.json.JsonPointer JsonPointer}s for
      * @return a set of JsonPointers as strings
      */
     public static Set<String> generateJsonPointers(final JsonValue schema) {

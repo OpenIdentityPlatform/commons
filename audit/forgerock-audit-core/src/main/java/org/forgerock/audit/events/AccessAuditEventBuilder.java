@@ -16,12 +16,12 @@
 package org.forgerock.audit.events;
 
 import static org.forgerock.audit.events.AuditEventBuilderUtil.*;
-import static org.forgerock.json.fluent.JsonValue.*;
+import static org.forgerock.json.JsonValue.*;
 
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.Context;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

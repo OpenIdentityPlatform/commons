@@ -15,7 +15,7 @@
  */
 package org.forgerock.audit.events;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 /**

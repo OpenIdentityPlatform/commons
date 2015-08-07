@@ -19,7 +19,7 @@ package org.forgerock.audit.events.handlers;
 import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ResourceException;
 

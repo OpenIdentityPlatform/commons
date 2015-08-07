@@ -49,17 +49,10 @@
         <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-audit/browse</url>
     </scm>
     <properties>
-        <commons.forgerock-rest.version>2.5.0-SNAPSHOT</commons.forgerock-rest.version>
+        <commons.forgerock-bom.version>1.0.0-SNAPSHOT</commons.forgerock-bom.version>
 
-        <supercsv.version>2.3.1</supercsv.version>
-        <slf4j.version>1.7.5</slf4j.version>
-        <jackson.version>1.9.12</jackson.version>
         <jodaTime.version>2.1</jodaTime.version>
-        <fasterxml-jackson.version>2.5.3</fasterxml-jackson.version>
-
-        <assertj.version>2.1.0</assertj.version>
-        <mockito.version>1.9.5</mockito.version>
-        <testng.version>6.8.21</testng.version>
+        <supercsv.version>2.3.1</supercsv.version>
     </properties>
 
     <modules>
@@ -72,41 +65,16 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-bom</artifactId>
+                <version>${commons.forgerock-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
                 <groupId>net.sf.supercsv</groupId>
                 <artifactId>super-csv</artifactId>
                 <version>${supercsv.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <!-- Jackson JSON parser -->
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-core-asl</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${fasterxml-jackson.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.fasterxml.jackson.module</groupId>
-                <artifactId>jackson-module-jsonSchema</artifactId>
-                <version>${fasterxml-jackson.version}</version>
             </dependency>
 
             <dependency>
@@ -125,45 +93,6 @@
                 <artifactId>javax.servlet-api</artifactId>
                 <version>3.0.1</version>
                 <scope>provided</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>3.0.0</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <!-- ForgeRock Commons Dependencies -->
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource-servlet</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-
-            <!-- Test Dependencies -->
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-                <scope>test</scope>
-            </dependency>
-	    <dependency>
-	        <groupId>org.assertj</groupId>
-		<artifactId>assertj-core</artifactId>
-		<version>${assertj.version}</version>
-		<scope>test</scope>
-	    </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

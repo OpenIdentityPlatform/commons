@@ -12,5 +12,6 @@
     "Host" : ["product.example.com:8080"]
   },
   "remoteAddress": "168.0.0.10",
+  "name" : "http",
   "parent": null
 }

@@ -17,7 +17,8 @@ package org.forgerock.audit.events;
 
 import org.forgerock.util.Reject;
 
-import javax.annotation.concurrent.ThreadSafe;
+// TODO-brmiller where do we get this
+//import javax.annotation.concurrent.ThreadSafe;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,7 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @since 1.0.0
  */
-@ThreadSafe
+// TODO-brmiller
+//@ThreadSafe
 public final class TransactionId {
 
     /**

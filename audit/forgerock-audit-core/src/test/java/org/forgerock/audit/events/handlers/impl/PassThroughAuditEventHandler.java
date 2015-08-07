@@ -18,17 +18,18 @@ package org.forgerock.audit.events.handlers.impl;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.context.ServerContext;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 
 /**
  * Handles AuditEvents by just calling the result Handler.
@@ -54,11 +55,10 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void actionCollection(
+    public Promise<JsonValue, ResourceException> actionCollection(
             final ServerContext context,
-            final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+            final ActionRequest request) {
+        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -66,12 +66,11 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(
+    public Promise<JsonValue, ResourceException> actionInstance(
             final ServerContext context,
             final String resourceId,
-            final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+            final ActionRequest request) {
+        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -79,13 +78,12 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void createInstance(
+    public Promise<Resource, ResourceException> createInstance(
             final ServerContext context,
-            final CreateRequest request,
-            final ResultHandler<Resource> handler) {
-        handler.handleResult(new Resource(request.getContent().get(Resource.FIELD_CONTENT_ID).asString(),
-                                          null,
-                                          new JsonValue(request.getContent())));
+            final CreateRequest request) {
+        return Promises.newResultPromise(new Resource(request.getContent().get(Resource.FIELD_CONTENT_ID).asString(),
+                null,
+                new JsonValue(request.getContent())));
     }
 
     /**
@@ -93,11 +91,11 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void queryCollection(
+    public Promise<QueryResult, ResourceException> queryCollection(
             final ServerContext context,
             final QueryRequest request,
-            final QueryResultHandler handler) {
-        handler.handleResult(new QueryResult());
+            final QueryResourceHandler handler) {
+        return Promises.newResultPromise(new QueryResult());
     }
 
     /**
@@ -105,12 +103,11 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(
+    public Promise<Resource, ResourceException> readInstance(
             final ServerContext context,
             final String resourceId,
-            final ReadRequest request,
-            final ResultHandler<Resource> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+            final ReadRequest request) {
+        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**

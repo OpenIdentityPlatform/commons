@@ -23,12 +23,13 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import org.forgerock.audit.json.AuditJsonConfig;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.RouteMatchers;
 import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.RoutingMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,11 @@ public final class AuditServiceConnectionFactoryProvider {
         // handlers
         registerCsvHandler(auditService);
 
-        router.addRoute(RoutingMode.STARTS_WITH, "/audit", auditService);
+// TODO-brmiller understand decision to drop addRoute(tempplate, RequestHandler)
+//        router.addRoute("/audit", auditService);
+        router.addRoute(
+                RouteMatchers.requestUriMatcher(RoutingMode.STARTS_WITH, "/audit"),
+                Resources.newCollection(auditService));
         return Resources.newInternalConnectionFactory(router);
     }
 
@@ -81,7 +86,7 @@ public final class AuditServiceConnectionFactoryProvider {
             AuditServiceConfiguration serviceConfig = AuditJsonConfig.parseAuditServiceConfiguration(inputStream);
             auditService.configure(serviceConfig);
             return auditService;
-        } catch (AuditException | ResourceException | IOException e) {
+        } catch (AuditException | IOException e) {
             RuntimeException exception = new RuntimeException("Error while configuring the audit service", e);
             logger.error(exception.getMessage(), e);
             throw exception;

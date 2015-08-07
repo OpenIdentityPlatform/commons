@@ -32,32 +32,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
-import org.codehaus.jackson.JsonFactory;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.schema.JsonSchema;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.JsonSchemaUtils;
 import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.http.context.ServerContext;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
+import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.cellprocessor.Optional;
@@ -144,11 +144,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public void actionCollection(
+    public Promise<JsonValue, ResourceException> actionCollection(
             final ServerContext context,
-            final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+            final ActionRequest request) {
+        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -156,12 +155,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public void actionInstance(
+    public Promise<JsonValue, ResourceException> actionInstance(
             final ServerContext context,
             final String resourceId,
-            final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+            final ActionRequest request) {
+        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -169,16 +167,15 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public void createInstance(
+    public Promise<Resource, ResourceException> createInstance(
             final ServerContext context,
-            final CreateRequest request,
-            final ResultHandler<Resource> handler) {
+            final CreateRequest request) {
 
         try {
             // Re-try once in case the writer stream became closed for some reason
             boolean retry;
             int retryCount = 0;
-            final String auditEventType = request.getResourceName();
+            final String auditEventType = request.getResourcePath();
             do {
                 retry = false;
                 ICsvMapWriter csvWriter = null;
@@ -228,7 +225,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
                 ++retryCount;
             } while (retry);
-            handler.handleResult(
+            return Promises.newResultPromise(
                     new Resource(
                             request.getContent().get(Resource.FIELD_CONTENT_ID).asString(),
                             null,
@@ -236,7 +233,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                     )
             );
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return Promises.newExceptionPromise(e);
         }
     }
 
@@ -258,19 +255,19 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public void queryCollection(
+    public Promise<QueryResult, ResourceException> queryCollection(
             final ServerContext context,
             final QueryRequest request,
-            final QueryResultHandler handler) {
+            final QueryResourceHandler handler) {
         try {
-            final String auditEventType = request.getResourceNameObject().head(1).toString();
+            final String auditEventType = request.getResourcePathObject().head(1).toString();
             for (final JsonValue value : getEntries(auditEventType, request.getQueryFilter())) {
                 handler.handleResource(new Resource(value.get(Resource.FIELD_CONTENT_ID).asString(), null, value));
             }
+            return Promises.newResultPromise(new QueryResult());
         } catch (Exception e) {
-            handler.handleError(new BadRequestException(e));
+            return Promises.newExceptionPromise((ResourceException) new BadRequestException(e));
         }
-        handler.handleResult(new QueryResult());
     }
 
     /**
@@ -278,24 +275,24 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public void readInstance(
+    public Promise<Resource, ResourceException> readInstance(
             final ServerContext context,
             final String resourceId,
-            final ReadRequest request,
-            final ResultHandler<Resource> handler) {
+            final ReadRequest request) {
         try {
-            final String auditEventType = request.getResourceNameObject().head(1).toString();
+            final String auditEventType = request.getResourcePathObject().head(1).toString();
             final Set<JsonValue> entry =
-                    getEntries(auditEventType, QueryFilter.valueOf("/_id eq \"" + resourceId + "\""));
+                    getEntries(auditEventType, QueryFilters.parse("/_id eq \"" + resourceId + "\""));
             if (entry.isEmpty()) {
                 throw new NotFoundException(auditEventType + " audit log not found");
             }
             final JsonValue resource = entry.iterator().next();
-            handler.handleResult(new Resource(resource.get(Resource.FIELD_CONTENT_ID).asString(), null, resource));
-        } catch (IOException e) {
-            handler.handleError(new BadRequestException(e));
+            return Promises.newResultPromise(
+                    new Resource(resource.get(Resource.FIELD_CONTENT_ID).asString(), null, resource));
         } catch (ResourceException e) {
-            handler.handleError(e);
+            return Promises.newExceptionPromise(e);
+        } catch (IOException e) {
+            return Promises.newExceptionPromise((ResourceException) new BadRequestException(e));
         }
     }
 
@@ -368,7 +365,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * @return  A audit log entry; null if no entry exists
      * @throws Exception
      */
-    private Set<JsonValue> getEntries(final String auditEntryType, QueryFilter queryFilter)
+    private Set<JsonValue> getEntries(final String auditEntryType, QueryFilter<JsonPointer> queryFilter)
             throws IOException, ResourceException {
         final File auditFile = getAuditLogFile(auditEntryType);
         final Set<JsonValue> results = new HashSet<>();

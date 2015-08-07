@@ -16,7 +16,7 @@
 
 package org.forgerock.audit.util;
 
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;

@@ -15,25 +15,20 @@
  */
 package org.forgerock.audit;
 
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.resource.Context;
-import org.forgerock.json.resource.PersistenceConfig;
+import org.forgerock.json.JsonValue;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.http.context.ServerContext;
 
 /**
  * A ServerContext used when auditing over the router.
  */
 public class AuditContext extends ServerContext {
     public AuditContext(final Context parent) {
-        super(parent);
+        super(parent, "audit");
     }
 
-    public AuditContext(final String id, final Context parent) {
-        super(id, parent);
-    }
-
-    public AuditContext(final JsonValue savedContext, final PersistenceConfig config) throws ResourceException {
-        super(savedContext, config);
+    public AuditContext(final JsonValue savedContext, final ClassLoader classLoader) throws ResourceException {
+        super(savedContext, classLoader);
     }
 }

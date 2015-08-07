@@ -27,7 +27,7 @@ import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.PassThroughAuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
