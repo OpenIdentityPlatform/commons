@@ -239,22 +239,22 @@ public class RoutingTest {
 
     private List<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {null, null, "2.0", true},
-                {null, DefaultVersionBehaviour.NONE, null, true},
-                {null, DefaultVersionBehaviour.LATEST, "2.0", true},
-                {null, DefaultVersionBehaviour.OLDEST, "1.0", true},
-                {"1.0", null, "1.1", false},
-                {"1.0", DefaultVersionBehaviour.NONE, "1.1", false},
-                {"1.0", DefaultVersionBehaviour.LATEST, "1.1", false},
-                {"1.0", DefaultVersionBehaviour.OLDEST, "1.1", false},
-                {"1.1", null, "1.1", false},
-                {"1.1", DefaultVersionBehaviour.NONE, "1.1", false},
-                {"1.1", DefaultVersionBehaviour.LATEST, "1.1", false},
-                {"1.1", DefaultVersionBehaviour.OLDEST, "1.1", false},
-                {"2.0", null, "2.0", false},
-                {"2.0", DefaultVersionBehaviour.NONE, "2.0", false},
-                {"2.0", DefaultVersionBehaviour.LATEST, "2.0", false},
-                {"2.0", DefaultVersionBehaviour.OLDEST, "2.0", false},
+            {null, null, "2.0", true},
+            {null, DefaultVersionBehaviour.NONE, null, true},
+            {null, DefaultVersionBehaviour.LATEST, "2.0", true},
+            {null, DefaultVersionBehaviour.OLDEST, "1.0", true},
+            {"1.0", null, "1.1", false},
+            {"1.0", DefaultVersionBehaviour.NONE, "1.1", false},
+            {"1.0", DefaultVersionBehaviour.LATEST, "1.1", false},
+            {"1.0", DefaultVersionBehaviour.OLDEST, "1.1", false},
+            {"1.1", null, "1.1", false},
+            {"1.1", DefaultVersionBehaviour.NONE, "1.1", false},
+            {"1.1", DefaultVersionBehaviour.LATEST, "1.1", false},
+            {"1.1", DefaultVersionBehaviour.OLDEST, "1.1", false},
+            {"2.0", null, "2.0", false},
+            {"2.0", DefaultVersionBehaviour.NONE, "2.0", false},
+            {"2.0", DefaultVersionBehaviour.LATEST, "2.0", false},
+            {"2.0", DefaultVersionBehaviour.OLDEST, "2.0", false},
         });
     }
 

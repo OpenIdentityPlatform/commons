@@ -132,12 +132,12 @@ final class AnnotatedMethod {
                     queryHandlerParam = i;
                 }
             }
-            if (Arrays.asList(Create.class, Update.class, Patch.class, Query.class).contains(annotation) &&
-                    requestParam == -1) {
+            if (Arrays.asList(Create.class, Update.class, Patch.class, Query.class).contains(annotation)
+                    && requestParam == -1) {
                 return null;
             }
-            if (queryHandlerParam == -1 && Query.class.equals(annotation) ||
-                    queryHandlerParam != -1 && !Query.class.equals(annotation)) {
+            if (queryHandlerParam == -1 && Query.class.equals(annotation)
+                    || queryHandlerParam != -1 && !Query.class.equals(annotation)) {
                 return null;
             }
             if (!needsId || idParam > -1) {

@@ -34,10 +34,8 @@ import org.forgerock.util.Reject;
  *
  * <p>Instances must be provided with a {@code ConnectionFactory} in order to
  * operate and optionally a {@code HttpContextFactory}.</p>
- *
- * @since 3.0.0
  */
-public class CrestHttp {
+public final class CrestHttp {
 
     private CrestHttp() {
     }
@@ -48,6 +46,7 @@ public class CrestHttp {
      *
      * @param connectionFactory
      *            The connection factory.
+     * @return A CREST HTTP {@code Handler}.
      */
     public static Handler newHttpHandler(ConnectionFactory connectionFactory) {
         Reject.ifNull(connectionFactory);

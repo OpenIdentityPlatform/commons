@@ -61,8 +61,6 @@ import org.forgerock.util.promise.Promise;
  *
  * @see AbstractRouter
  * @see RouteMatchers
- *
- * @since 3.0.0
  */
 public class Router extends AbstractRouter<Router, Request, RequestHandler> implements RequestHandler {
 

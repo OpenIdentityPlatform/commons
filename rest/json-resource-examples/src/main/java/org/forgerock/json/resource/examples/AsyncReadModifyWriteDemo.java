@@ -86,18 +86,18 @@ public final class AsyncReadModifyWriteDemo {
                     log("Updated resource now has revision " + user.getRevision());
                 }
             }).thenAlways(new Runnable() {
-            /*
-             * Close the connection.
-             */
-            @Override
-            public void run() {
-                log("Closing connection");
-                final Connection connection = connectionHolder.get();
-                if (connection != null) {
-                    connection.close();
+                /*
+                 * Close the connection.
+                 */
+                @Override
+                public void run() {
+                    log("Closing connection");
+                    final Connection connection = connectionHolder.get();
+                    if (connection != null) {
+                        connection.close();
+                    }
                 }
-            }
-        });
+            });
         // @formatter:on
 
         // Wait for update to complete/fail.

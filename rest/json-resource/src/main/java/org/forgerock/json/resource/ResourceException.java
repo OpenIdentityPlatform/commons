@@ -144,7 +144,6 @@ public class ResourceException extends IOException implements Response {
      * detail message.
      *
      * @return A {@code NotSupportedException}.
-     * @since 3.0.0
      */
     public static ResourceException newNotSupportedException() {
         return new NotSupportedException();
@@ -156,7 +155,6 @@ public class ResourceException extends IOException implements Response {
      *
      * @param message The detail message.
      * @return A {@code NotSupportedException}.
-     * @since 3.0.0
      */
     public static ResourceException newNotSupportedException(String message) {
         return new NotSupportedException(message);
@@ -169,7 +167,6 @@ public class ResourceException extends IOException implements Response {
      * @param message The detail message.
      * @param cause The exception which caused this exception to be thrown.
      * @return A {@code NotSupportedException}.
-     * @since 3.0.0
      */
     public static ResourceException newNotSupportedException(String message, Throwable cause) {
         return new NotSupportedException(message, cause);
@@ -180,7 +177,6 @@ public class ResourceException extends IOException implements Response {
      * detail message.
      *
      * @return A {@code BadRequestException}.
-     * @since 3.0.0
      */
     public static ResourceException newBadRequestException() {
         return new BadRequestException();
@@ -192,7 +188,6 @@ public class ResourceException extends IOException implements Response {
      *
      * @param message The detail message.
      * @return A {@code BadRequestException}.
-     * @since 3.0.0
      */
     public static ResourceException newBadRequestException(String message) {
         return new BadRequestException(message);
@@ -205,7 +200,6 @@ public class ResourceException extends IOException implements Response {
      * @param message The detail message.
      * @param cause The exception which caused this exception to be thrown.
      * @return A {@code BadRequestException}.
-     * @since 3.0.0
      */
     public static ResourceException newBadRequestException(String message, Throwable cause) {
         return new BadRequestException(message, cause);
@@ -216,7 +210,6 @@ public class ResourceException extends IOException implements Response {
      * detail message.
      *
      * @return A {@code NotFoundException}.
-     * @since 3.0.0
      */
     public static ResourceException newNotFoundException() {
         return new NotFoundException();
@@ -228,7 +221,6 @@ public class ResourceException extends IOException implements Response {
      *
      * @param message The detail message.
      * @return A {@code NotFoundException}.
-     * @since 3.0.0
      */
     public static ResourceException newNotFoundException(String message) {
         return new NotFoundException(message);
@@ -241,7 +233,6 @@ public class ResourceException extends IOException implements Response {
      * @param message The detail message.
      * @param cause The exception which caused this exception to be thrown.
      * @return A {@code NotFoundException}.
-     * @since 3.0.0
      */
     public static ResourceException newNotFoundException(String message, Throwable cause) {
         return new NotFoundException(message, cause);

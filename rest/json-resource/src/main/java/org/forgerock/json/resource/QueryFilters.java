@@ -28,17 +28,23 @@ import org.forgerock.util.query.QueryFilterParser;
  */
 public final class QueryFilters {
 
-    private static final QueryFilterParser<JsonPointer> parser = new QueryFilterParser<JsonPointer>() {
+    private static final QueryFilterParser<JsonPointer> PARSER = new QueryFilterParser<JsonPointer>() {
         @Override
         protected JsonPointer parseField(String s) {
             return new JsonPointer(s);
         }
     };
 
+    /**
+     * Parses the provided query string into a {@link QueryFilter}.
+     *
+     * @param query The query string to parse.
+     * @return A {@code QueryFilter}.
+     */
     public static QueryFilter<JsonPointer> parse(String query) {
-        return parser.valueOf(query);
+        return PARSER.valueOf(query);
     }
 
-    private QueryFilters() {}
-
+    private QueryFilters() {
+    }
 }

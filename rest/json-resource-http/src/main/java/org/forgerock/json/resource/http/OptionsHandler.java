@@ -32,13 +32,16 @@ import org.forgerock.util.promise.Promise;
 
 /**
  * {@link Filter} which handles OPTION HTTP requests to CREST resources.
- *
- * @since 3.0.0
  */
 public class OptionsHandler implements Filter {
 
     /**
      * Handles all OPTION requests to CREST resources, all other request methods are handled by the {@link Handler}.
+     *
+     * @param context {@inheritDoc}
+     * @param request {@inheritDoc}
+     * @param next {@inheritDoc}
+     * @return {@inheritDoc}
      */
     @Override
     public Promise<Response, NeverThrowsException> filter(Context context, Request request,

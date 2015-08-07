@@ -55,8 +55,8 @@ public class RequestRunnerTest {
     public void testHandleResultAnonymousQueryResourceHandlerInVisitQueryAsync() throws Exception {
         Response response = getAnonymousQueryResourceHandler(QUERY_RESULT);
         assertEquals(getResponseContent(response), "{" + "\"result\":[],"
-                + "\"resultCount\":0,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\",\"totalPagedResults\":-1"
-                + "}");
+                + "\"resultCount\":0,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\","
+                + "\"totalPagedResults\":-1}");
     }
 
     @Test
@@ -64,8 +64,8 @@ public class RequestRunnerTest {
         Response response = getAnonymousQueryResourceHandler(QUERY_RESULT,
                 newResourceResponse("id", "revision", new JsonValue("jsonValue")));
         assertEquals(getResponseContent(response), "{" + "\"result\":[\"jsonValue\"],"
-                + "\"resultCount\":1,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\",\"totalPagedResults\":-1"
-                + "}");
+                + "\"resultCount\":1,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\","
+                + "\"totalPagedResults\":-1}");
     }
 
     @Test
@@ -79,8 +79,8 @@ public class RequestRunnerTest {
         assertEquals(getResponseContent(response), "{" + "\"result\":["
                 + "{\"intField\":42,\"stringField\":\"stringValue\"},"
                 + "{\"intField\":43,\"stringField\":\"otherString\"}" + "],"
-                + "\"resultCount\":2,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\",\"totalPagedResults\":-1"
-                + "}");
+                + "\"resultCount\":2,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\","
+                + "\"totalPagedResults\":-1}");
     }
 
     @Test

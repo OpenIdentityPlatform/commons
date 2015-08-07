@@ -42,8 +42,8 @@ class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
     public AnnotatedSingletonHandler(Object requestHandler) {
         super(null);
         if (!requestHandler.getClass().isAnnotationPresent(RequestHandler.class)) {
-            throw new IllegalArgumentException("RequestHandler missing from class: " +
-                    requestHandler.getClass().getName());
+            throw new IllegalArgumentException("RequestHandler missing from class: "
+                    + requestHandler.getClass().getName());
         }
         this.readMethod = AnnotatedMethod.findMethod(requestHandler, Read.class, false);
         this.updateMethod = AnnotatedMethod.findMethod(requestHandler, Update.class, false);

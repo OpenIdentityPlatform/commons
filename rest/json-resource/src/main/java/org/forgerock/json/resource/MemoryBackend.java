@@ -601,14 +601,14 @@ public final class MemoryBackend implements CollectionResourceProvider {
                         resultIndex > lastResultIndex ? String.valueOf(lastResultIndex) : null;
 
                 switch (request.getTotalPagedResultsPolicy()) {
-                    case NONE:
-                        return newResultPromise(newQueryResponse(nextCookie));
-                    case EXACT:
-                    case ESTIMATE:
-                        return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
-                    default:
-                        throw new UnsupportedOperationException("totalPagedResultsPolicy: " +
-                                request.getTotalPagedResultsPolicy().toString() + " not supported");
+                case NONE:
+                    return newResultPromise(newQueryResponse(nextCookie));
+                case EXACT:
+                case ESTIMATE:
+                    return newResultPromise(newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount));
+                default:
+                    throw new UnsupportedOperationException("totalPagedResultsPolicy: "
+                            + request.getTotalPagedResultsPolicy().toString() + " not supported");
                 }
             } else {
                 return newResultPromise(newQueryResponse());

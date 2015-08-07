@@ -68,6 +68,7 @@ public interface QueryResponse extends Response {
     /**
      * Returns the policy that was used to calculate the {@literal totalPagedResults}.
      *
+     * @return The count policy.
      * @see #getTotalPagedResults()
      */
     CountPolicy getTotalPagedResultsPolicy();

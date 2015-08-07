@@ -28,8 +28,6 @@ import org.forgerock.util.Factory;
 
 /**
  * Http Application implementation to demonstrate integration with the Commons HTTP Framework.
- *
- * @since 3.0.0
  */
 public class CrestHttpApplication implements HttpApplication {
 
