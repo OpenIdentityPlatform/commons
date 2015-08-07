@@ -292,7 +292,7 @@ public class AuditService implements RequestHandler {
             }
 
             Collection<AuditEventHandler<?>> auditEventHandlersForEvent = getAuditEventHandlersForEvent(auditEventType);
-            logger.info("Will cascade the event of type {} to the handlers : {}",
+            logger.debug("Will cascade the event of type {} to the handlers : {}",
                         auditEventType,
                         auditEventHandlersForEvent);
 
