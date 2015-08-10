@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.context.AbstractContext;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 

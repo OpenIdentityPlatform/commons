@@ -17,9 +17,7 @@
 package org.forgerock.http.context;
 
 import java.security.cert.Certificate;
-import java.security.cert.X509Certificate;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * ClientInfo gives easy access to client-related information that are available into the request.
