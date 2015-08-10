@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource.http;
 
-import static org.forgerock.http.test.HttpTest.newRequest;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -28,8 +27,10 @@ import static org.testng.Assert.assertEquals;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 
 import org.forgerock.http.Context;
+import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
@@ -129,5 +130,11 @@ public class RequestRunnerTest {
         // run the code to access the anonymous class
         RequestRunner requestRunner = new RequestRunner(context, request, httpRequest, httpResponse);
         return requestRunner.handleResult(connection).getOrThrowUninterruptibly();
+    }
+
+    private Request newRequest() {
+        Request request = new Request();
+        request.setUri(URI.create(""));
+        return request;
     }
 }
