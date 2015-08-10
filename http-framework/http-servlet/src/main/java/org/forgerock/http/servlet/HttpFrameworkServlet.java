@@ -42,7 +42,7 @@ import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.Session;
 import org.forgerock.http.context.ClientInfoContext;
-import org.forgerock.http.context.HttpContext;
+import org.forgerock.http.context.HttpRequestContext;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
@@ -164,7 +164,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
             throws ServletException, IOException {
         final Request request = createRequest(req);
         final Session session = new ServletSession(req);
-        final HttpContext httpContext = new HttpContext(new RootContext(), session)
+        final HttpRequestContext httpRequestContext = new HttpRequestContext(new RootContext(), session)
                 .setPrincipal(req.getUserPrincipal());
 
         /* TODO
@@ -174,15 +174,15 @@ public final class HttpFrameworkServlet extends HttpServlet {
         Enumeration<String> attributeNames = req.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
             String attributeName = attributeNames.nextElement();
-            httpContext.getAttributes().put(attributeName, req.getAttribute(attributeName));
+            httpRequestContext.getAttributes().put(attributeName, req.getAttribute(attributeName));
         }
 
         //FIXME ideally we don't want to expose the HttpServlet Request and Response
         // handy servlet-specific attributes, sure to be abused by downstream filters
-        httpContext.getAttributes().put(HttpServletRequest.class.getName(), req);
-        httpContext.getAttributes().put(HttpServletResponse.class.getName(), resp);
+        httpRequestContext.getAttributes().put(HttpServletRequest.class.getName(), req);
+        httpRequestContext.getAttributes().put(HttpServletResponse.class.getName(), resp);
 
-        Context context = createRouterContext(createClientInfoContext(httpContext, req), req);
+        Context context = createRouterContext(createClientInfoContext(httpRequestContext, req), req);
 
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
@@ -191,7 +191,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                     @Override
                     public void handleResult(Response response) {
                         try {
-                            writeResponse(httpContext, resp, response);
+                            writeResponse(httpRequestContext, resp, response);
                         } catch (IOException e) {
                             log("Failed to write success response", e);
                         } finally {
@@ -258,7 +258,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         return new RouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
     }
 
-    private void writeResponse(HttpContext context, HttpServletResponse resp, Response response)
+    private void writeResponse(HttpRequestContext context, HttpServletResponse resp, Response response)
             throws IOException {
         /*
          * Support for OPENIG-94/95 - The wrapped servlet may have already

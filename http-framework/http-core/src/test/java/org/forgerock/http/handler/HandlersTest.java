@@ -28,7 +28,7 @@ import org.forgerock.http.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Session;
-import org.forgerock.http.context.HttpContext;
+import org.forgerock.http.context.HttpRequestContext;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -128,7 +128,7 @@ public final class HandlersTest {
 
     private Context context() {
         Session session = mock(Session.class);
-        return new HttpContext(new RootContext(), session);
+        return new HttpRequestContext(new RootContext(), session);
     }
 
     private Filter filter() throws Exception {
