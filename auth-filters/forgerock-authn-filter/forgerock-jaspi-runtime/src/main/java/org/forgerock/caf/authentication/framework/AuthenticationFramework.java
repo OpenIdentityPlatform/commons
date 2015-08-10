@@ -36,7 +36,7 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.context.HttpContext;
+import org.forgerock.http.context.HttpRequestContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
@@ -189,7 +189,7 @@ public final class AuthenticationFramework {
                             getMap(context.getRequestContextMap(), AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
                     logger.debug("Setting principal name, {}, and {} context values on to the request.",
                             principalName, contextMap.size());
-                    Map<String, Object> requestAttributes = context.asContext(HttpContext.class).getAttributes();
+                    Map<String, Object> requestAttributes = context.asContext(HttpRequestContext.class).getAttributes();
                     requestAttributes.put(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL, principalName);
                     requestAttributes.put(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, contextMap);
                 }
@@ -205,7 +205,7 @@ public final class AuthenticationFramework {
             public Promise<Response, NeverThrowsException> apply(AuthStatus authStatus) {
                 if (isSuccess(authStatus)) {
                     AuditTrail auditTrail = context.getAuditTrail();
-                    context.asContext(HttpContext.class).getAttributes()
+                    context.asContext(HttpRequestContext.class).getAttributes()
                             .put(AuthenticationFramework.ATTRIBUTE_REQUEST_ID, auditTrail.getRequestId());
                     return grantAccess(context, next);
                 }

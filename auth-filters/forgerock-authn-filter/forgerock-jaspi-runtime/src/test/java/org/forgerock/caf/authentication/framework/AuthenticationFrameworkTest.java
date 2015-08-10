@@ -32,9 +32,9 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.context.HttpContext;
-import org.forgerock.http.context.RootContext;
 import org.forgerock.http.Session;
+import org.forgerock.http.context.HttpRequestContext;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
@@ -42,7 +42,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-import org.mockito.Matchers;
 import org.slf4j.Logger;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -80,9 +79,9 @@ public class AuthenticationFrameworkTest {
                 initializationPromise);
     }
 
-    private HttpContext mockContext() {
+    private HttpRequestContext mockContext() {
         Session session = mock(Session.class);
-        return new HttpContext(new RootContext(), session);
+        return new HttpRequestContext(new RootContext(), session);
     }
 
     private Handler mockHandler(Request request, Promise<Response, NeverThrowsException> response) {
@@ -162,7 +161,7 @@ public class AuthenticationFrameworkTest {
     public void whenMessageProcessingSucceedsResourceResponseShouldBeReturned() {
 
         //Given
-        HttpContext context = mockContext();
+        HttpRequestContext context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
                 Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));
