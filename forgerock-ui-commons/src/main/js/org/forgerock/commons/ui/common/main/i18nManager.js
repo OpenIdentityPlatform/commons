@@ -75,7 +75,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             lng: options.serverLang,
             load: "unspecific",
             ns: nameSpace,
-            nsseparator = ":::",
+            nsseparator: ":::",
             resGetPath: require.toUrl("locales/__lng__/__ns__.json")
         };
 
