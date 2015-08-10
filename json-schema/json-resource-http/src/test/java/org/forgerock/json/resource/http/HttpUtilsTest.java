@@ -18,16 +18,17 @@ package org.forgerock.json.resource.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
-import static org.forgerock.http.test.HttpTest.newRequest;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -387,5 +388,11 @@ public class HttpUtilsTest {
             assertThat(e.getClass()).isEqualTo(BadRequestException.class);
             throw e;
         }
+    }
+
+    private Request newRequest() {
+        Request request = new Request();
+        request.setUri(URI.create(""));
+        return request;
     }
 }
