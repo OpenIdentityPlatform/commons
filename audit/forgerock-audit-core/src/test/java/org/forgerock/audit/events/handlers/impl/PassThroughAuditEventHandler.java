@@ -21,13 +21,15 @@ import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
@@ -55,7 +57,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<JsonValue, ResourceException> actionCollection(
+    public Promise<ActionResponse, ResourceException> actionCollection(
             final ServerContext context,
             final ActionRequest request) {
         return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
@@ -66,7 +68,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<JsonValue, ResourceException> actionInstance(
+    public Promise<ActionResponse, ResourceException> actionInstance(
             final ServerContext context,
             final String resourceId,
             final ActionRequest request) {
@@ -78,12 +80,14 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> createInstance(
+    public Promise<ResourceResponse, ResourceException> createInstance(
             final ServerContext context,
             final CreateRequest request) {
-        return Promises.newResultPromise(new Resource(request.getContent().get(Resource.FIELD_CONTENT_ID).asString(),
-                null,
-                new JsonValue(request.getContent())));
+        return Promises.newResultPromise(
+                Responses.newResourceResponse(
+                        request.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(),
+                        null,
+                        new JsonValue(request.getContent())));
     }
 
     /**
@@ -91,11 +95,11 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResult, ResourceException> queryCollection(
+    public Promise<QueryResponse, ResourceException> queryCollection(
             final ServerContext context,
             final QueryRequest request,
             final QueryResourceHandler handler) {
-        return Promises.newResultPromise(new QueryResult());
+        return Promises.newResultPromise(Responses.newQueryResponse());
     }
 
     /**
@@ -103,7 +107,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> readInstance(
+    public Promise<ResourceResponse, ResourceException> readInstance(
             final ServerContext context,
             final String resourceId,
             final ReadRequest request) {

@@ -24,7 +24,7 @@ import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
@@ -57,7 +57,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> deleteInstance(
+    public Promise<ResourceResponse, ResourceException> deleteInstance(
             final ServerContext context,
             final String resourceId,
             final DeleteRequest request) {
@@ -68,7 +68,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> patchInstance(
+    public Promise<ResourceResponse, ResourceException> patchInstance(
             final ServerContext context,
             final String resourceId,
             final PatchRequest request) {
@@ -79,7 +79,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      * {@inheritDoc}
      */
     @Override
-    public Promise<Resource, ResourceException> updateInstance(
+    public Promise<ResourceResponse, ResourceException> updateInstance(
             final ServerContext context,
             final String resourceId,
             final UpdateRequest request) {

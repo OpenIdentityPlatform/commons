@@ -32,19 +32,21 @@ import java.util.Set;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.context.ServerContext;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.forgerock.util.promise.ResultHandler;
@@ -126,17 +128,17 @@ public class AuditServiceTest {
         final CreateRequest createRequest = makeCreateRequest();
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
 
         //then
         assertThat(auditService.isAuditing("access")).isTrue();
         AssertJPromiseAssert.assertThat(promise).succeeded()
                 .withObject()
-                .isInstanceOf(Resource.class);
+                .isInstanceOf(ResourceResponse.class);
 
         // TODO-brmiller should use AssertJResourceAssert
-        final Resource resource = promise.get();
+        final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
@@ -148,17 +150,17 @@ public class AuditServiceTest {
         CreateRequest createRequest = makeCreateRequest("activity");
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
 
         //then
         assertThat(auditService.isAuditing("activity")).isFalse();
         AssertJPromiseAssert.assertThat(promise).succeeded()
                 .withObject()
-                .isInstanceOf(Resource.class);
+                .isInstanceOf(ResourceResponse.class);
 
         // TODO-brmiller should use AssertJResourceAssert
-        final Resource resource = promise.get();
+        final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
@@ -168,10 +170,10 @@ public class AuditServiceTest {
         //given
         AuditService auditService = new AuditService();
         CreateRequest createRequest = makeCreateRequest("unknownTopic");
-        ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
+        ResultHandler<ResourceResponse> resultHandler = mockResultHandler(ResourceResponse.class);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
 
         //then
@@ -193,23 +195,17 @@ public class AuditServiceTest {
         reset(auditEventHandler, queryAuditEventHandler); // So the verify assertions below can work.
 
         final ReadRequest readRequest = Requests.newReadRequest("access", "1234");
-        ResultHandler<Resource> readResultHandler = mockResultHandler(Resource.class, "readResultHandler");
+        ResultHandler<ResourceResponse> readResultHandler = mockResultHandler(ResourceResponse.class, "readResultHandler");
         ServerContext context = new ServerContext(new RootContext());
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleRead(context, readRequest);
 
         //then
         verify(queryAuditEventHandler).readInstance(same(context),
-<<<<<<< HEAD
-                eq("1234"),
-                same(readRequest),
-                same(readResultHandler));
-=======
                                                     eq("1234"),
                                                     same(readRequest));
->>>>>>> CREST3-ify:
         verifyZeroInteractions(auditEventHandler);
     }
 
@@ -218,7 +214,7 @@ public class AuditServiceTest {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleDelete(
                         new ServerContext(new RootContext()),
                         Requests.newDeleteRequest("_id"));
@@ -233,7 +229,7 @@ public class AuditServiceTest {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handlePatch(
                         new ServerContext(new RootContext()),
                         Requests.newPatchRequest("_id"));
@@ -248,7 +244,7 @@ public class AuditServiceTest {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleUpdate(
                         new ServerContext(new RootContext()),
                         Requests.newUpdateRequest("_id", new JsonValue(new HashMap<String, Object>())));
@@ -263,42 +259,28 @@ public class AuditServiceTest {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
 
         //when
-<<<<<<< HEAD
-        auditService.handleAction(
-                new ServerContext(new RootContext()),
-                Requests.newActionRequest("", "unknownAction"),
-                resultHandler
-        );
-
-        //then
-        verify(resultHandler, never()).handleResult(resourceCaptor.capture());
-        verify(resultHandler).handleError(resourceExceptionCaptor.capture());
-
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
-=======
-        Promise<JsonValue, ResourceException> promise =
+        Promise<ActionResponse, ResourceException> promise =
                 auditService.handleAction(
                         new ServerContext(new RootContext()),
-                        Requests.newActionRequest("_id", "action"));
+                        Requests.newActionRequest("_id", "unknownAction"));
 
         //then
         AssertJPromiseAssert.assertThat(promise).failedWithException()
-                .isInstanceOf(NotSupportedException.class);
->>>>>>> CREST3-ify:
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
     public void testQueryOnAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
-        final Promise<QueryResult, ResourceException> emptyPromise = Promises.newResultPromise(new QueryResult());
+        final Promise<QueryResponse, ResourceException> emptyPromise = Promises.newResultPromise(Responses.newQueryResponse());
         auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
         when(auditEventHandler.queryCollection(
                 any(ServerContext.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
             .thenReturn(emptyPromise);
 
         //when
-        Promise<QueryResult, ResourceException> promise = auditService.handleQuery(
+        Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(
                 new ServerContext(new RootContext()),
                 Requests.newQueryRequest("access"),
                 mock(QueryResourceHandler.class));
@@ -320,7 +302,7 @@ public class AuditServiceTest {
         final CreateRequest createRequest = Requests.newCreateRequest("access", content);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
 
         //then
@@ -337,13 +319,13 @@ public class AuditServiceTest {
                                               field("transactionId", "transactionId")));
 
         final CreateRequest createRequest = Requests.newCreateRequest("access", content);
-        final ResultHandler<Resource> resultHandler = mockResultHandler(Resource.class);
+        final ResultHandler<ResourceResponse> resultHandler = mockResultHandler(ResourceResponse.class);
 
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
                 ArgumentCaptor.forClass(ResourceException.class);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
 
         //then
@@ -365,16 +347,16 @@ public class AuditServiceTest {
         final CreateRequest createRequestAccess = makeCreateRequest("foo");
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new ServerContext(new RootContext()), createRequestAccess);
 
         //then
         AssertJPromiseAssert.assertThat(promise).succeeded()
                 .withObject()
-                .isInstanceOf(Resource.class);
+                .isInstanceOf(ResourceResponse.class);
 
         // TODO-brmiller should use AssertJResourceAssert
-        final Resource resource = promise.get();
+        final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequestAccess.getContent().asMap());
     }

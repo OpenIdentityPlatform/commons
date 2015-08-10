@@ -20,30 +20,27 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.context.ServerContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
-import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
@@ -54,7 +51,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 public class CSVAuditEventHandlerTest {
 
@@ -68,16 +64,16 @@ public class CSVAuditEventHandlerTest {
         final CreateRequest createRequest = makeCreateRequest();
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.createInstance(new ServerContext(new RootContext()), createRequest);
 
         //then
         AssertJPromiseAssert.assertThat(promise).succeeded()
                 .withObject()
-                .isInstanceOf(Resource.class);
+                .isInstanceOf(ResourceResponse.class);
 
         // TODO-brmiller should use AssertJResourceAssert
-        final Resource resource = promise.get();
+        final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
@@ -89,12 +85,12 @@ public class CSVAuditEventHandlerTest {
         logDirectory.toFile().deleteOnExit();
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
-        Resource event = createAccessEvent(csvHandler);
+        ResourceResponse event = createAccessEvent(csvHandler);
 
         final ReadRequest readRequest = Requests.newReadRequest("access", event.getId());
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.readInstance(
                         new ServerContext(new RootContext()),
                         readRequest.getResourcePathObject().tail(1).toString(),
@@ -103,14 +99,14 @@ public class CSVAuditEventHandlerTest {
         //then
         AssertJPromiseAssert.assertThat(promise).succeeded()
                 .withObject()
-                .isInstanceOf(Resource.class);
+                .isInstanceOf(ResourceResponse.class);
 
         // TODO-brmiller should use AssertJResourceAssert
-        final Resource resource = promise.get();
+        final ResourceResponse resource = promise.get();
         assertResourceEquals(resource, event);
     }
 
-    private static void assertResourceEquals(Resource left, Resource right) {
+    private static void assertResourceEquals(ResourceResponse left, ResourceResponse right) {
         Map<String, Object> leftAsMap = dropNullEntries(left.getContent()).asMap();
         Map<String, Object> rightAsMap = dropNullEntries(right.getContent()).asMap();
         assertThat(leftAsMap).isEqualTo(rightAsMap);
@@ -136,7 +132,7 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.deleteInstance(
                         new ServerContext(new RootContext()),
                         "_id",
@@ -155,7 +151,7 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.patchInstance(
                         new ServerContext(new RootContext()),
                         "_id",
@@ -174,7 +170,7 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         //when
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.updateInstance(
                         new ServerContext(new RootContext()),
                         "_id",
@@ -193,7 +189,7 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         //when
-        Promise<JsonValue, ResourceException> promise =
+        Promise<ActionResponse, ResourceException> promise =
                 csvHandler.actionCollection(
                         new ServerContext(new RootContext()),
                         Requests.newActionRequest("access", "action"));
@@ -211,7 +207,7 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         //when
-        Promise<JsonValue, ResourceException> promise =
+        Promise<ActionResponse, ResourceException> promise =
                 csvHandler.actionInstance(
                         new ServerContext(new RootContext()),
                         "_id",
@@ -230,14 +226,14 @@ public class CSVAuditEventHandlerTest {
         CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
-        final ArgumentCaptor<Resource> resourceCaptor = ArgumentCaptor.forClass(Resource.class);
+        final ArgumentCaptor<ResourceResponse> resourceCaptor = ArgumentCaptor.forClass(ResourceResponse.class);
 
-        Resource event = createAccessEvent(csvHandler);
+        ResourceResponse event = createAccessEvent(csvHandler);
 
         final QueryRequest queryRequest = Requests.newQueryRequest("access")
                 .setQueryFilter(QueryFilters.parse("/_id eq \"_id\""));
         //when
-        Promise<QueryResult, ResourceException> promise =
+        Promise<QueryResponse, ResourceException> promise =
                 csvHandler.queryCollection(
                         new ServerContext(new RootContext()),
                         queryRequest,
@@ -247,7 +243,7 @@ public class CSVAuditEventHandlerTest {
         AssertJPromiseAssert.assertThat(promise).succeeded();
         verify(queryResourceHandler).handleResource(resourceCaptor.capture());
 
-        final Resource resource = resourceCaptor.getValue();
+        final ResourceResponse resource = resourceCaptor.getValue();
         assertResourceEquals(resource, event);
     }
 
@@ -268,16 +264,16 @@ public class CSVAuditEventHandlerTest {
 
     }
 
-    private Resource createAccessEvent(AuditEventHandler<?> auditEventHandler) throws Exception {
+    private ResourceResponse createAccessEvent(AuditEventHandler<?> auditEventHandler) throws Exception {
         final CreateRequest createRequest = makeCreateRequest();
-        final ResultHandler<Resource> createResultHandler = mockResultHandler(Resource.class);
-        final ArgumentCaptor<Resource> createArgument = ArgumentCaptor.forClass(Resource.class);
+        final ResultHandler<ResourceResponse> createResultHandler = mockResultHandler(ResourceResponse.class);
+        final ArgumentCaptor<ResourceResponse> createArgument = ArgumentCaptor.forClass(ResourceResponse.class);
 
-        Promise<Resource, ResourceException> promise =
+        Promise<ResourceResponse, ResourceException> promise =
                 auditEventHandler.createInstance(new ServerContext(new RootContext()), createRequest);
 
         AssertJPromiseAssert.assertThat(promise).succeeded()
-                .isInstanceOf(Resource.class);
+                .isInstanceOf(ResourceResponse.class);
 
         // TODO-brmiller should use AssertJResourceAssert
         return promise.get();
