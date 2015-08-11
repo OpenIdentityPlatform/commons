@@ -33,10 +33,10 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
     public StageResponse advance(ProcessContext context, EmailStageConfig config,
                                  SnapshotAuthor snapshotAuthor) throws IllegalInputException {
         switch (context.getStageTag()) {
-            case EMPTY_TAG:
-                return sendEmail(context, snapshotAuthor);
-            case VALIDATE_LINK_TAG:
-                return validateLink(context);
+        case EMPTY_TAG:
+            return sendEmail(context, snapshotAuthor);
+        case VALIDATE_LINK_TAG:
+            return validateLink(context);
         }
 
         throw new IllegalStageTagException(context.getStageTag());

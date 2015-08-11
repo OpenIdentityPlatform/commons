@@ -39,14 +39,29 @@ public final class ProcessInstanceConfig {
         storageType = builder.storageType;
     }
 
+    /**
+     * Gets the ordered list of stage configurations.
+     *
+     * @return stage configurations
+     */
     public List<StageConfig> getStageConfigs() {
         return stageConfigs;
     }
 
+    /**
+     * Gets the snapshot token type.
+     *
+     * @return snapshot token type
+     */
     public SnapshotTokenType getTokenType() {
         return tokenType;
     }
 
+    /**
+     * Gets the storage type, whether local or stateless.
+     *
+     * @return the storage type
+     */
     public StorageType getStorageType() {
         return storageType;
     }
@@ -140,7 +155,15 @@ public final class ProcessInstanceConfig {
      * a local store and the returning token will be used to key that state.
      */
     public enum StorageType {
-        LOCAL, STATELESS
+        /**
+         * State should be preserved locally.
+         */
+        LOCAL,
+
+        /**
+         * State should be preserved in a stateless way.
+         */
+        STATELESS
     }
 
     /**

@@ -49,21 +49,27 @@ public final class ProcessContext {
     }
 
     /**
-     * @return the current index in the flow
+     * Gets the current stage index in the flow.
+     *
+     * @return the stage index
      */
     public int getStageIndex() {
         return stageIndex;
     }
 
     /**
-     * @return the current stage tag defined by the stage
+     * Gets the current stage tag defined by the previously invoked stage.
+     *
+     * @return the stage tag
      */
     public String getStageTag() {
         return stageTag;
     }
 
     /**
-     * @return input provided by the client, empty json object if none
+     * Gets the input provided by the client. Empty json object represents no input.
+     *
+     * @return the input
      */
     public JsonValue getInput() {
         return input;
@@ -181,6 +187,11 @@ public final class ProcessContext {
             return this;
         }
 
+        /**
+         * Builds a new process context instance.
+         *
+         * @return a process context instance
+         */
         public ProcessContext build() {
             return new ProcessContext(this);
         }

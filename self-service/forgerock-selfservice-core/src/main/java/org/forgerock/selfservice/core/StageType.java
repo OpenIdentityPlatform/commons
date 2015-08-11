@@ -21,6 +21,9 @@ import org.forgerock.selfservice.core.config.StageConfig;
 /**
  * The stage type provides some relationship between a stage config and a progress stage.
  *
+ * @param <C>
+ *         represents the subtype of stage config
+ *
  * @since 0.1.0
  */
 public final class StageType<C extends StageConfig> {

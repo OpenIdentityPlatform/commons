@@ -28,7 +28,11 @@ import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
  * an opportunity for the stage to return some initial requirements. The method
  * {@link ProgressStage#advance(ProcessContext, StageConfig, SnapshotAuthor)} is repeatedly after for every
  * {@link StageResponse} that is returned containing some requirements. Stage tags can be used in the stage response to
- * help track progress in the stage itself. State can also be added to the stage response to pass data throughout the flow.
+ * help track progress in the stage itself. State can also be added to the stage response to pass data throughout the
+ * flow.
+ *
+ * @param <C>
+ *         represents the subtype of stage config that the concrete progress stage is expecting
  *
  * @since 0.1.0
  */

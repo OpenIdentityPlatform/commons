@@ -14,27 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.exceptions;
-
-import org.forgerock.json.resource.BadRequestException;
-
 /**
- * Exception to represent illegal/invalid input from the client.
- *
- * @since 0.1.0
+ * This package contains all the exceptions.
  */
-public final class IllegalInputException extends BadRequestException {
-
-    private static final long serialVersionUID = 1L;
-
-    /**
-     * Creates a new exception instance.
-     *
-     * @param message
-     *         the message should refer to what is illegal about the input
-     */
-    public IllegalInputException(String message) {
-        super(message);
-    }
-
-}
+package org.forgerock.selfservice.core.exceptions;

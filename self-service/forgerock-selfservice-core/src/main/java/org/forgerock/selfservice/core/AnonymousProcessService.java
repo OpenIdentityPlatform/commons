@@ -24,9 +24,11 @@ import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig.StorageType;
 import org.forgerock.selfservice.core.config.StageConfig;
@@ -46,7 +48,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Anonymous process service progresses a chain of {@link ProgressStage} configurations, handling any required client interactions.
+ * Anonymous process service progresses a chain of {@link ProgressStage}
+ * configurations, handling any required client interactions.
  *
  * @since 0.1.0
  */
@@ -97,10 +100,10 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     }
 
     @Override
-    public Promise<Resource, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
         try {
             JsonValue clientResponse = initiateProcess();
-            return Promises.newResultPromise(new Resource("1", "1.0", clientResponse));
+            return Promises.newResultPromise(Responses.newResourceResponse("1", "1.0", clientResponse));
         } catch (ResourceException rE) {
             return Promises.newExceptionPromise(rE);
         } catch (RuntimeException rE) {
@@ -112,11 +115,11 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
         if (SUBMIT_ACTION.equals(request.getAction())) {
             try {
                 JsonValue clientResponse = progressProcess(request.getContent());
-                return Promises.newResultPromise(clientResponse);
+                return Promises.newResultPromise(Responses.newActionResponse(clientResponse));
             } catch (ResourceException rE) {
                 return Promises.newExceptionPromise(rE);
             } catch (RuntimeException rE) {
@@ -198,7 +201,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     }
 
     private JsonValue handleProgression(ProcessContext context, StageType<?> stageType,
-                                       StageResponse response) throws IllegalInputException {
+                                        StageResponse response) throws IllegalInputException {
         if (context.getStageIndex() + 1 == stageConfigs.size()) {
             // Flow complete, render completion response.
             return renderCompletion(stageType);
@@ -246,8 +249,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 object(
                         field(TYPE_FIELD, stageType.getName()),
                         field(STAGE_FIELD, context.getStageIndex()),
-                        field(REQUIREMENTS_FIELD, response.getRequirements().asMap())
-                ));
+                        field(REQUIREMENTS_FIELD, response.getRequirements().asMap())));
     }
 
     private JsonValue renderCompletion(StageType<?> stageType) {
@@ -257,10 +259,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                         field(STAGE_FIELD, END_VALUE),
                         field(STATUS_FIELD,
                                 object(
-                                        field(SUCCESS_FIELD, true)
-                                )
-                        )
-                ));
+                                        field(SUCCESS_FIELD, true)))));
     }
 
     /*
@@ -310,12 +309,12 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
     private InternalSnapshotAuthor newSnapshotAuthor(StorageType type) {
         switch (type) {
-            case LOCAL:
-                return new LocalSnapshotAuthor();
-            case STATELESS:
-                return new StatelessSnapshotAuthor();
-            default:
-                throw new IllegalArgumentException("Unknown storage type " + type);
+        case LOCAL:
+            return new LocalSnapshotAuthor();
+        case STATELESS:
+            return new StatelessSnapshotAuthor();
+        default:
+            throw new IllegalArgumentException("Unknown storage type " + type);
         }
     }
 
