@@ -16,6 +16,8 @@
 
 package org.forgerock.audit;
 
+import static org.forgerock.json.resource.Router.uriTemplate;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -59,11 +61,7 @@ public final class AuditServiceConnectionFactoryProvider {
         // handlers
         registerCsvHandler(auditService);
 
-// TODO-brmiller understand decision to drop addRoute(tempplate, RequestHandler)
-//        router.addRoute("/audit", auditService);
-        router.addRoute(
-                RouteMatchers.requestUriMatcher(RoutingMode.STARTS_WITH, "/audit"),
-                Resources.newCollection(auditService));
+        router.addRoute(RoutingMode.STARTS_WITH, uriTemplate("/audit"), auditService);
         return Resources.newInternalConnectionFactory(router);
     }
 
