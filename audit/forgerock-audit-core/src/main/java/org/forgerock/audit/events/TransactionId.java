@@ -17,8 +17,6 @@ package org.forgerock.audit.events;
 
 import org.forgerock.util.Reject;
 
-// TODO-brmiller where do we get this
-//import javax.annotation.concurrent.ThreadSafe;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -36,10 +34,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  * TransactionId with the same value as this would lead to duplicate sub-transaction ID values. As such, two instances
  * of TransactionId with the same value are not considered equal.
  *
+ * This class is thread-safe.
+ *
  * @since 1.0.0
  */
-// TODO-brmiller
-//@ThreadSafe
 public final class TransactionId {
 
     /**
