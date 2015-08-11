@@ -18,7 +18,7 @@ package org.forgerock.json.resource;
 
 import java.util.Collection;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 
 /**
  * An interface for implementing synchronous {@link RequestHandler}s. A
@@ -53,9 +53,9 @@ public interface SynchronousRequestHandler {
      * @return The possibly {@code null} result of the action.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleAction(ServerContext, ActionRequest)
+     * @see RequestHandler#handleAction(Context, ActionRequest)
      */
-    ActionResponse handleAction(ServerContext context, ActionRequest request) throws ResourceException;
+    ActionResponse handleAction(Context context, ActionRequest request) throws ResourceException;
 
     /**
      * Adds a new JSON resource.
@@ -67,9 +67,9 @@ public interface SynchronousRequestHandler {
      * @return The new resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleCreate(ServerContext, CreateRequest)
+     * @see RequestHandler#handleCreate(org.forgerock.http.Context, CreateRequest)
      */
-    ResourceResponse handleCreate(ServerContext context, CreateRequest request) throws ResourceException;
+    ResourceResponse handleCreate(Context context, CreateRequest request) throws ResourceException;
 
     /**
      * Deletes a JSON resource.
@@ -81,9 +81,9 @@ public interface SynchronousRequestHandler {
      * @return The deleted resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleDelete(ServerContext, DeleteRequest)
+     * @see RequestHandler#handleDelete(org.forgerock.http.Context, DeleteRequest)
      */
-    ResourceResponse handleDelete(ServerContext context, DeleteRequest request) throws ResourceException;
+    ResourceResponse handleDelete(Context context, DeleteRequest request) throws ResourceException;
 
     /**
      * Updates a JSON resource by applying a set of changes to its existing
@@ -96,9 +96,9 @@ public interface SynchronousRequestHandler {
      * @return The patched resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
+     * @see RequestHandler#handlePatch(org.forgerock.http.Context, PatchRequest)
      */
-    ResourceResponse handlePatch(ServerContext context, PatchRequest request) throws ResourceException;
+    ResourceResponse handlePatch(Context context, PatchRequest request) throws ResourceException;
 
     /**
      * Searches for all JSON resources matching a user specified set of
@@ -114,10 +114,9 @@ public interface SynchronousRequestHandler {
      * @return The query result.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleQuery(ServerContext, QueryRequest,
-     *      QueryResourceHandler)
+     * @see RequestHandler#handleQuery(org.forgerock.http.Context, QueryRequest, QueryResourceHandler)
      */
-    QueryResponse handleQuery(ServerContext context, QueryRequest request,
+    QueryResponse handleQuery(Context context, QueryRequest request,
             Collection<ResourceResponse> resources) throws ResourceException;
 
     /**
@@ -130,9 +129,9 @@ public interface SynchronousRequestHandler {
      * @return The resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleRead(ServerContext, ReadRequest)
+     * @see RequestHandler#handleRead(org.forgerock.http.Context, ReadRequest)
      */
-    ResourceResponse handleRead(ServerContext context, ReadRequest request) throws ResourceException;
+    ResourceResponse handleRead(Context context, ReadRequest request) throws ResourceException;
 
     /**
      * Updates a JSON resource by replacing its existing content with new
@@ -145,7 +144,7 @@ public interface SynchronousRequestHandler {
      * @return The updated resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
+     * @see RequestHandler#handleUpdate(org.forgerock.http.Context, UpdateRequest)
      */
-    ResourceResponse handleUpdate(ServerContext context, UpdateRequest request) throws ResourceException;
+    ResourceResponse handleUpdate(Context context, UpdateRequest request) throws ResourceException;
 }

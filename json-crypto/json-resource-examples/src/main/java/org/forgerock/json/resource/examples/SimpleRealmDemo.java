@@ -23,8 +23,8 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.Collections;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
@@ -76,7 +76,7 @@ public final class SimpleRealmDemo {
     private static RequestHandler simpleRouter() {
         return new AbstractRequestHandler() {
             @Override
-            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
                     final ReadRequest request) {
                 final ResourcePath name = request.getResourcePathObject();
                 final int size = name.size();

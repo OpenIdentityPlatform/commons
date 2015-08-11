@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
 
 /**
  * A completion handler for consuming the results of a query request.
@@ -49,7 +48,7 @@ public interface QueryResourceHandler {
      * this method will be invoked 10 times, once for each matching resource.
      *
      * <p>Refer to
-     * {@link RequestHandler#handleQuery(ServerContext, QueryRequest, QueryResourceHandler)}
+     * {@link RequestHandler#handleQuery(org.forgerock.http.Context, QueryRequest, QueryResourceHandler)}
      * for information regarding the concurrency and the order in which events
      * are processed.</p>
      *

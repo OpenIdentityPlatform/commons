@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 
 /**
  * A condition which controls whether or not a filter will be invoked or not.
@@ -36,5 +36,5 @@ public interface FilterCondition {
      *            The request to be filtered.
      * @return {@code true} if the conditional filter should be invoked.
      */
-    boolean matches(ServerContext context, Request request);
+    boolean matches(Context context, Request request);
 }

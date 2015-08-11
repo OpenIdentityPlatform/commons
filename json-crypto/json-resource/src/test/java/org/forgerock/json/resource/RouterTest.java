@@ -32,7 +32,6 @@ import java.util.Collections;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.RouterContext;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeClass;
@@ -82,11 +81,11 @@ public class RouterTest {
         Router newRouter = new Router(router);
 
         //Then
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ReadRequest request = mockRequest(ReadRequest.class, requestUri);
         newRouter.handleRead(context, request);
 
-        verify(expectedHandler).handleRead(any(ServerContext.class), any(ReadRequest.class));
+        verify(expectedHandler).handleRead(any(Context.class), any(ReadRequest.class));
     }
 
     @Test
@@ -94,7 +93,7 @@ public class RouterTest {
 
         //Given
         CollectionResourceProvider provider = mock(CollectionResourceProvider.class);
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ReadRequest request = mockRequest(ReadRequest.class, "users/demo");
 
         //When
@@ -102,7 +101,7 @@ public class RouterTest {
 
         //Then
         router.handleRead(context, request);
-        verify(provider).readInstance(any(ServerContext.class), anyString(), any(ReadRequest.class));
+        verify(provider).readInstance(any(Context.class), anyString(), any(ReadRequest.class));
     }
 
     @Test
@@ -110,7 +109,7 @@ public class RouterTest {
 
         //Given
         SingletonResourceProvider provider = mock(SingletonResourceProvider.class);
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ReadRequest request = mockRequest(ReadRequest.class, "config");
 
         //When
@@ -118,7 +117,7 @@ public class RouterTest {
 
         //Then
         router.handleRead(context, request);
-        verify(provider).readInstance(any(ServerContext.class), any(ReadRequest.class));
+        verify(provider).readInstance(any(Context.class), any(ReadRequest.class));
     }
 
     @DataProvider
@@ -134,7 +133,7 @@ public class RouterTest {
 
         //Given
         RequestHandler defaultRouteHandler = mock(RequestHandler.class);
-        ServerContext context = newRouterContext(mock(ServerContext.class), remainingUri);
+        Context context = newRouterContext(mock(Context.class), remainingUri);
         ActionRequest request = mock(ActionRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -145,9 +144,9 @@ public class RouterTest {
 
         //Then
         if (expectedRequestToBeCopied) {
-            verify(defaultRouteHandler).handleAction(any(ServerContext.class), any(ActionRequest.class));
+            verify(defaultRouteHandler).handleAction(any(Context.class), any(ActionRequest.class));
         } else {
-            verify(defaultRouteHandler).handleAction(any(ServerContext.class), eq(request));
+            verify(defaultRouteHandler).handleAction(any(Context.class), eq(request));
         }
     }
 
@@ -156,7 +155,7 @@ public class RouterTest {
 
         //Given
         RequestHandler defaultRouteHandler = mock(RequestHandler.class);
-        ServerContext context = newRouterContext(mock(ServerContext.class), remainingUri);
+        Context context = newRouterContext(mock(Context.class), remainingUri);
         CreateRequest request = mock(CreateRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -167,9 +166,9 @@ public class RouterTest {
 
         //Then
         if (expectedRequestToBeCopied) {
-            verify(defaultRouteHandler).handleCreate(any(ServerContext.class), any(CreateRequest.class));
+            verify(defaultRouteHandler).handleCreate(any(Context.class), any(CreateRequest.class));
         } else {
-            verify(defaultRouteHandler).handleCreate(any(ServerContext.class), eq(request));
+            verify(defaultRouteHandler).handleCreate(any(Context.class), eq(request));
         }
     }
 
@@ -178,7 +177,7 @@ public class RouterTest {
 
         //Given
         RequestHandler defaultRouteHandler = mock(RequestHandler.class);
-        ServerContext context = newRouterContext(mock(ServerContext.class), remainingUri);
+        Context context = newRouterContext(mock(Context.class), remainingUri);
         DeleteRequest request = mock(DeleteRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -189,9 +188,9 @@ public class RouterTest {
 
         //Then
         if (expectedRequestToBeCopied) {
-            verify(defaultRouteHandler).handleDelete(any(ServerContext.class), any(DeleteRequest.class));
+            verify(defaultRouteHandler).handleDelete(any(Context.class), any(DeleteRequest.class));
         } else {
-            verify(defaultRouteHandler).handleDelete(any(ServerContext.class), eq(request));
+            verify(defaultRouteHandler).handleDelete(any(Context.class), eq(request));
         }
     }
 
@@ -200,7 +199,7 @@ public class RouterTest {
 
         //Given
         RequestHandler defaultRouteHandler = mock(RequestHandler.class);
-        ServerContext context = newRouterContext(mock(ServerContext.class), remainingUri);
+        Context context = newRouterContext(mock(Context.class), remainingUri);
         PatchRequest request = mock(PatchRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -211,9 +210,9 @@ public class RouterTest {
 
         //Then
         if (expectedRequestToBeCopied) {
-            verify(defaultRouteHandler).handlePatch(any(ServerContext.class), any(PatchRequest.class));
+            verify(defaultRouteHandler).handlePatch(any(Context.class), any(PatchRequest.class));
         } else {
-            verify(defaultRouteHandler).handlePatch(any(ServerContext.class), eq(request));
+            verify(defaultRouteHandler).handlePatch(any(Context.class), eq(request));
         }
     }
 
@@ -222,7 +221,7 @@ public class RouterTest {
 
         //Given
         RequestHandler defaultRouteHandler = mock(RequestHandler.class);
-        ServerContext context = newRouterContext(mock(ServerContext.class), remainingUri);
+        Context context = newRouterContext(mock(Context.class), remainingUri);
         QueryRequest request = mock(QueryRequest.class);
         QueryResourceHandler resourceHandler = mock(QueryResourceHandler.class);
 
@@ -234,10 +233,10 @@ public class RouterTest {
 
         //Then
         if (expectedRequestToBeCopied) {
-            verify(defaultRouteHandler).handleQuery(any(ServerContext.class), any(QueryRequest.class),
+            verify(defaultRouteHandler).handleQuery(any(Context.class), any(QueryRequest.class),
                     any(QueryResourceHandler.class));
         } else {
-            verify(defaultRouteHandler).handleQuery(any(ServerContext.class), eq(request),
+            verify(defaultRouteHandler).handleQuery(any(Context.class), eq(request),
                     any(QueryResourceHandler.class));
         }
     }
@@ -247,7 +246,7 @@ public class RouterTest {
 
         //Given
         RequestHandler defaultRouteHandler = mock(RequestHandler.class);
-        ServerContext context = newRouterContext(mock(ServerContext.class), remainingUri);
+        Context context = newRouterContext(mock(Context.class), remainingUri);
         ReadRequest request = mock(ReadRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -258,9 +257,9 @@ public class RouterTest {
 
         //Then
         if (expectedRequestToBeCopied) {
-            verify(defaultRouteHandler).handleRead(any(ServerContext.class), any(ReadRequest.class));
+            verify(defaultRouteHandler).handleRead(any(Context.class), any(ReadRequest.class));
         } else {
-            verify(defaultRouteHandler).handleRead(any(ServerContext.class), eq(request));
+            verify(defaultRouteHandler).handleRead(any(Context.class), eq(request));
         }
     }
 
@@ -269,7 +268,7 @@ public class RouterTest {
 
         //Given
         RequestHandler defaultRouteHandler = mock(RequestHandler.class);
-        ServerContext context = newRouterContext(mock(ServerContext.class), remainingUri);
+        Context context = newRouterContext(mock(Context.class), remainingUri);
         UpdateRequest request = mock(UpdateRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -280,9 +279,9 @@ public class RouterTest {
 
         //Then
         if (expectedRequestToBeCopied) {
-            verify(defaultRouteHandler).handleUpdate(any(ServerContext.class), any(UpdateRequest.class));
+            verify(defaultRouteHandler).handleUpdate(any(Context.class), any(UpdateRequest.class));
         } else {
-            verify(defaultRouteHandler).handleUpdate(any(ServerContext.class), eq(request));
+            verify(defaultRouteHandler).handleUpdate(any(Context.class), eq(request));
         }
     }
 
@@ -290,7 +289,7 @@ public class RouterTest {
     public void handleCreateShouldReturn404ResponseExceptionIfNoRouteFound() {
 
         //Given
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         CreateRequest request = mock(CreateRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -313,7 +312,7 @@ public class RouterTest {
     public void handleReadShouldReturn404ResponseExceptionIfNoRouteFound() {
 
         //Given
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ReadRequest request = mock(ReadRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -336,7 +335,7 @@ public class RouterTest {
     public void handleUpdateShouldReturn404ResponseExceptionIfNoRouteFound() {
 
         //Given
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         UpdateRequest request = mock(UpdateRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -359,7 +358,7 @@ public class RouterTest {
     public void handleDeleteShouldReturn404ResponseExceptionIfNoRouteFound() {
 
         //Given
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         DeleteRequest request = mock(DeleteRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -382,7 +381,7 @@ public class RouterTest {
     public void handlePatchShouldReturn404ResponseExceptionIfNoRouteFound() {
 
         //Given
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         PatchRequest request = mock(PatchRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -405,7 +404,7 @@ public class RouterTest {
     public void handleActionShouldReturn404ResponseExceptionIfNoRouteFound() {
 
         //Given
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ActionRequest request = mock(ActionRequest.class);
 
         given(request.getResourcePath()).willReturn("users/demo");
@@ -428,7 +427,7 @@ public class RouterTest {
     public void handleQueryShouldReturn404ResponseExceptionIfNoRouteFound() {
 
         //Given
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         QueryRequest request = mock(QueryRequest.class);
         QueryResourceHandler resultHandler = mock(QueryResourceHandler.class);
 
@@ -448,7 +447,7 @@ public class RouterTest {
         }
     }
 
-    private ServerContext newRouterContext(Context parentContext, String remainingUri) {
+    private Context newRouterContext(Context parentContext, String remainingUri) {
         return new RouterContext(parentContext, "MATCHED_URI", remainingUri, Collections.<String, String>emptyMap());
     }
 

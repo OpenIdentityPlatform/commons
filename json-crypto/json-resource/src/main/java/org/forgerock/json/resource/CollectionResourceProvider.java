@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -51,7 +51,7 @@ public interface CollectionResourceProvider {
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(ServerContext, ActionRequest) action}
+     * {@link RequestHandler#handleAction(Context, ActionRequest) action}
      * against the resource collection.
      *
      * @param context
@@ -59,13 +59,13 @@ public interface CollectionResourceProvider {
      * @param request
      *            The action request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleAction(ServerContext, ActionRequest)
+     * @see RequestHandler#handleAction(Context, ActionRequest)
      */
-    Promise<ActionResponse, ResourceException> actionCollection(ServerContext context, ActionRequest request);
+    Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request);
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(ServerContext, ActionRequest)
+     * {@link RequestHandler#handleAction(Context, ActionRequest)
      * action} against a resource within the collection.
      *
      * @param context
@@ -75,13 +75,13 @@ public interface CollectionResourceProvider {
      * @param request
      *            The action request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleAction(ServerContext, ActionRequest)
+     * @see RequestHandler#handleAction(Context, ActionRequest)
      */
-    Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, String resourceId,
+    Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
             ActionRequest request);
 
     /**
-     * {@link RequestHandler#handleCreate(ServerContext, CreateRequest)
+     * {@link RequestHandler#handleCreate(org.forgerock.http.Context, CreateRequest)
      * Adds} a new resource instance to the collection.
      * <p>
      * Create requests are targeted at the collection itself and may include a
@@ -94,13 +94,13 @@ public interface CollectionResourceProvider {
      * @param request
      *            The create request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleCreate(ServerContext, CreateRequest)
+     * @see RequestHandler#handleCreate(org.forgerock.http.Context, CreateRequest)
      * @see CreateRequest#getNewResourceId()
      */
-    Promise<ResourceResponse, ResourceException> createInstance(ServerContext context, CreateRequest request);
+    Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request);
 
     /**
-     * {@link RequestHandler#handleDelete(ServerContext, DeleteRequest)
+     * {@link RequestHandler#handleDelete(org.forgerock.http.Context, DeleteRequest)
      * Removes} a resource instance from the collection.
      *
      * @param context
@@ -110,13 +110,13 @@ public interface CollectionResourceProvider {
      * @param request
      *            The delete request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleDelete(ServerContext, DeleteRequest)
+     * @see RequestHandler#handleDelete(org.forgerock.http.Context, DeleteRequest)
      */
-    Promise<ResourceResponse, ResourceException> deleteInstance(ServerContext context, String resourceId,
+    Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId,
             DeleteRequest request);
 
     /**
-     * {@link RequestHandler#handlePatch(ServerContext, PatchRequest)
+     * {@link RequestHandler#handlePatch(org.forgerock.http.Context, PatchRequest)
      * Patches} an existing resource within the collection.
      *
      * @param context
@@ -126,18 +126,18 @@ public interface CollectionResourceProvider {
      * @param request
      *            The patch request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
+     * @see RequestHandler#handlePatch(org.forgerock.http.Context, PatchRequest)
      */
-    Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, String resourceId,
+    Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId,
             PatchRequest request);
 
     /**
-     * {@link RequestHandler#handleQuery(ServerContext, QueryRequest, QueryResourceHandler)
+     * {@link RequestHandler#handleQuery(org.forgerock.http.Context, QueryRequest, QueryResourceHandler)
      * Searches} the collection for all resources which match the query request
      * criteria.
      * <p>
      * Implementations must invoke
-     * {@link QueryResourceHandler#handleResource(Resource)} for each resource
+     * {@link QueryResourceHandler#handleResource(ResourceResponse)} for each resource
      * which matches the query criteria. Once all matching resources have been
      * returned implementations are required to return either a
      * {@link QueryResponse} if the query has completed successfully, or
@@ -152,14 +152,13 @@ public interface CollectionResourceProvider {
      *            The query resource handler to be notified for each matching
      *            resource.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleQuery(ServerContext, QueryRequest,
-     *      QueryResourceHandler)
+     * @see RequestHandler#handleQuery(org.forgerock.http.Context, QueryRequest, QueryResourceHandler)
      */
-    Promise<QueryResponse, ResourceException> queryCollection(ServerContext context, QueryRequest request,
+    Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest request,
             QueryResourceHandler handler);
 
     /**
-     * {@link RequestHandler#handleRead(ServerContext, ReadRequest)
+     * {@link RequestHandler#handleRead(org.forgerock.http.Context, ReadRequest)
      * Reads} an existing resource within the collection.
      *
      * @param context
@@ -169,13 +168,13 @@ public interface CollectionResourceProvider {
      * @param request
      *            The read request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleRead(ServerContext, ReadRequest)
+     * @see RequestHandler#handleRead(org.forgerock.http.Context, ReadRequest)
      */
-    Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, String resourceId,
+    Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId,
             ReadRequest request);
 
     /**
-     * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest)
+     * {@link RequestHandler#handleUpdate(org.forgerock.http.Context, UpdateRequest)
      * Updates} an existing resource within the collection.
      *
      * @param context
@@ -185,8 +184,8 @@ public interface CollectionResourceProvider {
      * @param request
      *            The update request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
+     * @see RequestHandler#handleUpdate(org.forgerock.http.Context, UpdateRequest)
      */
-    Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, String resourceId,
+    Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId,
             UpdateRequest request);
 }
