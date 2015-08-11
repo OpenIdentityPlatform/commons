@@ -32,6 +32,62 @@ public class EmailStageConfig implements StageConfig {
     public static final StageType<EmailStageConfig> TYPE =
             StageType.valueOf("emailValidation", EmailStageConfig.class);
 
+    private String identityServiceUrl;
+    private String identityIdField;
+    private String identityEmailField;
+
+    private String emailServiceUrl;
+    private String emailSubject;
+    private String emailMessage;
+
+    public String getIdentityServiceUrl() {
+        return identityServiceUrl;
+    }
+
+    public void setIdentityServiceUrl(String identityServiceUrl) {
+        this.identityServiceUrl = identityServiceUrl;
+    }
+
+    public String getIdentityIdField() {
+        return identityIdField;
+    }
+
+    public void setIdentityIdField(String identityIdField) {
+        this.identityIdField = identityIdField;
+    }
+
+    public String getIdentityEmailField() {
+        return identityEmailField;
+    }
+
+    public void setIdentityEmailField(String identityEmailField) {
+        this.identityEmailField = identityEmailField;
+    }
+
+    public String getEmailServiceUrl() {
+        return emailServiceUrl;
+    }
+
+    public void setEmailServiceUrl(String emailServiceUrl) {
+        this.emailServiceUrl = emailServiceUrl;
+    }
+
+    public String getEmailSubject() {
+        return emailSubject;
+    }
+
+    public void setEmailSubject(String emailSubject) {
+        this.emailSubject = emailSubject;
+    }
+
+    public String getEmailMessage() {
+        return emailMessage;
+    }
+
+    public void setEmailMessage(String emailMessage) {
+        this.emailMessage = emailMessage;
+    }
+
     @Override
     public StageType<?> getStageType() {
         return TYPE;

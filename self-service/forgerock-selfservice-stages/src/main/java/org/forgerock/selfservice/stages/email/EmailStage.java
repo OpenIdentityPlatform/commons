@@ -18,15 +18,29 @@ package org.forgerock.selfservice.stages.email;
 
 import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
 
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.StageType;
 import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
+import org.forgerock.selfservice.core.exceptions.StageConfigException;
 import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.util.query.QueryFilter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Email stage.
@@ -36,6 +50,12 @@ import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 public class EmailStage implements ProgressStage<EmailStageConfig> {
 
     private static final String VALIDATE_LINK_TAG = "validateLinkTag";
+
+    private final ConnectionFactory connectionFactory;
+
+    public EmailStage(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context, EmailStageConfig config) {
@@ -59,6 +79,7 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
     }
 
     private StageResponse sendEmail(ProcessContext context,
+                                    EmailStageConfig config,
                                     SnapshotAuthor snapshotAuthor) throws IllegalInputException {
         String emailAddress = context
                 .getInput()
@@ -68,6 +89,10 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
         if (emailAddress == null || emailAddress.isEmpty()) {
             throw new IllegalInputException("mail is missing");
         }
+
+        JsonValue user = findUser(emailAddress, config);
+
+        System.out.println(user);
 
         context = ProcessContext
                 .newBuilder(context)
@@ -104,6 +129,37 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
         return StageResponse
                 .newBuilder()
                 .build();
+    }
+
+    private JsonValue findUser(String identifier, EmailStageConfig config) {
+        try {
+            Connection connection = connectionFactory.getConnection();
+
+            QueryRequest request = Requests.newQueryRequest("/user");
+            request.setQueryFilter(
+                    QueryFilter.or(
+                            QueryFilter.equalTo(new JsonPointer("userId"), "fred"),
+                            QueryFilter.equalTo(new JsonPointer("mail"), "a@b.com")));
+
+            final List<JsonValue> user = new ArrayList<>();
+            connection.query(new RootContext(), request, new QueryResourceHandler() {
+
+                @Override
+                public boolean handleResource(ResourceResponse resourceResponse) {
+                    user.add(resourceResponse.getContent());
+                    return true;
+                }
+
+            });
+
+            if (user.size() > 1) {
+                throw new StageConfigException("More than one user identified");
+            }
+
+            return user.isEmpty() ? null : user.get(0);
+        } catch (ResourceException rE) {
+            throw new StageConfigException(rE.getMessage());
+        }
     }
 
     @Override

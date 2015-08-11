@@ -16,9 +16,21 @@
 
 package org.forgerock.selfservice.example;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.json.resource.Resources.newInternalConnection;
+import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.selfservice.core.config.ProcessInstanceConfig.StorageType;
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
 
+import org.forgerock.http.context.RootContext;
+import org.forgerock.http.routing.RouterContext;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.stages.email.EmailStageConfig;
@@ -45,12 +57,25 @@ public final class BasicHttpApplication implements HttpApplication {
 
     @Override
     public Handler start() throws HttpApplicationException {
-        Router router = new Router();
-        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/reset"), initialiseHandler());
-        return router;
+        try {
+            Router router = new Router();
+            router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/reset"), initialiseHandler());
+            return router;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private Handler initialiseHandler() {
+    private Handler initialiseHandler() throws Exception {
+        MemoryBackend userStore = new MemoryBackend();
+        org.forgerock.json.resource.Router router = new org.forgerock.json.resource.Router();
+        router.addRoute("users", userStore);
+
+        // Create a demo user.
+        ConnectionFactory connectionFactory = newInternalConnectionFactory(router);
+        Connection connection = connectionFactory.getConnection();
+        connection.create(new RootContext(), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 0)));
+
         ProcessInstanceConfig config = ProcessInstanceConfig
                 .newBuilder()
                 .addStageConfig(new EmailStageConfig())
@@ -61,10 +86,15 @@ public final class BasicHttpApplication implements HttpApplication {
 
         byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(Charset.forName("UTF-8"));
 
-        RequestHandler userSelfServiceService = new AnonymousProcessService(config, new BasicProgressStageFactory(),
-                new BasicSnapshotTokenHandlerFactory(sharedKey), new BasicLocalStorage());
+        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
+                new BasicProgressStageFactory(connectionFactory), new BasicSnapshotTokenHandlerFactory(sharedKey), new BasicLocalStorage());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
+    }
+
+    static JsonValue userAliceWithIdAndRev(final int id, final int rev) {
+        return json(object(field("name", "alice"), field("age", 20), field("role", "sales"), field(
+                "_id", String.valueOf(id)), field("_rev", String.valueOf(rev))));
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package org.forgerock.selfservice.example;
 
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageFactory;
 import org.forgerock.selfservice.core.StageType;
@@ -37,9 +38,9 @@ public final class BasicProgressStageFactory implements ProgressStageFactory {
     /**
      * Creates a new basic progress stage factory.
      */
-    public BasicProgressStageFactory() {
+    public BasicProgressStageFactory(ConnectionFactory connectionFactory) {
         progressStages = new HashMap<>();
-        progressStages.put(EmailStageConfig.TYPE, new EmailStage());
+        progressStages.put(EmailStageConfig.TYPE, new EmailStage(connectionFactory));
         progressStages.put(ResetConfig.TYPE, new ResetStage());
     }
 
