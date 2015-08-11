@@ -22,8 +22,6 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
-import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.Test;
 

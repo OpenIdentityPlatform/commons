@@ -19,13 +19,10 @@ package org.forgerock.audit;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.json.JsonValue.*;
-import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -35,7 +32,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -45,7 +41,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -129,7 +125,7 @@ public class AuditServiceTest {
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
+                auditService.handleCreate(new RootContext(), createRequest);
 
         //then
         assertThat(auditService.isAuditing("access")).isTrue();
@@ -137,7 +133,7 @@ public class AuditServiceTest {
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
-        // TODO-brmiller should use AssertJResourceAssert
+        // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
@@ -151,7 +147,7 @@ public class AuditServiceTest {
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
+                auditService.handleCreate(new RootContext(), createRequest);
 
         //then
         assertThat(auditService.isAuditing("activity")).isFalse();
@@ -159,7 +155,7 @@ public class AuditServiceTest {
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
-        // TODO-brmiller should use AssertJResourceAssert
+        // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
@@ -174,7 +170,7 @@ public class AuditServiceTest {
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
+                auditService.handleCreate(new RootContext(), createRequest);
 
         //then
         assertThat(auditService.isAuditing("unknownTopic")).isFalse();
@@ -196,7 +192,7 @@ public class AuditServiceTest {
 
         final ReadRequest readRequest = Requests.newReadRequest("access", "1234");
         ResultHandler<ResourceResponse> readResultHandler = mockResultHandler(ResourceResponse.class, "readResultHandler");
-        ServerContext context = new ServerContext(new RootContext());
+        Context context = new RootContext();
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
@@ -216,7 +212,7 @@ public class AuditServiceTest {
         //when
         Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleDelete(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         Requests.newDeleteRequest("_id"));
 
         //then
@@ -231,7 +227,7 @@ public class AuditServiceTest {
         //when
         Promise<ResourceResponse, ResourceException> promise =
                 auditService.handlePatch(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         Requests.newPatchRequest("_id"));
 
         //then
@@ -246,7 +242,7 @@ public class AuditServiceTest {
         //when
         Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleUpdate(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         Requests.newUpdateRequest("_id", new JsonValue(new HashMap<String, Object>())));
 
         //then
@@ -261,7 +257,7 @@ public class AuditServiceTest {
         //when
         Promise<ActionResponse, ResourceException> promise =
                 auditService.handleAction(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         Requests.newActionRequest("_id", "unknownAction"));
 
         //then
@@ -276,18 +272,18 @@ public class AuditServiceTest {
         final Promise<QueryResponse, ResourceException> emptyPromise = Promises.newResultPromise(Responses.newQueryResponse());
         auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
         when(auditEventHandler.queryCollection(
-                any(ServerContext.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
+                any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
             .thenReturn(emptyPromise);
 
         //when
         Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(
-                new ServerContext(new RootContext()),
+                new RootContext(),
                 Requests.newQueryRequest("access"),
                 mock(QueryResourceHandler.class));
 
         //then
         verify(auditEventHandler).queryCollection(
-                any(ServerContext.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+                any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
         AssertJPromiseAssert.assertThat(promise).isSameAs(emptyPromise);
     }
 
@@ -303,7 +299,7 @@ public class AuditServiceTest {
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
+                auditService.handleCreate(new RootContext(), createRequest);
 
         //then
         AssertJPromiseAssert.assertThat(promise).failedWithException()
@@ -326,7 +322,7 @@ public class AuditServiceTest {
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                auditService.handleCreate(new ServerContext(new RootContext()), createRequest);
+                auditService.handleCreate(new RootContext(), createRequest);
 
         //then
         AssertJPromiseAssert.assertThat(promise).failedWithException()
@@ -348,14 +344,14 @@ public class AuditServiceTest {
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                auditService.handleCreate(new ServerContext(new RootContext()), createRequestAccess);
+                auditService.handleCreate(new RootContext(), createRequestAccess);
 
         //then
         AssertJPromiseAssert.assertThat(promise).succeeded()
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
-        // TODO-brmiller should use AssertJResourceAssert
+        // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequestAccess.getContent().asMap());

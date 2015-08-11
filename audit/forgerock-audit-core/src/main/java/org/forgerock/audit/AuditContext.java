@@ -15,15 +15,15 @@
  */
 package org.forgerock.audit;
 
+import org.forgerock.http.context.AbstractContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.http.Context;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.http.context.ServerContext;
 
 /**
- * A ServerContext used when auditing over the router.
+ * A Context used when auditing over the router.
  */
-public class AuditContext extends ServerContext {
+public class AuditContext extends AbstractContext {
     public AuditContext(final Context parent) {
         super(parent, "audit");
     }

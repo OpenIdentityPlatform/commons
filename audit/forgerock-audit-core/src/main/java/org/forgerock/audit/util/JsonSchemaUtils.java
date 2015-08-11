@@ -16,13 +16,7 @@
 
 package org.forgerock.audit.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsonschema.JsonSchema;
-import org.forgerock.audit.AuditException;
-import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.JsonValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

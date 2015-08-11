@@ -40,7 +40,7 @@ import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.JsonSchemaUtils;
 import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -147,7 +147,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      */
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(
-            final ServerContext context,
+            final Context context,
             final ActionRequest request) {
         return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
@@ -158,7 +158,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      */
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(
-            final ServerContext context,
+            final Context context,
             final String resourceId,
             final ActionRequest request) {
         return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
@@ -170,7 +170,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      */
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(
-            final ServerContext context,
+            final Context context,
             final CreateRequest request) {
 
         try {
@@ -258,7 +258,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      */
     @Override
     public Promise<QueryResponse, ResourceException> queryCollection(
-            final ServerContext context,
+            final Context context,
             final QueryRequest request,
             final QueryResourceHandler handler) {
         try {
@@ -280,7 +280,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(
-            final ServerContext context,
+            final Context context,
             final String resourceId,
             final ReadRequest request) {
         try {

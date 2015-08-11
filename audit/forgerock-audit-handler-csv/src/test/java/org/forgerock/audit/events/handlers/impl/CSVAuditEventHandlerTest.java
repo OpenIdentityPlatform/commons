@@ -38,7 +38,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
@@ -65,14 +64,14 @@ public class CSVAuditEventHandlerTest {
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                csvHandler.createInstance(new ServerContext(new RootContext()), createRequest);
+                csvHandler.createInstance(new RootContext(), createRequest);
 
         //then
         AssertJPromiseAssert.assertThat(promise).succeeded()
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
-        // TODO-brmiller should use AssertJResourceAssert
+        // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
         assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
@@ -92,7 +91,7 @@ public class CSVAuditEventHandlerTest {
         //when
         Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.readInstance(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         readRequest.getResourcePathObject().tail(1).toString(),
                         readRequest);
 
@@ -101,7 +100,7 @@ public class CSVAuditEventHandlerTest {
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
-        // TODO-brmiller should use AssertJResourceAssert
+        // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertResourceEquals(resource, event);
     }
@@ -134,7 +133,7 @@ public class CSVAuditEventHandlerTest {
         //when
         Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.deleteInstance(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         "_id",
                         Requests.newDeleteRequest("access"));
 
@@ -153,7 +152,7 @@ public class CSVAuditEventHandlerTest {
         //when
         Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.patchInstance(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         "_id",
                         Requests.newPatchRequest("access"));
 
@@ -172,7 +171,7 @@ public class CSVAuditEventHandlerTest {
         //when
         Promise<ResourceResponse, ResourceException> promise =
                 csvHandler.updateInstance(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         "_id",
                         Requests.newUpdateRequest("access", new JsonValue(new HashMap<String, Object>())));
 
@@ -191,7 +190,7 @@ public class CSVAuditEventHandlerTest {
         //when
         Promise<ActionResponse, ResourceException> promise =
                 csvHandler.actionCollection(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         Requests.newActionRequest("access", "action"));
 
         //then
@@ -209,7 +208,7 @@ public class CSVAuditEventHandlerTest {
         //when
         Promise<ActionResponse, ResourceException> promise =
                 csvHandler.actionInstance(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         "_id",
                         Requests.newActionRequest("access", "action"));
 
@@ -235,7 +234,7 @@ public class CSVAuditEventHandlerTest {
         //when
         Promise<QueryResponse, ResourceException> promise =
                 csvHandler.queryCollection(
-                        new ServerContext(new RootContext()),
+                        new RootContext(),
                         queryRequest,
                         queryResourceHandler);
 
@@ -270,12 +269,12 @@ public class CSVAuditEventHandlerTest {
         final ArgumentCaptor<ResourceResponse> createArgument = ArgumentCaptor.forClass(ResourceResponse.class);
 
         Promise<ResourceResponse, ResourceException> promise =
-                auditEventHandler.createInstance(new ServerContext(new RootContext()), createRequest);
+                auditEventHandler.createInstance(new RootContext(), createRequest);
 
         AssertJPromiseAssert.assertThat(promise).succeeded()
                 .isInstanceOf(ResourceResponse.class);
 
-        // TODO-brmiller should use AssertJResourceAssert
+        // TODO should use AssertJResourceResponseAssert
         return promise.get();
     }
 
@@ -291,7 +290,7 @@ public class CSVAuditEventHandlerTest {
                         field("transactionId", "A10000")));
         CreateRequest createRequest = Requests.newCreateRequest("access", content);
 
-        csvHandler.createInstance(new ServerContext(new RootContext()), createRequest);
+        csvHandler.createInstance(new RootContext(), createRequest);
 
         String expectedContent = "\"_id\",\"timestamp\",\"transactionId\"\n" + "\"1\",\"123456\",\"A10000\"";
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);

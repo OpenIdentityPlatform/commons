@@ -20,7 +20,7 @@ import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -58,7 +58,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      */
     @Override
     public Promise<ResourceResponse, ResourceException> deleteInstance(
-            final ServerContext context,
+            final Context context,
             final String resourceId,
             final DeleteRequest request) {
         return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
@@ -69,7 +69,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      */
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(
-            final ServerContext context,
+            final Context context,
             final String resourceId,
             final PatchRequest request) {
         return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
@@ -80,7 +80,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
      */
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(
-            final ServerContext context,
+            final Context context,
             final String resourceId,
             final UpdateRequest request) {
         return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
