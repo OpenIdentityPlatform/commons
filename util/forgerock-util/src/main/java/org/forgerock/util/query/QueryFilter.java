@@ -499,6 +499,50 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Creates a new generic comparison filter using the provided field name,
+     * operator, and value assertion. When the provided operator name represents
+     * a core operator, e.g. "eq", then this method is equivalent to calling the
+     * equivalent constructor, e.g. {@link #equalTo(Object, Object)}.
+     * Otherwise, when the operator name does not correspond to a core operator,
+     * an extended comparison filter will be returned.
+     *
+     * @param field
+     *            The name of field within the JSON resource to be compared.
+     * @param operator
+     *            The operator to use for the comparison, which must be one of
+     *            the core operator names, or a string matching the regular
+     *            expression {@code [a-zA-Z_0-9.]+}.
+     * @param valueAssertion
+     *            The assertion value.
+     * @return The newly created generic comparison filter.
+     * @throws IllegalArgumentException
+     *             If {@code operator} is not a valid operator name.
+     */
+    public static <FF> QueryFilter<FF> comparisonFilter(final FF field, final String operator,
+            final Object valueAssertion) {
+        if (operator.equalsIgnoreCase("eq")) {
+            return QueryFilter.equalTo(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("gt")) {
+            return QueryFilter.greaterThan(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("ge")) {
+            return QueryFilter.greaterThanOrEqualTo(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("lt")) {
+            return QueryFilter.lessThan(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("le")) {
+            return QueryFilter.lessThanOrEqualTo(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("co")) {
+            return QueryFilter.contains(field, valueAssertion);
+        } else if (operator.equalsIgnoreCase("sw")) {
+            return QueryFilter.startsWith(field, valueAssertion);
+        } else if (operator.matches("[a-zA-Z_0-9.]+")) {
+            return new QueryFilter<>(new ExtendedMatchImpl<>(field, operator, valueAssertion));
+        } else {
+            throw new IllegalArgumentException("\"" + operator
+                    + "\" is not a valid filter operator");
+        }
+    }
+
+    /**
      * Creates a new {@code contains} filter using the provided field name and
      * value assertion. This method is used to check that the string representation
      * of the field contains the provided substring. When operating on a collection 
