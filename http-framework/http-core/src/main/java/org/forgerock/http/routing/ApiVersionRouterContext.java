@@ -19,7 +19,7 @@ package org.forgerock.http.routing;
 import static org.forgerock.http.routing.Version.version;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.context.AbstractContext;
 import org.forgerock.json.JsonValue;
 
 /**
@@ -34,7 +34,7 @@ import org.forgerock.json.JsonValue;
  *     <li>the API version of the resource that was routed to</li>
  * </ul>
  */
-public class ApiVersionRouterContext extends ServerContext {
+public class ApiVersionRouterContext extends AbstractContext {
 
     private static final String DEFAULT_VERSION_BEHAVIOUR = "defaultVersionBehaviour";
     private static final String WARNING_ENABLED = "warningEnabled";

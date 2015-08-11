@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.context.AbstractContext;
 import org.forgerock.json.JsonValue;
 
 /**
@@ -38,7 +38,7 @@ import org.forgerock.json.JsonValue;
  * template variable name.
  * </ul>
  */
-public final class RouterContext extends ServerContext {
+public final class RouterContext extends AbstractContext {
 
     // Persisted attribute names
     private static final String ATTR_MATCHED_URI = "matchedUri";
