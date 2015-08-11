@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -80,7 +80,7 @@ public interface RequestHandler {
      *            The action request.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request);
+    Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request);
 
     /**
      * Adds a new JSON resource, returning a {@code Promise} that will be
@@ -106,7 +106,7 @@ public interface RequestHandler {
      *            The create request.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> handleCreate(ServerContext context, CreateRequest request);
+    Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request);
 
     /**
      * Deletes a JSON resource, returning a {@code Promise} that will be
@@ -132,7 +132,7 @@ public interface RequestHandler {
      *            The delete request.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> handleDelete(ServerContext context, DeleteRequest request);
+    Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request);
 
     /**
      * Updates a JSON resource by applying a set of changes to its existing
@@ -162,7 +162,7 @@ public interface RequestHandler {
      *            The patch request.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> handlePatch(ServerContext context, PatchRequest request);
+    Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request);
 
     /**
      * Searches for all JSON resources matching a user specified set of
@@ -170,7 +170,7 @@ public interface RequestHandler {
      * search has completed.
      * <p>
      * Implementations must invoke
-     * {@link QueryResourceHandler#handleResource(Resource)} for each resource
+     * {@link QueryResourceHandler#handleResource(ResourceResponse)} for each resource
      * which matches the query criteria. Once all matching resources have been
      * returned implementations are required to return either a
      * {@link QueryResponse} if the query has completed successfully, or
@@ -197,7 +197,7 @@ public interface RequestHandler {
      *            resource.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<QueryResponse, ResourceException> handleQuery(ServerContext context, QueryRequest request,
+    Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
             QueryResourceHandler handler);
 
     /**
@@ -221,7 +221,7 @@ public interface RequestHandler {
      *            The read request.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request);
+    Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request);
 
     /**
      * Updates a JSON resource by replacing its existing content with new
@@ -249,5 +249,5 @@ public interface RequestHandler {
      *            The update request.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> handleUpdate(ServerContext context, UpdateRequest request);
+    Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request);
 }

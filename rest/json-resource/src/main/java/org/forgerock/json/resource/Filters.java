@@ -22,7 +22,7 @@ import java.util.EnumSet;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -44,7 +44,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<ActionResponse, ResourceException> filterAction(final ServerContext context,
+        public Promise<ActionResponse, ResourceException> filterAction(final Context context,
                 final ActionRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterAction(context, request, next);
@@ -54,7 +54,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> filterCreate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterCreate(final Context context,
                 final CreateRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterCreate(context, request, next);
@@ -64,7 +64,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> filterDelete(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterDelete(final Context context,
                 final DeleteRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterDelete(context, request, next);
@@ -74,7 +74,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> filterPatch(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterPatch(final Context context,
                 final PatchRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterPatch(context, request, next);
@@ -84,7 +84,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<QueryResponse, ResourceException> filterQuery(final ServerContext context,
+        public Promise<QueryResponse, ResourceException> filterQuery(final Context context,
                 final QueryRequest request, final QueryResourceHandler handler, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterQuery(context, request, handler, next);
@@ -94,7 +94,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> filterRead(final ServerContext context, final ReadRequest request,
+        public Promise<ResourceResponse, ResourceException> filterRead(final Context context, final ReadRequest request,
                 final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterRead(context, request, next);
@@ -104,7 +104,7 @@ public final class Filters {
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> filterUpdate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterUpdate(final Context context,
                 final UpdateRequest request, final RequestHandler next) {
             if (condition.matches(context, request)) {
                 return subFilter.filterUpdate(context, request, next);
@@ -125,7 +125,7 @@ public final class Filters {
     public static FilterCondition and(final Collection<FilterCondition> conditions) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final ServerContext context, final Request request) {
+            public boolean matches(final Context context, final Request request) {
                 for (final FilterCondition condition : conditions) {
                     if (!condition.matches(context, request)) {
                         return false;
@@ -187,7 +187,7 @@ public final class Filters {
     public static FilterCondition matchRequestType(final Set<RequestType> types) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final ServerContext context, final Request request) {
+            public boolean matches(final Context context, final Request request) {
                 return types.contains(request.getRequestType());
             }
         };
@@ -206,7 +206,7 @@ public final class Filters {
     public static FilterCondition matchResourcePath(final Pattern regex) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final ServerContext context, final Request request) {
+            public boolean matches(final Context context, final Request request) {
                 return regex.matcher(request.getResourcePath()).matches();
             }
         };
@@ -237,7 +237,7 @@ public final class Filters {
     public static FilterCondition not(final FilterCondition condition) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final ServerContext context, final Request request) {
+            public boolean matches(final Context context, final Request request) {
                 return !condition.matches(context, request);
             }
         };
@@ -254,7 +254,7 @@ public final class Filters {
     public static FilterCondition or(final Collection<FilterCondition> conditions) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final ServerContext context, final Request request) {
+            public boolean matches(final Context context, final Request request) {
                 for (final FilterCondition condition : conditions) {
                     if (condition.matches(context, request)) {
                         return true;

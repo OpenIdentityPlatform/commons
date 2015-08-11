@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -347,7 +347,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<ActionResponse, ResourceException> actionCollection(final ServerContext context,
+    public Promise<ActionResponse, ResourceException> actionCollection(final Context context,
             final ActionRequest request) {
         try {
             if (request.getAction().equals("clear")) {
@@ -372,7 +372,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(final ServerContext context, final String id,
+    public Promise<ActionResponse, ResourceException> actionInstance(final Context context, final String id,
             final ActionRequest request) {
         final ResourceException e =
                 new NotSupportedException("Actions are not supported for resource instances");
@@ -383,7 +383,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> createInstance(final ServerContext context,
+    public Promise<ResourceResponse, ResourceException> createInstance(final Context context,
             final CreateRequest request) {
         final JsonValue value = request.getContent();
         final String id = request.getNewResourceId();
@@ -424,7 +424,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> deleteInstance(final ServerContext context, final String id,
+    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String id,
             final DeleteRequest request) {
         final String rev = request.getRevision();
         try {
@@ -443,7 +443,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(final ServerContext context, final String id,
+    public Promise<ResourceResponse, ResourceException> patchInstance(final Context context, final String id,
             final PatchRequest request) {
         final String rev = request.getRevision();
         try {
@@ -525,7 +525,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResponse, ResourceException> queryCollection(final ServerContext context,
+    public Promise<QueryResponse, ResourceException> queryCollection(final Context context,
             final QueryRequest request, final QueryResourceHandler handler) {
         if (request.getQueryId() != null) {
             return newExceptionPromise(newNotSupportedException("Query by ID not supported"));
@@ -620,7 +620,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(final ServerContext context, final String id,
+    public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final String id,
             final ReadRequest request) {
         try {
             final ResourceResponse resource = resources.get(id);
@@ -638,7 +638,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> updateInstance(final ServerContext context, final String id,
+    public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String id,
             final UpdateRequest request) {
         final String rev = request.getRevision();
         try {

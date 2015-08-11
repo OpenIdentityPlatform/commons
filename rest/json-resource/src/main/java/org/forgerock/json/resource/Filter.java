@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -55,7 +55,7 @@ import org.forgerock.util.promise.Promise;
  * <pre>
  * public class AuthzFilter implements Filter {
  *
- *     public Promise&lt;Resource, ResourceException&gt; filterRead(final ServerContext context,
+ *     public Promise&lt;Resource, ResourceException&gt; filterRead(final Context context,
  *             final ReadRequest request, final RequestHandler next) {
  *         /*
  *          * Only forward the request if the request is allowed.
@@ -114,7 +114,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ActionResponse, ResourceException> filterAction(ServerContext context, ActionRequest request,
+    Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest request,
             RequestHandler next);
 
     /**
@@ -129,7 +129,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> filterCreate(ServerContext context, CreateRequest request,
+    Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest request,
             RequestHandler next);
 
     /**
@@ -144,7 +144,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> filterDelete(ServerContext context, DeleteRequest request,
+    Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest request,
             RequestHandler next);
 
     /**
@@ -159,14 +159,14 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> filterPatch(ServerContext context, PatchRequest request,
+    Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest request,
             RequestHandler next);
 
     /**
      * Filters a query request.
      * <p>
      * Implementations which return results directly rather than forwarding the
-     * request should invoke {@link QueryResourceHandler#handleResource(Resource)}
+     * request should invoke {@link QueryResourceHandler#handleResource(ResourceResponse)}
      * for each resource which matches the query criteria. Once all matching
      * resources have been returned implementations are required to return
      * either a {@link QueryResponse} if the query has completed successfully, or
@@ -184,7 +184,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<QueryResponse, ResourceException> filterQuery(ServerContext context, QueryRequest request,
+    Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest request,
             QueryResourceHandler handler, RequestHandler next);
 
     /**
@@ -199,7 +199,7 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> filterRead(ServerContext context, ReadRequest request,
+    Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest request,
             RequestHandler next);
 
     /**
@@ -214,6 +214,6 @@ public interface Filter {
      *            chain.
      * @return A {@code Promise} containing the result of the operation.
      */
-    Promise<ResourceResponse, ResourceException> filterUpdate(ServerContext context, UpdateRequest request,
+    Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest request,
             RequestHandler next);
 }

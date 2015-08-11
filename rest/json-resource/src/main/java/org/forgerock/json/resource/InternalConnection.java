@@ -17,7 +17,6 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.util.promise.Promise;
 
 final class InternalConnection extends AbstractAsynchronousConnection {
@@ -30,7 +29,7 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     @Override
     public Promise<ActionResponse, ResourceException> actionAsync(final Context context,
             final ActionRequest request) {
-        return requestHandler.handleAction(getServerContext(context), request);
+        return requestHandler.handleAction(context, request);
     }
 
     @Override
@@ -41,13 +40,13 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     @Override
     public Promise<ResourceResponse, ResourceException> createAsync(final Context context,
             final CreateRequest request) {
-        return requestHandler.handleCreate(getServerContext(context), request);
+        return requestHandler.handleCreate(context, request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> deleteAsync(final Context context,
             final DeleteRequest request) {
-        return requestHandler.handleDelete(getServerContext(context), request);
+        return requestHandler.handleDelete(context, request);
     }
 
     @Override
@@ -65,13 +64,13 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     @Override
     public Promise<ResourceResponse, ResourceException> patchAsync(final Context context,
             final PatchRequest request) {
-        return requestHandler.handlePatch(getServerContext(context), request);
+        return requestHandler.handlePatch(context, request);
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> queryAsync(final Context context,
             final QueryRequest request, final QueryResourceHandler handler) {
-        return requestHandler.handleQuery(getServerContext(context), request,
+        return requestHandler.handleQuery(context, request,
                 new QueryResourceHandler() {
                     @Override
                     public boolean handleResource(ResourceResponse resource) {
@@ -83,20 +82,12 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     @Override
     public Promise<ResourceResponse, ResourceException> readAsync(final Context context,
             final ReadRequest request) {
-        return requestHandler.handleRead(getServerContext(context), request);
+        return requestHandler.handleRead(context, request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateAsync(final Context context,
             final UpdateRequest request) {
-        return requestHandler.handleUpdate(getServerContext(context), request);
-    }
-
-    private ServerContext getServerContext(final Context context) {
-        if (context instanceof ServerContext) {
-            return (ServerContext) context;
-        } else {
-            return new ServerContext(context);
-        }
+        return requestHandler.handleUpdate(context, request);
     }
 }

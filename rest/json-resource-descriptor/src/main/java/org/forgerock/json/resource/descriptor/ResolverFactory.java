@@ -15,11 +15,11 @@
  */
 package org.forgerock.json.resource.descriptor;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.Request;
 
 public interface ResolverFactory {
 
-    Resolver createResolver(ServerContext context, Request request);
+    Resolver createResolver(Context context, Request request);
 
 }
