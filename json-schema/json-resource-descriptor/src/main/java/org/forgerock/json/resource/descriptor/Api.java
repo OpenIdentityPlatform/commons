@@ -33,8 +33,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -63,7 +63,7 @@ public final class Api {
     public static RequestHandler newApiDescriptorRequestHandler(final ApiDescriptor api) {
         return new AbstractRequestHandler() {
             @Override
-            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
                     final ReadRequest request) {
                 if (request.getResourcePathObject().isEmpty()) {
                     return newResultPromise(newResourceResponse(null, null, json(apiToJson(api))));
@@ -77,7 +77,7 @@ public final class Api {
     public static RequestHandler newApiDescriptorRequestHandler(final Collection<ApiDescriptor> apis) {
         return new AbstractRequestHandler() {
             @Override
-            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
                     final ReadRequest request) {
                 if (request.getResourcePathObject().isEmpty()) {
                     final List<Object> values = new ArrayList<>(apis.size());
@@ -97,7 +97,7 @@ public final class Api {
         return new RequestHandler() {
 
             @Override
-            public Promise<ActionResponse, ResourceException> handleAction(final ServerContext context,
+            public Promise<ActionResponse, ResourceException> handleAction(final Context context,
                     final ActionRequest request) {
                 final ActionRequest mutableCopy = copyOfActionRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
@@ -111,7 +111,7 @@ public final class Api {
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handleCreate(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
                     final CreateRequest request) {
                 final CreateRequest mutableCopy = copyOfCreateRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
@@ -125,7 +125,7 @@ public final class Api {
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handleDelete(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleDelete(final Context context,
                     final DeleteRequest request) {
                 final DeleteRequest mutableCopy = copyOfDeleteRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
@@ -139,7 +139,7 @@ public final class Api {
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handlePatch(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handlePatch(final Context context,
                     final PatchRequest request) {
                 final PatchRequest mutableCopy = copyOfPatchRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
@@ -153,7 +153,7 @@ public final class Api {
             }
 
             @Override
-            public Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
+            public Promise<QueryResponse, ResourceException> handleQuery(final Context context,
                     final QueryRequest request, final QueryResourceHandler handler) {
                 final QueryRequest mutableCopy = copyOfQueryRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
@@ -167,7 +167,7 @@ public final class Api {
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
                     final ReadRequest request) {
                 final ReadRequest mutableCopy = copyOfReadRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);
@@ -181,7 +181,7 @@ public final class Api {
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handleUpdate(final ServerContext context,
+            public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
                     final UpdateRequest request) {
                 final UpdateRequest mutableCopy = copyOfUpdateRequest(request);
                 final Resolver resolver = factory.createResolver(context, request);

@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * </ul>
  * The method may also take the following parameters:
  * <ul>
- *     <li>A {@link org.forgerock.json.resource.ServerContext} to be given the context.</li>
+ *     <li>A {@link org.forgerock.json.resource.Context} to be given the context.</li>
  * </ul>
  */
 @Retention(RetentionPolicy.RUNTIME)

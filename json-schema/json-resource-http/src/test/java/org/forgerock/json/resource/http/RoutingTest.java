@@ -38,7 +38,6 @@ import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Session;
 import org.forgerock.http.context.HttpRequestContext;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.WarningHeader;
@@ -286,18 +285,18 @@ public class RoutingTest {
                 Promises.newResultPromise(Responses.newQueryResponse());
 
         CollectionResourceProvider provider = mock(CollectionResourceProvider.class);
-        given(provider.createInstance(any(ServerContext.class), any(CreateRequest.class))).willReturn(resourcePromise);
-        given(provider.readInstance(any(ServerContext.class), anyString(), any(ReadRequest.class)))
+        given(provider.createInstance(any(Context.class), any(CreateRequest.class))).willReturn(resourcePromise);
+        given(provider.readInstance(any(Context.class), anyString(), any(ReadRequest.class)))
                 .willReturn(resourcePromise);
-        given(provider.updateInstance(any(ServerContext.class), anyString(), any(UpdateRequest.class)))
+        given(provider.updateInstance(any(Context.class), anyString(), any(UpdateRequest.class)))
                 .willReturn(resourcePromise);
-        given(provider.deleteInstance(any(ServerContext.class), anyString(), any(DeleteRequest.class)))
+        given(provider.deleteInstance(any(Context.class), anyString(), any(DeleteRequest.class)))
                 .willReturn(resourcePromise);
-        given(provider.patchInstance(any(ServerContext.class), anyString(), any(PatchRequest.class)))
+        given(provider.patchInstance(any(Context.class), anyString(), any(PatchRequest.class)))
                 .willReturn(resourcePromise);
-        given(provider.actionCollection(any(ServerContext.class), any(ActionRequest.class)))
+        given(provider.actionCollection(any(Context.class), any(ActionRequest.class)))
                 .willReturn(jsonValuePromise);
-        given(provider.actionInstance(any(ServerContext.class), anyString(), any(ActionRequest.class)))
+        given(provider.actionInstance(any(Context.class), anyString(), any(ActionRequest.class)))
                 .willReturn(jsonValuePromise);
         doAnswer(new Answer<Promise<QueryResponse, ResourceException>>() {
             @Override
@@ -310,7 +309,7 @@ public class RoutingTest {
                 return queryPromise;
             }
         }).when(provider)
-                .queryCollection(any(ServerContext.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+                .queryCollection(any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
         return provider;
     }
 

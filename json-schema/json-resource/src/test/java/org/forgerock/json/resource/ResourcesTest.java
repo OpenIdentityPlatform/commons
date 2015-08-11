@@ -34,8 +34,8 @@ import static org.mockito.Mockito.verify;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
+import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.annotations.Action;
@@ -200,7 +200,7 @@ public final class ResourcesTest {
         ReadRequest read = Requests.newReadRequest(resourcePath);
         connection.readAsync(new RootContext(), read);
         ArgumentCaptor<ReadRequest> captor = ArgumentCaptor.forClass(ReadRequest.class);
-        verify(collection).readInstance(any(ServerContext.class), eq(expectedId), captor.capture());
+        verify(collection).readInstance(any(Context.class), eq(expectedId), captor.capture());
         Assertions.assertThat(captor.getValue().getResourcePath()).isEqualTo("");
     }
 

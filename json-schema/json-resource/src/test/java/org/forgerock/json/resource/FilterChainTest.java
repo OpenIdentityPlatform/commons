@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
@@ -58,11 +58,11 @@ public final class FilterChainTest {
     public void testFilterCanInvokeMultipleSubRequests() {
         final RequestHandler target = target();
         final Filter filter1 = mock(Filter.class);
-        doAnswer(invoke(2)).when(filter1).filterRead(any(ServerContext.class),
+        doAnswer(invoke(2)).when(filter1).filterRead(any(Context.class),
                 any(ReadRequest.class), any(RequestHandler.class));
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final ReadRequest request = Requests.newReadRequest("read");
 
         // The handler will be invoked twice which is obviously unrealistic. In practice,
@@ -92,11 +92,11 @@ public final class FilterChainTest {
         final RequestHandler target = target();
         final Filter filter1 = mock(Filter.class);
         final ResourceException expectedError = new NotSupportedException();
-        given(filter1.filterRead(any(ServerContext.class), any(ReadRequest.class), any(RequestHandler.class)))
+        given(filter1.filterRead(any(Context.class), any(ReadRequest.class), any(RequestHandler.class)))
                 .willReturn(Promises.<ResourceResponse, ResourceException>newExceptionPromise(expectedError));
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final ReadRequest request = Requests.newReadRequest("read");
 
         Promise<ResourceResponse, ResourceException> promise = chain.handleRead(context, request);
@@ -111,11 +111,11 @@ public final class FilterChainTest {
     public void testFilterCanStopProcessingWithResult() {
         final RequestHandler target = target();
         final Filter filter1 = mock(Filter.class);
-        given(filter1.filterRead(any(ServerContext.class), any(ReadRequest.class), any(RequestHandler.class)))
+        given(filter1.filterRead(any(Context.class), any(ReadRequest.class), any(RequestHandler.class)))
                 .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final ReadRequest request = Requests.newReadRequest("read");
 
         Promise<ResourceResponse, ResourceException> promise = chain.handleRead(context, request);
@@ -132,7 +132,7 @@ public final class FilterChainTest {
         final Filter filter1 = filter();
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final ActionRequest request = Requests.newActionRequest("action", "test");
 
         // Test twice to ensure that no state is carried over.
@@ -152,7 +152,7 @@ public final class FilterChainTest {
         final Filter filter1 = filter();
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final CreateRequest request = Requests.newCreateRequest("create", JSON);
 
         // Test twice to ensure that no state is carried over.
@@ -172,7 +172,7 @@ public final class FilterChainTest {
         final Filter filter1 = filter();
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final DeleteRequest request = Requests.newDeleteRequest("delete");
 
         // Test twice to ensure that no state is carried over.
@@ -192,7 +192,7 @@ public final class FilterChainTest {
         final Filter filter1 = filter();
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final PatchRequest request = Requests.newPatchRequest("patch");
 
         // Test twice to ensure that no state is carried over.
@@ -212,7 +212,7 @@ public final class FilterChainTest {
         final Filter filter1 = filter();
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final QueryRequest request = Requests.newQueryRequest("query");
         final QueryResourceHandler handler = mock(QueryResourceHandler.class);
 
@@ -235,7 +235,7 @@ public final class FilterChainTest {
         final Filter filter1 = filter();
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final ReadRequest request = Requests.newReadRequest("read");
 
         // Test twice to ensure that no state is carried over.
@@ -255,7 +255,7 @@ public final class FilterChainTest {
         final Filter filter1 = filter();
         final Filter filter2 = filter();
         final FilterChain chain = new FilterChain(target, filter1, filter2);
-        final ServerContext context = context();
+        final Context context = context();
         final UpdateRequest request = Requests.newUpdateRequest("update", JSON);
 
         // Test twice to ensure that no state is carried over.
@@ -269,25 +269,25 @@ public final class FilterChainTest {
         }
     }
 
-    private ServerContext context() {
-        return new ServerContext(new RootContext());
+    private Context context() {
+        return new RootContext();
     }
 
     private Filter filter() {
         final Filter filter = mock(Filter.class);
-        doAnswer(invoke()).when(filter).filterAction(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterAction(any(Context.class),
                 any(ActionRequest.class), any(RequestHandler.class));
-        doAnswer(invoke()).when(filter).filterCreate(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterCreate(any(Context.class),
                 any(CreateRequest.class), any(RequestHandler.class));
-        doAnswer(invoke()).when(filter).filterDelete(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterDelete(any(Context.class),
                 any(DeleteRequest.class), any(RequestHandler.class));
-        doAnswer(invoke()).when(filter).filterPatch(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterPatch(any(Context.class),
                 any(PatchRequest.class), any(RequestHandler.class));
-        doAnswer(invoke()).when(filter).filterQuery(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterQuery(any(Context.class),
                 any(QueryRequest.class), any(QueryResourceHandler.class), any(RequestHandler.class));
-        doAnswer(invoke()).when(filter).filterRead(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterRead(any(Context.class),
                 any(ReadRequest.class), any(RequestHandler.class));
-        doAnswer(invoke()).when(filter).filterUpdate(any(ServerContext.class),
+        doAnswer(invoke()).when(filter).filterUpdate(any(Context.class),
                 any(UpdateRequest.class), any(RequestHandler.class));
         return filter;
     }
@@ -301,7 +301,7 @@ public final class FilterChainTest {
             @Override
             public Promise<R, ResourceException> answer(final InvocationOnMock invocation) throws Throwable {
                 final Object[] args = invocation.getArguments();
-                final ServerContext context = (ServerContext) args[0];
+                final Context context = (Context) args[0];
                 final Request request = (Request) args[1];
                 QueryResourceHandler handler = null;
                 final RequestHandler next;
@@ -350,19 +350,19 @@ public final class FilterChainTest {
 
     private RequestHandler target() {
         final RequestHandler target = mock(RequestHandler.class);
-        given(target.handleAction(any(ServerContext.class), any(ActionRequest.class)))
+        given(target.handleAction(any(Context.class), any(ActionRequest.class)))
                 .willReturn(Promises.<ActionResponse, ResourceException>newResultPromise(Responses.newActionResponse(JSON)));
-        given(target.handleCreate(any(ServerContext.class), any(CreateRequest.class)))
+        given(target.handleCreate(any(Context.class), any(CreateRequest.class)))
                 .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
-        given(target.handleDelete(any(ServerContext.class), any(DeleteRequest.class)))
+        given(target.handleDelete(any(Context.class), any(DeleteRequest.class)))
                 .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
-        given(target.handlePatch(any(ServerContext.class), any(PatchRequest.class)))
+        given(target.handlePatch(any(Context.class), any(PatchRequest.class)))
                 .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
-        given(target.handleQuery(any(ServerContext.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
+        given(target.handleQuery(any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
                 .willReturn(Promises.<QueryResponse, ResourceException>newResultPromise(QUERY_RESULT));
-        given(target.handleRead(any(ServerContext.class), any(ReadRequest.class)))
+        given(target.handleRead(any(Context.class), any(ReadRequest.class)))
                 .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
-        given(target.handleUpdate(any(ServerContext.class), any(UpdateRequest.class)))
+        given(target.handleUpdate(any(Context.class), any(UpdateRequest.class)))
                 .willReturn(Promises.<ResourceResponse, ResourceException>newResultPromise(RESOURCE));
         return target;
     }

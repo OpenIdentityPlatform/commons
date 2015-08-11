@@ -24,7 +24,7 @@ import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.json.resource.examples.DemoUtils.*;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -140,22 +140,22 @@ public final class VersionedResourcesDemo {
         return new SingletonResourceProvider() {
 
             @Override
-            public Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
+            public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
                 return backend.actionInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
+            public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
                 return backend.patchInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, ReadRequest request) {
+            public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
                 return backend.readInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
+            public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
                 return backend.updateInstance(context, "INSTANCE", request);
             }
         };
@@ -164,38 +164,38 @@ public final class VersionedResourcesDemo {
     private static RequestHandler handler(final MemoryBackend backend) {
         return new RequestHandler() {
             @Override
-            public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+            public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
                 return backend.actionInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
+            public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
                 return backend.createInstance(context, request);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
+            public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
                 return backend.deleteInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+            public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
                 return backend.patchInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<QueryResponse, ResourceException> handleQuery(ServerContext context, QueryRequest request,
+            public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
                     QueryResourceHandler handler) {
                 return backend.queryCollection(context, request, handler);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+            public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
                 return backend.readInstance(context, "INSTANCE", request);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+            public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
                 return backend.updateInstance(context, "INSTANCE", request);
             }
         };

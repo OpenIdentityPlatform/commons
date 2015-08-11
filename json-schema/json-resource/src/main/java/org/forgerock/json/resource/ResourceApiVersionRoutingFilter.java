@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.http.routing.ResourceApiVersionBehaviourManager;
 import org.forgerock.http.routing.ApiVersionRouterContext;
 import org.forgerock.http.routing.Version;
@@ -38,7 +38,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> filterAction(ServerContext context, ActionRequest request,
+    public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest request,
             RequestHandler next) {
         final ApiVersionRouterContext apiVersionRouterContext = createApiVersionRouterContext(context);
         return wrapWithApiVersionInfo(apiVersionRouterContext, request,
@@ -46,7 +46,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> filterCreate(ServerContext context, CreateRequest request,
+    public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest request,
             RequestHandler next) {
         final ApiVersionRouterContext apiVersionRouterContext = createApiVersionRouterContext(context);
         return wrapWithApiVersionInfo(apiVersionRouterContext, request,
@@ -54,7 +54,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> filterDelete(ServerContext context, DeleteRequest request,
+    public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest request,
             RequestHandler next) {
         final ApiVersionRouterContext apiVersionRouterContext = createApiVersionRouterContext(context);
         return wrapWithApiVersionInfo(apiVersionRouterContext, request,
@@ -62,7 +62,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> filterPatch(ServerContext context, PatchRequest request,
+    public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest request,
             RequestHandler next) {
         final ApiVersionRouterContext apiVersionRouterContext = createApiVersionRouterContext(context);
         return wrapWithApiVersionInfo(apiVersionRouterContext, request,
@@ -70,7 +70,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> filterQuery(ServerContext context, QueryRequest request,
+    public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest request,
             QueryResourceHandler handler, RequestHandler next) {
         final ApiVersionRouterContext apiVersionRouterContext = createApiVersionRouterContext(context);
         return wrapWithApiVersionInfo(apiVersionRouterContext, request,
@@ -78,7 +78,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> filterRead(ServerContext context, ReadRequest request,
+    public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest request,
             RequestHandler next) {
         final ApiVersionRouterContext apiVersionRouterContext = createApiVersionRouterContext(context);
         return wrapWithApiVersionInfo(apiVersionRouterContext, request,
@@ -86,7 +86,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> filterUpdate(ServerContext context, UpdateRequest request,
+    public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest request,
             RequestHandler next) {
         final ApiVersionRouterContext apiVersionRouterContext = createApiVersionRouterContext(context);
         return wrapWithApiVersionInfo(apiVersionRouterContext, request,

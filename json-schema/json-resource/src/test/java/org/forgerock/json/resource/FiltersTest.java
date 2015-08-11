@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.DataProvider;
@@ -93,7 +93,7 @@ public final class FiltersTest {
         final FilterCondition condition = c(false);
         final Filter conditionalFilter = Filters.conditionalFilter(condition, filter);
         final RequestHandler next = mock(RequestHandler.class);
-        final ServerContext context = mock(ServerContext.class);
+        final Context context = mock(Context.class);
         invokeFilter(context, type, conditionalFilter, null, next);
         // Filter should not have been invoked and next should have.
         verifyZeroInteractions(filter);
@@ -106,7 +106,7 @@ public final class FiltersTest {
         final FilterCondition condition = c(true);
         final Filter conditionalFilter = Filters.conditionalFilter(condition, filter);
         final RequestHandler next = mock(RequestHandler.class);
-        final ServerContext context = mock(ServerContext.class);
+        final Context context = mock(Context.class);
         invokeFilter(context, type, conditionalFilter, null, next);
         // Filter should have been invoked and next should not.
         invokeFilter(context, type, verify(filter), null, next);
@@ -183,7 +183,7 @@ public final class FiltersTest {
         return new FilterCondition() {
 
             @Override
-            public boolean matches(final ServerContext context, final Request request) {
+            public boolean matches(final Context context, final Request request) {
                 return value;
             }
 
@@ -203,7 +203,7 @@ public final class FiltersTest {
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
-    private <R> Promise<R, ResourceException> invokeFilter(final ServerContext context, final RequestType type,
+    private <R> Promise<R, ResourceException> invokeFilter(final Context context, final RequestType type,
             final Filter filter, final QueryResourceHandler handler, final RequestHandler next) {
         switch (type) {
             case ACTION:
@@ -225,7 +225,7 @@ public final class FiltersTest {
     }
 
     @SuppressWarnings({ "unchecked" })
-    private <R> Promise<R, ResourceException> invokeRequestHandler(final ServerContext context, final RequestType type,
+    private <R> Promise<R, ResourceException> invokeRequestHandler(final Context context, final RequestType type,
             final RequestHandler handler) {
         switch (type) {
             case ACTION:

@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.http.routing.RouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -262,7 +262,7 @@ public final class Resources {
         };
     }
 
-    static String idOf(final ServerContext context) {
+    static String idOf(final Context context) {
         return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
     }
 
@@ -277,9 +277,9 @@ public final class Resources {
 
     // Strips off the unwanted leaf routing context which was added when routing
     // requests to a collection.
-    static ServerContext parentOf(final ServerContext context) {
+    static Context parentOf(final Context context) {
         assert context instanceof RouterContext;
-        return (ServerContext) context.getParent();
+        return context.getParent();
     }
 
     // Prevent instantiation.

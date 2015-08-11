@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -24,16 +24,16 @@ import org.forgerock.util.promise.Promise;
  */
 class RequestHandlerUtils {
 
-    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, ServerContext context, Request request) {
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request request) {
         return method.invoke(context, request, null);
     }
 
-    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, ServerContext context, Request request,
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request request,
             QueryResourceHandler queryResourceHandler) {
         return method.invoke(context, request, queryResourceHandler, null);
     }
 
-    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, ServerContext context, Request request,
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request request,
             String id) {
         return method.invoke(context, request, id);
     }

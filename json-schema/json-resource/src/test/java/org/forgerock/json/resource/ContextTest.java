@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.routing.RouterContext;
-import org.forgerock.http.context.ServerContext;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -51,20 +50,9 @@ public final class ContextTest {
     }
 
     @Test
-    public void testNewServerContext() throws Exception {
-        final Context root = new RootContext("root-id");
-        final ServerContext context = new ServerContext(root);
-
-        assertThat(context.getParent()).isSameAs(root);
-        assertThat(context.getId()).isNotEmpty();
-        assertThat(context.isRootContext()).isFalse();
-        assertThat(context.getContextName()).isEqualTo("server");
-    }
-
-    @Test
     public void testContainsContext() throws Exception {
         final Context root = new RootContext("root-id");
-        final ServerContext context = new ServerContext(root);
+        final Context context = new InternalContext(root);
 
         assertThat(context.containsContext(RootContext.class)).isTrue();
         assertThat(context.containsContext(SecurityContext.class)).isFalse();
@@ -75,15 +63,14 @@ public final class ContextTest {
     @Test
     public void testAsContext() throws Exception {
         final Context root = new RootContext("root-id");
-        final InternalServerContext internal = new InternalServerContext(root);
-        final ServerContext server = new ServerContext(internal);
-        final RouterContext router = new RouterContext(server, "test", "", new HashMap<String, String>(0));
-        final InternalServerContext internal2 = new InternalServerContext(router);
+        final InternalContext internal = new InternalContext(root);
+        final RouterContext router = new RouterContext(internal, "test", "", new HashMap<String, String>(0));
+        final InternalContext internal2 = new InternalContext(router);
 
-        assertThat(server.asContext(RootContext.class)).isSameAs(root);
+        assertThat(router.asContext(RootContext.class)).isSameAs(root);
         assertThat(router.asContext(RouterContext.class)).isSameAs(router);
-        assertThat(router.asContext(ServerContext.class)).isSameAs(router);
-        assertThat(router.getParent().asContext(ServerContext.class)).isSameAs(server);
+        assertThat(router.asContext(Context.class)).isSameAs(router);
+        assertThat(router.getParent().asContext(Context.class)).isSameAs(internal);
         assertThat(router.asContext(ClientContext.class)).isSameAs(internal);
         assertThat(internal2.asContext(ClientContext.class)).isSameAs(internal2);
 
@@ -99,7 +86,7 @@ public final class ContextTest {
     @Test
     public void testGetContext() throws Exception {
         final Context root = new RootContext("root-id");
-        final ServerContext context = new ServerContext(root);
+        final Context context = new InternalContext(root);
 
         assertThat(context.getContext("root")).isSameAs(root);
         try {
