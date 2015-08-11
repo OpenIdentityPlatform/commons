@@ -16,13 +16,13 @@
 
 package org.forgerock.selfservice.stages.tokenhandlers;
 
-import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
-import org.forgerock.selfservice.core.snapshot.SnapshotTokenType;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +34,9 @@ import java.util.Map;
  */
 public class JwtTokenHandler implements SnapshotTokenHandler {
 
+    /**
+     * JWT snapshot token handle type.
+     */
     public static final SnapshotTokenType TYPE = new SnapshotTokenType() {
 
         @Override
@@ -48,7 +51,18 @@ public class JwtTokenHandler implements SnapshotTokenHandler {
     private final SigningHandler signingHandler;
     private final SigningHandler verificationHandler;
 
-    public JwtTokenHandler(JwsAlgorithm jwsAlgorithm, SigningHandler signingHandler, SigningHandler verificationHandler) {
+    /**
+     * Constructs a new JWT token handler.
+     *
+     * @param jwsAlgorithm
+     *         the JWS algorithm to use
+     * @param signingHandler
+     *         the signing handler
+     * @param verificationHandler
+     *         the verification handler
+     */
+    public JwtTokenHandler(JwsAlgorithm jwsAlgorithm, SigningHandler signingHandler,
+                           SigningHandler verificationHandler) {
         jwtBuilderFactory = new JwtBuilderFactory();
         this.jwsAlgorithm = jwsAlgorithm;
         this.signingHandler = signingHandler;

@@ -26,10 +26,13 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @since 0.1.0
  */
-public class BasicLocalStorage implements ProcessStore {
+public final class BasicLocalStorage implements ProcessStore {
 
     private final Map<String, Map<String, String>> localStore;
 
+    /**
+     * Creates a new basic local storage instance.
+     */
     public BasicLocalStorage() {
         localStore = new ConcurrentHashMap<>();
     }

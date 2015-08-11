@@ -16,8 +16,8 @@
 
 package org.forgerock.selfservice.example;
 
-import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.StageType;
+import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
  * Configuration for the password reset stage.
@@ -26,6 +26,9 @@ import org.forgerock.selfservice.core.StageType;
  */
 public class ResetConfig implements StageConfig {
 
+    /**
+     * Reset password stage type.
+     */
     public static final StageType<ResetConfig> TYPE = StageType.valueOf("resetStage", ResetConfig.class);
 
     @Override

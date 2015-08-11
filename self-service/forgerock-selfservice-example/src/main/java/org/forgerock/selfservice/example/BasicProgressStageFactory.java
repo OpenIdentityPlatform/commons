@@ -30,10 +30,13 @@ import java.util.Map;
  *
  * @since 0.1.0
  */
-public class BasicProgressStageFactory implements ProgressStageFactory {
+public final class BasicProgressStageFactory implements ProgressStageFactory {
 
     private final Map<StageType<?>, ProgressStage<?>> progressStages;
 
+    /**
+     * Creates a new basic progress stage factory.
+     */
     public BasicProgressStageFactory() {
         progressStages = new HashMap<>();
         progressStages.put(EmailStageConfig.TYPE, new EmailStage());

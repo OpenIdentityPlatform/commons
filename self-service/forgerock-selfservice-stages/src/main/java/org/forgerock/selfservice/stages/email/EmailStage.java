@@ -58,7 +58,8 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
         throw new IllegalStageTagException(context.getStageTag());
     }
 
-    private StageResponse sendEmail(ProcessContext context, SnapshotAuthor snapshotAuthor) throws IllegalInputException {
+    private StageResponse sendEmail(ProcessContext context,
+                                    SnapshotAuthor snapshotAuthor) throws IllegalInputException {
         String emailAddress = context
                 .getInput()
                 .get("mail")

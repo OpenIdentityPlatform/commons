@@ -41,7 +41,7 @@ import java.nio.charset.Charset;
  *
  * @since 0.1.0
  */
-public class BasicHttpApplication implements HttpApplication {
+public final class BasicHttpApplication implements HttpApplication {
 
     @Override
     public Handler start() throws HttpApplicationException {
@@ -61,20 +61,21 @@ public class BasicHttpApplication implements HttpApplication {
 
         byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(Charset.forName("UTF-8"));
 
-        RequestHandler userSelfServiceService = new AnonymousProcessService(
-                config, new BasicProgressStageFactory(), new BasicSnapshotTokenHandlerFactory(sharedKey), new BasicLocalStorage());
+        RequestHandler userSelfServiceService = new AnonymousProcessService(config, new BasicProgressStageFactory(),
+                new BasicSnapshotTokenHandlerFactory(sharedKey), new BasicLocalStorage());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
     }
 
     @Override
     public Factory<Buffer> getBufferFactory() {
+        // Do nothing
         return null;
     }
 
     @Override
     public void stop() {
-
+        // Do nothing
     }
 
 }

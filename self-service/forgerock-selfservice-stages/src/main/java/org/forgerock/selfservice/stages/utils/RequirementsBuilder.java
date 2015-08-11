@@ -43,6 +43,7 @@ public final class RequirementsBuilder {
     private final Map<String, Map<String, String>> properties;
 
     private RequirementsBuilder(String description) {
+        Reject.ifNull(description);
         requiredProperties = new ArrayList<>();
         properties = new HashMap<>();
 
@@ -52,17 +53,38 @@ public final class RequirementsBuilder {
                         field("type", "object"),
                         field("description", description),
                         field("required", requiredProperties),
-                        field("properties", properties)
-                ));
+                        field("properties", properties)));
     }
 
+    /**
+     * Add a required property.
+     *
+     * @param name
+     *         property name
+     * @param description
+     *         property description
+     *
+     * @return this builder
+     */
     public RequirementsBuilder addRequireProperty(String name, String description) {
+        Reject.ifNull(name, description);
         requiredProperties.add(name);
         addProperty(name, description);
         return this;
     }
 
+    /**
+     * Add a property.
+     *
+     * @param name
+     *         property name
+     * @param description
+     *         property description
+     *
+     * @return this builder
+     */
     public RequirementsBuilder addProperty(String name, String description) {
+        Reject.ifNull(name, description);
         Map<String, String> entry = new HashMap<>();
         entry.put("description", description);
         entry.put("type", "string");
@@ -70,15 +92,33 @@ public final class RequirementsBuilder {
         return this;
     }
 
+    /**
+     * Builds a new json object representing the defined requirements.
+     *
+     * @return the json requirements
+     */
     public JsonValue build() {
         Reject.ifTrue(properties.isEmpty(), "There must be at least one property");
         return jsonValue;
     }
 
+    /**
+     * Creates a new builder instance.
+     *
+     * @param description
+     *         the overall requirements description
+     *
+     * @return a new builder instance
+     */
     public static RequirementsBuilder newInstance(String description) {
         return new RequirementsBuilder(description);
     }
 
+    /**
+     * Creates an empty requirements json object.
+     *
+     * @return empty requirements json object
+     */
     public static JsonValue newEmptyRequirements() {
         return emptyJson();
     }
