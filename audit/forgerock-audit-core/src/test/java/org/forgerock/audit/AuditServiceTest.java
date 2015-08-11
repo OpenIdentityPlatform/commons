@@ -283,43 +283,7 @@ public class AuditServiceTest {
         verify(resultHandler, never()).handleResult(resourceCaptor.capture());
         verify(resultHandler).handleError(resourceExceptionCaptor.capture());
 
-        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(InternalServerErrorException.class);
-    }
-
-    @Test
-    public void testAvailableHandlersAction() throws ResourceException {
-        final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
-        final ResultHandler<JsonValue> resultHandler = mockResultHandler(JsonValue.class);
-        final ArgumentCaptor<JsonValue> resourceCaptor = ArgumentCaptor.forClass(JsonValue.class);
-        final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
-                ArgumentCaptor.forClass(ResourceException.class);
-
-        //when
-        auditService.handleAction(
-                new ServerContext(new RootContext()),
-                Requests.newActionRequest("", "availableHandlers"),
-                resultHandler
-        );
-
-        //then
-        verify(resultHandler).handleResult(resourceCaptor.capture());
-        verify(resultHandler, never()).handleError(resourceExceptionCaptor.capture());
-
-        final JsonValue result = resourceCaptor.getValue();
-        assertThat(result.keys().size()).isEqualTo(1);
-        assertThat(result.get(0).get("class").asString())
-                .isEqualTo("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler");
-
-        // { "type": "object", "properties": { "message": { "type": "string" } } }
-        final JsonValue expectedConfig = json(object(
-                field("type", "object"),
-                field("properties", object(
-                    field("message", object(
-                        field("type", "string")
-                    ))
-                ))
-        ));
-        assertThat(result.get(0).get("config").asMap()).isEqualTo(expectedConfig.asMap());
+        assertThat(resourceExceptionCaptor.getValue()).isInstanceOf(BadRequestException.class);
     }
 
     @Test

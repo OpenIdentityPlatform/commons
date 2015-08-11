@@ -19,8 +19,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceConfiguration;
@@ -29,12 +32,15 @@ import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class to facilitate creation and configuration of audit service and audit event handlers
  * through JSON.
  */
 public class AuditJsonConfig {
+    private static final Logger logger = LoggerFactory.getLogger(AuditJsonConfig.class);
 
     /** Suffix for configuration class names. */
     private static final String CONFIGURATION_CLASS_SUFFIX = "Configuration";
@@ -268,6 +274,29 @@ public class AuditJsonConfig {
         AuditEventHandler<CFG> handler = buildAuditEventHandler(name, jsonConfig, classLoader);
         Set<String> events = getEvents(name, jsonConfig);
         auditService.register(handler, name, events);
+    }
+
+    /**
+     * Gets the configuration schema for an audit event handler as json schema.
+     * @param auditEventHandler The audit event handler to get the config schema for.
+     * @return The config schema as json schema.
+     * @throws AuditException If any error occurs parsing the config class for schema.
+     */
+    public static JsonValue getAuditEventHandlerConfigurationSchema(final AuditEventHandler auditEventHandler)
+            throws AuditException {
+        try {
+            SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
+            mapper.acceptJsonFormatVisitor(mapper.constructType(auditEventHandler.getConfigurationClass()), visitor);
+            JsonSchema jsonSchema = visitor.finalSchema();
+            jsonSchema.setId("/");
+            return new JsonValue(mapper.readValue(mapper.writeValueAsString(jsonSchema), Map.class));
+        } catch (IOException e) {
+            logger.error("Unable to parse configuration class schema for class {}",
+                    auditEventHandler.getClass().getName(), e);
+            throw new AuditException(
+                    String.format("Unable to parse configuration class schema for class %s",
+                            auditEventHandler.getClass().getName()), e);
+        }
     }
 
 }
