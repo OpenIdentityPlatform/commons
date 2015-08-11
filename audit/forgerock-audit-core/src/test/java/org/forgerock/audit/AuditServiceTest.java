@@ -16,6 +16,7 @@
 
 package org.forgerock.audit;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.json.fluent.JsonValue.*;
 import static org.mockito.Matchers.*;
@@ -385,9 +386,7 @@ public class AuditServiceTest {
             String queryHandlerName, JsonValue additionalEventTypes) throws ResourceException {
         AuditServiceConfiguration config = new AuditServiceConfiguration();
         config.setHandlerForQueries(queryHandlerName);
-        final List<String> availableAuditEventHandlers = new LinkedList<>();
-        availableAuditEventHandlers.add("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler");
-        config.setAvailableAuditEventHandlers(availableAuditEventHandlers);
+        config.setAvailableAuditEventHandlers(asList("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandelr"));
         AuditService auditService = new AuditService(json(object()), additionalEventTypes);
         auditService.configure(config);
         return auditService;
