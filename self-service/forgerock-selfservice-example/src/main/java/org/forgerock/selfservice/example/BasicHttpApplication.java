@@ -16,34 +16,24 @@
 
 package org.forgerock.selfservice.example;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.Requests.newCreateRequest;
-import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
-import static org.forgerock.selfservice.core.config.ProcessInstanceConfig.StorageType;
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
+import static org.forgerock.selfservice.core.config.ProcessInstanceConfig.StorageType;
 
-import org.forgerock.http.context.RootContext;
-import org.forgerock.http.routing.RouterContext;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.MemoryBackend;
-import org.forgerock.selfservice.core.AnonymousProcessService;
-import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
-import org.forgerock.selfservice.stages.email.EmailStageConfig;
-import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.Router;
 import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.http.CrestHttp;
+import org.forgerock.selfservice.core.AnonymousProcessService;
+import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
+import org.forgerock.selfservice.stages.email.EmailStageConfig;
+import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.util.Factory;
 
 import java.nio.charset.Charset;
@@ -54,6 +44,16 @@ import java.nio.charset.Charset;
  * @since 0.1.0
  */
 public final class BasicHttpApplication implements HttpApplication {
+
+    private final ConnectionFactory crestConnectionFactory;
+
+    public BasicHttpApplication() {
+        try {
+            crestConnectionFactory = new CrestInitialiser().initialise();
+        } catch (ResourceException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public Handler start() throws HttpApplicationException {
@@ -67,18 +67,14 @@ public final class BasicHttpApplication implements HttpApplication {
     }
 
     private Handler initialiseHandler() throws Exception {
-        MemoryBackend userStore = new MemoryBackend();
-        org.forgerock.json.resource.Router router = new org.forgerock.json.resource.Router();
-        router.addRoute("users", userStore);
-
-        // Create a demo user.
-        ConnectionFactory connectionFactory = newInternalConnectionFactory(router);
-        Connection connection = connectionFactory.getConnection();
-        connection.create(new RootContext(), newCreateRequest("users", "1", userAliceWithIdAndRev(1, 0)));
+        EmailStageConfig emailConfig = new EmailStageConfig();
+        emailConfig.setIdentityIdField("_id");
+        emailConfig.setIdentityEmailField("mail");
+        emailConfig.setIdentityServiceUrl("/users");
 
         ProcessInstanceConfig config = ProcessInstanceConfig
                 .newBuilder()
-                .addStageConfig(new EmailStageConfig())
+                .addStageConfig(emailConfig)
                 .addStageConfig(new ResetConfig())
                 .setTokenType(JwtTokenHandler.TYPE)
                 .setStorageType(StorageType.STATELESS)
@@ -87,14 +83,10 @@ public final class BasicHttpApplication implements HttpApplication {
         byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(Charset.forName("UTF-8"));
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new BasicProgressStageFactory(connectionFactory), new BasicSnapshotTokenHandlerFactory(sharedKey), new BasicLocalStorage());
+                new BasicProgressStageFactory(crestConnectionFactory),
+                new BasicSnapshotTokenHandlerFactory(sharedKey), new BasicLocalStorage());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
-    }
-
-    static JsonValue userAliceWithIdAndRev(final int id, final int rev) {
-        return json(object(field("name", "alice"), field("age", 20), field("role", "sales"), field(
-                "_id", String.valueOf(id)), field("_rev", String.valueOf(rev))));
     }
 
     @Override

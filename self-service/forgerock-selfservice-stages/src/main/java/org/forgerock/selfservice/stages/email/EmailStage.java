@@ -41,6 +41,7 @@ import org.forgerock.util.query.QueryFilter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Email stage.
@@ -61,7 +62,7 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
     public JsonValue gatherInitialRequirements(ProcessContext context, EmailStageConfig config) {
         return RequirementsBuilder
                 .newInstance("Reset your password")
-                .addRequireProperty("mail", "Email address for account")
+                .addRequireProperty("userId", "Identifier for the user")
                 .build();
     }
 
@@ -70,7 +71,7 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
                                  SnapshotAuthor snapshotAuthor) throws IllegalInputException {
         switch (context.getStageTag()) {
         case EMPTY_TAG:
-            return sendEmail(context, snapshotAuthor);
+            return sendEmail(context, config, snapshotAuthor);
         case VALIDATE_LINK_TAG:
             return validateLink(context);
         }
@@ -81,34 +82,44 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
     private StageResponse sendEmail(ProcessContext context,
                                     EmailStageConfig config,
                                     SnapshotAuthor snapshotAuthor) throws IllegalInputException {
-        String emailAddress = context
+        String userId = context
                 .getInput()
-                .get("mail")
+                .get("userId")
                 .asString();
 
-        if (emailAddress == null || emailAddress.isEmpty()) {
-            throw new IllegalInputException("mail is missing");
+        if (userId == null || userId.isEmpty()) {
+            throw new IllegalInputException("userId is missing");
         }
 
-        JsonValue user = findUser(emailAddress, config);
+        JsonValue user = findUser(userId, config);
 
-        System.out.println(user);
+        if (user == null) {
+            throw new IllegalInputException("Unknown user");
+        }
+
+        userId = user
+                .get(config.getIdentityIdField())
+                .asString();
+        String mail = user
+                .get(config.getIdentityEmailField())
+                .asString();
+        String code = UUID.randomUUID().toString();
 
         context = ProcessContext
                 .newBuilder(context)
-                .addState("mail", emailAddress)
+                .addState("userId", userId)
+                .addState("mail", mail)
+                .addState("code", code)
                 .setStageTag(VALIDATE_LINK_TAG)
                 .build();
 
         String snapshotToken = snapshotAuthor.captureSnapshotOf(context);
+        System.out.printf("Email sent for %s to %s with token %s and code %s\n", userId, mail, snapshotToken, code);
 
         JsonValue requirements = RequirementsBuilder
                 .newInstance("Verify email address")
                 .addRequireProperty("code", "Enter code emailed to address provided")
-                .addProperty("jwt", "Encrypted value emailed to address provided (when using different browser)")
                 .build();
-
-        System.out.println("Email sent with token: " + snapshotToken);
 
         return StageResponse
                 .newBuilder()
@@ -118,13 +129,36 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
     }
 
     private StageResponse validateLink(ProcessContext context) throws IllegalInputException {
-        String emailAddress = context.getState("mail");
+        String userId = context.getState("userId");
+        String mail = context.getState("mail");
+        String code = context.getState("code");
 
-        if (emailAddress == null || emailAddress.isEmpty()) {
+        if (userId == null || userId.isEmpty()) {
+            throw new IllegalInputException("Missing user Id");
+        }
+
+        if (mail == null || mail.isEmpty()) {
             throw new IllegalInputException("Missing email address");
         }
 
-        System.out.println("Token valid, found email address " + emailAddress);
+        if (code == null || code.isEmpty()) {
+            throw new IllegalInputException("Missing code");
+        }
+
+        String submittedCode = context
+                .getInput()
+                .get("code")
+                .asString();
+
+        if (submittedCode == null || submittedCode.isEmpty()) {
+            throw new IllegalInputException("Input code is missing");
+        }
+
+        if (!code.equals(submittedCode)) {
+            throw new IllegalInputException("Invalid code");
+        }
+
+        System.out.println("Token valid!");
 
         return StageResponse
                 .newBuilder()
@@ -135,11 +169,12 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
         try {
             Connection connection = connectionFactory.getConnection();
 
-            QueryRequest request = Requests.newQueryRequest("/user");
+            QueryRequest request = Requests.newQueryRequest(config.getIdentityServiceUrl());
+
             request.setQueryFilter(
                     QueryFilter.or(
-                            QueryFilter.equalTo(new JsonPointer("userId"), "fred"),
-                            QueryFilter.equalTo(new JsonPointer("mail"), "a@b.com")));
+                            QueryFilter.equalTo(new JsonPointer(config.getIdentityIdField()), identifier),
+                            QueryFilter.equalTo(new JsonPointer(config.getIdentityEmailField()), identifier)));
 
             final List<JsonValue> user = new ArrayList<>();
             connection.query(new RootContext(), request, new QueryResourceHandler() {
