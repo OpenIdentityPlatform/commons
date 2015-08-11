@@ -22,7 +22,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -36,7 +36,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(final ServerContext context,
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
             final UpdateRequest request) {
         try {
             return newResultPromise(syncHandler.handleUpdate(context, request));
@@ -46,7 +46,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+    public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
             final ReadRequest request) {
         try {
             return newResultPromise(syncHandler.handleRead(context, request));
@@ -56,7 +56,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context,
             final QueryRequest request,
             final QueryResourceHandler handler) {
         try {
@@ -72,7 +72,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handlePatch(final ServerContext context,
+    public Promise<ResourceResponse, ResourceException> handlePatch(final Context context,
             final PatchRequest request) {
         try {
             return newResultPromise(syncHandler.handlePatch(context, request));
@@ -82,7 +82,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleDelete(final ServerContext context,
+    public Promise<ResourceResponse, ResourceException> handleDelete(final Context context,
             final DeleteRequest request) {
         try {
             return newResultPromise(syncHandler.handleDelete(context, request));
@@ -92,7 +92,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleCreate(final ServerContext context,
+    public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
             final CreateRequest request) {
         try {
             return newResultPromise(syncHandler.handleCreate(context, request));
@@ -102,7 +102,7 @@ final class SynchronousRequestHandlerAdapter implements RequestHandler {
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> handleAction(final ServerContext context,
+    public Promise<ActionResponse, ResourceException> handleAction(final Context context,
             final ActionRequest request) {
         try {
             return newResultPromise(syncHandler.handleAction(context, request));

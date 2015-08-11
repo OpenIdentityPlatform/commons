@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -44,7 +44,7 @@ public interface SingletonResourceProvider {
 
     /**
      * Performs the provided
-     * {@link RequestHandler#handleAction(ServerContext, ActionRequest)
+     * {@link RequestHandler#handleAction(Context, ActionRequest)
      * action} against the single resource instance.
      *
      * @param context
@@ -52,12 +52,12 @@ public interface SingletonResourceProvider {
      * @param request
      *            The action request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleAction(ServerContext, ActionRequest)
+     * @see RequestHandler#handleAction(Context, ActionRequest)
      */
-    Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, ActionRequest request);
+    Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request);
 
     /**
-     * {@link RequestHandler#handlePatch(ServerContext, PatchRequest)
+     * {@link RequestHandler#handlePatch(Context, PatchRequest)
      * Patches} the single resource instance.
      *
      * @param context
@@ -65,12 +65,12 @@ public interface SingletonResourceProvider {
      * @param request
      *            The patch request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handlePatch(ServerContext, PatchRequest)
+     * @see RequestHandler#handlePatch(Context, PatchRequest)
      */
-    Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, PatchRequest request);
+    Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request);
 
     /**
-     * {@link RequestHandler#handleRead(ServerContext, ReadRequest)
+     * {@link RequestHandler#handleRead(Context, ReadRequest)
      * Reads} the single resource instance.
      *
      * @param context
@@ -78,12 +78,12 @@ public interface SingletonResourceProvider {
      * @param request
      *            The read request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleRead(ServerContext, ReadRequest)
+     * @see RequestHandler#handleRead(Context, ReadRequest)
      */
-    Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, ReadRequest request);
+    Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request);
 
     /**
-     * {@link RequestHandler#handleUpdate(ServerContext, UpdateRequest)
+     * {@link RequestHandler#handleUpdate(Context, UpdateRequest)
      * Updates} the single resource instance.
      *
      * @param context
@@ -91,7 +91,7 @@ public interface SingletonResourceProvider {
      * @param request
      *            The update request.
      * @return A {@code Promise} containing the result of the operation.
-     * @see RequestHandler#handleUpdate(ServerContext, UpdateRequest)
+     * @see RequestHandler#handleUpdate(Context, UpdateRequest)
      */
-    Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, UpdateRequest request);
+    Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request);
 }

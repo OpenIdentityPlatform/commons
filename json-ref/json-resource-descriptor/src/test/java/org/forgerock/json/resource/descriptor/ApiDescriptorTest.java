@@ -29,8 +29,8 @@ import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonGenerator.Feature;
+import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
@@ -73,7 +73,7 @@ public final class ApiDescriptorTest {
         }
 
         @Override
-        public Resolver createResolver(ServerContext context, Request request) {
+        public Resolver createResolver(Context context, Request request) {
             return new AbstractResolver() {
                 private final List<String> realmList = new LinkedList<>();
 
@@ -94,7 +94,7 @@ public final class ApiDescriptorTest {
                     } else if (relation.getResourceUrn().equals(USERS_URN)) {
                         return new AbstractRequestHandler() {
                             @Override
-                            public Promise<ResourceResponse, ResourceException> handleRead(final ServerContext context,
+                            public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
                                     final ReadRequest request) {
                                 System.out.println("Reading user from realm " + realmList);
                                 final JsonValue content =

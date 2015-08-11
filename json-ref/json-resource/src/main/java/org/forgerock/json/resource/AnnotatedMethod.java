@@ -24,7 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.annotations.Create;
 import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Query;
@@ -63,11 +63,11 @@ final class AnnotatedMethod {
         this.numberOfParameters = numberOfParameters;
     }
 
-    <T> Promise<T, ResourceException> invoke(ServerContext context, Request request, String id) {
+    <T> Promise<T, ResourceException> invoke(Context context, Request request, String id) {
         return invoke(context, request, null, id);
     }
 
-    <T> Promise<T, ResourceException> invoke(ServerContext context, Request request,
+    <T> Promise<T, ResourceException> invoke(Context context, Request request,
             QueryResourceHandler queryHandler, String id) {
         if (method == null) {
             return newExceptionPromise(newNotSupportedException(operation + " not supported"));
@@ -124,7 +124,7 @@ final class AnnotatedMethod {
                 Class<?> type = method.getParameterTypes()[i];
                 if (String.class.equals(type)) {
                     idParam = i;
-                } else if (ServerContext.class.equals(type)) {
+                } else if (Context.class.equals(type)) {
                     contextParam = i;
                 } else if (Request.class.isAssignableFrom(type)) {
                     requestParam = i;

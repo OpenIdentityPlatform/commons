@@ -27,7 +27,6 @@ import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.http.routing.AbstractRouter;
 import org.forgerock.http.routing.ApiVersionRouterContext;
 import org.forgerock.http.routing.IncomparableRouteMatchException;
@@ -219,7 +218,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
         return routeMatcher;
     }
 
-    private Pair<Context, RequestHandler> getBestMatch(ServerContext context, Request request)
+    private Pair<Context, RequestHandler> getBestMatch(Context context, Request request)
             throws ResourceException {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestRoute(context, request);
@@ -234,63 +233,63 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
             ActionRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfActionRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
-            return bestMatch.getSecond().handleAction((ServerContext) bestMatch.getFirst(), routedRequest);
+            return bestMatch.getSecond().handleAction(bestMatch.getFirst(), routedRequest);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleCreate(ServerContext context, CreateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
             CreateRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfCreateRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
-            return bestMatch.getSecond().handleCreate((ServerContext) bestMatch.getFirst(), routedRequest);
+            return bestMatch.getSecond().handleCreate(bestMatch.getFirst(), routedRequest);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleDelete(ServerContext context, DeleteRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
             DeleteRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfDeleteRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
-            return bestMatch.getSecond().handleDelete((ServerContext) bestMatch.getFirst(), routedRequest);
+            return bestMatch.getSecond().handleDelete(bestMatch.getFirst(), routedRequest);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
             PatchRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfPatchRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
-            return bestMatch.getSecond().handlePatch((ServerContext) bestMatch.getFirst(), routedRequest);
+            return bestMatch.getSecond().handlePatch(bestMatch.getFirst(), routedRequest);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(final ServerContext context,
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context,
             final QueryRequest request, final QueryResourceHandler handler) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
@@ -310,35 +309,35 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
                     return handler.handleResource(resource);
                 }
             };
-            return bestMatch.getSecond().handleQuery((ServerContext) decoratedContext, routedRequest, resourceHandler);
+            return bestMatch.getSecond().handleQuery(decoratedContext, routedRequest, resourceHandler);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
             ReadRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfReadRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
-            return bestMatch.getSecond().handleRead((ServerContext) bestMatch.getFirst(), routedRequest);
+            return bestMatch.getSecond().handleRead(bestMatch.getFirst(), routedRequest);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             RouterContext routerContext = getRouterContext(bestMatch.getFirst());
             UpdateRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfUpdateRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
-            return bestMatch.getSecond().handleUpdate((ServerContext) bestMatch.getFirst(), routedRequest);
+            return bestMatch.getSecond().handleUpdate(bestMatch.getFirst(), routedRequest);
         } catch (ResourceException e) {
             return newExceptionPromise(e);
         }

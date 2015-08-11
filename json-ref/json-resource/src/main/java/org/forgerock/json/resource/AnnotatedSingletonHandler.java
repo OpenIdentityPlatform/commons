@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Read;
 import org.forgerock.json.resource.annotations.RequestHandler;
@@ -52,22 +52,22 @@ class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         return RequestHandlerUtils.handle(readMethod, context, request);
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(ServerContext context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         return RequestHandlerUtils.handle(updateMethod, context, request);
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handlePatch(ServerContext context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
         return RequestHandlerUtils.handle(patchMethod, context, request);
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         return actionMethods.invoke(context, request, null);
     }
 
