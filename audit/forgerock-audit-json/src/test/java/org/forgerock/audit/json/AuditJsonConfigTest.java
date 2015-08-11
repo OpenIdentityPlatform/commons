@@ -18,10 +18,14 @@ package org.forgerock.audit.json;
 import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.json.fluent.JsonValue.field;
+import static org.forgerock.json.fluent.JsonValue.json;
+import static org.forgerock.json.fluent.JsonValue.object;
 
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceConfiguration;
+import org.forgerock.audit.PassThroughAuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.fluent.JsonValue;
 import org.forgerock.json.resource.ResourceException;
@@ -38,6 +42,8 @@ public class AuditJsonConfigTest {
         AuditServiceConfiguration actualConfig = auditService.getConfig();
         assertThat(actualConfig).isNotNull();
         assertThat(actualConfig.getHandlerForQueries()).isEqualTo("pass-through");
+        assertThat(actualConfig.getAvailableAuditEventHandlers())
+                .containsOnly("org.forgerock.audit.PassThroughAuditEventHandler");
     }
 
     @Test
@@ -66,6 +72,27 @@ public class AuditJsonConfigTest {
         final JsonValue config = AuditJsonConfig.getJson(getResource(jsonResource));
 
         AuditJsonConfig.registerHandlerToService(config, auditService);
+    }
+
+    @Test
+    public void testGetAuditEventHandlerConfigurationSchema() throws Exception {
+        //given
+        final AuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
+        final JsonValue expectedSchema = json(object(
+                field("type", "object"),
+                field("id", "/"),
+                field("properties", object(
+                        field("message", object(
+                                field("type", "string")
+                        ))
+                ))
+        ));
+
+        //when
+        final JsonValue schema = AuditJsonConfig.getAuditEventHandlerConfigurationSchema(auditEventHandler);
+
+        //then
+        assertThat(schema.asMap()).isEqualTo(expectedSchema.asMap());
     }
 
     private AuditService createAndConfigureAuditService() throws AuditException, ResourceException {

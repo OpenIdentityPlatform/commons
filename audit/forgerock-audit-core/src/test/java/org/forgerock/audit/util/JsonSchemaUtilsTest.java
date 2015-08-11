@@ -83,24 +83,4 @@ public class JsonSchemaUtilsTest {
         assertThat(pointers.contains("/server/port"));
         assertThat(pointers.contains("/array"));
     }
-
-    @Test
-    public void testGetAuditEventHandlerConfigurationSchema() throws Exception {
-        //given
-        final AuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
-        final JsonValue expectedSchema = json(object(
-                field("type", "object"),
-                field("properties", object(
-                        field("message", object(
-                                field("type", "string")
-                        ))
-                ))
-        ));
-
-        //when
-        final JsonValue schema = JsonSchemaUtils.getAuditEventHandlerConfigurationSchema(auditEventHandler);
-
-        //then
-        assertThat(schema.asMap()).isEqualTo(expectedSchema.asMap());
-    }
 }

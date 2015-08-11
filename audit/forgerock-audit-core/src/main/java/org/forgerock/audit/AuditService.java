@@ -36,11 +36,9 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
@@ -386,9 +384,10 @@ public class AuditService implements RequestHandler {
     @Override
     public void handleAction(final ServerContext context, final ActionRequest request,
             final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceExceptionsUtil.notSupported(request));
+        final String error = String.format("Unable to handle action: %s", request.getAction());
+        logger.error(error);
+        handler.handleError(new BadRequestException(error));
     }
-
 
     private Collection<AuditEventHandler<?>> getAuditEventHandlersForEvent(final String auditEvent) {
         if (eventTypeAuditEventHandlers.containsKey(auditEvent)) {
