@@ -217,19 +217,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
-    Handlebars.registerHelper("t", function(i18nKey) {
-        var params = {
-            postProcess: "sprintf",
-            sprintf: _.map(_.toArray(arguments).slice(1, -1),
-            Handlebars.Utils.escapeExpression)
-        },
-        result;
-
-        result = i18n.t(i18nKey, params);
-
-        return new Handlebars.SafeString(result);
-     });
-
     Handlebars.registerHelper("url", function(routeKey) {
         var result;
         if (_.isArray(arguments[1])) {
