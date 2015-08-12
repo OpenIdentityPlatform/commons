@@ -20,7 +20,7 @@ import org.forgerock.authz.filter.api.AuthorizationContext;
 import org.forgerock.authz.filter.api.AuthorizationException;
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.api.CrestAuthorizationModule;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -65,7 +65,7 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeCreate(ServerContext context,
+    public Promise<AuthorizationResult, ResourceException> authorizeCreate(Context context,
             CreateRequest request) {
 
         String accessToken = getAccessToken(context);
@@ -84,7 +84,7 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeRead(ServerContext context, ReadRequest request) {
+    public Promise<AuthorizationResult, ResourceException> authorizeRead(Context context, ReadRequest request) {
 
         String accessToken = getAccessToken(context);
         SecurityContext securityContext = context.asContext(SecurityContext.class);
@@ -101,7 +101,7 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeUpdate(ServerContext context,
+    public Promise<AuthorizationResult, ResourceException> authorizeUpdate(Context context,
             UpdateRequest request) {
 
         String accessToken = getAccessToken(context);
@@ -119,7 +119,7 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeDelete(ServerContext context,
+    public Promise<AuthorizationResult, ResourceException> authorizeDelete(Context context,
             DeleteRequest request) {
 
         String accessToken = getAccessToken(context);
@@ -137,7 +137,7 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizePatch(ServerContext context, PatchRequest request) {
+    public Promise<AuthorizationResult, ResourceException> authorizePatch(Context context, PatchRequest request) {
 
         String accessToken = getAccessToken(context);
         SecurityContext securityContext = context.asContext(SecurityContext.class);
@@ -154,7 +154,7 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeAction(ServerContext context,
+    public Promise<AuthorizationResult, ResourceException> authorizeAction(Context context,
             ActionRequest request) {
 
         String accessToken = getAccessToken(context);
@@ -172,7 +172,7 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeQuery(ServerContext context, QueryRequest request) {
+    public Promise<AuthorizationResult, ResourceException> authorizeQuery(Context context, QueryRequest request) {
 
         String accessToken = getAccessToken(context);
         SecurityContext securityContext = context.asContext(SecurityContext.class);
@@ -184,11 +184,11 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
     /**
      * Pulls the access token off of the request, by looking for the Authorization header containing a Bearer token.
      *
-     * @param context The {@link ServerContext} representing the context of the request.
+     * @param context The {@link Context} representing the context of the request.
      * @return The access token, or <code>null</code> if the access token was not present or was not using Bearer
      * authorization.
      */
-    private String getAccessToken(ServerContext context) {
+    private String getAccessToken(Context context) {
         HttpContext httpContext = context.asContext(HttpContext.class);
         String header = httpContext.getHeaderAsString("authorization");
         return bearerTokenExtractor.getAccessToken(header);

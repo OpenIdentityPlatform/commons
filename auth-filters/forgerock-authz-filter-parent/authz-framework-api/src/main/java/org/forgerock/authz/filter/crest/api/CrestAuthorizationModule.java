@@ -17,7 +17,7 @@
 package org.forgerock.authz.filter.crest.api;
 
 import org.forgerock.authz.filter.api.AuthorizationResult;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -46,13 +46,13 @@ public interface CrestAuthorizationModule {
      * <p>This method conveys the outcome of its authorization either by returning an {@link AuthorizationResult} value
      * or an {@link ResourceException}</p>
      *
-     * @param context The {@link ServerContext} representing the context of the request.
+     * @param context The {@link Context} representing the context of the request.
      * @param request The {@link CreateRequest} to authorize.
      * @return A {@link Promise} representing the result of the method call. The result of the {@code Promise}, when the
      * method completes successfully, will be an {@code AuthorizationResult} containing the result of the authorization,
      * or will be an {@code ResourceException} detailing the cause of the failure.
      */
-    Promise<AuthorizationResult, ResourceException> authorizeCreate(ServerContext context, CreateRequest request);
+    Promise<AuthorizationResult, ResourceException> authorizeCreate(Context context, CreateRequest request);
 
     /**
      * <p>Authorizes a received REST read request.</p>
@@ -60,13 +60,13 @@ public interface CrestAuthorizationModule {
      * <p>This method conveys the outcome of its authorization either by returning an {@link AuthorizationResult} value
      * or an {@link ResourceException}</p>
      *
-     * @param context The {@link ServerContext} representing the context of the request.
+     * @param context The {@link Context} representing the context of the request.
      * @param request The {@link ReadRequest} to authorize.
      * @return A {@link Promise} representing the result of the method call. The result of the {@code Promise}, when the
      * method completes successfully, will be an {@code AuthorizationResult} containing the result of the authorization,
      * or will be an {@code ResourceException} detailing the cause of the failure.
      */
-    Promise<AuthorizationResult, ResourceException> authorizeRead(ServerContext context, ReadRequest request);
+    Promise<AuthorizationResult, ResourceException> authorizeRead(Context context, ReadRequest request);
 
     /**
      * <p>Authorizes a received REST update request.</p>
@@ -74,13 +74,13 @@ public interface CrestAuthorizationModule {
      * <p>This method conveys the outcome of its authorization either by returning an {@link AuthorizationResult} value
      * or an {@link ResourceException}</p>
      *
-     * @param context The {@link ServerContext} representing the context of the request.
+     * @param context The {@link Context} representing the context of the request.
      * @param request The {@link UpdateRequest} to authorize.
      * @return A {@link Promise} representing the result of the method call. The result of the {@code Promise}, when the
      * method completes successfully, will be an {@code AuthorizationResult} containing the result of the authorization,
      * or will be an {@code ResourceException} detailing the cause of the failure.
      */
-    Promise<AuthorizationResult, ResourceException> authorizeUpdate(ServerContext context, UpdateRequest request);
+    Promise<AuthorizationResult, ResourceException> authorizeUpdate(Context context, UpdateRequest request);
 
     /**
      * <p>Authorizes a received REST delete request.</p>
@@ -88,13 +88,13 @@ public interface CrestAuthorizationModule {
      * <p>This method conveys the outcome of its authorization either by returning an {@link AuthorizationResult} value
      * or an {@link ResourceException}</p>
      *
-     * @param context The {@link ServerContext} representing the context of the request.
+     * @param context The {@link Context} representing the context of the request.
      * @param request The {@link DeleteRequest} to authorize.
      * @return A {@link Promise} representing the result of the method call. The result of the {@code Promise}, when the
      * method completes successfully, will be an {@code AuthorizationResult} containing the result of the authorization,
      * or will be an {@code ResourceException} detailing the cause of the failure.
      */
-    Promise<AuthorizationResult, ResourceException> authorizeDelete(ServerContext context, DeleteRequest request);
+    Promise<AuthorizationResult, ResourceException> authorizeDelete(Context context, DeleteRequest request);
 
     /**
      * <p>Authorizes a received REST patch request.</p>
@@ -102,13 +102,13 @@ public interface CrestAuthorizationModule {
      * <p>This method conveys the outcome of its authorization either by returning an {@link AuthorizationResult} value
      * or an {@link ResourceException}</p>
      *
-     * @param context The {@link ServerContext} representing the context of the request.
+     * @param context The {@link Context} representing the context of the request.
      * @param request The {@link PatchRequest} to authorize.
      * @return A {@link Promise} representing the result of the method call. The result of the {@code Promise}, when the
      * method completes successfully, will be an {@code AuthorizationResult} containing the result of the authorization,
      * or will be an {@code ResourceException} detailing the cause of the failure.
      */
-    Promise<AuthorizationResult, ResourceException> authorizePatch(ServerContext context, PatchRequest request);
+    Promise<AuthorizationResult, ResourceException> authorizePatch(Context context, PatchRequest request);
 
     /**
      * <p>Authorizes a received REST action request.</p>
@@ -116,13 +116,13 @@ public interface CrestAuthorizationModule {
      * <p>This method conveys the outcome of its authorization either by returning an {@link AuthorizationResult} value
      * or an {@link ResourceException}</p>
      *
-     * @param context The {@link ServerContext} representing the context of the request.
+     * @param context The {@link Context} representing the context of the request.
      * @param request The {@link ActionRequest} to authorize.
      * @return A {@link Promise} representing the result of the method call. The result of the {@code Promise}, when the
      * method completes successfully, will be an {@code AuthorizationResult} containing the result of the authorization,
      * or will be an {@code ResourceException} detailing the cause of the failure.
      */
-    Promise<AuthorizationResult, ResourceException> authorizeAction(ServerContext context, ActionRequest request);
+    Promise<AuthorizationResult, ResourceException> authorizeAction(Context context, ActionRequest request);
 
     /**
      * <p>Authorizes a received REST query request.</p>
@@ -130,11 +130,11 @@ public interface CrestAuthorizationModule {
      * <p>This method conveys the outcome of its authorization either by returning an {@link AuthorizationResult} value
      * or an {@link ResourceException}</p>
      *
-     * @param context The {@link ServerContext} representing the context of the request.
+     * @param context The {@link Context} representing the context of the request.
      * @param request The {@link QueryRequest} to authorize.
      * @return A {@link Promise} representing the result of the method call. The result of the {@code Promise}, when the
      * method completes successfully, will be an {@code AuthorizationResult} containing the result of the authorization,
      * or will be an {@code ResourceException} detailing the cause of the failure.
      */
-    Promise<AuthorizationResult, ResourceException> authorizeQuery(ServerContext context, QueryRequest request);
+    Promise<AuthorizationResult, ResourceException> authorizeQuery(Context context, QueryRequest request);
 }

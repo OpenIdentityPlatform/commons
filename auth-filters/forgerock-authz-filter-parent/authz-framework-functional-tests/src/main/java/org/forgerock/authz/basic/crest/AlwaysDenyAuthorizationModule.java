@@ -20,7 +20,7 @@ import static org.forgerock.json.JsonValue.*;
 
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.api.CrestAuthorizationModule;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -54,7 +54,7 @@ public class AlwaysDenyAuthorizationModule implements CrestAuthorizationModule {
      * {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeCreate(ServerContext context,
+    public Promise<AuthorizationResult, ResourceException> authorizeCreate(Context context,
             CreateRequest request) {
         return Promises.newResultPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
@@ -64,7 +64,7 @@ public class AlwaysDenyAuthorizationModule implements CrestAuthorizationModule {
      * {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeRead(ServerContext context, ReadRequest request) {
+    public Promise<AuthorizationResult, ResourceException> authorizeRead(Context context, ReadRequest request) {
         return Promises.newResultPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
     }
@@ -73,7 +73,7 @@ public class AlwaysDenyAuthorizationModule implements CrestAuthorizationModule {
      * {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeUpdate(ServerContext context,
+    public Promise<AuthorizationResult, ResourceException> authorizeUpdate(Context context,
             UpdateRequest request) {
         return Promises.newResultPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
@@ -83,7 +83,7 @@ public class AlwaysDenyAuthorizationModule implements CrestAuthorizationModule {
      * {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeDelete(ServerContext context,
+    public Promise<AuthorizationResult, ResourceException> authorizeDelete(Context context,
             DeleteRequest request) {
         return Promises.newResultPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
@@ -93,7 +93,7 @@ public class AlwaysDenyAuthorizationModule implements CrestAuthorizationModule {
      * {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizePatch(ServerContext context, PatchRequest request) {
+    public Promise<AuthorizationResult, ResourceException> authorizePatch(Context context, PatchRequest request) {
         return Promises.newResultPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
     }
@@ -102,7 +102,7 @@ public class AlwaysDenyAuthorizationModule implements CrestAuthorizationModule {
      * {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeAction(ServerContext context,
+    public Promise<AuthorizationResult, ResourceException> authorizeAction(Context context,
             ActionRequest request) {
         return Promises.newResultPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
@@ -112,7 +112,7 @@ public class AlwaysDenyAuthorizationModule implements CrestAuthorizationModule {
      * {@inheritDoc}
      */
     @Override
-    public Promise<AuthorizationResult, ResourceException> authorizeQuery(ServerContext context, QueryRequest request) {
+    public Promise<AuthorizationResult, ResourceException> authorizeQuery(Context context, QueryRequest request) {
         return Promises.newResultPromise(AuthorizationResult.accessDenied("Not authorized for endpoint: " + endpoint,
                 json(object(field("internalCode", 123)))));
     }

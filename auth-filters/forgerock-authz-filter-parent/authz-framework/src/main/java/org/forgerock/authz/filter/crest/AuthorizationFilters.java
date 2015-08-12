@@ -23,7 +23,7 @@ import java.util.List;
 
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.api.CrestAuthorizationModule;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CollectionResourceProvider;
@@ -176,7 +176,7 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<ActionResponse, ResourceException> filterAction(final ServerContext context,
+        public Promise<ActionResponse, ResourceException> filterAction(final Context context,
                 final ActionRequest request, final RequestHandler next) {
             return module.authorizeAction(context, request)
                     .thenAsync(new AsyncFunction<AuthorizationResult, ActionResponse, ResourceException>() {
@@ -204,7 +204,7 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<ResourceResponse, ResourceException> filterCreate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterCreate(final Context context,
                 final CreateRequest request, final RequestHandler next) {
             return module.authorizeCreate(context, request)
                     .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
@@ -232,7 +232,7 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<ResourceResponse, ResourceException> filterDelete(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterDelete(final Context context,
                 final DeleteRequest request, final RequestHandler next) {
             return module.authorizeDelete(context, request)
                     .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
@@ -260,7 +260,7 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<ResourceResponse, ResourceException> filterPatch(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterPatch(final Context context,
                 final PatchRequest request, final RequestHandler next) {
             return module.authorizePatch(context, request)
                     .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
@@ -289,7 +289,7 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<QueryResponse, ResourceException> filterQuery(final ServerContext context,
+        public Promise<QueryResponse, ResourceException> filterQuery(final Context context,
                 final QueryRequest request, final QueryResourceHandler handler, final RequestHandler next) {
             return module.authorizeQuery(context, request)
                     .thenAsync(new AsyncFunction<AuthorizationResult, QueryResponse, ResourceException>() {
@@ -317,7 +317,7 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<ResourceResponse, ResourceException> filterRead(final ServerContext context, final ReadRequest request,
+        public Promise<ResourceResponse, ResourceException> filterRead(final Context context, final ReadRequest request,
                 final RequestHandler next) {
             return module.authorizeRead(context, request)
                     .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {
@@ -345,7 +345,7 @@ public final class AuthorizationFilters {
          * @return {@inheritDoc}
          */
         @Override
-        public Promise<ResourceResponse, ResourceException> filterUpdate(final ServerContext context,
+        public Promise<ResourceResponse, ResourceException> filterUpdate(final Context context,
                 final UpdateRequest request, final RequestHandler next) {
             return module.authorizeUpdate(context, request)
                     .thenAsync(new AsyncFunction<AuthorizationResult, ResourceResponse, ResourceException>() {

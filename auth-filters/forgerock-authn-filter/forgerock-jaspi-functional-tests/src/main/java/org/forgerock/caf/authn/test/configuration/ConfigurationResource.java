@@ -23,7 +23,7 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import com.google.inject.Singleton;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -57,7 +57,7 @@ public class ConfigurationResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         return newExceptionPromise(newNotSupportedException());
     }
 
@@ -69,7 +69,7 @@ public class ConfigurationResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
         return newExceptionPromise(newNotSupportedException());
     }
 
@@ -81,7 +81,7 @@ public class ConfigurationResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         return newResultPromise(newResourceResponse("ModuleConfiguration",
                 Integer.toString(moduleConfiguration.hashCode()), moduleConfiguration));
     }
@@ -94,7 +94,7 @@ public class ConfigurationResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
         moduleConfiguration = request.getContent();
         return newResultPromise(newResourceResponse("ModuleConfiguration",
                 Integer.toString(moduleConfiguration.hashCode()), moduleConfiguration));

@@ -27,7 +27,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 import javax.inject.Inject;
 
 import org.forgerock.caf.authn.test.runtime.TestAuditApi;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -69,7 +69,7 @@ public class AuditResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         if ("readAndClear".equalsIgnoreCase(request.getAction())) {
             JsonValue jsonAuditRecords = getAuditRecords();
             auditApi.clear();
@@ -87,7 +87,7 @@ public class AuditResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
         return newExceptionPromise(newNotSupportedException());
     }
 
@@ -99,7 +99,7 @@ public class AuditResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         JsonValue jsonAuditRecords = getAuditRecords();
         return newResultPromise(newResourceResponse("AuditRecords", Integer.toString(jsonAuditRecords.hashCode()),
                 jsonAuditRecords));
@@ -113,7 +113,7 @@ public class AuditResource implements SingletonResourceProvider {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
         return newExceptionPromise(newNotSupportedException());
     }
 

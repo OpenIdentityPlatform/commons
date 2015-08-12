@@ -28,7 +28,7 @@ import static org.testng.Assert.*;
 
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.crest.api.CrestAuthorizationModule;
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CollectionResourceProvider;
@@ -193,7 +193,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
@@ -218,7 +218,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
@@ -253,7 +253,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
@@ -285,7 +285,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         CreateRequest request = Requests.newCreateRequest("", json(object()));
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
@@ -310,7 +310,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
@@ -345,7 +345,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
@@ -377,7 +377,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
@@ -402,7 +402,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
@@ -437,7 +437,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
@@ -469,7 +469,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
@@ -494,7 +494,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
@@ -529,7 +529,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
@@ -560,7 +560,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("");
         QueryResourceHandler handler = mock(QueryResourceHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
@@ -585,7 +585,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("RESOURCE_CONTAINER");
         QueryResourceHandler handler = mock(QueryResourceHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
@@ -620,7 +620,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("RESOURCE_CONTAINER");
         QueryResourceHandler handler = mock(QueryResourceHandler.class);
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
@@ -653,7 +653,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
@@ -678,7 +678,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
@@ -713,7 +713,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
@@ -745,7 +745,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
@@ -770,7 +770,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
@@ -805,7 +805,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createFilter(target, modules);
 
-        ServerContext context = mock(ServerContext.class);
+        Context context = mock(Context.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
         ResourceException resourceException = ResourceException.getException(ResourceException.INTERNAL_ERROR);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
