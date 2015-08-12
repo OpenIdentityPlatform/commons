@@ -24,7 +24,7 @@ import org.forgerock.json.resource.ServerContext;
 /**
  * A ServerContext used when auditing over the router.
  */
-class AuditContext extends ServerContext {
+public class AuditContext extends ServerContext {
     public AuditContext(final Context parent) {
         super(parent);
     }
