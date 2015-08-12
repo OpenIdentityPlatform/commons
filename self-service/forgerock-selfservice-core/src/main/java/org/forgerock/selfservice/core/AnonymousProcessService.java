@@ -20,7 +20,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
-import org.forgerock.http.context.ServerContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -100,7 +100,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handleRead(ServerContext context, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             JsonValue clientResponse = initiateProcess();
             return Promises.newResultPromise(Responses.newResourceResponse("1", "1.0", clientResponse));
@@ -115,7 +115,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> handleAction(ServerContext context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         if (SUBMIT_ACTION.equals(request.getAction())) {
             try {
                 JsonValue clientResponse = progressProcess(request.getContent());
