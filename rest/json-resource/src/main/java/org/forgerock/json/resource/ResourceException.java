@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 
 /**
  * An exception that is thrown during the processing of a JSON resource request.
@@ -280,6 +281,66 @@ public class ResourceException extends IOException implements Response {
      */
     public static ResourceException newInternalServerErrorException(String message, Throwable cause) {
         return new InternalServerErrorException(message, cause);
+    }
+
+    /**
+     * Constructs a new {@link InternalServerErrorException} with {@code null}
+     * as its detail message.
+     *
+     * @return A {@code NotFoundException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newInternalServerErrorException() {
+        return new InternalServerErrorException();
+    }
+
+    /**
+     * Constructs a new {@link InternalServerErrorException} with the specified
+     * detail message.
+     *
+     * @param message The detail message.
+     * @return A {@code NotFoundException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newInternalServerErrorException(String message) {
+        return new InternalServerErrorException(message);
+    }
+
+    /**
+     * Constructs a new {@link InternalServerErrorException} with the specified
+     * detail message and cause.
+     *
+     * @param message The detail message.
+     * @param cause The exception which caused this exception to be thrown.
+     * @return A {@code InternalServerErrorException}.
+     * @since 3.0.0
+     */
+    public static ResourceException newInternalServerErrorException(String message, Throwable cause) {
+        return new InternalServerErrorException(message, cause);
+    }
+
+    /**
+     * Adapts a {@code Throwable} to a {@code ResourceException}. If the
+     * {@code Throwable} is an JSON {@code JsonValueException} then an
+     * appropriate {@code ResourceException} is returned, otherwise an
+     * {@code InternalServerErrorException} is returned.
+     *
+     * @param t
+     *            The {@code Throwable} to be converted.
+     * @return The equivalent resource exception.
+     */
+    public static ResourceException adapt(final Throwable t) {
+        int resourceResultCode;
+        try {
+            throw t;
+        } catch (final ResourceException e) {
+            return e;
+        } catch (final JsonValueException e) {
+            resourceResultCode = ResourceException.BAD_REQUEST;
+        } catch (final Throwable tmp) {
+            resourceResultCode = ResourceException.INTERNAL_ERROR;
+        }
+        return ResourceException.getException(resourceResultCode, t.getMessage(), t);
     }
 
     /**
