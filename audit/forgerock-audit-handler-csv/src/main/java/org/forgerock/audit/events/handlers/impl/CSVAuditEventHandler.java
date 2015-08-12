@@ -16,6 +16,8 @@
 
 package org.forgerock.audit.events.handlers.impl;
 
+import static org.forgerock.util.promise.Promises.*;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -149,7 +151,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     public Promise<ActionResponse, ResourceException> actionCollection(
             final Context context,
             final ActionRequest request) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -161,7 +163,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             final Context context,
             final String resourceId,
             final ActionRequest request) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -227,7 +229,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
                 ++retryCount;
             } while (retry);
-            return Promises.newResultPromise(
+            return newResultPromise(
                     Responses.newResourceResponse(
                             request.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(),
                             null,
@@ -235,7 +237,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                     )
             );
         } catch (ResourceException e) {
-            return Promises.newExceptionPromise(e);
+            return newExceptionPromise(e);
         }
     }
 
@@ -268,9 +270,9 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                         Responses.newResourceResponse(
                                 value.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, value));
             }
-            return Promises.newResultPromise(Responses.newQueryResponse());
+            return newResultPromise(Responses.newQueryResponse());
         } catch (Exception e) {
-            return Promises.newExceptionPromise((ResourceException) new BadRequestException(e));
+            return newExceptionPromise((ResourceException) new BadRequestException(e));
         }
     }
 
@@ -291,13 +293,13 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 throw new NotFoundException(auditEventType + " audit log not found");
             }
             final JsonValue resource = entry.iterator().next();
-            return Promises.newResultPromise(
+            return newResultPromise(
                     Responses.newResourceResponse(
                             resource.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, resource));
         } catch (ResourceException e) {
-            return Promises.newExceptionPromise(e);
+            return newExceptionPromise(e);
         } catch (IOException e) {
-            return Promises.newExceptionPromise((ResourceException) new BadRequestException(e));
+            return newExceptionPromise((ResourceException) new BadRequestException(e));
         }
     }
 

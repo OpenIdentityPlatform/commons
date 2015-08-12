@@ -16,6 +16,8 @@
 
 package org.forgerock.audit.events.handlers;
 
+import static org.forgerock.util.promise.Promises.*;
+
 import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
@@ -61,7 +63,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
             final Context context,
             final String resourceId,
             final DeleteRequest request) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -72,7 +74,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
             final Context context,
             final String resourceId,
             final PatchRequest request) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -83,7 +85,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
             final Context context,
             final String resourceId,
             final UpdateRequest request) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**

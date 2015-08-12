@@ -16,6 +16,8 @@
 
 package org.forgerock.audit;
 
+import static org.forgerock.util.promise.Promises.*;
+
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.json.JsonValue;
@@ -65,7 +67,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     public Promise<ActionResponse, ResourceException> actionCollection(
             final Context context,
             final ActionRequest request) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -77,7 +79,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
             final Context context,
             final String resourceId,
             final ActionRequest request) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -89,7 +91,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
             final Context context,
             final CreateRequest request) {
         logger.info("Added an entry. Message: " + message);
-        return Promises.newResultPromise(
+        return newResultPromise(
                 Responses.newResourceResponse(
                         request.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(),
                         null,
@@ -105,7 +107,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
             final Context context,
             final QueryRequest request,
             final QueryResourceHandler handler) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     /**
@@ -117,7 +119,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
             final Context context,
             final String resourceId,
             final ReadRequest request) {
-        return Promises.newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
     }
 
     @Override

@@ -19,6 +19,7 @@ package org.forgerock.audit;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.util.promise.Promises.*;
 import static org.mockito.Mockito.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
@@ -276,7 +277,7 @@ public class AuditServiceTest {
     public void testQueryOnAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
-        final Promise<QueryResponse, ResourceException> emptyPromise = Promises.newResultPromise(Responses.newQueryResponse());
+        final Promise<QueryResponse, ResourceException> emptyPromise = newResultPromise(Responses.newQueryResponse());
         auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
         when(auditEventHandler.queryCollection(
                 any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
