@@ -16,42 +16,34 @@
 
 package org.forgerock.audit;
 
-import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletException;
-
 import org.forgerock.audit.json.AuditJsonConfig;
+import org.forgerock.http.Handler;
+import org.forgerock.http.HttpApplication;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.io.Buffer;
+import org.forgerock.http.routing.Router;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.http.CrestHttp;
+import org.forgerock.util.Factory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * ConnectionFactory that instantiates the AuditService on the crest router.
+ * Crest Application that instantiates the AuditService on the crest router.
  */
-public final class AuditServiceConnectionFactoryProvider {
+public final class AuditHttpApplication implements HttpApplication {
 
-    private static final Logger logger = LoggerFactory.getLogger(AuditServiceConnectionFactoryProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(AuditHttpApplication.class);
 
-    private AuditServiceConnectionFactoryProvider() {
-        // prevent instantiation
-    }
-
-    /**
-     * Creates a connection factory with the AuditService on the router.
-     *
-     * @param config the configuration of the servlet
-     * @return a ConnectionFactory containing the AuditService endpoint
-     * @throws ServletException if the connection factory can't be created
-     */
-    public static ConnectionFactory createConnectionFactory(final ServletConfig config) throws ServletException {
+    @Override
+    public Handler start() throws HttpApplicationException {
         final Router router = new Router();
         final AuditService auditService = createAndConfigureAuditService();
 
@@ -59,8 +51,20 @@ public final class AuditServiceConnectionFactoryProvider {
         // handlers
         registerCsvHandler(auditService);
 
-        router.addRoute(RoutingMode.STARTS_WITH, uriTemplate("/audit"), auditService);
-        return Resources.newInternalConnectionFactory(router);
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/audit"),
+                CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(
+                        Resources.newCollection(auditService))));
+        return router;
+    }
+
+    @Override
+    public Factory<Buffer> getBufferFactory() {
+        return null;
+    }
+
+    @Override
+    public void stop() {
+
     }
 
     /** Register the CSV handler based on JSON configuration. */

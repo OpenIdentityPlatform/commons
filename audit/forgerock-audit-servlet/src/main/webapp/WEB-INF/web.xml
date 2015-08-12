@@ -17,40 +17,19 @@
      */
 -->
 <web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
-         version="2.5">
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
 
-    <display-name>Json Resource Servlet</display-name>
+    <display-name>Json Resource Audit Example</display-name>
 
     <servlet>
-        <servlet-name>Audit</servlet-name>
-        <servlet-class>org.forgerock.json.resource.servlet.HttpServlet</servlet-class>
-
-        <init-param>
-            <param-name>connection-factory-class</param-name>
-            <param-value>org.forgerock.audit.AuditServiceConnectionFactoryProvider</param-value>
-        </init-param>
-
-        <init-param>
-            <param-name>connection-factory-method</param-name>
-            <param-value>createConnectionFactory</param-value>
-        </init-param>
-
-        <!--  Uncomment to specify a context factory and non-default method name.
-                <init-param>
-                    <param-name>context-factory-class</param-name>
-                    <param-value>org.forgerock.json.resource.servlet.SecurityContextFactory</param-value>
-                </init-param>
-                <init-param>
-                    <param-name>context-factory-method</param-name>
-                    <param-value>getHttpServletContextFactory</param-value>
-                </init-param>
-        -->
+        <servlet-name>CREST Audit Application</servlet-name>
+        <servlet-class>org.forgerock.http.servlet.HttpFrameworkServlet</servlet-class>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet-mapping>
-        <servlet-name>Audit</servlet-name>
+        <servlet-name>CREST Audit Application</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
-
 </web-app>
