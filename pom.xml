@@ -117,7 +117,7 @@
     <forgerock-http-framework.version>0.0.1-SNAPSHOT</forgerock-http-framework.version>
     <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
     <forgerock-auth-filters.version>2.0.0-SNAPSHOT</forgerock-auth-filters.version>
-    <forgerock-audit.version>1.0.0-SNAPSHOT</forgerock-audit.version>
+    <forgerock-audit.version>0.3.0-SNAPSHOT</forgerock-audit.version>
     <opendj.ldap-sdk.version>3.0.0-SNAPSHOT</opendj.ldap-sdk.version>
   </properties>
 
@@ -566,7 +566,7 @@
       <!-- ForgeRock Audit dependencies -->
       <dependency>
         <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-audit</artifactId>
+        <artifactId>forgerock-audit-core</artifactId>
         <version>${forgerock-audit.version}</version>
       </dependency>
 
@@ -578,10 +578,9 @@
 
       <dependency>
         <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-audit-servlet</artifactId>
+        <artifactId>forgerock-audit-json</artifactId>
         <version>${forgerock-audit.version}</version>
       </dependency>
-
 
       <!-- OpenDJ Ldap SDK dependencies -->
       <dependency>
