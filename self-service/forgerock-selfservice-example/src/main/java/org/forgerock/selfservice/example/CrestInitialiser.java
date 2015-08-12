@@ -23,8 +23,8 @@ import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.selfservice.core.ServiceUtils.isEmpty;
 
+import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.http.context.ServerContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -82,7 +82,7 @@ public final class CrestInitialiser {
     private static final class EmailService implements SingletonResourceProvider {
 
         @Override
-        public Promise<ActionResponse, ResourceException> actionInstance(ServerContext context, ActionRequest request) {
+        public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
             if (request.getAction().equals("send")) {
                 try {
                     JsonValue response = sendEmail(request.getContent());
@@ -130,17 +130,17 @@ public final class CrestInitialiser {
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> patchInstance(ServerContext context, PatchRequest request) {
+        public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
             return Promises.newExceptionPromise(ResourceException.newNotSupportedException());
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> readInstance(ServerContext context, ReadRequest request) {
+        public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
             return Promises.newExceptionPromise(ResourceException.newNotSupportedException());
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> updateInstance(ServerContext context, UpdateRequest request) {
+        public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
             return Promises.newExceptionPromise(ResourceException.newNotSupportedException());
         }
     }
