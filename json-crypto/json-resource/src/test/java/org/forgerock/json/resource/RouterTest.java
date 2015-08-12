@@ -32,7 +32,7 @@ import java.util.Collections;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -448,7 +448,7 @@ public class RouterTest {
     }
 
     private Context newRouterContext(Context parentContext, String remainingUri) {
-        return new RouterContext(parentContext, "MATCHED_URI", remainingUri, Collections.<String, String>emptyMap());
+        return new UriRouterContext(parentContext, "MATCHED_URI", remainingUri, Collections.<String, String>emptyMap());
     }
 
     private <T extends Request> T mockRequest(Class<T> clazz, String resourcePath) {

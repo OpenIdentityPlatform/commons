@@ -33,7 +33,7 @@ import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
@@ -518,7 +518,7 @@ final class HttpAdapter implements Handler {
      */
     private ResourcePath getResourcePath(Context context, org.forgerock.http.protocol.Request req) throws ResourceException {
         try {
-            if (context.containsContext(RouterContext.class)) {
+            if (context.containsContext(UriRouterContext.class)) {
                 ResourcePath reqPath = ResourcePath.valueOf(req.getUri().getRawPath());
                 return reqPath.subSequence(getMatchedUri(context).size(), reqPath.size());
             } else {
@@ -531,9 +531,9 @@ final class HttpAdapter implements Handler {
 
     private ResourcePath getMatchedUri(Context context) {
         List<ResourcePath> matched = new ArrayList<>();
-        if (context.containsContext(RouterContext.class)) {
-            for (Context ctx = context.asContext(RouterContext.class); ctx != null && ctx.containsContext(RouterContext.class); ctx = ctx.getParent()) {
-                matched.add(ResourcePath.valueOf(ctx.asContext(RouterContext.class).getMatchedUri()));
+        if (context.containsContext(UriRouterContext.class)) {
+            for (Context ctx = context.asContext(UriRouterContext.class); ctx != null && ctx.containsContext(UriRouterContext.class); ctx = ctx.getParent()) {
+                matched.add(ResourcePath.valueOf(ctx.asContext(UriRouterContext.class).getMatchedUri()));
             }
         }
         Collections.reverse(matched);
@@ -601,14 +601,14 @@ final class HttpAdapter implements Handler {
     }
 
     /**
-     * Attempts to parse the version header and return a corresponding {@link AcceptAPIVersion} representation.
+     * Attempts to parse the version header and return a corresponding resource {@link Version} representation.
      * Further validates that the specified versions are valid. That being not in the future and no earlier
      * that the current major version.
      *
      * @param req
      *         The HTTP servlet request
      *
-     * @return A non-null {@link AcceptAPIVersion} instance
+     * @return A non-null resource  {@link Version} instance
      *
      * @throws BadRequestException
      *         If an invalid version is requested

@@ -26,7 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
@@ -263,7 +263,7 @@ public final class Resources {
     }
 
     static String idOf(final Context context) {
-        return context.asContext(RouterContext.class).getUriTemplateVariables().get("id");
+        return context.asContext(UriRouterContext.class).getUriTemplateVariables().get("id");
     }
 
     static ResourceException newBadRequestException(final String fs, final Object... args) {
@@ -278,7 +278,7 @@ public final class Resources {
     // Strips off the unwanted leaf routing context which was added when routing
     // requests to a collection.
     static Context parentOf(final Context context) {
-        assert context instanceof RouterContext;
+        assert context instanceof UriRouterContext;
         return context.getParent();
     }
 

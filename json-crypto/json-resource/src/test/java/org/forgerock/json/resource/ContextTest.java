@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.UriRouterContext;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
@@ -64,11 +64,11 @@ public final class ContextTest {
     public void testAsContext() throws Exception {
         final Context root = new RootContext("root-id");
         final InternalContext internal = new InternalContext(root);
-        final RouterContext router = new RouterContext(internal, "test", "", new HashMap<String, String>(0));
+        final UriRouterContext router = new UriRouterContext(internal, "test", "", new HashMap<String, String>(0));
         final InternalContext internal2 = new InternalContext(router);
 
         assertThat(router.asContext(RootContext.class)).isSameAs(root);
-        assertThat(router.asContext(RouterContext.class)).isSameAs(router);
+        assertThat(router.asContext(UriRouterContext.class)).isSameAs(router);
         assertThat(router.asContext(Context.class)).isSameAs(router);
         assertThat(router.getParent().asContext(Context.class)).isSameAs(internal);
         assertThat(router.asContext(ClientContext.class)).isSameAs(internal);
