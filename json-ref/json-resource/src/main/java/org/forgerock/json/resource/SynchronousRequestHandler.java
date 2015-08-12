@@ -67,7 +67,7 @@ public interface SynchronousRequestHandler {
      * @return The new resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleCreate(org.forgerock.http.Context, CreateRequest)
+     * @see RequestHandler#handleCreate(Context, CreateRequest)
      */
     ResourceResponse handleCreate(Context context, CreateRequest request) throws ResourceException;
 
@@ -81,7 +81,7 @@ public interface SynchronousRequestHandler {
      * @return The deleted resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleDelete(org.forgerock.http.Context, DeleteRequest)
+     * @see RequestHandler#handleDelete(Context, DeleteRequest)
      */
     ResourceResponse handleDelete(Context context, DeleteRequest request) throws ResourceException;
 
@@ -96,7 +96,7 @@ public interface SynchronousRequestHandler {
      * @return The patched resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handlePatch(org.forgerock.http.Context, PatchRequest)
+     * @see RequestHandler#handlePatch(Context, PatchRequest)
      */
     ResourceResponse handlePatch(Context context, PatchRequest request) throws ResourceException;
 
@@ -114,7 +114,7 @@ public interface SynchronousRequestHandler {
      * @return The query result.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleQuery(org.forgerock.http.Context, QueryRequest, QueryResourceHandler)
+     * @see RequestHandler#handleQuery(Context, QueryRequest, QueryResourceHandler)
      */
     QueryResponse handleQuery(Context context, QueryRequest request,
             Collection<ResourceResponse> resources) throws ResourceException;
@@ -129,7 +129,7 @@ public interface SynchronousRequestHandler {
      * @return The resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleRead(org.forgerock.http.Context, ReadRequest)
+     * @see RequestHandler#handleRead(Context, ReadRequest)
      */
     ResourceResponse handleRead(Context context, ReadRequest request) throws ResourceException;
 
@@ -144,7 +144,7 @@ public interface SynchronousRequestHandler {
      * @return The updated resource.
      * @throws ResourceException
      *             If the request failed for some reason.
-     * @see RequestHandler#handleUpdate(org.forgerock.http.Context, UpdateRequest)
+     * @see RequestHandler#handleUpdate(Context, UpdateRequest)
      */
     ResourceResponse handleUpdate(Context context, UpdateRequest request) throws ResourceException;
 }
