@@ -348,7 +348,7 @@ public class AuditService implements RequestHandler {
 
     /**
      * Performs the query on the specified object and returns the associated results.
-     * <pkkj/R
+     * <p>
      * Queries are parametric; a set of named parameters is provided as the query criteria.
      * The query result is a JSON object structure composed of basic Java types.
      *

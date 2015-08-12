@@ -250,8 +250,8 @@ public final class JsonValueUtils {
 
                 @Override
                 public Boolean visitBooleanLiteralFilter(final JsonValue p, final boolean value) {
-                                                                                                       return value;
-                                                                                                                        }
+                    return value;
+                }
 
                 @Override
                 public Boolean visitContainsFilter(final JsonValue p, final JsonPointer field,

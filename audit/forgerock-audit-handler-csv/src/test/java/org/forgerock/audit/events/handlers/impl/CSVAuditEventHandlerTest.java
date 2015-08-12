@@ -22,6 +22,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
@@ -40,7 +41,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
-import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
@@ -67,7 +67,8 @@ public class CSVAuditEventHandlerTest {
                 csvHandler.createInstance(new RootContext(), createRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).succeeded()
+        assertThat(promise)
+                .succeeded()
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
@@ -96,7 +97,8 @@ public class CSVAuditEventHandlerTest {
                         readRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).succeeded()
+        assertThat(promise)
+                .succeeded()
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
@@ -138,7 +140,8 @@ public class CSVAuditEventHandlerTest {
                         Requests.newDeleteRequest("access"));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(NotSupportedException.class);
     }
 
@@ -157,7 +160,8 @@ public class CSVAuditEventHandlerTest {
                         Requests.newPatchRequest("access"));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(NotSupportedException.class);
     }
 
@@ -176,7 +180,8 @@ public class CSVAuditEventHandlerTest {
                         Requests.newUpdateRequest("access", new JsonValue(new HashMap<String, Object>())));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(NotSupportedException.class);
     }
 
@@ -194,7 +199,8 @@ public class CSVAuditEventHandlerTest {
                         Requests.newActionRequest("access", "action"));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(NotSupportedException.class);
     }
 
@@ -213,7 +219,8 @@ public class CSVAuditEventHandlerTest {
                         Requests.newActionRequest("access", "action"));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(NotSupportedException.class);
     }
 
@@ -239,7 +246,7 @@ public class CSVAuditEventHandlerTest {
                         queryResourceHandler);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).succeeded();
+        assertThat(promise).succeeded();
         verify(queryResourceHandler).handleResource(resourceCaptor.capture());
 
         final ResourceResponse resource = resourceCaptor.getValue();
@@ -271,7 +278,8 @@ public class CSVAuditEventHandlerTest {
         Promise<ResourceResponse, ResourceException> promise =
                 auditEventHandler.createInstance(new RootContext(), createRequest);
 
-        AssertJPromiseAssert.assertThat(promise).succeeded()
+        assertThat(promise)
+                .succeeded()
                 .isInstanceOf(ResourceResponse.class);
 
         // TODO should use AssertJResourceResponseAssert

@@ -17,9 +17,10 @@
 package org.forgerock.audit;
 
 import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.*;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,7 +47,6 @@ import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.forgerock.util.promise.ResultHandler;
-import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
@@ -129,7 +129,8 @@ public class AuditServiceTest {
 
         //then
         assertThat(auditService.isAuditing("access")).isTrue();
-        AssertJPromiseAssert.assertThat(promise).succeeded()
+        assertThat(promise)
+                .succeeded()
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
@@ -151,7 +152,8 @@ public class AuditServiceTest {
 
         //then
         assertThat(auditService.isAuditing("activity")).isFalse();
-        AssertJPromiseAssert.assertThat(promise).succeeded()
+        assertThat(promise)
+                .succeeded()
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
@@ -174,7 +176,8 @@ public class AuditServiceTest {
 
         //then
         assertThat(auditService.isAuditing("unknownTopic")).isFalse();
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(ResourceException.class);
     }
 
@@ -200,8 +203,8 @@ public class AuditServiceTest {
 
         //then
         verify(queryAuditEventHandler).readInstance(same(context),
-                                                    eq("1234"),
-                                                    same(readRequest));
+                eq("1234"),
+                same(readRequest));
         verifyZeroInteractions(auditEventHandler);
     }
 
@@ -216,7 +219,8 @@ public class AuditServiceTest {
                         Requests.newDeleteRequest("_id"));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(NotSupportedException.class);
     }
 
@@ -231,7 +235,8 @@ public class AuditServiceTest {
                         Requests.newPatchRequest("_id"));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(NotSupportedException.class);
     }
 
@@ -246,7 +251,8 @@ public class AuditServiceTest {
                         Requests.newUpdateRequest("_id", new JsonValue(new HashMap<String, Object>())));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(NotSupportedException.class);
     }
 
@@ -261,7 +267,8 @@ public class AuditServiceTest {
                         Requests.newActionRequest("_id", "unknownAction"));
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(BadRequestException.class);
     }
 
@@ -284,7 +291,7 @@ public class AuditServiceTest {
         //then
         verify(auditEventHandler).queryCollection(
                 any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
-        AssertJPromiseAssert.assertThat(promise).isSameAs(emptyPromise);
+        assertThat(promise).isSameAs(emptyPromise);
     }
 
     @Test
@@ -302,7 +309,8 @@ public class AuditServiceTest {
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(BadRequestException.class);
     }
 
@@ -325,7 +333,8 @@ public class AuditServiceTest {
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).failedWithException()
+        assertThat(promise)
+                .failedWithException()
                 .isInstanceOf(BadRequestException.class);
     }
 
@@ -347,7 +356,8 @@ public class AuditServiceTest {
                 auditService.handleCreate(new RootContext(), createRequestAccess);
 
         //then
-        AssertJPromiseAssert.assertThat(promise).succeeded()
+        assertThat(promise)
+                .succeeded()
                 .withObject()
                 .isInstanceOf(ResourceResponse.class);
 
