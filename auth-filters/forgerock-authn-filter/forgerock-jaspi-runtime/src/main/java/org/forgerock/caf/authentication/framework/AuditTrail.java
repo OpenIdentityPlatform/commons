@@ -202,7 +202,7 @@ public class AuditTrail {
      * @return A {@code List} of failure reasons as {@code Map}s of {@code String} to {@code Object}s.
      */
     @SuppressWarnings("unchecked")
-    List<Map<String, Object>> getFailureReasons() {
+    public List<Map<String, Object>> getFailureReasons() {
         List<Map<String, Object>> failureReasons = new ArrayList<>();
         for (Map<String, Object> entry : entries) {
             Map<String, Object> failureReason = (Map<String, Object>) entry.get(REASON_KEY);
