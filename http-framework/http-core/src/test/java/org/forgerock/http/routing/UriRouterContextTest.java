@@ -25,7 +25,7 @@ import org.forgerock.http.context.RootContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class RouterContextTest {
+public class UriRouterContextTest {
 
     @DataProvider
     private Object[][] testData() {
@@ -43,7 +43,7 @@ public class RouterContextTest {
     }
 
     @Test(dataProvider = "testData")
-    public void shouldGetBaseUri(RouterContext context, String expectedBaseUri) {
+    public void shouldGetBaseUri(UriRouterContext context, String expectedBaseUri) {
 
         //When
         String baseUri = context.getBaseUri();
@@ -52,7 +52,7 @@ public class RouterContextTest {
         assertThat(baseUri).isEqualTo(expectedBaseUri);
     }
 
-    private RouterContext newContext(Context parentContext, String matchedUri) {
-        return new RouterContext(parentContext, matchedUri, "REMAINING", Collections.<String, String>emptyMap());
+    private UriRouterContext newContext(Context parentContext, String matchedUri) {
+        return new UriRouterContext(parentContext, matchedUri, "REMAINING", Collections.<String, String>emptyMap());
     }
 }

@@ -60,7 +60,7 @@ public class RouteMatchersTest {
         assertThat(uri.toString()).isEqualTo(expectedUri);
     }
 
-    private RouterContext newContext(Context parentContext, String matchedUri) {
-        return new RouterContext(parentContext, matchedUri, "REMAINING", Collections.<String, String>emptyMap());
+    private UriRouterContext newContext(Context parentContext, String matchedUri) {
+        return new UriRouterContext(parentContext, matchedUri, "REMAINING", Collections.<String, String>emptyMap());
     }
 }

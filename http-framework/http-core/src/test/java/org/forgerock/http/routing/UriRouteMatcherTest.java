@@ -68,8 +68,8 @@ public class UriRouteMatcherTest {
         RouteMatch result = routeMatcher.evaluate(mock(Context.class), request);
         if (expectedRemaining != null) {
             assertThat(result).isNotNull();
-            RouterContext routerContext = result.decorateContext(context).asContext(RouterContext.class);
-            assertThat(routerContext.getRemainingUri()).isEqualTo(expectedRemaining);
+            UriRouterContext uriRouterContext = result.decorateContext(context).asContext(UriRouterContext.class);
+            assertThat(uriRouterContext.getRemainingUri()).isEqualTo(expectedRemaining);
         } else {
             assertThat(result).isNull();
         }
@@ -133,9 +133,9 @@ public class UriRouteMatcherTest {
 
         //Then
         assertThat(result).isNotNull();
-        RouterContext routerContext = result.decorateContext(context).asContext(RouterContext.class);
-        assertThat(routerContext.getRemainingUri()).isEqualTo("");
-        assertThat(routerContext.getUriTemplateVariables())
+        UriRouterContext uriRouterContext = result.decorateContext(context).asContext(UriRouterContext.class);
+        assertThat(uriRouterContext.getRemainingUri()).isEqualTo("");
+        assertThat(uriRouterContext.getUriTemplateVariables())
                 .hasSize(2)
                 .contains(entry("user", "demo"), entry("role", "admin"));
     }

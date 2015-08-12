@@ -47,7 +47,7 @@ import org.forgerock.http.context.RootContext;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.http.util.Uris;
 import org.forgerock.util.Factory;
@@ -252,10 +252,10 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 .build();
     }
 
-    private RouterContext createRouterContext(Context parent, HttpServletRequest req) {
+    private UriRouterContext createRouterContext(Context parent, HttpServletRequest req) {
         String matchedUri = routingBase.extractMatchedUri(req);
         String remaining = req.getRequestURI().substring(req.getRequestURI().indexOf(matchedUri) + matchedUri.length());
-        return new RouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
+        return new UriRouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
     }
 
     private void writeResponse(HttpRequestContext context, HttpServletResponse resp, Response response)

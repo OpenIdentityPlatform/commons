@@ -38,7 +38,7 @@ import org.forgerock.json.JsonValue;
  * template variable name.
  * </ul>
  */
-public final class RouterContext extends AbstractContext {
+public final class UriRouterContext extends AbstractContext {
 
     // Persisted attribute names
     private static final String ATTR_MATCHED_URI = "matchedUri";
@@ -62,9 +62,9 @@ public final class RouterContext extends AbstractContext {
      *            A {@code Map} containing the parsed URI template variables,
      *            keyed on the URI template variable name.
      */
-    public RouterContext(final Context parent, final String matchedUri, final String remainingUri,
+    public UriRouterContext(final Context parent, final String matchedUri, final String remainingUri,
             final Map<String, String> uriTemplateVariables) {
-        super(checkNotNull(parent, "Cannot instantiate RouterContext with null parent Context"), "router");
+        super(checkNotNull(parent, "Cannot instantiate UriRouterContext with null parent Context"), "router");
         data.put(ATTR_MATCHED_URI, matchedUri);
         data.put(ATTR_REMAINIG_URI, remainingUri);
         this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
@@ -80,7 +80,7 @@ public final class RouterContext extends AbstractContext {
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    RouterContext(final JsonValue savedContext, final ClassLoader classLoader) {
+    UriRouterContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
         this.uriTemplateVariables =
                 Collections.unmodifiableMap(data.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap(String.class));
@@ -98,8 +98,8 @@ public final class RouterContext extends AbstractContext {
     public String getBaseUri() {
         final StringBuilder builder = new StringBuilder();
         final Context parent = getParent();
-        if (parent.containsContext(RouterContext.class)) {
-            final String baseUri = parent.asContext(RouterContext.class).getBaseUri();
+        if (parent.containsContext(UriRouterContext.class)) {
+            final String baseUri = parent.asContext(UriRouterContext.class).getBaseUri();
             if (!baseUri.isEmpty()) {
                 builder.append(baseUri);
             }

@@ -28,7 +28,7 @@ import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -64,7 +64,7 @@ public class ExampleHttpApplication implements HttpApplication {
             public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
                 Map<String, String> content = new HashMap<>();
                 content.put("applicationName", applicationName);
-                content.put("matchedUri", context.asContext(RouterContext.class).getBaseUri());
+                content.put("matchedUri", context.asContext(UriRouterContext.class).getBaseUri());
                 return newResultPromise(new Response(Status.OK).setEntity(content));
             }
         };

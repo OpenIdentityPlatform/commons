@@ -148,8 +148,8 @@ public final class RouteMatchers {
 
     static ResourcePath getRemainingRequestUri(Context context, Request request) {
         ResourcePath path = request.getUri().getResourcePath();
-        if (context.containsContext(RouterContext.class)) {
-            ResourcePath matchedUri = ResourcePath.valueOf(context.asContext(RouterContext.class).getBaseUri());
+        if (context.containsContext(UriRouterContext.class)) {
+            ResourcePath matchedUri = ResourcePath.valueOf(context.asContext(UriRouterContext.class).getBaseUri());
             path = path.tail(matchedUri.size());
         }
         return path;

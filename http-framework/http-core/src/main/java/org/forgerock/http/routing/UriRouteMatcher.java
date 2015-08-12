@@ -58,12 +58,12 @@ import org.forgerock.http.ResourcePath;
  *
  * A request handler receiving a routed request may access the associated
  * route's URI template variables via
- * {@link RouterContext#getUriTemplateVariables()}. For example, a handler
+ * {@link UriRouterContext#getUriTemplateVariables()}. For example, a handler
  * processing requests for the route users/{userId} may obtain the value of
  * {@code userId} as follows:
  *
  * <pre>
- * String userId = context.asContext(RouterContext.class).getUriTemplateVariables().get(&quot;userId&quot;);
+ * String userId = context.asContext(UriRouterContext.class).getUriTemplateVariables().get(&quot;userId&quot;);
  * </pre>
  *
  * <b>NOTE:</b> for simplicity this implementation only supports a small
@@ -308,7 +308,7 @@ class UriRouteMatcher extends RouteMatcher<ResourcePath> {
 
         @Override
         public Context decorateContext(Context context) {
-            return new RouterContext(context, matched, remaining, variableMap);
+            return new UriRouterContext(context, matched, remaining, variableMap);
         }
     }
 }
