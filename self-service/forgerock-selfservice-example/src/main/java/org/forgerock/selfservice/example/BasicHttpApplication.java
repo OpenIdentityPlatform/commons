@@ -71,6 +71,10 @@ public final class BasicHttpApplication implements HttpApplication {
         emailConfig.setIdentityIdField("_id");
         emailConfig.setIdentityEmailField("mail");
         emailConfig.setIdentityServiceUrl("/users");
+        emailConfig.setEmailServiceUrl("/email");
+        emailConfig.setEmailFrom("info@admin.org");
+        emailConfig.setEmailSubject("Reset password email");
+        emailConfig.setEmailMessage("This is your reset email.\nLink: %link%");
 
         ProcessInstanceConfig config = ProcessInstanceConfig
                 .newBuilder()

@@ -16,11 +16,15 @@
 
 package org.forgerock.selfservice.stages.email;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
 
 import org.forgerock.http.context.RootContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;
@@ -105,16 +109,16 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
                 .asString();
         String code = UUID.randomUUID().toString();
 
-        context = ProcessContext
-                .newBuilder(context)
-                .addState("userId", userId)
-                .addState("mail", mail)
-                .addState("code", code)
-                .setStageTag(VALIDATE_LINK_TAG)
-                .build();
+        String snapshotToken = snapshotAuthor.captureSnapshotOf(
+                ProcessContext
+                        .newBuilder(context)
+                        .addState("userId", userId)
+                        .addState("mail", mail)
+                        .addState("code", code)
+                        .setStageTag(VALIDATE_LINK_TAG)
+                        .build());
 
-        String snapshotToken = snapshotAuthor.captureSnapshotOf(context);
-        System.out.printf("Email sent for %s to %s with token %s and code %s\n", userId, mail, snapshotToken, code);
+        sendEmail(mail, snapshotToken, code, config);
 
         JsonValue requirements = RequirementsBuilder
                 .newInstance("Verify email address")
@@ -169,12 +173,12 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
         try {
             Connection connection = connectionFactory.getConnection();
 
-            QueryRequest request = Requests.newQueryRequest(config.getIdentityServiceUrl());
-
-            request.setQueryFilter(
-                    QueryFilter.or(
-                            QueryFilter.equalTo(new JsonPointer(config.getIdentityIdField()), identifier),
-                            QueryFilter.equalTo(new JsonPointer(config.getIdentityEmailField()), identifier)));
+            QueryRequest request = Requests
+                    .newQueryRequest(config.getIdentityServiceUrl())
+                    .setQueryFilter(
+                            QueryFilter.or(
+                                    QueryFilter.equalTo(new JsonPointer(config.getIdentityIdField()), identifier),
+                                    QueryFilter.equalTo(new JsonPointer(config.getIdentityEmailField()), identifier)));
 
             final List<JsonValue> user = new ArrayList<>();
             connection.query(new RootContext(), request, new QueryResourceHandler() {
@@ -192,6 +196,30 @@ public class EmailStage implements ProgressStage<EmailStageConfig> {
             }
 
             return user.isEmpty() ? null : user.get(0);
+        } catch (ResourceException rE) {
+            throw new StageConfigException(rE.getMessage());
+        }
+    }
+
+    private void sendEmail(String mail, String snapshotToken, String code, EmailStageConfig config) {
+        String emailUrl = "http://localhost:9999/somepage?token=" + snapshotToken + "&code=" + code;
+        String message = config.getEmailMessage().replace("%link%", emailUrl);
+
+        try {
+            Connection connection = connectionFactory.getConnection();
+            ActionRequest request = Requests
+                    .newActionRequest(config.getEmailServiceUrl(), "send")
+                    .setContent(
+                            json(
+                                    object(
+                                            field("to", mail),
+                                            field("from", config.getEmailFrom()),
+                                            field("subject", config.getEmailSubject()),
+                                            field("message", message)
+                                    )
+                            ));
+
+            connection.action(new RootContext(), request);
         } catch (ResourceException rE) {
             throw new StageConfigException(rE.getMessage());
         }

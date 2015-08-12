@@ -39,6 +39,7 @@ public class EmailStageConfig implements StageConfig {
     private String emailServiceUrl;
     private String emailSubject;
     private String emailMessage;
+    private String emailFrom;
 
     public String getIdentityServiceUrl() {
         return identityServiceUrl;
@@ -86,6 +87,14 @@ public class EmailStageConfig implements StageConfig {
 
     public void setEmailMessage(String emailMessage) {
         this.emailMessage = emailMessage;
+    }
+
+    public String getEmailFrom() {
+        return emailFrom;
+    }
+
+    public void setEmailFrom(String emailFrom) {
+        this.emailFrom = emailFrom;
     }
 
     @Override
