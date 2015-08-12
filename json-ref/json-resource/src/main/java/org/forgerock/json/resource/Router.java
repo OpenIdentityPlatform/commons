@@ -31,8 +31,8 @@ import org.forgerock.http.routing.AbstractRouter;
 import org.forgerock.http.routing.ApiVersionRouterContext;
 import org.forgerock.http.routing.IncomparableRouteMatchException;
 import org.forgerock.http.routing.RouteMatcher;
-import org.forgerock.http.routing.RouterContext;
 import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.Promise;
@@ -236,7 +236,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
-            RouterContext routerContext = getRouterContext(bestMatch.getFirst());
+            UriRouterContext routerContext = getRouterContext(bestMatch.getFirst());
             ActionRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfActionRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
@@ -250,7 +250,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
-            RouterContext routerContext = getRouterContext(bestMatch.getFirst());
+            UriRouterContext routerContext = getRouterContext(bestMatch.getFirst());
             CreateRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfCreateRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
@@ -264,7 +264,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
-            RouterContext routerContext = getRouterContext(bestMatch.getFirst());
+            UriRouterContext routerContext = getRouterContext(bestMatch.getFirst());
             DeleteRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfDeleteRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
@@ -278,7 +278,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
-            RouterContext routerContext = getRouterContext(bestMatch.getFirst());
+            UriRouterContext routerContext = getRouterContext(bestMatch.getFirst());
             PatchRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfPatchRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
@@ -294,7 +294,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
             final Context decoratedContext = bestMatch.getFirst();
-            RouterContext routerContext = getRouterContext(decoratedContext);
+            UriRouterContext routerContext = getRouterContext(decoratedContext);
             QueryRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfQueryRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
@@ -319,7 +319,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
-            RouterContext routerContext = getRouterContext(bestMatch.getFirst());
+            UriRouterContext routerContext = getRouterContext(bestMatch.getFirst());
             ReadRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfReadRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
@@ -333,7 +333,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestMatch(context, request);
-            RouterContext routerContext = getRouterContext(bestMatch.getFirst());
+            UriRouterContext routerContext = getRouterContext(bestMatch.getFirst());
             UpdateRequest routedRequest = wasRouted(routerContext, request)
                     ? copyOfUpdateRequest(request).setResourcePath(getResourcePath(routerContext))
                     : request;
@@ -343,19 +343,19 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
         }
     }
 
-    private RouterContext getRouterContext(Context context) {
-        if (context.containsContext(RouterContext.class)) {
-            return context.asContext(RouterContext.class);
+    private UriRouterContext getRouterContext(Context context) {
+        if (context.containsContext(UriRouterContext.class)) {
+            return context.asContext(UriRouterContext.class);
         } else {
             return null;
         }
     }
 
-    private boolean wasRouted(RouterContext routerContext, Request request) {
+    private boolean wasRouted(UriRouterContext routerContext, Request request) {
         return routerContext != null && !routerContext.getRemainingUri().equals(request.getResourcePath());
     }
 
-    private String getResourcePath(RouterContext routerContext) {
+    private String getResourcePath(UriRouterContext routerContext) {
         return routerContext.getRemainingUri();
     }
 

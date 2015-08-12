@@ -29,7 +29,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
@@ -196,7 +196,7 @@ public final class DynamicRealmDemo {
             }
 
             private RequestHandler subrealm(final List<String> parentPath, final Context context) {
-                final String realm = context.asContext(RouterContext.class).getUriTemplateVariables().get("realm");
+                final String realm = context.asContext(UriRouterContext.class).getUriTemplateVariables().get("realm");
                 final List<String> path = new LinkedList<>(parentPath);
                 path.add(realm);
 

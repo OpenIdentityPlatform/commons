@@ -37,7 +37,7 @@ import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
-import org.forgerock.http.routing.RouterContext;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.AdviceContext;
@@ -317,7 +317,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                 .append(httpRequest.getUri().getRawAuthority());
 
         // Add back the context path.
-        builder.append(context.asContext(RouterContext.class).getMatchedUri());
+        builder.append(context.asContext(UriRouterContext.class).getMatchedUri());
 
         // Add new resource name and resource ID.
         final ResourcePath resourcePath = request.getResourcePathObject();
