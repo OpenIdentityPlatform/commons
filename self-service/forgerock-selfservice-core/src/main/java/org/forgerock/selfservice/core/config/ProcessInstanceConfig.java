@@ -161,7 +161,7 @@ public final class ProcessInstanceConfig {
         LOCAL,
 
         /**
-         * State should be preserved in a stateless way.
+         * State is serialised into request/response to avoid server-side state management.
          */
         STATELESS
     }

@@ -16,24 +16,24 @@
 
 package org.forgerock.selfservice.example;
 
-import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
 import static org.forgerock.selfservice.core.config.ProcessInstanceConfig.StorageType;
+import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
 
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.selfservice.core.AnonymousProcessService;
+import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
+import org.forgerock.selfservice.stages.email.EmailStageConfig;
+import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.Router;
 import org.forgerock.http.routing.RoutingMode;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.http.CrestHttp;
-import org.forgerock.selfservice.core.AnonymousProcessService;
-import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
-import org.forgerock.selfservice.stages.email.EmailStageConfig;
-import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.util.Factory;
 
 import java.nio.charset.Charset;
@@ -43,11 +43,11 @@ import java.nio.charset.Charset;
  *
  * @since 0.1.0
  */
-public final class BasicHttpApplication implements HttpApplication {
+public final class ExampleSelfServiceApplication implements HttpApplication {
 
     private final ConnectionFactory crestConnectionFactory;
 
-    public BasicHttpApplication() {
+    public ExampleSelfServiceApplication() {
         try {
             crestConnectionFactory = new CrestInitialiser().initialise();
         } catch (ResourceException e) {
@@ -87,8 +87,8 @@ public final class BasicHttpApplication implements HttpApplication {
         byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(Charset.forName("UTF-8"));
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new BasicProgressStageFactory(crestConnectionFactory),
-                new BasicSnapshotTokenHandlerFactory(sharedKey), new BasicLocalStorage());
+                new ExampleProgressStageFactory(crestConnectionFactory),
+                new ExampleTokenHandlerFactory(sharedKey), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
     }

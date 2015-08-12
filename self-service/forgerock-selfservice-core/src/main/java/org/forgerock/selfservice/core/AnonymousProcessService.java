@@ -264,7 +264,6 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
     /*
      * Enables a typed stage config to be passed to the stage.
-     * <b />
      * Type safety is checked during the stage retrieval.
      */
     private <C extends StageConfig> JsonValue gatherInitialRequirements(
@@ -274,7 +273,6 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
     /*
      * Enables a typed stage config to be passed to the stage.
-     * <b />
      * Type safety is checked during the stage retrieval.
      */
     private <C extends StageConfig> StageResponse advanceProgress(
@@ -284,7 +282,6 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
     /*
      * Retrieves the stage and its corresponding config based on the context stage index.
-     * <b />
      * This method also validates the expected subtype of the config.
      */
     private Pair<? extends ProgressStage<?>, StageConfig> retrieveStage(ProcessContext context) {

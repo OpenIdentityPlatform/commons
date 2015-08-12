@@ -31,14 +31,14 @@ import java.util.Map;
  *
  * @since 0.1.0
  */
-public final class BasicProgressStageFactory implements ProgressStageFactory {
+public final class ExampleProgressStageFactory implements ProgressStageFactory {
 
     private final Map<StageType<?>, ProgressStage<?>> progressStages;
 
     /**
      * Creates a new basic progress stage factory.
      */
-    public BasicProgressStageFactory(ConnectionFactory connectionFactory) {
+    public ExampleProgressStageFactory(ConnectionFactory connectionFactory) {
         progressStages = new HashMap<>();
         progressStages.put(EmailStageConfig.TYPE, new EmailStage(connectionFactory));
         progressStages.put(ResetConfig.TYPE, new ResetStage());

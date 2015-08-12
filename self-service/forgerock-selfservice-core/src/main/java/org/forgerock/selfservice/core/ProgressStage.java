@@ -23,7 +23,7 @@ import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 
 /**
  * Progress stage represents a single stage within the overall advance flow.
- * <b />
+ * <br />
  * The method {@link ProgressStage#gatherInitialRequirements(ProcessContext, StageConfig)} is invoke first and provides
  * an opportunity for the stage to return some initial requirements. The method
  * {@link ProgressStage#advance(ProcessContext, StageConfig, SnapshotAuthor)} is repeatedly after for every
@@ -40,7 +40,7 @@ public interface ProgressStage<C extends StageConfig> {
 
     /**
      * Response for defining any initial requirements the stage may have.
-     * <b />
+     * <br />
      * An empty json object implies no initial requirements.
      *
      * @param context
@@ -57,7 +57,7 @@ public interface ProgressStage<C extends StageConfig> {
 
     /**
      * Advance the progress stage.
-     * <b />
+     * <br />
      * The snapshot author can be used to take a snapshot of the current flow state.
      *
      * @param context
