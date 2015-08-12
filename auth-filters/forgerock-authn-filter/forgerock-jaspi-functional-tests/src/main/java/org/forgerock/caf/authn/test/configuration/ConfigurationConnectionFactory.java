@@ -16,6 +16,8 @@
 
 package org.forgerock.caf.authn.test.configuration;
 
+import static org.forgerock.json.resource.Router.uriTemplate;
+
 import org.forgerock.guice.core.InjectorHolder;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Resources;
@@ -41,8 +43,8 @@ public final class ConfigurationConnectionFactory {
      */
     public static ConnectionFactory getConnectionFactory() {
         Router router = new Router();
-        router.addRoute("/configuration", InjectorHolder.getInstance(ConfigurationResource.class));
-        router.addRoute("/auditrecords", InjectorHolder.getInstance(AuditResource.class));
+        router.addRoute(uriTemplate("configuration"), InjectorHolder.getInstance(ConfigurationResource.class));
+        router.addRoute(uriTemplate("auditrecords"), InjectorHolder.getInstance(AuditResource.class));
         return Resources.newInternalConnectionFactory(router);
     }
 }
