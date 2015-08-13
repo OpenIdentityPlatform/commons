@@ -17,7 +17,6 @@
 package org.forgerock.http.handler;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 
 import org.forgerock.http.Filter;
@@ -60,31 +59,6 @@ public final class Handlers {
      */
     public static Handler chainOf(final Handler handler, final List<Filter> filters) {
         return new Chain(handler, filters, 0);
-    }
-
-    /**
-     * Creates a {@link Filter} which encapsulates the provided {@literal filters}
-     * into a single {@code Filter}.
-     *
-     * @param filters The list of filters to be invoked, in order.
-     * @return A {@code Filter}.
-     * @see #chainOf(Collection)
-     */
-    public static Filter chainOf(final Filter... filters) {
-        return chainOf(Arrays.asList(filters));
-    }
-
-    /**
-     * Creates a {@link Filter} which encapsulates the provided {@literal filters}
-     * into a single {@code Filter}.
-     *
-     * @param filters The list of filters to be invoked, in order.
-     * @return A {@code Filter}.
-     * @see #chainOf(Filter...)
-     */
-    public static Filter chainOf(final Collection<Filter> filters) {
-        // TODO: return a subsequence of filters.
-        return null;
     }
 
 }
