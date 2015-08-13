@@ -23,6 +23,7 @@ import org.forgerock.http.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.SessionManager;
+import org.forgerock.http.handler.Handlers;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -82,38 +83,8 @@ public final class Filters {
         return new Filter() {
             @Override
             public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
-                return new Chain(next, filters, 0).handle(context, request);
+                return Handlers.chainOf(next, filters).handle(context, request);
             }
         };
-    }
-
-    private static final class Chain implements Handler {
-        private final Handler handler;
-        private final List<Filter> filters;
-        private final int position;
-
-        private Chain(Handler handler, List<Filter> filters, int position) {
-            this.handler = handler;
-            this.filters = filters;
-            this.position = position;
-        }
-
-        @Override
-        public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
-            if (position < filters.size()) {
-                return filters.get(position).filter(context, request, next());
-            } else {
-                return handler.handle(context, request);
-            }
-        }
-
-        private Handler next() {
-            return new Chain(handler, filters, position + 1);
-        }
-
-        @Override
-        public String toString() {
-            return filters.toString() + " -> " + handler.toString();
-        }
     }
 }
