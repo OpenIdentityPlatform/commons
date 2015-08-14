@@ -275,6 +275,19 @@ public class ResourceException extends IOException implements Response {
     }
 
     /**
+     * Casts a {@code ResourceException} to a {@code ResourceException} in places
+     * where the type system cannot determine that a subclass of ResourceException is
+     * really a ResourceExceptoin.
+     *
+     * @param exception
+     *            The {@code ResourceException} to be casted.
+     * @return The resource exception.
+     */
+    public static ResourceException cast(ResourceException exception) {
+        return exception;
+    }
+
+    /**
      * Adapts a {@code Throwable} to a {@code ResourceException}. If the
      * {@code Throwable} is an JSON {@code JsonValueException} then an
      * appropriate {@code ResourceException} is returned, otherwise an
