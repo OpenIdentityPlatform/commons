@@ -45,12 +45,17 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         baseTemplate: "templates/common/DefaultBaseTemplate.html",
         delegate: userDelegate,
         events: {
+            "click #changeSecurity": "changeSecurity",
             "click input[name=saveButton]": "formSubmit",
             "click input[name=resetButton]": "reloadData",
             "onValidate": "onValidate"
         },
 
         data:{},
+
+        changeSecurity: function() {
+            eventManager.sendEvent(constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG);
+        },
 
         submit: function(){
             var _this = this;

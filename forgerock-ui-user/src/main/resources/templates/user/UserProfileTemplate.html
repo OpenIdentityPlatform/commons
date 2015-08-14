@@ -2,7 +2,7 @@
     <div class="page-header">
         <div class='btn-toolbar pull-right' style="border-bottom:none">
             <div class='btn-group'>
-                <a class="pull-right" href="{{url 'changeSecurityData'}}"><button class="btn btn-primary" type="button" id="changeSecurity" name="changeSecurity">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</button></a>
+                <button class="btn btn-primary" type="button" id="changeSecurity" name="changeSecurity">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</button>
                 {{#unless adminUser}}
                 {{#siteIdentification}}<a class="pull-right" href="{{url 'siteIdentification'}}"><button class="btn btn-primary" type="button" name="changeSiteIdentification">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</button></a>{{/siteIdentification}}
                 {{/unless}}
