@@ -284,42 +284,6 @@ public class ResourceException extends IOException implements Response {
     }
 
     /**
-     * Constructs a new {@link InternalServerErrorException} with {@code null}
-     * as its detail message.
-     *
-     * @return A {@code NotFoundException}.
-     * @since 3.0.0
-     */
-    public static ResourceException newInternalServerErrorException() {
-        return new InternalServerErrorException();
-    }
-
-    /**
-     * Constructs a new {@link InternalServerErrorException} with the specified
-     * detail message.
-     *
-     * @param message The detail message.
-     * @return A {@code NotFoundException}.
-     * @since 3.0.0
-     */
-    public static ResourceException newInternalServerErrorException(String message) {
-        return new InternalServerErrorException(message);
-    }
-
-    /**
-     * Constructs a new {@link InternalServerErrorException} with the specified
-     * detail message and cause.
-     *
-     * @param message The detail message.
-     * @param cause The exception which caused this exception to be thrown.
-     * @return A {@code InternalServerErrorException}.
-     * @since 3.0.0
-     */
-    public static ResourceException newInternalServerErrorException(String message, Throwable cause) {
-        return new InternalServerErrorException(message, cause);
-    }
-
-    /**
      * Adapts a {@code Throwable} to a {@code ResourceException}. If the
      * {@code Throwable} is an JSON {@code JsonValueException} then an
      * appropriate {@code ResourceException} is returned, otherwise an
