@@ -99,12 +99,30 @@ public final class HttpFrameworkServlet extends HttpServlet {
     private Handler handler;
     private ServletRoutingBase routingBase;
 
+    /**
+     * Default constructor for use via web.xml declaration.
+     */
+    public HttpFrameworkServlet() {
+    }
+
+    /**
+     * Creates a new {@code HttpFrameworkServlet} programmatically using the
+     * specified {@link HttpApplication}.
+     *
+     * @param application The {@code HttpApplication} instance.
+     */
+    public HttpFrameworkServlet(HttpApplication application) {
+        this.application = application;
+    }
+
     @Override
     public void init() throws ServletException {
         adapter = getAdapter(getServletContext());
         routingBase = selectRoutingBase(getServletConfig());
-        HttpApplicationLoader applicationLoader = getApplicationLoader(getServletConfig());
-        application = getApplication(applicationLoader, getServletConfig());
+        if (application == null) {
+            HttpApplicationLoader applicationLoader = getApplicationLoader(getServletConfig());
+            application = getApplication(applicationLoader, getServletConfig());
+        }
         storage = application.getBufferFactory();
         if (storage == null) {
             final File tmpDir = (File) getServletContext().getAttribute(SERVLET_TEMP_DIR);
