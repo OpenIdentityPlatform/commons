@@ -30,9 +30,10 @@ require.config({
             "UserDelegate": "org/forgerock/mock/ui/user/delegates/UserDelegate",
             "ThemeManager": "org/forgerock/mock/ui/common/util/ThemeManager",
             "LoginView": "org/forgerock/commons/ui/common/LoginView",
+            "PasswordResetView": "org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView",
             "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
-            "RegisterView": "org/forgerock/mock/ui/user/UserRegistrationView",
+            "RegisterView": "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
             "ChangeSecurityDataDialog": "org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog"
         }
     },

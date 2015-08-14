@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
@@ -25,9 +25,6 @@
 /*global define*/
 /*jslint regexp:false */
 
-/**
- * @author jdabrowski
- */
 define("config/routes/UserRoutesConfig", [
 ], function() {
     //definitions for views here are generic
@@ -39,6 +36,14 @@ define("config/routes/UserRoutesConfig", [
             role: "ui-user",
             url: "profile/" ,
             forceUpdate: true
+        },
+        "passwordReset": {
+            view: "PasswordResetView",
+            url: /passwordReset(\/[^\&]*)(\&.+)?/,
+            pattern: "passwordReset??",
+            forceUpdate: true,
+            argumentNames: ["realm", "additionalParameters"],
+            defaults: ["/", ""]
         },
         "selfRegistration": {
             view: "RegisterView",
@@ -55,6 +60,6 @@ define("config/routes/UserRoutesConfig", [
             url: "profile/change_security_data/"
         }
     };
-    
+
     return obj;
 });

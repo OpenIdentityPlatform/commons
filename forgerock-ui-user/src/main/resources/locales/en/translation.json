@@ -46,14 +46,14 @@
     "templates" : {
         "user" : {
             "LoginDialog" : {
-                "refreshOnLogin" : "Should refresh on login" 
+                "refreshOnLogin" : "Should refresh on login"
             },
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
                 "noAccountQuestion" : "Don't have an account?",
                 "registerAccount" : "Register your account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
-                "resetPassword" : "Reset your password",
+                "resetPassword" : "Reset your Password",
                 "siteIdentificationHeader": "Site Identification",
                 "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here."
             },
@@ -166,6 +166,24 @@
             }
         },
         "user" : {
+            "passwordReset" : {
+                "title": "Reset Your Password",
+                "completed": "Your password has been successfully reset.",
+                "failed": "Unable to reset your password",
+                "tryAgain": "Try Resetting Your Password Again",
+                "return": "Return to Login Page"
+            },
+            "selfRegistration" : {
+                "title": "Register Your Account",
+                "completed": "Your account has been successfully registered.",
+                "failed": "Unable to register your account",
+                "tryAgain": "Try Registering Again",
+                "return": "Return to Login Page"
+            },
+            "emailVerification" : {
+                "description" : "Enter the email address associated with your account to reset your password. We will send you an email that will allow you to reset your password.",
+                "send": "Send"
+            },
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",

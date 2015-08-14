@@ -24,14 +24,220 @@
 
 /*global define, _ */
 
-/**
- * @author Eugenia Sergueeva
- * @author Jake Feasel
- */
-
  define("mock/Data", [
  ], function () {
     return function (server) {
+
+        server.respondWith(
+            "GET",
+            "/mock/reset",
+            [
+                200,
+                {
+                    "Content-Type": "application/json;charset=UTF-8"
+                },
+                JSON.stringify(
+                    {
+                        "type" : "emailValidation",
+                        "stage" : "0",
+                        "requirements" : {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "description": "Reset your password",
+                            "type" : "object",
+                            "required" : [
+                                "mail"
+                            ],
+                            "properties" : {
+                                "mail" : {
+                                    "description" : "Enter your email address",
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    }
+                )
+            ]
+        );
+
+        server.respondWith(
+            "POST",
+            "/mock/reset?_action=submitRequirements",
+            function (request) {
+                var requestContent = JSON.parse(request.requestBody),
+                    headers = { "Content-Type": "application/json;charset=UTF-8" };
+                switch (requestContent.token) {
+                    case undefined:
+                        if (_.isObject(requestContent, "input") && _.isString(requestContent.input.mail)) {
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "token": "mockToken1",
+                                    "type" : "emailValidation",
+                                    "stage" : "2",
+                                    "requirements" : {
+                                        "$schema": "http://json-schema.org/draft-04/schema#",
+                                        "description": "Verify email address",
+                                        "type" : "object",
+                                        "required" : [
+                                            "code"
+                                        ],
+                                        "properties" : {
+                                            "code" : {
+                                                "description" : "Enter code emailed to your address",
+                                                "type" : "string"
+                                            }
+                                        }
+                                    }
+                                })
+                            );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "username is missing"
+                                })
+                            );
+                        }
+                    break;
+                    case "mockToken1":
+                        if (_.isObject(requestContent, "input") &&
+                            _.isString(requestContent.input.code) &&
+                            requestContent.input.code === "12345") {
+                                request.respond(
+                                    200,
+                                    headers,
+                                    JSON.stringify({
+                                    "token" : "mockToken2",
+                                    "type" : "emailValidation",
+                                    "stage" : "3",
+                                    "requirements" : {
+                                        "$schema": "http://json-schema.org/draft-04/schema#",
+                                        "description": "Reset password",
+                                        "type" : "object",
+                                        "required" : [
+                                            "password"
+                                        ],
+                                        "properties" : {
+                                            "password" : {
+                                                "description" : "Password",
+                                                "type" : "string"
+                                            }
+                                        }
+                                    }
+                                })
+                            );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "Invalid code"
+                                })
+                            );
+                        }
+                    break;
+                    case "mockToken2":
+                        if (_.isObject(requestContent, "input") &&
+                            _.isString(requestContent.input.password)) {
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "type" : "emailValidation",
+                                    "stage" : "end",
+                                    "status" : {
+                                        "success": true
+                                    }
+                                })
+                            );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "password is missing from input"
+                                })
+                            );
+                        }
+                    break;
+                    default:
+                        request.respond(
+                            400,
+                            headers,
+                            JSON.stringify({
+                                "code": 400,
+                                "reason": "Bad Request",
+                                "message": "Token provided not recognized"
+                            })
+                        );
+                }
+            }
+        );
+
+
+        server.respondWith(
+            "GET",
+            "/mock/selfRegistration",
+            [
+                200,
+                {
+                    "Content-Type": "application/json;charset=UTF-8"
+                },
+                JSON.stringify(
+                    {
+                        "type" : "generic",
+                        "stage" : "1",
+                        "requirements" : {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "description": "Register your account",
+                            "type" : "object",
+                            "required" : [
+                                "mail"
+                            ],
+                            "properties" : {
+                                "mail" : {
+                                    "description" : "Enter your email address",
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    }
+                )
+            ]
+        );
+
+        server.respondWith(
+            "POST",
+            "/mock/selfRegistration?_action=submitRequirements",
+            function (request) {
+                var requestContent = JSON.parse(request.requestBody),
+                    headers = { "Content-Type": "application/json;charset=UTF-8" };
+                switch (requestContent.token) {
+                    case undefined:
+
+                        request.respond(
+                            400,
+                            headers,
+                            JSON.stringify({
+                                "code": 400,
+                                "reason": "Bad Request",
+                                "message": "Under Construction"
+                            })
+                        );
+
+                    break;
+                }
+            }
+        );
+
         server.respondWith(
             "GET",
             "/mock/config/ui/configuration",
@@ -46,6 +252,7 @@
                             "defaultNotificationType": "info",
                             "passwordResetLink": "",
                             "selfRegistration": true,
+                            "passwordReset": true,
                             "roles": {
                                 "ui-user": "User"
                             },
@@ -69,6 +276,7 @@
                 )
             ]
         );
+
 
         server.respondWith(
             "GET",

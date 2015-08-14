@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,17 +24,13 @@
 
 /*global define */
 
-define("org/forgerock/mock/ui/user/TermsOfUseDialog", [
-    "jquery",
-    "org/forgerock/commons/ui/common/components/BootstrapDialogView"
-], function ($, BootstrapDialogView) {
-    var TermsOfUseDialog = BootstrapDialogView.extend({
-        contentTemplate: "templates/mock/TermsOfUseTemplate.html",
-        render: function(){
-            this.setTitle($.t("templates.user.TermsOfUseTemplate.termsOfUse"));
-            this.show();
-        }
+define("org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView", [
+    "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView"
+], function(AnonymousProcessView) {
+    var PasswordResetView = AnonymousProcessView.extend({
+        endpoint: "reset",
+        i18nBase: "common.user.passwordReset"
     });
 
-    return new TermsOfUseDialog();
+    return new PasswordResetView();
 });
