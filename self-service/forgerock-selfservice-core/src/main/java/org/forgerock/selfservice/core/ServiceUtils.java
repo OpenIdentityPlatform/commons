@@ -31,7 +31,7 @@ public final class ServiceUtils {
     /**
      * Represents an empty stage tag.
      */
-    public static final String EMPTY_TAG = "";
+    public static final String INITIAL_TAG = "";
 
     private ServiceUtils() {
         throw new UnsupportedOperationException();
@@ -44,14 +44,6 @@ public final class ServiceUtils {
      */
     public static JsonValue emptyJson() {
         return json(object());
-    }
-
-    public static boolean isEmpty(String value) {
-        return value == null || value.isEmpty();
-    }
-
-    public static boolean isNotEmpty(String value) {
-        return !isEmpty(value);
     }
 
 }

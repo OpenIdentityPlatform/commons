@@ -29,6 +29,7 @@
 
     <servlet-mapping>
         <servlet-name>CREST HTTP Application</servlet-name>
-        <url-pattern>/*</url-pattern>
+        <url-pattern>/css/*</url-pattern>
     </servlet-mapping>
+
 </web-app>

@@ -16,7 +16,7 @@
 
 package org.forgerock.selfservice.core;
 
-import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
+import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
 import org.forgerock.json.JsonValue;
@@ -76,6 +76,18 @@ public final class ProcessContext {
     }
 
     /**
+     * Determines whether the keyed state exists.
+     *
+     * @param key
+     *         the key for the state
+     *
+     * @return whether of the a value exists
+     */
+    public boolean containsState(String key) {
+        return state.containsKey(key);
+    }
+
+    /**
      * Allows retrieval of state persisted throughout the flow.
      *
      * @param key
@@ -98,10 +110,10 @@ public final class ProcessContext {
         return flattenedContext;
     }
 
-    /**
+    /*
      * Builder assists with the creation of {@link ProcessContext} instance.
      */
-    public static final class Builder {
+    static final class Builder {
 
         private final int stageIndex;
         private String stageTag;
@@ -111,7 +123,7 @@ public final class ProcessContext {
         private Builder(int stageIndex) {
             Reject.ifTrue(stageIndex < 0);
             this.stageIndex = stageIndex;
-            stageTag = EMPTY_TAG;
+            stageTag = INITIAL_TAG;
             state = new HashMap<>();
             input = emptyJson();
         }
@@ -131,53 +143,21 @@ public final class ProcessContext {
             Map<String, String> localCopy = new HashMap<>(flattenedContext);
             stageIndex = Integer.parseInt(localCopy.remove(STAGE_INDEX_KEY));
             stageTag = localCopy.containsKey(STAGE_TAG_KEY)
-                    ? localCopy.remove(STAGE_TAG_KEY) : EMPTY_TAG;
+                    ? localCopy.remove(STAGE_TAG_KEY) : INITIAL_TAG;
 
             state = localCopy;
             input = emptyJson();
         }
 
-        /**
-         * Set the stage tag.
-         *
-         * @param stageTag
-         *         the stage tag
-         *
-         * @return this builder
-         */
-        public Builder setStageTag(String stageTag) {
+        Builder setStageTag(String stageTag) {
             Reject.ifNull(stageTag);
             this.stageTag = stageTag;
             return this;
         }
 
-        /**
-         * Add state that should be preserved throughout the flow.
-         *
-         * @param state
-         *         state to be preserved
-         *
-         * @return this builder
-         */
-        public Builder addState(Map<String, String> state) {
+        Builder addState(Map<String, String> state) {
             Reject.ifNull(state);
             this.state.putAll(state);
-            return this;
-        }
-
-        /**
-         * Add state that should be preserved throughout the flow.
-         *
-         * @param key
-         *         state key
-         * @param value
-         *         corresponding state value
-         *
-         * @return this builder
-         */
-        public Builder addState(String key, String value) {
-            Reject.ifNull(key, value);
-            this.state.put(key, value);
             return this;
         }
 
@@ -187,12 +167,7 @@ public final class ProcessContext {
             return this;
         }
 
-        /**
-         * Builds a new process context instance.
-         *
-         * @return a process context instance
-         */
-        public ProcessContext build() {
+        ProcessContext build() {
             return new ProcessContext(this);
         }
 
@@ -206,15 +181,7 @@ public final class ProcessContext {
         return new Builder(flattenedContext);
     }
 
-    /**
-     * Creates a new process context builder based of a previous context.
-     *
-     * @param previous
-     *         the previous context
-     *
-     * @return a new builder
-     */
-    public static Builder newBuilder(ProcessContext previous) {
+    static Builder newBuilder(ProcessContext previous) {
         return new Builder(previous);
     }
 

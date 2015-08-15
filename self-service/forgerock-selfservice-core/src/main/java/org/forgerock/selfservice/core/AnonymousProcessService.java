@@ -25,16 +25,14 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
-import org.forgerock.selfservice.core.config.ProcessInstanceConfig.StorageType;
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.exceptions.StageConfigException;
-import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.util.Pair;
@@ -43,7 +41,6 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
 import javax.inject.Inject;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -70,9 +67,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
     private final ProgressStageFactory progressStageFactory;
     private final List<StageConfig> stageConfigs;
-    private final ProcessStore processStore;
     private final SnapshotTokenHandler snapshotTokenHandler;
-    private final InternalSnapshotAuthor snapshotAuthor;
+    private final SnapshotAuthor snapshotAuthor;
 
     /**
      * Initialises the anonymous process service with the passed config.
@@ -90,13 +86,11 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     public AnonymousProcessService(ProcessInstanceConfig config, ProgressStageFactory progressStageFactory,
                                    SnapshotTokenHandlerFactory tokenHandlerFactory, ProcessStore processStore) {
         Reject.ifNull(config, progressStageFactory, tokenHandlerFactory, processStore);
-
         this.progressStageFactory = progressStageFactory;
-        this.processStore = processStore;
 
         stageConfigs = config.getStageConfigs();
-        snapshotAuthor = newSnapshotAuthor(config.getStorageType());
         snapshotTokenHandler = tokenHandlerFactory.get(config.getTokenType());
+        snapshotAuthor = config.getStorageType().newSnapshotAuthor(snapshotTokenHandler, processStore);
     }
 
     @Override
@@ -138,7 +132,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     /*
      * Responsible for retrieving the requirements from the first stage in the flow.
      */
-    private JsonValue initiateProcess() throws IllegalInputException {
+    private JsonValue initiateProcess() throws ResourceException {
         ProcessContext context = ProcessContext
                 .newBuilder(INITIAL_STAGE_INDEX)
                 .build();
@@ -158,17 +152,18 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     /*
      * With the process flow already kicked off, progresses to the flow by processing the client input.
      */
-    private JsonValue progressProcess(JsonValue clientInput) throws IllegalInputException {
+    private JsonValue progressProcess(JsonValue clientInput) throws ResourceException {
         JsonValue snapshotTokenValue = clientInput.get(TOKEN_FIELD);
         ProcessContext.Builder contextBuilder;
 
         if (snapshotTokenValue.isNotNull()) {
             String snapshotToken = snapshotTokenValue.asString();
+
             if (!snapshotTokenHandler.validate(snapshotToken)) {
-                throw new IllegalInputException("Invalid token");
+                throw new BadRequestException("Invalid token");
             }
 
-            Map<String, String> stageState = snapshotAuthor.retrieveSnapshotState(snapshotToken);
+            Map<String, String> stageState = snapshotAuthor.retrieveSnapshotFrom(snapshotToken);
             contextBuilder = ProcessContext.newBuilder(stageState);
         } else {
             contextBuilder = ProcessContext.newBuilder(INITIAL_STAGE_INDEX);
@@ -177,7 +172,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         JsonValue input = clientInput.get(INPUT_FIELD);
 
         if (input.isNull()) {
-            throw new IllegalInputException("No input provided");
+            throw new BadRequestException("No input provided");
         }
 
         ProcessContext context = contextBuilder
@@ -189,7 +184,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     }
 
     private JsonValue enactContext(ProcessContext context, ProgressStage<?> stage,
-                                   StageConfig config) throws IllegalInputException {
+                                   StageConfig config) throws ResourceException {
         StageResponse response = advanceProgress(context, stage, config);
 
         if (response.hasRequirements()) {
@@ -201,7 +196,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     }
 
     private JsonValue handleProgression(ProcessContext context, StageType<?> stageType,
-                                        StageResponse response) throws IllegalInputException {
+                                        StageResponse response) throws ResourceException {
         if (context.getStageIndex() + 1 == stageConfigs.size()) {
             // Flow complete, render completion response.
             return renderCompletion(stageType);
@@ -231,16 +226,21 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         return enactContext(nextContext, stagePair.getFirst(), stagePair.getSecond());
     }
 
-    private JsonValue renderRequirementsWithSnapshot(ProcessContext context,
-                                                     StageType<?> stageType, StageResponse response) {
-        String snapshotToken = snapshotAuthor
-                .captureSnapshotOf(ProcessContext
-                        .newBuilder(context)
-                        .setStageTag(response.getStageTag())
-                        .addState(response.getState())
-                        .build());
+    private JsonValue renderRequirementsWithSnapshot(ProcessContext context, StageType<?> stageType,
+                                                     StageResponse response) throws ResourceException {
+        ProcessContext updatedContext = ProcessContext
+                .newBuilder(context)
+                .setStageTag(response.getStageTag())
+                .addState(response.getState())
+                .build();
 
-        return renderRequirements(context, stageType, response)
+        String snapshotToken = snapshotAuthor.captureSnapshotOf(updatedContext.toFlattenedMap());
+
+        if (response.hasCallback()) {
+            response.getCallback().snapshotTokenPreview(updatedContext, snapshotToken);
+        }
+
+        return renderRequirements(updatedContext, stageType, response)
                 .add(TOKEN_FIELD, snapshotToken);
     }
 
@@ -267,7 +267,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
      * Type safety is checked during the stage retrieval.
      */
     private <C extends StageConfig> JsonValue gatherInitialRequirements(
-            ProcessContext context, ProgressStage<C> stage, StageConfig config) throws IllegalInputException {
+            ProcessContext context, ProgressStage<C> stage, StageConfig config) throws ResourceException {
         return stage.gatherInitialRequirements(context, stage.getStageType().getTypedConfig(config));
     }
 
@@ -276,8 +276,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
      * Type safety is checked during the stage retrieval.
      */
     private <C extends StageConfig> StageResponse advanceProgress(
-            ProcessContext context, ProgressStage<C> stage, StageConfig config) throws IllegalInputException {
-        return stage.advance(context, stage.getStageType().getTypedConfig(config), snapshotAuthor);
+            ProcessContext context, ProgressStage<C> stage, StageConfig config) throws ResourceException {
+        return stage.advance(context, stage.getStageType().getTypedConfig(config));
     }
 
     /*
@@ -302,58 +302,6 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         }
 
         return Pair.of(stage, config);
-    }
-
-    private InternalSnapshotAuthor newSnapshotAuthor(StorageType type) {
-        switch (type) {
-        case LOCAL:
-            return new LocalSnapshotAuthor();
-        case STATELESS:
-            return new StatelessSnapshotAuthor();
-        default:
-            throw new IllegalArgumentException("Unknown storage type " + type);
-        }
-    }
-
-    /*
-     * Snapshot author that stores state locally to the server.
-     */
-    private final class LocalSnapshotAuthor implements InternalSnapshotAuthor {
-
-        @Override
-        public String captureSnapshotOf(ProcessContext context) {
-            String snapshotToken = snapshotTokenHandler.generate(Collections.<String, String>emptyMap());
-            processStore.add(snapshotToken, context.toFlattenedMap());
-            return snapshotToken;
-        }
-
-        @Override
-        public Map<String, String> retrieveSnapshotState(String snapshotToken) {
-            return processStore.remove(snapshotToken);
-        }
-    }
-
-    /*
-     * Snapshot author that stores state within the token returned to the client.
-     */
-    private final class StatelessSnapshotAuthor implements InternalSnapshotAuthor {
-
-        @Override
-        public String captureSnapshotOf(ProcessContext context) {
-            return snapshotTokenHandler.generate(context.toFlattenedMap());
-        }
-
-        @Override
-        public Map<String, String> retrieveSnapshotState(String snapshotToken) {
-            return snapshotTokenHandler.parse(snapshotToken);
-        }
-
-    }
-
-    private interface InternalSnapshotAuthor extends SnapshotAuthor {
-
-        Map<String, String> retrieveSnapshotState(String snapshotToken);
-
     }
 
 }

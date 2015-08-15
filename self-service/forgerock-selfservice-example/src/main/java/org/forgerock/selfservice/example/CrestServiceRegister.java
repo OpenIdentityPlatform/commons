@@ -16,12 +16,12 @@
 
 package org.forgerock.selfservice.example;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
-import static org.forgerock.selfservice.core.ServiceUtils.isEmpty;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.context.RootContext;
@@ -31,6 +31,7 @@ import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
@@ -43,17 +44,27 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.Properties;
+
 /**
  * Initialises CREST services.
  *
  * @since 0.1.0
  */
-public final class CrestInitialiser {
+final class CrestServiceRegister {
 
-    public ConnectionFactory initialise() throws ResourceException {
+    ConnectionFactory initialise(Properties properties) throws ResourceException {
         Router router = new Router();
         router.addRoute(Router.uriTemplate("/users"), new MemoryBackend());
-        router.addRoute(Router.uriTemplate("/email"), new EmailService());
+        router.addRoute(Router.uriTemplate("/email"), new EmailService(properties));
 
         ConnectionFactory connectionFactory = newInternalConnectionFactory(router);
         createDemoData(connectionFactory);
@@ -63,23 +74,28 @@ public final class CrestInitialiser {
     private void createDemoData(ConnectionFactory connectionFactory) throws ResourceException {
         Connection connection = connectionFactory.getConnection();
         connection.create(new RootContext(),
-                newCreateRequest("/users", "1", buildUser("andy123", "Andy", "andy@email.com")));
+                newCreateRequest("/users", "andy123", buildUser("Andy", "andrew.forrest@forgerock.com")));
         connection.create(new RootContext(),
-                newCreateRequest("/users", "2", buildUser("peter123", "Peter", "peter@email.com")));
+                newCreateRequest("/users", "jake123", buildUser("Jake", "jake.feasel@forgerock.com")));
         connection.create(new RootContext(),
-                newCreateRequest("/users", "3", buildUser("hannah123", "Hannah", "hannah@email.com")));
+                newCreateRequest("/users", "andi123", buildUser("Andi", "andi.egloff@forgerock.com")));
     }
 
-    private JsonValue buildUser(String id, String name, String email) {
+    private JsonValue buildUser(String name, String email) {
         return json(
                 object(
-                        field("_id", id),
                         field("name", name),
                         field("mail", email),
                         field("_rev", "1.0")));
     }
 
     private static final class EmailService implements SingletonResourceProvider {
+
+        private final Properties properties;
+
+        EmailService(Properties properties) {
+            this.properties = properties;
+        }
 
         @Override
         public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
@@ -115,18 +131,40 @@ public final class CrestInitialiser {
                 throw new BadRequestException("Field subject is not specified");
             }
 
-            String message = document.get("message").asString();
+            String messageBody = document.get("message").asString();
 
-            if (isEmpty(message)) {
+            if (isEmpty(messageBody)) {
                 throw new BadRequestException("Field message is not specified");
             }
 
-            System.out.printf("Sending email to \"%s\" from \"%s\" with subject \"%s\" and message \"%s\".\n",
-                    to, from, subject, message);
+            Properties props = new Properties();
+            props.put("mail.smtp.auth", "true");
+            props.put("mail.smtp.starttls.enable", "true");
+            props.put("mail.smtp.host", properties.getProperty("emailserver.host"));
+            props.put("mail.smtp.port", properties.getProperty("emailserver.port"));
 
-            return json(
-                    object(
-                            field("status", "okay")));
+            Session session = Session.getInstance(props, new Authenticator() {
+                protected PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(
+                            properties.getProperty("emailserver.username"),
+                            properties.getProperty("emailserver.password"));
+                }
+            });
+
+            try {
+                Message message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(from));
+                message.setRecipients(Message.RecipientType.TO,
+                        InternetAddress.parse(to));
+                message.setSubject(subject);
+                message.setText(messageBody);
+
+                Transport.send(message);
+            } catch (MessagingException mE) {
+                throw new InternalServerErrorException(mE);
+            }
+
+            return json(object(field("status", "okay")));
         }
 
         @Override
@@ -143,6 +181,7 @@ public final class CrestInitialiser {
         public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
             return Promises.newExceptionPromise(ResourceException.newNotSupportedException());
         }
+
     }
 
 }

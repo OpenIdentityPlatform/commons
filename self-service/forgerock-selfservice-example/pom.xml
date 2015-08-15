@@ -84,6 +84,15 @@
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.2.1.v20140609</version>
+                <configuration>
+                    <scanIntervalSeconds>10</scanIntervalSeconds>
+                    <webApp>
+                        <contextPath>/example</contextPath>
+                    </webApp>
+                    <httpConnector>
+                        <port>9999</port>
+                    </httpConnector>
+                </configuration>
             </plugin>
         </plugins>
     </build>

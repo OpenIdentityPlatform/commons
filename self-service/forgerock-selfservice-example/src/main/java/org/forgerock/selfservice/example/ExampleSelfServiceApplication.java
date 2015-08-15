@@ -16,27 +16,29 @@
 
 package org.forgerock.selfservice.example;
 
-import static org.forgerock.selfservice.core.config.ProcessInstanceConfig.StorageType;
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
 
-import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.selfservice.core.AnonymousProcessService;
-import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
-import org.forgerock.selfservice.stages.email.EmailStageConfig;
-import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.Router;
 import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.http.CrestHttp;
+import org.forgerock.selfservice.core.AnonymousProcessService;
+import org.forgerock.selfservice.core.StorageType;
+import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
+import org.forgerock.selfservice.stages.email.EmailStageConfig;
+import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.util.Factory;
 
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Properties;
 
 /**
  * Basic http application which initialises the user self service service.
@@ -46,12 +48,23 @@ import java.nio.charset.Charset;
 public final class ExampleSelfServiceApplication implements HttpApplication {
 
     private final ConnectionFactory crestConnectionFactory;
+    private final Properties properties;
 
+    /**
+     * Constructs the example application.
+     */
     public ExampleSelfServiceApplication() {
         try {
-            crestConnectionFactory = new CrestInitialiser().initialise();
-        } catch (ResourceException e) {
-            throw new RuntimeException(e);
+            properties = new Properties(System.getProperties());
+            properties.load(getClass().getResourceAsStream("/configuration.properties"));
+        } catch (IOException ioE) {
+            throw new RuntimeException(ioE);
+        }
+
+        try {
+            crestConnectionFactory = new CrestServiceRegister().initialise(properties);
+        } catch (ResourceException rE) {
+            throw new RuntimeException(rE);
         }
     }
 
@@ -62,7 +75,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
             router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/reset"), initialiseHandler());
             return router;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new HttpApplicationException(e);
         }
     }
 
@@ -75,6 +88,8 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         emailConfig.setEmailFrom("info@admin.org");
         emailConfig.setEmailSubject("Reset password email");
         emailConfig.setEmailMessage("This is your reset email.\nLink: %link%");
+        emailConfig.setEmailResetUrlToken("%link%");
+        emailConfig.setEmailResetUrl("http://localhost:9999/example/next.html");
 
         ProcessInstanceConfig config = ProcessInstanceConfig
                 .newBuilder()
