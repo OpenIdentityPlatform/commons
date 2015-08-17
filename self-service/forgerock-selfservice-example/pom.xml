@@ -46,6 +46,13 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-selfservice-example-ui</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+            <classifier>www</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource</artifactId>
         </dependency>
         <dependency>
@@ -80,13 +87,43 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                    <id>unpack</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>unpack</goal>
+                    </goals>
+                    <configuration>
+                        <artifactItems>
+                        <artifactItem>
+                            <groupId>org.forgerock.commons</groupId>
+                            <artifactId>forgerock-selfservice-example-ui</artifactId>
+                            <version>${project.version}</version>
+                            <type>zip</type>
+                            <classifier>www</classifier>
+                        </artifactItem>
+                        </artifactItems>
+                        <outputDirectory>${project.build.directory}/webapp</outputDirectory>
+                    </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <plugin>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>9.2.1.v20140609</version>
                 <configuration>
-                    <scanIntervalSeconds>10</scanIntervalSeconds>
+                    <scanIntervalSeconds>2</scanIntervalSeconds>
                     <webApp>
+                        <baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+                            <resourcesAsCSV>${project.build.directory}/webapp</resourcesAsCSV>
+                        </baseResource>
                         <contextPath>/example</contextPath>
                     </webApp>
                     <httpConnector>

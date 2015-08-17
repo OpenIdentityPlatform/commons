@@ -189,7 +189,7 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
     private void sendEmail(String snapshotToken, String code, String mail,
                            EmailStageConfig config) throws ResourceException {
 
-        String emailUrl = config.getEmailResetUrl() + "?token=" + snapshotToken + "&code=" + code;
+        String emailUrl = config.getEmailResetUrl() + "&token=" + snapshotToken + "&code=" + code;
         String message = config.getEmailMessage().replace(config.getEmailResetUrlToken(), emailUrl);
 
         Connection connection = connectionFactory.getConnection();

@@ -94,3 +94,6 @@ local.properties
 
 # Emacs
 *~
+
+# NPM
+node_modules

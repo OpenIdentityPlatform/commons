@@ -89,7 +89,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         emailConfig.setEmailSubject("Reset password email");
         emailConfig.setEmailMessage("This is your reset email.\nLink: %link%");
         emailConfig.setEmailResetUrlToken("%link%");
-        emailConfig.setEmailResetUrl("http://localhost:9999/example/next.html");
+        emailConfig.setEmailResetUrl("http://localhost:9999/example/#passwordReset/");
 
         ProcessInstanceConfig config = ProcessInstanceConfig
                 .newBuilder()
