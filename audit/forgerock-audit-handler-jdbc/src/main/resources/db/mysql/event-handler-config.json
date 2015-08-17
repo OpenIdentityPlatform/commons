@@ -1,0 +1,97 @@
+{
+  "name" : "jdbc",
+  "class" : "org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandler",
+  "config" : {
+    "driverClass" : "com.mysql.jdbc.Driver",
+    "jdbcUrl" : "jdbc:mysql://localhost:3306/audit?allowMultiQueries=true&characterEncoding=utf8",
+    "username" : "auditAdmin",
+    "password" : "auditAdminPassword",
+    "tableMappings" : [
+      {
+        "event": "authentication",
+        "table": "auditauthentication",
+        "fieldToColumn": {
+          "_id" : "objectid",
+          "transactionId" : "transactionid",
+          "timestamp" : "activitydate",
+          "authentication/id" : "userid",
+          "eventName" : "eventname",
+          "result" : "result",
+          "principal" : "principals",
+          "context" : "context",
+          "sessionId" : "sessionid",
+          "entries" : "entries"
+        }
+      },
+      {
+        "event": "activity",
+        "table": "auditactivity",
+        "fieldToColumn": {
+          "_id" : "objectid",
+          "timestamp" : "activitydate",
+          "transactionId" : "transactionid",
+          "eventName" : "eventname",
+          "authentication/id" : "userid",
+          "runAs" : "runas",
+          "resourceOperation/uri" : "resource_uri",
+          "resourceOperation/protocol" : "resource_protocol",
+          "resourceOperation/operation/method" : "resource_method",
+          "resourceOperation/operation/detail" : "resource_detail",
+          "before" : "subjectbefore",
+          "after" : "subjectafter",
+          "changedFields" : "changedfields",
+          "revision" : "subjectrev"
+        }
+      },
+      {
+        "event": "access",
+        "table": "auditaccess",
+        "fieldToColumn": {
+          "_id" : "objectid",
+          "timestamp" : "activitydate",
+          "transactionId" : "transactionid",
+          "eventName" : "eventname",
+          "server/ip" : "server_ip",
+          "server/port" : "server_port",
+          "client/host" : "client_host",
+          "client/ip" : "client_ip",
+          "client/port" : "client_port",
+          "authentication/id" : "userid",
+          "authorizationId/id" : "principal",
+          "authorizationId/roles" : "roles",
+          "authorizationId/component" : "auth_component",
+          "resourceOperation/uri" : "resource_uri",
+          "resourceOperation/protocol" : "resource_protocol",
+          "resourceOperation/operation/method" : "resource_method",
+          "resourceOperation/operation/detail" : "resource_detail",
+          "http/method" : "http_method",
+          "http/path" : "http_path",
+          "http/queryString" : "http_querystring",
+          "http/headers" : "http_headers",
+          "response/status" : "status",
+          "response/elapsedTime" : "elapsedtime"
+        }
+      },
+      {
+        "event": "config",
+        "table": "auditconfig",
+        "fieldToColumn": {
+          "_id" : "objectid",
+          "timestamp" : "activitydate",
+          "transactionId" : "transactionid",
+          "eventName" : "eventname",
+          "authentication/id" : "userid",
+          "runAs" : "runas",
+          "resourceOperation/uri" : "resource_uri",
+          "resourceOperation/protocol" : "resource_protocol",
+          "resourceOperation/operation/method" : "resource_method",
+          "resourceOperation/operation/detail" : "resource_detail",
+          "before" : "subjectbefore",
+          "after" : "subjectafter",
+          "changedFields" : "changedfields",
+          "revision" : "subjectrev"
+        }
+      }
+    ]
+  }
+}

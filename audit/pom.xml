@@ -50,9 +50,12 @@
     </scm>
     <properties>
         <commons.forgerock-bom.version>1.0.0-SNAPSHOT</commons.forgerock-bom.version>
+        <forgerock-guava.version>18.0.1</forgerock-guava.version>
 
         <jodaTime.version>2.1</jodaTime.version>
         <supercsv.version>2.3.1</supercsv.version>
+        <apache.commons-lang3.version>3.4</apache.commons-lang3.version>
+        <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
     </properties>
 
     <modules>
@@ -61,10 +64,12 @@
         <module>forgerock-audit-servlet</module>
         <module>forgerock-audit-handler-csv</module>
         <module>forgerock-audit-handler-syslog</module>
+        <module>forgerock-audit-handler-jdbc</module>
     </modules>
 
     <dependencyManagement>
         <dependencies>
+            <!-- ForgeRock commons dependencies -->
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-bom</artifactId>
@@ -73,11 +78,17 @@
                 <type>pom</type>
             </dependency>
             <dependency>
+                <groupId>org.forgerock.commons.guava</groupId>
+                <artifactId>forgerock-guava-collect</artifactId>
+                <version>${forgerock-guava.version}</version>
+            </dependency>
+
+            <!-- Third party dependencies -->
+            <dependency>
                 <groupId>net.sf.supercsv</groupId>
                 <artifactId>super-csv</artifactId>
                 <version>${supercsv.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
@@ -86,13 +97,12 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>3.3.2</version>
+                <version>${apache.commons-lang3.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>3.0.1</version>
+                <version>${javax.servlet-api.version}</version>
                 <scope>provided</scope>
             </dependency>
         </dependencies>
