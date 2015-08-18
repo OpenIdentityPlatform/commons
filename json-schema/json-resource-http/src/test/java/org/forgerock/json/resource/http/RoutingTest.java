@@ -22,6 +22,10 @@ import static org.forgerock.http.routing.Version.version;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.json.resource.http.HttpUtils.ETAG_ANY;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_IF_MATCH;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_IF_NONE_MATCH;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
@@ -116,6 +120,7 @@ public class RoutingTest {
     private Object[][] requestData() {
         List<Object[]> requestData = new ArrayList<>();
         requestData.addAll(createRequestData());
+        requestData.addAll(createViaPutRequestData());
         requestData.addAll(readRequestData());
         requestData.addAll(updateRequestData());
         requestData.addAll(deleteRequestData());
@@ -131,8 +136,23 @@ public class RoutingTest {
         for (Object[] data : data()) {
             Request request = new Request()
                     .setMethod("POST")
-                    .setUri(URI.create("users?_action=create"))
+                    .setUri(URI.create("json/users?_action=create"))
                     .setEntity(new HashMap<>());
+            Object[] newData = Arrays.copyOf(data, data.length + 1);
+            newData[data.length] = request;
+            requestData.add(newData);
+        }
+        return requestData;
+    }
+
+    private List<Object[]> createViaPutRequestData() {
+        List<Object[]> requestData = new ArrayList<>();
+        for (Object[] data : data()) {
+            Request request = new Request()
+                    .setMethod("PUT")
+                    .setUri(URI.create("json/users/demo"))
+                    .setEntity(new HashMap<>());
+            request.getHeaders().putSingle(HEADER_IF_NONE_MATCH, ETAG_ANY);
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
             requestData.add(newData);
@@ -145,7 +165,7 @@ public class RoutingTest {
         for (Object[] data : data()) {
             Request request = new Request()
                     .setMethod("GET")
-                    .setUri(URI.create("users/USER_ID"));
+                    .setUri(URI.create("json/users/USER_ID"));
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
             requestData.add(newData);
@@ -158,7 +178,7 @@ public class RoutingTest {
         for (Object[] data : data()) {
             Request request = new Request()
                     .setMethod("PUT")
-                    .setUri(URI.create("users/USER_ID"))
+                    .setUri(URI.create("json/users/USER_ID"))
                     .setEntity(new HashMap<>());
             request.getHeaders().putSingle("If-Match", "\"*\"");
             Object[] newData = Arrays.copyOf(data, data.length + 1);
@@ -172,7 +192,7 @@ public class RoutingTest {
         List<Object[]> requestData = new ArrayList<>();
         Request request = new Request()
                 .setMethod("DELETE")
-                .setUri(URI.create("users/USER_ID"));
+                .setUri(URI.create("json/users/USER_ID"));
         for (Object[] data : data()) {
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
@@ -186,7 +206,7 @@ public class RoutingTest {
         for (Object[] data : data()) {
             Request request = new Request()
                     .setMethod("PATCH")
-                    .setUri(URI.create("users/USER_ID"))
+                    .setUri(URI.create("json/users/USER_ID"))
                     .setEntity(new ArrayList<>());
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
@@ -200,7 +220,7 @@ public class RoutingTest {
         for (Object[] data : data()) {
             Request request = new Request()
                     .setMethod("POST")
-                    .setUri(URI.create("users/USER_ID?_action=ACTION"))
+                    .setUri(URI.create("json/users/USER_ID?_action=ACTION"))
                     .setEntity(new ArrayList<>());
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
@@ -214,7 +234,7 @@ public class RoutingTest {
         for (Object[] data : data()) {
             Request request = new Request()
                     .setMethod("GET")
-                    .setUri(URI.create("users?_queryFilter=true"))
+                    .setUri(URI.create("json/users?_queryFilter=true"))
                     .setEntity(new ArrayList<>());
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
@@ -228,7 +248,7 @@ public class RoutingTest {
         for (Object[] data : data()) {
             Request request = new Request()
                     .setMethod("GET")
-                    .setUri(URI.create("users?_queryFilter=false"))
+                    .setUri(URI.create("json/users?_queryFilter=false"))
                     .setEntity(new ArrayList<>());
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
@@ -260,17 +280,20 @@ public class RoutingTest {
 
     private Handler createHandler() {
         org.forgerock.http.routing.Router rootRouter = new org.forgerock.http.routing.Router();
-        rootRouter.addRoute(org.forgerock.http.routing.RouteMatchers.requestUriMatcher(STARTS_WITH, "users"),
+        rootRouter.addRoute(org.forgerock.http.routing.RouteMatchers.requestUriMatcher(STARTS_WITH, "json"),
                 createCrestHandler());
         return rootRouter;
     }
 
     private Handler createCrestHandler() {
-        Router router = new Router();
+        Router versionRouter = new Router();
 
-        router.addRoute(version(1), mockCollectionResourceProvider());
-        router.addRoute(version(1, 1), mockCollectionResourceProvider());
-        router.addRoute(version(2), mockCollectionResourceProvider());
+        versionRouter.addRoute(version(1), mockCollectionResourceProvider());
+        versionRouter.addRoute(version(1, 1), mockCollectionResourceProvider());
+        versionRouter.addRoute(version(2), mockCollectionResourceProvider());
+
+        Router router = new Router();
+        router.addRoute(STARTS_WITH, uriTemplate("users"), versionRouter);
 
         return CrestHttp.newHttpHandler(new FilterChain(router,
                 org.forgerock.json.resource.RouteMatchers.resourceApiVersionContextFilter(apiVersionBehaviourManager)));
