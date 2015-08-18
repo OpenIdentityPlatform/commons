@@ -16,7 +16,6 @@
 
 package org.forgerock.json.resource.http;
 
-import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Reject.checkNotNull;
 
@@ -32,9 +31,9 @@ import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.json.JsonValue;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
 import org.forgerock.json.resource.BadRequestException;
@@ -155,23 +154,28 @@ final class HttpAdapter implements Handler {
     @Override
     public Promise<Response, NeverThrowsException> handle(Context context,
             org.forgerock.http.protocol.Request request) {
-
-        // Dispatch the request based on method, taking into account \
-        // method override header.
-        final String method = getMethod(request);
-        if (METHOD_DELETE.equals(method)) {
-            return doDelete(context, request);
-        } else if (METHOD_GET.equals(method)) {
-            return doGet(context, request);
-        } else if (METHOD_PATCH.equals(method)) {
-            return doPatch(context, request);
-        } else if (METHOD_POST.equals(method)) {
-            return doPost(context, request);
-        } else if (METHOD_PUT.equals(method)) {
-            return doPut(context, request);
-        } else {
-            // TODO: i18n
-            return fail(request, new NotSupportedException("Method " + method + " not supported"));
+        try {
+            Operation operation = determineRequestOperation(request);
+            switch (operation) {
+                case CREATE:
+                    return doCreate(context, request);
+                case READ:
+                    return doRead(context, request);
+                case UPDATE:
+                    return doUpdate(context, request);
+                case DELETE:
+                    return doDelete(context, request);
+                case PATCH:
+                    return doPatch(context, request);
+                case ACTION:
+                    return doAction(context, request);
+                case QUERY:
+                    return doQuery(context, request);
+                default:
+                    return fail(request, new NotSupportedException("Operation " + operation + " not supported"));
+            }
+        } catch (ResourceException e) {
+            return fail(request, e);
         }
     }
 
@@ -206,7 +210,7 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, NeverThrowsException> doGet(Context context, org.forgerock.http.protocol.Request req) {
+    Promise<Response, NeverThrowsException> doRead(Context context, org.forgerock.http.protocol.Request req) {
         try {
             Version requestedResourceVersion = getRequestedResourceVersion(req);
 
@@ -218,119 +222,132 @@ final class HttpAdapter implements Handler {
             rejectIfMatch(req);
 
             final Form parameters = req.getForm();
-            if (hasParameter(req, PARAM_QUERY_ID) || hasParameter(req, PARAM_QUERY_EXPRESSION)
-                    || hasParameter(req, PARAM_QUERY_FILTER)) {
-                // Additional pre-validation for queries.
-                rejectIfNoneMatch(req);
+            // Read of instance within collection or singleton.
+            final String rev = getIfNoneMatch(req);
+            if (ETAG_ANY.equals(rev)) {
+                // FIXME: i18n
+                throw new PreconditionFailedException("If-None-Match * not appropriate for "
+                        + getMethod(req) + " requests");
+            }
 
-                // Query against collection.
-                final QueryRequest request = Requests.newQueryRequest(getResourcePath(context, req))
-                        .setResourceVersion(requestedResourceVersion);
+            final ReadRequest request = Requests.newReadRequest(getResourcePath(context, req))
+                    .setResourceVersion(requestedResourceVersion);
+            for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
+                final String name = p.getKey();
+                final List<String> values = p.getValue();
+                if (parseCommonParameter(name, values, request)) {
+                    continue;
+                } else if (PARAM_MIME_TYPE.equalsIgnoreCase(name)) {
+                    if (values.size() != 1 || values.get(0).split(FIELDS_DELIMITER).length > 1) {
+                        // FIXME: i18n.
+                        throw new BadRequestException("Only one mime type value allowed");
+                    }
+                    if (parameters.get(PARAM_FIELDS).size() != 1) {
+                        // FIXME: i18n.
+                        throw new BadRequestException("The mime type parameter requires only "
+                                + "1 field to be specified");
+                    }
+                } else {
+                    request.setAdditionalParameter(name, asSingleValue(name, values));
+                }
+            }
+            return doRequest(context, req, resp, request);
+        } catch (final Exception e) {
+            return fail(req, e);
+        }
+    }
 
-                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
-                    final String name = p.getKey();
-                    final List<String> values = p.getValue();
+    Promise<Response, NeverThrowsException> doQuery(Context context, org.forgerock.http.protocol.Request req) {
+        try {
+            Version requestedResourceVersion = getRequestedResourceVersion(req);
 
-                    if (parseCommonParameter(name, values, request)) {
-                        continue;
-                    } else if (name.equalsIgnoreCase(PARAM_SORT_KEYS)) {
-                        for (final String s : values) {
-                            try {
-                                request.addSortKey(s.split(SORT_KEYS_DELIMITER));
-                            } catch (final IllegalArgumentException e) {
-                                // FIXME: i18n.
-                                throw new BadRequestException("The value '" + s
-                                        + "' for parameter '" + name
-                                        + "' could not be parsed as a comma "
-                                        + "separated list of sort keys");
-                            }
-                        }
-                    } else if (name.equalsIgnoreCase(PARAM_QUERY_ID)) {
-                        request.setQueryId(asSingleValue(name, values));
-                    } else if (name.equalsIgnoreCase(PARAM_QUERY_EXPRESSION)) {
-                        request.setQueryExpression(asSingleValue(name, values));
-                    } else if (name.equalsIgnoreCase(PARAM_PAGED_RESULTS_COOKIE)) {
-                        request.setPagedResultsCookie(asSingleValue(name, values));
-                    } else if (name.equalsIgnoreCase(PARAM_PAGED_RESULTS_OFFSET)) {
-                        request.setPagedResultsOffset(asIntValue(name, values));
-                    } else if (name.equalsIgnoreCase(PARAM_PAGE_SIZE)) {
-                        request.setPageSize(asIntValue(name, values));
-                    } else if (name.equalsIgnoreCase(PARAM_QUERY_FILTER)) {
-                        final String s = asSingleValue(name, values);
+            // Prepare response.
+            Response resp = prepareResponse(req);
+
+            // Validate request.
+            preprocessRequest(req);
+            rejectIfMatch(req);
+
+            final Form parameters = req.getForm();
+            // Additional pre-validation for queries.
+            rejectIfNoneMatch(req);
+
+            // Query against collection.
+            final QueryRequest request = Requests.newQueryRequest(getResourcePath(context, req))
+                    .setResourceVersion(requestedResourceVersion);
+
+            for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
+                final String name = p.getKey();
+                final List<String> values = p.getValue();
+
+                if (parseCommonParameter(name, values, request)) {
+                    continue;
+                } else if (name.equalsIgnoreCase(PARAM_SORT_KEYS)) {
+                    for (final String s : values) {
                         try {
-                            request.setQueryFilter(QueryFilters.parse(s));
+                            request.addSortKey(s.split(SORT_KEYS_DELIMITER));
                         } catch (final IllegalArgumentException e) {
                             // FIXME: i18n.
-                            throw new BadRequestException("The value '" + s + "' for parameter '"
-                                    + name + "' could not be parsed as a valid query filter");
+                            throw new BadRequestException("The value '" + s
+                                    + "' for parameter '" + name
+                                    + "' could not be parsed as a comma "
+                                    + "separated list of sort keys");
                         }
-                    } else if (name.equalsIgnoreCase(PARAM_TOTAL_PAGED_RESULTS_POLICY)) {
-                        final String policy = asSingleValue(name, values);
-
-                        try {
-                            request.setTotalPagedResultsPolicy(CountPolicy.valueOf(policy.toUpperCase()));
-                        } catch (IllegalArgumentException e) {
-                            // FIXME: i18n.
-                            throw new BadRequestException("The value '" + policy + "' for parameter '"
-                                    + name + "' could not be parsed as a valid count policy");
-                        }
-                    } else {
-                        request.setAdditionalParameter(name, asSingleValue(name, values));
                     }
-                }
-
-                // Check for incompatible arguments.
-                if (request.getQueryId() != null && request.getQueryFilter() != null) {
-                    // FIXME: i18n.
-                    throw new BadRequestException("The parameters " + PARAM_QUERY_ID + " and "
-                            + PARAM_QUERY_FILTER + " are mutually exclusive");
-                }
-
-                if (request.getQueryId() != null && request.getQueryExpression() != null) {
-                    // FIXME: i18n.
-                    throw new BadRequestException("The parameters " + PARAM_QUERY_ID + " and "
-                            + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
-                }
-
-                if (request.getQueryFilter() != null && request.getQueryExpression() != null) {
-                    // FIXME: i18n.
-                    throw new BadRequestException("The parameters " + PARAM_QUERY_FILTER + " and "
-                            + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
-                }
-
-                return doRequest(context, req, resp, request);
-            } else {
-                // Read of instance within collection or singleton.
-                final String rev = getIfNoneMatch(req);
-                if (ETAG_ANY.equals(rev)) {
-                    // FIXME: i18n
-                    throw new PreconditionFailedException("If-None-Match * not appropriate for "
-                            + getMethod(req) + " requests");
-                }
-
-                final ReadRequest request = Requests.newReadRequest(getResourcePath(context, req))
-                        .setResourceVersion(requestedResourceVersion);
-                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
-                    final String name = p.getKey();
-                    final List<String> values = p.getValue();
-                    if (parseCommonParameter(name, values, request)) {
-                        continue;
-                    } else if (PARAM_MIME_TYPE.equalsIgnoreCase(name)) {
-                        if (values.size() != 1 || values.get(0).split(FIELDS_DELIMITER).length > 1) {
-                            // FIXME: i18n.
-                            throw new BadRequestException("Only one mime type value allowed");
-                        }
-                        if (parameters.get(PARAM_FIELDS).size() != 1) {
-                            // FIXME: i18n.
-                            throw new BadRequestException("The mime type parameter requires only "
-                                    + "1 field to be specified");
-                        }
-                    } else {
-                        request.setAdditionalParameter(name, asSingleValue(name, values));
+                } else if (name.equalsIgnoreCase(PARAM_QUERY_ID)) {
+                    request.setQueryId(asSingleValue(name, values));
+                } else if (name.equalsIgnoreCase(PARAM_QUERY_EXPRESSION)) {
+                    request.setQueryExpression(asSingleValue(name, values));
+                } else if (name.equalsIgnoreCase(PARAM_PAGED_RESULTS_COOKIE)) {
+                    request.setPagedResultsCookie(asSingleValue(name, values));
+                } else if (name.equalsIgnoreCase(PARAM_PAGED_RESULTS_OFFSET)) {
+                    request.setPagedResultsOffset(asIntValue(name, values));
+                } else if (name.equalsIgnoreCase(PARAM_PAGE_SIZE)) {
+                    request.setPageSize(asIntValue(name, values));
+                } else if (name.equalsIgnoreCase(PARAM_QUERY_FILTER)) {
+                    final String s = asSingleValue(name, values);
+                    try {
+                        request.setQueryFilter(QueryFilters.parse(s));
+                    } catch (final IllegalArgumentException e) {
+                        // FIXME: i18n.
+                        throw new BadRequestException("The value '" + s + "' for parameter '"
+                                + name + "' could not be parsed as a valid query filter");
                     }
+                } else if (name.equalsIgnoreCase(PARAM_TOTAL_PAGED_RESULTS_POLICY)) {
+                    final String policy = asSingleValue(name, values);
+
+                    try {
+                        request.setTotalPagedResultsPolicy(CountPolicy.valueOf(policy.toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        // FIXME: i18n.
+                        throw new BadRequestException("The value '" + policy + "' for parameter '"
+                                + name + "' could not be parsed as a valid count policy");
+                    }
+                } else {
+                    request.setAdditionalParameter(name, asSingleValue(name, values));
                 }
-                return doRequest(context, req, resp, request);
             }
+
+            // Check for incompatible arguments.
+            if (request.getQueryId() != null && request.getQueryFilter() != null) {
+                // FIXME: i18n.
+                throw new BadRequestException("The parameters " + PARAM_QUERY_ID + " and "
+                        + PARAM_QUERY_FILTER + " are mutually exclusive");
+            }
+
+            if (request.getQueryId() != null && request.getQueryExpression() != null) {
+                // FIXME: i18n.
+                throw new BadRequestException("The parameters " + PARAM_QUERY_ID + " and "
+                        + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
+            }
+
+            if (request.getQueryFilter() != null && request.getQueryExpression() != null) {
+                // FIXME: i18n.
+                throw new BadRequestException("The parameters " + PARAM_QUERY_FILTER + " and "
+                        + PARAM_QUERY_EXPRESSION + " are mutually exclusive");
+            }
+
+            return doRequest(context, req, resp, request);
         } catch (final Exception e) {
             return fail(req, e);
         }
@@ -372,21 +389,21 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    Promise<Response, NeverThrowsException> doPost(Context context, org.forgerock.http.protocol.Request req) {
+    Promise<Response, NeverThrowsException> doCreate(Context context, org.forgerock.http.protocol.Request req) {
         try {
             Version requestedResourceVersion = getRequestedResourceVersion(req);
-
             // Prepare response.
             Response resp = prepareResponse(req);
 
             // Validate request.
             preprocessRequest(req);
-            rejectIfNoneMatch(req);
-            rejectIfMatch(req);
 
-            final Form parameters = req.getForm();
-            final String action = asSingleValue(PARAM_ACTION, getParameter(req, PARAM_ACTION));
-            if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
+            if ("POST".equals(getMethod(req))) {
+
+                rejectIfNoneMatch(req);
+                rejectIfMatch(req);
+
+                final Form parameters = req.getForm();
                 final JsonValue content = getJsonContent(req);
                 final CreateRequest request =
                         Requests.newCreateRequest(getResourcePath(context, req), content)
@@ -404,53 +421,18 @@ final class HttpAdapter implements Handler {
                 }
                 return doRequest(context, req, resp, request);
             } else {
-                // Action request.
-                final JsonValue content = getJsonActionContent(req);
-                final ActionRequest request =
-                        Requests.newActionRequest(getResourcePath(context, req), action)
-                                .setContent(content)
-                                .setResourceVersion(requestedResourceVersion);
-                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
-                    final String name = p.getKey();
-                    final List<String> values = p.getValue();
-                    if (parseCommonParameter(name, values, request)) {
-                        continue;
-                    } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
-                        // Ignore - already handled.
-                    } else {
-                        request.setAdditionalParameter(name, asSingleValue(name, values));
-                    }
+
+                if (req.getHeaders().getFirst(HEADER_IF_MATCH) != null
+                        && req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
+                    // FIXME: i18n
+                    throw new PreconditionFailedException(
+                            "Simultaneous use of If-Match and If-None-Match not "
+                                    + "supported for PUT requests");
                 }
-                return doRequest(context, req, resp, request);
-            }
-        } catch (final Exception e) {
-            return fail(req, e);
-        }
-    }
 
-    Promise<Response, NeverThrowsException> doPut(Context context, org.forgerock.http.protocol.Request req) {
-        try {
-            Version requestedResourceVersion = getRequestedResourceVersion(req);
+                final Form parameters = req.getForm();
+                final JsonValue content = getJsonContent(req);
 
-            // Prepare response.
-            Response resp = prepareResponse(req);
-
-            // Validate request.
-            preprocessRequest(req);
-
-            if (req.getHeaders().getFirst(HEADER_IF_MATCH) != null
-                    && req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
-                // FIXME: i18n
-                throw new PreconditionFailedException(
-                        "Simultaneous use of If-Match and If-None-Match not "
-                                + "supported for PUT requests");
-            }
-
-            final Form parameters = req.getForm();
-            final JsonValue content = getJsonContent(req);
-
-            final String rev = getIfNoneMatch(req);
-            if (ETAG_ANY.equals(rev)) {
                 // This is a create with a user provided resource ID: split the
                 // path into the parent resource name and resource ID.
                 final ResourcePath resourcePath = getResourcePath(context, req);
@@ -474,22 +456,84 @@ final class HttpAdapter implements Handler {
                     }
                 }
                 return doRequest(context, req, resp, request);
-            } else {
-                final UpdateRequest request =
-                        Requests.newUpdateRequest(getResourcePath(context, req), content)
-                                .setRevision(getIfMatch(req))
-                                .setResourceVersion(requestedResourceVersion);
-                for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
-                    final String name = p.getKey();
-                    final List<String> values = p.getValue();
-                    if (parseCommonParameter(name, values, request)) {
-                        continue;
-                    } else {
-                        request.setAdditionalParameter(name, asSingleValue(name, values));
-                    }
-                }
-                return doRequest(context, req, resp, request);
             }
+        } catch (final Exception e) {
+            return fail(req, e);
+        }
+    }
+
+    Promise<Response, NeverThrowsException> doAction(Context context, org.forgerock.http.protocol.Request req) {
+        try {
+            Version requestedResourceVersion = getRequestedResourceVersion(req);
+
+            // Prepare response.
+            Response resp = prepareResponse(req);
+
+            // Validate request.
+            preprocessRequest(req);
+            rejectIfNoneMatch(req);
+            rejectIfMatch(req);
+
+            final Form parameters = req.getForm();
+            final String action = asSingleValue(PARAM_ACTION, getParameter(req, PARAM_ACTION));
+            // Action request.
+            final JsonValue content = getJsonActionContent(req);
+            final ActionRequest request =
+                    Requests.newActionRequest(getResourcePath(context, req), action)
+                            .setContent(content)
+                            .setResourceVersion(requestedResourceVersion);
+            for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
+                final String name = p.getKey();
+                final List<String> values = p.getValue();
+                if (parseCommonParameter(name, values, request)) {
+                    continue;
+                } else if (name.equalsIgnoreCase(PARAM_ACTION)) {
+                    // Ignore - already handled.
+                } else {
+                    request.setAdditionalParameter(name, asSingleValue(name, values));
+                }
+            }
+            return doRequest(context, req, resp, request);
+        } catch (final Exception e) {
+            return fail(req, e);
+        }
+    }
+
+    Promise<Response, NeverThrowsException> doUpdate(Context context, org.forgerock.http.protocol.Request req) {
+        try {
+            Version requestedResourceVersion = getRequestedResourceVersion(req);
+
+            // Prepare response.
+            Response resp = prepareResponse(req);
+
+            // Validate request.
+            preprocessRequest(req);
+
+            if (req.getHeaders().getFirst(HEADER_IF_MATCH) != null
+                    && req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
+                // FIXME: i18n
+                throw new PreconditionFailedException(
+                        "Simultaneous use of If-Match and If-None-Match not "
+                                + "supported for PUT requests");
+            }
+
+            final Form parameters = req.getForm();
+            final JsonValue content = getJsonContent(req);
+
+            final UpdateRequest request =
+                    Requests.newUpdateRequest(getResourcePath(context, req), content)
+                            .setRevision(getIfMatch(req))
+                            .setResourceVersion(requestedResourceVersion);
+            for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
+                final String name = p.getKey();
+                final List<String> values = p.getValue();
+                if (parseCommonParameter(name, values, request)) {
+                    continue;
+                } else {
+                    request.setAdditionalParameter(name, asSingleValue(name, values));
+                }
+            }
+            return doRequest(context, req, resp, request);
         } catch (final Exception e) {
             return fail(req, e);
         }
@@ -533,11 +577,11 @@ final class HttpAdapter implements Handler {
 
     private ResourcePath getMatchedUri(Context context) {
         List<ResourcePath> matched = new ArrayList<>();
-        if (context.containsContext(UriRouterContext.class)) {
-            for (Context ctx = context.asContext(UriRouterContext.class); ctx != null
-                    && ctx.containsContext(UriRouterContext.class); ctx = ctx.getParent()) {
-                matched.add(ResourcePath.valueOf(ctx.asContext(UriRouterContext.class).getMatchedUri()));
-            }
+        Context ctx = context;
+        while (ctx.containsContext(UriRouterContext.class)) {
+            UriRouterContext uriRouterContext = ctx.asContext(UriRouterContext.class);
+            matched.add(ResourcePath.valueOf(uriRouterContext.getMatchedUri()));
+            ctx = uriRouterContext.getParent();
         }
         Collections.reverse(matched);
         ResourcePath matchedUri = new ResourcePath();
