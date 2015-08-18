@@ -16,9 +16,12 @@
 
 package org.forgerock.json.resource.test.assertj;
 
+import java.util.concurrent.ExecutionException;
+
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.assertj.core.api.Assertions;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 import org.forgerock.util.promise.Promise;
@@ -58,6 +61,24 @@ public class AssertJResourceResponseAssert extends AbstractAssert<AssertJResourc
         @Override
         protected AssertJResourceResponseAssert createSucceededAssert(ResourceResponse resource) {
             return new AssertJResourceResponseAssert(resource);
+        }
+
+        /**
+         * Asserts that the promise failed.
+         * @return A {@link AssertJResourceExceptionAssert} for making
+         * assertions on the promise's resource exception.
+         */
+        public AssertJResourceExceptionAssert failedWithResourceException() {
+            isNotNull();
+            try {
+                Object value = actual.get();
+                failWithMessage("Promise succeeded with value <%s>", value);
+            } catch (InterruptedException e) {
+                failWithMessage("Promise was interrupted");
+            } catch (ExecutionException e) {
+                return AssertJResourceExceptionAssert.assertThat((ResourceException) e.getCause());
+            }
+            throw new IllegalStateException("Shouldn't have reached here");
         }
     }
 
