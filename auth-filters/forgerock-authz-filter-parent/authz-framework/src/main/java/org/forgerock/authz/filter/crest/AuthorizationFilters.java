@@ -19,6 +19,7 @@ package org.forgerock.authz.filter.crest;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.forgerock.authz.filter.api.AuthorizationResult;
@@ -73,9 +74,24 @@ public final class AuthorizationFilters {
      * {@code null}.
      */
     public static FilterChain createFilter(CollectionResourceProvider target, CrestAuthorizationModule... modules) {
+        return createFilter(target, Arrays.asList(modules));
+    }
+
+    /**
+     * Returns a new {@link FilterChain} which will perform authorization for each request before allowing access to the
+     * provided collection resource provider.
+     *
+     * @param target The collection resource provider.
+     * @param modules The {@code CrestAuthorizationModule}s that will perform authorization for each request.
+     * @return A new {@code FilterChain} which will filter requests before allowing access to the provided collection
+     * resource provider.
+     * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
+     * {@code null}.
+     */
+    public static FilterChain createFilter(CollectionResourceProvider target, List<CrestAuthorizationModule> modules) {
         Reject.ifNull(target, "Target cannot be null.");
         Reject.ifNull(modules, "Authorization module cannot be null.");
-        Reject.ifTrue(modules.length == 0, "Authorization filters cannot be empty.");
+        Reject.ifTrue(modules.isEmpty(), "Authorization filters cannot be empty.");
 
         final List<Filter> filters = new ArrayList<>();
         for (final CrestAuthorizationModule module : modules) {
@@ -97,9 +113,24 @@ public final class AuthorizationFilters {
      * {@code null}.
      */
     public static FilterChain createFilter(SingletonResourceProvider target, CrestAuthorizationModule... modules) {
+        return createFilter(target, Arrays.asList(modules));
+    }
+
+    /**
+     * Returns a new {@link FilterChain} which will perform authorization for each request before allowing access to the
+     * provided singleton resource provider.
+     *
+     * @param target The singleton resource provider.
+     * @param modules The {@code CrestAuthorizationModule}s that will perform authorization for each request.
+     * @return A new {@code FilterChain} which will filter requests before allowing access to the provided singleton
+     * resource provider.
+     * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
+     * {@code null}.
+     */
+    public static FilterChain createFilter(SingletonResourceProvider target, List<CrestAuthorizationModule> modules) {
         Reject.ifNull(target, "Target cannot be null.");
         Reject.ifNull(modules, "Authorization module cannot be null.");
-        Reject.ifTrue(modules.length == 0, "Authorization filters cannot be empty.");
+        Reject.ifTrue(modules.isEmpty(), "Authorization filters cannot be empty.");
 
         final List<Filter> filters = new ArrayList<>();
         for (final CrestAuthorizationModule module : modules) {
@@ -120,9 +151,23 @@ public final class AuthorizationFilters {
      * {@code null}.
      */
     public static FilterChain createFilter(RequestHandler target, CrestAuthorizationModule... modules) {
+        return createFilter(target, Arrays.asList(modules));
+    }
+
+    /**
+     * Returns a new {@link FilterChain} which will perform authorization for each request before allowing access to the
+     * provided RequestHandler.
+     *
+     * @param target The RequestHandler.
+     * @param modules The {@code CrestAuthorizationModule}s that will perform authorization for each request.
+     * @return A new {@code FilterChain} which will filter requests before allowing access to the provided RequestHandler.
+     * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
+     * {@code null}.
+     */
+    public static FilterChain createFilter(RequestHandler target, List<CrestAuthorizationModule> modules) {
         Reject.ifNull(target, "Target cannot be null.");
         Reject.ifNull(modules, "Authorization module cannot be null.");
-        Reject.ifTrue(modules.length == 0, "Authorization filters cannot be empty.");
+        Reject.ifTrue(modules.isEmpty(), "Authorization filters cannot be empty.");
 
         final List<Filter> filters = new ArrayList<>();
         for (final CrestAuthorizationModule module : modules) {
