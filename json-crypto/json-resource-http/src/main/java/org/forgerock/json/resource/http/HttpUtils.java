@@ -19,6 +19,7 @@ package org.forgerock.json.resource.http;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 
 import static org.forgerock.http.routing.Version.version;
+import static org.forgerock.json.resource.ActionRequest.ACTION_ID_CREATE;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -57,6 +58,7 @@ import org.forgerock.http.routing.Version;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
@@ -265,6 +267,50 @@ public final class HttpUtils {
     static Promise<Response, NeverThrowsException> fail(org.forgerock.http.protocol.Request req,
             org.forgerock.http.protocol.Response resp, final Throwable t) {
         return fail0(req, resp, t);
+    }
+
+    /**
+     * Determines which CREST operation (CRUDPAQ) of the incoming request.
+     *
+     * @param request The request.
+     * @return The Operation.
+     * @throws ResourceException If the request operation could not be
+     * determined or is not supported.
+     */
+    public static Operation determineRequestOperation(org.forgerock.http.protocol.Request request)
+            throws ResourceException {
+        // Dispatch the request based on method, taking into account
+        // method override header.
+        final String method = getMethod(request);
+        if (METHOD_DELETE.equals(method)) {
+            return Operation.DELETE;
+        } else if (METHOD_GET.equals(method)) {
+            if (hasParameter(request, PARAM_QUERY_ID) || hasParameter(request, PARAM_QUERY_EXPRESSION)
+                    || hasParameter(request, PARAM_QUERY_FILTER)) {
+                return Operation.QUERY;
+            } else {
+                return Operation.READ;
+            }
+        } else if (METHOD_PATCH.equals(method)) {
+            return Operation.PATCH;
+        } else if (METHOD_POST.equals(method)) {
+            final String action = asSingleValue(PARAM_ACTION, getParameter(request, PARAM_ACTION));
+            if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
+                return Operation.CREATE;
+            } else {
+                return Operation.ACTION;
+            }
+        } else if (METHOD_PUT.equals(method)) {
+            final String rev = getIfNoneMatch(request);
+            if (ETAG_ANY.equals(rev)) {
+                return Operation.CREATE;
+            } else {
+                return Operation.UPDATE;
+            }
+        } else {
+            // TODO: i18n
+            throw new NotSupportedException("Method " + method + " not supported");
+        }
     }
 
     private static Promise<Response, NeverThrowsException> fail0(org.forgerock.http.protocol.Request req,
