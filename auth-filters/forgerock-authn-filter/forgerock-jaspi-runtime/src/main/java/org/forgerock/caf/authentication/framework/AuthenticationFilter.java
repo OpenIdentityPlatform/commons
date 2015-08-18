@@ -299,8 +299,12 @@ public final class AuthenticationFilter implements Filter {
         }
 
         private Promise<Void, AuthenticationException> initializeModule(AuthenticationModuleBuilder moduleBuilder) {
+            CallbackHandler callbackHandler = moduleBuilder.handler;
+            if (callbackHandler == null) {
+                callbackHandler = new HttpCallbackHandler();
+            }
             return moduleBuilder.authModule.initialize(moduleBuilder.requestPolicy, moduleBuilder.responsePolicy,
-                    moduleBuilder.handler, moduleBuilder.settings);
+                    callbackHandler, moduleBuilder.settings);
         }
 
         AuthenticationFilter createFilter(Logger logger, AuditApi auditApi, ResponseHandler responseHandler,

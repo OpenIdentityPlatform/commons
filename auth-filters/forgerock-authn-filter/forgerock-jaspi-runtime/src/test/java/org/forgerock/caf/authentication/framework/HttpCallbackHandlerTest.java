@@ -35,13 +35,13 @@ import java.security.Principal;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class HttpServletCallbackHandlerTest {
+public class HttpCallbackHandlerTest {
 
-    private HttpServletCallbackHandler callbackHandler;
+    private HttpCallbackHandler callbackHandler;
 
     @BeforeMethod
     public void setUp() {
-        callbackHandler = new HttpServletCallbackHandler();
+        callbackHandler = new HttpCallbackHandler();
     }
 
     @Test

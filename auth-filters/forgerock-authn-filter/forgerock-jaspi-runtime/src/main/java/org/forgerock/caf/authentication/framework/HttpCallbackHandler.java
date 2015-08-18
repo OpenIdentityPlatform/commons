@@ -35,7 +35,7 @@ import java.util.Set;
  *
  * @since 1.0.0
  */
-public class HttpServletCallbackHandler implements CallbackHandler {
+public class HttpCallbackHandler implements CallbackHandler {
 
     /**
      * Called by Authentication modules to request more information about the request and response message.
