@@ -73,8 +73,9 @@ public final class AuthorizationFilters {
      * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
      * {@code null}.
      */
-    public static FilterChain createFilter(CollectionResourceProvider target, CrestAuthorizationModule... modules) {
-        return createFilter(target, Arrays.asList(modules));
+    public static FilterChain createAuthorizationFilter(CollectionResourceProvider target,
+            CrestAuthorizationModule... modules) {
+        return createAuthorizationFilter(target, Arrays.asList(modules));
     }
 
     /**
@@ -88,7 +89,8 @@ public final class AuthorizationFilters {
      * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
      * {@code null}.
      */
-    public static FilterChain createFilter(CollectionResourceProvider target, List<CrestAuthorizationModule> modules) {
+    public static FilterChain createAuthorizationFilter(CollectionResourceProvider target,
+            List<CrestAuthorizationModule> modules) {
         Reject.ifNull(target, "Target cannot be null.");
         Reject.ifNull(modules, "Authorization module cannot be null.");
         Reject.ifTrue(modules.isEmpty(), "Authorization filters cannot be empty.");
@@ -112,8 +114,9 @@ public final class AuthorizationFilters {
      * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
      * {@code null}.
      */
-    public static FilterChain createFilter(SingletonResourceProvider target, CrestAuthorizationModule... modules) {
-        return createFilter(target, Arrays.asList(modules));
+    public static FilterChain createAuthorizationFilter(SingletonResourceProvider target,
+            CrestAuthorizationModule... modules) {
+        return createAuthorizationFilter(target, Arrays.asList(modules));
     }
 
     /**
@@ -127,7 +130,8 @@ public final class AuthorizationFilters {
      * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
      * {@code null}.
      */
-    public static FilterChain createFilter(SingletonResourceProvider target, List<CrestAuthorizationModule> modules) {
+    public static FilterChain createAuthorizationFilter(SingletonResourceProvider target,
+            List<CrestAuthorizationModule> modules) {
         Reject.ifNull(target, "Target cannot be null.");
         Reject.ifNull(modules, "Authorization module cannot be null.");
         Reject.ifTrue(modules.isEmpty(), "Authorization filters cannot be empty.");
@@ -150,8 +154,8 @@ public final class AuthorizationFilters {
      * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
      * {@code null}.
      */
-    public static FilterChain createFilter(RequestHandler target, CrestAuthorizationModule... modules) {
-        return createFilter(target, Arrays.asList(modules));
+    public static FilterChain createAuthorizationFilter(RequestHandler target, CrestAuthorizationModule... modules) {
+        return createAuthorizationFilter(target, Arrays.asList(modules));
     }
 
     /**
@@ -164,7 +168,7 @@ public final class AuthorizationFilters {
      * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
      * {@code null}.
      */
-    public static FilterChain createFilter(RequestHandler target, List<CrestAuthorizationModule> modules) {
+    public static FilterChain createAuthorizationFilter(RequestHandler target, List<CrestAuthorizationModule> modules) {
         Reject.ifNull(target, "Target cannot be null.");
         Reject.ifNull(modules, "Authorization module cannot be null.");
         Reject.ifTrue(modules.isEmpty(), "Authorization filters cannot be empty.");

@@ -61,7 +61,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = null;
 
         //When
-        AuthorizationFilters.createFilter(target, modules);
+        AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         // Expect NullPointerException
@@ -75,7 +75,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = null;
 
         //When
-        AuthorizationFilters.createFilter(target, modules);
+        AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         // Expect NullPointerException
@@ -89,7 +89,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[0];
 
         //When
-        AuthorizationFilters.createFilter(target, modules);
+        AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         // Expect IllegalArgumentException
@@ -104,7 +104,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
         //When
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         assertNotNull(chain);
@@ -118,7 +118,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = null;
 
         //When
-        AuthorizationFilters.createFilter(target, modules);
+        AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         // Expect NullPointerException
@@ -132,7 +132,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = null;
 
         //When
-        AuthorizationFilters.createFilter(target, modules);
+        AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         // Expect NullPointerException
@@ -146,7 +146,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[0];
 
         //When
-        AuthorizationFilters.createFilter(target, modules);
+        AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         // Expect IllegalArgumentException
@@ -161,7 +161,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
         //When
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         assertNotNull(chain);
@@ -176,7 +176,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
         //When
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         //Then
         assertNotNull(chain);
@@ -191,7 +191,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
@@ -216,7 +216,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
@@ -251,7 +251,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[]{module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
@@ -283,7 +283,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         CreateRequest request = Requests.newCreateRequest("", json(object()));
@@ -308,7 +308,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
@@ -343,7 +343,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[]{module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
@@ -375,7 +375,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
@@ -400,7 +400,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
@@ -435,7 +435,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[]{module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
@@ -467,7 +467,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
@@ -492,7 +492,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
@@ -527,7 +527,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[]{module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
@@ -558,7 +558,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("");
@@ -583,7 +583,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("RESOURCE_CONTAINER");
@@ -618,7 +618,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[]{module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         QueryRequest request = Requests.newQueryRequest("RESOURCE_CONTAINER");
@@ -651,7 +651,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
@@ -676,7 +676,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
@@ -711,7 +711,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[]{module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
@@ -743,7 +743,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
@@ -768,7 +768,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[] {module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
@@ -803,7 +803,7 @@ public class AuthorizationFiltersTest {
         CrestAuthorizationModule module = mock(CrestAuthorizationModule.class);
         CrestAuthorizationModule[] modules = new CrestAuthorizationModule[]{module};
 
-        FilterChain chain = AuthorizationFilters.createFilter(target, modules);
+        FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
         Context context = mock(Context.class);
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));

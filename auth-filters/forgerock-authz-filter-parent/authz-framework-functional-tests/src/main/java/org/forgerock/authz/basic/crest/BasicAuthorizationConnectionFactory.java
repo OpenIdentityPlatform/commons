@@ -67,9 +67,9 @@ public final class BasicAuthorizationConnectionFactory {
     private static RequestHandler createEndpointCheckerHandler() {
         Router router = new Router();
 
-        router.addRoute(requestUriMatcher(STARTS_WITH, "/users"), AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/users"), AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
                 new AlwaysAllowAuthorizationModule()));
-        router.addRoute(requestUriMatcher(STARTS_WITH, "/roles"), AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/roles"), AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
                 new AlwaysDenyAuthorizationModule("roles")));
 
         return router;
@@ -81,7 +81,7 @@ public final class BasicAuthorizationConnectionFactory {
      * @return A no action {@code RequestHandler}.
      */
     private static RequestHandler createNotActionHandler() {
-        return AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        return AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
                 new NotActionAuthorizationModule());
     }
 
@@ -91,7 +91,7 @@ public final class BasicAuthorizationConnectionFactory {
      * @return A no create or patch {@code RequestHandler}.
      */
     private static RequestHandler createNotCreateOrPatchHandler() {
-        return AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        return AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
                 new NotCreateAuthorizationModule(), new NotPatchAuthorizationModule());
     }
 
@@ -101,7 +101,7 @@ public final class BasicAuthorizationConnectionFactory {
      * @return A deny all {@code RequestHandler}.
      */
     private static RequestHandler createNoneHandler() {
-        return AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        return AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
                 new NotCreateAuthorizationModule(), new NotReadAuthorizationModule(),
                 new NotUpdateAuthorizationModule(), new NotDeleteAuthorizationModule(),
                 new NotPatchAuthorizationModule(), new NotActionAuthorizationModule(),

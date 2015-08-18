@@ -72,7 +72,7 @@ public final class OAuth2AuthorizationConnectionFactory {
 
         Router router = new Router();
 
-        router.addRoute(requestUriMatcher(STARTS_WITH, "/resource"), AuthorizationFilters.createFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/resource"), AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
                 authorizationModule));
 
         return Resources.newInternalConnectionFactory(router);
