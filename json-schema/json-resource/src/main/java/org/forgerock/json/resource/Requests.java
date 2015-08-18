@@ -50,6 +50,7 @@ public final class Requests {
             this.resourcePath = request.getResourcePathObject();
             this.fields.addAll(request.getFields());
             this.parameters.putAll(request.getAdditionalParameters());
+            this.resourceVersion = request.getResourceVersion();
         }
 
         @Override
