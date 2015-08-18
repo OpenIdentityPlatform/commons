@@ -39,7 +39,6 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.PromiseImpl;
 import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -285,8 +284,6 @@ public final class AuthenticationFilter implements Filter {
             List<AsyncServerAuthModule> authModules = new ArrayList<>();
 
             List<Promise<Void, AuthenticationException>> initializationPromises = new ArrayList<>();
-            PromiseImpl<Void, AuthenticationException> kicker = PromiseImpl.create();
-            initializationPromises.add(kicker);
 
             if (sessionAuthModuleBuilder != null && sessionAuthModuleBuilder.authModule != null) {
                 sessionAuthModule = sessionAuthModuleBuilder.authModule;
@@ -297,7 +294,6 @@ public final class AuthenticationFilter implements Filter {
                 initializationPromises.add(initializeModule(authModuleBuilder));
             }
             Promise<List<Void>, AuthenticationException> initializationPromise = Promises.when(initializationPromises);
-            kicker.handleResult(null);
             return createFilter(logger, auditApi, responseHandler, serviceSubject, sessionAuthModule, authModules,
                     initializationPromise);
         }
