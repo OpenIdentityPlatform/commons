@@ -82,6 +82,11 @@ public class AuthorizationModulesTest {
 
     public static class MyModule implements HttpServletAuthorizationModule {
         @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
         public Promise<AuthorizationResult, AuthorizationException> authorize(HttpServletRequest req, AuthorizationContext context) {
             return null;
         }

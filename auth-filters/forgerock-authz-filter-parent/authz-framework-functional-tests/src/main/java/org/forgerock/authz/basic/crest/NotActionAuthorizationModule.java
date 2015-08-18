@@ -41,6 +41,11 @@ import org.forgerock.util.promise.Promises;
  */
 public class NotActionAuthorizationModule implements CrestAuthorizationModule {
 
+    @Override
+    public String getName() {
+        return "NotAction";
+    }
+
     /**
      * {@inheritDoc}
      */

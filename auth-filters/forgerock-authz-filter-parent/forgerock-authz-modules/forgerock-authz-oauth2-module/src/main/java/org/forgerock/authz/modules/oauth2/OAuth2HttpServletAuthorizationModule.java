@@ -50,6 +50,11 @@ public class OAuth2HttpServletAuthorizationModule implements HttpServletAuthoriz
         this.bearerTokenExtractor = bearerTokenExtractor;
     }
 
+    @Override
+    public String getName() {
+        return "OAuth2";
+    }
+
     /**
      * <p>Authorizes a received HTTP Servlet request using the OAuth2 Access Token present in the request header.</p>
      *

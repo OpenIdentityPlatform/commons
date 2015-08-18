@@ -36,6 +36,13 @@ import javax.servlet.http.HttpServletRequest;
 public interface HttpServletAuthorizationModule {
 
     /**
+     * Returns the name of the authorization module.
+     *
+     * @return The module name.
+     */
+    String getName();
+
+    /**
      * <p>Authorizes a received HTTP Servlet request.</p>
      *
      * <p>This method conveys the outcome of its authorization either by returning an {@link AuthorizationResult} value

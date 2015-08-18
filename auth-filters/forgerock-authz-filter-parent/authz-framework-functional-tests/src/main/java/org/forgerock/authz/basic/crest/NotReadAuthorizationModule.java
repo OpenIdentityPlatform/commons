@@ -41,6 +41,11 @@ import org.forgerock.util.promise.Promises;
  */
 public class NotReadAuthorizationModule implements CrestAuthorizationModule {
 
+    @Override
+    public String getName() {
+        return "NotRead";
+    }
+
     /**
      * {@inheritDoc}
      */

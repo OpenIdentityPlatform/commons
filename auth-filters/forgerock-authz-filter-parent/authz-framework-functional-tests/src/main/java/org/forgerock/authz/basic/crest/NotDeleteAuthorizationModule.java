@@ -41,6 +41,11 @@ import org.forgerock.util.promise.Promises;
  */
 public class NotDeleteAuthorizationModule implements CrestAuthorizationModule {
 
+    @Override
+    public String getName() {
+        return "NotDelete";
+    }
+
     /**
      * {@inheritDoc}
      */

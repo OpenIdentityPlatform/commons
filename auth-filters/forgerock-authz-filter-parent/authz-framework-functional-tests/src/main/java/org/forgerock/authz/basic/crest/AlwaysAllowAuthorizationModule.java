@@ -37,6 +37,11 @@ import org.forgerock.util.promise.Promises;
  */
 public class AlwaysAllowAuthorizationModule implements CrestAuthorizationModule {
 
+    @Override
+    public String getName() {
+        return "AlwaysAllow";
+    }
+
     /**
      * {@inheritDoc}
      */

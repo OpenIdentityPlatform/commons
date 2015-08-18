@@ -50,6 +50,11 @@ public class AlwaysDenyAuthorizationModule implements CrestAuthorizationModule {
         this.endpoint = endpoint;
     }
 
+    @Override
+    public String getName() {
+        return "AlwaysDeny";
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -57,6 +57,11 @@ public class OAuth2CrestAuthorizationModule implements CrestAuthorizationModule 
         this.bearerTokenExtractor = bearerTokenExtractor;
     }
 
+    @Override
+    public String getName() {
+        return "OAuth2";
+    }
+
     /**
      * <p>Authorizes a received REST create request using the OAuth2 Access Token present in the request header.</p>
      *

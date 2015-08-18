@@ -36,6 +36,11 @@ import static org.forgerock.json.JsonValue.object;
  */
 public class HttpServletEndpointCheckerAuthorizationModule implements HttpServletAuthorizationModule {
 
+    @Override
+    public String getName() {
+        return "EndpointChecker";
+    }
+
     private final EndpointChecker endpointChecker;
 
     /**

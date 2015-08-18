@@ -41,6 +41,11 @@ import org.forgerock.util.promise.Promises;
  */
 public class NotCreateAuthorizationModule implements CrestAuthorizationModule {
 
+    @Override
+    public String getName() {
+        return "NotCreate";
+    }
+
     /**
      * {@inheritDoc}
      */

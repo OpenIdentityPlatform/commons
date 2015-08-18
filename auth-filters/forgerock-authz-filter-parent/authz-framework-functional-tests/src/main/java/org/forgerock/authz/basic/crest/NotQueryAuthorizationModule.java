@@ -41,6 +41,11 @@ import org.forgerock.util.promise.Promises;
  */
 public class NotQueryAuthorizationModule implements CrestAuthorizationModule {
 
+    @Override
+    public String getName() {
+        return "NotQuery";
+    }
+
     /**
      * {@inheritDoc}
      */
