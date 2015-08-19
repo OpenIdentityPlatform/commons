@@ -41,21 +41,28 @@
   Dark secondary button style
 */
 .fr-btn-secondary {
-  background-color:  #f7f7f7;
-  border-color: #ccc;
-  color: #333;
-
-  .fa {
+    background-color:  #f7f7f7;
+    border-color: #ccc;
     color: #333;
-  }
 
-  &:hover,
-  &:focus,
-  &.focus,
-  &:active,
-  &.active {
+    .fa {
+        color: #333;
+    }
+
+    &:hover,
+    &:focus,
+    &.focus,
+    &:active,
+    &.active {
+        color: #333;
+        background-color: #e6e6e6;
+        border-color: #adadad;
+    }
+}
+
+
+li.btn-group.active .fr-btn-secondary {
     color: #333;
     background-color: #e6e6e6;
     border-color: #adadad;
-  }
 }
