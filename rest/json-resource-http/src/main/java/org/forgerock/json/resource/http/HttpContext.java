@@ -69,6 +69,12 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      */
     public static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
 
+    /**
+     * Attribute in the serialized JSON form that holds the request received time (ms since UTC epoch).
+     * @see #HttpContext(JsonValue, ClassLoader)
+     */
+    public static final String ATTR_TIME = "time";
+
     private final Map<String, List<String>> headers;
     private final Map<String, List<String>> parameters;
 
@@ -84,6 +90,7 @@ public final class HttpContext extends AbstractContext implements ClientContext 
         data.put(ATTR_METHOD, HttpUtils.getMethod(req));
         data.put(ATTR_PATH, getRequestPath(req));
         data.put(ATTR_REMOTE_ADDRESS, getRemoteAddress(parent));
+        data.put(ATTR_TIME, req.getTime());
         this.headers = Collections.unmodifiableMap(new LazyMap<>(
                 new Factory<Map<String, List<String>>>() {
                     @Override
@@ -253,4 +260,13 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     public String getPath() {
         return data.get(ATTR_PATH).asString();
     }
+
+    /**
+     * Gets the time the request was received in milliseconds since the UTC epoch.
+     * @return The time of the request.
+     */
+    public long getRequestTime() {
+        return data.get(ATTR_TIME).asLong();
+    }
+
 }
