@@ -158,6 +158,7 @@ public final class Request extends MessageImpl<Request> {
     /**
      * Sets the time of the request.
      * @param time The time (milliseconds since the UTC epoch) of the request.
+     * @return This request.
      */
     public Request setTime(long time) {
         this.time = time;
