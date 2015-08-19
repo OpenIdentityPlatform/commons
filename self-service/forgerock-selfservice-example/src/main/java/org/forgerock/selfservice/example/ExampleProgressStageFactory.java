@@ -16,6 +16,7 @@
 
 package org.forgerock.selfservice.example;
 
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageFactory;
 import org.forgerock.selfservice.core.StageType;
@@ -30,16 +31,16 @@ import java.util.Map;
  *
  * @since 0.1.0
  */
-public final class ExampleProgressStageFactory implements ProgressStageFactory {
+final class ExampleProgressStageFactory implements ProgressStageFactory {
 
     private final Map<StageType<?>, ProgressStage<?>> progressStages;
 
     /**
      * Creates a new basic progress stage factory.
      */
-    public ExampleProgressStageFactory() {
+    ExampleProgressStageFactory(ConnectionFactory connectionFactory) {
         progressStages = new HashMap<>();
-        progressStages.put(EmailStageConfig.TYPE, new EmailStage());
+        progressStages.put(EmailStageConfig.TYPE, new EmailStage(connectionFactory));
         progressStages.put(ResetConfig.TYPE, new ResetStage());
     }
 

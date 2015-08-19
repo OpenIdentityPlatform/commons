@@ -16,10 +16,11 @@
 
 package org.forgerock.selfservice.core;
 
-import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
+import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.util.Reject;
 
 import java.util.Collections;
@@ -36,11 +37,13 @@ public final class StageResponse {
     private final String stageTag;
     private final JsonValue requirements;
     private final Map<String, String> state;
+    private final SnapshotTokenCallback callback;
 
     private StageResponse(Builder builder) {
         stageTag = builder.stageTag;
         requirements = builder.requirements;
         state = builder.state;
+        callback = builder.callback;
     }
 
     String getStageTag() {
@@ -59,6 +62,14 @@ public final class StageResponse {
         return Collections.unmodifiableMap(state);
     }
 
+    boolean hasCallback() {
+        return callback != null;
+    }
+
+    SnapshotTokenCallback getCallback() {
+        return callback;
+    }
+
     /**
      * Builder assists with the creation of {@link StageResponse} instances.
      */
@@ -67,9 +78,10 @@ public final class StageResponse {
         private String stageTag;
         private JsonValue requirements;
         private final Map<String, String> state;
+        private SnapshotTokenCallback callback;
 
         private Builder() {
-            stageTag = EMPTY_TAG;
+            stageTag = INITIAL_TAG;
             requirements = emptyJson();
             state = new HashMap<>();
         }
@@ -85,20 +97,6 @@ public final class StageResponse {
         public Builder setStageTag(String stageTag) {
             Reject.ifNull(stageTag);
             this.stageTag = stageTag;
-            return this;
-        }
-
-        /**
-         * Sets the json requirements.
-         *
-         * @param requirements
-         *         the json requirements
-         *
-         * @return this builder
-         */
-        public Builder setRequirements(JsonValue requirements) {
-            Reject.ifNull(requirements);
-            this.requirements = requirements;
             return this;
         }
 
@@ -119,6 +117,35 @@ public final class StageResponse {
         }
 
         /**
+         * Sets the json requirements.
+         *
+         * @param requirements
+         *         the json requirements
+         *
+         * @return a requirements builder
+         */
+        public RequirementsBuilder setRequirements(JsonValue requirements) {
+            Reject.ifNull(requirements);
+            this.requirements = requirements;
+
+            return new RequirementsBuilder() {
+
+                @Override
+                public RequirementsBuilder setCallback(SnapshotTokenCallback callback) {
+                    Reject.ifNull(callback);
+                    Builder.this.callback = callback;
+                    return this;
+                }
+
+                @Override
+                public StageResponse build() {
+                    return Builder.this.build();
+                }
+
+            };
+        }
+
+        /**
          * Builds a stage response instance.
          *
          * @return a stage response instance
@@ -126,6 +153,32 @@ public final class StageResponse {
         public StageResponse build() {
             return new StageResponse(this);
         }
+
+    }
+
+    /**
+     * Requirements builder allows for the definition of a snapshot token
+     * callback, which gets invoked with just prior to requirements being
+     * sent to the client.
+     */
+    public interface RequirementsBuilder {
+
+        /**
+         * Sets the snapshot token callback.
+         *
+         * @param callback
+         *         the callback
+         *
+         * @return this builder
+         */
+        RequirementsBuilder setCallback(SnapshotTokenCallback callback);
+
+        /**
+         * Builds a stage response instance.
+         *
+         * @return a stage response instance
+         */
+        StageResponse build();
 
     }
 

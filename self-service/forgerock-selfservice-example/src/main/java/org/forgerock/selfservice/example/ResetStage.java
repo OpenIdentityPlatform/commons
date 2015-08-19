@@ -16,25 +16,30 @@
 
 package org.forgerock.selfservice.example;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.core.exceptions.IllegalInputException;
-import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.util.Reject;
 
 /**
  * The reset password stage.
  *
  * @since 0.1.0
  */
-public class ResetStage implements ProgressStage<ResetConfig> {
+public final class ResetStage implements ProgressStage<ResetConfig> {
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context,
-                                               ResetConfig config) throws IllegalInputException {
+                                               ResetConfig config) throws ResourceException {
+        Reject.ifFalse(context.containsState("userId"), "Reset stage expects userId in the context");
+
         return RequirementsBuilder
                 .newInstance("Reset password")
                 .addRequireProperty("password", "Password")
@@ -42,22 +47,19 @@ public class ResetStage implements ProgressStage<ResetConfig> {
     }
 
     @Override
-    public StageResponse advance(ProcessContext context, ResetConfig config,
-                                 SnapshotAuthor snapshotAuthor) throws IllegalInputException {
+    public StageResponse advance(ProcessContext context, ResetConfig config) throws ResourceException {
+        String userId = context.getState("userId");
+        String password = context
+                .getInput()
+                .get("password")
+                .asString();
 
-        String emailAddress = context.getState("mail");
-
-        if (emailAddress == null || emailAddress.isEmpty()) {
-            throw new IllegalInputException("Missing email address");
+        if (isEmpty(password)) {
+            throw new BadRequestException("password is missing from input");
         }
 
-        String password = context.getInput().get("password").asString();
-
-        if (password == null || password.isEmpty()) {
-            throw new IllegalInputException("Missing password");
-        }
-
-        System.out.println("Reset password for " + emailAddress + " to " + password);
+        System.out.println("Reset password for " + userId + " to " + password);
+        // todo: call out to CREST
 
         return StageResponse
                 .newBuilder()

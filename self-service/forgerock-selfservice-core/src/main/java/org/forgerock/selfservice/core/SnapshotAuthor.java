@@ -14,27 +14,35 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.exceptions;
+package org.forgerock.selfservice.core;
 
-import org.forgerock.json.resource.BadRequestException;
+import java.util.Map;
 
 /**
- * Exception to represent illegal/invalid input from the client.
+ * Responsible for authoring new tokens used to key context snapshots.
  *
  * @since 0.1.0
  */
-public final class IllegalInputException extends BadRequestException {
-
-    private static final long serialVersionUID = 1L;
+interface SnapshotAuthor {
 
     /**
-     * Creates a new exception instance.
+     * Captures a snapshot of the state held within the passed map.
      *
-     * @param message
-     *         the message should refer to what is illegal about the input
+     * @param state
+     *         map of key/value pairs
+     *
+     * @return a snapshot token used as a reference back to the state
      */
-    public IllegalInputException(String message) {
-        super(message);
-    }
+    String captureSnapshotOf(Map<String, String> state);
+
+    /**
+     * Retrieves a previous snapshot of some state referenced by the token.
+     *
+     * @param snapshotToken
+     *         the snapshot token
+     *
+     * @return a key/value map containing the state
+     */
+    Map<String, String> retrieveSnapshotFrom(String snapshotToken);
 
 }

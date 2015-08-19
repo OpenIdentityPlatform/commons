@@ -16,6 +16,7 @@
 
 package org.forgerock.selfservice.core.config;
 
+import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenType;
 import org.forgerock.util.Reject;
 
@@ -145,25 +146,6 @@ public final class ProcessInstanceConfig {
             return new ProcessInstanceConfig(this);
         }
 
-    }
-
-    /**
-     * Indicates whether the service should operate in stateless or stateful mode.
-     * <b/>
-     * Stateless means that all process state will be pushed into the token that
-     * is returned to the client. Whereas stateful (local) will push all state to
-     * a local store and the returning token will be used to key that state.
-     */
-    public enum StorageType {
-        /**
-         * State should be preserved locally.
-         */
-        LOCAL,
-
-        /**
-         * State is serialised into request/response to avoid server-side state management.
-         */
-        STATELESS
     }
 
     /**

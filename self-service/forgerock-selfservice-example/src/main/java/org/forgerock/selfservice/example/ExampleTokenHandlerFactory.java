@@ -29,7 +29,7 @@ import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
  *
  * @since 0.1.0
  */
-public final class ExampleTokenHandlerFactory implements SnapshotTokenHandlerFactory {
+final class ExampleTokenHandlerFactory implements SnapshotTokenHandlerFactory {
 
     private final byte[] sharedKey;
 
@@ -39,7 +39,7 @@ public final class ExampleTokenHandlerFactory implements SnapshotTokenHandlerFac
      * @param sharedKey
      *         shared key used by the underlying token handler
      */
-    public ExampleTokenHandlerFactory(byte[] sharedKey) {
+    ExampleTokenHandlerFactory(byte[] sharedKey) {
         this.sharedKey = sharedKey;
     }
 

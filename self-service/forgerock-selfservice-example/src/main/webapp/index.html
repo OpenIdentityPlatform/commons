@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--
+  ~ The contents of this file are subject to the terms of the Common Development and
+  ~ Distribution License (the License). You may not use this file except in compliance with the
+  ~ License.
+  ~
+  ~ You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  ~ specific language governing permission and limitations under the License.
+  ~
+  ~ When distributing Covered Software, include this CDDL Header Notice in each file and include
+  ~ the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
+  ~ information: "Portions copyright [year] [name of copyright owner]".
+  ~
+  ~ Copyright 2015 ForgeRock AS.
+  -->
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Example app</title>
+</head>
+<body>
+<h2>Example app</h2>
+<h4>To kick of the process:</h4>
+<h5>
+    curl -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" 'http://localhost:9999/example/css/reset'
+</h5>
+<h4>Following requests need to satisfy the requirements returned from the previous request, like so:</h4>
+<h5>
+    curl -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{
+    "input": {
+    <span style="color: darkred">"username": "andy123"</span>
+    }
+    }' 'http://localhost:9999/example/css/reset?_action=submitRequirements'
+</h5>
+<h4>When a token is returned in the response along with requirements, it must be echoed back like so:</h4>
+<h5>
+    curl -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache" -d '{
+    <span style="color: darkred">"token":
+    "eyAidHlwIjogIkpXVCIsICJhbGciOiAiSFMyNTYiIH0.eyAic3RhZ2VUYWciOiAidmFsaWRhdGVDb2RlVGFnIiwgInN0YWdlSW5kZXgiOiAiMCIsICJ1c2VySWQiOiAiYW5keTEyMyIsICJjb2RlIjogImRhNzRmNDVjLTYzNjgtNDE0NC04NDU2LTBkOGZlODFjMjE1NSIgfQ.0jIOiB6QXbrAKpPbDNrvXp72WrOozOiHQfQwWf60USk"</span>,
+    "input": {
+    <span style="color: darkred">"code": "da74f45c-6368-4144-8456-0d8fe81c2155"</span>
+    }
+    }' 'http://localhost:9999/example/css/reset?_action=submitRequirements'
+</h5>
+</body>
+</html>

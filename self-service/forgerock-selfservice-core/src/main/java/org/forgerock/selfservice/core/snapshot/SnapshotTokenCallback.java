@@ -16,23 +16,28 @@
 
 package org.forgerock.selfservice.core.snapshot;
 
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 
 /**
- * Responsible for authoring new tokens used to key context snapshots.
+ * Callback is invoked when a new snapshot token is created
+ * just before requirements are returned to the client.
  *
  * @since 0.1.0
  */
-public interface SnapshotAuthor {
+public interface SnapshotTokenCallback {
 
     /**
-     * Captures a snapshot of the passed process context.
+     * Preview of the snapshot token just prior to requirements being sent to the client.
      *
      * @param context
      *         the process context
+     * @param snapshotToken
+     *         the snapshot token
      *
-     * @return a snapshot token used to reference the context
+     * @throws ResourceException
+     *         should some error occur during the token preview
      */
-    String captureSnapshotOf(ProcessContext context);
+    void snapshotTokenPreview(ProcessContext context, String snapshotToken) throws ResourceException;
 
 }

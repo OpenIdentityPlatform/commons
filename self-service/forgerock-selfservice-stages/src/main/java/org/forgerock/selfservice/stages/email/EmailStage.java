@@ -16,94 +16,194 @@
 
 package org.forgerock.selfservice.stages.email;
 
-import static org.forgerock.selfservice.core.ServiceUtils.EMPTY_TAG;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 
+import org.forgerock.http.context.RootContext;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.core.exceptions.IllegalInputException;
 import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
-import org.forgerock.selfservice.core.snapshot.SnapshotAuthor;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.util.query.QueryFilter;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Email stage.
  *
  * @since 0.1.0
  */
-public class EmailStage implements ProgressStage<EmailStageConfig> {
+public final class EmailStage implements ProgressStage<EmailStageConfig> {
 
-    private static final String VALIDATE_LINK_TAG = "validateLinkTag";
+    private static final String VALIDATE_CODE_TAG = "validateCodeTag";
+
+    private final ConnectionFactory connectionFactory;
+
+    /**
+     * Constructs a new email stage.
+     *
+     * @param connectionFactory
+     *         the CREST connection factory
+     */
+    @Inject
+    public EmailStage(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context, EmailStageConfig config) {
         return RequirementsBuilder
                 .newInstance("Reset your password")
-                .addRequireProperty("mail", "Email address for account")
+                .addRequireProperty("username", "Username (either user Id or email)")
                 .build();
     }
 
     @Override
-    public StageResponse advance(ProcessContext context, EmailStageConfig config,
-                                 SnapshotAuthor snapshotAuthor) throws IllegalInputException {
+    public StageResponse advance(ProcessContext context, EmailStageConfig config) throws ResourceException {
         switch (context.getStageTag()) {
-        case EMPTY_TAG:
-            return sendEmail(context, snapshotAuthor);
-        case VALIDATE_LINK_TAG:
-            return validateLink(context);
+        case INITIAL_TAG:
+            return sendEmail(context, config);
+        case VALIDATE_CODE_TAG:
+            return validateCode(context);
         }
 
         throw new IllegalStageTagException(context.getStageTag());
     }
 
-    private StageResponse sendEmail(ProcessContext context,
-                                    SnapshotAuthor snapshotAuthor) throws IllegalInputException {
-        String emailAddress = context
+    private StageResponse sendEmail(ProcessContext context, final EmailStageConfig config) throws ResourceException {
+        String username = context
                 .getInput()
-                .get("mail")
+                .get("username")
                 .asString();
 
-        if (emailAddress == null || emailAddress.isEmpty()) {
-            throw new IllegalInputException("mail is missing");
+        if (isEmpty(username)) {
+            throw new BadRequestException("username is missing");
         }
 
-        context = ProcessContext
-                .newBuilder(context)
-                .addState("mail", emailAddress)
-                .setStageTag(VALIDATE_LINK_TAG)
-                .build();
+        JsonValue user = findUser(username, config);
 
-        String snapshotToken = snapshotAuthor.captureSnapshotOf(context);
+        if (user == null) {
+            throw new BadRequestException("Unable to find associated account");
+        }
+
+        String userId = user
+                .get(config.getIdentityIdField())
+                .asString();
+
+        final String mail = user
+                .get(config.getIdentityEmailField())
+                .asString();
+
+        final String code = UUID.randomUUID().toString();
 
         JsonValue requirements = RequirementsBuilder
-                .newInstance("Verify email address")
-                .addRequireProperty("code", "Enter code emailed to address provided")
-                .addProperty("jwt", "Encrypted value emailed to address provided (when using different browser)")
+                .newInstance("Verify user account")
+                .addRequireProperty("code", "Enter code emailed")
                 .build();
 
-        System.out.println("Email sent with token: " + snapshotToken);
+        SnapshotTokenCallback callback = new SnapshotTokenCallback() {
+
+            @Override
+            public void snapshotTokenPreview(ProcessContext context,
+                                             String snapshotToken) throws ResourceException {
+                sendEmail(snapshotToken, code, mail, config);
+            }
+
+        };
 
         return StageResponse
                 .newBuilder()
+                .addState("userId", userId)
+                .addState("code", code)
+                .setStageTag(VALIDATE_CODE_TAG)
                 .setRequirements(requirements)
-                .setStageTag(VALIDATE_LINK_TAG)
+                .setCallback(callback)
                 .build();
     }
 
-    private StageResponse validateLink(ProcessContext context) throws IllegalInputException {
-        String emailAddress = context.getState("mail");
+    private StageResponse validateCode(ProcessContext context) throws ResourceException {
+        String originalCode = context.getState("code");
 
-        if (emailAddress == null || emailAddress.isEmpty()) {
-            throw new IllegalInputException("Missing email address");
+        String submittedCode = context
+                .getInput()
+                .get("code")
+                .asString();
+
+        if (isEmpty(submittedCode)) {
+            throw new BadRequestException("Input code is missing");
         }
 
-        System.out.println("Token valid, found email address " + emailAddress);
+        if (!originalCode.equals(submittedCode)) {
+            throw new BadRequestException("Invalid code");
+        }
 
         return StageResponse
                 .newBuilder()
                 .build();
+    }
+
+    private JsonValue findUser(String identifier, EmailStageConfig config) throws ResourceException {
+        Connection connection = connectionFactory.getConnection();
+
+        QueryRequest request = Requests
+                .newQueryRequest(config.getIdentityServiceUrl())
+                .setQueryFilter(
+                        QueryFilter.or(
+                                QueryFilter.equalTo(new JsonPointer(config.getIdentityIdField()), identifier),
+                                QueryFilter.equalTo(new JsonPointer(config.getIdentityEmailField()), identifier)));
+
+        final List<JsonValue> user = new ArrayList<>();
+        connection.query(new RootContext(), request, new QueryResourceHandler() {
+
+            @Override
+            public boolean handleResource(ResourceResponse resourceResponse) {
+                user.add(resourceResponse.getContent());
+                return true;
+            }
+
+        });
+
+        return user.isEmpty() ? null : user.get(0);
+    }
+
+    private void sendEmail(String snapshotToken, String code, String mail,
+                           EmailStageConfig config) throws ResourceException {
+
+        String emailUrl = config.getEmailResetUrl() + "?token=" + snapshotToken + "&code=" + code;
+        String message = config.getEmailMessage().replace(config.getEmailResetUrlToken(), emailUrl);
+
+        Connection connection = connectionFactory.getConnection();
+        ActionRequest request = Requests
+                .newActionRequest(config.getEmailServiceUrl(), "send")
+                .setContent(
+                        json(
+                                object(
+                                        field("to", mail),
+                                        field("from", config.getEmailFrom()),
+                                        field("subject", config.getEmailSubject()),
+                                        field("message", message))));
+
+        connection.action(new RootContext(), request);
     }
 
     @Override
