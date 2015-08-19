@@ -17,10 +17,10 @@
 package org.forgerock.json.test.assertj;
 
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.util.test.assertj.Conditions.*;
 
 import org.assertj.core.api.Assertions;
-import org.assertj.core.api.Condition;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.Test;
@@ -74,11 +74,11 @@ public class AssertJJsonValueAssertTest {
         asserter.isObject().longAt("long").isEqualTo(3_257_259_826_582_038L);
         asserter.isObject().doubleAt("double").isEqualTo(50.91D);
         asserter.isObject()
-                .stringIs("string", EqualToCondition.equalTo("fred"))
-                .integerIs("int", EqualToCondition.equalTo(5))
-                .longIs("long", EqualToCondition.equalTo(3_257_259_826_582_038L))
-                .doubleIs("double", EqualToCondition.equalTo(50.91D))
-                .booleanIs("bool", EqualToCondition.equalTo(true));
+                .stringIs("string", equalTo("fred"))
+                .integerIs("int", equalTo(5))
+                .longIs("long", equalTo(3_257_259_826_582_038L))
+                .doubleIs("double", equalTo(50.91D))
+                .booleanIs("bool", equalTo(true));
 
         asserter.hasObject("obj/subobj")
                 .containsOnly(Assertions.entry("property", "abc"))
@@ -111,19 +111,4 @@ public class AssertJJsonValueAssertTest {
         asserter.succeeded().isObject().hasBoolean("bool");
     }
 
-    private static class EqualToCondition<T> extends Condition<T> {
-
-        private T expected;
-
-        static <T> EqualToCondition<T> equalTo(T expected) {
-            EqualToCondition<T> condition = new EqualToCondition<>();
-            condition.expected = expected;
-            return condition;
-        }
-
-        @Override
-        public boolean matches(T value) {
-            return expected == null ? value == null : expected.equals(value);
-        }
-    }
 }
