@@ -47,6 +47,7 @@ import org.forgerock.http.context.RootContext;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.http.util.Uris;
@@ -54,6 +55,7 @@ import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
+import org.forgerock.util.promise.RuntimeExceptionHandler;
 
 /**
  * <p>
@@ -205,19 +207,34 @@ public final class HttpFrameworkServlet extends HttpServlet {
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
         final Promise<Response, NeverThrowsException> promise =
-                handler.handle(context, request).thenOnResult(new ResultHandler<Response>() {
-                    @Override
-                    public void handleResult(Response response) {
-                        try {
-                            writeResponse(httpRequestContext, resp, response);
-                        } catch (IOException e) {
-                            log("Failed to write success response", e);
-                        } finally {
-                            closeSilently(request, response);
-                            sync.signalAndComplete();
-                        }
-                    }
-                });
+                handler.handle(context, request)
+                        .thenOnResult(new ResultHandler<Response>() {
+                            @Override
+                            public void handleResult(Response response) {
+                                try {
+                                    writeResponse(httpRequestContext, resp, response);
+                                } catch (IOException e) {
+                                    log("Failed to write success response", e);
+                                } finally {
+                                    closeSilently(request, response);
+                                    sync.signalAndComplete();
+                                }
+                            }
+                        });
+        promise.thenOnRuntimeException(new RuntimeExceptionHandler() {
+            @Override
+            public void handleRuntimeException(RuntimeException e) {
+                Response response = new Response(Status.INTERNAL_SERVER_ERROR);
+                try {
+                    writeResponse(httpRequestContext, resp, response);
+                } catch (IOException ioe) {
+                    log("Failed to write success response", e);
+                } finally {
+                    closeSilently(request, response);
+                    sync.signalAndComplete();
+                }
+            }
+        });
 
         sync.setAsyncListener(new Runnable() {
             @Override
