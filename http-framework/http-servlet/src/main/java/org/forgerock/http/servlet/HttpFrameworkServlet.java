@@ -237,6 +237,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         // populate request
         Request request = new Request();
         request.setMethod(req.getMethod());
+        request.setTime(System.currentTimeMillis());
         try {
             request.setUri(Uris.create(req.getScheme(), null, req.getServerName(),
                                        req.getServerPort(), req.getRequestURI(), req.getQueryString(), null));
