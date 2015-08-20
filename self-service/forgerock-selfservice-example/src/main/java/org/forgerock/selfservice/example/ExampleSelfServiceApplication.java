@@ -24,6 +24,7 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.Router;
 import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
@@ -36,9 +37,7 @@ import org.forgerock.selfservice.stages.email.EmailStageConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.util.Factory;
 
-import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Properties;
 
 /**
  * Basic http application which initialises the user self service service.
@@ -48,21 +47,15 @@ import java.util.Properties;
 public final class ExampleSelfServiceApplication implements HttpApplication {
 
     private final ConnectionFactory crestConnectionFactory;
-    private final Properties properties;
+    private final JsonValue appConfig;
 
     /**
      * Constructs the example application.
      */
     public ExampleSelfServiceApplication() {
         try {
-            properties = new Properties(System.getProperties());
-            properties.load(getClass().getResourceAsStream("/configuration.properties"));
-        } catch (IOException ioE) {
-            throw new RuntimeException(ioE);
-        }
-
-        try {
-            crestConnectionFactory = new CrestServiceRegister().initialise(properties);
+            appConfig = JsonReader.jsonFileToJsonValue("/config.json");
+            crestConnectionFactory = new CrestServiceRegister().initialise(appConfig);
         } catch (ResourceException rE) {
             throw new RuntimeException(rE);
         }

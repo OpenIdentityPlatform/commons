@@ -61,40 +61,31 @@ import java.util.Properties;
  */
 final class CrestServiceRegister {
 
-    ConnectionFactory initialise(Properties properties) throws ResourceException {
+    ConnectionFactory initialise(JsonValue config) throws ResourceException {
         Router router = new Router();
         router.addRoute(Router.uriTemplate("/users"), new MemoryBackend());
-        router.addRoute(Router.uriTemplate("/email"), new EmailService(properties));
+        router.addRoute(Router.uriTemplate("/email"), new EmailService(config.get("mailserver")));
 
         ConnectionFactory connectionFactory = newInternalConnectionFactory(router);
-        createDemoData(connectionFactory);
+        createDemoData(connectionFactory, config.get("users"));
         return connectionFactory;
     }
 
-    private void createDemoData(ConnectionFactory connectionFactory) throws ResourceException {
+    private void createDemoData(ConnectionFactory connectionFactory, JsonValue users) throws ResourceException {
         Connection connection = connectionFactory.getConnection();
-        connection.create(new RootContext(),
-                newCreateRequest("/users", "andy123", buildUser("Andy", "andrew.forrest@forgerock.com")));
-        connection.create(new RootContext(),
-                newCreateRequest("/users", "jake123", buildUser("Jake", "jake.feasel@forgerock.com")));
-        connection.create(new RootContext(),
-                newCreateRequest("/users", "andi123", buildUser("Andi", "andi.egloff@forgerock.com")));
-    }
 
-    private JsonValue buildUser(String name, String email) {
-        return json(
-                object(
-                        field("name", name),
-                        field("mail", email),
-                        field("_rev", "1.0")));
+        for (JsonValue user : users) {
+            user.add("mail", System.getProperty("user.mail"));
+            connection.create(new RootContext(), newCreateRequest("/users", user.get("_id").asString(), user));
+        }
     }
 
     private static final class EmailService implements SingletonResourceProvider {
 
-        private final Properties properties;
+        private final JsonValue config;
 
-        EmailService(Properties properties) {
-            this.properties = properties;
+        EmailService(JsonValue config) {
+            this.config = config;
         }
 
         @Override
@@ -140,14 +131,14 @@ final class CrestServiceRegister {
             Properties props = new Properties();
             props.put("mail.smtp.auth", "true");
             props.put("mail.smtp.starttls.enable", "true");
-            props.put("mail.smtp.host", properties.getProperty("emailserver.host"));
-            props.put("mail.smtp.port", properties.getProperty("emailserver.port"));
+            props.put("mail.smtp.host", config.get("host").asString());
+            props.put("mail.smtp.port", config.get("port").asString());
 
             Session session = Session.getInstance(props, new Authenticator() {
                 protected PasswordAuthentication getPasswordAuthentication() {
                     return new PasswordAuthentication(
-                            properties.getProperty("emailserver.username"),
-                            properties.getProperty("emailserver.password"));
+                            System.getProperty("mailserver.username"),
+                            System.getProperty("mailserver.password"));
                 }
             });
 
