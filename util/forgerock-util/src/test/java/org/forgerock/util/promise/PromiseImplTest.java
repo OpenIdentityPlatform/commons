@@ -30,7 +30,7 @@ public class PromiseImplTest {
 
     @SuppressWarnings("unchecked")
     @Test
-    public void completingPromiseWithResourceExceptionShouldPropagateThroughAChainedThen() {
+    public void completingPromiseWithRuntimeExceptionShouldPropagateThroughAChainedThen() {
 
         //Given
         Function<Void, Void, NeverThrowsException> promiseFunction = mock(Function.class);
@@ -51,7 +51,7 @@ public class PromiseImplTest {
     }
 
     @Test
-    public void completingPromiseWithResourceExceptionShouldPropagateThroughAChainedThenAsync() {
+    public void completingPromiseWithRuntimeExceptionShouldPropagateThroughAChainedThenAsync() {
 
         //Given
         RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
@@ -143,7 +143,7 @@ public class PromiseImplTest {
         } catch (Exception e) {
             //Then
             assertThat(e).isInstanceOf(ExecutionException.class);
-            assertThat(e.getCause()).isEqualTo(runtimeException);
+            assertThat(e.getCause()).isSameAs(runtimeException);
         }
     }
 
@@ -162,7 +162,7 @@ public class PromiseImplTest {
             fail();
         } catch (Exception e) {
             //Then
-            assertThat(e).isEqualTo(runtimeException);
+            assertThat(e).isSameAs(runtimeException);
         }
     }
 }

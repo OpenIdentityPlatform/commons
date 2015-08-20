@@ -359,24 +359,25 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
                     } else if (newState == HAS_EXCEPTION || newState == CANCELLED) {
                         chained.handleResult(onException.apply(exception));
                     } else {
-                        try {
-                            chained.handleRuntimeException(runtimeException);
-                        } catch (Exception ignored) {
-                            LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
-                        }
+                        tryHandlingRuntimeException(runtimeException, chained);
                     }
                 } catch (final RuntimeException e) {
-                    try {
-                        chained.handleRuntimeException(e);
-                    } catch (Exception ignored) {
-                        LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
-                    }
+                    tryHandlingRuntimeException(e, chained);
                 } catch (final Exception e) {
                     chained.handleException((EOUT) e);
                 }
             }
         });
         return chained;
+    }
+
+    private <VOUT, EOUT extends Exception> void tryHandlingRuntimeException(final RuntimeException runtimeException,
+            final PromiseImpl<VOUT, EOUT> chained) {
+        try {
+            chained.handleRuntimeException(runtimeException);
+        } catch (Exception ignored) {
+            LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
+        }
     }
 
     @Override
@@ -415,40 +416,20 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
                     } else if (newState == HAS_EXCEPTION || newState == CANCELLED) {
                         callNestedPromise(onException.apply(exception));
                     } else {
-                        try {
-                            chained.handleRuntimeException(runtimeException);
-                        } catch (Exception ignored) {
-                            LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
-                        }
+                        tryHandlingRuntimeException(runtimeException, chained);
                     }
                 } catch (final RuntimeException e) {
-                    try {
-                        chained.handleRuntimeException(e);
-                    } catch (Exception ignored) {
-                        LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
-                    }
+                    tryHandlingRuntimeException(e, chained);
                 } catch (final Exception e) {
                     chained.handleException((EOUT) e);
                 }
             }
 
             private void callNestedPromise(Promise<VOUT, EOUT> nestedPromise) {
-                nestedPromise.thenOnResult(new ResultHandler<VOUT>() {
-                    @Override
-                    public void handleResult(final VOUT value) {
-                        chained.handleResult(value);
-                    }
-                }).thenOnException(new ExceptionHandler<EOUT>() {
-                    @Override
-                    public void handleException(final EOUT exception) {
-                        chained.handleException(exception);
-                    }
-                }).thenOnRuntimeException(new RuntimeExceptionHandler() {
-                    @Override
-                    public void handleRuntimeException(RuntimeException exception) {
-                        chained.handleRuntimeException(exception);
-                    }
-                });
+                nestedPromise
+                        .thenOnResult(chained)
+                        .thenOnException(chained)
+                        .thenOnRuntimeException(chained);
             }
         });
         return chained;
