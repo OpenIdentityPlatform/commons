@@ -14,26 +14,22 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.example;
-
-import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.core.config.StageConfig;
+package org.forgerock.selfservice.stages;
 
 /**
- * Configuration for the password reset stage.
+ * Constants class for defining fields for common state shared across stages.
  *
  * @since 0.1.0
  */
-public class ResetConfig implements StageConfig {
+public final class CommonStateFields {
+
+    private CommonStateFields() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
-     * Reset password stage type.
+     * The userId field.
      */
-    public static final StageType<ResetConfig> TYPE = StageType.valueOf("resetStage", ResetConfig.class);
-
-    @Override
-    public StageType<?> getStageType() {
-        return TYPE;
-    }
+    public static final String USER_ID_FIELD = "userId";
 
 }

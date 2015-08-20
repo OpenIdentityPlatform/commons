@@ -75,7 +75,7 @@ public final class JsonReader {
                 contents.append(line).append('\n');
             }
 
-            return toJsonValue(contents.toString().replaceAll("\\s", ""));
+            return toJsonValue(contents.toString());
         } catch (IOException e) {
             throw new JsonException("Failed to parse json", e);
         }

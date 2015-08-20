@@ -21,8 +21,9 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
+import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
-import org.forgerock.http.context.RootContext;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -90,7 +91,8 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
         throw new IllegalStageTagException(context.getStageTag());
     }
 
-    private StageResponse sendEmail(ProcessContext context, final EmailStageConfig config) throws ResourceException {
+    private StageResponse sendEmail(final ProcessContext context,
+                                    final EmailStageConfig config) throws ResourceException {
         String username = context
                 .getInput()
                 .get("username")
@@ -100,7 +102,7 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
             throw new BadRequestException("username is missing");
         }
 
-        JsonValue user = findUser(username, config);
+        JsonValue user = findUser(context.getHttpContext(), username, config);
 
         if (user == null) {
             throw new BadRequestException("Unable to find associated account");
@@ -126,14 +128,14 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
             @Override
             public void snapshotTokenPreview(ProcessContext context,
                                              String snapshotToken) throws ResourceException {
-                sendEmail(snapshotToken, code, mail, config);
+                sendEmail(context.getHttpContext(), snapshotToken, code, mail, config);
             }
 
         };
 
         return StageResponse
                 .newBuilder()
-                .addState("userId", userId)
+                .addState(USER_ID_FIELD, userId)
                 .addState("code", code)
                 .setStageTag(VALIDATE_CODE_TAG)
                 .setRequirements(requirements)
@@ -162,8 +164,8 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
                 .build();
     }
 
-    private JsonValue findUser(String identifier, EmailStageConfig config) throws ResourceException {
-        Connection connection = connectionFactory.getConnection();
+    private JsonValue findUser(Context httpContext, String identifier,
+                               EmailStageConfig config) throws ResourceException {
 
         QueryRequest request = Requests
                 .newQueryRequest(config.getIdentityServiceUrl())
@@ -173,37 +175,41 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
                                 QueryFilter.equalTo(new JsonPointer(config.getIdentityEmailField()), identifier)));
 
         final List<JsonValue> user = new ArrayList<>();
-        connection.query(new RootContext(), request, new QueryResourceHandler() {
 
-            @Override
-            public boolean handleResource(ResourceResponse resourceResponse) {
-                user.add(resourceResponse.getContent());
-                return true;
-            }
+        try (Connection connection = connectionFactory.getConnection()) {
+            connection.query(httpContext, request, new QueryResourceHandler() {
 
-        });
+                @Override
+                public boolean handleResource(ResourceResponse resourceResponse) {
+                    user.add(resourceResponse.getContent());
+                    return true;
+                }
+
+            });
+        }
 
         return user.isEmpty() ? null : user.get(0);
     }
 
-    private void sendEmail(String snapshotToken, String code, String mail,
+    private void sendEmail(Context httpContext, String snapshotToken, String code, String mail,
                            EmailStageConfig config) throws ResourceException {
 
         String emailUrl = config.getEmailResetUrl() + "&token=" + snapshotToken + "&code=" + code;
         String message = config.getEmailMessage().replace(config.getEmailResetUrlToken(), emailUrl);
 
-        Connection connection = connectionFactory.getConnection();
-        ActionRequest request = Requests
-                .newActionRequest(config.getEmailServiceUrl(), "send")
-                .setContent(
-                        json(
-                                object(
-                                        field("to", mail),
-                                        field("from", config.getEmailFrom()),
-                                        field("subject", config.getEmailSubject()),
-                                        field("message", message))));
+        try (Connection connection = connectionFactory.getConnection()) {
+            ActionRequest request = Requests
+                    .newActionRequest(config.getEmailServiceUrl(), "send")
+                    .setContent(
+                            json(
+                                    object(
+                                            field("to", mail),
+                                            field("from", config.getEmailFrom()),
+                                            field("subject", config.getEmailSubject()),
+                                            field("message", message))));
 
-        connection.action(new RootContext(), request);
+            connection.action(httpContext, request);
+        }
     }
 
     @Override

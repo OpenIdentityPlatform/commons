@@ -19,6 +19,7 @@ package org.forgerock.selfservice.core;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
@@ -36,16 +37,27 @@ public final class ProcessContext {
     private static final String STAGE_INDEX_KEY = "stageIndex";
     private static final String STAGE_TAG_KEY = "stageTag";
 
+    private final Context httpContext;
     private final int stageIndex;
     private final String stageTag;
     private final JsonValue input;
     private final Map<String, String> state;
 
     private ProcessContext(Builder builder) {
+        httpContext = builder.httpContext;
         stageIndex = builder.stageIndex;
         stageTag = builder.stageTag;
         input = builder.input;
         state = builder.state;
+    }
+
+    /**
+     * Gets the http context.
+     *
+     * @return the http context
+     */
+    public Context getHttpContext() {
+        return httpContext;
     }
 
     /**
@@ -115,13 +127,16 @@ public final class ProcessContext {
      */
     static final class Builder {
 
+        private final Context httpContext;
         private final int stageIndex;
         private String stageTag;
         private final Map<String, String> state;
         private JsonValue input;
 
-        private Builder(int stageIndex) {
+        private Builder(Context httpContext, int stageIndex) {
+            Reject.ifNull(httpContext);
             Reject.ifTrue(stageIndex < 0);
+            this.httpContext = httpContext;
             this.stageIndex = stageIndex;
             stageTag = INITIAL_TAG;
             state = new HashMap<>();
@@ -131,14 +146,17 @@ public final class ProcessContext {
         private Builder(ProcessContext previous) {
             Reject.ifNull(previous);
             stageIndex = previous.stageIndex;
+            httpContext = previous.httpContext;
             stageTag = previous.stageTag;
             state = new HashMap<>(previous.state);
             input = previous.input;
         }
 
-        private Builder(Map<String, String> flattenedContext) {
-            Reject.ifNull(flattenedContext);
+        private Builder(Context httpContext, Map<String, String> flattenedContext) {
+            Reject.ifNull(httpContext, flattenedContext);
             Reject.ifFalse(flattenedContext.containsKey(STAGE_INDEX_KEY), "Stage index missing");
+
+            this.httpContext = httpContext;
 
             Map<String, String> localCopy = new HashMap<>(flattenedContext);
             stageIndex = Integer.parseInt(localCopy.remove(STAGE_INDEX_KEY));
@@ -173,12 +191,12 @@ public final class ProcessContext {
 
     }
 
-    static Builder newBuilder(int stageIndex) {
-        return new Builder(stageIndex);
+    static Builder newBuilder(Context httpContext, int stageIndex) {
+        return new Builder(httpContext, stageIndex);
     }
 
-    static Builder newBuilder(Map<String, String> flattenedContext) {
-        return new Builder(flattenedContext);
+    static Builder newBuilder(Context httpContext, Map<String, String> flattenedContext) {
+        return new Builder(httpContext, flattenedContext);
     }
 
     static Builder newBuilder(ProcessContext previous) {

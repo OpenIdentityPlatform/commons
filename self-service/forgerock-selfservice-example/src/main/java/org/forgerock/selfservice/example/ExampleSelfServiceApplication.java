@@ -17,15 +17,21 @@
 package org.forgerock.selfservice.example;
 
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
+import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
+import static org.forgerock.json.resource.Router.uriTemplate;
 
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.Router;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
@@ -34,6 +40,7 @@ import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.stages.email.EmailStageConfig;
+import org.forgerock.selfservice.stages.reset.ResetStageConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.util.Factory;
 
@@ -46,33 +53,46 @@ import java.nio.charset.Charset;
  */
 public final class ExampleSelfServiceApplication implements HttpApplication {
 
-    private final ConnectionFactory crestConnectionFactory;
-    private final JsonValue appConfig;
-
-    /**
-     * Constructs the example application.
-     */
-    public ExampleSelfServiceApplication() {
-        try {
-            appConfig = JsonReader.jsonFileToJsonValue("/config.json");
-            crestConnectionFactory = new CrestServiceRegister().initialise(appConfig);
-        } catch (ResourceException rE) {
-            throw new RuntimeException(rE);
-        }
-    }
+    private ConnectionFactory crestConnectionFactory;
+    private org.forgerock.json.resource.Router crestRouter;
+    private JsonValue appConfig;
 
     @Override
     public Handler start() throws HttpApplicationException {
         try {
-            Router router = new Router();
-            router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/reset"), initialiseHandler());
-            return router;
+            appConfig = JsonReader.jsonFileToJsonValue("/config.json");
+
+            crestRouter = new org.forgerock.json.resource.Router();
+            crestConnectionFactory = newInternalConnectionFactory(crestRouter);
+            registerCRESTServices();
+
+            Router chfRouter = new Router();
+            chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "internal"),
+                    CrestHttp.newHttpHandler(crestConnectionFactory));
+            chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "reset"), registerResetHandler());
+            return chfRouter;
         } catch (Exception e) {
-            throw new HttpApplicationException(e);
+            throw new HttpApplicationException("Some error starting", e);
         }
     }
 
-    private Handler initialiseHandler() throws Exception {
+    private void registerCRESTServices() throws ResourceException {
+        crestRouter.addRoute(uriTemplate("users"), new MemoryBackend());
+        crestRouter.addRoute(uriTemplate("email"), new ExampleEmailService(appConfig.get("mailserver")));
+        createDemoData(crestConnectionFactory, appConfig.get("users"));
+    }
+
+    private void createDemoData(ConnectionFactory connectionFactory, JsonValue users) throws ResourceException {
+        try (Connection connection = connectionFactory.getConnection()) {
+            for (JsonValue user : users) {
+                user.add("mail", System.getProperty("user.mail"));
+                connection.create(new RootContext(),
+                        newCreateRequest("/users", user.get("_id").asString(), user));
+            }
+        }
+    }
+
+    private Handler registerResetHandler() throws Exception {
         EmailStageConfig emailConfig = new EmailStageConfig();
         emailConfig.setIdentityIdField("_id");
         emailConfig.setIdentityEmailField("mail");
@@ -84,10 +104,14 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         emailConfig.setEmailResetUrlToken("%link%");
         emailConfig.setEmailResetUrl("http://localhost:9999/example/#passwordReset/");
 
+        ResetStageConfig resetConfig = new ResetStageConfig();
+        resetConfig.setIdentityServiceUrl("/users");
+        resetConfig.setIdentityPasswordField("password");
+
         ProcessInstanceConfig config = ProcessInstanceConfig
                 .newBuilder()
                 .addStageConfig(emailConfig)
-                .addStageConfig(new ResetConfig())
+                .addStageConfig(resetConfig)
                 .setTokenType(JwtTokenHandler.TYPE)
                 .setStorageType(StorageType.STATELESS)
                 .build();
