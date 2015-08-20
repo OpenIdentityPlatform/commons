@@ -145,6 +145,11 @@ public final class Promises {
                 public void handleException(final E exception) {
                     composite.handleException(exception);
                 }
+            }).thenOnRuntimeException(new RuntimeExceptionHandler() {
+                @Override
+                public void handleRuntimeException(RuntimeException exception) {
+                    composite.handleRuntimeException(exception);
+                }
             });
         }
         if (promises.isEmpty()) {

@@ -147,4 +147,10 @@ Note: waiting on https://jira.codehaus.org/browse/MCLIRR-62 to be resolved to av
 		<method>org.forgerock.util.promise.Promise thenOnResultOrException(java.lang.Runnable)</method>
 		<justification>Disambiguate success/failure methods with result/exception</justification>
 	</difference>
+	<difference>
+		<className>org/forgerock/util/promise/Promise</className>
+		<differenceType>7012</differenceType>
+		<method>void thenOnRuntimeException(org.forgerock.util.promise.RuntimeExceptionHandler)</method>
+		<justification>Allow for handling of runtime exceptions</justification>
+	</difference>
 </differences>

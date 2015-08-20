@@ -467,4 +467,19 @@ public interface Promise<V, E extends Exception> extends Future<V> {
     <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
             AsyncFunction<? super V, VOUT, EOUT> onResult,
             AsyncFunction<? super E, VOUT, EOUT> onException);
+
+    /**
+     * Registers the provided completion handler for notification if this
+     * {@code Promise} cannot be completed due to an runtime exception. If this
+     * {@code Promise} completes with a result or the typed exception then the
+     * completion handler will not be notified.
+     * <p>
+     * This method can be used for asynchronous completion notification.
+     *
+     * @param onRuntimeException
+     *            The completion handler which will be notified upon an
+     *            uncaught runtime exception completion of this
+     *            {@code Promise}.
+     */
+    void thenOnRuntimeException(RuntimeExceptionHandler onRuntimeException);
 }

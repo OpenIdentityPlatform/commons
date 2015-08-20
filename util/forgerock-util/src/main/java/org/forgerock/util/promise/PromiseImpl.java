@@ -22,6 +22,8 @@ import java.util.concurrent.TimeoutException;
 
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An implementation of {@link Promise} which can be used as is, or as the basis
@@ -47,11 +49,13 @@ import org.forgerock.util.Function;
  * @see Promises
  */
 public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, ResultHandler<V>,
-        ExceptionHandler<E> {
+        ExceptionHandler<E>, RuntimeExceptionHandler {
     // TODO: Is using monitor based sync better than AQS?
 
-    private static interface StateListener<V, E extends Exception> {
-        void handleStateChange(int newState, V result, E exception);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PromiseImpl.class);
+
+    private interface StateListener<V, E extends Exception> {
+        void handleStateChange(int newState, V result, E exception, RuntimeException runtimeException);
     }
 
     /**
@@ -76,6 +80,11 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     private static final int CANCELLED = 3;
 
     /**
+     * State value indicating that this promise has failed with a runtime exception.
+     */
+    private static final int HAS_RUNTIME_EXCEPTION = 4;
+
+    /**
      * Creates a new pending {@link Promise} implementation.
      *
      * @param <V>
@@ -93,6 +102,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     private volatile int state = PENDING;
     private V result = null;
     private E exception = null;
+    private RuntimeException runtimeException = null;
 
     private final Queue<StateListener<V, E>> listeners =
             new ConcurrentLinkedQueue<>();
@@ -112,7 +122,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             return false;
         }
         final E exception = tryCancel(mayInterruptIfRunning);
-        return exception != null && setState(CANCELLED, null, exception);
+        return exception != null && setState(CANCELLED, null, exception, null);
     }
 
     @Override
@@ -185,6 +195,11 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
         tryHandleException(exception);
     }
 
+    @Override
+    public void handleRuntimeException(RuntimeException exception) {
+        setState(HAS_RUNTIME_EXCEPTION, null, null, exception);
+    }
+
     /**
      * Signals that the asynchronous task represented by this promise has
      * succeeded. If the task has already completed (i.e.
@@ -222,7 +237,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
      * @see #isDone()
      */
     public final boolean tryHandleException(final E exception) {
-        return setState(HAS_EXCEPTION, null, exception);
+        return setState(HAS_EXCEPTION, null, exception, null);
     }
 
     /**
@@ -247,7 +262,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
      * @see #isDone()
      */
     public final boolean tryHandleResult(final V result) {
-        return setState(HAS_RESULT, result, null);
+        return setState(HAS_RESULT, result, null, null);
     }
 
     @Override
@@ -264,8 +279,9 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     public final Promise<V, E> thenOnException(final ExceptionHandler<? super E> onException) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            public void handleStateChange(final int newState, final V result, final E exception) {
-                if (newState != HAS_RESULT) {
+            public void handleStateChange(final int newState, final V result, final E exception,
+                    final RuntimeException runtimeException) {
+                if (newState == HAS_EXCEPTION || newState == CANCELLED) {
                     onException.handleException(exception);
                 }
             }
@@ -277,7 +293,8 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     public final Promise<V, E> thenOnResult(final ResultHandler<? super V> onResult) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            public void handleStateChange(final int newState, final V result, final E exception) {
+            public void handleStateChange(final int newState, final V result, final E exception,
+                    final RuntimeException runtimeException) {
                 if (newState == HAS_RESULT) {
                     onResult.handleResult(result);
                 }
@@ -291,10 +308,11 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
                                                    final ExceptionHandler<? super E> onException) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            public void handleStateChange(final int newState, final V result, final E exception) {
+            public void handleStateChange(final int newState, final V result, final E exception,
+                    final RuntimeException runtimeException) {
                 if (newState == HAS_RESULT) {
                     onResult.handleResult(result);
-                } else {
+                } else if (newState == HAS_EXCEPTION || newState == CANCELLED) {
                     onException.handleException(exception);
                 }
             }
@@ -306,8 +324,11 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     public final Promise<V, E> thenOnResultOrException(final Runnable onResultOrException) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            public void handleStateChange(final int newState, final V result, final E exception) {
-                onResultOrException.run();
+            public void handleStateChange(final int newState, final V result, final E exception,
+                    final RuntimeException runtimeException) {
+                if (newState != HAS_RUNTIME_EXCEPTION) {
+                    onResultOrException.run();
+                }
             }
         });
         return this;
@@ -330,12 +351,25 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
         addOrFireListener(new StateListener<V, E>() {
             @Override
             @SuppressWarnings("unchecked")
-            public void handleStateChange(final int newState, final V result, final E exception) {
+            public void handleStateChange(final int newState, final V result, final E exception,
+                    final RuntimeException runtimeException) {
                 try {
                     if (newState == HAS_RESULT) {
                         chained.handleResult(onResult.apply(result));
-                    } else {
+                    } else if (newState == HAS_EXCEPTION || newState == CANCELLED) {
                         chained.handleResult(onException.apply(exception));
+                    } else {
+                        try {
+                            chained.handleRuntimeException(runtimeException);
+                        } catch (Exception ignored) {
+                            LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
+                        }
+                    }
+                } catch (final RuntimeException e) {
+                    try {
+                        chained.handleRuntimeException(e);
+                    } catch (Exception ignored) {
+                        LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
                     }
                 } catch (final Exception e) {
                     chained.handleException((EOUT) e);
@@ -373,33 +407,63 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
         addOrFireListener(new StateListener<V, E>() {
             @Override
             @SuppressWarnings("unchecked")
-            public void handleStateChange(final int newState, final V result, final E exception) {
+            public void handleStateChange(final int newState, final V result, final E exception,
+                    final RuntimeException runtimeException) {
                 try {
-                    final Promise<VOUT, EOUT> nestedPromise;
                     if (newState == HAS_RESULT) {
-                        nestedPromise = onResult.apply(result);
+                        callNestedPromise(onResult.apply(result));
+                    } else if (newState == HAS_EXCEPTION || newState == CANCELLED) {
+                        callNestedPromise(onException.apply(exception));
                     } else {
-                        nestedPromise = onException.apply(exception);
+                        try {
+                            chained.handleRuntimeException(runtimeException);
+                        } catch (Exception ignored) {
+                            LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
+                        }
                     }
-                    nestedPromise.thenOnResult(new ResultHandler<VOUT>() {
-                        @Override
-                        public void handleResult(final VOUT value) {
-                            chained.handleResult(value);
-                        }
-                    }).thenOnException(new ExceptionHandler<EOUT>() {
-                        @Override
-                        public void handleException(final EOUT exception) {
-                            chained.handleException(exception);
-                        }
-
-                        ;
-                    });
+                } catch (final RuntimeException e) {
+                    try {
+                        chained.handleRuntimeException(e);
+                    } catch (Exception ignored) {
+                        LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
+                    }
                 } catch (final Exception e) {
                     chained.handleException((EOUT) e);
                 }
             }
+
+            private void callNestedPromise(Promise<VOUT, EOUT> nestedPromise) {
+                nestedPromise.thenOnResult(new ResultHandler<VOUT>() {
+                    @Override
+                    public void handleResult(final VOUT value) {
+                        chained.handleResult(value);
+                    }
+                }).thenOnException(new ExceptionHandler<EOUT>() {
+                    @Override
+                    public void handleException(final EOUT exception) {
+                        chained.handleException(exception);
+                    }
+                }).thenOnRuntimeException(new RuntimeExceptionHandler() {
+                    @Override
+                    public void handleRuntimeException(RuntimeException exception) {
+                        chained.handleRuntimeException(exception);
+                    }
+                });
+            }
         });
         return chained;
+    }
+
+    @Override
+    public final void thenOnRuntimeException(final RuntimeExceptionHandler onRuntimeException) {
+        addOrFireListener(new StateListener<V, E>() {
+            @Override
+            public void handleStateChange(int newState, V result, E exception, RuntimeException runtimeException) {
+                if (newState == HAS_RUNTIME_EXCEPTION) {
+                    onRuntimeException.handleRuntimeException(runtimeException);
+                }
+            }
+        });
     }
 
     /**
@@ -426,18 +490,28 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     private void addOrFireListener(final StateListener<V, E> listener) {
         final int stateBefore = state;
         if (stateBefore != PENDING) {
-            listener.handleStateChange(stateBefore, result, exception);
+            fireListener(listener, stateBefore);
         } else {
             listeners.add(listener);
             final int stateAfter = state;
             if (stateAfter != PENDING && listeners.remove(listener)) {
-                listener.handleStateChange(stateAfter, result, exception);
+                fireListener(listener, stateBefore);
             }
         }
     }
 
+    private void fireListener(final StateListener<V, E> listener, int stateBefore) {
+        try {
+            listener.handleStateChange(stateBefore, result, exception, runtimeException);
+        } catch (Exception e) {
+            LOGGER.error("State change listener threw a RuntimeException which cannot be handled!");
+        }
+    }
+
     private V get0() throws ExecutionException {
-        if (exception != null) {
+        if (runtimeException != null) {
+            throw new ExecutionException(runtimeException);
+        } else if (exception != null) {
             throw new ExecutionException(exception);
         } else {
             return result;
@@ -445,14 +519,17 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     }
 
     private V getOrThrow0() throws E {
-        if (exception != null) {
+        if (runtimeException != null) {
+            throw runtimeException;
+        } else if (exception != null) {
             throw exception;
         } else {
             return result;
         }
     }
 
-    private boolean setState(final int newState, final V result, final E exception) {
+    private boolean setState(final int newState, final V result, final E exception,
+            final RuntimeException runtimeException) {
         synchronized (this) {
             if (state != PENDING) {
                 // Already completed.
@@ -460,12 +537,13 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             }
             this.result = result;
             this.exception = exception;
+            this.runtimeException = runtimeException;
             state = newState; // Publishes.
             notifyAll(); // Wake up any blocked threads.
         }
         StateListener<V, E> listener;
         while ((listener = listeners.poll()) != null) {
-            listener.handleStateChange(newState, result, exception);
+            listener.handleStateChange(newState, result, exception, runtimeException);
         }
         return true;
     }
