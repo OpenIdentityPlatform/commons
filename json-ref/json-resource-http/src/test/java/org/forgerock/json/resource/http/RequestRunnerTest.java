@@ -57,7 +57,7 @@ public class RequestRunnerTest {
         Response response = getAnonymousQueryResourceHandler(QUERY_RESULT);
         assertEquals(getResponseContent(response), "{" + "\"result\":[],"
                 + "\"resultCount\":0,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\","
-                + "\"totalPagedResults\":-1}");
+                + "\"totalPagedResults\":-1,\"remainingPagedResults\":-1}");
     }
 
     @Test
@@ -66,7 +66,7 @@ public class RequestRunnerTest {
                 newResourceResponse("id", "revision", new JsonValue("jsonValue")));
         assertEquals(getResponseContent(response), "{" + "\"result\":[\"jsonValue\"],"
                 + "\"resultCount\":1,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\","
-                + "\"totalPagedResults\":-1}");
+                + "\"totalPagedResults\":-1,\"remainingPagedResults\":-1}");
     }
 
     @Test
@@ -81,7 +81,7 @@ public class RequestRunnerTest {
                 + "{\"intField\":42,\"stringField\":\"stringValue\"},"
                 + "{\"intField\":43,\"stringField\":\"otherString\"}" + "],"
                 + "\"resultCount\":2,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\","
-                + "\"totalPagedResults\":-1}");
+                + "\"totalPagedResults\":-1,\"remainingPagedResults\":-1}");
     }
 
     @Test

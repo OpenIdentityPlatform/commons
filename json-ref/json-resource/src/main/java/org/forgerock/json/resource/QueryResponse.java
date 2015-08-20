@@ -49,6 +49,12 @@ public interface QueryResponse extends Response {
     String FIELD_TOTAL_PAGED_RESULTS = "totalPagedResults";
 
     /**
+     * The name of the field which contains the remaining paged results in the
+     * JSON representation.
+     */
+    String FIELD_REMAINING_PAGED_RESULTS = "remainingPagedResults";
+
+    /**
      * The name of the field which contains the result count in the JSON
      * representation.
      */
@@ -96,4 +102,15 @@ public interface QueryResponse extends Response {
      *         number of remaining results is unknown.
      */
     int getTotalPagedResults();
+
+    /**
+     * Returns an estimate of the total number of remaining results to be
+     * returned in subsequent paged results query requests.
+     *
+     * @return An estimate of the total number of remaining results to be
+     *         returned in subsequent paged results query requests, or
+     *         {@code -1} if paged results were not requested, or if the total
+     *         number of remaining results is unknown.
+     */
+    int getRemainingPagedResults();
 }
