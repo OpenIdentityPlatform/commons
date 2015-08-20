@@ -367,5 +367,15 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
         private UriTemplate(String template) {
             this.template = template;
         }
+
+        /**
+         * Return the string representation of the UriTemplate.
+         *
+         * @return the string representation of the UriTemplate.
+         */
+        @Override
+        public String toString() {
+            return template;
+        }
     }
 }
