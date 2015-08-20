@@ -223,6 +223,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                     writer.writeStringField(FIELD_TOTAL_PAGED_RESULTS_POLICY,
                             result.getTotalPagedResultsPolicy().toString());
                     writer.writeNumberField(FIELD_TOTAL_PAGED_RESULTS, result.getTotalPagedResults());
+                    writer.writeNumberField(FIELD_REMAINING_PAGED_RESULTS, result.getRemainingPagedResults());
                     writer.writeEndObject();
                     onSuccess();
                 } catch (final Exception e) {

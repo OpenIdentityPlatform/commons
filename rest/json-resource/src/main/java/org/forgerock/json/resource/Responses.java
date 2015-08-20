@@ -98,7 +98,32 @@ public final class Responses {
      */
     public static QueryResponse newQueryResponse(String pagedResultsCookie, CountPolicy totalPagedResultsPolicy,
             int totalPagedResults) {
-        return new QueryResponseImpl(pagedResultsCookie, totalPagedResultsPolicy, totalPagedResults);
+        return new QueryResponseImpl(pagedResultsCookie, totalPagedResultsPolicy, totalPagedResults,
+                QueryResponse.NO_COUNT);
+    }
+
+    /**
+     * Creates a new query result with the provided paged results cookie and an
+     * estimate of the total number of remaining results.
+     *
+     * @param pagedResultsCookie
+     *            The opaque cookie which should be used with the next paged
+     *            results query request, or {@code null} if paged results were
+     *            not requested, or if there are not more pages to be returned.
+     * @param remainingPagedResults
+     *            An estimate of the total number of remaining results to be
+     *            returned in subsequent paged results query requests, or
+     *            {@code -1} if paged results were not requested, or if the total
+     *            number of remaining results is unknown.
+     *
+     * @return The new {@code QueryResponse}.
+     *
+     * @deprecated Use {@link #newQueryResponse(String, CountPolicy, int)} instead.
+     */
+    @Deprecated
+    public static QueryResponse newQueryResponse(String pagedResultsCookie, int remainingPagedResults) {
+        return new QueryResponseImpl(pagedResultsCookie, CountPolicy.NONE, QueryResponse.NO_COUNT,
+                remainingPagedResults);
     }
 
     private static abstract class AbstractResponseImpl implements Response {
@@ -216,6 +241,7 @@ public final class Responses {
         private final String pagedResultsCookie;
         private final CountPolicy totalPagedResultsPolicy;
         private final int totalPagedResults;
+        private final int remainingPagedResults;
 
         /**
          * Creates a new query result with the provided paged results cookie and
@@ -234,12 +260,18 @@ public final class Responses {
          *            or {@link #NO_COUNT} if paged results were not requested, the count
          *            policy is {@code NONE}, or if the total number of remaining
          *            results is unknown.
+         * @param remainingPagedResults
+         *            An estimate of the total number of remaining results to be
+         *            returned in subsequent paged results query requests, or
+         *            {@code -1} if paged results were not requested, or if the total
+         *            number of remaining results is unknown.
          */
         private QueryResponseImpl(String pagedResultsCookie, CountPolicy totalPagedResultsPolicy,
-                int totalPagedResults) {
+                int totalPagedResults, int remainingPagedResults) {
             this.pagedResultsCookie = pagedResultsCookie;
             this.totalPagedResultsPolicy = totalPagedResultsPolicy;
             this.totalPagedResults = totalPagedResults;
+            this.remainingPagedResults = remainingPagedResults;
         }
 
         /**
@@ -281,6 +313,11 @@ public final class Responses {
         }
 
         @Override
+        public int getRemainingPagedResults() {
+            return remainingPagedResults;
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -290,7 +327,8 @@ public final class Responses {
             }
             QueryResponseImpl that = (QueryResponseImpl) o;
             return totalPagedResults == that.totalPagedResults && pagedResultsCookie.equals(that.pagedResultsCookie)
-                    && totalPagedResultsPolicy == that.totalPagedResultsPolicy;
+                    && totalPagedResultsPolicy == that.totalPagedResultsPolicy
+                    && remainingPagedResults == that.remainingPagedResults;
         }
 
         @Override
@@ -298,6 +336,7 @@ public final class Responses {
             int result = pagedResultsCookie.hashCode();
             result = 31 * result + totalPagedResultsPolicy.hashCode();
             result = 31 * result + totalPagedResults;
+            result = 31 * result + remainingPagedResults;
             return result;
         }
     }
