@@ -38,12 +38,36 @@ import org.forgerock.util.LazyMap;
 public final class HttpContext extends AbstractContext implements ClientContext {
 
     // TODO: security parameters such as user name, etc?
+    /**
+     * Attribute in the serialized JSON form that holds the request headers.
+     * @see #HttpContext(JsonValue, ClassLoader)
+     */
+    public static final String ATTR_HEADERS = "headers";
 
-    private static final String ATTR_METHOD = "method";
-    private static final String ATTR_PATH = "path";
-    private static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
-    private static final String ATTR_HEADERS = "headers";
-    private static final String ATTR_PARAMETERS = "parameters";
+    /**
+     * Attribute in the serialized JSON form that holds the query and/or form parameters.
+     * @see #HttpContext(JsonValue, ClassLoader)
+     */
+    public static final String ATTR_PARAMETERS = "parameters";
+
+    /**
+     * Attribute in the serialised JSON form that holds the HTTP method of the request.
+     * @see #HttpContext(JsonValue, ClassLoader)
+     */
+    public static final String ATTR_METHOD = "method";
+
+    /**
+     * Attribute in the serialised JSON form that holds the full URI of the request, excluding anything beyond the
+     * path component (i.e., no query parameters).
+     * @see #HttpContext(JsonValue, ClassLoader)
+     */
+    public static final String ATTR_PATH = "path";
+
+    /**
+     * Attribute in the serialised JSON form that holds the remote client IP address.
+     * @see #HttpContext(JsonValue, ClassLoader)
+     */
+    public static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
 
     private final Map<String, List<String>> headers;
     private final Map<String, List<String>> parameters;
@@ -97,15 +121,15 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      *
      * @param savedContext
      *            The JSON representation from which this context's attributes
-     *            should be parsed.
+     *            should be parsed. Must be a JSON Object that contains {@link #ATTR_HEADERS} and
+     *            {@link #ATTR_PARAMETERS} attributes.
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     public HttpContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
-        this.headers = (Map) data.get(ATTR_HEADERS).required().asMap();
-        this.parameters = (Map) data.get(ATTR_PARAMETERS).required().asMap();
+        this.headers = data.get(ATTR_HEADERS).required().asMapOfList(String.class);
+        this.parameters = data.get(ATTR_PARAMETERS).required().asMapOfList(String.class);
     }
 
     private String getRequestPath(org.forgerock.http.protocol.Request req) {
