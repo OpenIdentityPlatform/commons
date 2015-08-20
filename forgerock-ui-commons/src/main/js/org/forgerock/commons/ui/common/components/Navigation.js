@@ -369,7 +369,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
      * Does nothing if this link already exists.
      * @param {Object} link Link to add.
      * @param {string} role Role to add for ("admin" or "user").
-     * @param {string} [seconLevelItem] If this parameter is absent, the new link will become a top-level link,
+     * @param {string} [secondLevelItem] If this parameter is absent, the new link will become a top-level link,
      *                                  in order for the new link to become a second-level item, this parameter should
      *                                  point to an existing top-level item.
      */
