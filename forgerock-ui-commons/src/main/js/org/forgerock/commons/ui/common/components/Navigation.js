@@ -1,25 +1,17 @@
 /**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
 
 /*global define, window */
@@ -31,12 +23,9 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/ModuleLoader",
-    "org/forgerock/commons/ui/common/main/ViewManager",
-    "org/forgerock/commons/ui/common/main/Router"
-], function($, _, Backbone, AbstractConfigurationAware, AbstractView, conf, constants, eventManager, ModuleLoader, viewManager, router) {
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function($, _, Backbone, AbstractConfigurationAware, AbstractView, Configuration, EventManager, ModuleLoader) {
     var obj = new AbstractConfigurationAware();
 
 
@@ -163,7 +152,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                 e.preventDefault();
                 var event = $(e.currentTarget).data().event;
                 if (event){
-                    eventManager.sendEvent(event, e);
+                    EventManager.sendEvent(event, e);
                 }
             },
             render: function(args, callback) {
@@ -171,27 +160,27 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                    The user information is shown at the top of the userBar widget,
                    but it is stored in different ways for different products.
                 */
-                if (conf.loggedUser) {
+                if (Configuration.loggedUser) {
                     /*
                         The Navigation module is called with every page load, but it doesn't render a drop down
                         unless the user is actually logged in. To prevent any unnecessary module loading, only
                         load bootstrap when actually needed.
                     */
                     ModuleLoader.load("bootstrap").then(_.bind(function () {
-                        // in rare cases conf.loggedUser can be reset by the time bootstap has loaded
-                        if (!conf.loggedUser) {
+                        // in rare cases Configuration.loggedUser can be reset by the time bootstap has loaded
+                        if (!Configuration.loggedUser) {
                             return;
                         }
 
-                        if (conf.loggedUser.userName) {
-                            this.data.username = conf.loggedUser.userName; //idm
-                        } else if (conf.loggedUser.cn) {
-                            this.data.username = conf.loggedUser.cn; //am
+                        if (Configuration.loggedUser.userName) {
+                            this.data.username = Configuration.loggedUser.userName; //idm
+                        } else if (Configuration.loggedUser.cn) {
+                            this.data.username = Configuration.loggedUser.cn; //am
                         } else {
-                            this.data.username = conf.loggedUser._id; //fallback option
+                            this.data.username = Configuration.loggedUser._id; //fallback option
                         }
 
-                        this.data.admin = _.contains(conf.loggedUser.roles, "ui-admin");
+                        this.data.admin = _.contains(Configuration.loggedUser.roles, "ui-admin");
 
                         this.data.userBar = _.map(obj.configuration.userBar, function (link) {
                             if (_.has(link, "i18nKey")) {
@@ -229,13 +218,12 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
             },
 
-            addLinks: function(linkName) {
+            addLinkFromConfiguration: function(linkName) {
                 var urlName,
                     subUrl,
                     subUrlName,
                     baseActive,
                     navObj;
-
 
                 for (urlName in obj.configuration.links[linkName].urls) {
 
@@ -334,16 +322,19 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             reload: function() {
                 this.clear();
 
-                var link, linkName;
+                var link,
+                    linkName,
+                    linkHasNoRole,
+                    userHasNecessaryRole;
 
-                for(linkName in obj.configuration.links) {
+                for (linkName in obj.configuration.links) {
                     link = obj.configuration.links[linkName];
 
-                    if(!link.role){
-                        this.addLinks(linkName);
-                        return;
-                    } else if (link.role && conf.loggedUser && _.contains(conf.loggedUser.roles, link.role)) {
-                        this.addLinks(linkName);
+                    linkHasNoRole = !link.role;
+                    userHasNecessaryRole = link.role && Configuration.loggedUser && _.contains(Configuration.loggedUser.roles, link.role);
+
+                    if (linkHasNoRole || userHasNecessaryRole) {
+                        this.addLinkFromConfiguration(linkName);
                         return;
                     }
                 }
@@ -370,6 +361,33 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             } else {
                 obj.configuration.userBar.push(link);
             }
+        }
+    };
+
+    /**
+     * Adds new link to the navigation bar. Can either be a top- or a second-level item.
+     * Does nothing if this link already exists.
+     * @param {Object} link Link to add.
+     * @param {string} role Role to add for ("admin" or "user").
+     * @param {string} [seconLevelItem] If this parameter is absent, the new link will become a top-level link,
+     *                                  in order for the new link to become a second-level item, this parameter should
+     *                                  point to an existing top-level item.
+     */
+    obj.addLink = function (link, role, secondLevelItem) {
+        var pathToTheNewLink = [role, "urls"];
+
+        if (secondLevelItem) {
+            pathToTheNewLink = pathToTheNewLink.concat([secondLevelItem, "urls"]);
+        }
+
+        var links = _.reduce(pathToTheNewLink, function (prevVal, nextVal) {
+            if (prevVal) {
+                return prevVal[nextVal];
+            }
+        }, obj.configuration.links);
+
+        if (!_.findWhere(links, {name: link.name})) {
+            links.push(link);
         }
     };
 
