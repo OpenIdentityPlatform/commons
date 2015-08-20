@@ -14,6 +14,14 @@
 .btn-default.active {
     color: darken(@base-theme-color, 5%);
 }
+.btn-default.disabled, .btn-default[disabled]{
+    background-color: #fff;
+    border-color: #ccc;
+    &:hover, &:focus {
+        background-color: #fff;
+        border-color: #ccc;
+    }
+}
 
 .btn-uppercase {
     text-transform: uppercase;
@@ -32,11 +40,6 @@
     }
 }
 
-.btn-default.disabled, .btn-default[disabled] {
-    background-color: #fff;
-    border-color: #ccc;
-}
-
 /*
   Dark secondary button style
 */
@@ -49,11 +52,9 @@
         color: #333;
     }
 
-    &:hover,
-    &:focus,
-    &.focus,
-    &:active,
-    &.active {
+    &:focus, &.focus,
+    &:active, &.active,
+    &:hover {
         color: #333;
         background-color: #e6e6e6;
         border-color: #adadad;
