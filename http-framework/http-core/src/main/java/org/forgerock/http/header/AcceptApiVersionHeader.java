@@ -71,9 +71,12 @@ public final class AcceptApiVersionHeader implements Header {
             protocolVersion = version(matcher.group(1));
         } else if (matcher.group(3) != null) {
             resourceVersion = version(matcher.group(3));
-        } else {
+        } else if (matcher.group(5) != null) {
             protocolVersion = version(matcher.group(5));
             resourceVersion = version(matcher.group(7));
+        } else {
+            protocolVersion = version(matcher.group(9));
+            resourceVersion = version(matcher.group(11));
         }
         return Pair.of(protocolVersion, resourceVersion);
     }
@@ -95,15 +98,16 @@ public final class AcceptApiVersionHeader implements Header {
      * <ul>
      *     <li>protocol=123.123,resource=123.123</li>
      *     <li>protocol=123,resource=123</li>
+     *     <li>protocol=123, resource=123</li>
      *     <li>protocol=123.123</li>
      *     <li>protocol=123</li>
      *     <li>resource=123.123</li>
      *     <li>resource=123</li>
+     *     <li>resource=123.123,protocol=123.123</li>
      * </ul>
      *
      * Pattern does not matches:
      * <ul>
-     *     <li>resource=123.123,protocol=123.123</li>
      *     <li>protocol=123.123.123,resource=123.123.123</li>
      *     <li>protocol=123.123resource=123.123</li>
      *     <li>protocol=123.123 resource=123.123</li>
@@ -115,7 +119,8 @@ public final class AcceptApiVersionHeader implements Header {
     private static final Pattern EXPECTED_VERSION_FORMAT =
             Pattern.compile("^" + PROTOCOL_VERSION_REGEX + "$|^"
                     + RESOURCE_VERSION_REGEX + "$|^"
-                    + PROTOCOL_VERSION_REGEX + "," + RESOURCE_VERSION_REGEX + "$");
+                    + PROTOCOL_VERSION_REGEX + "\\s*,\\s*" + RESOURCE_VERSION_REGEX + "$|^"
+                    + RESOURCE_VERSION_REGEX + "\\s*,\\s*" + PROTOCOL_VERSION_REGEX + "$");
 
     private Version protocolVersion;
     private Version resourceVersion;
