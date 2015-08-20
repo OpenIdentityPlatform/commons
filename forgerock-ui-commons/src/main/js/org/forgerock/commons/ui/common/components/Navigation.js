@@ -374,13 +374,14 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
      *                                  point to an existing top-level item.
      */
     obj.addLink = function (link, role, secondLevelItem) {
-        var pathToTheNewLink = [role, "urls"];
+        var pathToTheNewLink = [role, "urls"],
+            links;
 
         if (secondLevelItem) {
             pathToTheNewLink = pathToTheNewLink.concat([secondLevelItem, "urls"]);
         }
 
-        var links = _.reduce(pathToTheNewLink, function (prevVal, nextVal) {
+        links = _.reduce(pathToTheNewLink, function (prevVal, nextVal) {
             if (prevVal) {
                 return prevVal[nextVal];
             }
