@@ -67,7 +67,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.json.resource.servlet;version=${project.version}
+                            org.forgerock.json.resource.http;version=${project.version}
                         </Export-Package>
                     </instructions>
                 </configuration>
