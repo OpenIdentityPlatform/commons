@@ -22,14 +22,19 @@ import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
 import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AbstractAssertJPromiseAssert;
 
+import java.util.concurrent.ExecutionException;
+
+/**
+ * Offers AssertJ assertions for {@link QueryResponse} instances.
+ */
 public class AssertJQueryResponseAssert extends AbstractAssert<AssertJQueryResponseAssert, QueryResponse> {
 
     /**
-     * Assert the value of the provided {@link ResourceResponse} instance.
+     * Assert the value of the provided {@link QueryResponse} instance.
      * @param resource The instance to make assertions on.
      * @return An assert object.
      */
@@ -38,7 +43,7 @@ public class AssertJQueryResponseAssert extends AbstractAssert<AssertJQueryRespo
     }
 
     /**
-     * Assert the promise of a {@link ResourceResponse} instance.
+     * Assert the promise of a {@link QueryResponse} instance.
      * @param promise The promise to make assertions on.
      * @return An assert object.
      */
@@ -46,7 +51,8 @@ public class AssertJQueryResponseAssert extends AbstractAssert<AssertJQueryRespo
         return new AssertJResourcePromiseAssert(promise);
     }
 
-    public static class AssertJResourcePromiseAssert extends AbstractAssertJPromiseAssert<QueryResponse, AssertJResourcePromiseAssert, AssertJQueryResponseAssert> {
+    public static class AssertJResourcePromiseAssert extends AbstractAssertJPromiseAssert<QueryResponse,
+            AssertJResourcePromiseAssert, AssertJQueryResponseAssert> {
 
         protected AssertJResourcePromiseAssert(Promise<QueryResponse, ?> promise) {
             super(promise, AssertJResourcePromiseAssert.class);
@@ -56,36 +62,54 @@ public class AssertJQueryResponseAssert extends AbstractAssert<AssertJQueryRespo
         protected AssertJQueryResponseAssert createSucceededAssert(QueryResponse resource) {
             return new AssertJQueryResponseAssert(resource);
         }
+
+        /**
+         * Asserts that the promise failed.
+         * @return A {@link AssertJResourceExceptionAssert} for making
+         * assertions on the promise's resource exception.
+         */
+        public AssertJResourceExceptionAssert failedWithResourceException() {
+            isNotNull();
+            try {
+                Object value = actual.get();
+                failWithMessage("Promise succeeded with value <%s>", value);
+            } catch (InterruptedException e) {
+                failWithMessage("Promise was interrupted");
+            } catch (ExecutionException e) {
+                return AssertJResourceExceptionAssert.assertThat((ResourceException) e.getCause());
+            }
+            throw new IllegalStateException("Shouldn't have reached here");
+        }
     }
 
     /**
-     * Creates a new {@link AssertJResourceResponseAssert}.
+     * Creates a new {@link AssertJQueryResponseAssert}.
      *
-     * @param actual   the actual value to verify.
+     * @param actual the actual value to verify.
      */
     private AssertJQueryResponseAssert(QueryResponse actual) {
         super(actual, AssertJQueryResponseAssert.class);
     }
 
     /**
-     * Assert the value of the resource ID.
-     * @return A {@code AbstractCharSequenceAssert} for this Resource's ID.
+     * Assert the value of the total paged results policy
+     * @return A {@code AbstractObjectAssert} for the total paged results policy.
      */
     public AbstractObjectAssert<?, CountPolicy> withTotalPagedResultsPolicy() {
         return Assertions.assertThat(actual.getTotalPagedResultsPolicy());
     }
 
     /**
-     * Assert the value of the resource revision.
-     * @return A {@code AbstractCharSequenceAssert} for this Resource's revision.
+     * Assert the value of the paged results cookie.
+     * @return A {@code AbstractCharSequenceAssert} for the paged results cookie.
      */
     public AbstractCharSequenceAssert<?, String> withPagedResultsCookie() {
         return Assertions.assertThat(actual.getPagedResultsCookie());
     }
 
     /**
-     * Assert the value of the resource content.
-     * @return A {@code AbstractJsonValueAssert} for this Resource's content.
+     * Assert the value of the total paged results.
+     * @return A {@code AbstractIntegerAssert} for the total paged results.
      */
     public AbstractIntegerAssert<?> withTotalPagedResults() {
         return Assertions.assertThat(actual.getTotalPagedResults());
