@@ -15,12 +15,14 @@
  */
 package org.forgerock.audit;
 
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A configuration for pass-through audit event handler.
  */
-public class PassThroughAuditEventHandlerConfiguration {
+public class PassThroughAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonProperty("message")
     private String message;

@@ -13,29 +13,28 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.events.handlers;
 
 import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 
+import java.util.List;
 import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
-import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.util.promise.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Abstract AuditEventHandler class.
  *
- * @param <CFG> type of the configuration
+ * @param <CFG>
+ *            type of the configuration
  */
-public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CFG> {
+public abstract class AuditEventHandlerBase<CFG extends EventHandlerConfiguration>
+    implements AuditEventHandler<CFG> {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuditEventHandlerBase.class);
 
     /**
      * {@inheritDoc}
@@ -55,41 +54,21 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
 
     /**
      * {@inheritDoc}
+     * <p>
+     * This default implementation publishes each event in order.
+     * Implementing classes should override this method to optimize the publication.
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> deleteInstance(
-            final Context context,
-            final String resourceId,
-            final DeleteRequest request) {
-        return notSupported(request).asPromise();
+    public synchronized void publishEvents(List<TopicAndEvent> events) {
+        try {
+            for (TopicAndEvent event : events) {
+                publishEvent(event.getTopic(), event.getEvent());
+            }
+        } catch (Exception e) {
+            logger.error(
+                    String.format("Could not process buffered events. Size of events: %d, first event: %s",
+                            events.size(), events.get(0)), e);
+        }
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(
-            final Context context,
-            final String resourceId,
-            final PatchRequest request) {
-        return notSupported(request).asPromise();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> updateInstance(
-            final Context context,
-            final String resourceId,
-            final UpdateRequest request) {
-        return notSupported(request).asPromise();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public abstract Class<CFG> getConfigurationClass();
 
 }

@@ -16,19 +16,24 @@
 
 package org.forgerock.audit.events.handlers;
 
+import java.util.List;
 import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.util.promise.Promise;
 
 /**
  * The interface for an AuditEventHandler.
  *
  * @param <CFG> type of the configuration
  */
-public interface AuditEventHandler<CFG> extends CollectionResourceProvider {
+public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
 
     /**
      * Configures the Audit Event Handler with the provided configuration.
@@ -67,5 +72,49 @@ public interface AuditEventHandler<CFG> extends CollectionResourceProvider {
      * @return the configuration class for the audit event handler
      */
     public Class<CFG> getConfigurationClass();
+
+    /**
+     * Publishes an event to the provided topic.
+     *
+     * @param topic
+     *          The topic where to publish the event.
+     * @param event
+     *          The event to publish.
+     * @return a promise with either a response or an exception
+     */
+    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event);
+
+    /**
+     * Publishes a list of events.
+     *
+     * @param events
+     *          The list of (topic, event) pairs to publish.
+     */
+    public void publishEvents(List<TopicAndEvent> events);
+
+    /**
+     * Reads an event with the provided resource id from the provided topic.
+     *
+     * @param topic
+     *          The topic where event is read.
+     * @param resourceId
+     *          The identifier of the event.
+     * @return a promise with either a response or an exception
+     */
+    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId);
+
+    /**
+     * Query some events from the provided topic.
+     *
+     * @param topic
+     *          The topic on which query is performed.
+     * @param query
+     *          The request with the query.
+     * @param handler
+     *          The handler to process responses for the query.
+     * @return a promise with either a response or an exception
+     */
+    public Promise<QueryResponse, ResourceException> queryEvents(String topic, QueryRequest query,
+            QueryResourceHandler handler);
 
 }

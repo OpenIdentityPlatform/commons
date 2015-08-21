@@ -20,10 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+
 import org.testng.annotations.Test;
 
 import java.io.IOException;
 
+@SuppressWarnings("javadoc")
 public class SyslogAuditEventHandlerConfigurationTest {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -45,14 +47,16 @@ public class SyslogAuditEventHandlerConfigurationTest {
                 objectMapper.readValue(json, SyslogAuditEventHandlerConfiguration.class);
 
         // then
-        assertThat(json).isEqualTo("{" +
-                "\"protocol\":\"TCP\"," +
-                "\"host\":\"https://forgerock.example.com\"," +
-                "\"port\":6514," +
-                "\"connectTimeout\":30000," +
-                "\"facility\":\"LOCAL0\"," +
-                "\"productName\":\"OpenAM\"" +
-                "}");
+        // note: using '^' instead if '"' to avoid escaping it, then perform a global replace
+        assertThat(json).isEqualTo(("{" +
+                "^bufferingConfig^:{^enabled^:false,^forceFlushBeforeRead^:false,^maxTime^:0,^maxSize^:1}," +
+                "^protocol^:^TCP^," +
+                "^host^:^https://forgerock.example.com^," +
+                "^port^:6514," +
+                "^connectTimeout^:30000," +
+                "^facility^:^LOCAL0^," +
+                "^productName^:^OpenAM^" +
+                "}").replace('^', '"'));
         assertThat(config2).isEqualTo(config);
     }
 

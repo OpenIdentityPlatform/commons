@@ -16,6 +16,8 @@
 
 package org.forgerock.audit.handlers.syslog;
 
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -34,7 +36,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *  }
  * </pre>
  */
-public class SyslogAuditEventHandlerConfiguration {
+public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonProperty(required=true)
     private TransportProtocol protocol;

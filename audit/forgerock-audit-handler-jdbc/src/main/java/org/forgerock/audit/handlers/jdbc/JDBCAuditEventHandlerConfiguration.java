@@ -21,7 +21,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import java.util.Collections;
 import java.util.List;
 
-public class JDBCAuditEventHandlerConfiguration {
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+
+public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool")
     private ConnectionPool connectionPool = new ConnectionPool();

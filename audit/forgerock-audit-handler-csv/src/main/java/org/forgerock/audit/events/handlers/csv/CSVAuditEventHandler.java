@@ -19,7 +19,6 @@ package org.forgerock.audit.events.handlers.csv;
 import static org.forgerock.audit.events.AuditEventHelper.*;
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.*;
-import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -39,25 +38,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.http.Context;
+import org.forgerock.audit.events.handlers.TopicAndEvent;
+import org.forgerock.audit.util.JsonSchemaUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
@@ -72,16 +67,19 @@ import org.supercsv.prefs.CsvPreference;
 import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.util.CsvContext;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Handles AuditEvents by writing them to a CSV file.
  */
 public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHandlerConfiguration> {
+
     private static final Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
 
     private Map<String, JsonValue> auditEvents;
     private String auditLogDirectory;
     private CsvPreference csvPreference;
-
     private final Map<String, ICsvMapWriter> writers = new HashMap<>();
 
     private boolean secure;
@@ -94,7 +92,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         JsonFactory jsonFactory = new JsonFactory();
         mapper = new ObjectMapper(jsonFactory);
     }
-
 
     /**
      * {@inheritDoc}
@@ -152,97 +149,132 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     /**
-     * Perform an action on the csv audit log.
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ActionResponse, ResourceException> actionCollection(
-            final Context context,
-            final ActionRequest request) {
-        return notSupported(request).asPromise();
-    }
-
-    /**
-     * Perform an action on the csv audit log entry.
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(
-            final Context context,
-            final String resourceId,
-            final ActionRequest request) {
-        return notSupported(request).asPromise();
-    }
-
-    /**
      * Create a csv audit log entry.
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> createInstance(
-            final Context context,
-            final CreateRequest request) {
-
+    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
         try {
-            // Re-try once in case the writer stream became closed for some reason
-            boolean retry;
-            int retryCount = 0;
-            final String auditEventType = request.getResourcePath();
-            do {
-                retry = false;
-                ICsvMapWriter csvWriter = null;
-                try {
-                    final JsonValue auditEventProperties = getAuditEventProperties(auditEvents.get(auditEventType));
-                    if (auditEventProperties == null || auditEventProperties.isNull()) {
-                        throw new InternalServerErrorException("No audit event properties defined for audit event: "
-                                + auditEventType);
-                    }
-                    final Set<String> fieldOrder = new LinkedHashSet<>();
-                    fieldOrder.addAll(generateJsonPointers(getAuditEventSchema(auditEvents.get(auditEventType))));
-
-                    File auditFile = getAuditLogFile(auditEventType);
-                    // Create header if creating a new file
-                    if (!auditFile.exists()) {
-                        synchronized (this) {
-                            final ICsvMapWriter existingCsvWriter = getWriter(auditEventType, auditFile, false);
-                            final File auditTmpFile = new File(auditFile.getParent(), auditEventType + ".tmp");
-                            // This is atomic, so only one caller will succeed with created
-                            final boolean created = auditTmpFile.createNewFile();
-                            if (created) {
-                                final ICsvMapWriter tmpFileWriter = createCsvMapWriter(auditTmpFile);
-                                tmpFileWriter.writeHeader(buildHeaders(fieldOrder));
-                                tmpFileWriter.close();
-                                if (!auditTmpFile.renameTo(auditFile)) {
-                                    logger.error("Unable to rename audit temp file");
-                                    throw new InternalServerErrorException("Unable to rename audit temp file");
-                                }
-                                resetWriter(auditEventType, existingCsvWriter);
-                            }
-                        }
-                    }
-                    csvWriter = getWriter(auditEventType, auditFile, true);
-                    writeEntry(csvWriter, request.getContent(), fieldOrder);
-                } catch (IOException ex) {
-                    if (retryCount == 0) {
-                        retry = true;
-                        logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
-                        synchronized (this) {
-                            resetWriter(auditEventType, csvWriter);
-                        }
-                    } else {
-                        throw new BadRequestException(ex);
-                    }
-                }
-                ++retryCount;
-            } while (retry);
+            checkTopic(topic);
+            publishEventWithRetry(topic, event, getFieldOrder(topic), true);
             return newResourceResponse(
-                            request.getContent().get(FIELD_CONTENT_ID).asString(),
-                            null,
-                            new JsonValue(request.getContent())
-                    ).asPromise();
+                    event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, event).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         }
+    }
+
+    @Override
+    public synchronized void publishEvents(List<TopicAndEvent> events) {
+        Map<String, Set<String>> topicCache = new HashMap<String, Set<String>>();
+        // publish all events
+        int nbPublished = 0;
+        try {
+            for (TopicAndEvent topicAndEvent : events) {
+                String topic = topicAndEvent.getTopic();
+                Set<String> fieldOrder = topicCache.get(topic);
+                if (fieldOrder == null) {
+                    checkTopic(topic);
+                    fieldOrder = getFieldOrder(topic);
+                    topicCache.put(topic, fieldOrder);
+                }
+                publishEventWithRetry(topic, topicAndEvent.getEvent(), fieldOrder, false);
+                nbPublished++;
+            }
+        } catch (IOException e) {
+            String message = "Could not publish all buffered events." + "Size of events buffer: " + events.size()
+                    + ", number of events published: " + nbPublished;
+            logger.error(message.toString(), e);
+        }
+        // flushes writers for all topics
+        int nbFlushed = 0;
+        try {
+            for (String topic : topicCache.keySet()) {
+                ICsvMapWriter writer = getWriter(topic, null, false);
+                writer.flush();
+                nbFlushed++;
+            }
+        } catch (IOException e) {
+            StringBuilder message = new StringBuilder("Could not flush all topics for buffered events.")
+                .append("Number of topics: ").append(topicCache.size())
+                .append(", number topics flushed: ").append(nbFlushed);
+            logger.error(message.toString(), e);
+        }
+    }
+
+    private void checkTopic(String topic) throws ResourceException, InternalServerErrorException {
+        final JsonValue auditEventProperties = AuditEventHelper.getAuditEventProperties(auditEvents.get(topic));
+        if (auditEventProperties == null || auditEventProperties.isNull()) {
+            throw new InternalServerErrorException("No audit event properties defined for audit event: " + topic);
+        }
+    }
+
+    /**
+     * Publishes the provided event, and returns the writer used.
+     */
+    private void publishEventWithRetry(
+            final String topic, final JsonValue event, final Set<String> fieldOrder, boolean mustFlush)
+                    throws ResourceException {
+        ICsvMapWriter csvWriter = null;
+        try {
+            csvWriter = writeEvent(topic, event, fieldOrder, mustFlush);
+        } catch (IOException ex) {
+            // Re-try once in case the writer stream became closed for some reason
+            logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
+            synchronized (this) {
+                resetWriter(topic, csvWriter);
+            }
+            try {
+                writeEvent(topic, event, fieldOrder, mustFlush);
+            } catch (IOException ex2) {
+                throw new BadRequestException(ex2);
+            }
+        }
+    }
+
+    private ICsvMapWriter writeEvent(
+            final String topic, final JsonValue event, final Set<String> fieldOrder, boolean mustFlush)
+                    throws IOException, InternalServerErrorException {
+        File auditFile = getOrCreateAuditFile(topic, fieldOrder);
+        ICsvMapWriter csvWriter = getWriter(topic, auditFile, true);
+        writeEntry(csvWriter, event, fieldOrder);
+        if (mustFlush) {
+            csvWriter.flush();
+        }
+        return csvWriter;
+    }
+
+    private Set<String> getFieldOrder(final String topic) throws ResourceException {
+        final Set<String> fieldOrder = new LinkedHashSet<>();
+        fieldOrder.addAll(generateJsonPointers(AuditEventHelper.getAuditEventSchema(auditEvents
+                .get(topic))));
+        return fieldOrder;
+    }
+
+    /** Returns the audit file to use for logging the event. It may imply its creation. */
+    private File getOrCreateAuditFile(final String auditEventType, final Set<String> fieldOrder) throws IOException,
+            InternalServerErrorException {
+        File auditFile = getAuditLogFile(auditEventType);
+        // Create header if creating a new file
+        if (!auditFile.exists()) {
+            synchronized (this) {
+                final ICsvMapWriter existingCsvWriter = getWriter(auditEventType, auditFile, false);
+                final File auditTmpFile = new File(auditFile.getParent(), auditEventType + ".tmp");
+                // This is atomic, so only one caller will succeed with created
+                final boolean created = auditTmpFile.createNewFile();
+                if (created) {
+                    final ICsvMapWriter tmpFileWriter = createCsvMapWriter(auditTmpFile);
+                    tmpFileWriter.writeHeader(buildHeaders(fieldOrder));
+                    tmpFileWriter.close();
+                    if (!auditTmpFile.renameTo(auditFile)) {
+                        logger.error("Unable to rename audit temp file");
+                        throw new InternalServerErrorException("Unable to rename audit temp file");
+                    }
+                    resetWriter(auditEventType, existingCsvWriter);
+                }
+            }
+        }
+        return auditFile;
     }
 
     private ICsvMapWriter createCsvMapWriter(final File auditTmpFile) throws IOException {
@@ -286,13 +318,12 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResponse, ResourceException> queryCollection(
-            final Context context,
-            final QueryRequest request,
-            final QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryEvents(
+            String topic,
+            QueryRequest query,
+            QueryResourceHandler handler) {
         try {
-            final String auditEventType = request.getResourcePathObject().head(1).toString();
-            for (final JsonValue value : getEntries(auditEventType, request.getQueryFilter())) {
+            for (final JsonValue value : getEntries(topic, query.getQueryFilter())) {
                 handler.handleResource(newResourceResponse(value.get(FIELD_CONTENT_ID).asString(), null, value));
             }
             return newQueryResponse().asPromise();
@@ -306,16 +337,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(
-            final Context context,
-            final String resourceId,
-            final ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
         try {
-            final String auditEventType = request.getResourcePathObject().head(1).toString();
-            final Set<JsonValue> entry =
-                    getEntries(auditEventType, QueryFilters.parse("/_id eq \"" + resourceId + "\""));
+            final Set<JsonValue> entry = getEntries(topic, QueryFilters.parse("/_id eq \"" + resourceId + "\""));
             if (entry.isEmpty()) {
-                throw new NotFoundException(auditEventType + " audit log not found");
+                throw new NotFoundException(topic + " audit log not found");
             }
             final JsonValue resource = entry.iterator().next();
             return newResourceResponse(resource.get(FIELD_CONTENT_ID).asString(), null, resource).asPromise();
@@ -330,13 +356,13 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         return new File(auditLogDirectory, type + ".csv");
     }
 
-    private ICsvMapWriter getWriter(final String auditEventType, final File auditFile, final boolean createIfMissing)
+    private ICsvMapWriter getWriter(final String topic, final File auditFile, final boolean createIfMissing)
             throws IOException {
         synchronized (writers) {
-            ICsvMapWriter existingWriter = writers.get(auditEventType);
+            ICsvMapWriter existingWriter = writers.get(topic);
             if (existingWriter == null && createIfMissing) {
                 existingWriter = createCsvMapWriter(auditFile);
-                writers.put(auditEventType, existingWriter);
+                writers.put(topic, existingWriter);
             }
             return existingWriter;
         }
@@ -352,7 +378,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             cells.put(jsonPointerToDotNotation(key), extractValue(obj, key));
         }
         csvWriter.write(cells, buildHeaders(fieldOrder));
-        csvWriter.flush();
     }
 
     private void resetWriter(final String auditEventType, final ICsvMapWriter writerToReset) {
@@ -495,6 +520,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     /**
      * {@inheritDoc}
      */
+    @Override
     public Class<CSVAuditEventHandlerConfiguration> getConfigurationClass() {
         return CSVAuditEventHandlerConfiguration.class;
     }
