@@ -15,26 +15,29 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
+import static org.assertj.core.api.Assertions.*;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.ConnectionPool;
-import org.forgerock.http.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -47,16 +50,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+@SuppressWarnings("javadoc")
 public class JDBCAuditEventHandlerTest {
 
     public static final String H2_DRIVER = "org.h2.Driver";
@@ -111,19 +107,19 @@ public class JDBCAuditEventHandlerTest {
     }
 
     @Test
-    public void testCreate() throws Exception {
+    public void testPublish() throws Exception {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
+        JsonValue event = makeEvent();
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
-                handler.createInstance(mock(Context.class), createRequest);
+            handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
 
         // then
         AssertJPromiseAssert.assertThat(promise).succeeded();
-        AssertJJsonValueAssert.assertThat(promise.get().getContent()).isEqualTo(createRequest.getContent());
+        AssertJJsonValueAssert.assertThat(promise.get().getContent()).isEqualTo(event);
     }
 
     @Test
@@ -131,12 +127,12 @@ public class JDBCAuditEventHandlerTest {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
+        JsonValue event = makeEvent();
         connection.createStatement().execute(SHUTDOWN);
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
-                handler.createInstance(mock(Context.class), createRequest);
+            handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
 
         // then
         AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(InternalServerErrorException.class);
@@ -148,11 +144,11 @@ public class JDBCAuditEventHandlerTest {
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         configuration.setTableMappings(new LinkedList<TableMapping>());
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
+        JsonValue event = makeEvent();
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
-                handler.createInstance(mock(Context.class), createRequest);
+            handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
 
         // then
         AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(InternalServerErrorException.class);
@@ -163,15 +159,14 @@ public class JDBCAuditEventHandlerTest {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
-        final ReadRequest readRequest = Requests.newReadRequest(TEST_AUDIT_EVENT_TOPIC);
+        JsonValue event = makeEvent();
 
         // create entry
-        Promise<ResourceResponse, ResourceException> promise = handler.createInstance(mock(Context.class),
-                createRequest);
+        Promise<ResourceResponse, ResourceException> promise =
+            handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
 
         // when
-        promise = handler.readInstance(mock(Context.class), promise.get().getId(), readRequest);
+        promise = handler.readEvent(TEST_AUDIT_EVENT_TOPIC, promise.get().getId());
 
         // then
         AssertJPromiseAssert.assertThat(promise).succeeded();
@@ -192,10 +187,10 @@ public class JDBCAuditEventHandlerTest {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final ReadRequest readRequest = Requests.newReadRequest(TEST_AUDIT_EVENT_TOPIC);
+
         // when
-        final Promise<ResourceResponse, ResourceException> promise = handler.readInstance(mock(Context.class),
-                ID_VALUE, readRequest);
+        final Promise<ResourceResponse, ResourceException> promise =
+            handler.readEvent(TEST_AUDIT_EVENT_TOPIC, ID_VALUE);
 
         // then
         AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
@@ -206,16 +201,14 @@ public class JDBCAuditEventHandlerTest {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
-        final ReadRequest readRequest = Requests.newReadRequest(TEST_AUDIT_EVENT_TOPIC);
+        JsonValue event = makeEvent();
 
         // create entry
-        Promise<ResourceResponse, ResourceException> promise = handler.createInstance(mock(Context.class),
-                createRequest);
+        Promise<ResourceResponse, ResourceException> promise = handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
         connection.createStatement().execute(SHUTDOWN);
 
         // when
-        promise = handler.readInstance(mock(Context.class), promise.get().getId(), readRequest);
+        promise = handler.readEvent(TEST_AUDIT_EVENT_TOPIC, promise.get().getId());
 
         // then
         AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(InternalServerErrorException.class);
@@ -226,18 +219,16 @@ public class JDBCAuditEventHandlerTest {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
-        final ReadRequest readRequest = Requests.newReadRequest(TEST_AUDIT_EVENT_TOPIC);
+        JsonValue event = makeEvent();
 
         // create entry
-        Promise<ResourceResponse, ResourceException> promise = handler.createInstance(mock(Context.class),
-                createRequest);
+        Promise<ResourceResponse, ResourceException> promise = handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
 
         configuration.setTableMappings(new LinkedList<TableMapping>());
         handler = createJDBCAuditEventHandler(configuration);
 
         // when
-        promise = handler.readInstance(mock(Context.class), promise.get().getId(), readRequest);
+        promise = handler.readEvent(TEST_AUDIT_EVENT_TOPIC, promise.get().getId());
 
         // then
         AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(InternalServerErrorException.class);
@@ -248,11 +239,10 @@ public class JDBCAuditEventHandlerTest {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
+        final JsonValue event = makeEvent();
 
         // create entry
-        Promise<ResourceResponse, ResourceException> promise = handler.createInstance(mock(Context.class),
-                createRequest);
+        Promise<ResourceResponse, ResourceException> promise = handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
 
         final QueryRequest queryRequest = Requests.newQueryRequest(TEST_AUDIT_EVENT_TOPIC)
                 .setQueryFilter(QueryFilter.equalTo(new JsonPointer(ID_FIELD), promise.get().getId()));
@@ -261,7 +251,7 @@ public class JDBCAuditEventHandlerTest {
 
         // when
         final Promise<QueryResponse, ResourceException> queryPromise =
-                handler.queryCollection(mock(Context.class), queryRequest, new QueryResourceHandler() {
+                handler.queryEvents(TEST_AUDIT_EVENT_TOPIC, queryRequest, new QueryResourceHandler() {
                     @Override
                     public boolean handleResource(ResourceResponse resourceResponse) {
                         resourceResponses.add(resourceResponse);
@@ -286,11 +276,10 @@ public class JDBCAuditEventHandlerTest {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
+        final JsonValue event = makeEvent();
 
         // create entry
-        Promise<ResourceResponse, ResourceException> promise = handler.createInstance(mock(Context.class),
-                createRequest);
+        Promise<ResourceResponse, ResourceException> promise = handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
 
         final QueryRequest queryRequest = Requests.newQueryRequest(TEST_AUDIT_EVENT_TOPIC)
                 .setQueryFilter(QueryFilter.equalTo(new JsonPointer(ID_FIELD), promise.get().getId()));
@@ -301,7 +290,7 @@ public class JDBCAuditEventHandlerTest {
 
         // when
         final Promise<QueryResponse, ResourceException> queryPromise =
-                handler.queryCollection(mock(Context.class), queryRequest, new QueryResourceHandler() {
+                handler.queryEvents(TEST_AUDIT_EVENT_TOPIC, queryRequest, new QueryResourceHandler() {
                     @Override
                     public boolean handleResource(ResourceResponse resourceResponse) {
                         resourceResponses.add(resourceResponse);
@@ -318,11 +307,10 @@ public class JDBCAuditEventHandlerTest {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
         JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-        final CreateRequest createRequest = makeCreateRequest();
+        final JsonValue event = makeEvent();
 
         // create entry
-        Promise<ResourceResponse, ResourceException> promise = handler.createInstance(mock(Context.class),
-                createRequest);
+        Promise<ResourceResponse, ResourceException> promise = handler.publishEvent(TEST_AUDIT_EVENT_TOPIC, event);
 
         final QueryRequest queryRequest = Requests.newQueryRequest(TEST_AUDIT_EVENT_TOPIC)
                 .setQueryFilter(QueryFilter.equalTo(new JsonPointer(ID_FIELD), promise.get().getId()));
@@ -334,7 +322,7 @@ public class JDBCAuditEventHandlerTest {
 
         // when
         final Promise<QueryResponse, ResourceException> queryPromise =
-                handler.queryCollection(mock(Context.class), queryRequest, new QueryResourceHandler() {
+                handler.queryEvents(TEST_AUDIT_EVENT_TOPIC, queryRequest, new QueryResourceHandler() {
                     @Override
                     public boolean handleResource(ResourceResponse resourceResponse) {
                         resourceResponses.add(resourceResponse);
@@ -345,34 +333,6 @@ public class JDBCAuditEventHandlerTest {
         // then
         AssertJPromiseAssert.assertThat(queryPromise).failedWithException().isInstanceOf(InternalServerErrorException.class);
     }
-
-    @Test
-    public void testActionCollection() throws Exception {
-        // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-
-        // when
-        Promise<ActionResponse, ResourceException> promise = handler.actionCollection(mock(Context.class), mock
-                (ActionRequest.class));
-        // then
-        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
-    }
-
-    @Test
-    public void testActionInstance() throws Exception {
-        // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
-
-        // when
-        Promise<ActionResponse, ResourceException> promise = handler.actionCollection(mock(Context.class), mock
-                (ActionRequest.class));
-        // then
-        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
-    }
-
-
 
     private JDBCAuditEventHandler createJDBCAuditEventHandler(final JDBCAuditEventHandlerConfiguration configuration)
             throws Exception {
@@ -405,14 +365,15 @@ public class JDBCAuditEventHandlerTest {
         return configuration;
     }
 
-    private CreateRequest makeCreateRequest() {
-        final AuditEvent testAuditEvent = TestAuditEventBuilder.testAuditEventBuilder()
-                .eventName(EVENT_NAME_VALUE)
-                .authentication(AUTHENTICATION_ID_VALUE)
-                .timestamp(System.currentTimeMillis())
-                .transactionId(TRANSACTION_ID_VALUE).toEvent();
-        testAuditEvent.getValue().put(ID_FIELD, ID_VALUE);
-        return Requests.newCreateRequest(TEST_AUDIT_EVENT_TOPIC, ID_VALUE, testAuditEvent.getValue());
+    private JsonValue makeEvent()
+    {
+      final AuditEvent testAuditEvent = TestAuditEventBuilder.testAuditEventBuilder()
+              .eventName(EVENT_NAME_VALUE)
+              .authentication(AUTHENTICATION_ID_VALUE)
+              .timestamp(System.currentTimeMillis())
+              .transactionId(TRANSACTION_ID_VALUE).toEvent();
+      testAuditEvent.getValue().put(ID_FIELD, ID_VALUE);
+      return testAuditEvent.getValue();
     }
 
     private void addEventsMetaData(JDBCAuditEventHandler handler) throws Exception {

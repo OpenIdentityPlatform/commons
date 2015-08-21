@@ -195,7 +195,8 @@ public class AuditServiceTest {
         reset(auditEventHandler, queryAuditEventHandler); // So the verify assertions below can work.
 
         final ReadRequest readRequest = Requests.newReadRequest("access", "1234");
-        ResultHandler<ResourceResponse> readResultHandler = mockResultHandler(ResourceResponse.class, "readResultHandler");
+        ResultHandler<ResourceResponse> readResultHandler =
+                mockResultHandler(ResourceResponse.class, "readResultHandler");
         Context context = new RootContext();
 
         //when
@@ -203,9 +204,7 @@ public class AuditServiceTest {
                 auditService.handleRead(context, readRequest);
 
         //then
-        verify(queryAuditEventHandler).readInstance(same(context),
-                eq("1234"),
-                same(readRequest));
+        verify(queryAuditEventHandler).readEvent(eq("access"), eq("1234"));
         verifyZeroInteractions(auditEventHandler);
     }
 
@@ -279,8 +278,8 @@ public class AuditServiceTest {
         final AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
         final Promise<QueryResponse, ResourceException> emptyPromise = newQueryResponse().asPromise();
         auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
-        when(auditEventHandler.queryCollection(
-                any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
+        when(auditEventHandler.queryEvents(
+                any(String.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
             .thenReturn(emptyPromise);
 
         //when
@@ -290,8 +289,8 @@ public class AuditServiceTest {
                 mock(QueryResourceHandler.class));
 
         //then
-        verify(auditEventHandler).queryCollection(
-                any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+        verify(auditEventHandler).queryEvents(
+                any(String.class), any(QueryRequest.class), any(QueryResourceHandler.class));
         assertThat(promise).isSameAs(emptyPromise);
     }
 
@@ -376,7 +375,8 @@ public class AuditServiceTest {
             String queryHandlerName, JsonValue additionalEventTypes) throws ResourceException {
         AuditServiceConfiguration config = new AuditServiceConfiguration();
         config.setHandlerForQueries(queryHandlerName);
-        config.setAvailableAuditEventHandlers(asList("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandelr"));
+        config.setAvailableAuditEventHandlers(
+                asList("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler"));
         AuditService auditService = new AuditService(json(object()), additionalEventTypes);
         auditService.configure(config);
         return auditService;

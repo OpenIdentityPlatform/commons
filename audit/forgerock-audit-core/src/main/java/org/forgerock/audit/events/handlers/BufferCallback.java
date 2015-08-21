@@ -13,35 +13,26 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.events.handlers.impl;
+package org.forgerock.audit.events.handlers;
 
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 /**
- * A configuration for pass-through audit event handler.
+ * A callback for the Buffer.
+ *
+ * @param <T>
+ *            The type of the elements in the buffer.
  */
-public class PassThroughAuditEventHandlerConfiguration extends EventHandlerConfiguration {
-
-    @JsonProperty("message")
-    private String message;
+public interface BufferCallback<T> {
 
     /**
-     * Returns the message.
+     * This method is called when the buffer is flushed, providing the elements in the buffer that have been flushed.
+     * <p>
+     * The implementation of this method must be thread-safe because it can be called by multiple threads.
      *
-     * @return the message
+     * @param elements
+     *          The list of elements flushed from the buffer.
      */
-    public String getMessage() {
-        return message;
-    }
+    void bufferFlush(List<T> elements);
 
-    /**
-     * Sets the message.
-     *
-     * @param message the message
-     */
-    public void setMessage(String message) {
-        this.message = message;
-    }
 }

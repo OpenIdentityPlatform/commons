@@ -64,6 +64,7 @@ tmp/
 local.properties
 .settings/
 .loadpath
+test-output
 
 # Eclipse Core
 .project
