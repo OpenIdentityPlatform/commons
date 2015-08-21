@@ -218,7 +218,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
             },
 
-            addLinkFromConfiguration: function(linkName) {
+            addLinksFromConfiguration: function(linkName) {
                 var urlName,
                     subUrl,
                     subUrlName,
@@ -334,7 +334,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     userHasNecessaryRole = link.role && Configuration.loggedUser && _.contains(Configuration.loggedUser.roles, link.role);
 
                     if (linkHasNoRole || userHasNecessaryRole) {
-                        this.addLinkFromConfiguration(linkName);
+                        this.addLinksFromConfiguration(linkName);
                         return;
                     }
                 }
@@ -368,10 +368,15 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
      * Adds new link to the navigation bar. Can either be a top- or a second-level item.
      * Does nothing if this link already exists.
      * @param {Object} link Link to add.
+     * @param {string} link.url - Link url.
+     * @param {string} link.name - Link name.
+     * @param {string} link.cssClass - Link css class.
+     * @param {string} link.icon - Link icon font awesome class.
+     * @param {string} link.event - Link event.
      * @param {string} role Role to add for ("admin" or "user").
      * @param {string} [secondLevelItem] If this parameter is absent, the new link will become a top-level link,
      *                                  in order for the new link to become a second-level item, this parameter should
-     *                                  point to an existing top-level item.
+     *                                  point to an existing top-level item (one of the keys of the "urls" object).
      */
     obj.addLink = function (link, role, secondLevelItem) {
         var pathToTheNewLink = [role, "urls"],
@@ -387,8 +392,12 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             }
         }, obj.configuration.links);
 
-        if (!_.findWhere(links, {name: link.name})) {
-            links.push(link);
+        if (links && !_.findWhere(links, {name: link.name})) {
+            if (secondLevelItem) {
+                links.push(link);
+            } else {
+                links[link.name] = link;
+            }
         }
     };
 
