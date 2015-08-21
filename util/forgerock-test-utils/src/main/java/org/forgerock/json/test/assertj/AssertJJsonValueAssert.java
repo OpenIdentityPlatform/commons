@@ -115,6 +115,19 @@ public class AssertJJsonValueAssert {
         }
 
         /**
+         * Check that the JSON is either an array or an object and is empty.
+         * @return This assertion object.
+         */
+        public T isEmpty() {
+            if (actual.isMap()) {
+                isObject().isEmpty();
+            } else {
+                isArray().isEmpty();
+            }
+            return myself;
+        }
+
+        /**
          * Check that the referenced {@link JsonValue} is an object.
          * @param path The {@link JsonPointer} path to the expected value.
          * @return The {@code ObjectJsonValueAssert} for that node.
@@ -317,6 +330,12 @@ public class AssertJJsonValueAssert {
             this.mapAssert = Assertions.assertThat(value.asMap());
         }
 
+        @Override
+        public ObjectJsonValueAssert isEmpty() {
+            mapAssert.isEmpty();
+            return myself;
+        }
+
         /**
          * Check that this object contains a property with the given name, and value.
          * @param key The name of the object property.
@@ -415,6 +434,12 @@ public class AssertJJsonValueAssert {
         private ArrayJsonValueAssert(JsonValue value) {
             super(ArrayJsonValueAssert.class, value);
             this.listAssert = Assertions.assertThat(value.asList());
+        }
+
+        @Override
+        public ArrayJsonValueAssert isEmpty() {
+            listAssert.isEmpty();
+            return myself;
         }
 
         /**

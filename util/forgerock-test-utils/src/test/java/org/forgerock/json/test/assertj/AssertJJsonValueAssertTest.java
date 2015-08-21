@@ -48,7 +48,9 @@ public class AssertJJsonValueAssertTest {
                                 null,
                                 "str2"
                         ))
-                ))));
+                )),
+                field("emptyObject", object()),
+                field("emptyArray", array())));
 
         // When
         AssertJJsonValueAssert.AbstractJsonValueAssert asserter = AssertJJsonValueAssert.assertThat(value);
@@ -97,6 +99,10 @@ public class AssertJJsonValueAssertTest {
                 .endsWith(null, "str2")
                 .doesNotHaveDuplicates()
                 .hasSize(5);
+
+        asserter.hasObject("emptyObject").isEmpty();
+
+        asserter.hasArray("emptyArray").isEmpty();
     }
 
     @Test
