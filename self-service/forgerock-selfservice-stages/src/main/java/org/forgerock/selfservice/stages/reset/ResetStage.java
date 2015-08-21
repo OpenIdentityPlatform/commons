@@ -34,6 +34,7 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.StageType;
+import org.forgerock.selfservice.stages.CommonStageTypes;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
 
@@ -84,7 +85,7 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
 
         JsonValue user = readUser(context.getHttpContext(), userId, config);
         user.put(new JsonPointer(config.getIdentityPasswordField()), password);
-        changePassword(context.getHttpContext(), userId, user, config);
+        updateUser(context.getHttpContext(), userId, user, config);
 
         return StageResponse
                 .newBuilder()
@@ -100,8 +101,8 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
         }
     }
 
-    private void changePassword(Context httpContext, String userId, JsonValue user,
-                                ResetStageConfig config) throws ResourceException {
+    private void updateUser(Context httpContext, String userId, JsonValue user,
+                            ResetStageConfig config) throws ResourceException {
         try (Connection connection = connectionFactory.getConnection()) {
             UpdateRequest request = Requests.newUpdateRequest(config.getIdentityServiceUrl(), userId, user);
             connection.update(httpContext, request);
@@ -110,7 +111,7 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
 
     @Override
     public StageType<ResetStageConfig> getStageType() {
-        return ResetStageConfig.TYPE;
+        return CommonStageTypes.RESET_TYPE;
     }
 
 }

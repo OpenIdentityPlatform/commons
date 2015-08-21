@@ -21,44 +21,37 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
-import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
 import org.forgerock.http.Context;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
-import org.forgerock.selfservice.core.StageType;
 import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
-import org.forgerock.util.query.QueryFilter;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 /**
- * Email stage.
+ * This stage is intended to be sub classed to define the initial client interaction
+ * in order to retrieve an email address. The account associated with the email address
+ * is verified via an email link callback.
  *
  * @since 0.1.0
  */
-public final class EmailStage implements ProgressStage<EmailStageConfig> {
+abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificationConfig> implements ProgressStage<C> {
 
     private static final String VALIDATE_CODE_TAG = "validateCodeTag";
 
-    private final ConnectionFactory connectionFactory;
+    protected final ConnectionFactory connectionFactory;
 
     /**
      * Constructs a new email stage.
@@ -67,20 +60,12 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
      *         the CREST connection factory
      */
     @Inject
-    public EmailStage(ConnectionFactory connectionFactory) {
+    public AbstractEmailVerificationStage(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 
     @Override
-    public JsonValue gatherInitialRequirements(ProcessContext context, EmailStageConfig config) {
-        return RequirementsBuilder
-                .newInstance("Reset your password")
-                .addRequireProperty("username", "Username (either user Id or email)")
-                .build();
-    }
-
-    @Override
-    public StageResponse advance(ProcessContext context, EmailStageConfig config) throws ResourceException {
+    public final StageResponse advance(ProcessContext context, C config) throws ResourceException {
         switch (context.getStageTag()) {
         case INITIAL_TAG:
             return sendEmail(context, config);
@@ -92,34 +77,14 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
     }
 
     private StageResponse sendEmail(final ProcessContext context,
-                                    final EmailStageConfig config) throws ResourceException {
-        String username = context
-                .getInput()
-                .get("username")
-                .asString();
+                                    final C config) throws ResourceException {
 
-        if (isEmpty(username)) {
-            throw new BadRequestException("username is missing");
-        }
-
-        JsonValue user = findUser(context.getHttpContext(), username, config);
-
-        if (user == null) {
-            throw new BadRequestException("Unable to find associated account");
-        }
-
-        String userId = user
-                .get(config.getIdentityIdField())
-                .asString();
-
-        final String mail = user
-                .get(config.getIdentityEmailField())
-                .asString();
-
+        StageResponse.Builder builder = StageResponse.newBuilder();
+        final String mail = getEmailAddress(context, config, builder);
         final String code = UUID.randomUUID().toString();
 
         JsonValue requirements = RequirementsBuilder
-                .newInstance("Verify user account")
+                .newInstance("Verify emailed code")
                 .addRequireProperty("code", "Enter code emailed")
                 .build();
 
@@ -133,15 +98,32 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
 
         };
 
-        return StageResponse
-                .newBuilder()
-                .addState(USER_ID_FIELD, userId)
+        return builder
                 .addState("code", code)
+                .addState("mail", mail)
                 .setStageTag(VALIDATE_CODE_TAG)
                 .setRequirements(requirements)
                 .setCallback(callback)
                 .build();
     }
+
+    /**
+     * Given the current context containing input from the previous requirements, resolve the email address.
+     *
+     * @param context
+     *         the current context
+     * @param config
+     *         the stage config
+     * @param builder
+     *         the stage response builder should it be required
+     *
+     * @return the email address
+     *
+     * @throws ResourceException
+     *         if some expected state or input is invalid
+     */
+    protected abstract String getEmailAddress(ProcessContext context, C config,
+                                              StageResponse.Builder builder) throws ResourceException;
 
     private StageResponse validateCode(ProcessContext context) throws ResourceException {
         String originalCode = context.getState("code");
@@ -164,38 +146,11 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
                 .build();
     }
 
-    private JsonValue findUser(Context httpContext, String identifier,
-                               EmailStageConfig config) throws ResourceException {
+    private void sendEmail(Context httpContext, String snapshotToken, String code,
+                           String email, C config) throws ResourceException {
 
-        QueryRequest request = Requests
-                .newQueryRequest(config.getIdentityServiceUrl())
-                .setQueryFilter(
-                        QueryFilter.or(
-                                QueryFilter.equalTo(new JsonPointer(config.getIdentityIdField()), identifier),
-                                QueryFilter.equalTo(new JsonPointer(config.getIdentityEmailField()), identifier)));
-
-        final List<JsonValue> user = new ArrayList<>();
-
-        try (Connection connection = connectionFactory.getConnection()) {
-            connection.query(httpContext, request, new QueryResourceHandler() {
-
-                @Override
-                public boolean handleResource(ResourceResponse resourceResponse) {
-                    user.add(resourceResponse.getContent());
-                    return true;
-                }
-
-            });
-        }
-
-        return user.isEmpty() ? null : user.get(0);
-    }
-
-    private void sendEmail(Context httpContext, String snapshotToken, String code, String mail,
-                           EmailStageConfig config) throws ResourceException {
-
-        String emailUrl = config.getEmailResetUrl() + "&token=" + snapshotToken + "&code=" + code;
-        String message = config.getEmailMessage().replace(config.getEmailResetUrlToken(), emailUrl);
+        String emailUrl = config.getEmailVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
+        String message = config.getEmailMessage().replace(config.getEmailVerificationLinkToken(), emailUrl);
 
         try (Connection connection = connectionFactory.getConnection()) {
             ActionRequest request = Requests
@@ -203,18 +158,13 @@ public final class EmailStage implements ProgressStage<EmailStageConfig> {
                     .setContent(
                             json(
                                     object(
-                                            field("to", mail),
+                                            field("to", email),
                                             field("from", config.getEmailFrom()),
                                             field("subject", config.getEmailSubject()),
                                             field("message", message))));
 
             connection.action(httpContext, request);
         }
-    }
-
-    @Override
-    public StageType<EmailStageConfig> getStageType() {
-        return EmailStageConfig.TYPE;
     }
 
 }

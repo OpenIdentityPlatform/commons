@@ -26,7 +26,6 @@ import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.io.Buffer;
-import org.forgerock.http.routing.Router;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
@@ -35,16 +34,20 @@ import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
-import org.forgerock.selfservice.stages.email.EmailStageConfig;
+import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
+import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.util.Factory;
 
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Basic http application which initialises the user self service service.
@@ -54,7 +57,7 @@ import java.nio.charset.Charset;
 public final class ExampleSelfServiceApplication implements HttpApplication {
 
     private ConnectionFactory crestConnectionFactory;
-    private org.forgerock.json.resource.Router crestRouter;
+    private Router crestRouter;
     private JsonValue appConfig;
 
     @Override
@@ -62,14 +65,16 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         try {
             appConfig = JsonReader.jsonFileToJsonValue("/config.json");
 
-            crestRouter = new org.forgerock.json.resource.Router();
+            crestRouter = new Router();
             crestConnectionFactory = newInternalConnectionFactory(crestRouter);
             registerCRESTServices();
 
-            Router chfRouter = new Router();
+            org.forgerock.http.routing.Router chfRouter = new org.forgerock.http.routing.Router();
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "internal"),
                     CrestHttp.newHttpHandler(crestConnectionFactory));
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "reset"), registerResetHandler());
+            chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "registration"),
+                    registerRegistrationHandler());
             return chfRouter;
         } catch (Exception e) {
             throw new HttpApplicationException("Some error starting", e);
@@ -93,16 +98,19 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     }
 
     private Handler registerResetHandler() throws Exception {
-        EmailStageConfig emailConfig = new EmailStageConfig();
-        emailConfig.setIdentityIdField("_id");
-        emailConfig.setIdentityEmailField("mail");
-        emailConfig.setIdentityServiceUrl("/users");
+        VerifyEmailAccountConfig emailConfig = new VerifyEmailAccountConfig();
         emailConfig.setEmailServiceUrl("/email");
         emailConfig.setEmailFrom("info@admin.org");
         emailConfig.setEmailSubject("Reset password email");
         emailConfig.setEmailMessage("This is your reset email.\nLink: %link%");
-        emailConfig.setEmailResetUrlToken("%link%");
-        emailConfig.setEmailResetUrl("http://localhost:9999/example/#passwordReset/");
+        emailConfig.setEmailVerificationLinkToken("%link%");
+        emailConfig.setEmailVerificationLink("http://localhost:9999/example/#passwordReset/");
+
+        VerifyUserIdConfig verifyUserIdConfig = new VerifyUserIdConfig(emailConfig);
+        verifyUserIdConfig.setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")));
+        verifyUserIdConfig.setIdentityIdField("_id");
+        verifyUserIdConfig.setIdentityEmailField("mail");
+        verifyUserIdConfig.setIdentityServiceUrl("/users");
 
         ResetStageConfig resetConfig = new ResetStageConfig();
         resetConfig.setIdentityServiceUrl("/users");
@@ -110,13 +118,38 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
 
         ProcessInstanceConfig config = ProcessInstanceConfig
                 .newBuilder()
-                .addStageConfig(emailConfig)
+                .addStageConfig(verifyUserIdConfig)
                 .addStageConfig(resetConfig)
                 .setTokenType(JwtTokenHandler.TYPE)
                 .setStorageType(StorageType.STATELESS)
                 .build();
 
-        byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(Charset.forName("UTF-8"));
+        byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(StandardCharsets.UTF_8);
+
+        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
+                new ExampleProgressStageFactory(crestConnectionFactory),
+                new ExampleTokenHandlerFactory(sharedKey), new SimpleInMemoryStore());
+
+        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
+    }
+
+    private Handler registerRegistrationHandler() throws Exception {
+        VerifyEmailAccountConfig emailConfig = new VerifyEmailAccountConfig();
+        emailConfig.setEmailServiceUrl("/email");
+        emailConfig.setEmailFrom("info@admin.org");
+        emailConfig.setEmailSubject("Register new account");
+        emailConfig.setEmailMessage("This is email address verification message.\nLink: %link%");
+        emailConfig.setEmailVerificationLinkToken("%link%");
+        emailConfig.setEmailVerificationLink("http://localhost:9999/example/#selfRegistration/");
+
+        ProcessInstanceConfig config = ProcessInstanceConfig
+                .newBuilder()
+                .addStageConfig(emailConfig)
+                .setTokenType(JwtTokenHandler.TYPE)
+                .setStorageType(StorageType.STATELESS)
+                .build();
+
+        byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(StandardCharsets.UTF_8);
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
                 new ExampleProgressStageFactory(crestConnectionFactory),

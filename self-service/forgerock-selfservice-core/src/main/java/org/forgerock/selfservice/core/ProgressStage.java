@@ -74,6 +74,6 @@ public interface ProgressStage<C extends StageConfig> {
      *
      * @return the stage type
      */
-    StageType<C> getStageType();
+    StageType<? extends C> getStageType();
 
 }

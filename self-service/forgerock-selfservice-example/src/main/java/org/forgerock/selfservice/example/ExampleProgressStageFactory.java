@@ -20,9 +20,9 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageFactory;
 import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.stages.email.EmailStage;
-import org.forgerock.selfservice.stages.email.EmailStageConfig;
-import org.forgerock.selfservice.stages.reset.ResetStageConfig;
+import org.forgerock.selfservice.stages.CommonStageTypes;
+import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
+import org.forgerock.selfservice.stages.email.VerifyUserIdStage;
 import org.forgerock.selfservice.stages.reset.ResetStage;
 
 import java.util.HashMap;
@@ -42,8 +42,9 @@ final class ExampleProgressStageFactory implements ProgressStageFactory {
      */
     ExampleProgressStageFactory(ConnectionFactory connectionFactory) {
         progressStages = new HashMap<>();
-        progressStages.put(EmailStageConfig.TYPE, new EmailStage(connectionFactory));
-        progressStages.put(ResetStageConfig.TYPE, new ResetStage(connectionFactory));
+        progressStages.put(CommonStageTypes.VERIFY_EMAIL_TYPE, new VerifyEmailAccountStage(connectionFactory));
+        progressStages.put(CommonStageTypes.VERIFY_USER_ID_TYPE, new VerifyUserIdStage(connectionFactory));
+        progressStages.put(CommonStageTypes.RESET_TYPE, new ResetStage(connectionFactory));
     }
 
     @Override
