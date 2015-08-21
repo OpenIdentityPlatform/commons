@@ -121,7 +121,7 @@ public final class Responses {
      * @deprecated Use {@link #newQueryResponse(String, CountPolicy, int)} instead.
      */
     @Deprecated
-    public static QueryResponse newQueryResponse(String pagedResultsCookie, int remainingPagedResults) {
+    public static QueryResponse newRemainingResultsResponse(String pagedResultsCookie, int remainingPagedResults) {
         return new QueryResponseImpl(pagedResultsCookie, CountPolicy.NONE, QueryResponse.NO_COUNT,
                 remainingPagedResults);
     }
