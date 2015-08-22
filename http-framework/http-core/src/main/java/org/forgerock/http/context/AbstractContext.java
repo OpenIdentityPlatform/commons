@@ -132,7 +132,7 @@ public abstract class AbstractContext implements Context {
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    protected AbstractContext(final JsonValue savedContext, final ClassLoader classLoader) {
+    public AbstractContext(final JsonValue savedContext, final ClassLoader classLoader) {
         final JsonValue savedParentContext = savedContext.get(ATTR_PARENT);
         savedContext.remove(ATTR_PARENT);
         data = savedContext.copy();

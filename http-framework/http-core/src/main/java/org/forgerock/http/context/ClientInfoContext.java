@@ -97,7 +97,7 @@ public final class ClientInfoContext extends AbstractContext implements ClientIn
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    ClientInfoContext(final JsonValue savedContext, final ClassLoader classLoader) {
+    public ClientInfoContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
         try {
             this.certificates = Collections.unmodifiableCollection(
