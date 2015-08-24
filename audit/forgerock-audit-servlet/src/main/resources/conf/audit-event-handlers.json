@@ -12,6 +12,23 @@
         "config",
         "authentication"
       ]
+    },
+    {
+      "name" : "syslog",
+      "class" : "org.forgerock.audit.handlers.syslog.SyslogAuditEventHandler",
+      "config" : {
+        "protocol" : "UDP",
+        "host" : "localhost",
+        "port" : 514,
+        "facility" : "local0",
+        "productName" : "OpenAM"
+      },
+      "events": [
+        "access",
+        "activity",
+        "config",
+        "authentication"
+      ]
     }
   ]
 }

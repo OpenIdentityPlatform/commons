@@ -21,21 +21,35 @@
         <artifactId>forgerock-audit</artifactId>
         <version>0.3.0-SNAPSHOT</version>
     </parent>
-    <artifactId>forgerock-audit-servlet</artifactId>
+
+    <artifactId>forgerock-audit-handler-syslog</artifactId>
     <packaging>bundle</packaging>
-    <name>Commons - ForgeRock Audit Framework Servlet</name>
+    <name>Commons - ForgeRock Audit Syslog Event Handler</name>
     <description />
 
     <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
         <!-- ForgeRock Commons Dependencies -->
-        <dependency>
-            <groupId>org.forgerock.http</groupId>
-            <artifactId>chf-http-servlet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource-http</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource</artifactId>
@@ -45,20 +59,27 @@
             <artifactId>forgerock-audit-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-audit-handler-csv</artifactId>
-            <version>${project.version}</version>
+            <artifactId>forgerock-test-utils</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-audit-handler-syslog</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-audit-json</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
@@ -67,27 +88,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>war</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>war</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>servlet</classifier>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <version>9.0.4.v20130625</version>
             </plugin>
         </plugins>
     </build>
