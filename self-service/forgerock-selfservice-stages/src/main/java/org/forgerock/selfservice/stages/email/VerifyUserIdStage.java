@@ -32,8 +32,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
-import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.stages.CommonStageTypes;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.query.QueryFilter;
 
@@ -124,12 +122,6 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
         }
 
         return user.isEmpty() ? null : user.get(0);
-    }
-
-
-    @Override
-    public StageType<VerifyUserIdConfig> getStageType() {
-        return CommonStageTypes.VERIFY_USER_ID_TYPE;
     }
 
 }

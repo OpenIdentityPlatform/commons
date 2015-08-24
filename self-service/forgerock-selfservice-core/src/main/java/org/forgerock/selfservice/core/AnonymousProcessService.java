@@ -35,7 +35,6 @@ import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.exceptions.StageConfigException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
-import org.forgerock.util.Pair;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -137,12 +136,12 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 .newBuilder(httpContext, INITIAL_STAGE_INDEX)
                 .build();
 
-        Pair<? extends ProgressStage<?>, StageConfig> stagePair = retrieveStage(context);
-        JsonValue requirements = gatherInitialRequirements(context, stagePair.getFirst(), stagePair.getSecond());
+        ProgressStageWrapper<?> stage = retrieveStage(context);
+        JsonValue requirements = stage.gatherInitialRequirements(context);
 
         return renderRequirements(
                 context,
-                stagePair.getFirst().getStageType(),
+                stage,
                 StageResponse
                         .newBuilder()
                         .setRequirements(requirements)
@@ -179,27 +178,25 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 .setInput(input)
                 .build();
 
-        Pair<? extends ProgressStage<?>, StageConfig> stagePair = retrieveStage(context);
-        return enactContext(context, stagePair.getFirst(), stagePair.getSecond());
+        return enactContext(context, retrieveStage(context));
     }
 
-    private JsonValue enactContext(ProcessContext context, ProgressStage<?> stage,
-                                   StageConfig config) throws ResourceException {
-        StageResponse response = advanceProgress(context, stage, config);
+    private JsonValue enactContext(ProcessContext context, ProgressStageWrapper<?> stage) throws ResourceException {
+        StageResponse response = stage.advance(context);
 
         if (response.hasRequirements()) {
             // Stage has additional requirements, render response.
-            return renderRequirementsWithSnapshot(context, config.getStageType(), response);
+            return renderRequirementsWithSnapshot(context, stage, response);
         }
 
-        return handleProgression(context, config.getStageType(), response);
+        return handleProgression(context, stage, response);
     }
 
-    private JsonValue handleProgression(ProcessContext context, StageType<?> stageType,
+    private JsonValue handleProgression(ProcessContext context, ProgressStageWrapper<?> stage,
                                         StageResponse response) throws ResourceException {
         if (context.getStageIndex() + 1 == stageConfigs.size()) {
             // Flow complete, render completion response.
-            return renderCompletion(stageType);
+            return renderCompletion(stage);
         }
 
         // Stage satisfied, move onto the next stage.
@@ -211,24 +208,24 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 .addState(response.getState())
                 .build();
 
-        Pair<? extends ProgressStage<?>, StageConfig> stagePair = retrieveStage(nextContext);
-        JsonValue requirements = gatherInitialRequirements(nextContext, stagePair.getFirst(), stagePair.getSecond());
+        ProgressStageWrapper<?> nextStage = retrieveStage(nextContext);
+        JsonValue requirements = nextStage.gatherInitialRequirements(nextContext);
 
         if (requirements.size() > 0) {
             // Stage has some initial requirements, render response.
             return renderRequirementsWithSnapshot(
                     nextContext,
-                    stagePair.getFirst().getStageType(),
+                    nextStage,
                     StageResponse
                             .newBuilder()
                             .setRequirements(requirements)
                             .build());
         }
 
-        return enactContext(nextContext, stagePair.getFirst(), stagePair.getSecond());
+        return enactContext(nextContext, nextStage);
     }
 
-    private JsonValue renderRequirementsWithSnapshot(ProcessContext context, StageType<?> stageType,
+    private JsonValue renderRequirementsWithSnapshot(ProcessContext context, ProgressStageWrapper<?> stage,
                                                      StageResponse response) throws ResourceException {
         ProcessContext updatedContext = ProcessContext
                 .newBuilder(context)
@@ -242,68 +239,45 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
             response.getCallback().snapshotTokenPreview(updatedContext, snapshotToken);
         }
 
-        return renderRequirements(updatedContext, stageType, response)
+        return renderRequirements(updatedContext, stage, response)
                 .add(TOKEN_FIELD, snapshotToken);
     }
 
-    private JsonValue renderRequirements(ProcessContext context, StageType<?> stageType, StageResponse response) {
+    private JsonValue renderRequirements(ProcessContext context, ProgressStageWrapper<?> stage,
+                                         StageResponse response) {
         return json(
                 object(
-                        field(TYPE_FIELD, stageType.getName()),
+                        field(TYPE_FIELD, stage.getName()),
                         field(STAGE_FIELD, context.getStageIndex()),
                         field(REQUIREMENTS_FIELD, response.getRequirements().asMap())));
     }
 
-    private JsonValue renderCompletion(StageType<?> stageType) {
+    private JsonValue renderCompletion(ProgressStageWrapper<?> stage) {
         return json(
                 object(
-                        field(TYPE_FIELD, stageType.getName()),
+                        field(TYPE_FIELD, stage.getName()),
                         field(STAGE_FIELD, END_VALUE),
                         field(STATUS_FIELD,
                                 object(
                                         field(SUCCESS_FIELD, true)))));
     }
 
-    /*
-     * Enables a typed stage config to be passed to the stage.
-     * Type safety is checked during the stage retrieval.
-     */
-    private <C extends StageConfig> JsonValue gatherInitialRequirements(
-            ProcessContext context, ProgressStage<C> stage, StageConfig config) throws ResourceException {
-        return stage.gatherInitialRequirements(context, stage.getStageType().getTypedConfig(config));
-    }
-
-    /*
-     * Enables a typed stage config to be passed to the stage.
-     * Type safety is checked during the stage retrieval.
-     */
-    private <C extends StageConfig> StageResponse advanceProgress(
-            ProcessContext context, ProgressStage<C> stage, StageConfig config) throws ResourceException {
-        return stage.advance(context, stage.getStageType().getTypedConfig(config));
-    }
-
-    /*
-     * Retrieves the stage and its corresponding config based on the context stage index.
-     * This method also validates the expected subtype of the config.
-     */
-    private Pair<? extends ProgressStage<?>, StageConfig> retrieveStage(ProcessContext context) {
+    private ProgressStageWrapper<?> retrieveStage(ProcessContext context) {
         if (context.getStageIndex() >= stageConfigs.size()) {
             throw new StageConfigException("Invalid stage index " + context.getStageIndex());
         }
 
-        StageConfig config = stageConfigs.get(context.getStageIndex());
-        ProgressStage<?> stage = progressStageFactory.get(config.getStageType());
+        return getStageWrappedWithConfig(stageConfigs.get(context.getStageIndex()));
+    }
+
+    private <C extends StageConfig> ProgressStageWrapper<C> getStageWrappedWithConfig(C config) {
+        ProgressStage<C> stage = progressStageFactory.get(config);
 
         if (stage == null) {
-            throw new StageConfigException("Unknown progress stage " + config.getStageType().getName());
+            throw new StageConfigException("Unknown progress stage " + config.getName());
         }
 
-        if (!stage.getStageType().equals(config.getStageType())) {
-            // Implicit enforcement of the expected subtype of the stage config.
-            throw new StageConfigException("Type for progress stage and config should be equivalent");
-        }
-
-        return Pair.of(stage, config);
+        return new ProgressStageWrapper<>(stage, config);
     }
 
 }

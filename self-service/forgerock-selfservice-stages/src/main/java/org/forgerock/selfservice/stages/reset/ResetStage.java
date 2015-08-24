@@ -33,8 +33,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
-import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.stages.CommonStageTypes;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
 
@@ -107,11 +105,6 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
             UpdateRequest request = Requests.newUpdateRequest(config.getIdentityServiceUrl(), userId, user);
             connection.update(httpContext, request);
         }
-    }
-
-    @Override
-    public StageType<ResetStageConfig> getStageType() {
-        return CommonStageTypes.RESET_TYPE;
     }
 
 }

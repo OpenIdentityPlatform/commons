@@ -69,11 +69,4 @@ public interface ProgressStage<C extends StageConfig> {
      */
     StageResponse advance(ProcessContext context, C config) throws ResourceException;
 
-    /**
-     * Gets the stage type.
-     *
-     * @return the stage type
-     */
-    StageType<? extends C> getStageType();
-
 }

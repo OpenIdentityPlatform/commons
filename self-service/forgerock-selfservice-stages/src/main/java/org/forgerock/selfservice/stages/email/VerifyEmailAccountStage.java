@@ -24,8 +24,6 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
-import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.stages.CommonStageTypes;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 
 /**
@@ -67,11 +65,6 @@ public final class VerifyEmailAccountStage extends AbstractEmailVerificationStag
         }
 
         return email;
-    }
-
-    @Override
-    public StageType<VerifyEmailAccountConfig> getStageType() {
-        return CommonStageTypes.VERIFY_EMAIL_TYPE;
     }
 
 }

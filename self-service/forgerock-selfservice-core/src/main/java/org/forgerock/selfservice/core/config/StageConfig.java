@@ -16,8 +16,6 @@
 
 package org.forgerock.selfservice.core.config;
 
-import org.forgerock.selfservice.core.StageType;
-
 /**
  * Represents the configuration for a given progress stage.
  *
@@ -26,10 +24,10 @@ import org.forgerock.selfservice.core.StageType;
 public interface StageConfig {
 
     /**
-     * Gets the type associated with this stage config.
+     * Gets the name of the stage configuration.
      *
-     * @return the stage types
+     * @return the config name
      */
-    StageType<?> getStageType();
+    String getName();
 
 }

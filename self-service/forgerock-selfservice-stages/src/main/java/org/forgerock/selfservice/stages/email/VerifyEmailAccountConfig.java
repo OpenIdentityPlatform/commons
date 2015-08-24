@@ -16,15 +16,14 @@
 
 package org.forgerock.selfservice.stages.email;
 
-import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.stages.CommonStageTypes;
-
 /**
  * Configuration for the email account verification stage.
  *
  * @since 0.1.0
  */
 public final class VerifyEmailAccountConfig implements AbstractEmailVerificationConfig {
+
+    private static final String NAME = "emailValidation";
 
     private String emailServiceUrl;
     private String emailSubject;
@@ -124,8 +123,8 @@ public final class VerifyEmailAccountConfig implements AbstractEmailVerification
     }
 
     @Override
-    public StageType<?> getStageType() {
-        return CommonStageTypes.VERIFY_EMAIL_TYPE;
+    public String getName() {
+        return NAME;
     }
 
 }

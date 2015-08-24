@@ -19,11 +19,13 @@ package org.forgerock.selfservice.example;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageFactory;
-import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.stages.CommonStageTypes;
+import org.forgerock.selfservice.core.config.StageConfig;
+import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
+import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
 import org.forgerock.selfservice.stages.email.VerifyUserIdStage;
 import org.forgerock.selfservice.stages.reset.ResetStage;
+import org.forgerock.selfservice.stages.reset.ResetStageConfig;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,21 +37,33 @@ import java.util.Map;
  */
 final class ExampleProgressStageFactory implements ProgressStageFactory {
 
-    private final Map<StageType<?>, ProgressStage<?>> progressStages;
+    private final Map<Class<? extends StageConfig>, ProgressStage<?>> progressStages;
 
     /**
      * Creates a new basic progress stage factory.
      */
     ExampleProgressStageFactory(ConnectionFactory connectionFactory) {
         progressStages = new HashMap<>();
-        progressStages.put(CommonStageTypes.VERIFY_EMAIL_TYPE, new VerifyEmailAccountStage(connectionFactory));
-        progressStages.put(CommonStageTypes.VERIFY_USER_ID_TYPE, new VerifyUserIdStage(connectionFactory));
-        progressStages.put(CommonStageTypes.RESET_TYPE, new ResetStage(connectionFactory));
+        put(VerifyEmailAccountConfig.class, new VerifyEmailAccountStage(connectionFactory));
+        put(VerifyUserIdConfig.class, new VerifyUserIdStage(connectionFactory));
+        put(ResetStageConfig.class, new ResetStage(connectionFactory));
+    }
+
+    private <C extends StageConfig> void put(Class<C> expectedConfigType, ProgressStage<C> stage) {
+        progressStages.put(expectedConfigType, stage);
     }
 
     @Override
-    public ProgressStage<?> get(StageType<?> type) {
-        return progressStages.get(type);
+    public <C extends StageConfig> ProgressStage<C> get(C config) {
+        ProgressStage<?> untypedStage = progressStages.get(config.getClass());
+
+        if (untypedStage == null) {
+            throw new RuntimeException("Unknown type");
+        }
+
+        @SuppressWarnings("unchecked")
+        ProgressStage<C> typedStage = (ProgressStage<C>) untypedStage;
+        return typedStage;
     }
 
 }

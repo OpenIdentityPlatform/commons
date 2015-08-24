@@ -16,9 +16,7 @@
 
 package org.forgerock.selfservice.stages.reset;
 
-import org.forgerock.selfservice.core.StageType;
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.stages.CommonStageTypes;
 
 /**
  * Configuration for the password reset stage.
@@ -26,6 +24,8 @@ import org.forgerock.selfservice.stages.CommonStageTypes;
  * @since 0.1.0
  */
 public class ResetStageConfig implements StageConfig {
+
+    private static final String NAME = "resetStage";
 
     private String identityServiceUrl;
     private String identityPasswordField;
@@ -69,8 +69,8 @@ public class ResetStageConfig implements StageConfig {
     }
 
     @Override
-    public StageType<?> getStageType() {
-        return CommonStageTypes.RESET_TYPE;
+    public String getName() {
+        return NAME;
     }
 
 }

@@ -16,21 +16,25 @@
 
 package org.forgerock.selfservice.core;
 
+import org.forgerock.selfservice.core.config.StageConfig;
+
 /**
- * Factory responsible for providing progress stage instances based on the requested type.
+ * Factory responsible for providing progress stage instances based on the requested configuration.
  *
  * @since 0.1.0
  */
 public interface ProgressStageFactory {
 
     /**
-     * Retrieves the corresponding progress stage based on the type.
+     * Given a stage configuration, retrieves an actual stage cable of handling the config.
      *
-     * @param type
-     *         the stage type
+     * @param config
+     *         the stage configuration
+     * @param <C>
+     *         the stage configuration type
      *
-     * @return the appropriate progress stage instance
+     * @return the progress stage cable of handling the config
      */
-    ProgressStage<?> get(StageType<?> type);
+    <C extends StageConfig> ProgressStage<C> get(C config);
 
 }

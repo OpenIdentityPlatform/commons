@@ -16,8 +16,6 @@
 
 package org.forgerock.selfservice.stages.email;
 
-import org.forgerock.selfservice.core.StageType;
-import org.forgerock.selfservice.stages.CommonStageTypes;
 import org.forgerock.util.Reject;
 
 import java.util.Set;
@@ -28,6 +26,8 @@ import java.util.Set;
  * @since 0.1.0
  */
 public final class VerifyUserIdConfig implements AbstractEmailVerificationConfig {
+
+    private static final String NAME = "userIdValidation";
 
     private final VerifyEmailAccountConfig emailStageConfig;
     private String identityServiceUrl;
@@ -153,8 +153,8 @@ public final class VerifyUserIdConfig implements AbstractEmailVerificationConfig
     }
 
     @Override
-    public StageType<?> getStageType() {
-        return CommonStageTypes.VERIFY_USER_ID_TYPE;
+    public String getName() {
+        return NAME;
     }
 
 }
