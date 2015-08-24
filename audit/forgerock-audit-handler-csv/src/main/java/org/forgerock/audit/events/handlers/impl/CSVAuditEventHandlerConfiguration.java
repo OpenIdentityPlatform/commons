@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.events.handlers.impl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.util.Reject;
