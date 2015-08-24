@@ -17,4 +17,4 @@
 /**
  * This package contains the default AuditEventHandler implementations.
  */
-package org.forgerock.audit.events.handlers.impl;
+package org.forgerock.audit.events.handlers.csv;

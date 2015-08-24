@@ -1,6 +1,6 @@
 {
   "name" : "csv",
-  "class" : "org.forgerock.audit.events.handlers.impl.CSVAuditEventHandler",
+  "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
   "config" : {
     "logDirectory" : "/tmp/audit"
   },
