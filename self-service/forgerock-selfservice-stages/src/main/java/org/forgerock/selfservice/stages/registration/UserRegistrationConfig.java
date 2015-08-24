@@ -14,21 +14,21 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.stages.reset;
+package org.forgerock.selfservice.stages.registration;
 
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
- * Configuration for the password reset stage.
+ * Configuration for the user registration stage.
  *
  * @since 0.1.0
  */
-public final class ResetStageConfig implements StageConfig {
+public final class UserRegistrationConfig implements StageConfig {
 
-    private static final String NAME = "resetStage";
+    private static final String NAME = "selfRegistration";
 
     private String identityServiceUrl;
-    private String identityPasswordField;
+    private String identityEmailField;
 
     /**
      * Gets the URL for the identity service.
@@ -50,22 +50,22 @@ public final class ResetStageConfig implements StageConfig {
     }
 
     /**
-     * Gets the password field identifier.
+     * Gets the field name for the identity email address.
      *
-     * @return the password field name
+     * @return the identity email address field name
      */
-    public String getIdentityPasswordField() {
-        return identityPasswordField;
+    public String getIdentityEmailField() {
+        return identityEmailField;
     }
 
     /**
-     * Sets the password field identifier.
+     * Sets the field name for the identity email address.
      *
-     * @param identityPasswordField
-     *         the password field name
+     * @param identityEmailField
+     *         the identity email address field name
      */
-    public void setIdentityPasswordField(String identityPasswordField) {
-        this.identityPasswordField = identityPasswordField;
+    public void setIdentityEmailField(String identityEmailField) {
+        this.identityEmailField = identityEmailField;
     }
 
     @Override

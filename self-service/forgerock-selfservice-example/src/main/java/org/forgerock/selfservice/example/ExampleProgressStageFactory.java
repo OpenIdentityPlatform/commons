@@ -20,10 +20,13 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageFactory;
 import org.forgerock.selfservice.core.config.StageConfig;
+import org.forgerock.selfservice.core.exceptions.StageConfigException;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
 import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
 import org.forgerock.selfservice.stages.email.VerifyUserIdStage;
+import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
+import org.forgerock.selfservice.stages.registration.UserRegistrationStage;
 import org.forgerock.selfservice.stages.reset.ResetStage;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
 
@@ -44,12 +47,16 @@ final class ExampleProgressStageFactory implements ProgressStageFactory {
      */
     ExampleProgressStageFactory(ConnectionFactory connectionFactory) {
         progressStages = new HashMap<>();
-        put(VerifyEmailAccountConfig.class, new VerifyEmailAccountStage(connectionFactory));
-        put(VerifyUserIdConfig.class, new VerifyUserIdStage(connectionFactory));
-        put(ResetStageConfig.class, new ResetStage(connectionFactory));
+        safePut(VerifyEmailAccountConfig.class, new VerifyEmailAccountStage(connectionFactory));
+        safePut(VerifyUserIdConfig.class, new VerifyUserIdStage(connectionFactory));
+        safePut(ResetStageConfig.class, new ResetStage(connectionFactory));
+        safePut(UserRegistrationConfig.class, new UserRegistrationStage(connectionFactory));
     }
 
-    private <C extends StageConfig> void put(Class<C> expectedConfigType, ProgressStage<C> stage) {
+    /*
+     * The generics ensure the expected stage config is enforced at compile time.
+     */
+    private <C extends StageConfig> void safePut(Class<C> expectedConfigType, ProgressStage<C> stage) {
         progressStages.put(expectedConfigType, stage);
     }
 
@@ -58,10 +65,10 @@ final class ExampleProgressStageFactory implements ProgressStageFactory {
         ProgressStage<?> untypedStage = progressStages.get(config.getClass());
 
         if (untypedStage == null) {
-            throw new RuntimeException("Unknown type");
+            throw new StageConfigException("Unable to find matching stage for config " + config.getName());
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("unchecked") // Type safety is enforced by safePut
         ProgressStage<C> typedStage = (ProgressStage<C>) untypedStage;
         return typedStage;
     }

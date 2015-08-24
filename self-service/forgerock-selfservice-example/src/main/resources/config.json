@@ -2,17 +2,5 @@
   "mailserver": {
     "host": "smtp.gmail.com",
     "port": "587"
-  },
-  "users": [
-    {
-      "_id": "alice",
-      "name": "Alice Jones",
-      "password": "123456789"
-    },
-    {
-      "_id": "bob",
-      "name": "Bob Miles",
-      "password": "123456789"
-    }
-  ]
+  }
 }

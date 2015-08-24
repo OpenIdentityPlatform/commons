@@ -17,18 +17,15 @@
 package org.forgerock.selfservice.example;
 
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
-import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.context.RootContext;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.RequestHandler;
@@ -41,6 +38,7 @@ import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
+import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.util.Factory;
@@ -84,17 +82,6 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     private void registerCRESTServices() throws ResourceException {
         crestRouter.addRoute(uriTemplate("users"), new MemoryBackend());
         crestRouter.addRoute(uriTemplate("email"), new ExampleEmailService(appConfig.get("mailserver")));
-        createDemoData(crestConnectionFactory, appConfig.get("users"));
-    }
-
-    private void createDemoData(ConnectionFactory connectionFactory, JsonValue users) throws ResourceException {
-        try (Connection connection = connectionFactory.getConnection()) {
-            for (JsonValue user : users) {
-                user.add("mail", System.getProperty("user.mail"));
-                connection.create(new RootContext(),
-                        newCreateRequest("/users", user.get("_id").asString(), user));
-            }
-        }
     }
 
     private Handler registerResetHandler() throws Exception {
@@ -142,9 +129,14 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         emailConfig.setEmailVerificationLinkToken("%link%");
         emailConfig.setEmailVerificationLink("http://localhost:9999/example/#selfRegistration/");
 
+        UserRegistrationConfig registrationConfig = new UserRegistrationConfig();
+        registrationConfig.setIdentityServiceUrl("/users");
+        registrationConfig.setIdentityEmailField("mail");
+
         ProcessInstanceConfig config = ProcessInstanceConfig
                 .newBuilder()
                 .addStageConfig(emailConfig)
+                .addStageConfig(registrationConfig)
                 .setTokenType(JwtTokenHandler.TYPE)
                 .setStorageType(StorageType.STATELESS)
                 .build();

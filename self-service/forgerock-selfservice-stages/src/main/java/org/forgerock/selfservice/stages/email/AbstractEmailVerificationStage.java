@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
+import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
@@ -100,7 +101,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
 
         return builder
                 .addState("code", code)
-                .addState("mail", mail)
+                .addState(EMAIL_FIELD, mail)
                 .setStageTag(VALIDATE_CODE_TAG)
                 .setRequirements(requirements)
                 .setCallback(callback)

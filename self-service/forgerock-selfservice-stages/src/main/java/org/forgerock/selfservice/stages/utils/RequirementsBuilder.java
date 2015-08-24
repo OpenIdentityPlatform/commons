@@ -57,7 +57,7 @@ public final class RequirementsBuilder {
     }
 
     /**
-     * Add a required property.
+     * Add a required property; default type is string.
      *
      * @param name
      *         property name
@@ -67,14 +67,31 @@ public final class RequirementsBuilder {
      * @return this builder
      */
     public RequirementsBuilder addRequireProperty(String name, String description) {
-        Reject.ifNull(name, description);
-        requiredProperties.add(name);
-        addProperty(name, description);
+        addRequireProperty(name, "string", description);
         return this;
     }
 
     /**
-     * Add a property.
+     * Add a required property.
+     *
+     * @param name
+     *         property name
+     * @param type
+     *         property type
+     * @param description
+     *         property description
+     *
+     * @return this builder
+     */
+    public RequirementsBuilder addRequireProperty(String name, String type, String description) {
+        Reject.ifNull(name, description);
+        requiredProperties.add(name);
+        addProperty(name, type, description);
+        return this;
+    }
+
+    /**
+     * Add a property; default type is string.
      *
      * @param name
      *         property name
@@ -84,10 +101,27 @@ public final class RequirementsBuilder {
      * @return this builder
      */
     public RequirementsBuilder addProperty(String name, String description) {
+        addProperty(name, "string", description);
+        return this;
+    }
+
+    /**
+     * Add a property.
+     *
+     * @param name
+     *         property name
+     * @param type
+     *         property type
+     * @param description
+     *         property description
+     *
+     * @return this builder
+     */
+    public RequirementsBuilder addProperty(String name, String type, String description) {
         Reject.ifNull(name, description);
         Map<String, String> entry = new HashMap<>();
         entry.put("description", description);
-        entry.put("type", "string");
+        entry.put("type", type);
         properties.put(name, entry);
         return this;
     }

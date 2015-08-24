@@ -14,27 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.stages;
-
 /**
- * Constants class for defining fields for common state shared across stages.
- *
- * @since 0.1.0
+ * This package contains a common user registration stage implementation.
  */
-public final class CommonStateFields {
-
-    private CommonStateFields() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * The userId field.
-     */
-    public static final String USER_ID_FIELD = "userId";
-
-    /**
-     * The email address field.
-     */
-    public static final String EMAIL_FIELD = "mail";
-
-}
+package org.forgerock.selfservice.stages.registration;
