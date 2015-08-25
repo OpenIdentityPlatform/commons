@@ -27,7 +27,7 @@ import org.forgerock.util.Reject;
  *
  * @since 0.1.0
  */
-class ProgressStageWrapper<C extends StageConfig> {
+final class ProgressStageWrapper<C extends StageConfig> {
 
     private final ProgressStage<C> delegatedStage;
     private final C stageConfig;

@@ -90,21 +90,8 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
             throw new BadRequestException("user has not been specified");
         }
 
-        String submittedEmail = user
-                .get(new JsonPointer(config.getIdentityEmailField()))
-                .asString();
-
-        if (isEmpty(submittedEmail)) {
-            throw new BadRequestException("Cannot find field "
-                    + config.getIdentityEmailField() + " within the user json");
-        }
-
-        String originalEmail = context.getState(EMAIL_FIELD);
-
-        if (!originalEmail.equals(submittedEmail)) {
-            throw new BadRequestException("Verified email address and user email address do not match");
-        }
-
+        String email = context.getState(EMAIL_FIELD);
+        user.put(new JsonPointer(config.getIdentityEmailField()), email);
         createUser(context.getHttpContext(), userId, user, config);
 
         return StageResponse
