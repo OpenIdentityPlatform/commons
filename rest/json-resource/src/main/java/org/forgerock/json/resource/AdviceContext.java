@@ -74,7 +74,7 @@ public class AdviceContext extends AbstractContext {
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    AdviceContext(final JsonValue savedContext, final ClassLoader classLoader) {
+    public AdviceContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
         restrictedAdviceNames.addAll(data.get(RESTRICTED_ADVICE_NAMES_ATTR).asSet(String.class));
         advice.putAll(data.get(ADVICE_ATTR).asMapOfList(String.class));
