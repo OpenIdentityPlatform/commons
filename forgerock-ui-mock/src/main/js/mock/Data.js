@@ -185,7 +185,7 @@
 
         server.respondWith(
             "GET",
-            "/mock/selfRegistration",
+            "/mock/registration",
             [
                 200,
                 {
@@ -204,7 +204,7 @@
                             ],
                             "properties" : {
                                 "mail" : {
-                                    "description" : "Enter your email address",
+                                    "description" : "Email address",
                                     "type" : "string"
                                 }
                             }
@@ -216,27 +216,131 @@
 
         server.respondWith(
             "POST",
-            "/mock/selfRegistration?_action=submitRequirements",
+            "/mock/registration?_action=submitRequirements",
             function (request) {
                 var requestContent = JSON.parse(request.requestBody),
                     headers = { "Content-Type": "application/json;charset=UTF-8" };
                 switch (requestContent.token) {
                     case undefined:
-
+                    if (_.isObject(requestContent, "input") && _.isString(requestContent.input.mail)) {
+                        request.respond(
+                            200,
+                            headers,
+                            JSON.stringify({
+                                "token": "mockToken1",
+                                "type" : "emailValidation",
+                                "stage" : "2",
+                                "requirements" : {
+                                    "$schema": "http://json-schema.org/draft-04/schema#",
+                                    "description": "Verify email address",
+                                    "type" : "object",
+                                    "required" : [
+                                        "code"
+                                    ],
+                                    "properties" : {
+                                        "code" : {
+                                            "description" : "Enter code emailed to your address",
+                                            "type" : "string"
+                                        }
+                                    }
+                                }
+                            })
+                        );
+                    } else {
                         request.respond(
                             400,
                             headers,
                             JSON.stringify({
                                 "code": 400,
                                 "reason": "Bad Request",
-                                "message": "Under Construction"
+                                "message": "username is missing"
                             })
                         );
-
-                    break;
+                    }
+                break;
+                case "mockToken1":
+                    if (_.isObject(requestContent, "input") &&
+                        _.isString(requestContent.input.code) &&
+                        requestContent.input.code === "12345") {
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "token": "mockToken2",
+                                    "type": "selfRegistration",
+                                    "stage": 1,
+                                    "requirements": {
+                                        "$schema": "http://json-schema.org/draft-04/schema#",
+                                        "type": "object",
+                                        "description": "New user details",
+                                        "required": [
+                                            "userId",
+                                            "user"
+                                        ],
+                                        "properties": {
+                                            "userId": {
+                                                "description": "New user Id",
+                                                "type": "string"
+                                            },
+                                            "user": {
+                                                "description": "User details",
+                                                "type": "object"
+                                            }
+                                        }
+                                    }
+                                })
+                        );
+                    } else {
+                        request.respond(
+                            400,
+                            headers,
+                            JSON.stringify({
+                                "code": 400,
+                                "reason": "Bad Request",
+                                "message": "Invalid code"
+                            })
+                        );
+                    }
+                break;
+                case "mockToken2":
+                    if (_.isObject(requestContent, "input") &&
+                        _.isString(requestContent.input.userId) &&
+                        _.isObject(requestContent.input, "user")) {
+                        request.respond(
+                            200,
+                            headers,
+                            JSON.stringify({
+                                "type" : "selfRegistration",
+                                "stage" : "end",
+                                "status" : {
+                                    "success": true
+                                }
+                            })
+                        );
+                    } else {
+                        request.respond(
+                            400,
+                            headers,
+                            JSON.stringify({
+                                "code": 400,
+                                "reason": "Bad Request",
+                                "message": "Missing required input"
+                            })
+                        );
+                    }
+                break;
+                default:
+                    request.respond(
+                        400,
+                        headers,
+                        JSON.stringify({
+                            "code": 400,
+                            "reason": "Bad Request",
+                            "message": "Token provided not recognized"
+                        })
+                    );
                 }
-            }
-        );
+        });
 
         server.respondWith(
             "GET",

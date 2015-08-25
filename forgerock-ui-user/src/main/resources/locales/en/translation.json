@@ -126,7 +126,7 @@
             "actions" : "Actions",
             "complete" : "Complete",
             "reset" : "Reset",
-            "copyright" : "Copyright (c) 2010-14 ForgeRock, all rights reserved.",
+            "copyright" : "Copyright (c) 2010-15 ForgeRock, all rights reserved.",
             "sessionExpired" : "Session Expired",
             "enableCookies" : "Cookies must be enabled to login",
             "reloadGrid" : "Reload Grid",
@@ -180,7 +180,7 @@
                 "tryAgain": "Try Registering Again",
                 "return": "Return to Login Page"
             },
-            "emailVerification" : {
+            "userIdValidation" : {
                 "description" : "Enter the email address associated with your account to reset your password. We will send you an email that will allow you to reset your password.",
                 "send": "Send"
             },
@@ -192,7 +192,7 @@
             "username" : "Username",
             "emailAddress" : "Email address",
             "givenName" : "First Name",
-            "familyName" : "Last Name",
+            "sn" : "Last Name",
             "changePassword" : "Change password",
             "accountStatus" : "Account status",
             "active" : "Active",

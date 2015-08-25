@@ -28,7 +28,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
     "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView"
 ], function(AnonymousProcessView) {
     var SelfRegistrationView = AnonymousProcessView.extend({
-        endpoint: "selfRegistration",
+        endpoint: "registration",
         i18nBase: "common.user.selfRegistration"
     });
 

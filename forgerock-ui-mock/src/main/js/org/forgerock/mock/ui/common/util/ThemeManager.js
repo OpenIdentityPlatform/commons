@@ -82,8 +82,7 @@ define("org/forgerock/mock/ui/common/util/ThemeManager", [
                         "width": "210px"
                     },
                     "footer": {
-                        "mailto": "info@forgerock.com",
-                        "phone": "+47-2108-1746"
+                        "mailto": "info@forgerock.com"
                     }
                 }
             });
