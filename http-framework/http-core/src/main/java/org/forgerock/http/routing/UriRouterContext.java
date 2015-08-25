@@ -80,7 +80,7 @@ public final class UriRouterContext extends AbstractContext {
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    UriRouterContext(final JsonValue savedContext, final ClassLoader classLoader) {
+    public UriRouterContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
         this.uriTemplateVariables =
                 Collections.unmodifiableMap(data.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap(String.class));

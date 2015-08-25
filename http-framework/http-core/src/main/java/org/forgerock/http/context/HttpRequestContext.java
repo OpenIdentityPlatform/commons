@@ -64,7 +64,7 @@ public final class HttpRequestContext extends AbstractContext {
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    HttpRequestContext(final JsonValue savedContext, final ClassLoader classLoader) {
+    public HttpRequestContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
     }
 

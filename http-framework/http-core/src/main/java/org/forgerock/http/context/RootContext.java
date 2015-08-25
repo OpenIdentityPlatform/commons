@@ -70,7 +70,7 @@ public final class RootContext extends AbstractContext {
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    RootContext(final JsonValue savedContext, final ClassLoader classLoader) {
+    public RootContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
     }
 
