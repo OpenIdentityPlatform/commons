@@ -127,7 +127,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         emailConfig.setEmailSubject("Register new account");
         emailConfig.setEmailMessage("This is email address verification message.\nLink: %link%");
         emailConfig.setEmailVerificationLinkToken("%link%");
-        emailConfig.setEmailVerificationLink("http://localhost:9999/example/#selfRegistration/");
+        emailConfig.setEmailVerificationLink("http://localhost:9999/example/#register/");
 
         UserRegistrationConfig registrationConfig = new UserRegistrationConfig();
         registrationConfig.setIdentityServiceUrl("/users");
