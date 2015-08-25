@@ -43,11 +43,8 @@ public class InternalContext extends AbstractContext implements ClientContext {
      *         should be parsed.
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
-     *
-     * @throws ResourceException
-     *         If the JSON representation could not be parsed.
      */
-    public InternalContext(JsonValue savedContext, ClassLoader classLoader) throws ResourceException {
+    public InternalContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
     }
 
