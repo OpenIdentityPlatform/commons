@@ -165,7 +165,7 @@ public final class SecurityContext extends AbstractContext {
      * @param classLoader
      *            The ClassLoader which can properly resolve the persisted class-name.
      */
-    SecurityContext(final JsonValue savedContext, final ClassLoader classLoader) {
+    public SecurityContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
     }
 
