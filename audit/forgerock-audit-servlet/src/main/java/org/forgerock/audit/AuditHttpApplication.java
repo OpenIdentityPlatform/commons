@@ -52,8 +52,7 @@ public final class AuditHttpApplication implements HttpApplication {
         registerCsvHandler(auditService);
 
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/audit"),
-                CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(
-                        Resources.newCollection(auditService))));
+                CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(auditService)));
         return router;
     }
 
