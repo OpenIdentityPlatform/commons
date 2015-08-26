@@ -41,17 +41,25 @@ import org.slf4j.LoggerFactory;
 public final class AuditHttpApplication implements HttpApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(AuditHttpApplication.class);
+    public static final String AUDIT_EVENT_HANDLERS_CONFIG = "/conf/audit-event-handlers.json";
+    public static final String EVENT_HANDLERS = "eventHandlers";
+    public static final String AUDIT_ROOT_PATH = "/audit";
 
     @Override
     public Handler start() throws HttpApplicationException {
         final Router router = new Router();
         final AuditService auditService = createAndConfigureAuditService();
 
-        // TODO: replace hard-coded registration of handlers by dynamic registration to allow to plug-in new
-        // handlers
-        registerCsvHandler(auditService);
+        try (final InputStream eventHandlersConfig = this.getClass().getResourceAsStream(AUDIT_EVENT_HANDLERS_CONFIG)) {
+            JsonValue auditEventHandlers = AuditJsonConfig.getJson(eventHandlersConfig).get(EVENT_HANDLERS);
+            for (final JsonValue handlerConfig : auditEventHandlers) {
+                AuditJsonConfig.registerHandlerToService(handlerConfig, auditService, this.getClass().getClassLoader());
+            }
+        } catch (AuditException | IOException e) {
+            logger.error("An exception happened starting the audit service", e);
+        }
 
-        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/audit"),
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, AUDIT_ROOT_PATH),
                 CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(auditService)));
         return router;
     }
@@ -66,27 +74,15 @@ public final class AuditHttpApplication implements HttpApplication {
 
     }
 
-    /** Register the CSV handler based on JSON configuration. */
-    private static void registerCsvHandler(final AuditService auditService) {
-        try (InputStream handlerConfig = auditService.getClass().getResourceAsStream("/conf/audit-csv-handler.json")) {
-            JsonValue jsonHandlerConfig = AuditJsonConfig.getJson(handlerConfig);
-            AuditJsonConfig.registerHandlerToService(jsonHandlerConfig, auditService);
-        } catch (AuditException | IOException e) {
-            RuntimeException runtimeException = new RuntimeException("Error while enabling the CSV handler", e);
-            logger.error(runtimeException.getMessage(), runtimeException.getCause());
-            throw runtimeException;
-        }
-    }
-
     /** Returns the audit service configured with provided JSON configuration. */
     private static AuditService createAndConfigureAuditService() {
         final AuditService auditService = new AuditService();
         try (InputStream inputStream = auditService.getClass().getResourceAsStream("/conf/audit-service.json")) {
-            AuditServiceConfiguration serviceConfig = AuditJsonConfig.parseAuditServiceConfiguration(inputStream);
+            final AuditServiceConfiguration serviceConfig = AuditJsonConfig.parseAuditServiceConfiguration(inputStream);
             auditService.configure(serviceConfig);
             return auditService;
         } catch (AuditException | IOException e) {
-            RuntimeException exception = new RuntimeException("Error while configuring the audit service", e);
+            final RuntimeException exception = new RuntimeException("Error while configuring the audit service", e);
             logger.error(exception.getMessage(), e);
             throw exception;
         }
