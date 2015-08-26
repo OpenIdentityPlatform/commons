@@ -75,7 +75,7 @@ public final class Version implements Comparable<Version> {
     /**
      * Parses the string argument as a version. The string must be one of the
      * following forms:
-     * <p/>
+     * <p>
      * <pre>
      * major
      * major.minor

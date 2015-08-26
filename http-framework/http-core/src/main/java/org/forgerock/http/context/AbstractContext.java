@@ -38,9 +38,9 @@ import org.forgerock.util.Reject;
  * <li>a <b>public</b> constructor having the same declaration as
  * {@link #AbstractContext(JsonValue, ClassLoader)}</li>
  * <li>a <b>public</b> method having the same declaration as
- * {@link org.forgerock.http.Context#toJsonValue}</li> See the
- * documentation for more details.
+ * {@link org.forgerock.http.Context#toJsonValue}</li>
  * </ul>
+ * See the documentation for more details.
  * <p>
  * Here is an example of the JSON representation of the core attributes of all
  * contexts:
