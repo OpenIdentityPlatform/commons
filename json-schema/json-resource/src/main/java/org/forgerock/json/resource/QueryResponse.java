@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.util.promise.Promise;
+
 /**
  * The final result of a query request returned after all resources matching the
  * request have been returned. In addition to indicating that no more resources
@@ -113,4 +115,11 @@ public interface QueryResponse extends Response {
      *         number of remaining results is unknown.
      */
     int getRemainingPagedResults();
+
+    /**
+     * Return this response as a result Promise.
+     *
+     * @return A Promise whose result is this QueryResponse object.
+     */
+    Promise<QueryResponse, ResourceException> asPromise();
 }

@@ -16,8 +16,10 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.util.promise.Promise;
 import org.testng.annotations.Test;
 
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
@@ -74,5 +76,19 @@ public class ResourceExceptionTest {
 
         //Then
         assertFalse(isServerSideError);
+    }
+
+    @Test
+    public void asPromiseCanSpecifyTypeOfPromise() {
+        //Given
+        ResourceException e = new InternalServerErrorException();
+
+        //When
+        Promise<ResourceResponse, ResourceException> responsePromise = e.asPromise();
+        Promise<Integer, ResourceException> integerPromise = e.asPromise();
+
+        //Then
+        assertThat(responsePromise).failedWithException().isInstanceOf(InternalServerErrorException.class);
+        assertThat(integerPromise).failedWithException().isInstanceOf(InternalServerErrorException.class);
     }
 }

@@ -23,6 +23,8 @@ import java.util.Map;
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 
 /**
  * An exception that is thrown during the processing of a JSON resource request.
@@ -709,5 +711,15 @@ public class ResourceException extends IOException implements Response {
     @Override
     public Version getResourceApiVersion() {
         return null;
+    }
+
+    /**
+     * Return this ResourceException as a Promise.
+     *
+     * @param <V> the result value type of the promise
+     * @return an Exception promise of type ResourceException
+     */
+    public <V> Promise<V, ResourceException> asPromise() {
+        return Promises.newExceptionPromise(this);
     }
 }
