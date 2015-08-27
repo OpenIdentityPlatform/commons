@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * A resource, comprising of a resource ID, a revision (etag), and its JSON
@@ -122,6 +123,13 @@ public interface ResourceResponse extends Response {
      * @param field a {@link JsonPointer} representing the field to add.
      */
     public void addField(JsonPointer... fields);
+
+    /**
+     * Return this response as a result Promise.
+     *
+     * @return A Promise whose result is this ResourceResponse object.
+     */
+    Promise<ResourceResponse, ResourceException> asPromise();
 
     /**
      * Returns {@code true} if the provided object is a resource having the same
