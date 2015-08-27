@@ -16,7 +16,7 @@
 package org.forgerock.audit.events.handlers.csv;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.util.Reject;
 
@@ -40,11 +40,14 @@ import org.forgerock.util.Reject;
  */
 public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
-    @JsonProperty(required = true)
+    @JsonProperty(required=true)
+    @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.logDirectory")
     private String logDirectory;
 
+    @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.csvConfiguration")
     private CsvConfiguration csvConfiguration = new CsvConfiguration();
 
+    @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.csvSecurity")
     private CsvSecurity csvSecurity = new CsvSecurity();
 
     /**
@@ -102,63 +105,129 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
         this.csvSecurity = Reject.checkNotNull(csvSecurity);
     }
 
+    /**
+     * Contains the csv writer configuration parameters
+     */
     public static class CsvConfiguration {
-
+        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvConfiguration.quoteChar")
         private char quoteChar = '"';
+
+        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvConfiguration.delimiterChar")
         private char delimiterChar = ',';
+
+        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvConfiguration.endOfLineSymbols")
         private String endOfLineSymbols = System.getProperty("line.separator");
 
+        /**
+         * Gets the character to use to quote the csv entries.
+         * @return The quote character.
+         */
         public char getQuoteChar() {
             return quoteChar;
         }
 
+        /**
+         * Sets the character to use to quote the csv entries.
+         * @param quoteChar The quote character.
+         */
         public void setQuoteChar(char quoteChar) {
             this.quoteChar = quoteChar;
         }
 
+        /**
+         * Gets the character to use to delimit the csv entries.
+         * @return The character used to delimit the entries.
+         */
         public int getDelimiterChar() {
             return delimiterChar;
         }
 
+        /**
+         * Sets the character to use to delimit the csv entries.
+         * @param delimiterChar The character used to delimit the entries.
+         */
         public void setDelimiterChar(char delimiterChar) {
             this.delimiterChar = delimiterChar;
         }
 
+        /**
+         * Gets the end of line symbol.
+         * @return The end of line symbol.
+         */
         public String getEndOfLineSymbols() {
             return endOfLineSymbols;
         }
 
+        /**
+         * Gets the end of line symbol.
+         * @param endOfLineSymbols The end of line symbol.
+         */
         public void setEndOfLineSymbols(String endOfLineSymbols) {
             this.endOfLineSymbols = endOfLineSymbols;
         }
     }
 
+    /**
+     * Contains the configuration parameters to configure tamper evident logging.
+     */
     public static class CsvSecurity {
 
+        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity.enabled")
         private boolean enabled = false;
+
+        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity.filename")
         private String filename;
+
+        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity.password")
         private String password;
 
+        /**
+         * Enables tamper evident logging. By default tamper evident logging is disabled.
+         * @param enabled True - To enable tamper evident logging.
+         *                False - To disable tamper evident logging.
+         */
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
         }
 
+        /**
+         *
+         * Gets tamper evident logging enabled status. By default tamper evident logging is disabled.
+         * @return True - If tamper evident logging enabled.
+         *         False - If tamper evident logging disabled.
+         */
         public boolean isEnabled() {
             return enabled;
         }
 
+        /**
+         * Sets the location of the keystore to be used.
+         * @param filename The location of the keystore.
+         */
         public void setFilename(String filename) {
             this.filename = filename;
         }
 
+        /**
+         * Gets the location of the keystore to be used.
+         * @return The location of the keystore.
+         */
         public String getFilename() {
             return filename;
         }
 
+        /**
+         * Sets the password of the keystore.
+         * @param password The password of the keystore.
+         */
         public void setPassword(String password) {
             this.password = password;
         }
 
+        /**
+         * Gets the password of the keystore.
+         * @return The password of the keystore.
+         */
         public String getPassword() {
             return password;
         }
