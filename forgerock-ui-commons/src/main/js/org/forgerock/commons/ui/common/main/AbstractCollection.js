@@ -20,8 +20,9 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
     "underscore",
     "backbone",
     "backbone.paginator",
+    "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function(_, Backbone, BackbonePaginator, ServiceInvoker) {
+], function(_, Backbone, BackbonePaginator, AbstractModel, ServiceInvoker) {
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractCollection
      *
@@ -29,7 +30,7 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
      *
      */
     return BackbonePaginator.extend({
-
+        model: AbstractModel,
         /**
             The only two type values supported here are offset and cookie. If anything else is
             passed in, it will default to offset.
