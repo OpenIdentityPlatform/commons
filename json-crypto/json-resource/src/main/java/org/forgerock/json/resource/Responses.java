@@ -24,6 +24,8 @@ import java.util.List;
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
 
 /**
  * A utility class containing various factory methods for creating and
@@ -173,6 +175,11 @@ public final class Responses {
         public int hashCode() {
             return getJsonContent().getObject().hashCode();
         }
+
+        @Override
+        public Promise<ActionResponse, ResourceException> asPromise() {
+            return Promises.<ActionResponse, ResourceException>newResultPromise(this);
+        }
     }
 
     private static final class ResourceResponseImpl extends AbstractResponseImpl implements ResourceResponse {
@@ -216,9 +223,13 @@ public final class Responses {
 
         @Override
         public void addField(JsonPointer... fields) {
-        	for (final JsonPointer field : fields) {
+            for (final JsonPointer field : fields) {
                 this.fields.add(field);
             }
+        }
+
+        public Promise<ResourceResponse, ResourceException> asPromise() {
+            return Promises.<ResourceResponse, ResourceException>newResultPromise(this);
         }
 
         @Override
@@ -338,6 +349,11 @@ public final class Responses {
         @Override
         public int getRemainingPagedResults() {
             return remainingPagedResults;
+        }
+
+        @Override
+        public Promise<QueryResponse, ResourceException> asPromise() {
+            return Promises.<QueryResponse, ResourceException>newResultPromise(this);
         }
 
         @Override
