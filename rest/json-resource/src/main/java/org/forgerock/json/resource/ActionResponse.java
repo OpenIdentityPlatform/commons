@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Response object for JSON responses.
@@ -29,4 +30,11 @@ public interface ActionResponse extends Response {
      * @return The {@code JsonValue} response content.
      */
     JsonValue getJsonContent();
+
+    /**
+     * Return this response as a result Promise.
+     *
+     * @return A Promise whose result is this ActionResponse object.
+     */
+    Promise<ActionResponse, ResourceException> asPromise();
 }
