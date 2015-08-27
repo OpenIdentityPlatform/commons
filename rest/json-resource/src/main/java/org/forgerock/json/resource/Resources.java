@@ -127,7 +127,10 @@ public final class Resources {
     public static ResourceResponse filterResource(final ResourceResponse resource,
             final Collection<JsonPointer> fields) {
         final JsonValue unfiltered = resource.getContent();
-        final JsonValue filtered = filterResource(unfiltered, fields);
+        final Collection<JsonPointer> filterFields = resource.hasFields()
+        		? resource.getFields()
+        	    : fields;
+        final JsonValue filtered = filterResource(unfiltered, filterFields);
         if (filtered == unfiltered) {
             return resource; // Unchanged.
         } else {

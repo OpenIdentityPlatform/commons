@@ -16,10 +16,14 @@
 
 package org.forgerock.json.resource;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 
-import org.forgerock.json.JsonValue;
 import org.forgerock.http.routing.Version;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 
 /**
  * A utility class containing various factory methods for creating and
@@ -176,11 +180,13 @@ public final class Responses {
         private final JsonValue content;
         private final String id;
         private final String revision;
+        private final List<JsonPointer> fields;
 
         private ResourceResponseImpl(String id, String revision, JsonValue content) {
             this.id = id;
             this.revision = revision;
             this.content = content;
+            this.fields = new ArrayList<JsonPointer>();
         }
 
         @Override
@@ -196,6 +202,23 @@ public final class Responses {
         @Override
         public String getRevision() {
             return revision;
+        }
+
+        @Override
+        public List<JsonPointer> getFields() {
+            return Collections.unmodifiableList(fields);
+        }
+        
+        @Override
+        public boolean hasFields() {
+        	return fields.size() > 0;
+        }
+
+        @Override
+        public void addField(JsonPointer... fields) {
+        	for (final JsonPointer field : fields) {
+                this.fields.add(field);
+            }
         }
 
         @Override
