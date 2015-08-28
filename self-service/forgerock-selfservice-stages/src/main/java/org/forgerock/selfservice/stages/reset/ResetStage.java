@@ -20,16 +20,14 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
 import org.forgerock.http.Context;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
@@ -81,29 +79,19 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
             throw new BadRequestException("password is missing from input");
         }
 
-        JsonValue user = readUser(context.getHttpContext(), userId, config);
-        user.put(new JsonPointer(config.getIdentityPasswordField()), password);
-        updateUser(context.getHttpContext(), userId, user, config);
+        patchUser(context.getHttpContext(), userId, password, config);
 
         return StageResponse
                 .newBuilder()
                 .build();
     }
 
-    private JsonValue readUser(Context httpContext, String userId,
-                               ResetStageConfig config) throws ResourceException {
+    private void patchUser(Context httpContext, String userId, String password,
+                           ResetStageConfig config) throws ResourceException {
         try (Connection connection = connectionFactory.getConnection()) {
-            ReadRequest request = Requests.newReadRequest(config.getIdentityServiceUrl(), userId);
-            ResourceResponse response = connection.read(httpContext, request);
-            return response.getContent();
-        }
-    }
-
-    private void updateUser(Context httpContext, String userId, JsonValue user,
-                            ResetStageConfig config) throws ResourceException {
-        try (Connection connection = connectionFactory.getConnection()) {
-            UpdateRequest request = Requests.newUpdateRequest(config.getIdentityServiceUrl(), userId, user);
-            connection.update(httpContext, request);
+            PatchOperation operation = PatchOperation.replace(config.getIdentityPasswordField(), password);
+            PatchRequest request = Requests.newPatchRequest(config.getIdentityServiceUrl(), userId, operation);
+            connection.patch(httpContext, request);
         }
     }
 
