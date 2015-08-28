@@ -438,19 +438,9 @@ public final class PatchOperation {
      *            may be a {@link JsonValue} or a JSON object, such as a
      *            {@code String}, {@code Map}, etc.
      * @return The new patch operation.
-     * @throws NullPointerException
-     *             If the operation is an add or increment and the value is
-     *             {@code null}.
-     * @throws IllegalArgumentException
-     *             If the operation is an increment an the value was not a
-     *             number.
      */
-    public static PatchOperation operation(final String operation, final JsonPointer field,
-                                           final Object value) {
-        return new PatchOperation(json(object(
-                field("operation", operation),
-                field("field", field),
-                field("value", json(value)))));
+    public static PatchOperation operation(final String operation, final JsonPointer field, final Object value) {
+        return new PatchOperation(operation, field, null, json(value), null);
     }
 
     /**
@@ -463,17 +453,11 @@ public final class PatchOperation {
      * @param field
      *            The field targeted by the patch operation.
      * @return The new patch operation.
-     * @throws NullPointerException
-     *             If the operation is a move or copy and from is {@code null}.
      * @throws IllegalArgumentException
      *             If the operation is not move or copy.
      */
-    private static PatchOperation operation(final String operation, final JsonPointer from,
-                                           final JsonPointer field) {
-        return new PatchOperation(json(object(
-                field("operation", operation),
-                field("field", field),
-                field("from", from))));
+    private static PatchOperation operation(final String operation, final JsonPointer from, final JsonPointer field) {
+        return new PatchOperation(operation, field, from, null, null);
     }
 
     /**
@@ -490,27 +474,8 @@ public final class PatchOperation {
      *            {@code String}, {@code Map}, etc.
      * @return The new patch operation.
      */
-    public static PatchOperation operation(final String operation, final String field,
-                                           final Object value) {
+    public static PatchOperation operation(final String operation, final String field, final Object value) {
         return operation(operation, new JsonPointer(field), value);
-    }
-
-    /**
-     * Creates a new patch operation from json.
-     *
-     * @param json
-     *            The json object containing the operation type, field and other parameters
-     *            as required by the supplied operation type.
-     * @return The new patch operation.
-     */
-    private static PatchOperation operation(final JsonValue json) {
-        final String       type = json.get(FIELD_OPERATION).required().asString();
-        final JsonPointer field = json.get(FIELD_FIELD).required().asPointer();
-        if (type.equals(OPERATION_MOVE) || type.equals(OPERATION_COPY)) {
-            return operation(type, json.get(FIELD_FROM).required().asPointer(), field);
-        } else {
-            return operation(type, field, json.get(FIELD_VALUE).required());
-        }
     }
 
     /**
@@ -523,7 +488,12 @@ public final class PatchOperation {
      * @return A deep copy of the provided patch operation.
      */
     public static PatchOperation copyOf(final PatchOperation operation) {
-        return operation(operation.getOperation(), operation.getField(), operation.getValue().copy());
+        return new PatchOperation(
+            operation.getOperation(),
+            operation.getField(),
+            operation.getFrom(),
+            operation.getValue().copy(),
+            operation.toJsonValue().copy());
     }
 
     /**
@@ -542,7 +512,8 @@ public final class PatchOperation {
                                 + "content is not a valid JSON patch");
         }
         try {
-            return operation(json);
+            return new PatchOperation(json.get(FIELD_OPERATION).asString(), json.get(FIELD_FIELD).asPointer(),
+                    json.get(FIELD_FROM).asPointer(), json.get(FIELD_VALUE), json);
         } catch (final Exception e) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "
@@ -576,26 +547,41 @@ public final class PatchOperation {
     private final JsonPointer from;
     private final String operation;
     private final JsonValue value;
-    private final JsonValue rawOperation;
+    private JsonValue json;
 
-    private PatchOperation(final JsonValue operation) {
-        this.operation = checkNotNull(operation.get(FIELD_OPERATION).required().asString(),
-                "Cannot instantiate PatchOperation with null operation value");
-        this.field = (JsonPointer) checkNotNull(operation.get(FIELD_FIELD).required().getObject(),
-                "Cannot instantiate PatchOperation with null field value");
-        if (this.operation.equals(OPERATION_MOVE) || this.operation.equals(OPERATION_COPY)) {
-            this.from = (JsonPointer) checkNotNull(operation.get(FIELD_FROM).required().getObject(),
-                    "Cannot instantiate PatchOperation with null from value");
-            this.value = null;
-        } else if (!this.operation.equals(OPERATION_REMOVE)) {
-            this.value = checkNotNull(operation.get(FIELD_VALUE).required(),
-                    "Cannot instantiate PatchOperation with null value value");
-            this.from = null;
-        } else {
-            this.value = null;
-            this.from = null;
+    private PatchOperation(final String operation, final JsonPointer field, final JsonPointer from,
+                           final JsonValue value, final JsonValue json) {
+        checkNotNull(operation, "Cannot instantiate PatchOperation with null operation value");
+        checkNotNull(field, "Cannot instantiate PatchOperation with null field value");
+
+        this.operation = operation;
+        this.field = field;
+        this.value = value;
+        this.from = from;
+        this.json = json;
+
+        if (isAdd() || isIncrement() || isReplace() || isTransform()) {
+            if (value == null || value.isNull()) {
+                throw new NullPointerException("No value field provided for '" + operation + "' operation");
+            }
+            if (from != null) {
+                throw new IllegalArgumentException("'" + operation + "' does not accept from field");
+            }
+            if (isIncrement() && !value.isNumber()) {
+                throw new IllegalArgumentException("Non-numeric value provided for increment operation");
+            }
+        } else if (isRemove()) {
+            if (from != null) {
+                throw new IllegalArgumentException("'" + operation + "' does not accept from field");
+            }
+        } else if (isCopy() || isMove()) {
+            if (from == null || from.isEmpty()) {
+                throw new NullPointerException("No from field provided for '" + operation + "' operation");
+            }
+            if (value != null) {
+                throw new IllegalArgumentException("'" + operation + "' does not accept value field");
+            }
         }
-        this.rawOperation = operation.copy();
     }
 
     /**
@@ -633,16 +619,6 @@ public final class PatchOperation {
      */
     public JsonValue getValue() {
         return json(value);
-    }
-
-    /**
-     * Returns the original, raw operation used to create this PatchOperation.
-     * This may be useful to some apply implementations such as transform.
-     *
-     * @return The original raw patch operation.
-     */
-    public JsonValue getRawOperation() {
-        return rawOperation;
     }
 
     /**
@@ -714,13 +690,16 @@ public final class PatchOperation {
      * @return A JSON value representation of this patch operation.
      */
     public JsonValue toJsonValue() {
-        final JsonValue json = new JsonValue(new LinkedHashMap<>(3));
-        json.put(FIELD_OPERATION, operation);
-        json.put(FIELD_FIELD, field.toString());
-        if (isMove() || isCopy()) {
-            json.put(FIELD_FROM, from.toString());
-        } else if (value != null) {
-            json.put(FIELD_VALUE, value.getObject());
+        if (json == null) {
+            json = new JsonValue(new LinkedHashMap<>());
+            json.put(FIELD_OPERATION, operation);
+            json.put(FIELD_FIELD, field.toString());
+            if (from != null) {
+                json.put(FIELD_FROM, from.toString());
+            }
+            if (value != null) {
+                json.put(FIELD_VALUE, value.getObject());
+            }
         }
         return json;
     }
@@ -728,23 +707,6 @@ public final class PatchOperation {
     @Override
     public String toString() {
         return toJsonValue().toString();
-    }
-
-    private void checkOperationValue() {
-        if (isAdd() && value == null) {
-            throw new NullPointerException("No value provided for add patch operation");
-        } else if (isIncrement()) {
-            if (value == null || value.isNull()) {
-                throw new NullPointerException("No value provided for increment patch operation");
-            } else if (!value.isNumber()) {
-                throw new IllegalArgumentException(
-                        "Non-numeric value provided for increment patch operation");
-            }
-        } else if (isMove() || isCopy()) {
-            if (from == null || from.isEmpty()) {
-                throw new NullPointerException("No from field provided for operation");
-            }
-        }
     }
 
     private boolean is(final String type) {
