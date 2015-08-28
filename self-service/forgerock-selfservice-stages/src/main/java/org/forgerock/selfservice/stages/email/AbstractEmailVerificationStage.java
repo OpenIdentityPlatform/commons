@@ -29,6 +29,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
@@ -82,6 +83,11 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
 
         StageResponse.Builder builder = StageResponse.newBuilder();
         final String mail = getEmailAddress(context, config, builder);
+
+        if (isEmpty(mail)) {
+            throw new InternalServerErrorException("mail should not be empty");
+        }
+
         final String code = UUID.randomUUID().toString();
 
         JsonValue requirements = RequirementsBuilder
@@ -118,7 +124,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
      * @param builder
      *         the stage response builder should it be required
      *
-     * @return the email address
+     * @return the none null email address
      *
      * @throws ResourceException
      *         if some expected state or input is invalid

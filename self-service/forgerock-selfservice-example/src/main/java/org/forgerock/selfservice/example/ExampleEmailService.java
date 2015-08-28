@@ -37,6 +37,8 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.mail.Authenticator;
 import javax.mail.Message;
@@ -54,6 +56,8 @@ import java.util.Properties;
  * @since 0.1.0
  */
 final class ExampleEmailService implements SingletonResourceProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExampleEmailService.class);
 
     private final String host;
     private final String port;
@@ -131,6 +135,8 @@ final class ExampleEmailService implements SingletonResourceProvider {
             message.setText(messageBody);
 
             Transport.send(message);
+            LOGGER.debug("Email sent to " + to);
+
         } catch (MessagingException mE) {
             throw new InternalServerErrorException(mE);
         }

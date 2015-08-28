@@ -26,6 +26,7 @@ import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -38,6 +39,8 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -50,6 +53,8 @@ import java.util.Map;
  * @since 0.1.0
  */
 public final class AnonymousProcessService extends AbstractRequestHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnonymousProcessService.class);
 
     private static final String SUBMIT_ACTION = "submitRequirements";
 
@@ -98,13 +103,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         try {
             JsonValue clientResponse = initiateProcess(context);
             return Promises.newResultPromise(Responses.newResourceResponse("1", "1.0", clientResponse));
-        } catch (ResourceException rE) {
-            return Promises.newExceptionPromise(rE);
-        } catch (RuntimeException rE) {
-            ResourceException resourceException = ResourceException
-                    .getException(ResourceException.INTERNAL_ERROR, "Internal error intercepted", rE)
-                    .includeCauseInJsonValue();
-            return Promises.newExceptionPromise(resourceException);
+        } catch (ResourceException | RuntimeException e) {
+            return Promises.newExceptionPromise(logAndAdaptException(e));
         }
     }
 
@@ -114,19 +114,30 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
             try {
                 JsonValue clientResponse = progressProcess(context, request.getContent());
                 return Promises.newResultPromise(Responses.newActionResponse(clientResponse));
-            } catch (ResourceException rE) {
-                return Promises.newExceptionPromise(rE);
-            } catch (RuntimeException rE) {
-                ResourceException resourceException = ResourceException
-                        .getException(ResourceException.INTERNAL_ERROR, "Internal error intercepted", rE)
-                        .includeCauseInJsonValue();
-                return Promises.newExceptionPromise(resourceException);
+            } catch (ResourceException | RuntimeException e) {
+                return Promises.newExceptionPromise(logAndAdaptException(e));
             }
         }
 
         return Promises.newExceptionPromise(
                 ResourceException.getException(ResourceException.NOT_SUPPORTED,
                         "Unknown action " + request.getAction()));
+    }
+
+    private ResourceException logAndAdaptException(Exception exception) {
+        try {
+            throw exception;
+        } catch (InternalServerErrorException iseE) {
+            LOGGER.error("Internal error intercepted", iseE);
+            return iseE;
+        } catch (ResourceException rE) {
+            LOGGER.warn("Resource exception intercepted", rE);
+            return rE;
+        } catch (Exception ex) {
+            LOGGER.error("Exception intercepted", ex);
+            return ResourceException
+                    .newInternalServerErrorException("Exception intercepted", ex);
+        }
     }
 
     /*
@@ -139,6 +150,10 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
         ProgressStageWrapper<?> stage = retrieveStage(context);
         JsonValue requirements = stage.gatherInitialRequirements(context);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Initial requirements retrieved for stage " + stage.getName());
+        }
 
         return renderRequirements(
                 context,
@@ -179,7 +194,13 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 .setInput(input)
                 .build();
 
-        return enactContext(context, retrieveStage(context));
+        ProgressStageWrapper<?> stage = retrieveStage(context);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Advancing stage " + stage.getName());
+        }
+
+        return enactContext(context, stage);
     }
 
     private JsonValue enactContext(ProcessContext context, ProgressStageWrapper<?> stage) throws ResourceException {
@@ -211,6 +232,10 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
         ProgressStageWrapper<?> nextStage = retrieveStage(nextContext);
         JsonValue requirements = nextStage.gatherInitialRequirements(nextContext);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Initial requirements retrieved for stage " + nextStage.getName());
+        }
 
         if (requirements.size() > 0) {
             // Stage has some initial requirements, render response.
