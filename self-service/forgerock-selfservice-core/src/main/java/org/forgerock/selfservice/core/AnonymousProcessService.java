@@ -57,6 +57,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     private static final String INPUT_FIELD = "input";
     private static final String TYPE_FIELD = "type";
     private static final String STAGE_FIELD = "stage";
+    private static final String TAG_FIELD = "tag";
     private static final String STATUS_FIELD = "status";
     private static final String SUCCESS_FIELD = "success";
     private static final String REQUIREMENTS_FIELD = "requirements";
@@ -249,6 +250,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 object(
                         field(TYPE_FIELD, stage.getName()),
                         field(STAGE_FIELD, context.getStageIndex()),
+                        field(TAG_FIELD, response.getStageTag()),
                         field(REQUIREMENTS_FIELD, response.getRequirements().asMap())));
     }
 

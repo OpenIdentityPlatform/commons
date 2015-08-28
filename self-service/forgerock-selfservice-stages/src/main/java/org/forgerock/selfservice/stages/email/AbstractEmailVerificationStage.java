@@ -50,7 +50,7 @@ import java.util.UUID;
  */
 abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificationConfig> implements ProgressStage<C> {
 
-    private static final String VALIDATE_CODE_TAG = "validateCodeTag";
+    private static final String VALIDATE_CODE_TAG = "validateCode";
 
     protected final ConnectionFactory connectionFactory;
 

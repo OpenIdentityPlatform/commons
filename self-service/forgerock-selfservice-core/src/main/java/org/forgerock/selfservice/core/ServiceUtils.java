@@ -31,7 +31,7 @@ public final class ServiceUtils {
     /**
      * Represents an empty stage tag.
      */
-    public static final String INITIAL_TAG = "";
+    public static final String INITIAL_TAG = "initial";
 
     private ServiceUtils() {
         throw new UnsupportedOperationException();
