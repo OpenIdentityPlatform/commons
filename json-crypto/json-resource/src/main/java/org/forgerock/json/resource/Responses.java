@@ -211,7 +211,7 @@ public final class Responses {
         
         @Override
         public boolean hasFields() {
-        	return fields.size() > 0;
+        	return !fields.isEmpty();
         }
 
         @Override
