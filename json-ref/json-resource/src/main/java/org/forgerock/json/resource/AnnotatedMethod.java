@@ -16,9 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -70,7 +67,7 @@ final class AnnotatedMethod {
     <T> Promise<T, ResourceException> invoke(Context context, Request request,
             QueryResourceHandler queryHandler, String id) {
         if (method == null) {
-            return newExceptionPromise(newNotSupportedException(operation + " not supported"));
+            return new NotSupportedException(operation + " not supported").asPromise();
         }
         Object[] args = new Object[numberOfParameters];
         if (idParameter > -1) {
