@@ -19,7 +19,6 @@ package org.forgerock.json.resource.test.assertj;
 import java.util.concurrent.ExecutionException;
 
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.AbstractThrowableAssert;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert;

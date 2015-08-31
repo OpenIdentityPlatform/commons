@@ -19,9 +19,7 @@ package org.forgerock.json.resource.descriptor;
 import static java.util.Collections.unmodifiableSet;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.*;
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
@@ -42,6 +40,7 @@ import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -68,7 +67,7 @@ public final class Api {
                 if (request.getResourcePathObject().isEmpty()) {
                     return newResultPromise(newResourceResponse(null, null, json(apiToJson(api))));
                 } else {
-                    return newExceptionPromise(newNotSupportedException());
+                    return new NotSupportedException().asPromise();
                 }
             }
         };
@@ -86,7 +85,7 @@ public final class Api {
                     }
                     return newResultPromise(newResourceResponse(null, null, json(values)));
                 } else {
-                    return newExceptionPromise(newNotSupportedException());
+                    return new NotSupportedException().asPromise();
                 }
             }
         };
@@ -278,7 +277,7 @@ public final class Api {
                         }
                         return newResultPromise(resolvedRequestHandler);
                     } catch (final ResourceException e) {
-                        return newExceptionPromise(e);
+                        return e.asPromise();
                     }
                 } else if (subMatch != null) {
                     final String childId;
@@ -300,8 +299,7 @@ public final class Api {
                                 }
                             });
                 } else {
-                    ResourceException e = new NotFoundException(String.format("Resource '%s' not found", name));
-                    return newExceptionPromise(e);
+                    return new NotFoundException(String.format("Resource '%s' not found", name)).asPromise();
                 }
             }
         };

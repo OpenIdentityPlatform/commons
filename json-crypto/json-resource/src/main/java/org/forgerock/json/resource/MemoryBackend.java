@@ -16,8 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.ResourceException.newBadRequestException;
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
@@ -528,9 +526,9 @@ public final class MemoryBackend implements CollectionResourceProvider {
     public Promise<QueryResponse, ResourceException> queryCollection(final Context context,
             final QueryRequest request, final QueryResourceHandler handler) {
         if (request.getQueryId() != null) {
-            return newExceptionPromise(newNotSupportedException("Query by ID not supported"));
+            return new NotSupportedException("Query by ID not supported").asPromise();
         } else if (request.getQueryExpression() != null) {
-            return newExceptionPromise(newNotSupportedException("Query by expression not supported"));
+            return new NotSupportedException("Query by expression not supported").asPromise();
         } else {
             // No filtering or query by filter.
             final org.forgerock.util.query.QueryFilter<JsonPointer> filter = request.getQueryFilter();
@@ -548,7 +546,7 @@ public final class MemoryBackend implements CollectionResourceProvider {
                 try {
                     firstResultIndex = Integer.parseInt(pagedResultsCookie);
                 } catch (final NumberFormatException e) {
-                    return newExceptionPromise(newBadRequestException("Invalid paged results cookie"));
+                    return new BadRequestException("Invalid paged results cookie").asPromise();
                 }
             }
             final int lastResultIndex =
