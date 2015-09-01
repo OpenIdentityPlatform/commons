@@ -57,8 +57,7 @@ public final class ResourceExceptionsUtil {
      * @return a NotSupportedException
      */
     public static ResourceException notSupported(final Request request) {
-        return new NotSupportedException("The " + request.getRequestType().name()
-                + " operations are not supported");
+        return new NotSupportedException(request.getRequestType().name() + " operations are not supported");
     }
 
     /**
@@ -67,8 +66,7 @@ public final class ResourceExceptionsUtil {
      * @return a NotSupportedException
      */
     public static ResourceException notSupportedOnCollection(final Request request) {
-        return new NotSupportedException("The " + request.getRequestType().name()
-                + " operations are not supported");
+        return new NotSupportedException(request.getRequestType().name() + " operations are not supported");
     }
 
     /**
@@ -77,7 +75,6 @@ public final class ResourceExceptionsUtil {
      * @return a NotSupportedException
      */
     public static ResourceException notSupportedOnInstance(final Request request) {
-        return new NotSupportedException("The " + request.getRequestType().name()
-                + " operations are not supported");
+        return new NotSupportedException(request.getRequestType().name() + " operations are not supported");
     }
 }

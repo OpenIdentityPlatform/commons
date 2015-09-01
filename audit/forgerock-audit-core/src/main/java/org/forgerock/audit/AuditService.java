@@ -15,7 +15,9 @@
  */
 package org.forgerock.audit;
 
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
+import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +33,6 @@ import java.util.UUID;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -49,10 +50,8 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,11 +235,12 @@ public class AuditService implements RequestHandler {
                         ? request.getResourcePathObject().tail(1).toString() : null;
                 return allAuditEventHandlers.get(queryHandlerName).readInstance(context, id, request);
             }
-            return newExceptionPromise(ResourceExceptionsUtil.adapt(new AuditException(String.format(
+            String error = String.format(
                     "The handler defined for queries, '%s', has not been registered to the audit service.",
-                    queryHandlerName))));
+                    queryHandlerName);
+            return adapt(new AuditException(error)).asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(ResourceExceptionsUtil.adapt(e));
+            return adapt(e).asPromise();
         }
     }
 
@@ -270,7 +270,7 @@ public class AuditService implements RequestHandler {
 
             // Don't audit the audit log
             if (context.containsContext(AuditContext.class)) {
-                return newResultPromise(Responses.newResourceResponse(null, null, request.getContent().copy()));
+                return newResourceResponse(null, null, request.getContent().copy()).asPromise();
             }
 
             // Generate an ID for the object
@@ -296,8 +296,8 @@ public class AuditService implements RequestHandler {
                         auditEventType,
                         auditEventHandlersForEvent);
 
-            ResourceResponse result = Responses.newResourceResponse(localId, null, new JsonValue(request.getContent()));
-            Promise<ResourceResponse, ResourceException> promise = newResultPromise(result);
+            ResourceResponse result = newResourceResponse(localId, null, new JsonValue(request.getContent()));
+            Promise<ResourceResponse, ResourceException> promise = result.asPromise();
             // if the event is known but not registered with a handler, it's ok to ignore it
             if (auditEventHandlersForEvent.isEmpty()) {
                 logger.debug("No handler found for the event of type {}", auditEventType);
@@ -312,7 +312,7 @@ public class AuditService implements RequestHandler {
             return promise;
         } catch (Exception e) {
             logger.warn(e.getMessage());
-            return newExceptionPromise(ResourceExceptionsUtil.adapt(e));
+            return adapt(e).asPromise();
         }
     }
 
@@ -323,7 +323,7 @@ public class AuditService implements RequestHandler {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context, final UpdateRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -335,7 +335,7 @@ public class AuditService implements RequestHandler {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(final Context context, DeleteRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -345,7 +345,7 @@ public class AuditService implements RequestHandler {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -369,11 +369,12 @@ public class AuditService implements RequestHandler {
             if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
                 return getRegisteredHandler(queryHandlerName).queryCollection(context, request, handler);
             }
-            return newExceptionPromise(ResourceExceptionsUtil.adapt(new AuditException(String.format(
+            String error = String.format(
                     "The handler defined for queries, '%s', has not been registered to the audit service.",
-                    queryHandlerName))));
+                    queryHandlerName);
+            return adapt(new AuditException(error)).asPromise();
         } catch (Exception e) {
-            return newExceptionPromise(ResourceExceptionsUtil.adapt(e));
+            return adapt(e).asPromise();
         }
     }
 
@@ -386,7 +387,7 @@ public class AuditService implements RequestHandler {
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
         final String error = String.format("Unable to handle action: %s", request.getAction());
         logger.error(error);
-        return newExceptionPromise((ResourceException) new BadRequestException(error));
+        return new BadRequestException(error).asPromise();
     }
 
     private Collection<AuditEventHandler<?>> getAuditEventHandlersForEvent(final String auditEvent) {

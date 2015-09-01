@@ -19,7 +19,9 @@ package org.forgerock.audit;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.json.resource.Requests.newQueryRequest;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.mockito.Mockito.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
@@ -44,9 +46,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.Context;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.forgerock.util.promise.ResultHandler;
 
 import org.mockito.ArgumentCaptor;
@@ -277,7 +277,7 @@ public class AuditServiceTest {
     public void testQueryOnAuditLogEntry() throws Exception {
         final AuditService auditService = getAuditService(QUERY_HANDLER_NAME);
         final AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
-        final Promise<QueryResponse, ResourceException> emptyPromise = newResultPromise(Responses.newQueryResponse());
+        final Promise<QueryResponse, ResourceException> emptyPromise = newQueryResponse().asPromise();
         auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
         when(auditEventHandler.queryCollection(
                 any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
@@ -286,7 +286,7 @@ public class AuditServiceTest {
         //when
         Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(
                 new RootContext(),
-                Requests.newQueryRequest("access"),
+                newQueryRequest("access"),
                 mock(QueryResourceHandler.class));
 
         //then
@@ -303,7 +303,7 @@ public class AuditServiceTest {
         final JsonValue content = json(object(field("_id", "_id"),
                 field("timestamp", "timestamp")));
 
-        final CreateRequest createRequest = Requests.newCreateRequest("access", content);
+        final CreateRequest createRequest = newCreateRequest("access", content);
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
@@ -323,7 +323,7 @@ public class AuditServiceTest {
         final JsonValue content = json(object(field("_id", "_id"),
                                               field("transactionId", "transactionId")));
 
-        final CreateRequest createRequest = Requests.newCreateRequest("access", content);
+        final CreateRequest createRequest = newCreateRequest("access", content);
         final ResultHandler<ResourceResponse> resultHandler = mockResultHandler(ResourceResponse.class);
 
         final ArgumentCaptor<ResourceException> resourceExceptionCaptor =
@@ -393,7 +393,7 @@ public class AuditServiceTest {
                         field("timestamp", "timestamp"),
                         field("transactionId", "transactionId"))
         );
-        return Requests.newCreateRequest(event, content);
+        return newCreateRequest(event, content);
     }
 
     private static <T> ResultHandler<T> mockResultHandler(Class<T> type) {
