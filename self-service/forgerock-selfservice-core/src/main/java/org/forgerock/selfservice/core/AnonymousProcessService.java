@@ -61,7 +61,6 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     private static final String TOKEN_FIELD = "token";
     private static final String INPUT_FIELD = "input";
     private static final String TYPE_FIELD = "type";
-    private static final String STAGE_FIELD = "stage";
     private static final String TAG_FIELD = "tag";
     private static final String STATUS_FIELD = "status";
     private static final String SUCCESS_FIELD = "success";
@@ -156,7 +155,6 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         }
 
         return renderRequirements(
-                context,
                 stage,
                 StageResponse
                         .newBuilder()
@@ -265,16 +263,14 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
             response.getCallback().snapshotTokenPreview(updatedContext, snapshotToken);
         }
 
-        return renderRequirements(updatedContext, stage, response)
+        return renderRequirements(stage, response)
                 .add(TOKEN_FIELD, snapshotToken);
     }
 
-    private JsonValue renderRequirements(ProcessContext context, ProgressStageWrapper<?> stage,
-                                         StageResponse response) {
+    private JsonValue renderRequirements(ProgressStageWrapper<?> stage, StageResponse response) {
         return json(
                 object(
                         field(TYPE_FIELD, stage.getName()),
-                        field(STAGE_FIELD, context.getStageIndex()),
                         field(TAG_FIELD, response.getStageTag()),
                         field(REQUIREMENTS_FIELD, response.getRequirements().asMap())));
     }
@@ -283,7 +279,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         return json(
                 object(
                         field(TYPE_FIELD, stage.getName()),
-                        field(STAGE_FIELD, END_VALUE),
+                        field(TAG_FIELD, END_VALUE),
                         field(STATUS_FIELD,
                                 object(
                                         field(SUCCESS_FIELD, true)))));
