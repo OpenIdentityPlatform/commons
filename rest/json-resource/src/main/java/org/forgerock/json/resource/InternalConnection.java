@@ -17,6 +17,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.http.Context;
+import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 
 final class InternalConnection extends AbstractAsynchronousConnection {
@@ -40,13 +41,16 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     @Override
     public Promise<ResourceResponse, ResourceException> createAsync(final Context context,
             final CreateRequest request) {
-        return requestHandler.handleCreate(context, request);
+        return requestHandler.handleCreate(context, request)
+                             .then(filterResponse(request));
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> deleteAsync(final Context context,
             final DeleteRequest request) {
-        return requestHandler.handleDelete(context, request);
+        return requestHandler.handleDelete(context, request)
+                             .then(filterResponse(request));
+
     }
 
     @Override
@@ -62,9 +66,10 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> patchAsync(final Context context,
-            final PatchRequest request) {
-        return requestHandler.handlePatch(context, request);
+    public Promise<ResourceResponse, ResourceException> patchAsync(final Context context, final PatchRequest request) {
+        return requestHandler.handlePatch(context, request)
+                             .then(filterResponse(request));
+
     }
 
     @Override
@@ -80,14 +85,25 @@ final class InternalConnection extends AbstractAsynchronousConnection {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> readAsync(final Context context,
-            final ReadRequest request) {
-        return requestHandler.handleRead(context, request);
+    public Promise<ResourceResponse, ResourceException> readAsync(final Context context, final ReadRequest request) {
+        return requestHandler.handleRead(context, request)
+                             .then(filterResponse(request));
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateAsync(final Context context,
             final UpdateRequest request) {
-        return requestHandler.handleUpdate(context, request);
+        return requestHandler.handleUpdate(context, request)
+                             .then(filterResponse(request));
+    }
+
+    private Function<ResourceResponse, ResourceResponse, ResourceException> filterResponse(final Request request) {
+        return new Function<ResourceResponse, ResourceResponse, ResourceException>() {
+            @Override
+            public ResourceResponse apply(final ResourceResponse response)
+                    throws ResourceException {
+                return Resources.filterResource(response, request.getFields());
+            }
+        };
     }
 }

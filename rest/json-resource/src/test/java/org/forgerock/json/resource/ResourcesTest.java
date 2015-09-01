@@ -16,13 +16,17 @@
 
 package org.forgerock.json.resource;
 
+import static java.util.Collections.singletonMap;
 import static org.forgerock.http.routing.RoutingMode.EQUALS;
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.json.resource.Resources.newInternalConnection;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.json.resource.TestUtils.*;
 import static org.forgerock.json.resource.test.assertj.AssertJResourceResponseAssert.assertThat;
 import static org.forgerock.json.resource.test.assertj.AssertJActionResponseAssert.assertThat;
@@ -31,8 +35,10 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.assertj.core.api.Assertions;
 import org.forgerock.http.Context;
@@ -191,7 +197,6 @@ public final class ResourcesTest {
         // @formatter:on
     }
 
-    @SuppressWarnings("unchecked")
     @Test(dataProvider = "testCollectionResourceProviderData")
     public void testCollectionResourceProvider(String resourcePath, String expectedId)
             throws Exception {
@@ -199,6 +204,10 @@ public final class ResourcesTest {
         RequestHandler handler = Resources.newCollection(collection);
         Connection connection = Resources.newInternalConnection(handler);
         ReadRequest read = Requests.newReadRequest(resourcePath);
+        Promise<ResourceResponse, ResourceException> resultPromise =
+            newResultPromise(newResourceResponse(null, null, null));
+        when(collection.readInstance(any(Context.class), any(String.class), any(ReadRequest.class)))
+            .thenReturn(resultPromise);
         connection.readAsync(new RootContext(), read);
         ArgumentCaptor<ReadRequest> captor = ArgumentCaptor.forClass(ReadRequest.class);
         verify(collection).readInstance(any(Context.class), eq(expectedId), captor.capture());
@@ -485,6 +494,54 @@ public final class ResourcesTest {
         }
     }
 
+    /** Ensure non regression of CREST-321 */
+    @Test
+    public void testCreateRequestResponseIsFiltered() throws Exception {
+        final Connection internalConnection = getConnectionWithAlice();
+        final ResourceResponse response = internalConnection.create(
+            ctx(), Requests.newCreateRequest("users", userBob()).addField("role"));
+        final Map<String, Object> result = response.getContent().asMap();
+        Assertions.assertThat(result).isEqualTo(singletonMap("role", "it"));
+    }
+
+    /** Ensure non regression of CREST-321 */
+    @Test
+    public void testDeleteRequestResponseIsFiltered() throws Exception {
+        final Connection internalConnection = getConnectionWithAlice();
+        final ResourceResponse response = internalConnection.delete(
+            ctx(), Requests.newDeleteRequest("/users/0").addField("role"));
+        final Map<String, Object> result = response.getContent().asMap();
+        Assertions.assertThat(result).isEqualTo(singletonMap("role", "sales"));
+    }
+
+    /** Ensure non regression of CREST-321 */
+    @Test
+    public void testReadRequestResponseIsFiltered() throws Exception {
+        final Connection internalConnection = getConnectionWithAlice();
+        final ResourceResponse response = internalConnection.read(
+            ctx(), Requests.newReadRequest("/users/0").addField("age"));
+        final Map<String, Object> result = response.getContent().asMap();
+        Assertions.assertThat(result).isEqualTo(singletonMap("age", 20));
+    }
+
+    private Connection getConnectionWithAlice() throws Exception {
+        final MemoryBackend users = new MemoryBackend();
+        final Router router = new Router();
+        router.addRoute(uriTemplate("users"), users);
+
+        final Connection connection = newInternalConnection(router);
+        connection.create(ctx(), newCreateRequest("users", userAlice()));
+        return connection;
+    }
+
+    private JsonValue userAlice() {
+        return content(object(field("name", "alice"), field("age", 20), field("role", "sales")));
+    }
+
+    private JsonValue userBob() {
+        return content(object(field("name", "bob"), field("age", 30), field("role", "it")));
+    }
+
     private RequestHandler createHandler(boolean collection, Object provider) {
         RequestHandler handler = collection ? Resources.newCollection(provider) : Resources.newSingleton(provider);
         Router router = new Router();
@@ -598,5 +655,4 @@ public final class ResourcesTest {
             return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
         }
     }
-
 }
