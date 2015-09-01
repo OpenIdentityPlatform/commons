@@ -15,9 +15,10 @@
  */
 package org.forgerock.audit;
 
+import static java.util.Collections.emptyList;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -82,7 +83,7 @@ public class AuditServiceConfiguration {
      */
     public List<String> getAvailableAuditEventHandlers() {
         if (availableAuditEventHandlers == null) {
-            return Collections.EMPTY_LIST;
+            return emptyList();
         } else {
             return availableAuditEventHandlers;
         }
