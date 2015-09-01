@@ -60,8 +60,7 @@ define("config/AppConfiguration", [
                     },
                     loader: [
                         {"routes": "config/routes/CommonRoutesConfig"},
-                        {"routes": "config/routes/UserRoutesConfig"},
-                        {"routes": "config/routes/MockRoutesConfig"}
+                        {"routes": "config/routes/UserRoutesConfig"}
                     ]
                 }
             },

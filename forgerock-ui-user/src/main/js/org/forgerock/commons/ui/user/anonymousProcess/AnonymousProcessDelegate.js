@@ -26,10 +26,11 @@
 
 
 define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessDelegate", [
+    "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/util/Constants"
-], function (_, AbstractDelegate, Constants) {
+], function ($, _, AbstractDelegate, Constants) {
 
     var AnonymousProcessDelegate = function (path, token) {
         this.token = token;
@@ -40,10 +41,16 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessDelegate"
     AnonymousProcessDelegate.prototype.constructor = AnonymousProcessDelegate;
 
     AnonymousProcessDelegate.prototype.start = function () {
-        return this.serviceCall({
-            "type": "GET",
-            "url" : ""
-        });
+        if (!this.token || !this.lastResponse) {
+            return this.serviceCall({
+                "type": "GET",
+                "url" : ""
+            }).done(function (response) {
+                this.lastResponse = response;
+            });
+        } else { // the presence of a token means this can be treated as more of a "resume" than a start
+            return $.Deferred().resolve(this.lastResponse);
+        }
     };
 
     /**
@@ -69,10 +76,12 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessDelegate"
                 if (_.has(response, "token")) {
                     this.token = response.token;
                 }
+                this.lastResponse = response;
                 return response;
             }, this),
             _.bind(function (xhr) {
                 delete this.token;
+                delete this.lastResponse;
                 return {
                     "status": {
                         "success": false,

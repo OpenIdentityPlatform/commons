@@ -180,10 +180,10 @@
                 "tryAgain": "Try Registering Again",
                 "return": "Return to Login Page"
             },
-            "userIdValidation" : {
-                "description" : "Enter the email address associated with your account to reset your password. We will send you an email that will allow you to reset your password.",
-                "send": "Send"
-            },
+            "userIdValidation" : "Enter the username or email address associated with your account. We will send you an email with a link that will allow you to reset your password.",
+            "emailValidation" : "Enter your email address to proceed. We will send you an email with a link that will allow you to continue registering.",
+            "send": "Send",
+            "validateCode" : "An email has been sent to the address you entered. Click the link in that email to proceed.",
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",

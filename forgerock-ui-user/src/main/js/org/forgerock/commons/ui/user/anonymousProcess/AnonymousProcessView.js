@@ -33,8 +33,9 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function($, _, form2js, AbstractView, AnonymousProcessDelegate, Constants, EventManager, Router, UIUtils) {
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function($, _, form2js, AbstractView, AnonymousProcessDelegate, Constants, EventManager, Router, UIUtils, ValidatorsManager) {
     /**
      * @exports org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView
      *
@@ -55,7 +56,8 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
         template: "templates/user/AnonymousProcessWrapper.html",
         events: {
             "click input[type=submit]": "formSubmit",
-            "click #restart": "restartProcess"
+            "click #restart": "restartProcess",
+            "onValidate": "onValidate"
         },
         data: {
             i18n: {}
@@ -76,7 +78,16 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
         render: function(args, callback) {
             var params = Router.convertCurrentUrlToJSON().params;
 
-            this.delegate = new AnonymousProcessDelegate(this.endpoint, params.token);
+            // if a token is passed to us via the url, submit it along with whatever other parameters were included and reset the URL hash
+            if (params.token) {
+                this.delegate = new AnonymousProcessDelegate(this.endpoint, params.token);
+                this.delegate.submit(_.omit(params, 'token')).then(function () {
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, { route: Router.currentRoute, args: ["/continue"] });
+                });
+                return;
+            } else if (!this.delegate || args[0] !== "/continue") {
+                this.delegate = new AnonymousProcessDelegate(this.endpoint);
+            }
 
             // each instance of this module can define their own i18nBase value to provide specific translation values
             _.each(["title", "completed", "failed", "tryAgain", "return"], function (key) {
@@ -84,16 +95,13 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
             }, this);
 
             this.parentRender(_.bind(function () {
-                if (params.token) {
-                    this.delegate.submit(_.omit(params, 'token')).then(_.bind(this.renderProcessState, this));
-                } else {
-                    this.delegate.start().then(_.bind(this.renderProcessState, this));
-                }
+                this.delegate.start().then(_.bind(this.renderProcessState, this));
             }, this));
         },
 
         restartProcess: function (e) {
             e.preventDefault();
+            delete this.delegate;
             EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, { route: Router.currentRoute });
         },
 
@@ -110,7 +118,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                 },
                 attemptCustomTemplate = function () {
                     UIUtils.fillTemplateWithData(
-                        baseTemplateUrl + response.type + "-" + response.stage + ".html",
+                        baseTemplateUrl + response.type + "-" + response.tag + ".html",
                         stateData,
                         function (renderedTemplate) {
                             /*
@@ -137,7 +145,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                 }, this.data);
             }
 
-            if (_.has(response, "type") && _.has(response, "stage")) {
+            if (_.has(response, "type") && _.has(response, "tag")) {
                 attemptCustomTemplate();
             } else {
                 loadGenericTemplate();
@@ -145,6 +153,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
 
             processStatePromise.then(_.bind(function (content) {
                 this.$el.find("#processContent").html(content);
+                ValidatorsManager.bindValidators(this.$el);
                 this.$el.find(":input:first").focus();
             }, this));
 

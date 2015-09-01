@@ -51,9 +51,10 @@ define("config/validators/CommonValidators", [
                 "org/forgerock/commons/ui/common/util/ValidatorsUtils"
             ],
             "validator": function(el, input, callback, utils) {
-                var v = input.val();
+                var confirmValue = input.val(),
+                    mainInput = el.find("input[data-validation-dependents=passwordConfirm]");
 
-                if (v === "" || el.find("input[name=password]").val() !== el.find("input[name=passwordConfirm]").val() || el.find("input[name=password]").attr("data-validation-status") === "error") {
+                if (confirmValue === "" || mainInput.val() !== confirmValue || mainInput.attr("data-validation-status") === "error") {
                     callback([$.t("common.form.validation.confirmationMatchesPassword")]);
                     return;
                 }
@@ -70,7 +71,7 @@ define("config/validators/CommonValidators", [
                 var v = input.val(),
                     errors = [],
                     len = input.attr('minLength');
-                
+
                 if (v.length < len) {
                     errors.push($.t("common.form.validation.MIN_LENGTH", {minLength: len}));
                 }

@@ -41,7 +41,6 @@ define("config/routes/UserRoutesConfig", [
             view: "PasswordResetView",
             url: /passwordReset(\/[^\&]*)(\&.+)?/,
             pattern: "passwordReset??",
-            forceUpdate: true,
             argumentNames: ["realm", "additionalParameters"],
             defaults: ["/", ""]
         },
@@ -49,7 +48,6 @@ define("config/routes/UserRoutesConfig", [
             view: "RegisterView",
             url: /register(\/[^\&]*)(\&.+)?/,
             pattern: "register??",
-            forceUpdate: true,
             argumentNames: ["realm", "additionalParameters"],
             defaults: ["/",""]
         },

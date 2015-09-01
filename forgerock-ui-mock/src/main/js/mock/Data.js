@@ -39,7 +39,7 @@
                 JSON.stringify(
                     {
                         "type" : "emailValidation",
-                        "stage" : "0",
+                        "tag" : "initial",
                         "requirements" : {
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "description": "Reset your password",
@@ -74,7 +74,7 @@
                                 JSON.stringify({
                                     "token": "mockToken1",
                                     "type" : "emailValidation",
-                                    "stage" : "2",
+                                    "tag" : "validateCode",
                                     "requirements" : {
                                         "$schema": "http://json-schema.org/draft-04/schema#",
                                         "description": "Verify email address",
@@ -112,8 +112,8 @@
                                     headers,
                                     JSON.stringify({
                                     "token" : "mockToken2",
-                                    "type" : "emailValidation",
-                                    "stage" : "3",
+                                    "type" : "resetStage",
+                                    "tag" : "initial",
                                     "requirements" : {
                                         "$schema": "http://json-schema.org/draft-04/schema#",
                                         "description": "Reset password",
@@ -150,7 +150,7 @@
                                 headers,
                                 JSON.stringify({
                                     "type" : "emailValidation",
-                                    "stage" : "end",
+                                    "tag" : "end",
                                     "status" : {
                                         "success": true
                                     }
@@ -193,8 +193,8 @@
                 },
                 JSON.stringify(
                     {
-                        "type" : "generic",
-                        "stage" : "1",
+                        "type" : "emailValidation",
+                        "tag" : "initial",
                         "requirements" : {
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "description": "Register your account",
@@ -229,7 +229,7 @@
                             JSON.stringify({
                                 "token": "mockToken1",
                                 "type" : "emailValidation",
-                                "stage" : "2",
+                                "tag" : "validateCode",
                                 "requirements" : {
                                     "$schema": "http://json-schema.org/draft-04/schema#",
                                     "description": "Verify email address",
@@ -268,7 +268,7 @@
                                 JSON.stringify({
                                     "token": "mockToken2",
                                     "type": "selfRegistration",
-                                    "stage": 1,
+                                    "tag": "initial",
                                     "requirements": {
                                         "$schema": "http://json-schema.org/draft-04/schema#",
                                         "type": "object",
@@ -311,7 +311,7 @@
                             headers,
                             JSON.stringify({
                                 "type" : "selfRegistration",
-                                "stage" : "end",
+                                "tag" : "end",
                                 "status" : {
                                     "success": true
                                 }

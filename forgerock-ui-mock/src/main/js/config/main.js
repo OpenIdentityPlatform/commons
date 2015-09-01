@@ -24,14 +24,9 @@
 
 /*global define*/
 
-/**
- * @author Eugenia Sergueeva
- */
-
 define("config/main", [
     "./routes/CommonRoutesConfig",
     "./routes/UserRoutesConfig",
-    "./routes/MockRoutesConfig",
     "./messages/CommonMessages",
     "./messages/UserMessages",
     "./validators/CommonValidators",
