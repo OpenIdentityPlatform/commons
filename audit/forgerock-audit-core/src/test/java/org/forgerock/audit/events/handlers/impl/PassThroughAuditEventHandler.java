@@ -16,11 +16,10 @@
 
 package org.forgerock.audit.events.handlers.impl;
 
+import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.*;
-import static org.forgerock.util.promise.Promises.*;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -32,9 +31,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 
 /**
  * Handles AuditEvents by just calling the result Handler.
@@ -63,7 +60,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     public Promise<ActionResponse, ResourceException> actionCollection(
             final Context context,
             final ActionRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -75,7 +72,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
             final Context context,
             final String resourceId,
             final ActionRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -86,11 +83,10 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     public Promise<ResourceResponse, ResourceException> createInstance(
             final Context context,
             final CreateRequest request) {
-        return newResultPromise(
-                newResourceResponse(
+        return newResourceResponse(
                         request.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(),
                         null,
-                        new JsonValue(request.getContent())));
+                        new JsonValue(request.getContent())).asPromise();
     }
 
     /**
@@ -102,7 +98,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
             final Context context,
             final QueryRequest request,
             final QueryResourceHandler handler) {
-        return newResultPromise(newQueryResponse());
+        return newQueryResponse().asPromise();
     }
 
     /**
@@ -114,7 +110,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
             final Context context,
             final String resourceId,
             final ReadRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**

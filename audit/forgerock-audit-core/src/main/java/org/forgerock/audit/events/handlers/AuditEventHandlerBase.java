@@ -16,12 +16,11 @@
 
 package org.forgerock.audit.events.handlers;
 
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 
 import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
-import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.DeleteRequest;
@@ -30,7 +29,6 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 
 /**
  * Abstract AuditEventHandler class.
@@ -63,7 +61,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
             final Context context,
             final String resourceId,
             final DeleteRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -74,7 +72,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
             final Context context,
             final String resourceId,
             final PatchRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -85,7 +83,7 @@ public abstract class AuditEventHandlerBase<CFG> implements AuditEventHandler<CF
             final Context context,
             final String resourceId,
             final UpdateRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**

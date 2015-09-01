@@ -16,7 +16,10 @@
 
 package org.forgerock.audit.events.handlers.csv;
 
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.File;
 import java.io.FileReader;
@@ -41,7 +44,6 @@ import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.JsonSchemaUtils;
 import org.forgerock.audit.util.JsonValueUtils;
-import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -58,9 +60,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -151,7 +151,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     public Promise<ActionResponse, ResourceException> actionCollection(
             final Context context,
             final ActionRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -163,7 +163,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             final Context context,
             final String resourceId,
             final ActionRequest request) {
-        return newExceptionPromise(ResourceExceptionsUtil.notSupported(request));
+        return notSupported(request).asPromise();
     }
 
     /**
@@ -229,15 +229,13 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
                 ++retryCount;
             } while (retry);
-            return newResultPromise(
-                    Responses.newResourceResponse(
-                            request.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(),
+            return newResourceResponse(
+                            request.getContent().get(FIELD_CONTENT_ID).asString(),
                             null,
                             new JsonValue(request.getContent())
-                    )
-            );
+                    ).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
     }
 
@@ -266,13 +264,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         try {
             final String auditEventType = request.getResourcePathObject().head(1).toString();
             for (final JsonValue value : getEntries(auditEventType, request.getQueryFilter())) {
-                handler.handleResource(
-                        Responses.newResourceResponse(
-                                value.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, value));
+                handler.handleResource(newResourceResponse(value.get(FIELD_CONTENT_ID).asString(), null, value));
             }
-            return newResultPromise(Responses.newQueryResponse());
+            return newQueryResponse().asPromise();
         } catch (Exception e) {
-            return newExceptionPromise((ResourceException) new BadRequestException(e));
+            return new BadRequestException(e).asPromise();
         }
     }
 
@@ -293,13 +289,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 throw new NotFoundException(auditEventType + " audit log not found");
             }
             final JsonValue resource = entry.iterator().next();
-            return newResultPromise(
-                    Responses.newResourceResponse(
-                            resource.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, resource));
+            return newResourceResponse(resource.get(FIELD_CONTENT_ID).asString(), null, resource).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         } catch (IOException e) {
-            return newExceptionPromise((ResourceException) new BadRequestException(e));
+            return new BadRequestException(e).asPromise();
         }
     }
 

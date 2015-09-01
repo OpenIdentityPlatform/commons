@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
@@ -196,7 +197,7 @@ public class CSVAuditEventHandlerTest {
         Promise<ActionResponse, ResourceException> promise =
                 csvHandler.actionCollection(
                         new RootContext(),
-                        Requests.newActionRequest("access", "action"));
+                        newActionRequest("access", "action"));
 
         //then
         assertThat(promise)
@@ -216,7 +217,7 @@ public class CSVAuditEventHandlerTest {
                 csvHandler.actionInstance(
                         new RootContext(),
                         "_id",
-                        Requests.newActionRequest("access", "action"));
+                        newActionRequest("access", "action"));
 
         //then
         assertThat(promise)
