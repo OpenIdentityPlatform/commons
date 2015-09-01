@@ -77,7 +77,7 @@ public class AuditJsonConfigTest {
     @Test
     public void testGetAuditEventHandlerConfigurationSchema() throws Exception {
         //given
-        final AuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
+        final AuditEventHandler<?> auditEventHandler = new PassThroughAuditEventHandler();
         final JsonValue expectedSchema = json(object(
                 field("type", "object"),
                 field("id", "/"),

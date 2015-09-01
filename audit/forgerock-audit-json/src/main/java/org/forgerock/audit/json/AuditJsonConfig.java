@@ -282,7 +282,7 @@ public class AuditJsonConfig {
      * @return The config schema as json schema.
      * @throws AuditException If any error occurs parsing the config class for schema.
      */
-    public static JsonValue getAuditEventHandlerConfigurationSchema(final AuditEventHandler auditEventHandler)
+    public static JsonValue getAuditEventHandlerConfigurationSchema(final AuditEventHandler<?> auditEventHandler)
             throws AuditException {
         try {
             SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
