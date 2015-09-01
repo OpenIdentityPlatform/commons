@@ -54,7 +54,7 @@ import java.util.Map;
  */
 public final class AnonymousProcessService extends AbstractRequestHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AnonymousProcessService.class);
+    private static final Logger logger = LoggerFactory.getLogger(AnonymousProcessService.class);
 
     private static final String SUBMIT_ACTION = "submitRequirements";
 
@@ -103,7 +103,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
             JsonValue clientResponse = initiateProcess(context);
             return Promises.newResultPromise(Responses.newResourceResponse("1", "1.0", clientResponse));
         } catch (ResourceException | RuntimeException e) {
-            return Promises.newExceptionPromise(logAndAdaptException(e));
+            return logAndAdaptException(e).asPromise();
         }
     }
 
@@ -114,7 +114,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 JsonValue clientResponse = progressProcess(context, request.getContent());
                 return Promises.newResultPromise(Responses.newActionResponse(clientResponse));
             } catch (ResourceException | RuntimeException e) {
-                return Promises.newExceptionPromise(logAndAdaptException(e));
+                return logAndAdaptException(e).asPromise();
             }
         }
 
@@ -127,15 +127,14 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         try {
             throw exception;
         } catch (InternalServerErrorException iseE) {
-            LOGGER.error("Internal error intercepted", iseE);
+            logger.error("Internal error intercepted", iseE);
             return iseE;
         } catch (ResourceException rE) {
-            LOGGER.warn("Resource exception intercepted", rE);
+            logger.warn("Resource exception intercepted", rE);
             return rE;
         } catch (Exception ex) {
-            LOGGER.error("Exception intercepted", ex);
-            return ResourceException
-                    .newInternalServerErrorException("Exception intercepted", ex);
+            logger.error("Exception intercepted", ex);
+            return new InternalServerErrorException("Exception intercepted", ex);
         }
     }
 
@@ -150,8 +149,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         ProgressStageWrapper<?> stage = retrieveStage(context);
         JsonValue requirements = stage.gatherInitialRequirements(context);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Initial requirements retrieved for stage " + stage.getName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initial requirements retrieved for stage " + stage.getName());
         }
 
         return renderRequirements(
@@ -194,8 +193,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
         ProgressStageWrapper<?> stage = retrieveStage(context);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Advancing stage " + stage.getName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Advancing stage " + stage.getName());
         }
 
         return enactContext(context, stage);
@@ -231,8 +230,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         ProgressStageWrapper<?> nextStage = retrieveStage(nextContext);
         JsonValue requirements = nextStage.gatherInitialRequirements(nextContext);
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Initial requirements retrieved for stage " + nextStage.getName());
+        if (logger.isDebugEnabled()) {
+            logger.debug("Initial requirements retrieved for stage " + nextStage.getName());
         }
 
         if (requirements.size() > 0) {

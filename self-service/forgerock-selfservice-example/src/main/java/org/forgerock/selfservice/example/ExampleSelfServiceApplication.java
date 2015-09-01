@@ -89,7 +89,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         emailConfig.setEmailServiceUrl("/email");
         emailConfig.setEmailFrom("info@admin.org");
         emailConfig.setEmailSubject("Reset password email");
-        emailConfig.setEmailMessage("This is your reset email.\nLink: %link%");
+        emailConfig.setEmailMessage("<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>");
         emailConfig.setEmailVerificationLinkToken("%link%");
         emailConfig.setEmailVerificationLink("http://localhost:9999/example/#passwordReset/");
 
@@ -125,7 +125,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         emailConfig.setEmailServiceUrl("/email");
         emailConfig.setEmailFrom("info@admin.org");
         emailConfig.setEmailSubject("Register new account");
-        emailConfig.setEmailMessage("This is email address verification message.\nLink: %link%");
+        emailConfig.setEmailMessage("<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>");
         emailConfig.setEmailVerificationLinkToken("%link%");
         emailConfig.setEmailVerificationLink("http://localhost:9999/example/#register/");
 

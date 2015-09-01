@@ -27,6 +27,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
@@ -83,8 +84,7 @@ final class ExampleEmailService implements SingletonResourceProvider {
             }
         }
 
-        return Promises.newExceptionPromise(
-                ResourceException.newNotSupportedException("Unknown action " + request.getAction()));
+        return new NotSupportedException("Unknown action " + request.getAction()).asPromise();
     }
 
     private JsonValue sendEmail(JsonValue document) throws ResourceException {
@@ -132,7 +132,7 @@ final class ExampleEmailService implements SingletonResourceProvider {
             message.setRecipients(Message.RecipientType.TO,
                     InternetAddress.parse(to));
             message.setSubject(subject);
-            message.setText(messageBody);
+            message.setContent(messageBody, "text/html; charset=UTF-8");
 
             Transport.send(message);
             LOGGER.debug("Email sent to " + to);
@@ -146,17 +146,17 @@ final class ExampleEmailService implements SingletonResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-        return Promises.newExceptionPromise(ResourceException.newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return Promises.newExceptionPromise(ResourceException.newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-        return Promises.newExceptionPromise(ResourceException.newNotSupportedException());
+        return new NotSupportedException().asPromise();
     }
 
 }

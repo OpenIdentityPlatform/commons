@@ -16,6 +16,8 @@
 
 package org.forgerock.selfservice.example;
 
+import org.forgerock.json.jose.jwe.EncryptionMethod;
+import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
@@ -23,6 +25,10 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenType;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
+
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Basic token handler factory that always returns the same handler.
@@ -48,7 +54,22 @@ final class ExampleTokenHandlerFactory implements SnapshotTokenHandlerFactory {
         if (tokenType == JwtTokenHandler.TYPE) {
             SigningManager signingManager = new SigningManager();
             SigningHandler signingHandler = signingManager.newHmacSigningHandler(sharedKey);
-            return new JwtTokenHandler(JwsAlgorithm.HS256, signingHandler, signingHandler);
+
+            try {
+                KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
+                keyPairGen.initialize(1024);
+                KeyPair keyPair = keyPairGen.generateKeyPair();
+
+                return new JwtTokenHandler(
+                        JweAlgorithm.RSAES_PKCS1_V1_5,
+                        EncryptionMethod.A128CBC_HS256,
+                        keyPair,
+                        JwsAlgorithm.HS256,
+                        signingHandler);
+
+            } catch (NoSuchAlgorithmException nsaE) {
+                throw new RuntimeException("Unable to create key pair for encryption", nsaE);
+            }
         }
 
         throw new IllegalArgumentException("Unknown type " + tokenType.getName());

@@ -17,13 +17,22 @@
 package org.forgerock.selfservice.stages.tokenhandlers;
 
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
+import org.forgerock.json.jose.jwe.CompressionAlgorithm;
+import org.forgerock.json.jose.jwe.EncryptionMethod;
+import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.SignedEncryptedJwt;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenType;
+import org.forgerock.util.Reject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.security.KeyPair;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +41,9 @@ import java.util.Map;
  *
  * @since 0.1.0
  */
-public class JwtTokenHandler implements SnapshotTokenHandler {
+public final class JwtTokenHandler implements SnapshotTokenHandler {
+
+    private final static Logger logger = LoggerFactory.getLogger(JwtTokenHandler.class);
 
     /**
      * JWT snapshot token handle type.
@@ -47,56 +58,79 @@ public class JwtTokenHandler implements SnapshotTokenHandler {
     };
 
     private final JwtBuilderFactory jwtBuilderFactory;
+    private final JweAlgorithm jweAlgorithm;
+    private final EncryptionMethod jweMethod;
+    private final KeyPair jweKeyPair;
     private final JwsAlgorithm jwsAlgorithm;
-    private final SigningHandler signingHandler;
-    private final SigningHandler verificationHandler;
+    private final SigningHandler jwsHandler;
 
     /**
      * Constructs a new JWT token handler.
      *
+     * @param jweAlgorithm
+     *         the JWE algorithm use to construct the key pair
+     * @param jweMethod
+     *         the encryption method to use
+     * @param jweKeyPair
+     *         key pair for the purpose of encryption
      * @param jwsAlgorithm
      *         the JWS algorithm to use
-     * @param signingHandler
+     * @param jwsHandler
      *         the signing handler
-     * @param verificationHandler
-     *         the verification handler
      */
-    public JwtTokenHandler(JwsAlgorithm jwsAlgorithm, SigningHandler signingHandler,
-                           SigningHandler verificationHandler) {
+    public JwtTokenHandler(JweAlgorithm jweAlgorithm, EncryptionMethod jweMethod, KeyPair jweKeyPair,
+                           JwsAlgorithm jwsAlgorithm, SigningHandler jwsHandler) {
+        Reject.ifNull(jweAlgorithm, jweMethod, jweKeyPair, jwsAlgorithm, jwsHandler);
         jwtBuilderFactory = new JwtBuilderFactory();
+        this.jweAlgorithm = jweAlgorithm;
+        this.jweMethod = jweMethod;
+        this.jweKeyPair = jweKeyPair;
         this.jwsAlgorithm = jwsAlgorithm;
-        this.signingHandler = signingHandler;
-        this.verificationHandler = verificationHandler;
+        this.jwsHandler = jwsHandler;
     }
 
     @Override
     public boolean validate(String snapshotToken) {
-        return jwtBuilderFactory
-                .reconstruct(snapshotToken, SignedJwt.class)
-                .verify(verificationHandler);
+        Reject.ifNull(snapshotToken);
+
+        try {
+            return jwtBuilderFactory
+                    .reconstruct(snapshotToken, SignedJwt.class)
+                    .verify(jwsHandler);
+        } catch (JwtRuntimeException jwtRE) {
+            logger.error("Error parsing JWT snapshot token", jwtRE);
+            return false;
+        }
     }
 
     @Override
     public String generate(Map<String, String> state) {
+        Reject.ifNull(state);
         JwtClaimsSet claimsSet = jwtBuilderFactory
                 .claims()
                 .claims(new HashMap<String, Object>(state))
                 .build();
 
         return jwtBuilderFactory
-                .jws(signingHandler)
+                .jwe(jweKeyPair.getPublic())
                 .headers()
-                .alg(jwsAlgorithm)
-                .done()
+                    .alg(jweAlgorithm)
+                    .enc(jweMethod)
+                    .done()
                 .claims(claimsSet)
+                .sign(jwsHandler, jwsAlgorithm)
                 .build();
     }
 
     @Override
     public Map<String, String> parse(String snapshotToken) {
-        JwtClaimsSet claimsSet = jwtBuilderFactory
-                .reconstruct(snapshotToken, SignedJwt.class)
-                .getClaimsSet();
+        Reject.ifNull(snapshotToken);
+
+        SignedEncryptedJwt signedEncryptedJwt = jwtBuilderFactory
+                .reconstruct(snapshotToken, SignedEncryptedJwt.class);
+
+        signedEncryptedJwt.decrypt(jweKeyPair.getPrivate());
+        JwtClaimsSet claimsSet = signedEncryptedJwt.getClaimsSet();
 
         Map<String, String> state = new HashMap<>();
         for (String key : claimsSet.keys()) {
