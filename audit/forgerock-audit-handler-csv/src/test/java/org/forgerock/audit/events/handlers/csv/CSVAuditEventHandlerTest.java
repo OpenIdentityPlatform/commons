@@ -52,7 +52,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import org.forgerock.util.encode.Base64;
 
 import static org.mockito.Mockito.spy;
 
@@ -306,7 +308,7 @@ public class CSVAuditEventHandlerTest {
         csvHandler.createInstance(new RootContext(), createRequest);
 
         String expectedContent = "\"_id\",\"timestamp\",\"transactionId\",\"HMAC\"\n"
-                + "\"1\",\"123456\",\"A10000\",\"N/DdzwOaO8ML86L7SaA5Y2Ptd4nl4cPsAAfstbNdIQ0=\"";
+                + "\"1\",\"123456\",\"A10000\",\"l3jKX9DpKEWpALEBefJxOUKtLQttianWfqISvnk2HgE=\"";
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }
 
@@ -317,11 +319,14 @@ public class CSVAuditEventHandlerTest {
 
         CSVAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CSVAuditEventHandlerConfiguration.CsvSecurity();
         csvSecurity.setEnabled(true);
-        csvSecurity.setFilename(new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath());
+        final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath();
+        csvSecurity.setFilename(keystorePath);
         csvSecurity.setPassword("forgerock");
         config.setCsvSecurity(csvSecurity);
 
-        HmacCalculator.writeToKeyStore(new SecretKeySpec("forgerock".getBytes("UTF-8"), "Raw"), "/tmp/secure-audit.jks", "InitialKey", "forgerock");
+        // Force the initial key so we'll have reproductible builds.
+        SecretKey secretKey = new SecretKeySpec(Base64.decode("zmq4EoprX52XLGyLkMENcin0gv0jwYyrySi3YOqfhFY="), "RAW");
+        HmacCalculator.writeToKeyStore(secretKey, csvSecurity.getFilename(), "InitialKey", csvSecurity.getPassword());
 
         handler.configure(config);
         addEventsMetaData(handler);
