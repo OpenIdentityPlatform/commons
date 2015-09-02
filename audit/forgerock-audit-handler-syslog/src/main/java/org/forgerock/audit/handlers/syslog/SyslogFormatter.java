@@ -24,12 +24,7 @@ import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotati
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.extractValue;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.audit.events.AuditEventHelper;
-import org.forgerock.audit.util.DateUtil;
-import org.forgerock.audit.util.JsonValueUtils;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Reject;
@@ -38,11 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.text.MessageFormat;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -98,7 +89,7 @@ public class SyslogFormatter {
 
         final Severity severity = Severity.INFORMATIONAL; // TODO: Establish from auditEvent, (schema-dependent)
         final String priority = String.valueOf(calculatePriorityValue(facility, severity));
-        final String timestamp = formatAsSyslogTimestamp(auditEvent.get(TIMESTAMP).asString());
+        final String timestamp = auditEvent.get(TIMESTAMP).asString();
         final String msgId = auditEvent.get(EVENT_NAME).asString();
         final String structuredData = structuredDataFormatters.get(topic).format(auditEvent);
         final String msg = "";
@@ -144,47 +135,6 @@ public class SyslogFormatter {
      */
     private int calculatePriorityValue(Facility facility, Severity severityLevel) {
         return (facility.getCode() * 8) + severityLevel.getCode();
-    }
-
-    // TODO: Check for an existing commons equivalent
-    // from com.sun.identity.shared.DateUtils
-    // see https://tools.ietf.org/html/rfc5424 §6.2.3 TIMESTAMP
-    private String formatAsSyslogTimestamp(String timestamp) {
-        final String fullDateFormat = "{0}-{1}-{2}T{3}:{4}:{5}{7}";
-
-        Date date = DateUtil.getDateUtil("UTC").parseTimestamp(timestamp).toDate();
-
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(date);
-        String[] params = new String[8];
-
-        params[0] = formatInteger(cal.get(Calendar.YEAR), 4);
-        params[1] = formatInteger(cal.get(Calendar.MONTH) + 1, 2);
-        params[2] = formatInteger(cal.get(Calendar.DAY_OF_MONTH), 2);
-        params[3] = formatInteger(cal.get(Calendar.HOUR_OF_DAY), 2);
-        params[4] = formatInteger(cal.get(Calendar.MINUTE), 2);
-        params[5] = formatInteger(cal.get(Calendar.SECOND), 2);
-        params[6] = formatInteger(cal.get(Calendar.MILLISECOND), 3);
-
-        int offset = cal.get(Calendar.ZONE_OFFSET) + cal.get(Calendar.DST_OFFSET);
-        if (offset == 0) {
-            params[7] = "Z";
-        } else {
-            params[7] = (offset < 0 ? "-" : "+")
-                    + formatInteger(Math.abs(offset) / 3600000, 2)
-                    + ":" + formatInteger((Math.abs(offset) / 60000) % 60, 2);
-        }
-        return MessageFormat.format(fullDateFormat, (Object[]) params);
-    }
-
-    private String formatInteger(int value, int length) {
-        String val = Integer.toString(value);
-        int diff = length - val.length();
-
-        for (int i = 0; i < diff; i++) {
-            val = "0" + val;
-        }
-        return val;
     }
 
     /**
