@@ -49,13 +49,4 @@ public enum CompressionAlgorithm {
         }
     }
 
-    /**
-     * Turns the CompressionAlgorithm constant into a JSON value string.
-     *
-     * @return {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return '"' + super.toString() + '"';
-    }
 }
