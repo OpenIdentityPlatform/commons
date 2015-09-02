@@ -38,8 +38,10 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
     "org/forgerock/commons/ui/common/components/Navigation",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(form2js, js2form, AbstractView, validatorsManager, uiUtils, userDelegate, router, navigation, eventManager, constants, conf) {
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/components/ChangesPending"
+
+], function(form2js, js2form, AbstractView, validatorsManager, uiUtils, userDelegate, router, navigation, eventManager, constants, conf, ChangesPending) {
     var UserProfileView = AbstractView.extend({
         template: "templates/user/UserProfileTemplate.html",
         baseTemplate: "templates/common/DefaultBaseTemplate.html",
@@ -48,7 +50,9 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             "click #changeSecurity": "changeSecurity",
             "click input[name=saveButton]": "formSubmit",
             "click input[name=resetButton]": "reloadData",
-            "onValidate": "onValidate"
+            "onValidate": "onValidate",
+            "change input": "checkChanges",
+            "change select": "checkChanges"
         },
 
         data:{},
@@ -58,20 +62,23 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
 
         submit: function(){
-            var _this = this;
-
             this.delegate.updateUser(conf.loggedUser, this.data, _.bind(function(newUserData) {
+                this.changesPendingWidget.saveChanges();
                 if (_.has(newUserData, "_rev")) {
-                    _this.data._rev = newUserData._rev;
+                    this.data._rev = newUserData._rev;
                 }
-                $.extend(conf.loggedUser, _this.data);
+                $.extend(conf.loggedUser, this.data);
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
             }, this ),
-            function(e){
+            _.bind(function(e) {
                 console.log('errorCallback', e.responseText);
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
-                _this.reloadData();
-            });
+                this.reloadData();
+            }, this));
+        },
+
+        checkChanges: function(e) {
+            this.changesPendingWidget.makeChanges({ loggedUser: this.getFormData() });
         },
 
         formSubmit: function(event) {
@@ -84,14 +91,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
             if (validatorsManager.formValidated(this.$el)) {
 
-                this.data = form2js(this.el, '.', false);
-
-                // buttons will be included in this structure, so remove those.
-                _.each(this.data, function (value, key, list) {
-                    if (this.$el.find("input[name=" + key + "]").hasClass('btn')) {
-                        delete this.data[key];
-                    }
-                }, this);
+                this.data = this.getFormData();
 
                 _.each(conf.globalData.protectedUserAttributes, function(attr){
                     if(_this.data[attr] && conf.loggedUser[attr] !== _this.data[attr]){
@@ -109,10 +109,28 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             }
         },
 
+        getFormData: function() {
+            var data = form2js(this.el, '.', false);
+
+            // buttons will be included in this structure, so remove those.
+            _.each(data, function (value, key, list) {
+                if (this.$el.find("input[name=" + key + "]").hasClass('btn')) {
+                    delete data[key];
+                }
+            }, this);
+
+            return data;
+        },
+
         render: function(args, callback) {
             this.parentRender(function() {
                 validatorsManager.bindValidators( this.$el, this.delegate.getUserResourceName(conf.loggedUser), _.bind(function () {
                     this.reloadData();
+                    this.changesPendingWidget = ChangesPending.watchChanges({
+                        element: this.$el.find(".user-profile-changes-pending"),
+                        watchedObj: { loggedUser: this.getFormData() },
+                        watchedProperties: ["loggedUser"]
+                    });
                     if (callback) {
                         callback();
                     }
@@ -125,6 +143,9 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
             this.$el.find("input[name=resetButton]").val($.t("common.form.reset"));
             validatorsManager.validateAllFields(this.$el);
+            if (this.changesPendingWidget) {
+                this.changesPendingWidget.makeChanges({ loggedUser: this.getFormData() });
+            }
         }
     });
 
