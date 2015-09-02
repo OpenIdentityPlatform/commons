@@ -164,7 +164,7 @@ public final class RouteMatchers {
         private DefaultVersionBehaviour defaultVersionBehaviour = DefaultVersionBehaviour.LATEST;
 
         @Override
-        public void setIsWarningEnabled(boolean warningEnabled) {
+        public void setWarningEnabled(boolean warningEnabled) {
             this.warningEnabled = warningEnabled;
         }
 

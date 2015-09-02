@@ -40,7 +40,7 @@ public interface ResourceApiVersionBehaviourManager {
      *
      * @param warningEnabled {@code true} if warning headers should be set.
      */
-    void setIsWarningEnabled(boolean warningEnabled);
+    void setWarningEnabled(boolean warningEnabled);
 
     /**
      * Returns {@code true} if warning headers should be set on the response if
