@@ -25,7 +25,7 @@ import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Session;
 import org.forgerock.http.SessionManager;
-import org.forgerock.http.context.HttpRequestContext;
+import org.forgerock.http.context.SessionContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.Reject;
@@ -35,7 +35,7 @@ import org.forgerock.util.promise.ResultHandler;
 
 /**
  * Filter implementation that uses a {@link SessionManager} to set the {@link Session} in the
- * {@link HttpRequestContext}.
+ * {@link SessionContext}.
  *
  * <p>The previous {@code Session} value will be saved and restored after the {@code Handler} has been executed.</p>
  */
@@ -49,19 +49,19 @@ class SessionFilter implements Filter {
 
     @Override
     public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
-        final HttpRequestContext httpRequestContext = context.asContext(HttpRequestContext.class);
-        final Session oldSession = httpRequestContext.getSession();
-        httpRequestContext.setSession(sessionManager.load(request));
+        final SessionContext sessionContext = context.asContext(SessionContext.class);
+        final Session oldSession = sessionContext.getSession();
+        sessionContext.setSession(sessionManager.load(request));
         return next.handle(context, request)
                    .thenOnResult(new ResultHandler<Response>() {
                        @Override
                        public void handleResult(Response response) {
                            try {
-                               sessionManager.save(httpRequestContext.getSession(), response);
+                               sessionManager.save(sessionContext.getSession(), response);
                            } catch (IOException e) {
                                LOGGER.error("Failed to save session", e);
                            } finally {
-                               httpRequestContext.setSession(oldSession);
+                               sessionContext.setSession(oldSession);
                            }
                        }
                    });

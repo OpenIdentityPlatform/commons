@@ -41,9 +41,10 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.Session;
-import org.forgerock.http.context.ClientInfoContext;
-import org.forgerock.http.context.HttpRequestContext;
+import org.forgerock.http.context.AttributesContext;
+import org.forgerock.http.context.ClientContext;
 import org.forgerock.http.context.RootContext;
+import org.forgerock.http.context.SessionContext;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -184,8 +185,9 @@ public final class HttpFrameworkServlet extends HttpServlet {
             throws ServletException, IOException {
         final Request request = createRequest(req);
         final Session session = new ServletSession(req);
-        final HttpRequestContext httpRequestContext = new HttpRequestContext(new RootContext(), session)
-                .setPrincipal(req.getUserPrincipal());
+        final SessionContext sessionContext = new SessionContext(new RootContext(), session);
+        final AttributesContext attributesContext = new AttributesContext(sessionContext);
+
 
         /* TODO
          * add comment on why this was added as probably shouldn't stick around as
@@ -194,15 +196,15 @@ public final class HttpFrameworkServlet extends HttpServlet {
         Enumeration<String> attributeNames = req.getAttributeNames();
         while (attributeNames.hasMoreElements()) {
             String attributeName = attributeNames.nextElement();
-            httpRequestContext.getAttributes().put(attributeName, req.getAttribute(attributeName));
+            attributesContext.getAttributes().put(attributeName, req.getAttribute(attributeName));
         }
 
         //FIXME ideally we don't want to expose the HttpServlet Request and Response
         // handy servlet-specific attributes, sure to be abused by downstream filters
-        httpRequestContext.getAttributes().put(HttpServletRequest.class.getName(), req);
-        httpRequestContext.getAttributes().put(HttpServletResponse.class.getName(), resp);
+        attributesContext.getAttributes().put(HttpServletRequest.class.getName(), req);
+        attributesContext.getAttributes().put(HttpServletResponse.class.getName(), resp);
 
-        Context context = createRouterContext(createClientInfoContext(httpRequestContext, req), req);
+        Context context = createRouterContext(createClientContext(attributesContext, req), req);
 
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
@@ -212,7 +214,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                             @Override
                             public void handleResult(Response response) {
                                 try {
-                                    writeResponse(httpRequestContext, resp, response);
+                                    writeResponse(sessionContext, resp, response);
                                 } catch (IOException e) {
                                     log("Failed to write success response", e);
                                 } finally {
@@ -226,7 +228,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
             public void handleRuntimeException(RuntimeException e) {
                 Response response = new Response(Status.INTERNAL_SERVER_ERROR);
                 try {
-                    writeResponse(httpRequestContext, resp, response);
+                    writeResponse(sessionContext, resp, response);
                 } catch (IOException ioe) {
                     log("Failed to write success response", e);
                 } finally {
@@ -277,14 +279,15 @@ public final class HttpFrameworkServlet extends HttpServlet {
         return request;
     }
 
-    private ClientInfoContext createClientInfoContext(Context parent, HttpServletRequest req) {
-        return ClientInfoContext.builder(parent)
+    private ClientContext createClientContext(Context parent, HttpServletRequest req) {
+        return ClientContext.buildExternalClientContext(parent)
                 .remoteUser(req.getRemoteUser())
                 .remoteAddress(req.getRemoteAddr())
                 .remoteHost(req.getRemoteHost())
                 .remotePort(req.getRemotePort())
                 .certificates((X509Certificate[]) req.getAttribute(SERVLET_REQUEST_X509_ATTRIBUTE))
                 .userAgent(req.getHeader("User-Agent"))
+                .secure("https".equalsIgnoreCase(req.getScheme()))
                 .build();
     }
 
@@ -294,7 +297,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         return new UriRouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
     }
 
-    private void writeResponse(HttpRequestContext context, HttpServletResponse resp, Response response)
+    private void writeResponse(SessionContext context, HttpServletResponse resp, Response response)
             throws IOException {
         /*
          * Support for OPENIG-94/95 - The wrapped servlet may have already

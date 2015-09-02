@@ -30,7 +30,7 @@ import java.net.URI;
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Session;
-import org.forgerock.http.context.HttpRequestContext;
+import org.forgerock.http.context.SessionContext;
 import org.forgerock.http.handler.Handlers;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentApiVersionHeader;
@@ -111,7 +111,7 @@ public class RoutingTest {
     }
 
     private Context mockContext() {
-        return new HttpRequestContext(mock(Context.class), mock(Session.class));
+        return new SessionContext(mock(Context.class), mock(Session.class));
     }
 
     private Handler createHandler() {
