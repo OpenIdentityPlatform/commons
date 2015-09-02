@@ -16,12 +16,16 @@
 
 package org.forgerock.audit.events;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Helper methods for AuditEvents.
@@ -115,4 +119,29 @@ public final class AuditEventHelper {
         }
         return auditEvent.get(SCHEMA);
     }
+
+    /**
+     * Converts JsonPointer field identifier to dotted-path form.
+     *
+     * @param fieldName The JsonPointer reference to a field within a JSON object.
+     * @return The field name in dotted-path form.
+     */
+    public static String jsonPointerToDotNotation(final String fieldName) {
+        String newPath = fieldName;
+        if (fieldName.startsWith("/")) {
+            newPath = fieldName.substring(1);
+        }
+        return StringUtils.replace(newPath, "/", ".");
+    }
+
+    /**
+     * Converts dotted-path field identifier to JsonPointer form.
+     *
+     * @param fieldName The dotted-path reference to a field within a JSON object.
+     * @return The field name in JsonPointer form.
+     */
+    public static String dotNotationToJsonPointer(final String fieldName) {
+        return StringUtils.replace(fieldName, ".", "/");
+    }
+
 }

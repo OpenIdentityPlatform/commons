@@ -115,6 +115,28 @@ public final class JsonValueUtils {
         return flatObject;
     }
 
+    /**
+     * Extracts String representation of field identified by <code>fieldName</code> from <code>json</code> object.
+     *
+     * @param json the {@link JsonValue} object from which to extract a value.
+     * @param fieldName the field identifier in a form consumable by {@link JsonPointer}.
+     *
+     * @return A non-null String representation of the field's value. If the specified field is not present or has
+     *         a null value, an empty string will be returned.
+     */
+    public static String extractValue(final JsonValue json, final String fieldName) {
+        JsonValue value = json.get(new JsonPointer(fieldName));
+        final String rawStr;
+        if (value == null) {
+            rawStr = "";
+        } else if (value.isString()) {
+            rawStr = value.asString();
+        } else {
+            rawStr = value.toString();
+        }
+        return rawStr;
+    }
+
     private static JsonValue buildObject(Map<String, Object> objectSet) {
         final JsonValue jsonValue = new JsonValue(new LinkedHashMap<>());
         for (Map.Entry<String, Object> entry : objectSet.entrySet()) {

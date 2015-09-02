@@ -20,11 +20,15 @@ package org.forgerock.audit.handlers.syslog;
 import static org.forgerock.audit.events.AuditEventBuilder.EVENT_NAME;
 import static org.forgerock.audit.events.AuditEventBuilder.TIMESTAMP;
 import static org.forgerock.audit.events.AuditEventHelper.getAuditEventSchema;
+import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotation;
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
+import static org.forgerock.audit.util.JsonValueUtils.extractValue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.util.DateUtil;
+import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
@@ -266,7 +270,7 @@ public class SyslogFormatter {
         }
 
         private String formatParamName(String name) {
-            return convertToDotNotation(name);
+            return jsonPointerToDotNotation(name);
         }
 
         private String formatParamValue(String value) {
@@ -276,32 +280,5 @@ public class SyslogFormatter {
                 return value.replaceAll("[\\\\\"\\]]", "\\\\$0");
             }
         }
-
-        // copied from CsvAuditEventHandler
-        // TODO: Move to a shared location
-        private String convertToDotNotation(final String path) {
-            String newPath = path;
-            if (path.startsWith("/")) {
-                newPath = path.substring(1);
-            }
-            return StringUtils.replace(newPath, "/", ".");
-        }
-
-        // copied from CsvAuditEventHandler
-        // TODO: Move to a shared location
-        private String extractValue(final JsonValue auditEvent, final String fieldName) {
-            JsonValue value = auditEvent.get(new JsonPointer(fieldName));
-            final String rawStr;
-            if (value == null) {
-                rawStr = "";
-            } else if (value.isString()) {
-                rawStr = value.asString();
-            } else {
-                rawStr = value.toString();
-            }
-            return rawStr;
-        }
-
     }
-
 }
