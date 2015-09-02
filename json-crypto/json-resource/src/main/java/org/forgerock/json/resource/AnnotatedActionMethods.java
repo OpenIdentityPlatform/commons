@@ -16,9 +16,6 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.json.resource.ResourceException.newNotSupportedException;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +36,7 @@ class AnnotatedActionMethods {
     Promise<ActionResponse, ResourceException> invoke(Context context, ActionRequest request, String id) {
         AnnotatedMethod method = methods.get(request.getAction());
         if (method == null) {
-            return newExceptionPromise(newNotSupportedException(request.getAction() + "not supported"));
+            return new NotSupportedException(request.getAction() + "not supported").asPromise();
         }
         return method.invoke(context, request, id);
     }
