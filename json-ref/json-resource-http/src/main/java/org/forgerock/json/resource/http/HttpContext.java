@@ -24,18 +24,13 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import org.forgerock.http.context.AbstractContext;
-import org.forgerock.http.context.ClientInfoContext;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ClientContext;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
 
-/**
- * A {@link Context} containing information relating to the originating HTTP
- * Servlet request.
- */
-public final class HttpContext extends AbstractContext implements ClientContext {
+/** A {@link Context} containing information relating to the originating HTTP request. */
+public final class HttpContext extends AbstractContext {
 
     // TODO: security parameters such as user name, etc?
     /**
@@ -63,63 +58,42 @@ public final class HttpContext extends AbstractContext implements ClientContext 
      */
     public static final String ATTR_PATH = "path";
 
-    /**
-     * Attribute in the serialised JSON form that holds the remote client IP address.
-     * @see #HttpContext(JsonValue, ClassLoader)
-     */
-    public static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
-
-    /**
-     * Attribute in the serialized JSON form that holds the request received time (ms since UTC epoch).
-     * @see #HttpContext(JsonValue, ClassLoader)
-     */
-    public static final String ATTR_TIME = "time";
-
     private final Map<String, List<String>> headers;
     private final Map<String, List<String>> parameters;
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isExternal() {
-        return true;
-    }
 
     HttpContext(Context parent, final org.forgerock.http.protocol.Request req) {
         super(parent, "http");
         data.put(ATTR_METHOD, HttpUtils.getMethod(req));
         data.put(ATTR_PATH, getRequestPath(req));
-        data.put(ATTR_REMOTE_ADDRESS, getRemoteAddress(parent));
-        data.put(ATTR_TIME, req.getTime());
         this.headers = Collections.unmodifiableMap(new LazyMap<>(
-                new Factory<Map<String, List<String>>>() {
-                    @Override
-                    public Map<String, List<String>> newInstance() {
-                        Map<String, List<String>> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-                        Set<Map.Entry<String, List<String>>> headers = req.getHeaders().entrySet();
-                        for (Map.Entry<String, List<String>> header : headers) {
-                            String name = header.getKey();
-                            List<String> values = header.getValue();
-                            result.put(name, values);
-                        }
-                        return result;
+            new Factory<Map<String, List<String>>>() {
+                @Override
+                public Map<String, List<String>> newInstance() {
+                    Map<String, List<String>> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+                    Set<Map.Entry<String, List<String>>> headers = req.getHeaders().entrySet();
+                    for (Map.Entry<String, List<String>> header : headers) {
+                        String name = header.getKey();
+                        List<String> values = header.getValue();
+                        result.put(name, values);
                     }
-                }));
+                    return result;
+                }
+            }));
         data.put(ATTR_HEADERS, headers);
         this.parameters = Collections.unmodifiableMap(new LazyMap<>(
-                new Factory<Map<String, List<String>>>() {
-                    @Override
-                    public Map<String, List<String>> newInstance() {
-                        Map<String, List<String>> result = new LinkedHashMap<>();
-                        Set<Map.Entry<String, List<String>>> parameters = req.getForm().entrySet();
-                        for (Map.Entry<String, List<String>> parameter : parameters) {
-                            String name = parameter.getKey();
-                            List<String> values = parameter.getValue();
-                            result.put(name, values);
-                        }
-                        return result;
+            new Factory<Map<String, List<String>>>() {
+                @Override
+                public Map<String, List<String>> newInstance() {
+                    Map<String, List<String>> result = new LinkedHashMap<>();
+                    Set<Map.Entry<String, List<String>>> parameters = req.getForm().entrySet();
+                    for (Map.Entry<String, List<String>> parameter : parameters) {
+                        String name = parameter.getKey();
+                        List<String> values = parameter.getValue();
+                        result.put(name, values);
                     }
-                }));
+                    return result;
+                }
+            }));
         data.put(ATTR_PARAMETERS, parameters);
     }
 
@@ -141,18 +115,10 @@ public final class HttpContext extends AbstractContext implements ClientContext 
 
     private String getRequestPath(org.forgerock.http.protocol.Request req) {
         return new StringBuilder()
-                .append(req.getUri().getScheme())
-                .append("://")
-                .append(req.getUri().getRawAuthority())
-                .append(req.getUri().getRawPath()).toString();
-    }
-
-    private String getRemoteAddress(Context context) {
-        if (context.containsContext(ClientInfoContext.class)) {
-            return context.asContext(ClientInfoContext.class).getRemoteAddress();
-        } else {
-            return null;
-        }
+            .append(req.getUri().getScheme())
+            .append("://")
+            .append(req.getUri().getRawAuthority())
+            .append(req.getUri().getRawPath()).toString();
     }
 
     /**
@@ -204,18 +170,6 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     }
 
     /**
-     * Returns the address of the client making the request. This may be an IPV4 or
-     * an IPv6 address depending on server configuration. Note that the address returned
-     * may also be the address of a proxy.
-     * No guarantees of whether the returned address is reachable are made.
-     *
-     * @return The address of the client or proxy making the request.
-     */
-    public String getRemoteAddress() {
-        return data.get(ATTR_REMOTE_ADDRESS).asString();
-    }
-
-    /**
      * Returns an unmodifiable list containing the values of the named HTTP
      * request parameter.
      *
@@ -260,13 +214,4 @@ public final class HttpContext extends AbstractContext implements ClientContext 
     public String getPath() {
         return data.get(ATTR_PATH).asString();
     }
-
-    /**
-     * Gets the time the request was received in milliseconds since the UTC epoch.
-     * @return The time of the request.
-     */
-    public long getRequestTime() {
-        return data.get(ATTR_TIME).asLong();
-    }
-
 }
