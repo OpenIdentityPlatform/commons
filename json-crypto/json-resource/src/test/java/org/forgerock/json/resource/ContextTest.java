@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.forgerock.http.Context;
+import org.forgerock.http.context.ClientContext;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.routing.UriRouterContext;
 import org.testng.annotations.Test;
@@ -52,7 +53,7 @@ public final class ContextTest {
     @Test
     public void testContainsContext() throws Exception {
         final Context root = new RootContext("root-id");
-        final Context context = new InternalContext(root);
+        final Context context = ClientContext.newInternalClientContext(root);
 
         assertThat(context.containsContext(RootContext.class)).isTrue();
         assertThat(context.containsContext(SecurityContext.class)).isFalse();
@@ -63,9 +64,9 @@ public final class ContextTest {
     @Test
     public void testAsContext() throws Exception {
         final Context root = new RootContext("root-id");
-        final InternalContext internal = new InternalContext(root);
+        final ClientContext internal = ClientContext.newInternalClientContext(root);
         final UriRouterContext router = new UriRouterContext(internal, "test", "", new HashMap<String, String>(0));
-        final InternalContext internal2 = new InternalContext(router);
+        final ClientContext internal2 = ClientContext.newInternalClientContext(root);
 
         assertThat(router.asContext(RootContext.class)).isSameAs(root);
         assertThat(router.asContext(UriRouterContext.class)).isSameAs(router);
@@ -86,7 +87,7 @@ public final class ContextTest {
     @Test
     public void testGetContext() throws Exception {
         final Context root = new RootContext("root-id");
-        final Context context = new InternalContext(root);
+        final Context context = ClientContext.newInternalClientContext(root);
 
         assertThat(context.getContext("root")).isSameAs(root);
         try {
@@ -97,5 +98,4 @@ public final class ContextTest {
                     .hasNoCause();
         }
     }
-
 }
