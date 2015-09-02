@@ -16,12 +16,8 @@
 package org.forgerock.audit.handlers.jdbc;
 
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.ResourceException.newInternalServerErrorException;
-import static org.forgerock.json.resource.ResourceException.newNotFoundException;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -42,6 +38,9 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
@@ -140,7 +139,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(final Context context,
             final ActionRequest actionRequest) {
-        return newExceptionPromise(ResourceException.newNotSupportedException("Action is not supported."));
+        return new NotSupportedException("Action is not supported.").asPromise();
     }
 
     /**
@@ -149,7 +148,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(final Context context, final String s,
             final ActionRequest actionRequest) {
-        return newExceptionPromise(ResourceException.newNotSupportedException("Action is not supported."));
+        return new NotSupportedException("Action is not supported.").asPromise();
     }
 
     /**
@@ -165,7 +164,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
             final Connection connection = dataSource.getConnection();
             if (connection == null) {
                 LOGGER.error("No database connection");
-                return newExceptionPromise(newInternalServerErrorException("No database connection"));
+                return new InternalServerErrorException("No database connection").asPromise();
             }
 
             final PreparedStatement createStatement =
@@ -174,13 +173,12 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
         } catch (AuditException | SQLException e) {
             final String error = String.format("Unable to create audit entry for %s", auditEventTopic);
             LOGGER.error(error);
-            return newExceptionPromise(newInternalServerErrorException(error, e));
+            return new InternalServerErrorException(error, e).asPromise();
         } catch (ResourceException e) {
-            return newExceptionPromise(e);
+            return e.asPromise();
         }
 
-        return newResultPromise(
-                newResourceResponse(createRequest.getNewResourceId(), null, createRequest.getContent()));
+        return newResourceResponse(createRequest.getNewResourceId(), null, createRequest.getContent()).asPromise();
 
     }
 
@@ -198,7 +196,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
             final Connection connection = dataSource.getConnection();
             if (connection == null) {
                 LOGGER.error("No database connection");
-                return newExceptionPromise(newInternalServerErrorException("No database connection"));
+                return new InternalServerErrorException("No database connection").asPromise();
             }
 
             final TableMapping mapping = getTableMapping(auditEventTopic);
@@ -212,13 +210,12 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
                 queryResourceHandler.handleResource(newResourceResponse(result.get(ResourceResponse.FIELD_CONTENT_ID)
                         .asString(), null, result));
             }
-            return newResultPromise(
-                    newQueryResponse(String.valueOf(queryRequest.getPagedResultsOffset() + results.size()),
-                            CountPolicy.EXACT, results.size()));
+            return newQueryResponse(String.valueOf(queryRequest.getPagedResultsOffset() + results.size()),
+                            CountPolicy.EXACT, results.size()).asPromise();
         } catch (AuditException | SQLException | IOException e) {
             final String error = String.format("Unable to create audit entry for %s", auditEventTopic);
             LOGGER.error(error);
-            return newExceptionPromise(newInternalServerErrorException(error, e));
+            return new InternalServerErrorException(error, e).asPromise();
         }
     }
 
@@ -236,7 +233,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
             final Connection connection = dataSource.getConnection();
             if (connection == null) {
                 LOGGER.error("No database connection");
-                return newExceptionPromise(newInternalServerErrorException("No database connection"));
+                return new InternalServerErrorException("No database connection").asPromise();
             }
 
             final TableMapping mapping = getTableMapping(auditEventTopic);
@@ -244,15 +241,15 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
             final List<Map<String,Object>> resultSet = execute(readStatement);
 
             if (resultSet.isEmpty()) {
-                return newExceptionPromise(newNotFoundException(String.format("Entry not found for id: %s", id)));
+                return new NotFoundException(String.format("Entry not found for id: %s", id)).asPromise();
             }
             result = processEntry(resultSet.get(0), mapping, auditEventTopic);
         } catch (AuditException | SQLException | IOException e ) {
             final String error = String.format("Unable to create audit entry for %s", auditEventTopic);
             LOGGER.error(error);
-            return newExceptionPromise(newInternalServerErrorException(error, e));
+            return new InternalServerErrorException(error, e).asPromise();
         }
-        return newResultPromise(newResourceResponse(id, null, result));
+        return newResourceResponse(id, null, result).asPromise();
     }
 
     private DataSource configureDatasource() throws ResourceException {
