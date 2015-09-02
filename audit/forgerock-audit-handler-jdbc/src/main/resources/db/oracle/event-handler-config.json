@@ -2,11 +2,11 @@
   "name" : "jdbc",
   "class" : "org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandler",
   "config" : {
-    "databaseName" : "mysql",
+    "databaseName" : "oracle",
     "connectionPool" : {
-      "jdbcUrl" : "jdbc:mysql://localhost:3306/audit?allowMultiQueries=true&characterEncoding=utf8",
-      "username" : "audit",
-      "password" : "audit"
+      "jdbcUrl": "jdbc:oracle:thin:@//localhost:1521/XE",
+      "username": "audit",
+      "password": "audit"
     },
     "tableMappings" : [
       {
@@ -15,7 +15,7 @@
         "fieldToColumn": {
           "_id" : "id",
           "transactionId" : "transactionid",
-          "timestamp" : "timestamp_",
+          "timestamp" : "timestamp",
           "authentication/id" : "authentication_id",
           "eventName" : "eventname",
           "result" : "result",
@@ -30,7 +30,7 @@
         "table": "auditactivity",
         "fieldToColumn": {
           "_id" : "id",
-          "timestamp" : "timestamp_",
+          "timestamp" : "timestamp",
           "transactionId" : "transactionid",
           "eventName" : "eventname",
           "authentication/id" : "authentication_id",
@@ -49,8 +49,8 @@
         "event": "access",
         "table": "auditaccess",
         "fieldToColumn": {
-          "_id" : "id",
-          "timestamp" : "timestamp_",
+          "_id" : "objectid",
+          "timestamp" : "timestamp",
           "transactionId" : "transactionid",
           "eventName" : "eventname",
           "server/ip" : "server_ip",
@@ -79,7 +79,7 @@
         "table": "auditconfig",
         "fieldToColumn": {
           "_id" : "id",
-          "timestamp" : "timestamp_",
+          "timestamp" : "timestamp",
           "transactionId" : "transactionid",
           "eventName" : "eventname",
           "authentication/id" : "authentication_id",

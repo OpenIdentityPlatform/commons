@@ -19,10 +19,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 
+/**
+ * Configures the JDBC mapping and connection pool.
+ */
 public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool")
@@ -30,7 +34,11 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
 
     @JsonProperty(required = true)
     @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.tableMappings")
-    private List<TableMapping> tableMappings;
+    private List<TableMapping> tableMappings = new LinkedList<>();
+
+    @JsonProperty(required = true)
+    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.databaseName")
+    private String databaseName;
 
     /**
      * Gets the table mappings for the audit events.
@@ -40,7 +48,7 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
         if (tableMappings == null) {
             return Collections.emptyList();
         }
-        return tableMappings;
+        return Collections.unmodifiableList(tableMappings);
     }
 
     /**
@@ -65,6 +73,22 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
      */
     public void setConnectionPool(ConnectionPool connectionPool) {
         this.connectionPool = connectionPool;
+    }
+
+    /**
+     * Gets the name of the database.
+     * @return The name of the database.
+     */
+    public String getDatabaseName() {
+        return databaseName;
+    }
+
+    /**
+     * Sets the name of the database.
+     * @return The name of the database.
+     */
+    public void setDatabaseName(String databaseName) {
+        this.databaseName = databaseName;
     }
 
     public static class ConnectionPool {

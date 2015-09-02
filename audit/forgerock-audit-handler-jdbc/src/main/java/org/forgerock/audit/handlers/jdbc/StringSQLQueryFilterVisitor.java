@@ -17,12 +17,10 @@ package org.forgerock.audit.handlers.jdbc;
 
 import static org.forgerock.util.Utils.joinAsString;
 
+import java.util.LinkedList;
 import java.util.List;
 
-import org.forgerock.guava.common.base.Function;
-import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
-import org.forgerock.util.Utils;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 
@@ -56,60 +54,73 @@ import org.forgerock.util.query.QueryFilterVisitor;
  * by database implementation (though typically "field IS NOT NULL" is chosen).
  */
 public class StringSQLQueryFilterVisitor
-        extends AbstractSQLQueryFilterVisitor<StringSQLRenderer, TableMappingAndParameters> {
+        extends AbstractSQLQueryFilterVisitor<StringSQLRenderer, TableMappingParametersPair> {
 
     // key/value number for each key/value placeholder
     int objectNumber = 0;
 
-    public StringSQLRenderer visitCompositeFilter(final TableMappingAndParameters parameters,
+    private StringSQLRenderer visitCompositeFilter(final TableMappingParametersPair parameters,
             List<QueryFilter<JsonPointer>> subFilters, String operand) {
         final String operandDelimiter = new StringBuilder(" ").append(operand).append(" ").toString();
-        return new StringSQLRenderer("(")
-                .append(joinAsString(
-                        operandDelimiter,
-                        FluentIterable.from(subFilters)
-                                .transform(new Function<QueryFilter<JsonPointer>, String>() {
-                                    @Override
-                                    public String apply(QueryFilter<JsonPointer> filter) {
-                                        return filter.accept(StringSQLQueryFilterVisitor.this, parameters).toSQL();
-                                    }
-                                })))
-                .append(")");
+        final List<String> subFilterValues = new LinkedList<>();
+        for (QueryFilter<JsonPointer> subFilter : subFilters) {
+            subFilterValues.add(subFilter.accept(StringSQLQueryFilterVisitor.this, parameters).toSQL());
+        }
+        return new StringSQLRenderer("(").append(joinAsString(operandDelimiter, subFilterValues)).append(")");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public StringSQLRenderer visitAndFilter(TableMappingAndParameters parameters,
+    public StringSQLRenderer visitAndFilter(TableMappingParametersPair parameters,
             List<QueryFilter<JsonPointer>> subFilters) {
         return visitCompositeFilter(parameters, subFilters, "AND");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public StringSQLRenderer visitOrFilter(TableMappingAndParameters parameters,
+    public StringSQLRenderer visitOrFilter(TableMappingParametersPair parameters,
             List<QueryFilter<JsonPointer>> subFilters) {
         return visitCompositeFilter(parameters, subFilters, "OR");
     }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public StringSQLRenderer visitBooleanLiteralFilter(TableMappingAndParameters parameters, boolean value) {
+    public StringSQLRenderer visitBooleanLiteralFilter(TableMappingParametersPair parameters, boolean value) {
         return new StringSQLRenderer(value ? "1 = 1" : "1 <> 1");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public StringSQLRenderer visitNotFilter(TableMappingAndParameters parameters, QueryFilter<JsonPointer> subFilter) {
+    public StringSQLRenderer visitNotFilter(TableMappingParametersPair parameters, QueryFilter<JsonPointer> subFilter) {
         return new StringSQLRenderer("NOT ")
                 .append(subFilter.accept(this, parameters).toSQL());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public StringSQLRenderer visitValueAssertion(TableMappingAndParameters parameters, String operand, JsonPointer field,
+    public StringSQLRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand, JsonPointer field,
             Object valueAssertion) {
         ++objectNumber;
         String value = "${v"+objectNumber + "}";
-        parameters.getParameters().put(value, new TableMappingAndParameters.FieldValuePair(field, valueAssertion));
+        parameters.getParameters().put(value, new TableMappingParametersPair.FieldValuePair(field, valueAssertion));
         return new StringSQLRenderer(parameters.getColumnName(field) + " " + operand + " " + value);
-    }
+        }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public StringSQLRenderer visitPresentFilter(TableMappingAndParameters parameters, JsonPointer field) {
+    public StringSQLRenderer visitPresentFilter(TableMappingParametersPair parameters, JsonPointer field) {
         return new StringSQLRenderer(parameters.getColumnName(field) + " IS NOT NULL");
     }
 }

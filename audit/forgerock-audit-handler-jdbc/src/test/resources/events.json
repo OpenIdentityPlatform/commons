@@ -24,6 +24,12 @@
               "type": "string"
             }
           }
+        },
+        "customObject": {
+          "type": "object"
+        },
+        "customArray": {
+          "type": "array"
         }
       }
     }

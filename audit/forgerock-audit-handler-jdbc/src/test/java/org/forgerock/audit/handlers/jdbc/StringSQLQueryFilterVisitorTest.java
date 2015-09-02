@@ -33,7 +33,7 @@ public class StringSQLQueryFilterVisitorTest {
     /* a visitor to generate base value assertions */
     private StringSQLQueryFilterVisitor visitor = new StringSQLQueryFilterVisitor() {
         @Override
-        public StringSQLRenderer visitValueAssertion(TableMappingAndParameters parameters, String operand, JsonPointer field, Object valueAssertion) {
+        public StringSQLRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand, JsonPointer field, Object valueAssertion) {
             String quote = valueAssertion instanceof String ? "'" : "";
             return new StringSQLRenderer(field.leaf())
                     .append(" ")
@@ -45,7 +45,7 @@ public class StringSQLQueryFilterVisitorTest {
         }
 
         @Override
-        public StringSQLRenderer visitPresentFilter(TableMappingAndParameters parameters, JsonPointer field) {
+        public StringSQLRenderer visitPresentFilter(TableMappingParametersPair parameters, JsonPointer field) {
             return new StringSQLRenderer(field.leaf()).append(" IS NOT NULL");
         }
     };

@@ -15,26 +15,29 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import org.forgerock.json.JsonPointer;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.TreeMap;
 
+/**
+ * Contains the necessary information to map an event to a database table, and the event fields to the columns
+ * in that database table.
+ */
 public class TableMapping {
     @JsonProperty
-    @JsonPropertyDescription("The audit event of the mapping")
+    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.mapping.event")
     private String event;
 
     @JsonProperty
-    @JsonPropertyDescription("The table name of the mapping")
+    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.mapping.table")
     private String table;
 
     @JsonProperty
-    @JsonPropertyDescription("The mapping of event fields to database columns")
-    private Map<String, String> fieldToColumn;
+    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.mapping.fieldToColumn")
+    private Map<String, String> fieldToColumn = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     /**
      * Gets the audit event the table mapping is for.
@@ -73,28 +76,14 @@ public class TableMapping {
      * @return The field to column mapping.
      */
     public Map<String, String> getFieldToColumn() {
-        if (fieldToColumn == null) {
-            return Collections.emptyMap();
-        }
-        return fieldToColumn;
+        return Collections.unmodifiableMap(fieldToColumn);
     }
 
     /**
-     * Sets the field to column mapping.
+     * Sets the field to column mapping. The map should be case insensitive.
      * @param fieldToColumn The field to column mapping.
      */
     public void setFieldToColumn(Map<String, String> fieldToColumn) {
         this.fieldToColumn = fieldToColumn;
-    }
-
-    @JsonIgnore
-    public String getColumnName(final JsonPointer field) {
-        final String fieldString = field.toString();
-        if (getFieldToColumn().get(fieldString) != null) {
-            return getFieldToColumn().get(fieldString);
-        } else {
-            //remove forward slash and return the result
-            return getFieldToColumn().get(fieldString.substring(1));
-        }
     }
 }

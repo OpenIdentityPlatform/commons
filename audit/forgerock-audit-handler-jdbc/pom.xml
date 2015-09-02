@@ -50,6 +50,7 @@
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>${hikaricp.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- ForgeRock Commons Dependencies -->
@@ -62,15 +63,12 @@
             <artifactId>forgerock-audit-core</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-collect</artifactId>
-        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-test-utils</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>

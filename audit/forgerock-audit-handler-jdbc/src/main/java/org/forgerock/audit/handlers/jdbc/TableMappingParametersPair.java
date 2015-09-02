@@ -15,34 +15,58 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
-import org.forgerock.json.JsonPointer;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class TableMappingAndParameters {
+import org.forgerock.json.JsonPointer;
+
+/**
+ * Stores a pair of {@link TableMapping} and a map of parameters.
+ */
+public class TableMappingParametersPair {
 
     private TableMapping tableMapping;
     private Map<String, FieldValuePair> parameters;
 
-    public TableMappingAndParameters(final TableMapping tableMapping) {
-        this.tableMapping = tableMapping;
-        this.parameters = new LinkedHashMap<>();
+    /**
+     * Creates a TableMappingParametersPair given a {@link TableMapping}. A empty parameter map is created.
+     * @param tableMapping The {@link TableMapping} to create the pair with.
+     */
+    public TableMappingParametersPair(final TableMapping tableMapping) {
+        this(tableMapping, new LinkedHashMap<String, FieldValuePair>());
     }
 
-    public TableMappingAndParameters(final TableMapping tableMapping, final Map<String, FieldValuePair> parameters) {
+    /**
+     * Creates a TableMappingParametersPair given a {@link TableMapping} and parameter map.
+     * @param tableMapping A {@link TableMapping}.
+     * @param parameters A Map of replacement parameters.
+     */
+    public TableMappingParametersPair(final TableMapping tableMapping, final Map<String, FieldValuePair> parameters) {
         this.tableMapping = tableMapping;
         this.parameters = parameters;
     }
 
+    /**
+     * Gets the {@link TableMapping} in the pair.
+     * @return A {@link TableMapping}.
+     */
     public TableMapping getTableMapping() {
         return tableMapping;
     }
 
+    /**
+     * Gets the replacement parameters in the pair.
+     * @return A map of replacement parameters.
+     */
     public Map<String, FieldValuePair> getParameters() {
         return parameters;
     }
 
+    /**
+     * Utility method to get the column name out of a {@link TableMapping}
+     * @param field The {@link JsonPointer} field to get the column of.
+     * @return The column name mapped to the given field.
+     */
     public String getColumnName(final JsonPointer field) {
         final String fieldString = field.toString();
         if (tableMapping.getFieldToColumn().get(fieldString) != null) {
@@ -53,20 +77,36 @@ public class TableMappingAndParameters {
         }
     }
 
+    /**
+     * Stores a field and value as a pair.
+     */
     static class FieldValuePair {
 
         private JsonPointer field;
         private Object value;
 
+        /**
+         * Creates a FieldValuePair given a field and a value.
+         * @param field
+         * @param value
+         */
         public FieldValuePair(final JsonPointer field, final Object value) {
             this.field = field;
             this.value = value;
         }
 
+        /**
+         * Gets the {@link JsonPointer} field value.
+         * @return The field value.
+         */
         public JsonPointer getField() {
             return field;
         }
 
+        /**
+         * Gets the value from the FiledValuePair.
+         * @return A value object.
+         */
         public Object getValue() {
             return value;
         }

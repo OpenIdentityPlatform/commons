@@ -76,11 +76,6 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons.guava</groupId>
-                <artifactId>forgerock-guava-collect</artifactId>
-                <version>${forgerock-guava.version}</version>
-            </dependency>
 
             <!-- Third party dependencies -->
             <dependency>

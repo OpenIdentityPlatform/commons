@@ -22,6 +22,7 @@ import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -86,6 +87,14 @@ public class JDBCAuditEventHandlerTest {
     public static final String EVENT_NAME_VALUE = "eventName";
     public static final String AUTHENTICATION_ID_VALUE = "test@forgerock.com";
     public static final String TRANSACTION_ID_VALUE = "transactionId";
+    public static final String CUSTOM_OBJECT_FIELD = "customObject";
+    public static final String CUSTOM_OBJECT_KEY_FIELD = "key";
+    public static final String CUSTOM_OBJECT_VALUE = "value";
+    public static final String CUSTOM_OBJECT_COLUMN = "custom_object";
+    public static final String CUSTOM_ARRAY_FIELD = "customArray";
+    public static final String CUSTOM_ARRAY_VALUE = "Item1";
+    public static final String CUSTOM_ARRAY_COLUMN = "custom_array";
+    public static final String H2 = "h2";
 
     private Connection connection;
 
@@ -183,9 +192,10 @@ public class JDBCAuditEventHandlerTest {
                 .containsKeys(TIMESTAMP_FIELD)
                 .containsEntry(TRANSACTION_ID_FIELD, TRANSACTION_ID_VALUE)
                 .containsEntry(AUTHENTICATION_FIELD,
-                        new LinkedHashMap<String, Object>() {{
-                            put(AUTHENTICATION_ID_FIELD, AUTHENTICATION_ID_VALUE);
-                        }});
+                        Collections.singletonMap(AUTHENTICATION_ID_FIELD, AUTHENTICATION_ID_VALUE))
+                .containsEntry(CUSTOM_OBJECT_FIELD,
+                        Collections.singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
+                .containsEntry(CUSTOM_ARRAY_FIELD, Collections.singletonList(CUSTOM_ARRAY_VALUE));
     }
 
     @Test
@@ -279,9 +289,10 @@ public class JDBCAuditEventHandlerTest {
                 .containsKeys(TIMESTAMP_FIELD)
                 .containsEntry(TRANSACTION_ID_FIELD, TRANSACTION_ID_VALUE)
                 .containsEntry(AUTHENTICATION_FIELD,
-                        new LinkedHashMap<String, Object>() {{
-                            put(AUTHENTICATION_ID_FIELD, AUTHENTICATION_ID_VALUE);
-                        }});
+                        Collections.singletonMap(AUTHENTICATION_ID_FIELD, AUTHENTICATION_ID_VALUE))
+                .containsEntry(CUSTOM_OBJECT_FIELD,
+                        Collections.singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
+                .containsEntry(CUSTOM_ARRAY_FIELD, Collections.singletonList(CUSTOM_ARRAY_VALUE));
     }
 
     @Test
@@ -314,7 +325,9 @@ public class JDBCAuditEventHandlerTest {
                 });
 
         // then
-        AssertJPromiseAssert.assertThat(queryPromise).failedWithException().isInstanceOf(InternalServerErrorException.class);
+        AssertJPromiseAssert.assertThat(queryPromise)
+                .failedWithException()
+                .isInstanceOf(InternalServerErrorException.class);
     }
 
     @Test
@@ -348,7 +361,9 @@ public class JDBCAuditEventHandlerTest {
                 });
 
         // then
-        AssertJPromiseAssert.assertThat(queryPromise).failedWithException().isInstanceOf(InternalServerErrorException.class);
+        AssertJPromiseAssert.assertThat(queryPromise)
+                .failedWithException()
+                .isInstanceOf(InternalServerErrorException.class);
     }
 
     private JDBCAuditEventHandler createJDBCAuditEventHandler(final JDBCAuditEventHandlerConfiguration configuration)
@@ -369,6 +384,8 @@ public class JDBCAuditEventHandlerTest {
         fieldToColumn.put(TIMESTAMP_FIELD, TIMESTAMP_TABLE_COLUMN);
         fieldToColumn.put(AUTHENTICATION_ID_POINTER, AUTHENTICATION_ID_TABLE_COLUMN);
         fieldToColumn.put(TRANSACTION_ID_FIELD, TRANSACTIONID_TABLE_COLUMN);
+        fieldToColumn.put(CUSTOM_OBJECT_FIELD, CUSTOM_OBJECT_COLUMN);
+        fieldToColumn.put(CUSTOM_ARRAY_FIELD, CUSTOM_ARRAY_COLUMN);
         tableMapping.setEvent(TEST_AUDIT_EVENT_TOPIC);
         tableMapping.setTable(AUDIT_TEST_TABLE_NAME);
         tableMapping.setFieldToColumn(fieldToColumn);
@@ -379,16 +396,19 @@ public class JDBCAuditEventHandlerTest {
         connectionPool.setPassword(H2_JDBC_PASSWORD);
         connectionPool.setJdbcUrl(H2_JDBC_URL);
         configuration.setConnectionPool(connectionPool);
+        configuration.setDatabaseName(H2);
         return configuration;
     }
 
-    private JsonValue makeEvent()
-    {
+
+    private JsonValue makeEvent() {
       final AuditEvent testAuditEvent = TestAuditEventBuilder.testAuditEventBuilder()
               .eventName(EVENT_NAME_VALUE)
               .authentication(AUTHENTICATION_ID_VALUE)
               .timestamp(System.currentTimeMillis())
-              .transactionId(TRANSACTION_ID_VALUE).toEvent();
+              .transactionId(TRANSACTION_ID_VALUE)
+              .customObject(Collections.<String, Object>singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
+              .customArray(Collections.singletonList(CUSTOM_ARRAY_VALUE)).toEvent();
       testAuditEvent.getValue().put(ID_FIELD, ID_VALUE);
       return testAuditEvent.getValue();
     }
@@ -410,6 +430,16 @@ public class JDBCAuditEventHandlerTest {
         @SuppressWarnings("rawtypes")
         public static TestAuditEventBuilder<?> testAuditEventBuilder() {
             return new TestAuditEventBuilder();
+        }
+
+        public T customObject(Map<String, Object> object) {
+            jsonValue.put(CUSTOM_OBJECT_FIELD, object);
+            return self();
+        }
+
+        public T customArray(List<String> object) {
+            jsonValue.put(CUSTOM_ARRAY_FIELD, object);
+            return self();
         }
     }
 }
