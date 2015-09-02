@@ -278,4 +278,10 @@ public class Duration {
     public boolean isZero() {
         return this == ZERO;
     }
+
+    @Override
+    public String toString() {
+        return number + " " + unit;
+    }
+
 }
