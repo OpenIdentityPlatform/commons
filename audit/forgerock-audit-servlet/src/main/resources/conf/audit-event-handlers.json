@@ -20,7 +20,7 @@
         "protocol" : "UDP",
         "host" : "localhost",
         "port" : 514,
-        "facility" : "local0",
+        "facility" : "LOCAL0",
         "productName" : "OpenAM"
       },
       "events": [

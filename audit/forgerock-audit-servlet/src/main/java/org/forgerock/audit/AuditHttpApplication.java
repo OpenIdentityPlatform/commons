@@ -16,6 +16,8 @@
 
 package org.forgerock.audit;
 
+import static org.forgerock.audit.json.AuditJsonConfig.getJson;
+import static org.forgerock.audit.json.AuditJsonConfig.registerHandlerToService;
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
 
 import java.io.IOException;
@@ -51,12 +53,16 @@ public final class AuditHttpApplication implements HttpApplication {
         final AuditService auditService = createAndConfigureAuditService();
 
         try (final InputStream eventHandlersConfig = this.getClass().getResourceAsStream(AUDIT_EVENT_HANDLERS_CONFIG)) {
-            JsonValue auditEventHandlers = AuditJsonConfig.getJson(eventHandlersConfig).get(EVENT_HANDLERS);
+            JsonValue auditEventHandlers = getJson(eventHandlersConfig).get(EVENT_HANDLERS);
             for (final JsonValue handlerConfig : auditEventHandlers) {
-                AuditJsonConfig.registerHandlerToService(handlerConfig, auditService, this.getClass().getClassLoader());
+                try {
+                    registerHandlerToService(handlerConfig, auditService, this.getClass().getClassLoader());
+                } catch (Exception ex) {
+                    logger.error("Unable to register handler defined by config: " + handlerConfig, ex);
+                }
             }
         } catch (AuditException | IOException e) {
-            logger.error("An exception happened starting the audit service", e);
+            logger.error("Unable to start audit service", e);
         }
 
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, AUDIT_ROOT_PATH),
