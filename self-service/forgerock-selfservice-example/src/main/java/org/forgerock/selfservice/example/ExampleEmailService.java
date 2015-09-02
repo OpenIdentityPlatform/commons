@@ -20,6 +20,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newActionResponse;
 
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
@@ -32,12 +33,10 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,9 +77,9 @@ final class ExampleEmailService implements SingletonResourceProvider {
         if (request.getAction().equals("send")) {
             try {
                 JsonValue response = sendEmail(request.getContent());
-                return Promises.newResultPromise(Responses.newActionResponse(response));
+                return newActionResponse(response).asPromise();
             } catch (ResourceException rE) {
-                return Promises.newExceptionPromise(rE);
+                return rE.asPromise();
             }
         }
 

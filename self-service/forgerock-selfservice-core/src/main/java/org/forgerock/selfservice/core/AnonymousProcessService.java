@@ -19,6 +19,8 @@ package org.forgerock.selfservice.core;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
@@ -27,10 +29,10 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.exceptions.StageConfigException;
@@ -38,7 +40,6 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +102,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             JsonValue clientResponse = initiateProcess(context);
-            return Promises.newResultPromise(Responses.newResourceResponse("1", "1.0", clientResponse));
+            return newResourceResponse("1", "1.0", clientResponse).asPromise();
         } catch (ResourceException | RuntimeException e) {
             return logAndAdaptException(e).asPromise();
         }
@@ -112,15 +113,13 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         if (SUBMIT_ACTION.equals(request.getAction())) {
             try {
                 JsonValue clientResponse = progressProcess(context, request.getContent());
-                return Promises.newResultPromise(Responses.newActionResponse(clientResponse));
+                return newActionResponse(clientResponse).asPromise();
             } catch (ResourceException | RuntimeException e) {
                 return logAndAdaptException(e).asPromise();
             }
         }
 
-        return Promises.newExceptionPromise(
-                ResourceException.getException(ResourceException.NOT_SUPPORTED,
-                        "Unknown action " + request.getAction()));
+        return new NotSupportedException("Unknown action " + request.getAction()).asPromise();
     }
 
     private ResourceException logAndAdaptException(Exception exception) {
