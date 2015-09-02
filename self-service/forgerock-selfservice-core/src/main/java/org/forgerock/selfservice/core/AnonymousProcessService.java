@@ -91,10 +91,13 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     public AnonymousProcessService(ProcessInstanceConfig config, ProgressStageFactory progressStageFactory,
                                    SnapshotTokenHandlerFactory tokenHandlerFactory, ProcessStore processStore) {
         Reject.ifNull(config, progressStageFactory, tokenHandlerFactory, processStore);
+        Reject.ifNull(config.getStageConfigs(), config.getSnapshotTokenType(), config.getStorageType());
+        Reject.ifTrue(config.getStageConfigs().isEmpty());
+
         this.progressStageFactory = progressStageFactory;
 
         stageConfigs = config.getStageConfigs();
-        snapshotTokenHandler = tokenHandlerFactory.get(config.getTokenType());
+        snapshotTokenHandler = tokenHandlerFactory.get(config.getSnapshotTokenType());
         snapshotAuthor = config.getStorageType().newSnapshotAuthor(snapshotTokenHandler, processStore);
     }
 

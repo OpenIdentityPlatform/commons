@@ -42,9 +42,12 @@ public final class VerifyEmailAccountConfig implements AbstractEmailVerification
      *
      * @param emailServiceUrl
      *         the email service URL
+     *
+     * @return this config instance
      */
-    public void setEmailServiceUrl(String emailServiceUrl) {
+    public VerifyEmailAccountConfig setEmailServiceUrl(String emailServiceUrl) {
         this.emailServiceUrl = emailServiceUrl;
+        return this;
     }
 
     @Override
@@ -57,9 +60,12 @@ public final class VerifyEmailAccountConfig implements AbstractEmailVerification
      *
      * @param emailSubject
      *         the email subject
+     *
+     * @return this config instance
      */
-    public void setEmailSubject(String emailSubject) {
+    public VerifyEmailAccountConfig setEmailSubject(String emailSubject) {
         this.emailSubject = emailSubject;
+        return this;
     }
 
     @Override
@@ -72,9 +78,12 @@ public final class VerifyEmailAccountConfig implements AbstractEmailVerification
      *
      * @param emailMessage
      *         the email message
+     *
+     * @return this config instance
      */
-    public void setEmailMessage(String emailMessage) {
+    public VerifyEmailAccountConfig setEmailMessage(String emailMessage) {
         this.emailMessage = emailMessage;
+        return this;
     }
 
     @Override
@@ -87,9 +96,12 @@ public final class VerifyEmailAccountConfig implements AbstractEmailVerification
      *
      * @param emailFrom
      *         the email from field
+     *
+     * @return this config instance
      */
-    public void setEmailFrom(String emailFrom) {
+    public VerifyEmailAccountConfig setEmailFrom(String emailFrom) {
         this.emailFrom = emailFrom;
+        return this;
     }
 
     @Override
@@ -102,9 +114,12 @@ public final class VerifyEmailAccountConfig implements AbstractEmailVerification
      *
      * @param emailVerificationLinkToken
      *         the reset URL string token
+     *
+     * @return this config instance
      */
-    public void setEmailVerificationLinkToken(String emailVerificationLinkToken) {
+    public VerifyEmailAccountConfig setEmailVerificationLinkToken(String emailVerificationLinkToken) {
         this.emailVerificationLinkToken = emailVerificationLinkToken;
+        return this;
     }
 
     @Override
@@ -117,9 +132,12 @@ public final class VerifyEmailAccountConfig implements AbstractEmailVerification
      *
      * @param emailVerificationLink
      *         the reset URL
+     *
+     * @return this config instance
      */
-    public void setEmailVerificationLink(String emailVerificationLink) {
+    public VerifyEmailAccountConfig setEmailVerificationLink(String emailVerificationLink) {
         this.emailVerificationLink = emailVerificationLink;
+        return this;
     }
 
     @Override

@@ -26,11 +26,11 @@ public interface SnapshotTokenHandlerFactory {
     /**
      * Given the token type, provide a token handler instance.
      *
-     * @param tokenType
-     *         token type
+     * @param snapshotTokenType
+     *         snapshot token type
      *
      * @return snapshot token handler
      */
-    SnapshotTokenHandler get(SnapshotTokenType tokenType);
+    SnapshotTokenHandler get(String snapshotTokenType);
 
 }

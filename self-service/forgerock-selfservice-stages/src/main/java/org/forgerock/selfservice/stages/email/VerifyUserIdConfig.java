@@ -60,9 +60,12 @@ public final class VerifyUserIdConfig implements AbstractEmailVerificationConfig
      *
      * @param identityServiceUrl
      *         the identity service URL
+     *
+     * @return this config instance
      */
-    public void setIdentityServiceUrl(String identityServiceUrl) {
+    public VerifyUserIdConfig setIdentityServiceUrl(String identityServiceUrl) {
         this.identityServiceUrl = identityServiceUrl;
+        return this;
     }
 
     /**
@@ -79,9 +82,12 @@ public final class VerifyUserIdConfig implements AbstractEmailVerificationConfig
      *
      * @param identityIdField
      *         the identity id field name
+     *
+     * @return this config instance
      */
-    public void setIdentityIdField(String identityIdField) {
+    public VerifyUserIdConfig setIdentityIdField(String identityIdField) {
         this.identityIdField = identityIdField;
+        return this;
     }
 
     /**
@@ -98,9 +104,12 @@ public final class VerifyUserIdConfig implements AbstractEmailVerificationConfig
      *
      * @param identityEmailField
      *         the identity email address field name
+     *
+     * @return this config instance
      */
-    public void setIdentityEmailField(String identityEmailField) {
+    public VerifyUserIdConfig setIdentityEmailField(String identityEmailField) {
         this.identityEmailField = identityEmailField;
+        return this;
     }
 
     /**
@@ -117,9 +126,12 @@ public final class VerifyUserIdConfig implements AbstractEmailVerificationConfig
      *
      * @param queryFields
      *         query fields
+     *
+     * @return this config instance
      */
-    public void setQueryFields(Set<String> queryFields) {
+    public VerifyUserIdConfig setQueryFields(Set<String> queryFields) {
         this.queryFields = queryFields;
+        return this;
     }
 
     @Override

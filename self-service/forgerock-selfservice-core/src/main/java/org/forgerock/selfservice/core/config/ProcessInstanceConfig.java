@@ -17,7 +17,6 @@
 package org.forgerock.selfservice.core.config;
 
 import org.forgerock.selfservice.core.StorageType;
-import org.forgerock.selfservice.core.snapshot.SnapshotTokenType;
 import org.forgerock.util.Reject;
 
 import java.util.ArrayList;
@@ -30,131 +29,78 @@ import java.util.List;
  */
 public final class ProcessInstanceConfig {
 
-    private final List<StageConfig> stageConfigs;
-    private final SnapshotTokenType tokenType;
-    private final StorageType storageType;
+    private List<StageConfig> stageConfigs;
+    private String snapshotTokenType;
+    private StorageType storageType;
 
-    private ProcessInstanceConfig(Builder builder) {
-        stageConfigs = builder.stageConfigs;
-        tokenType = builder.tokenType;
-        storageType = builder.storageType;
+    /**
+     * Sets the list of stage configs. The order of the list
+     * is the order in which the stages will be processed.
+     *
+     * @param stageConfigs
+     *         the list of stage configs
+     *
+     * @return this config
+     */
+    public ProcessInstanceConfig setStageConfigs(List<StageConfig> stageConfigs) {
+        Reject.ifNull(stageConfigs);
+        this.stageConfigs = new ArrayList<>(stageConfigs);
+        return this;
     }
 
     /**
-     * Gets the ordered list of stage configurations.
+     * Gets the list of stage configs.
      *
-     * @return stage configurations
+     * @return the list of stage configs
      */
     public List<StageConfig> getStageConfigs() {
         return stageConfigs;
     }
 
     /**
-     * Gets the snapshot token type.
+     * Sets the snapshot token type to use.
      *
-     * @return snapshot token type
+     * @param snapshotTokenType
+     *         the snapshot token type
+     *
+     * @return this config
      */
-    public SnapshotTokenType getTokenType() {
-        return tokenType;
+    public ProcessInstanceConfig setSnapshotTokenType(String snapshotTokenType) {
+        Reject.ifNull(snapshotTokenType);
+        this.snapshotTokenType = snapshotTokenType;
+        return this;
     }
 
     /**
-     * Gets the storage type, whether local or stateless.
+     * Gets the snapshot token type to use.
+     *
+     * @return the snapshot token type
+     */
+    public String getSnapshotTokenType() {
+        return snapshotTokenType;
+    }
+
+    /**
+     * Sets the storage type to use. See {@link org.forgerock.selfservice.core.StorageType}.
+     *
+     * @param storageType
+     *         the storage type
+     *
+     * @return this config
+     */
+    public ProcessInstanceConfig setStorageType(String storageType) {
+        Reject.ifNull(storageType);
+        this.storageType = StorageType.valueOf(storageType);
+        return this;
+    }
+
+    /**
+     * Gets the storage type to use.
      *
      * @return the storage type
      */
     public StorageType getStorageType() {
         return storageType;
-    }
-
-    /**
-     * Builder for assisting with the construction of {@link ProcessInstanceConfig}.
-     */
-    public static final class Builder {
-
-        private List<StageConfig> stageConfigs;
-        private SnapshotTokenType tokenType;
-        private StorageType storageType;
-
-        private Builder() {
-            stageConfigs = new ArrayList<>();
-        }
-
-        /**
-         * Add a new stage config.
-         *
-         * @param stageConfig
-         *         stage config
-         *
-         * @return this builder
-         */
-        public Builder addStageConfig(StageConfig stageConfig) {
-            Reject.ifNull(stageConfig);
-            stageConfigs.add(stageConfig);
-            return this;
-        }
-
-        /**
-         * Add a list of new stage configs.
-         *
-         * @param stageConfigs
-         *         stage configs
-         *
-         * @return this builder
-         */
-        public Builder addStageConfigs(List<StageConfig> stageConfigs) {
-            Reject.ifNull(stageConfigs);
-            this.stageConfigs.addAll(stageConfigs);
-            return this;
-        }
-
-        /**
-         * Defines the snapshot token type to use.
-         *
-         * @param tokenType
-         *         the snapshot token type
-         *
-         * @return this builder
-         */
-        public Builder setTokenType(SnapshotTokenType tokenType) {
-            Reject.ifNull(tokenType);
-            this.tokenType = tokenType;
-            return this;
-        }
-
-        /**
-         * The store type, whether local or stateless.
-         *
-         * @param storageType
-         *         the storage type
-         *
-         * @return this builder
-         */
-        public Builder setStorageType(StorageType storageType) {
-            this.storageType = storageType;
-            return this;
-        }
-
-        /**
-         * Builds a config instance.
-         *
-         * @return a new config instance
-         */
-        public ProcessInstanceConfig build() {
-            Reject.ifTrue(stageConfigs.isEmpty());
-            Reject.ifNull(tokenType, storageType);
-            return new ProcessInstanceConfig(this);
-        }
-
-    }
-
-    /**
-     * Provides a new builder instance.
-     *
-     * @return a builder instance
-     */
-    public static Builder newBuilder() {
-        return new Builder();
     }
 
 }

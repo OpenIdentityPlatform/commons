@@ -85,31 +85,29 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     }
 
     private Handler registerResetHandler() throws Exception {
-        VerifyEmailAccountConfig emailConfig = new VerifyEmailAccountConfig();
-        emailConfig.setEmailServiceUrl("/email");
-        emailConfig.setEmailFrom("info@admin.org");
-        emailConfig.setEmailSubject("Reset password email");
-        emailConfig.setEmailMessage("<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>");
-        emailConfig.setEmailVerificationLinkToken("%link%");
-        emailConfig.setEmailVerificationLink("http://localhost:9999/example/#passwordReset/");
+        VerifyEmailAccountConfig emailConfig = new VerifyEmailAccountConfig()
+                .setEmailServiceUrl("/email")
+                .setEmailFrom("info@admin.org")
+                .setEmailSubject("Reset password email")
+                .setEmailMessage("<h3>This is your reset email.</h3>"
+                        + "<h4><a href=\"%link%\">Email verification link</a></h4>")
+                .setEmailVerificationLinkToken("%link%")
+                .setEmailVerificationLink("http://localhost:9999/example/#passwordReset/");
 
-        VerifyUserIdConfig verifyUserIdConfig = new VerifyUserIdConfig(emailConfig);
-        verifyUserIdConfig.setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")));
-        verifyUserIdConfig.setIdentityIdField("_id");
-        verifyUserIdConfig.setIdentityEmailField("mail");
-        verifyUserIdConfig.setIdentityServiceUrl("/users");
+        VerifyUserIdConfig verifyUserIdConfig = new VerifyUserIdConfig(emailConfig)
+                .setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")))
+                .setIdentityIdField("_id")
+                .setIdentityEmailField("mail")
+                .setIdentityServiceUrl("/users");
 
-        ResetStageConfig resetConfig = new ResetStageConfig();
-        resetConfig.setIdentityServiceUrl("/users");
-        resetConfig.setIdentityPasswordField("password");
+        ResetStageConfig resetConfig = new ResetStageConfig()
+                .setIdentityServiceUrl("/users")
+                .setIdentityPasswordField("password");
 
-        ProcessInstanceConfig config = ProcessInstanceConfig
-                .newBuilder()
-                .addStageConfig(verifyUserIdConfig)
-                .addStageConfig(resetConfig)
-                .setTokenType(JwtTokenHandler.TYPE)
-                .setStorageType(StorageType.STATELESS)
-                .build();
+        ProcessInstanceConfig config = new ProcessInstanceConfig()
+                .setStageConfigs(Arrays.asList(verifyUserIdConfig, resetConfig))
+                .setSnapshotTokenType(JwtTokenHandler.TYPE)
+                .setStorageType(StorageType.STATELESS.name());
 
         byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(StandardCharsets.UTF_8);
 
@@ -121,25 +119,23 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     }
 
     private Handler registerRegistrationHandler() throws Exception {
-        VerifyEmailAccountConfig emailConfig = new VerifyEmailAccountConfig();
-        emailConfig.setEmailServiceUrl("/email");
-        emailConfig.setEmailFrom("info@admin.org");
-        emailConfig.setEmailSubject("Register new account");
-        emailConfig.setEmailMessage("<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>");
-        emailConfig.setEmailVerificationLinkToken("%link%");
-        emailConfig.setEmailVerificationLink("http://localhost:9999/example/#register/");
+        VerifyEmailAccountConfig emailConfig = new VerifyEmailAccountConfig()
+                .setEmailServiceUrl("/email")
+                .setEmailFrom("info@admin.org")
+                .setEmailSubject("Register new account")
+                .setEmailMessage("<h3>This is your registration email.</h3>"
+                        + "<h4><a href=\"%link%\">Email verification link</a></h4>")
+                .setEmailVerificationLinkToken("%link%")
+                .setEmailVerificationLink("http://localhost:9999/example/#register/");
 
-        UserRegistrationConfig registrationConfig = new UserRegistrationConfig();
-        registrationConfig.setIdentityServiceUrl("/users");
-        registrationConfig.setIdentityEmailField("mail");
+        UserRegistrationConfig registrationConfig = new UserRegistrationConfig()
+                .setIdentityServiceUrl("/users")
+                .setIdentityEmailField("mail");
 
-        ProcessInstanceConfig config = ProcessInstanceConfig
-                .newBuilder()
-                .addStageConfig(emailConfig)
-                .addStageConfig(registrationConfig)
-                .setTokenType(JwtTokenHandler.TYPE)
-                .setStorageType(StorageType.STATELESS)
-                .build();
+        ProcessInstanceConfig config = new ProcessInstanceConfig()
+                .setStageConfigs(Arrays.asList(emailConfig, registrationConfig))
+                .setSnapshotTokenType(JwtTokenHandler.TYPE)
+                .setStorageType(StorageType.STATELESS.name());
 
         byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(StandardCharsets.UTF_8);
 

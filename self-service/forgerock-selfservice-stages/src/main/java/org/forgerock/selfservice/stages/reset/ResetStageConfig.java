@@ -44,9 +44,12 @@ public final class ResetStageConfig implements StageConfig {
      *
      * @param identityServiceUrl
      *         the identity service URL
+     *
+     * @return this config instance
      */
-    public void setIdentityServiceUrl(String identityServiceUrl) {
+    public ResetStageConfig setIdentityServiceUrl(String identityServiceUrl) {
         this.identityServiceUrl = identityServiceUrl;
+        return this;
     }
 
     /**
@@ -63,9 +66,12 @@ public final class ResetStageConfig implements StageConfig {
      *
      * @param identityPasswordField
      *         the password field name
+     *
+     * @return this config instance
      */
-    public void setIdentityPasswordField(String identityPasswordField) {
+    public ResetStageConfig setIdentityPasswordField(String identityPasswordField) {
         this.identityPasswordField = identityPasswordField;
+        return this;
     }
 
     @Override

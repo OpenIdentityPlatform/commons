@@ -44,9 +44,12 @@ public final class UserRegistrationConfig implements StageConfig {
      *
      * @param identityServiceUrl
      *         the identity service URL
+     *
+     * @return this config instance
      */
-    public void setIdentityServiceUrl(String identityServiceUrl) {
+    public UserRegistrationConfig setIdentityServiceUrl(String identityServiceUrl) {
         this.identityServiceUrl = identityServiceUrl;
+        return this;
     }
 
     /**
@@ -63,9 +66,12 @@ public final class UserRegistrationConfig implements StageConfig {
      *
      * @param identityEmailField
      *         the identity email address field name
+     *
+     * @return this config instance
      */
-    public void setIdentityEmailField(String identityEmailField) {
+    public UserRegistrationConfig setIdentityEmailField(String identityEmailField) {
         this.identityEmailField = identityEmailField;
+        return this;
     }
 
     @Override
