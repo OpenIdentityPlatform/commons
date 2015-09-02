@@ -407,6 +407,7 @@
         "list-group.less",
         "panels.less",
         "responsive-embed.less",
+        "wells.less",
         "close.less",
         "component-animations.less",
         "dropdowns.less",
@@ -429,5 +430,5 @@
         "scrollspy.js",
         "transition.js"
     ],
-    "customizerUrl": "http://getbootstrap.com/customize/?id=72379dc0b47c3335c674"
+    "customizerUrl": "http://getbootstrap.com/customize/?id=638b7d810e0c795c2b3d"
 }
