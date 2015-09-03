@@ -109,7 +109,7 @@ public class ApiVersionRouterContext extends AbstractContext {
      * @return {@code true} if warnings should be issued to the client.
      */
     public boolean isWarningEnabled() {
-        return data.get(WARNING_ENABLED).asBoolean();
+        return data.get(WARNING_ENABLED).defaultTo(true).asBoolean();
     }
 
     /**
