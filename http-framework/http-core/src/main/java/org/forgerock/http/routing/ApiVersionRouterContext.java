@@ -38,6 +38,7 @@ public class ApiVersionRouterContext extends AbstractContext {
 
     private static final String DEFAULT_VERSION_BEHAVIOUR = "defaultVersionBehaviour";
     private static final String WARNING_ENABLED = "warningEnabled";
+    public static final boolean DEFAULT_WARNING_ENABLED = true;
 
     private Version protocolVersion;
     private Version resourceVersion;
@@ -76,6 +77,7 @@ public class ApiVersionRouterContext extends AbstractContext {
         if (data.isDefined("resourceVersion")) {
             this.protocolVersion = version(data.get("resourceVersion").asString());
         }
+        data.put(WARNING_ENABLED, DEFAULT_WARNING_ENABLED);
     }
 
     /**
@@ -86,6 +88,7 @@ public class ApiVersionRouterContext extends AbstractContext {
      */
     ApiVersionRouterContext(Context parent) {
         super(parent, "apiVersionRouter");
+        data.put(WARNING_ENABLED, DEFAULT_WARNING_ENABLED);
     }
 
     /**
@@ -109,11 +112,7 @@ public class ApiVersionRouterContext extends AbstractContext {
      * @return {@code true} if warnings should be issued to the client.
      */
     public boolean isWarningEnabled() {
-        if (data.isDefined(WARNING_ENABLED) && data.get(WARNING_ENABLED).isBoolean()) {
-            return data.get(WARNING_ENABLED).asBoolean();
-        } else {
-            return true;
-        }
+        return data.get(WARNING_ENABLED).asBoolean();
     }
 
     /**
