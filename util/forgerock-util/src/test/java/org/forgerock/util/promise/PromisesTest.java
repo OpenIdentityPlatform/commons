@@ -17,11 +17,16 @@
 package org.forgerock.util.promise;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Function;
 import org.testng.annotations.Test;
 
 public class PromisesTest {
@@ -45,5 +50,117 @@ public class PromisesTest {
 
         //Then
         assertThat(complete.get()).describedAs("Promises.when did not complete").isTrue();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void chainedCompletedResultPromiseWithRuntimeExceptionShouldPropagateThroughAChainedThen() {
+
+        //Given
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+        final RuntimeException runtimeException = new RuntimeException();
+        Promise<Void, Exception> completedPromise = newResultPromise(null);
+
+        Function<Void, Void, Exception> resultHandler = mock(Function.class);
+        Function<Exception, Void, Exception> exceptionHandler = mock(Function.class);
+
+        Promise<Void, Exception> leafPromise = completedPromise
+                .then(new Function<Void, Void, Exception>() {
+                    @Override
+                    public Void apply(Void value) {
+                        throw runtimeException;
+                    }
+                }).then(resultHandler, exceptionHandler);
+
+        //When
+        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+
+        //Then
+        verifyZeroInteractions(resultHandler, exceptionHandler);
+        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void chainedCompletedExceptionPromiseWithRuntimeExceptionShouldPropagateThroughAChainedThen() {
+
+        //Given
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+        final RuntimeException runtimeException = new RuntimeException();
+        Promise<Void, Exception> completedPromise = newExceptionPromise(null);
+
+        Function<Void, Void, Exception> resultHandler = mock(Function.class);
+        Function<Exception, Void, Exception> exceptionHandler = mock(Function.class);
+
+        Promise<Void, Exception> leafPromise = completedPromise
+                .then(null, new Function<Exception, Void, Exception>() {
+                    @Override
+                    public Void apply(Exception exception) {
+                        throw runtimeException;
+                    }
+                }).then(resultHandler, exceptionHandler);
+
+        //When
+        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+
+        //Then
+        verifyZeroInteractions(resultHandler, exceptionHandler);
+        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void chainedCompletedResultPromiseWithRuntimeExceptionShouldPropagateThroughAChainedThenAsync() {
+
+        //Given
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+        final RuntimeException runtimeException = new RuntimeException();
+        Promise<Void, Exception> completedPromise = newResultPromise(null);
+
+        AsyncFunction<Void, Void, Exception> resultHandler = mock(AsyncFunction.class);
+        AsyncFunction<Exception, Void, Exception> exceptionHandler = mock(AsyncFunction.class);
+
+        Promise<Void, Exception> leafPromise = completedPromise
+                .thenAsync(new AsyncFunction<Void, Void, Exception>() {
+                    @Override
+                    public Promise<Void, Exception> apply(Void value) {
+                        throw runtimeException;
+                    }
+                }).thenAsync(resultHandler, exceptionHandler);
+
+        //When
+        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+
+        //Then
+        verifyZeroInteractions(resultHandler, exceptionHandler);
+        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void chainedCompletedExceptionPromiseWithRuntimeExceptionShouldPropagateThroughAChainedThenAsync() {
+
+        //Given
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+        final RuntimeException runtimeException = new RuntimeException();
+        Promise<Void, Exception> completedPromise = newExceptionPromise(null);
+
+        AsyncFunction<Void, Void, Exception> resultHandler = mock(AsyncFunction.class);
+        AsyncFunction<Exception, Void, Exception> exceptionHandler = mock(AsyncFunction.class);
+
+        Promise<Void, Exception> leafPromise = completedPromise
+                .thenAsync(null, new AsyncFunction<Exception, Void, Exception>() {
+                    @Override
+                    public Promise<Void, Exception> apply(Exception exception) {
+                        throw runtimeException;
+                    }
+                }).thenAsync(resultHandler, exceptionHandler);
+
+        //When
+        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+
+        //Then
+        verifyZeroInteractions(resultHandler, exceptionHandler);
+        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
     }
 }

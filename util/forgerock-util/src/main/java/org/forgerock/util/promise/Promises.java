@@ -31,6 +31,24 @@ import org.forgerock.util.Function;
 public final class Promises {
     // TODO: n-of, etc.
 
+    /**
+     * These completed promise implementations provide an optimization for
+     * synchronous processing, which have been found to provide small but
+     * significant benefit:
+     *
+     * <ul>
+     *     <li>A small reduction in GC overhead (less frequent GCs = more
+     *     deterministic response times)</li>
+     *     <li>A reduction of the cost associated with calling then() on a
+     *     pre-completed promise versus the implementation in
+     *     org.forgerock.util.promise.PromiseImpl#then(Function, Function).
+     *     Specifically, a reduction in two volatile accesses as well as memory
+     *     again.</li>
+     * </ul>
+     *
+     * @param <V> {@inheritDoc}
+     * @param <E> {@inheritDoc}
+     */
     private static abstract class CompletedPromise<V, E extends Exception> implements Promise<V, E> {
         @Override
         public final boolean cancel(final boolean mayInterruptIfRunning) {
@@ -41,8 +59,10 @@ public final class Promises {
         public final V get() throws ExecutionException {
             if (hasResult()) {
                 return getResult();
-            } else {
+            } else if (hasException()) {
                 throw new ExecutionException(getException());
+            } else {
+                throw new ExecutionException(getRuntimeException());
             }
         }
 
@@ -55,8 +75,10 @@ public final class Promises {
         public final V getOrThrow() throws E {
             if (hasResult()) {
                 return getResult();
-            } else {
+            } else if (hasException()) {
                 throw getException();
+            } else {
+                throw getRuntimeException();
             }
         }
 
@@ -87,7 +109,7 @@ public final class Promises {
 
         @Override
         public final Promise<V, E> thenOnException(final ExceptionHandler<? super E> onException) {
-            if (!hasResult()) {
+            if (hasException()) {
                 onException.handleException(getException());
             }
             return this;
@@ -109,7 +131,9 @@ public final class Promises {
 
         @Override
         public final Promise<V, E> thenOnResultOrException(final Runnable onResultOrException) {
-            onResultOrException.run();
+            if (hasResult() || hasException()) {
+                onResultOrException.run();
+            }
             return this;
         }
 
@@ -131,23 +155,27 @@ public final class Promises {
             try {
                 if (hasResult()) {
                     return newResultPromise(onResult.apply(getResult()));
-                } else {
+                } else if (hasException()) {
                     return newResultPromise(onException.apply(getException()));
+                } else {
+                    return new RuntimeExceptionPromise<>(getRuntimeException());
                 }
+            } catch (final RuntimeException e) {
+                return new RuntimeExceptionPromise<>(e);
             } catch (final Exception e) {
                 return newExceptionPromise((EOUT) e);
             }
         }
 
-
         @Override
         public final Promise<V, E> thenAlways(final Runnable onResultOrException) {
-            return thenOnResultOrException(onResultOrException);
+            return thenFinally(onResultOrException);
         }
 
         @Override
         public Promise<V, E> thenFinally(Runnable onResultOrException) {
-            return thenOnResultOrException(onResultOrException);
+            onResultOrException.run();
+            return this;
         }
 
         @Override
@@ -170,19 +198,67 @@ public final class Promises {
             try {
                 if (hasResult()) {
                     return onResult.apply(getResult());
-                } else {
+                } else if (hasException()) {
                     return onException.apply(getException());
+                } else {
+                    return new RuntimeExceptionPromise<>(getRuntimeException());
                 }
+            } catch (final RuntimeException e) {
+                return new RuntimeExceptionPromise<>(e);
             } catch (final Exception e) {
                 return newExceptionPromise((EOUT) e);
             }
         }
 
+        @Override
+        public void thenOnRuntimeException(RuntimeExceptionHandler onRuntimeException) {
+            if (getRuntimeException() != null) {
+                onRuntimeException.handleRuntimeException(getRuntimeException());
+            }
+        }
+
+        abstract RuntimeException getRuntimeException();
+
         abstract E getException();
 
         abstract V getResult();
 
+        abstract boolean hasException();
+
         abstract boolean hasResult();
+    }
+
+    private static final class RuntimeExceptionPromise<V, E extends Exception> extends CompletedPromise<V, E> {
+        private final RuntimeException runtimeException;
+
+        private RuntimeExceptionPromise(RuntimeException runtimeException) {
+            this.runtimeException = runtimeException;
+        }
+
+        @Override
+        RuntimeException getRuntimeException() {
+            return runtimeException;
+        }
+
+        @Override
+        E getException() {
+            return null;
+        }
+
+        @Override
+        V getResult() {
+            return null;
+        }
+
+        @Override
+        boolean hasException() {
+            return false;
+        }
+
+        @Override
+        boolean hasResult() {
+            return false;
+        }
     }
 
     private static final class ExceptionPromise<V, E extends Exception> extends CompletedPromise<V, E> {
@@ -193,6 +269,11 @@ public final class Promises {
         }
 
         @Override
+        RuntimeException getRuntimeException() {
+            return null;
+        }
+
+        @Override
         E getException() {
             return exception;
         }
@@ -200,6 +281,11 @@ public final class Promises {
         @Override
         V getResult() {
             throw new IllegalStateException();
+        }
+
+        @Override
+        boolean hasException() {
+            return true;
         }
 
         @Override
@@ -217,6 +303,11 @@ public final class Promises {
         }
 
         @Override
+        RuntimeException getRuntimeException() {
+            return null;
+        }
+
+        @Override
         E getException() {
             throw new IllegalStateException();
         }
@@ -224,6 +315,11 @@ public final class Promises {
         @Override
         V getResult() {
             return value;
+        }
+
+        @Override
+        boolean hasException() {
+            return false;
         }
 
         @Override

@@ -376,7 +376,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
         try {
             chained.handleRuntimeException(runtimeException);
         } catch (Exception ignored) {
-            LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!");
+            LOGGER.error("Runtime exception handler threw a RuntimeException which cannot be handled!", ignored);
         }
     }
 
@@ -484,8 +484,8 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     private void fireListener(final StateListener<V, E> listener, int stateBefore) {
         try {
             listener.handleStateChange(stateBefore, result, exception, runtimeException);
-        } catch (Exception e) {
-            LOGGER.error("State change listener threw a RuntimeException which cannot be handled!");
+        } catch (Exception ignored) {
+            LOGGER.error("State change listener threw a RuntimeException which cannot be handled!", ignored);
         }
     }
 
