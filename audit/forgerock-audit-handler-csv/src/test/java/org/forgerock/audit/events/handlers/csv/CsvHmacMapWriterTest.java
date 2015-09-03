@@ -39,29 +39,25 @@ public class CsvHmacMapWriterTest {
         ICsvMapWriter csvMapWriter = new CsvMapWriter(writer , CsvPreference.STANDARD_PREFERENCE);
         HmacCalculator hmacCalculator = mock(HmacCalculator.class);
         when(hmacCalculator.calculate(Mockito.any(byte[].class))).thenReturn("myHMAC");
-        CsvHmacMapWriter csvHMACWriter = new CsvHmacMapWriter(csvMapWriter, hmacCalculator);
-
-        Map<String, String> values = Collections.singletonMap("foo", "bar");
-        String nameMapping = "foo";
-        csvHMACWriter.write(values, nameMapping);
-
-        csvHMACWriter.close();
+        try (CsvHmacMapWriter csvHMACWriter = new CsvHmacMapWriter(csvMapWriter, hmacCalculator)) {
+            Map<String, String> values = Collections.singletonMap("foo", "bar");
+            String nameMapping = "foo";
+            csvHMACWriter.write(values, nameMapping);
+        }
 
         assertThat(writer.toString()).isEqualTo("bar,myHMAC\r\n");
     }
 
     @Test
-    public void shouldGenerateHMACHeader() throws Exception {
+    public void shouldGenerateHeaderWithExtraColumns() throws Exception {
         Writer writer = new StringWriter();
         ICsvMapWriter csvMapWriter = new CsvMapWriter(writer , CsvPreference.STANDARD_PREFERENCE);
         HmacCalculator hmacCalculator = mock(HmacCalculator.class);
         when(hmacCalculator.calculate(Mockito.any(byte[].class))).thenReturn("myHMAC");
-        CsvHmacMapWriter csvHMACWriter = new CsvHmacMapWriter(csvMapWriter, hmacCalculator);
-
-        String header = "foo";
-        csvHMACWriter.writeHeader(header);
-
-        csvHMACWriter.close();
+        try (CsvHmacMapWriter csvHMACWriter = new CsvHmacMapWriter(csvMapWriter, hmacCalculator)) {
+            String header = "foo";
+            csvHMACWriter.writeHeader(header);
+        }
 
         assertThat(writer.toString()).isEqualTo("foo,HMAC\r\n");
     }
