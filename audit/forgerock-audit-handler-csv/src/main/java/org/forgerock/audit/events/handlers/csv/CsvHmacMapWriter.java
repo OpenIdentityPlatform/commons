@@ -90,7 +90,7 @@ public class CsvHmacMapWriter implements ICsvMapWriter {
 
         Map<String, Object> newValues = insertHMACSignature(values, nameMapping);
 
-        CellProcessor[] newProcessors = new CellProcessor[processors.length + 1];
+        CellProcessor[] newProcessors = new CellProcessor[newNameMapping.length];
         System.arraycopy(processors, 0, newProcessors, 0, processors.length);
         newProcessors[processors.length] = null;
 
