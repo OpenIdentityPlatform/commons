@@ -36,15 +36,11 @@ import java.security.NoSuchAlgorithmException;
 final class ExampleTokenHandlerFactory implements SnapshotTokenHandlerFactory {
 
     private final byte[] sharedKey;
+    private final long tokenLifeTimeInSeconds;
 
-    /**
-     * Creates a new snapshot token handler factory.
-     *
-     * @param sharedKey
-     *         shared key used by the underlying token handler
-     */
-    ExampleTokenHandlerFactory(byte[] sharedKey) {
+    ExampleTokenHandlerFactory(byte[] sharedKey, long tokenLifeTimeInSeconds) {
         this.sharedKey = sharedKey;
+        this.tokenLifeTimeInSeconds = tokenLifeTimeInSeconds;
     }
 
     @Override
@@ -70,7 +66,8 @@ final class ExampleTokenHandlerFactory implements SnapshotTokenHandlerFactory {
                     EncryptionMethod.A128CBC_HS256,
                     keyPairGen.generateKeyPair(),
                     JwsAlgorithm.HS256,
-                    signingHandler);
+                    signingHandler,
+                    tokenLifeTimeInSeconds);
 
         } catch (NoSuchAlgorithmException nsaE) {
             throw new RuntimeException("Unable to create key pair for encryption", nsaE);

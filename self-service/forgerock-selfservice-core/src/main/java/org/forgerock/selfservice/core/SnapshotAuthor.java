@@ -16,7 +16,8 @@
 
 package org.forgerock.selfservice.core;
 
-import java.util.Map;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 
 /**
  * Responsible for authoring new tokens used to key context snapshots.
@@ -29,11 +30,14 @@ interface SnapshotAuthor {
      * Captures a snapshot of the state held within the passed map.
      *
      * @param state
-     *         map of key/value pairs
+     *         json state
      *
      * @return a snapshot token used as a reference back to the state
+     *
+     * @throws ResourceException
+     *         should some issue occur creating a snapshot
      */
-    String captureSnapshotOf(Map<String, String> state);
+    String captureSnapshotOf(JsonValue state) throws ResourceException;
 
     /**
      * Retrieves a previous snapshot of some state referenced by the token.
@@ -41,8 +45,11 @@ interface SnapshotAuthor {
      * @param snapshotToken
      *         the snapshot token
      *
-     * @return a key/value map containing the state
+     * @return json state
+     *
+     * @throws ResourceException
+     *         should some issue occur retrieving a snapshot
      */
-    Map<String, String> retrieveSnapshotFrom(String snapshotToken);
+    JsonValue retrieveSnapshotFrom(String snapshotToken) throws ResourceException;
 
 }

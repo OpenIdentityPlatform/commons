@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Anonymous process service progresses a chain of {@link ProgressStage}
@@ -144,7 +143,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
      * Responsible for retrieving the requirements from the first stage in the flow.
      */
     private JsonValue initiateProcess(Context httpContext) throws ResourceException {
-        ProcessContext context = ProcessContext
+        ProcessContextImpl context = ProcessContextImpl
                 .newBuilder(httpContext, INITIAL_STAGE_INDEX)
                 .build();
 
@@ -168,19 +167,14 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
      */
     private JsonValue progressProcess(Context httpContext, JsonValue clientInput) throws ResourceException {
         JsonValue snapshotTokenValue = clientInput.get(TOKEN_FIELD);
-        ProcessContext.Builder contextBuilder;
+        ProcessContextImpl.Builder contextBuilder;
 
         if (snapshotTokenValue.isNotNull()) {
-            String snapshotToken = snapshotTokenValue.asString();
-
-            if (!snapshotTokenHandler.validate(snapshotToken)) {
-                throw new BadRequestException("Invalid token");
-            }
-
-            Map<String, String> stageState = snapshotAuthor.retrieveSnapshotFrom(snapshotToken);
-            contextBuilder = ProcessContext.newBuilder(httpContext, stageState);
+            JsonValue jsonContext = snapshotAuthor
+                    .retrieveSnapshotFrom(snapshotTokenValue.asString());
+            contextBuilder = ProcessContextImpl.newBuilder(httpContext, jsonContext);
         } else {
-            contextBuilder = ProcessContext.newBuilder(httpContext, INITIAL_STAGE_INDEX);
+            contextBuilder = ProcessContextImpl.newBuilder(httpContext, INITIAL_STAGE_INDEX);
         }
 
         JsonValue input = clientInput.get(INPUT_FIELD);
@@ -189,7 +183,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
             throw new BadRequestException("No input provided");
         }
 
-        ProcessContext context = contextBuilder
+        ProcessContextImpl context = contextBuilder
                 .setInput(input)
                 .build();
 
@@ -202,7 +196,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         return enactContext(context, stage);
     }
 
-    private JsonValue enactContext(ProcessContext context, ProgressStageWrapper<?> stage) throws ResourceException {
+    private JsonValue enactContext(ProcessContextImpl context, ProgressStageWrapper<?> stage) throws ResourceException {
         StageResponse response = stage.advance(context);
 
         if (response.hasRequirements()) {
@@ -210,11 +204,11 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
             return renderRequirementsWithSnapshot(context, stage, response);
         }
 
-        return handleProgression(context, stage, response);
+        return handleProgression(context, stage);
     }
 
-    private JsonValue handleProgression(ProcessContext context, ProgressStageWrapper<?> stage,
-                                        StageResponse response) throws ResourceException {
+    private JsonValue handleProgression(ProcessContextImpl context,
+                                        ProgressStageWrapper<?> stage) throws ResourceException {
         if (context.getStageIndex() + 1 == stageConfigs.size()) {
             // Flow complete, render completion response.
             return renderCompletion(stage);
@@ -223,10 +217,9 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         // Stage satisfied, move onto the next stage.
         int nextIndex = context.getStageIndex() + 1;
 
-        ProcessContext nextContext = ProcessContext
+        ProcessContextImpl nextContext = ProcessContextImpl
                 .newBuilder(context.getHttpContext(), nextIndex)
-                .addState(context.getState())
-                .addState(response.getState())
+                .setState(context.getState())
                 .build();
 
         ProgressStageWrapper<?> nextStage = retrieveStage(nextContext);
@@ -250,15 +243,14 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         return enactContext(nextContext, nextStage);
     }
 
-    private JsonValue renderRequirementsWithSnapshot(ProcessContext context, ProgressStageWrapper<?> stage,
+    private JsonValue renderRequirementsWithSnapshot(ProcessContextImpl context, ProgressStageWrapper<?> stage,
                                                      StageResponse response) throws ResourceException {
-        ProcessContext updatedContext = ProcessContext
+        ProcessContextImpl updatedContext = ProcessContextImpl
                 .newBuilder(context)
                 .setStageTag(response.getStageTag())
-                .addState(response.getState())
                 .build();
 
-        String snapshotToken = snapshotAuthor.captureSnapshotOf(updatedContext.toFlattenedMap());
+        String snapshotToken = snapshotAuthor.captureSnapshotOf(updatedContext.toJson());
 
         if (response.hasCallback()) {
             response.getCallback().snapshotTokenPreview(updatedContext, snapshotToken);
@@ -286,7 +278,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                                         field(SUCCESS_FIELD, true)))));
     }
 
-    private ProgressStageWrapper<?> retrieveStage(ProcessContext context) {
+    private ProgressStageWrapper<?> retrieveStage(ProcessContextImpl context) {
         if (context.getStageIndex() >= stageConfigs.size()) {
             throw new StageConfigException("Invalid stage index " + context.getStageIndex());
         }

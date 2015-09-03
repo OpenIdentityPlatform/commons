@@ -88,7 +88,7 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
                 .get(config.getIdentityIdField())
                 .asString();
 
-        builder.addState(USER_ID_FIELD, userId);
+        context.putState(USER_ID_FIELD, userId);
 
         return user
                 .get(config.getIdentityEmailField())

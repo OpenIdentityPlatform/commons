@@ -16,191 +16,65 @@
 
 package org.forgerock.selfservice.core;
 
-import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
-import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
-
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.util.Reject;
-
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Process context represents the current state of the workflow.
  *
- * @since 0.1.0
+ * @since 0.2.0
  */
-public final class ProcessContext {
-
-    private static final String STAGE_INDEX_KEY = "stageIndex";
-    private static final String STAGE_TAG_KEY = "stageTag";
-
-    private final Context httpContext;
-    private final int stageIndex;
-    private final String stageTag;
-    private final JsonValue input;
-    private final Map<String, String> state;
-
-    private ProcessContext(Builder builder) {
-        httpContext = builder.httpContext;
-        stageIndex = builder.stageIndex;
-        stageTag = builder.stageTag;
-        input = builder.input;
-        state = builder.state;
-    }
+public interface ProcessContext {
 
     /**
      * Gets the http context.
      *
      * @return the http context
      */
-    public Context getHttpContext() {
-        return httpContext;
-    }
-
-    /**
-     * Gets the current stage index in the flow.
-     *
-     * @return the stage index
-     */
-    public int getStageIndex() {
-        return stageIndex;
-    }
+    Context getHttpContext();
 
     /**
      * Gets the current stage tag defined by the previously invoked stage.
      *
      * @return the stage tag
      */
-    public String getStageTag() {
-        return stageTag;
-    }
+    String getStageTag();
 
     /**
      * Gets the input provided by the client. Empty json object represents no input.
      *
      * @return the input
      */
-    public JsonValue getInput() {
-        return input;
-    }
+    JsonValue getInput();
 
     /**
-     * Determines whether the keyed state exists.
+     * Determines whether state defined by the json pointer exists.
      *
-     * @param key
-     *         the key for the state
+     * @param jsonPointer
+     *         json pointer to the state
      *
      * @return whether of the a value exists
      */
-    public boolean containsState(String key) {
-        return state.containsKey(key);
-    }
+    boolean containsState(String jsonPointer);
 
     /**
      * Allows retrieval of state persisted throughout the flow.
      *
-     * @param key
-     *         the state key
+     * @param jsonPointer
+     *         json pointer to the state
      *
      * @return the corresponding value
      */
-    public String getState(String key) {
-        return state.get(key);
-    }
+    JsonValue getState(String jsonPointer);
 
-    Map<String, String> getState() {
-        return Collections.unmodifiableMap(state);
-    }
-
-    Map<String, String> toFlattenedMap() {
-        Map<String, String> flattenedContext = new HashMap<>(state);
-        flattenedContext.put(STAGE_INDEX_KEY, String.valueOf(stageIndex));
-        flattenedContext.put(STAGE_TAG_KEY, stageTag);
-        return flattenedContext;
-    }
-
-    /*
-     * Builder assists with the creation of {@link ProcessContext} instance.
+    /**
+     * Puts a value into the state referenced by the json pointer.
+     *
+     * @param jsonPointer
+     *         json pointer to where the state should be added
+     * @param value
+     *         the value to be added
      */
-    static final class Builder {
-
-        private final Context httpContext;
-        private final int stageIndex;
-        private String stageTag;
-        private final Map<String, String> state;
-        private JsonValue input;
-
-        private Builder(Context httpContext, int stageIndex) {
-            Reject.ifNull(httpContext);
-            Reject.ifTrue(stageIndex < 0);
-            this.httpContext = httpContext;
-            this.stageIndex = stageIndex;
-            stageTag = INITIAL_TAG;
-            state = new HashMap<>();
-            input = emptyJson();
-        }
-
-        private Builder(ProcessContext previous) {
-            Reject.ifNull(previous);
-            stageIndex = previous.stageIndex;
-            httpContext = previous.httpContext;
-            stageTag = previous.stageTag;
-            state = new HashMap<>(previous.state);
-            input = previous.input;
-        }
-
-        private Builder(Context httpContext, Map<String, String> flattenedContext) {
-            Reject.ifNull(httpContext, flattenedContext);
-            Reject.ifFalse(flattenedContext.containsKey(STAGE_INDEX_KEY), "Stage index missing");
-
-            this.httpContext = httpContext;
-
-            Map<String, String> localCopy = new HashMap<>(flattenedContext);
-            stageIndex = Integer.parseInt(localCopy.remove(STAGE_INDEX_KEY));
-            stageTag = localCopy.containsKey(STAGE_TAG_KEY)
-                    ? localCopy.remove(STAGE_TAG_KEY) : INITIAL_TAG;
-
-            state = localCopy;
-            input = emptyJson();
-        }
-
-        Builder setStageTag(String stageTag) {
-            Reject.ifNull(stageTag);
-            this.stageTag = stageTag;
-            return this;
-        }
-
-        Builder addState(Map<String, String> state) {
-            Reject.ifNull(state);
-            this.state.putAll(state);
-            return this;
-        }
-
-        Builder setInput(JsonValue input) {
-            Reject.ifNull(input);
-            this.input = input;
-            return this;
-        }
-
-        ProcessContext build() {
-            return new ProcessContext(this);
-        }
-
-    }
-
-    static Builder newBuilder(Context httpContext, int stageIndex) {
-        return new Builder(httpContext, stageIndex);
-    }
-
-    static Builder newBuilder(Context httpContext, Map<String, String> flattenedContext) {
-        return new Builder(httpContext, flattenedContext);
-    }
-
-    static Builder newBuilder(ProcessContext previous) {
-        return new Builder(previous);
-    }
+    void putState(String jsonPointer, Object value);
 
 }

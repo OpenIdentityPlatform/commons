@@ -110,10 +110,11 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
                 .setStorageType(StorageType.STATELESS.name());
 
         byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(StandardCharsets.UTF_8);
+        long tokenLifeTimeInSeconds = 3L * 60L;
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
                 new ExampleProgressStageFactory(crestConnectionFactory),
-                new ExampleTokenHandlerFactory(sharedKey), new SimpleInMemoryStore());
+                new ExampleTokenHandlerFactory(sharedKey, tokenLifeTimeInSeconds), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
     }
@@ -138,10 +139,11 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
                 .setStorageType(StorageType.STATELESS.name());
 
         byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(StandardCharsets.UTF_8);
+        long tokenLifeTimeInSeconds = 3L * 60L;
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
                 new ExampleProgressStageFactory(crestConnectionFactory),
-                new ExampleTokenHandlerFactory(sharedKey), new SimpleInMemoryStore());
+                new ExampleTokenHandlerFactory(sharedKey, tokenLifeTimeInSeconds), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
     }

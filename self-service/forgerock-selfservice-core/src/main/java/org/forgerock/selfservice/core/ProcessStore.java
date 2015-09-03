@@ -16,7 +16,7 @@
 
 package org.forgerock.selfservice.core;
 
-import java.util.Map;
+import org.forgerock.json.JsonValue;
 
 /**
  * Process store is used to persist state throughout a given flow cycle.
@@ -33,7 +33,7 @@ public interface ProcessStore {
      * @param state
      *         the state
      */
-    void add(String key, Map<String, String> state);
+    void add(String key, JsonValue state);
 
     /**
      * Removes the state out of the store.
@@ -43,6 +43,6 @@ public interface ProcessStore {
      *
      * @return the state
      */
-    Map<String, String> remove(String key);
+    JsonValue remove(String key);
 
 }

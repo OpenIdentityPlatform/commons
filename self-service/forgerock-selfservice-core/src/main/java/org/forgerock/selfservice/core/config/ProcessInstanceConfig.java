@@ -42,7 +42,7 @@ public final class ProcessInstanceConfig {
      *
      * @return this config
      */
-    public ProcessInstanceConfig setStageConfigs(List<StageConfig> stageConfigs) {
+    public ProcessInstanceConfig setStageConfigs(List<? extends StageConfig> stageConfigs) {
         Reject.ifNull(stageConfigs);
         this.stageConfigs = new ArrayList<>(stageConfigs);
         return this;

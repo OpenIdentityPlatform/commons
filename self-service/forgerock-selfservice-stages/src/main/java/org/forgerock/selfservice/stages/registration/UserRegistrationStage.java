@@ -90,7 +90,10 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
             throw new BadRequestException("user has not been specified");
         }
 
-        String email = context.getState(EMAIL_FIELD);
+        String email = context
+                .getState(EMAIL_FIELD)
+                .asString();
+
         user.put(new JsonPointer(config.getIdentityEmailField()), email);
         createUser(context.getHttpContext(), userId, user, config);
 

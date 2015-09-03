@@ -14,38 +14,42 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.example;
+package org.forgerock.selfservice.stages.utils;
 
+import org.codehaus.jackson.map.ObjectMapper;
+import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
-import org.forgerock.selfservice.core.ProcessStore;
 
+import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Simple local stores in memory.
+ * Simple utility class to parse json string into a json value.
  *
- * @since 0.1.0
+ * @since 0.2.0
  */
-public final class SimpleInMemoryStore implements ProcessStore {
+public final class JsonUtils {
 
-    private final Map<String, JsonValue> localStore;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private JsonUtils() {
+        throw new UnsupportedOperationException();
+    }
 
     /**
-     * Creates a new basic local storage instance.
+     * Given a json string return a corresponding json value.
+     *
+     * @param json
+     *         json string
+     *
+     * @return json value
      */
-    public SimpleInMemoryStore() {
-        localStore = new ConcurrentHashMap<>();
-    }
-
-    @Override
-    public JsonValue remove(String key) {
-        return localStore.remove(key);
-    }
-
-    @Override
-    public void add(String key, JsonValue state) {
-        localStore.put(key, state);
+    public static JsonValue toJsonValue(String json) {
+        try {
+            return new JsonValue(MAPPER.readValue(json, Map.class));
+        } catch (IOException e) {
+            throw new JsonException("Failed to parse json", e);
+        }
     }
 
 }

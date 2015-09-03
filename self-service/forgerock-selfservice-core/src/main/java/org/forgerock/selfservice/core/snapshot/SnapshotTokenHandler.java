@@ -16,7 +16,8 @@
 
 package org.forgerock.selfservice.core.snapshot;
 
-import java.util.Map;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 
 /**
  * Responsible for the validation, generation and parsing of snapshot tokens used for keying a snapshot of some state.
@@ -26,33 +27,40 @@ import java.util.Map;
 public interface SnapshotTokenHandler {
 
     /**
-     * Validates the passed snapshot token string.
-     *
-     * @param snapshotToken
-     *         the token string
-     *
-     * @return whether the snapshotToken is valid
-     */
-    boolean validate(String snapshotToken);
-
-    /**
      * Generates a new snapshot token using the state.
      *
      * @param state
      *         the state
      *
      * @return snapshot token
+     *
+     * @throws ResourceException
+     *         thrown should some issue occur creating the snapshot token
      */
-    String generate(Map<String, String> state);
+    String generate(JsonValue state) throws ResourceException;
 
     /**
-     * Parses the token, extracting any encapsulated state.
+     * Validates the passed snapshot token.
      *
      * @param snapshotToken
-     *         the token string
+     *         the snapshot token to be validated
      *
-     * @return any encapsulated state
+     * @throws ResourceException
+     *         thrown should some issue be found with the token
      */
-    Map<String, String> parse(String snapshotToken);
+    void validate(String snapshotToken) throws ResourceException;
+
+    /**
+     * Validates and parses the token, extracting any encapsulated state.
+     *
+     * @param snapshotToken
+     *         the snapshot token to be validated and parsed
+     *
+     * @return the state
+     *
+     * @throws ResourceException
+     *         thrown should some issue be found with the token
+     */
+    JsonValue validateAndExtractState(String snapshotToken) throws ResourceException;
 
 }

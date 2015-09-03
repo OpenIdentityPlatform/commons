@@ -90,6 +90,9 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
 
         final String code = UUID.randomUUID().toString();
 
+        context.putState(EMAIL_FIELD, mail);
+        context.putState("code", code);
+
         JsonValue requirements = RequirementsBuilder
                 .newInstance("Verify emailed code")
                 .addRequireProperty("code", "Enter code emailed")
@@ -106,8 +109,6 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
         };
 
         return builder
-                .addState("code", code)
-                .addState(EMAIL_FIELD, mail)
                 .setStageTag(VALIDATE_CODE_TAG)
                 .setRequirements(requirements)
                 .setCallback(callback)
@@ -133,7 +134,9 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
                                               StageResponse.Builder builder) throws ResourceException;
 
     private StageResponse validateCode(ProcessContext context) throws ResourceException {
-        String originalCode = context.getState("code");
+        String originalCode = context
+                .getState("code")
+                .asString();
 
         String submittedCode = context
                 .getInput()

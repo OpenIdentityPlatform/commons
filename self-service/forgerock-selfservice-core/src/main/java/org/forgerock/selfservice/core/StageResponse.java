@@ -23,10 +23,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.util.Reject;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Stage response represents a response from having invoked a progress stage.
  *
@@ -36,13 +32,11 @@ public final class StageResponse {
 
     private final String stageTag;
     private final JsonValue requirements;
-    private final Map<String, String> state;
     private final SnapshotTokenCallback callback;
 
     private StageResponse(Builder builder) {
         stageTag = builder.stageTag;
         requirements = builder.requirements;
-        state = builder.state;
         callback = builder.callback;
     }
 
@@ -56,10 +50,6 @@ public final class StageResponse {
 
     JsonValue getRequirements() {
         return requirements;
-    }
-
-    Map<String, String> getState() {
-        return Collections.unmodifiableMap(state);
     }
 
     boolean hasCallback() {
@@ -77,13 +67,11 @@ public final class StageResponse {
 
         private String stageTag;
         private JsonValue requirements;
-        private final Map<String, String> state;
         private SnapshotTokenCallback callback;
 
         private Builder() {
             stageTag = INITIAL_TAG;
             requirements = emptyJson();
-            state = new HashMap<>();
         }
 
         /**
@@ -97,22 +85,6 @@ public final class StageResponse {
         public Builder setStageTag(String stageTag) {
             Reject.ifNull(stageTag);
             this.stageTag = stageTag;
-            return this;
-        }
-
-        /**
-         * Adds state to be preserved throughout the flow.
-         *
-         * @param key
-         *         state key
-         * @param value
-         *         corresponding state value
-         *
-         * @return this builder
-         */
-        public Builder addState(String key, String value) {
-            Reject.ifNull(key, value);
-            state.put(key, value);
             return this;
         }
 

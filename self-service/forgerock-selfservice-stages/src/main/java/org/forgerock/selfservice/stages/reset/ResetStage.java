@@ -69,7 +69,10 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
 
     @Override
     public StageResponse advance(ProcessContext context, ResetStageConfig config) throws ResourceException {
-        String userId = context.getState(USER_ID_FIELD);
+        String userId = context
+                .getState(USER_ID_FIELD)
+                .asString();
+
         String password = context
                 .getInput()
                 .get("password")

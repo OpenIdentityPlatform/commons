@@ -16,10 +16,11 @@
 
 package org.forgerock.selfservice.core;
 
-import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
+import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
-import java.util.Collections;
-import java.util.Map;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 
 /**
  * Indicates whether the service should operate in stateless or stateful mode.
@@ -91,14 +92,15 @@ public enum StorageType {
         }
 
         @Override
-        public String captureSnapshotOf(Map<String, String> state) {
-            String snapshotToken = handler.generate(Collections.<String, String>emptyMap());
+        public String captureSnapshotOf(JsonValue state) throws ResourceException {
+            String snapshotToken = handler.generate(emptyJson());
             store.add(snapshotToken, state);
             return snapshotToken;
         }
 
         @Override
-        public Map<String, String> retrieveSnapshotFrom(String snapshotToken) {
+        public JsonValue retrieveSnapshotFrom(String snapshotToken) throws ResourceException {
+            handler.validate(snapshotToken);
             return store.remove(snapshotToken);
         }
 
@@ -118,13 +120,13 @@ public enum StorageType {
         }
 
         @Override
-        public String captureSnapshotOf(Map<String, String> state) {
+        public String captureSnapshotOf(JsonValue state) throws ResourceException {
             return handler.generate(state);
         }
 
         @Override
-        public Map<String, String> retrieveSnapshotFrom(String snapshotToken) {
-            return handler.parse(snapshotToken);
+        public JsonValue retrieveSnapshotFrom(String snapshotToken) throws ResourceException {
+            return handler.validateAndExtractState(snapshotToken);
         }
 
     }

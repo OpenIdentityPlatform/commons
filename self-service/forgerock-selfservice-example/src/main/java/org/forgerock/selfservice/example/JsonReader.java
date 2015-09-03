@@ -16,15 +16,14 @@
 
 package org.forgerock.selfservice.example;
 
-import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
+import org.forgerock.selfservice.stages.utils.JsonUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Map;
 
 /**
  * Simple utility class to parse json string into a json value.
@@ -33,26 +32,8 @@ import java.util.Map;
  */
 public final class JsonReader {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
-
     private JsonReader() {
         throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Given a json string return a corresponding json value.
-     *
-     * @param json
-     *         json string
-     *
-     * @return json value
-     */
-    public static JsonValue toJsonValue(String json) {
-        try {
-            return new JsonValue(MAPPER.readValue(json, Map.class));
-        } catch (IOException e) {
-            throw new JsonException("Failed to parse json", e);
-        }
     }
 
     /**
@@ -75,7 +56,7 @@ public final class JsonReader {
                 contents.append(line).append('\n');
             }
 
-            return toJsonValue(contents.toString());
+            return JsonUtils.toJsonValue(contents.toString());
         } catch (IOException e) {
             throw new JsonException("Failed to parse json", e);
         }
