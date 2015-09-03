@@ -38,7 +38,7 @@ public class ApiVersionRouterContext extends AbstractContext {
 
     private static final String DEFAULT_VERSION_BEHAVIOUR = "defaultVersionBehaviour";
     private static final String WARNING_ENABLED = "warningEnabled";
-    public static final boolean DEFAULT_WARNING_ENABLED = true;
+    private static final boolean DEFAULT_WARNING_ENABLED = true;
 
     private Version protocolVersion;
     private Version resourceVersion;
