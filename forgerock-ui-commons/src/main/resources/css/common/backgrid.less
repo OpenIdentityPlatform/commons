@@ -180,3 +180,49 @@
         }
     }
 }
+
+@media (max-width: 899px) {
+  .backgrid {
+    tbody > tr:first-of-type .smallScreenCell {
+      border-top: none;
+    }
+
+    thead {
+      display: none;
+    }
+
+    td.smallScreenCell {
+      a {
+        color: @text-color;
+        cursor: pointer;
+      }
+    }
+
+    th:not(.smallScreenCell), td:not(.smallScreenCell) {
+      display: none;
+      border: none;
+    }
+  }
+}
+
+@media (min-width: 900px) {
+  .backgrid {
+    .smallScreenCell {
+      display: none !important;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    th:not(.smallScreenCell), td:not(.smallScreenCell) {
+      display: table-cell;
+      border-bottom: 1px solid #eee;
+
+      a {
+        color: @text-color;
+        cursor: pointer;
+      }
+    }
+  }
+}

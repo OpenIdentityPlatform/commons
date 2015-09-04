@@ -21,8 +21,9 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
     "backbone",
     "backbone.paginator",
     "org/forgerock/commons/ui/common/main/AbstractModel",
-    "org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function(_, Backbone, BackbonePaginator, AbstractModel, ServiceInvoker) {
+    "org/forgerock/commons/ui/common/main/ServiceInvoker",
+    "org/forgerock/commons/ui/common/components/Messages"
+], function(_, Backbone, BackbonePaginator, AbstractModel, ServiceInvoker, Messages) {
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractCollection
      *
@@ -69,8 +70,28 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
                     (this.getPagingType() === "offset" && this.state.totalRecords >= ((this.state.currentPage+1) * this.state.pageSize));
         },
         sync: function (method, collection, options) {
+            var params = [],
+                includeList = ["_pageSize", "_pagedResultsOffset", "_sortKeys", "_totalPagedResultsPolicy", "_queryFilter"];
+            
             if (method === "read") {
                 delete options.data.order; // BackbonePaginator seems to insist that this field be included anytime sorting is performed.
+
+                _.forIn(options.data, function (val, key) {
+                    if (_.include(includeList, key)) {
+                        params.push(key + "=" + val);
+                    }
+                });
+
+                options.data = params.join("&");
+                options.processData = false;
+
+                options.error = function (response) {
+                    Messages.addMessage({
+                        type: Messages.TYPE_DANGER,
+                        response: response
+                    });
+                };
+                
                 return ServiceInvoker.restCall(options);
             } else {
                 return BackbonePaginator.prototype.sync.apply(this, arguments);
@@ -130,7 +151,13 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
             }
 
             // totalPagedResults may not be defined in the response, depending on the policy
-            this.state.totalRecords = _.isFinite(resp.totalPagedResults) ? resp.totalPagedResults : null;
+            this.state.totalRecords = _.isFinite(resp.totalPagedResults) && resp.totalPagedResults > -1 ? resp.totalPagedResults : null;
+            
+            if (!this.state.totalPages && this.state.totalRecords) {
+                this.state.totalPages = Math.ceil(this.state.totalRecords / this.state.pageSize);
+            } else {
+                this.state.totalPages = null;
+            }
         },
         parseRecords: function (resp) {
             return resp.result;
