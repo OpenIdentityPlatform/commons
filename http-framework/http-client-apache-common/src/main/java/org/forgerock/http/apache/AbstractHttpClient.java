@@ -18,7 +18,6 @@ package org.forgerock.http.apache;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Date;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderIterator;
@@ -28,7 +27,6 @@ import org.apache.http.StatusLine;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.utils.DateUtils;
 import org.apache.http.entity.InputStreamEntity;
 import org.forgerock.http.header.ConnectionHeader;
 import org.forgerock.http.header.ContentEncodingHeader;
@@ -142,16 +140,6 @@ public abstract class AbstractHttpClient implements HttpClient {
                 }
             }
         }
-
-        Header dateHeader = clientRequest.getFirstHeader("Date");
-        if (dateHeader != null && request.getTime() == -1) {
-            request.setTime(DateUtils.parseDate(dateHeader.getValue()).getTime());
-        } else if (dateHeader == null && request.getTime() != -1) {
-            Date date = new Date();
-            date.setTime(request.getTime());
-            clientRequest.addHeader("Date", DateUtils.formatDate(date));
-        }
-
         return clientRequest;
     }
 

@@ -43,6 +43,7 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.Session;
 import org.forgerock.http.context.AttributesContext;
 import org.forgerock.http.context.ClientContext;
+import org.forgerock.http.context.RequestAuditContext;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.context.SessionContext;
 import org.forgerock.http.io.Buffer;
@@ -186,8 +187,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         final Request request = createRequest(req);
         final Session session = new ServletSession(req);
         final SessionContext sessionContext = new SessionContext(new RootContext(), session);
-        final AttributesContext attributesContext = new AttributesContext(sessionContext);
-
+        final AttributesContext attributesContext = new AttributesContext(new RequestAuditContext(sessionContext));
 
         /* TODO
          * add comment on why this was added as probably shouldn't stick around as
@@ -256,7 +256,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
         // populate request
         Request request = new Request();
         request.setMethod(req.getMethod());
-        request.setTime(System.currentTimeMillis());
         try {
             request.setUri(Uris.create(req.getScheme(), null, req.getServerName(),
                                        req.getServerPort(), req.getRequestURI(), req.getQueryString(), null));

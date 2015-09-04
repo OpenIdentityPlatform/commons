@@ -38,10 +38,6 @@ public final class Request extends MessageImpl<Request> {
     /** The fully-qualified URI of the resource being accessed. */
     private MutableUri uri;
 
-    /** The time of the request. */
-    private long time = -1;
-
-
     /**
      * Creates a new request message.
      */
@@ -153,24 +149,5 @@ public final class Request extends MessageImpl<Request> {
     public Request setVersion(String version) {
         setVersion0(version);
         return this;
-    }
-
-    /**
-     * Sets the time of the request.
-     * @param time The time (milliseconds since the UTC epoch) of the request.
-     * @return This request.
-     */
-    public Request setTime(long time) {
-        this.time = time;
-        return this;
-    }
-
-    /**
-     * Gets the time of the request. For a server-side request this should be the time the request was received
-     * by the HTTP Framework. For client-side requests, it should be the time the request was sent.
-     * @return The time (milliseconds since the UTC epoch) of the request, or -1 if unknown.
-     */
-    public long getTime() {
-        return time;
     }
 }
