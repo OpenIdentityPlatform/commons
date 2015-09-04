@@ -199,7 +199,15 @@ public final class RouteMatchers {
 
         @Override
         public RouteMatch evaluate(Context context, Request request) {
-            AcceptApiVersionHeader apiVersionHeader = AcceptApiVersionHeader.valueOf(request);
+            AcceptApiVersionHeader apiVersionHeader;
+            try {
+                apiVersionHeader = AcceptApiVersionHeader.valueOf(request);
+            } catch (IllegalArgumentException ignored) {
+                // This exception is thrown when trying to parse an invalid
+                // Accept-API-Version header. null is returned to signify a bad
+                // request.
+                return null;
+            }
             return delegate.evaluate(context, apiVersionHeader.getResourceVersion());
         }
 

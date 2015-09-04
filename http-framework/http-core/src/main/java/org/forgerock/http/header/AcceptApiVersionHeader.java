@@ -39,6 +39,7 @@ public final class AcceptApiVersionHeader implements Header {
      *
      * @param message The message to initialize the header from.
      * @return The parsed header.
+     * @throws IllegalArgumentException If the version header is in an invalid format.
      */
     public static AcceptApiVersionHeader valueOf(Message message) {
         return valueOf(parseSingleValuedHeader(message, NAME));
@@ -49,6 +50,7 @@ public final class AcceptApiVersionHeader implements Header {
      *
      * @param string The value to initialize the header from.
      * @return The parsed header.
+     * @throws IllegalArgumentException If the version header is in an invalid format.
      */
     public static AcceptApiVersionHeader valueOf(String string) {
         Pair<Version, Version> parsedValue = parse(string);

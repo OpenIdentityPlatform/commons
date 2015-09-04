@@ -16,6 +16,8 @@
 
 package org.forgerock.http.routing;
 
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import org.forgerock.http.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
@@ -24,6 +26,7 @@ import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.WarningHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -52,7 +55,12 @@ public class ResourceApiVersionRoutingFilter implements Filter {
     @Override
     public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
         final ApiVersionRouterContext apiVersionRouterContext = createApiVersionRouterContext(context);
-        final Version requestedResourceVersion = AcceptApiVersionHeader.valueOf(request).getResourceVersion();
+        final Version requestedResourceVersion;
+        try {
+            requestedResourceVersion = AcceptApiVersionHeader.valueOf(request).getResourceVersion();
+        } catch (IllegalArgumentException e) {
+            return newResultPromise(new Response(Status.BAD_REQUEST).setEntity(e.getMessage()).setCause(e));
+        }
         return next.handle(apiVersionRouterContext, request)
                 .thenOnResult(new ResultHandler<Response>() {
                     @Override
