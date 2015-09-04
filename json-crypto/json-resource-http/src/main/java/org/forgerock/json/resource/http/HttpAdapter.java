@@ -661,7 +661,12 @@ final class HttpAdapter implements Handler {
      *         If an invalid version is requested
      */
     private Version getRequestedResourceVersion(org.forgerock.http.protocol.Request req) throws BadRequestException {
-        AcceptApiVersionHeader apiVersionHeader = AcceptApiVersionHeader.valueOf(req);
+        AcceptApiVersionHeader apiVersionHeader;
+        try {
+            apiVersionHeader = AcceptApiVersionHeader.valueOf(req);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e);
+        }
         Version protocolVersion = apiVersionHeader.getProtocolVersion();
         if (protocolVersion != null && protocolVersion.getMajor() != PROTOCOL_VERSION.getMajor()) {
             throw new BadRequestException("Unsupported major version: " + protocolVersion);
