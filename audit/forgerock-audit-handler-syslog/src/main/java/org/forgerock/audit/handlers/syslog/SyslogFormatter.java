@@ -31,8 +31,6 @@ import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,13 +61,18 @@ public class SyslogFormatter {
      *
      * @param auditEventsMetaData Schemas and additional meta-data for known audit event topics.
      * @param config Configuration options.
+     * @param localHostNameProvider Strategy for obtaining hostname of current server.
      */
-    public SyslogFormatter(Map<String, JsonValue> auditEventsMetaData, SyslogAuditEventHandlerConfiguration config) {
-        hostname = getLocalHostName();
-        procId = String.valueOf(SyslogFormatter.class.hashCode());
-        appName = config.getProductName();
-        facility = config.getFacility();
-        structuredDataFormatters = Collections.unmodifiableMap(
+    public SyslogFormatter(Map<String, JsonValue> auditEventsMetaData, SyslogAuditEventHandlerConfiguration config,
+            LocalHostNameProvider localHostNameProvider) {
+
+        Reject.ifNull(localHostNameProvider, "LocalHostNameProvider must not be null");
+
+        this.hostname = getLocalHostName(localHostNameProvider);
+        this.procId = String.valueOf(SyslogFormatter.class.hashCode());
+        this.appName = config.getProductName();
+        this.facility = config.getFacility();
+        this.structuredDataFormatters = Collections.unmodifiableMap(
                 createStructuredDataFormatters(appName, auditEventsMetaData));
     }
 
@@ -142,15 +145,9 @@ public class SyslogFormatter {
      *
      * @see <a href=https://tools.ietf.org/html/rfc5424#section-6.2.4>RFC-5424 section 6.2.4</a>
      */
-    private String getLocalHostName() {
-        try {
-            return InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException uhe) {
-            logger.error("Cannot resolve localhost's name", uhe);
-            // TODO: Provide means for hostname to be injected via DependencyProvider?
-//            return SystemProperties.get(Constants.AM_SERVER_HOST);
-            return NIL_VALUE;
-        }
+    private String getLocalHostName(LocalHostNameProvider localHostNameProvider) {
+        String localHostName = localHostNameProvider.getLocalHostName();
+        return localHostName != null ? localHostName : NIL_VALUE;
     }
 
     /**

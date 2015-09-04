@@ -51,6 +51,7 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,6 +167,7 @@ public class AuditService implements RequestHandler {
      *            the DependencyProvider to register
      */
     public void registerDependencyProvider(DependencyProvider provider) {
+        Reject.ifNull(provider, "DependencyProvider must not be null");
         dependencyProvider = provider;
     }
 

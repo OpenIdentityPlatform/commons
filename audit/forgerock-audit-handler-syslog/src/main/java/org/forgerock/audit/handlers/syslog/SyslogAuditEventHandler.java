@@ -21,6 +21,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
 import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
@@ -40,7 +41,9 @@ import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Map;
 
@@ -53,6 +56,7 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
 
     private static final Logger logger = LoggerFactory.getLogger(SyslogAuditEventHandler.class);
 
+    private volatile DependencyProvider dependencyProvider;
     private volatile SyslogAuditEventHandlerConfiguration config;
     private volatile Map<String, JsonValue> auditEventsMetaData;
     private volatile SyslogPublisher publisher;
@@ -86,9 +90,28 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
         logger.debug("Successfully configured Syslog audit event handler.");
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void setDependencyProvider(DependencyProvider dependencyProvider) {
+        Reject.ifNull(dependencyProvider, "DependencyProvider must not be null");
+        this.dependencyProvider = dependencyProvider;
+        updateFormatter();
+    }
+
     private void updateFormatter() {
         if (auditEventsMetaData != null && config != null) {
-            formatter = new SyslogFormatter(auditEventsMetaData, config);
+            formatter = new SyslogFormatter(auditEventsMetaData, config, getLocalHostNameProvider());
+        }
+    }
+
+    private LocalHostNameProvider getLocalHostNameProvider() {
+        try {
+            return dependencyProvider.getDependency(LocalHostNameProvider.class);
+        } catch (ClassNotFoundException e) {
+            logger.debug("No {} provided; using default.", LocalHostNameProvider.class.getSimpleName());
+            return new DefaultLocalHostNameProvider();
         }
     }
 
@@ -173,4 +196,21 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
         return notSupported(readRequest).asPromise();
     }
 
+    /**
+     * Default implementation of LocalHostNameProvider.
+     * <p/>
+     * Products can provide an alternative via {@link DependencyProvider}.
+     */
+    private static class DefaultLocalHostNameProvider implements LocalHostNameProvider {
+
+        @Override
+        public String getLocalHostName() {
+            try {
+                return InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException uhe) {
+                logger.error("Cannot resolve localhost name", uhe);
+                return null;
+            }
+        }
+    }
 }

@@ -16,54 +16,37 @@
 
 package org.forgerock.audit.handlers.syslog;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.accessEvent;
+import static org.forgerock.audit.events.ActivityAuditEventBuilder.activityEvent;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.json.JsonValue;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SyslogFormatterTest {
 
-    private SyslogFormatter syslogFormatter;
-
-    @BeforeTest
-    public void setUp() throws Exception {
-        Map<String, JsonValue> auditEventDefinitions = loadAuditEventDefinitions();
-        SyslogAuditEventHandlerConfiguration config = new SyslogAuditEventHandlerConfiguration();
-        config.setProductName("OpenAM");
-        config.setFacility(Facility.LOCAL5);
-        syslogFormatter = new SyslogFormatter(auditEventDefinitions, config);
-    }
-
     @Test
-    public void canFormatAccessEventAsSyslogMessage() {
+    public void canFormatAuditEventAsSyslogMessage() throws Exception {
         // given
+        SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL5, "server.name");
 
-        Map<String, List<String>> headers = new HashMap<>();
-        headers.put("Content-Length", singletonList("200"));
-        headers.put("Content-Type", singletonList("application/json"));
         AuditEvent auditEvent = accessEvent()
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-ACCESS-ATTEMPT")
-                .client("cip", 1203)
-                .server("sip", 80)
-                .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
                 .authentication("someone@forgerock.com")
                 .resourceOperation("/some/path", "CREST", "action", "reconcile")
-                .http("GET", "/some/path", "p1=v1&p2=v2", headers)
                 .response("200", 12)
                 .toEvent();
 
@@ -75,7 +58,7 @@ public class SyslogFormatterTest {
         assertThat(syslogMessage.priority).isEqualTo(174);
         assertThat(syslogMessage.syslogSpecVersion).isEqualTo(1);
         assertThat(syslogMessage.timestamp).isEqualTo("2015-03-25T14:21:26.239Z");
-//        assertThat(syslogMessage.hostname).isEqualTo("Craigs-MacBook-Pro.local"); // TODO: mock for testing
+        assertThat(syslogMessage.hostname).isEqualTo("server.name");
         assertThat(syslogMessage.appName).isEqualTo("OpenAM");
 //        assertThat(syslogMessage.procId).isEqualTo("789219251"); // TODO: mock for testing
         assertThat(syslogMessage.msgId).isEqualTo("AM-ACCESS-ATTEMPT");
@@ -85,25 +68,127 @@ public class SyslogFormatterTest {
         assertThat(syslogMessage.structuredData.get("transactionId")).isEqualTo("transactionId");
         assertThat(syslogMessage.structuredData.get("eventName")).isEqualTo("AM-ACCESS-ATTEMPT"); // TODO: don't repeat eventName
         assertThat(syslogMessage.structuredData.get("authentication.id")).isEqualTo("someone@forgerock.com");
-        assertThat(syslogMessage.structuredData.get("server.ip")).isEqualTo("sip");
-        assertThat(syslogMessage.structuredData.get("server.port")).isEqualTo("80");
-        assertThat(syslogMessage.structuredData.get("client.host")).isEqualTo("null");
-        assertThat(syslogMessage.structuredData.get("client.ip")).isEqualTo("cip");
-        assertThat(syslogMessage.structuredData.get("client.port")).isEqualTo("1203");
-        assertThat(syslogMessage.structuredData.get("authorizationId.roles")).isEqualTo("[ \"openidm-admin\", \"openidm-authorized\" ]");
-        assertThat(syslogMessage.structuredData.get("authorizationId.component")).isEqualTo("managed/user");
-        assertThat(syslogMessage.structuredData.get("authorizationId.id")).isEqualTo("aegloff");
         assertThat(syslogMessage.structuredData.get("resourceOperation.uri")).isEqualTo("/some/path");
         assertThat(syslogMessage.structuredData.get("resourceOperation.protocol")).isEqualTo("CREST");
         assertThat(syslogMessage.structuredData.get("resourceOperation.operation.method")).isEqualTo("action");
         assertThat(syslogMessage.structuredData.get("resourceOperation.operation.detail")).isEqualTo("reconcile");
-        assertThat(syslogMessage.structuredData.get("http.method")).isEqualTo("GET");
-        assertThat(syslogMessage.structuredData.get("http.path")).isEqualTo("/some/path");
-        assertThat(syslogMessage.structuredData.get("http.queryString")).isEqualTo("p1=v1&p2=v2");
-        assertThat(syslogMessage.structuredData.get("http.headers")).isEqualTo("{ \"Content-Length\": [ \"200\" ], \"Content-Type\": [ \"application/json\" ] }");
         assertThat(syslogMessage.structuredData.get("response.status")).isEqualTo("200");
         assertThat(syslogMessage.structuredData.get("response.elapsedTime")).isEqualTo("12");
         assertThat(syslogMessage.structuredData.get("response.message")).isEqualTo("");
+    }
+
+    @Test
+    public void setsPriorityBasedOnFacility() throws Exception {
+        // given
+        SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL7, "server.name");
+
+        AuditEvent auditEvent = accessEvent()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(190);
+    }
+
+    @Test
+    public void replacesNullLocalHostNameWithNIL() throws Exception {
+        // given
+        SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL5, null);
+
+        AuditEvent auditEvent = accessEvent()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.hostname).isEqualTo("-");
+    }
+
+    @Test
+    public void setsAppNameFromConfiguration() throws Exception {
+        // given
+        SyslogFormatter syslogFormatter = newSyslogFormatter("OpenIDM", Facility.LOCAL5, "server.name");
+
+        AuditEvent auditEvent = accessEvent()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.appName).isEqualTo("OpenIDM");
+    }
+
+    @Test
+    public void createsUniqueStructuredDataIdPerAppNameAndAuditEventTopic() throws Exception {
+        // given
+        SyslogFormatter syslogFormatter = newSyslogFormatter("OpenDJ", Facility.LOCAL5, "server.name");
+
+        AuditEvent auditEvent = activityEvent()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .resourceOperation("/managed/users/admin", "CREST", "READ")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("activity", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.structuredDataId).isEqualTo("activity.OpenDJ@36733");
+    }
+
+    @Test
+    public void escapesDoubleQuotesInStructuredDataParamValues() throws Exception {
+        // given
+        SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL5, "server.name");
+
+        AuditEvent auditEvent = accessEvent()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.structuredData.get("authorizationId.roles"))
+                .isEqualTo("[ \"openidm-admin\", \"openidm-authorized\" ]");
+    }
+
+
+    private SyslogFormatter newSyslogFormatter(String productName, Facility facility, String localHostName)
+            throws Exception {
+
+        Map<String, JsonValue> auditEventDefinitions = loadAuditEventDefinitions();
+
+        SyslogAuditEventHandlerConfiguration config = new SyslogAuditEventHandlerConfiguration();
+        config.setProductName(productName);
+        config.setFacility(facility);
+
+        LocalHostNameProvider localHostNameProvider = mock(LocalHostNameProvider.class);
+        given(localHostNameProvider.getLocalHostName()).willReturn(localHostName);
+
+        return new SyslogFormatter(auditEventDefinitions, config, localHostNameProvider);
     }
 
     private SyslogMessage readSyslogMessage(String message) {
