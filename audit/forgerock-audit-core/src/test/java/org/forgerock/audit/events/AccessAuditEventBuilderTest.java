@@ -17,6 +17,8 @@ package org.forgerock.audit.events;
 
 import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
 import static org.forgerock.audit.events.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
 import static org.forgerock.audit.events.AuditEventBuilder.ID;
 
@@ -67,7 +69,7 @@ public class AccessAuditEventBuilderTest {
 
     @Test
     public void ensureEventIsCorrectlyBuilt() {
-        Map<String, List<String>> headers = new HashMap<String, List<String>>();
+        Map<String, List<String>> headers = new HashMap<>();
         headers.put("Content-Length", asList("200"));
         headers.put("Content-Type", asList("application/json"));
 
@@ -81,7 +83,7 @@ public class AccessAuditEventBuilderTest {
                 .authentication("someone@forgerock.com")
                 .resourceOperation("/some/path", "CREST", "action", "reconcile")
                 .http("GET", "/some/path", "p1=v1&p2=v2", headers)
-                .response("200", 12)
+                .response(SUCCESS, "200", 12, MILLISECONDS)
                 .openField("value")
                 .toEvent();
 
@@ -95,8 +97,10 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(HTTP).get(HEADERS).asMapOfList(String.class)).isEqualTo(headers);
         assertThat(value.get(AUTHORIZATION_ID).get(ID).asString()).isEqualTo("aegloff");
         assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("action");
-        assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("200");
+        assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("SUCCESS");
+        assertThat(value.get(RESPONSE).get(STATUS_CODE).asString()).isEqualTo("200");
         assertThat(value.get(RESPONSE).get(ELAPSED_TIME).asLong()).isEqualTo(12);
+        assertThat(value.get(RESPONSE).get(ELAPSED_TIME_UNITS).asString()).isEqualTo("ms");
         assertThat(value.get("open").getObject()).isEqualTo("value");
     }
 

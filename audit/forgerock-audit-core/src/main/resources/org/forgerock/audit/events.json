@@ -117,10 +117,16 @@
             "status": {
               "type": "string"
             },
-            "elapsedTime": {
+            "statusCode": {
               "type": "string"
             },
-            "message": {
+            "detail": {
+              "type": "string"
+            },
+            "elapsedTime": {
+              "type": "integer"
+            },
+            "elapsedTimeUnits": {
               "type": "string"
             }
           }

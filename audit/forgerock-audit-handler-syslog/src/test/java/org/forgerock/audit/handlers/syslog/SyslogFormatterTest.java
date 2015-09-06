@@ -17,6 +17,8 @@
 package org.forgerock.audit.handlers.syslog;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.accessEvent;
 import static org.forgerock.audit.events.ActivityAuditEventBuilder.activityEvent;
 import static org.mockito.BDDMockito.given;
@@ -47,7 +49,7 @@ public class SyslogFormatterTest {
                 .eventName("AM-ACCESS-ATTEMPT")
                 .authentication("someone@forgerock.com")
                 .resourceOperation("/some/path", "CREST", "action", "reconcile")
-                .response("200", 12)
+                .response(SUCCESS, "200", 12, MILLISECONDS)
                 .toEvent();
 
         // when
@@ -68,9 +70,10 @@ public class SyslogFormatterTest {
         assertThat(syslogMessage.structuredData.get("resourceOperation.protocol")).isEqualTo("CREST");
         assertThat(syslogMessage.structuredData.get("resourceOperation.operation.method")).isEqualTo("action");
         assertThat(syslogMessage.structuredData.get("resourceOperation.operation.detail")).isEqualTo("reconcile");
-        assertThat(syslogMessage.structuredData.get("response.status")).isEqualTo("200");
+        assertThat(syslogMessage.structuredData.get("response.status")).isEqualTo("SUCCESS");
+        assertThat(syslogMessage.structuredData.get("response.statusCode")).isEqualTo("200");
         assertThat(syslogMessage.structuredData.get("response.elapsedTime")).isEqualTo("12");
-        assertThat(syslogMessage.structuredData.get("response.message")).isEqualTo("");
+        assertThat(syslogMessage.structuredData.get("response.detail")).isEqualTo("");
     }
 
     @Test

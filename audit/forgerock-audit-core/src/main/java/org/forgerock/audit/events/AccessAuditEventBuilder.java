@@ -86,9 +86,10 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public static final String HEADERS = "headers";
     public static final String HTTP = "http";
     public static final String STATUS = "status";
+    public static final String STATUS_CODE = "statusCode";
     public static final String ELAPSED_TIME = "elapsedTime";
+    public static final String ELAPSED_TIME_UNITS = "elapsedTimeUnits";
     public static final String RESPONSE = "response";
-    public static final String MESSAGE = "message";
 
     private static final String HOST_HEADER = "Host";
     private static final String HTTP_CONTEXT_NAME = "http";
@@ -328,30 +329,39 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * Sets the provided response for the event.
      *
      * @param status the status of the operation.
+     * @param statusCode the status code of the operation.
      * @param elapsedTime the execution time of the action.
+     * @param elapsedTimeUnits the unit of measure for the execution time value (either milliseconds or nanoseconds).
      * @return this builder
      */
-    public final T response(String status, long elapsedTime) {
+    public final T response(ResponseStatus status, String statusCode, long elapsedTime, TimeUnit elapsedTimeUnits) {
         JsonValue object = json(object(
-                field(STATUS, status),
-                field(ELAPSED_TIME, elapsedTime)));
+                field(STATUS, status == null ? null : status.toString()),
+                field(STATUS_CODE, statusCode),
+                field(ELAPSED_TIME, elapsedTime),
+                field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.getAbbreviation())));
         jsonValue.put(RESPONSE, object);
         return self();
     }
 
     /**
-     * Sets the provided response for the event, with an additional message.
+     * Sets the provided response for the event, with an additional detail.
      *
      * @param status the status of the operation.
+     * @param statusCode the status code of the operation.
      * @param elapsedTime the execution time of the action.
-     * @param message the message associated to the status.
+     * @param elapsedTimeUnits the unit of measure for the execution time value (either milliseconds or nanoseconds).
+     * @param detail the detail associated to the status.
      * @return this builder
      */
-    public final T responseWithMessage(String status, long elapsedTime, String message) {
+    public final T responseWithDetail(ResponseStatus status, String statusCode,
+            long elapsedTime, TimeUnit elapsedTimeUnits, String detail) {
         JsonValue object = json(object(
-                field(STATUS, status),
+                field(STATUS, status == null ? null : status.toString()),
+                field(STATUS_CODE, statusCode),
                 field(ELAPSED_TIME, elapsedTime),
-                field(MESSAGE, message)));
+                field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.getAbbreviation()),
+                field(DETAIL, detail)));
         jsonValue.put(RESPONSE, object);
         return self();
     }
@@ -458,6 +468,41 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
             return URLEncoder.encode(string, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             return string;
+        }
+    }
+
+    /**
+     * The status of the access request.
+     */
+    public enum ResponseStatus {
+        /** The access request was successfully completed. */
+        SUCCESS,
+        /** The access request was not successfully completed. */
+        FAILURE
+    }
+
+    /**
+     * Defines a fixed set of options for <code>/response/elapsedTimeUnit</code> values.
+     */
+    public enum TimeUnit {
+
+        /**
+         * Thousandths of a second.
+         */
+        MILLISECONDS("ms"),
+        /**
+         * Billionths of a second.
+         */
+        NANOSECONDS("ns");
+
+        private final String abbreviation;
+
+        TimeUnit(String abbreviation) {
+            this.abbreviation = abbreviation;
+        }
+
+        public String getAbbreviation() {
+            return abbreviation;
         }
     }
 }
