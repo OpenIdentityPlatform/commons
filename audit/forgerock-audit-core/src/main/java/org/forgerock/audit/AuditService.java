@@ -32,10 +32,8 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -235,8 +233,7 @@ public class AuditService implements RequestHandler {
             if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
                 final String id = request.getResourcePathObject().size() > 1
                         ? request.getResourcePathObject().tail(1).toString() : null;
-                final String topic = parseTopicFromPath(request.getResourcePathObject());
-                return allAuditEventHandlers.get(queryHandlerName).readEvent(topic, id);
+                return allAuditEventHandlers.get(queryHandlerName).readInstance(context, id, request);
             }
             String error = String.format(
                     "The handler defined for queries, '%s', has not been registered to the audit service.",
@@ -289,27 +286,27 @@ public class AuditService implements RequestHandler {
                 throw new BadRequestException("The request requires a transactionId and a timestamp");
             }
 
-            final String topic = parseTopicFromPath(request.getResourcePathObject());
-            if (!auditEvents.containsKey(topic)) {
-                throw new NotSupportedException("Audit service called with unknown event type " + topic);
+            final String auditEventType = request.getResourcePathObject().head(1).toString();
+            if (!auditEvents.containsKey(auditEventType)) {
+                throw new NotSupportedException("Audit service called with unknown event type " + auditEventType);
             }
 
-            Collection<AuditEventHandler<?>> auditEventHandlersForEvent = getAuditEventHandlersForEvent(topic);
+            Collection<AuditEventHandler<?>> auditEventHandlersForEvent = getAuditEventHandlersForEvent(auditEventType);
             logger.debug("Will cascade the event of type {} to the handlers : {}",
-                        topic,
+                        auditEventType,
                         auditEventHandlersForEvent);
 
             ResourceResponse result = newResourceResponse(localId, null, new JsonValue(request.getContent()));
             Promise<ResourceResponse, ResourceException> promise = result.asPromise();
             // if the event is known but not registered with a handler, it's ok to ignore it
             if (auditEventHandlersForEvent.isEmpty()) {
-                logger.debug("No handler found for the event of type {}", topic);
+                logger.debug("No handler found for the event of type {}", auditEventType);
                 return promise;
             }
 
             // Otherwise, let the event handlers set the response
             for (AuditEventHandler<?> auditEventHandler : auditEventHandlersForEvent) {
-                promise = auditEventHandler.publishEvent(topic, request.getContent());
+                promise = auditEventHandler.createInstance(context, request);
             }
             // TODO CAUD-24 last one wins!
             return promise;
@@ -319,18 +316,13 @@ public class AuditService implements RequestHandler {
         }
     }
 
-    private String parseTopicFromPath(final ResourcePath path) {
-        return path.head(1).toString();
-    }
-
     /**
      * Audit service does not support changing audit entries.
      *
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(
-            final Context context, final UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context, final UpdateRequest request) {
         return notSupported(request).asPromise();
     }
 
@@ -371,13 +363,11 @@ public class AuditService implements RequestHandler {
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
-            final QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
         try {
             logger.debug("Audit query called for {}", request.getResourcePath());
             if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
-                final String topic = parseTopicFromPath(request.getResourcePathObject());
-                return getRegisteredHandler(queryHandlerName).queryEvents(topic, request, handler);
+                return getRegisteredHandler(queryHandlerName).queryCollection(context, request, handler);
             }
             String error = String.format(
                     "The handler defined for queries, '%s', has not been registered to the audit service.",

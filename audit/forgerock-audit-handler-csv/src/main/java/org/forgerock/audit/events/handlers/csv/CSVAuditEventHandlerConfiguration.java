@@ -16,15 +16,12 @@
 package org.forgerock.audit.events.handlers.csv;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.util.Reject;
 
 /**
  * A configuration for CSV audit event handler.
  * <p>
  * This configuration object can be created from JSON. Example of valid JSON configuration:
- *
  * <pre>
  *  {
  *    "logDirectory" : "/tmp/audit",
@@ -38,9 +35,9 @@ import org.forgerock.util.Reject;
  *  }
  * </pre>
  */
-public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration {
+public class CSVAuditEventHandlerConfiguration {
 
-    @JsonProperty(required = true)
+    @JsonProperty(required=true)
     private String logDirectory;
 
     private CsvConfiguration csvConfiguration = new CsvConfiguration();
@@ -76,14 +73,12 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
     }
 
     /**
-     * @param csvConfiguration
-     *            the csvConfiguration to set
+     *
+     * @param csvConfiguration the csvConfiguration to set
      */
     public void setCsvConfiguration(CsvConfiguration csvConfiguration) {
         this.csvConfiguration = Reject.checkNotNull(csvConfiguration);
     }
-
-
 
     /**
      * Returns the csvSecurity

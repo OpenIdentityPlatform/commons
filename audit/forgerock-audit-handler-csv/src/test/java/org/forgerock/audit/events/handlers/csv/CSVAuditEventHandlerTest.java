@@ -16,88 +16,62 @@
 
 package org.forgerock.audit.events.handlers.csv;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Requests.newActionRequest;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.events.handlers.BufferedAuditEventHandler;
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
-import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.util.encode.Base64;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import org.forgerock.util.encode.Base64;
 
-@SuppressWarnings("javadoc")
+import static org.mockito.Mockito.spy;
+
 public class CSVAuditEventHandlerTest {
-
-    @Test
-    public void testCreatingAuditLogEntryWithBuffering() throws Exception {
-        //given
-        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
-        logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
-        AuditEventHandler<CSVAuditEventHandlerConfiguration> bufferedHandler =
-                new BufferedAuditEventHandler<>(csvHandler);
-        try {
-            bufferedHandler.configure(getConfigWithBuffering(logDirectory, 0, 2));
-
-            // when
-            bufferedHandler.publishEvent("access", buildEvent(1));
-            bufferedHandler.publishEvent("access", buildEvent(2));
-
-            // then
-            String expectedContent = "\"_id\",\"timestamp\",\"transactionId\"\n"
-                    + "\"_id1\",\"timestamp\",\"transactionId-X\"\n" + "\"_id2\",\"timestamp\",\"transactionId-X\"";
-            File file = logDirectory.resolve("access.csv").toFile();
-            int tries = 0;
-            while ((!file.exists() || file.length() < expectedContent.length()) && tries < 10) {
-                Thread.sleep(10);
-            }
-            assertThat(file).hasContent(expectedContent);
-        } finally {
-            bufferedHandler.close();
-        }
-    }
-
 
     @Test
     public void testCreatingAuditLogEntry() throws Exception {
         //given
         Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         final CreateRequest createRequest = makeCreateRequest();
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                csvHandler.publishEvent("access", createRequest.getContent());
+                csvHandler.createInstance(new RootContext(), createRequest);
 
         //then
         assertThat(promise)
@@ -116,7 +90,7 @@ public class CSVAuditEventHandlerTest {
         //given
         Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         ResourceResponse event = createAccessEvent(csvHandler);
 
@@ -124,7 +98,10 @@ public class CSVAuditEventHandlerTest {
 
         //when
         Promise<ResourceResponse, ResourceException> promise =
-                csvHandler.readEvent("access", readRequest.getResourcePathObject().tail(1).toString());
+                csvHandler.readInstance(
+                        new RootContext(),
+                        readRequest.getResourcePathObject().tail(1).toString(),
+                        readRequest);
 
         //then
         assertThat(promise)
@@ -156,11 +133,110 @@ public class CSVAuditEventHandlerTest {
     }
 
     @Test
+    public void testDeleteAuditLogEntry() throws Exception {
+        //given
+        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
+
+        //when
+        Promise<ResourceResponse, ResourceException> promise =
+                csvHandler.deleteInstance(
+                        new RootContext(),
+                        "_id",
+                        Requests.newDeleteRequest("access"));
+
+        //then
+        assertThat(promise)
+                .failedWithException()
+                .isInstanceOf(NotSupportedException.class);
+    }
+
+    @Test
+    public void testPatchAuditLogEntry() throws Exception {
+        //given
+        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
+
+        //when
+        Promise<ResourceResponse, ResourceException> promise =
+                csvHandler.patchInstance(
+                        new RootContext(),
+                        "_id",
+                        Requests.newPatchRequest("access"));
+
+        //then
+        assertThat(promise)
+                .failedWithException()
+                .isInstanceOf(NotSupportedException.class);
+    }
+
+    @Test
+    public void testUpdateAuditLogEntry() throws Exception {
+        //given
+        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
+
+        //when
+        Promise<ResourceResponse, ResourceException> promise =
+                csvHandler.updateInstance(
+                        new RootContext(),
+                        "_id",
+                        Requests.newUpdateRequest("access", new JsonValue(new HashMap<String, Object>())));
+
+        //then
+        assertThat(promise)
+                .failedWithException()
+                .isInstanceOf(NotSupportedException.class);
+    }
+
+    @Test
+    public void testActionOnAuditLogEntryCollection() throws Exception {
+        //given
+        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
+
+        //when
+        Promise<ActionResponse, ResourceException> promise =
+                csvHandler.actionCollection(
+                        new RootContext(),
+                        newActionRequest("access", "action"));
+
+        //then
+        assertThat(promise)
+                .failedWithException()
+                .isInstanceOf(NotSupportedException.class);
+    }
+
+    @Test
+    public void testActionOnAuditLogEntryInstance() throws Exception {
+        //given
+        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
+
+        //when
+        Promise<ActionResponse, ResourceException> promise =
+                csvHandler.actionInstance(
+                        new RootContext(),
+                        "_id",
+                        newActionRequest("access", "action"));
+
+        //then
+        assertThat(promise)
+                .failedWithException()
+                .isInstanceOf(NotSupportedException.class);
+    }
+
+    @Test
     public void testQueryOnAuditLogEntry() throws Exception{
         //given
         Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
 
         final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
         final ArgumentCaptor<ResourceResponse> resourceCaptor = ArgumentCaptor.forClass(ResourceResponse.class);
@@ -168,11 +244,11 @@ public class CSVAuditEventHandlerTest {
         ResourceResponse event = createAccessEvent(csvHandler);
 
         final QueryRequest queryRequest = Requests.newQueryRequest("access")
-                .setQueryFilter(QueryFilters.parse("/_id eq \"_id0\""));
+                .setQueryFilter(QueryFilters.parse("/_id eq \"_id\""));
         //when
         Promise<QueryResponse, ResourceException> promise =
-                csvHandler.queryEvents(
-                        "access",
+                csvHandler.queryCollection(
+                        new RootContext(),
                         queryRequest,
                         queryResourceHandler);
 
@@ -185,22 +261,14 @@ public class CSVAuditEventHandlerTest {
     }
 
     private CreateRequest makeCreateRequest() {
-        return Requests.newCreateRequest("access", buildEvent());
-    }
-
-    private JsonValue buildEvent() {
-        return buildEvent(0);
-    }
-
-    private JsonValue buildEvent(int index) {
         final JsonValue content = json(
                 object(
-                        field("_id", "_id" + index),
+                        field("_id", "_id"),
                         field("timestamp", "timestamp"),
                         field("transactionId", "transactionId-X")
-                        )
-                );
-        return content;
+                )
+        );
+        return Requests.newCreateRequest("access", content);
     }
 
     @SuppressWarnings("unchecked")
@@ -215,7 +283,7 @@ public class CSVAuditEventHandlerTest {
         final ArgumentCaptor<ResourceResponse> createArgument = ArgumentCaptor.forClass(ResourceResponse.class);
 
         Promise<ResourceResponse, ResourceException> promise =
-                auditEventHandler.publishEvent("access", createRequest.getContent());
+                auditEventHandler.createInstance(new RootContext(), createRequest);
 
         assertThat(promise)
                 .succeeded()
@@ -229,7 +297,7 @@ public class CSVAuditEventHandlerTest {
     public void testCreateCsvLogEntryWritesToFile() throws Exception {
         Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory);
         final JsonValue content = json(
                 object(
                         field("_id", "1"),
@@ -237,52 +305,32 @@ public class CSVAuditEventHandlerTest {
                         field("transactionId", "A10000")));
         CreateRequest createRequest = Requests.newCreateRequest("access", content);
 
-        csvHandler.publishEvent("access", createRequest.getContent());
+        csvHandler.createInstance(new RootContext(), createRequest);
 
         String expectedContent = "\"_id\",\"timestamp\",\"transactionId\",\"HMAC\"\n"
                 + "\"1\",\"123456\",\"A10000\",\"l3jKX9DpKEWpALEBefJxOUKtLQttianWfqISvnk2HgE=\"";
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }
 
-    private CSVAuditEventHandler createAndConfigureHandler(Path tempDirectory, boolean enableSecurity)
-            throws Exception {
+    private CSVAuditEventHandler createAndConfigureHandler(Path tempDirectory) throws Exception {
         CSVAuditEventHandler handler = spy(new CSVAuditEventHandler());
         CSVAuditEventHandlerConfiguration config = new CSVAuditEventHandlerConfiguration();
         config.setLogDirectory(tempDirectory.toString());
 
-        if (enableSecurity) {
-            config.setCsvSecurity(getCsvSecurityConfig());
-        }
-
-        handler.configure(config);
-        addEventsMetaData(handler);
-        return handler;
-    }
-
-    private CsvSecurity getCsvSecurityConfig() throws Exception {
         CSVAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CSVAuditEventHandlerConfiguration.CsvSecurity();
         csvSecurity.setEnabled(true);
         final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath();
         csvSecurity.setFilename(keystorePath);
         csvSecurity.setPassword("forgerock");
+        config.setCsvSecurity(csvSecurity);
 
         // Force the initial key so we'll have reproductible builds.
         SecretKey secretKey = new SecretKeySpec(Base64.decode("zmq4EoprX52XLGyLkMENcin0gv0jwYyrySi3YOqfhFY="), "RAW");
         HmacCalculator.writeToKeyStore(secretKey, csvSecurity.getFilename(), "InitialKey", csvSecurity.getPassword());
 
-        return csvSecurity;
-    }
-
-    /** Returns a configuration with buffering enabled. */
-    private CSVAuditEventHandlerConfiguration getConfigWithBuffering(Path tempDir, long maxTimeInMillis, int maxSize) {
-        EventBufferingConfiguration config = new EventBufferingConfiguration();
-        config.setEnabled(true);
-        config.setMaxSize(maxSize);
-        config.setMaxTime(maxTimeInMillis);
-        CSVAuditEventHandlerConfiguration handlerConfig = new CSVAuditEventHandlerConfiguration();
-        handlerConfig.setLogDirectory(tempDir.toString());
-        handlerConfig.setBufferingConfiguration(config);
-        return handlerConfig;
+        handler.configure(config);
+        addEventsMetaData(handler);
+        return handler;
     }
 
     private void addEventsMetaData(CSVAuditEventHandler handler) throws Exception {

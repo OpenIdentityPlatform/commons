@@ -20,15 +20,17 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.*;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.util.ResourceExceptionsUtil;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.RequestType;
-import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -51,15 +53,40 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     }
 
     /**
+     * Perform an action on the audit log.
+     * {@inheritDoc}
+     */
+    @Override
+    public Promise<ActionResponse, ResourceException> actionCollection(
+            final Context context,
+            final ActionRequest request) {
+        return notSupported(request).asPromise();
+    }
+
+    /**
+     * Perform an action on the audit log entry.
+     * {@inheritDoc}
+     */
+    @Override
+    public Promise<ActionResponse, ResourceException> actionInstance(
+            final Context context,
+            final String resourceId,
+            final ActionRequest request) {
+        return notSupported(request).asPromise();
+    }
+
+    /**
      * Create a audit log entry.
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
+    public Promise<ResourceResponse, ResourceException> createInstance(
+            final Context context,
+            final CreateRequest request) {
         return newResourceResponse(
-                        event.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
+                        request.getContent().get(ResourceResponse.FIELD_CONTENT_ID).asString(),
                         null,
-                        new JsonValue(event)).asPromise();
+                        new JsonValue(request.getContent())).asPromise();
     }
 
     /**
@@ -67,8 +94,10 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResponse, ResourceException> queryEvents(
-            String topic, QueryRequest query, QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection(
+            final Context context,
+            final QueryRequest request,
+            final QueryResourceHandler handler) {
         return newQueryResponse().asPromise();
     }
 
@@ -77,9 +106,11 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
-        return ResourceExceptionsUtil.adapt(
-                new NotSupportedException("The " + RequestType.READ + " operation is not supported.")).asPromise();
+    public Promise<ResourceResponse, ResourceException> readInstance(
+            final Context context,
+            final String resourceId,
+            final ReadRequest request) {
+        return notSupported(request).asPromise();
     }
 
     /**

@@ -22,20 +22,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.events.handlers.BufferedAuditEventHandler;
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class to facilitate creation and configuration of audit service and audit event handlers
@@ -44,6 +42,8 @@ import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 public class AuditJsonConfig {
     private static final Logger logger = LoggerFactory.getLogger(AuditJsonConfig.class);
 
+    /** Suffix for configuration class names. */
+    private static final String CONFIGURATION_CLASS_SUFFIX = "Configuration";
     /** Field containing the name of an event handler. */
     private static final String NAME_FIELD = "name";
     /** Field containing the implementation class of an event handler. */
@@ -151,8 +151,8 @@ public class AuditJsonConfig {
      *             If any error occurs during configuration or registration of the handler.
      */
     @SuppressWarnings("unchecked") // Class.forName calls
-    public static <CFG extends EventHandlerConfiguration> AuditEventHandler<CFG> buildAuditEventHandler(
-            String handlerName, JsonValue jsonConfig, ClassLoader classLoader) throws AuditException {
+    public static <CFG> AuditEventHandler<CFG> buildAuditEventHandler(String handlerName, JsonValue jsonConfig,
+            ClassLoader classLoader) throws AuditException {
         // TODO: class name should not be provided in customer configuration
         // but through a commons module/service context
         String className = jsonConfig.get(CLASS_FIELD).asString();
@@ -167,9 +167,6 @@ public class AuditJsonConfig {
             if (conf != null) {
                 Class<CFG> klass = eventHandler.getConfigurationClass();
                 CFG configuration = mapper.readValue(conf.toString(), klass);
-                if (configuration.getBufferingConfig().isEnabled()) {
-                    eventHandler = new BufferedAuditEventHandler<CFG>(eventHandler);
-                }
                 eventHandler.configure(configuration);
             }
             // else assume there is no configuration needed
@@ -271,7 +268,7 @@ public class AuditJsonConfig {
      * @throws AuditException
      *             If any error occurs during configuration or registration of the handler.
      */
-    public static <CFG extends EventHandlerConfiguration> void registerHandlerToService(JsonValue jsonConfig, AuditService auditService,
+    public static <CFG> void registerHandlerToService(JsonValue jsonConfig, AuditService auditService,
             ClassLoader classLoader) throws AuditException {
         String name = getHandlerName(jsonConfig);
         AuditEventHandler<CFG> handler = buildAuditEventHandler(name, jsonConfig, classLoader);

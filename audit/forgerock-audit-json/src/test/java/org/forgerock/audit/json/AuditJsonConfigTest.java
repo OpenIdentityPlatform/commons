@@ -78,15 +78,21 @@ public class AuditJsonConfigTest {
     public void testGetAuditEventHandlerConfigurationSchema() throws Exception {
         //given
         final AuditEventHandler<?> auditEventHandler = new PassThroughAuditEventHandler();
+        final JsonValue expectedSchema = json(object(
+                field("type", "object"),
+                field("id", "/"),
+                field("properties", object(
+                        field("message", object(
+                                field("type", "string")
+                        ))
+                ))
+        ));
 
         //when
         final JsonValue schema = AuditJsonConfig.getAuditEventHandlerConfigurationSchema(auditEventHandler);
 
         //then
-        assertThat(schema.get("type").asString()).isEqualTo("object");
-        assertThat(schema.get("id").asString()).isEqualTo("/");
-        assertThat(schema.get("properties").get("message")).isNotNull();
-        assertThat(schema.get("properties").get("bufferingConfig")).isNotNull();
+        assertThat(schema.asMap()).isEqualTo(expectedSchema.asMap());
     }
 
     private AuditService createAndConfigureAuditService() throws AuditException, ResourceException {

@@ -29,7 +29,6 @@ import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
@@ -109,18 +108,38 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
+    public Promise<ActionResponse, ResourceException> actionCollection(
+            Context context,
+            ActionRequest actionRequest) {
+        return notSupported(actionRequest).asPromise();
+    }
+
+    @Override
+    public Promise<ActionResponse, ResourceException> actionInstance(
+            Context context,
+            String resourceId,
+            ActionRequest actionRequest) {
+        return notSupported(actionRequest).asPromise();
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> createInstance(
+            Context context,
+            CreateRequest createRequest) {
 
         try {
-            final String syslogMessage = formatAsSyslogMessage(topic, event);
+
+            final String topic = createRequest.getResourcePath();
+            final JsonValue auditEvent = createRequest.getContent();
+            final String syslogMessage = formatAsSyslogMessage(topic, auditEvent);
             synchronized (publisher) {
                 publisher.publishSyslogMessages(Collections.singletonList(syslogMessage));
             }
 
             return newResourceResponse(
-                    event.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
+                    auditEvent.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
                     null,
-                    event.clone()).asPromise();
+                    auditEvent.clone()).asPromise();
 
         } catch (Exception ex) {
             return adapt(ex).asPromise();
@@ -139,16 +158,19 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> queryEvents(
-            String topic,
+    public Promise<QueryResponse, ResourceException> queryCollection(
+            Context context,
             QueryRequest queryRequest,
             QueryResourceHandler queryResourceHandler) {
         return notSupported(queryRequest).asPromise();
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
-        return new NotSupportedException("query operations are not supported").asPromise();
+    public Promise<ResourceResponse, ResourceException> readInstance(
+            Context context,
+            String resourceId,
+            ReadRequest readRequest) {
+        return notSupported(readRequest).asPromise();
     }
 
 }
