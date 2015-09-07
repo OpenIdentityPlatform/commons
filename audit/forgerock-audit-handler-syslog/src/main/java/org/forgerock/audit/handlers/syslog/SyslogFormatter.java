@@ -17,8 +17,9 @@
 
 package org.forgerock.audit.handlers.syslog;
 
-import static org.forgerock.audit.events.AuditEventBuilder.EVENT_NAME;
-import static org.forgerock.audit.events.AuditEventBuilder.TIMESTAMP;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableSet;
+import static org.forgerock.audit.events.AuditEventBuilder.*;
 import static org.forgerock.audit.events.AuditEventHelper.getAuditEventSchema;
 import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotation;
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
@@ -33,6 +34,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -160,6 +162,11 @@ public class SyslogFormatter {
     private static class StructuredDataFormatter {
 
         private static final String FORGEROCK_IANA_ENTERPRISE_ID = "36733";
+        /**
+         * The set of audit event fields that should not be copied to structured-data.
+         */
+        private static final Set<String> IGNORED_FIELDS = unmodifiableSet(
+                new HashSet<>(asList("_id", TIMESTAMP, EVENT_NAME)));
 
         private final String id;
         private final Set<String> fieldNames;
@@ -188,7 +195,7 @@ public class SyslogFormatter {
             }
 
             id = topic + "." + productName + "@" + FORGEROCK_IANA_ENTERPRISE_ID;
-            fieldNames = Collections.unmodifiableSet(generateJsonPointers(auditEventSchema));
+            fieldNames = unmodifiableSet(generateJsonPointers(auditEventSchema));
         }
 
         /**
@@ -205,8 +212,12 @@ public class SyslogFormatter {
             sd.append("[");
             sd.append(id);
             for (String fieldName : fieldNames) {
+                String formattedName = formatParamName(fieldName);
+                if (IGNORED_FIELDS.contains(formattedName)) {
+                    continue;
+                }
                 sd.append(" ");
-                sd.append(formatParamName(fieldName));
+                sd.append(formattedName);
                 sd.append("=\"");
                 sd.append(formatParamValue(extractValue(auditEvent, fieldName)));
                 sd.append("\"");

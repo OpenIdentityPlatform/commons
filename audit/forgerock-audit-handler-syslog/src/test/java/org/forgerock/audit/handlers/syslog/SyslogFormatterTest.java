@@ -60,13 +60,9 @@ public class SyslogFormatterTest {
         assertThat(syslogMessage.timestamp).isEqualTo("2015-03-25T14:21:26.239Z");
         assertThat(syslogMessage.hostname).isEqualTo("server.name");
         assertThat(syslogMessage.appName).isEqualTo("OpenAM");
-//        assertThat(syslogMessage.procId).isEqualTo("789219251"); // TODO: mock for testing
         assertThat(syslogMessage.msgId).isEqualTo("AM-ACCESS-ATTEMPT");
         assertThat(syslogMessage.structuredDataId).isEqualTo("access.OpenAM@36733");
-        assertThat(syslogMessage.structuredData.get("_id")).isEqualTo(""); // TODO: drop _id as Syslog is write only?
-        assertThat(syslogMessage.structuredData.get("timestamp")).isEqualTo("2015-03-25T14:21:26.239Z"); // TODO: don't repeat timestamp
         assertThat(syslogMessage.structuredData.get("transactionId")).isEqualTo("transactionId");
-        assertThat(syslogMessage.structuredData.get("eventName")).isEqualTo("AM-ACCESS-ATTEMPT"); // TODO: don't repeat eventName
         assertThat(syslogMessage.structuredData.get("authentication.id")).isEqualTo("someone@forgerock.com");
         assertThat(syslogMessage.structuredData.get("resourceOperation.uri")).isEqualTo("/some/path");
         assertThat(syslogMessage.structuredData.get("resourceOperation.protocol")).isEqualTo("CREST");
@@ -152,6 +148,30 @@ public class SyslogFormatterTest {
 
         // then
         assertThat(syslogMessage.structuredDataId).isEqualTo("activity.OpenDJ@36733");
+    }
+
+    @Test
+    public void filtersAuditEventFieldsWrittenToStructuredData() throws Exception {
+        // given
+        SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL5, "server.name");
+
+        AuditEvent auditEvent = accessEvent()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        // As Syslog is write-only, there's little value in including the _id of the event instance
+        assertThat(syslogMessage.structuredData.get("_id")).isNull();
+        // As timestamp is already mapped to the TIMESTAMP field, it shouldn't be repeated in the STRUCTURED-DATA
+        assertThat(syslogMessage.structuredData.get("timestamp")).isNull();
+        // As eventName is already mapped to the MSGID field, it shouldn't be repeated in the STRUCTURED-DATA
+        assertThat(syslogMessage.structuredData.get("eventName")).isNull();
     }
 
     @Test
