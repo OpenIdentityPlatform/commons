@@ -1,25 +1,23 @@
-.validationRules .error,
-.has-feedback .form-control-feedback.error {
+.validationRules .has-error,
+.has-feedback.has-error .form-control-feedback {
     .validation-icon {
         .fa-icon();
-        color: @failure-color;
         &:before {
-            content: @fa-var-times;
+            content: @fa-var-exclamation-circle;
         }
     }
 }
 
-.validationRules .ok,
-.has-feedback .form-control-feedback.ok {
+.validationRules .has-success,
+.has-feedback.has-success .form-control-feedback {
     .validation-icon {
         .fa-icon();
-        color: @success-color;
         &:before {
             content:'';
         }
     }
 }
 
-.validationRules .ok .validation-icon:before {
+.validationRules .has-success .validation-icon:before {
     content: @fa-var-check;
 }

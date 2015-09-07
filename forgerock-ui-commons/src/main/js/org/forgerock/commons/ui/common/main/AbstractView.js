@@ -146,7 +146,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 if (!msg && $(input, this.$el).data()["bs.popover"]) {
                     $(input, this.$el).popover('destroy');
                 }
-                $(input, this.$el).removeClass('field-error');
+                $(input, this.$el).parents(".form-group").removeClass('has-feedback has-error');
 
                 if(msg && _.isArray(msg)){
                     validationMessage = msg;
@@ -172,7 +172,7 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 } else {
                     ValidatorsUtils.showValidation(input, this.$el);
                     if(validationMessage.length){
-                        $(input, this.$el).addClass('field-error');
+                        $(input, this.$el).parents(".form-group").addClass('has-feedback has-error');
                         //clean up existing popover if validation messsage is different
                         if ($(input, this.$el).data()["bs.popover"] && !_.isEqual(validationMessage,$(input, this.$el).data()["bs.popover"].options.validationMessage)) {
                             $(input, this.$el).popover('destroy');
@@ -183,21 +183,9 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                             trigger:'hover',
                             placement:'top',
                             html: 'true',
-                            template: '<div class="popover popover-error" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+                            template: '<div class="popover popover-error help-block" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
                         });
                     }
-                }
-
-                if (input.nextAll("span")) {
-                    ValidatorsUtils.setTick(input, msg);
-                }
-
-                if (msg) {
-                    input.parents('.separate-message').addClass('invalid');
-                    input.addClass('invalid');
-                } else {
-                    input.parents('.separate-message').removeClass('invalid');
-                    input.removeClass('invalid');
                 }
 
                 this.$el.find("div.validation-message[for='" + input.attr('name') + "']").html(msg ? msg : '');
