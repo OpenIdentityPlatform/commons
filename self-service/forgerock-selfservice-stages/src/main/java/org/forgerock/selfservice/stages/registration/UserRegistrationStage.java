@@ -17,9 +17,10 @@
 package org.forgerock.selfservice.stages.registration;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
-import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.*;
+import static org.forgerock.json.JsonValue.*;
 
+import javax.inject.Inject;
 import org.forgerock.http.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -34,8 +35,6 @@ import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
-
-import javax.inject.Inject;
 
 /**
  * Stage is responsible for request a new user json representation and passing it off
@@ -83,16 +82,16 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
         }
 
         JsonValue user = context
-                .getInput()
-                .get("user");
+            .getInput()
+            .get("user");
 
         if (user.isNull()) {
             throw new BadRequestException("user has not been specified");
         }
 
         String email = context
-                .getState(EMAIL_FIELD)
-                .asString();
+            .getState(EMAIL_FIELD)
+            .asString();
 
         user.put(new JsonPointer(config.getIdentityEmailField()), email);
         createUser(context.getHttpContext(), userId, user, config);

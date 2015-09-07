@@ -40,23 +40,48 @@ public final class StageResponse {
         callback = builder.callback;
     }
 
-    String getStageTag() {
+    /**
+     * Returns the stage tag.
+     *
+     * @return the stage tag
+     */
+    public String getStageTag() {
         return stageTag;
     }
 
-    boolean hasRequirements() {
+    /**
+     * Returns <code>true</code> if the response has any requirements.
+     *
+     * @return <code>true</code> if the response has any requirements
+     */
+    public boolean hasRequirements() {
         return requirements.size() > 0;
     }
 
-    JsonValue getRequirements() {
+    /**
+     * Returns the requirements.
+     *
+     * @return the requirements
+     */
+    public JsonValue getRequirements() {
         return requirements;
     }
 
-    boolean hasCallback() {
+    /**
+     * Returns <code>true</code> if the response contains a snapshot token callback instance.
+     *
+     * @return <code>true</code> if the response contains a snapshot token callback instance
+     */
+    public boolean hasCallback() {
         return callback != null;
     }
 
-    SnapshotTokenCallback getCallback() {
+    /**
+     * Returns the callback instance.
+     *
+     * @return the callback instance
+     */
+    public SnapshotTokenCallback getCallback() {
         return callback;
     }
 

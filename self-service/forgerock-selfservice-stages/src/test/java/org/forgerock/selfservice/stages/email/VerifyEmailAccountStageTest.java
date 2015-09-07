@@ -40,7 +40,6 @@ public class VerifyEmailAccountStageTest {
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
 
     private VerifyEmailAccountStage verifyEmailStage;
-
     @Mock
     private ProcessContext context;
     @Mock
@@ -66,7 +65,7 @@ public class VerifyEmailAccountStageTest {
         assertThat(jsonValue).stringAt("properties/mail/description").isEqualTo("Email address");
     }
 
-    @Test (expectedExceptions = BadRequestException.class)
+    @Test (expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp = "mail is missing")
     public void testGetEmailAddressWithoutSufficientInput() throws Exception {
         // Given
         given(context.getInput()).willReturn(newEmptyJsonValue());
