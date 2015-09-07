@@ -23,18 +23,13 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.Reject;
@@ -102,7 +97,7 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
     }
 
     private void updateFormatter() {
-        if (auditEventsMetaData != null && config != null) {
+        if (dependencyProvider != null && auditEventsMetaData != null && config != null) {
             formatter = new SyslogFormatter(auditEventsMetaData, config, getLocalHostNameProvider());
         }
     }

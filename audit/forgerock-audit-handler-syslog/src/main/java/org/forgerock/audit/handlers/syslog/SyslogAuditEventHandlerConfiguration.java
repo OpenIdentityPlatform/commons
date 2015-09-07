@@ -16,9 +16,16 @@
 
 package org.forgerock.audit.handlers.syslog;
 
+import static java.util.Collections.unmodifiableMap;
+
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Configuration object for the {@link SyslogAuditEventHandler}.
@@ -26,15 +33,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * This configuration object can be created from JSON. Example of valid JSON configuration:
  *
  * <pre>
- *  {
- *    "protocol" : "TCP",
- *    "host" : "https://forgerock.example.com",
- *    "port" : 6514,
- *    "connectTimeout" : 30000,
- *    "facility" : "local0",
- *    "productName" : "OpenAM"
- *  }
- * </pre>
+    {
+      "protocol" : "TCP",
+      "host" : "https://forgerock.example.com",
+      "port" : 6514,
+      "connectTimeout" : 30000,
+      "facility" : "local0",
+      "productName" : "OpenAM",
+      "severityFieldMappings": [{
+        "topic" : "system-status",
+        "field"  : "level",
+        "valueMappings" : {
+          "SEVERE" : "EMERGENCY",
+          "WARNING" : "WARNING",
+          "INFO" : "INFORMATIONAL"
+        }
+      }]
+    }
+   </pre>
  */
 public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
@@ -54,6 +70,9 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
 
     @JsonProperty(required=true)
     private String productName;
+
+    @JsonProperty
+    private List<SeverityFieldMapping> severityFieldMappings = new ArrayList<>();
 
     /**
      * Returns the protocol over which messages transmitted to the Syslog daemon.
@@ -181,45 +200,97 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
         this.productName = productName;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
+    /**
+     * Returns the configurations for mapping audit event field values to Syslog severity values.
+     *
+     * @return the severity field mappings.
+     */
+    public List<SeverityFieldMapping> getSeverityFieldMappings() {
+        return severityFieldMappings;
+    }
+
+    /**
+     * Sets the configurations for mapping audit event field values to Syslog severity values.
+     *
+     * @param severityFieldMappings
+     *          the severity field mappings.
+     */
+    public void setSeverityFieldMappings(List<SeverityFieldMapping> severityFieldMappings) {
+        this.severityFieldMappings = severityFieldMappings;
+    }
+
+    /**
+     * Encapsulates configuration for mapping audit event field values to Syslog severity values.
+     */
+    public static final class SeverityFieldMapping {
+
+        @JsonProperty(required=true)
+        private String topic;
+
+        @JsonProperty(required=true)
+        private String field;
+
+        @JsonProperty(required=true)
+        private Map<String, Severity> valueMappings = new HashMap<>();
+
+        /**
+         * Returns the name of the event topic to which this mapping applies.
+         *
+         * @return the event topic name.
+         */
+        public String getTopic() {
+            return topic;
         }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
+
+        /**
+         * Sets the name of the event topic to which this mapping applies.
+         *
+         * @param topic
+         *          the event topic name.
+         */
+        public void setTopic(String topic) {
+            this.topic = topic;
         }
 
-        SyslogAuditEventHandlerConfiguration that = (SyslogAuditEventHandlerConfiguration) o;
+        /**
+         * Returns the name of the event topic field to which this mapping applies.
+         * <p/>
+         * If the chosen field is nested, JsonPointer notation should be used.
+         *
+         * @return the event topic field name.
+         */
+        public String getField() {
+            return field;
+        }
 
-        return this.port == that.port &&
-                this.connectTimeout == that.connectTimeout &&
-                this.protocol == that.protocol &&
-                this.facility == that.facility &&
-                !(this.productName != null ? !this.productName.equals(that.productName) : that.productName != null) &&
-                !(this.host != null ? !this.host.equals(that.host) : that.host != null);
+        /**
+         * Sets the name of the event topic field to which this mapping applies.
+         *
+         * @param field
+         *          the event topic field name.
+         */
+        public void setField(String field) {
+            this.field = field;
+        }
+
+        /**
+         * Returns the mapping of audit event values to Syslog severity values.
+         *
+         * @return the value mappings.
+         */
+        public Map<String, Severity> getValueMappings() {
+            return unmodifiableMap(valueMappings);
+        }
+
+        /**
+         * Sets the mapping of audit event values to Syslog severity values.
+         *
+         * @param valueMappings
+         *          the value mappings.
+         */
+        public void setValueMappings(Map<String, Severity> valueMappings) {
+            this.valueMappings = new HashMap<>(valueMappings);
+        }
     }
 
-    @Override
-    public int hashCode() {
-        int result = protocol != null ? protocol.hashCode() : 0;
-        result = 31 * result + (host != null ? host.hashCode() : 0);
-        result = 31 * result + port;
-        result = 31 * result + connectTimeout;
-        result = 31 * result + (facility != null ? facility.hashCode() : 0);
-        result = 31 * result + (productName != null ? productName.hashCode() : 0);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "SyslogAuditEventHandlerConfiguration{" +
-                "protocol=" + protocol +
-                ", host='" + host + '\'' +
-                ", port=" + port +
-                ", connectTimeout=" + connectTimeout +
-                ", facility=" + facility +
-                ", productName='" + productName + '\'' +
-                '}';
-    }
 }

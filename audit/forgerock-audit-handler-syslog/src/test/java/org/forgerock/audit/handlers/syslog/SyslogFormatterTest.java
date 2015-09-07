@@ -16,22 +16,26 @@
 
 package org.forgerock.audit.handlers.syslog;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.accessEvent;
-import static org.forgerock.audit.events.ActivityAuditEventBuilder.activityEvent;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.audit.events.AuditEventBuilder;
+import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration.SeverityFieldMapping;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.Test;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -43,17 +47,17 @@ public class SyslogFormatterTest {
         // given
         SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL5, "server.name");
 
-        AuditEvent auditEvent = accessEvent()
+        AuditEvent auditEvent = firstTestTopic()
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-ACCESS-ATTEMPT")
                 .authentication("someone@forgerock.com")
-                .resourceOperation("/some/path", "CREST", "action", "reconcile")
-                .response(SUCCESS, "200", 12, MILLISECONDS)
+                .field1("foo", "bar")
+                .field4("123456789")
                 .toEvent();
 
         // when
-        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
         SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
 
         // then
@@ -63,17 +67,11 @@ public class SyslogFormatterTest {
         assertThat(syslogMessage.hostname).isEqualTo("server.name");
         assertThat(syslogMessage.appName).isEqualTo("OpenAM");
         assertThat(syslogMessage.msgId).isEqualTo("AM-ACCESS-ATTEMPT");
-        assertThat(syslogMessage.structuredDataId).isEqualTo("access.OpenAM@36733");
+        assertThat(syslogMessage.structuredDataId).isEqualTo("firstTestTopic.OpenAM@36733");
         assertThat(syslogMessage.structuredData.get("transactionId")).isEqualTo("transactionId");
-        assertThat(syslogMessage.structuredData.get("authentication.id")).isEqualTo("someone@forgerock.com");
-        assertThat(syslogMessage.structuredData.get("resourceOperation.uri")).isEqualTo("/some/path");
-        assertThat(syslogMessage.structuredData.get("resourceOperation.protocol")).isEqualTo("CREST");
-        assertThat(syslogMessage.structuredData.get("resourceOperation.operation.method")).isEqualTo("action");
-        assertThat(syslogMessage.structuredData.get("resourceOperation.operation.detail")).isEqualTo("reconcile");
-        assertThat(syslogMessage.structuredData.get("response.status")).isEqualTo("SUCCESS");
-        assertThat(syslogMessage.structuredData.get("response.statusCode")).isEqualTo("200");
-        assertThat(syslogMessage.structuredData.get("response.elapsedTime")).isEqualTo("12");
-        assertThat(syslogMessage.structuredData.get("response.detail")).isEqualTo("");
+        assertThat(syslogMessage.structuredData.get("field1.field2")).isEqualTo("foo");
+        assertThat(syslogMessage.structuredData.get("field1.field3")).isEqualTo("bar");
+        assertThat(syslogMessage.structuredData.get("field4")).isEqualTo("123456789");
     }
 
     @Test
@@ -81,14 +79,221 @@ public class SyslogFormatterTest {
         // given
         SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL7, "server.name");
 
-        AuditEvent auditEvent = accessEvent()
+        AuditEvent auditEvent = firstTestTopic()
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-ACCESS-ATTEMPT")
                 .toEvent();
 
         // when
-        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(190);
+    }
+
+    @Test
+    public void canMapTopicRootFieldToSeverityLevel() throws Exception {
+        // given
+        SeverityFieldMapping severityFieldMapping = new SeverityFieldMapping();
+        severityFieldMapping.setTopic("firstTestTopic");
+        severityFieldMapping.setField("field4");
+        severityFieldMapping.setValueMappings(Collections.singletonMap("SEVERE", Severity.EMERGENCY));
+
+        SyslogFormatter syslogFormatter = newSyslogFormatter(
+                "OpenAM", Facility.LOCAL7, "server.name", singletonList(severityFieldMapping));
+
+        AuditEvent auditEvent = firstTestTopic()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .field4("EMERGENCY")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(184);
+    }
+
+    @Test
+    public void canMapTopicNestedFieldToSeverityLevel() throws Exception {
+        // given
+        SeverityFieldMapping severityFieldMapping = new SeverityFieldMapping();
+        severityFieldMapping.setTopic("firstTestTopic");
+        severityFieldMapping.setField("field1/field2");
+        severityFieldMapping.setValueMappings(Collections.singletonMap("SEVERE", Severity.EMERGENCY));
+
+        SyslogFormatter syslogFormatter = newSyslogFormatter(
+                "OpenAM", Facility.LOCAL7, "server.name", singletonList(severityFieldMapping));
+
+        AuditEvent auditEvent = firstTestTopic()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .field1("EMERGENCY", "")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(184);
+    }
+
+    @Test
+    public void defaultsToInformationSeverityLevelIfMappedTopicIsNull() throws Exception {
+        // given
+        SeverityFieldMapping severityFieldMapping = new SeverityFieldMapping();
+        severityFieldMapping.setTopic(null);
+        severityFieldMapping.setField("field4");
+        severityFieldMapping.setValueMappings(Collections.singletonMap("SEVERE", Severity.EMERGENCY));
+
+        SyslogFormatter syslogFormatter = newSyslogFormatter(
+                "OpenAM", Facility.LOCAL7, "server.name", singletonList(severityFieldMapping));
+
+        AuditEvent auditEvent = firstTestTopic()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .field4("EMERGENCY")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(190);
+    }
+
+    @Test
+    public void defaultsToInformationSeverityLevelIfMappedTopicUnknown() throws Exception {
+        // given
+        SeverityFieldMapping severityFieldMapping = new SeverityFieldMapping();
+        severityFieldMapping.setTopic("unknownTopic");
+        severityFieldMapping.setField("field4");
+        severityFieldMapping.setValueMappings(Collections.singletonMap("SEVERE", Severity.EMERGENCY));
+
+        SyslogFormatter syslogFormatter = newSyslogFormatter(
+                "OpenAM", Facility.LOCAL7, "server.name", singletonList(severityFieldMapping));
+
+        AuditEvent auditEvent = firstTestTopic()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .field4("EMERGENCY")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(190);
+    }
+
+    @Test
+    public void defaultsToInformationSeverityLevelIfMappedTopicFieldIsNull() throws Exception {
+        // given
+        SeverityFieldMapping severityFieldMapping = new SeverityFieldMapping();
+        severityFieldMapping.setTopic("firstTestTopic");
+        severityFieldMapping.setField(null);
+        severityFieldMapping.setValueMappings(Collections.singletonMap("SEVERE", Severity.EMERGENCY));
+
+        SyslogFormatter syslogFormatter = newSyslogFormatter(
+                "OpenAM", Facility.LOCAL7, "server.name", singletonList(severityFieldMapping));
+
+        AuditEvent auditEvent = firstTestTopic()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .field4("EMERGENCY")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(190);
+    }
+
+    @Test
+    public void defaultsToInformationSeverityLevelIfMappedTopicFieldUnknown() throws Exception {
+        // given
+        SeverityFieldMapping severityFieldMapping = new SeverityFieldMapping();
+        severityFieldMapping.setTopic("firstTestTopic");
+        severityFieldMapping.setField("unknownField");
+        severityFieldMapping.setValueMappings(Collections.singletonMap("SEVERE", Severity.EMERGENCY));
+
+        SyslogFormatter syslogFormatter = newSyslogFormatter(
+                "OpenAM", Facility.LOCAL7, "server.name", singletonList(severityFieldMapping));
+
+        AuditEvent auditEvent = firstTestTopic()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .field4("EMERGENCY")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(190);
+    }
+
+    @Test
+    public void defaultsToInformationSeverityLevelIfMappedTopicFieldValueIsNull() throws Exception {
+        // given
+        SeverityFieldMapping severityFieldMapping = new SeverityFieldMapping();
+        severityFieldMapping.setTopic("firstTestTopic");
+        severityFieldMapping.setField("field4");
+        severityFieldMapping.setValueMappings(Collections.singletonMap("SEVERE", Severity.EMERGENCY));
+
+        SyslogFormatter syslogFormatter = newSyslogFormatter(
+                "OpenAM", Facility.LOCAL7, "server.name", singletonList(severityFieldMapping));
+
+        AuditEvent auditEvent = firstTestTopic()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
+        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
+
+        // then
+        assertThat(syslogMessage.priority).isEqualTo(190);
+    }
+
+    @Test
+    public void defaultsToInformationSeverityLevelIfMappedTopicFieldValueIsNotMapped() throws Exception {
+        // given
+        SeverityFieldMapping severityFieldMapping = new SeverityFieldMapping();
+        severityFieldMapping.setTopic("firstTestTopic");
+        severityFieldMapping.setField("field4");
+        severityFieldMapping.setValueMappings(Collections.singletonMap("SEVERE", Severity.EMERGENCY));
+
+        SyslogFormatter syslogFormatter = newSyslogFormatter(
+                "OpenAM", Facility.LOCAL7, "server.name", singletonList(severityFieldMapping));
+
+        AuditEvent auditEvent = firstTestTopic()
+                .transactionId("transactionId")
+                .timestamp(1427293286239L)
+                .eventName("AM-ACCESS-ATTEMPT")
+                .field4("panic")
+                .toEvent();
+
+        // when
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
         SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
 
         // then
@@ -100,14 +305,14 @@ public class SyslogFormatterTest {
         // given
         SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL5, null);
 
-        AuditEvent auditEvent = accessEvent()
+        AuditEvent auditEvent = firstTestTopic()
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-ACCESS-ATTEMPT")
                 .toEvent();
 
         // when
-        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
         SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
 
         // then
@@ -119,14 +324,14 @@ public class SyslogFormatterTest {
         // given
         SyslogFormatter syslogFormatter = newSyslogFormatter("OpenIDM", Facility.LOCAL5, "server.name");
 
-        AuditEvent auditEvent = accessEvent()
+        AuditEvent auditEvent = firstTestTopic()
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-ACCESS-ATTEMPT")
                 .toEvent();
 
         // when
-        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
         SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
 
         // then
@@ -138,75 +343,57 @@ public class SyslogFormatterTest {
         // given
         SyslogFormatter syslogFormatter = newSyslogFormatter("OpenDJ", Facility.LOCAL5, "server.name");
 
-        AuditEvent auditEvent = activityEvent()
+        AuditEvent auditEvent = secondTestTopic()
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-ACCESS-ATTEMPT")
-                .resourceOperation("/managed/users/admin", "CREST", "READ")
                 .toEvent();
 
         // when
-        String formattedEvent = syslogFormatter.format("activity", auditEvent.getValue());
+        String formattedEvent = syslogFormatter.format("secondTestTopic", auditEvent.getValue());
         SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
 
         // then
-        assertThat(syslogMessage.structuredDataId).isEqualTo("activity.OpenDJ@36733");
+        assertThat(syslogMessage.structuredDataId).isEqualTo("secondTestTopic.OpenDJ@36733");
     }
 
     @Test
-    public void filtersAuditEventFieldsWrittenToStructuredData() throws Exception {
+    public void escapesSpecialCharactersInStructuredDataParamValues() throws Exception {
         // given
         SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL5, "server.name");
 
-        AuditEvent auditEvent = accessEvent()
+        AuditEvent auditEvent = firstTestTopic()
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-ACCESS-ATTEMPT")
+                .field1("A list with escaped characters", "\"]\\")
+                .field4("\"]\\")
                 .toEvent();
 
         // when
-        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
+        String formattedEvent = syslogFormatter.format("firstTestTopic", auditEvent.getValue());
         SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
 
         // then
-        // As Syslog is write-only, there's little value in including the _id of the event instance
-        assertThat(syslogMessage.structuredData.get("_id")).isNull();
-        // As timestamp is already mapped to the TIMESTAMP field, it shouldn't be repeated in the STRUCTURED-DATA
-        assertThat(syslogMessage.structuredData.get("timestamp")).isNull();
-        // As eventName is already mapped to the MSGID field, it shouldn't be repeated in the STRUCTURED-DATA
-        assertThat(syslogMessage.structuredData.get("eventName")).isNull();
+        assertThat(syslogMessage.structuredData.get("field1.field2")).isEqualTo("A list with escaped characters");
+        assertThat(syslogMessage.structuredData.get("field1.field3")).isEqualTo("\"]\\");
+        assertThat(syslogMessage.structuredData.get("field4")).isEqualTo("\"]\\");
     }
-
-    @Test
-    public void escapesDoubleQuotesInStructuredDataParamValues() throws Exception {
-        // given
-        SyslogFormatter syslogFormatter = newSyslogFormatter("OpenAM", Facility.LOCAL5, "server.name");
-
-        AuditEvent auditEvent = accessEvent()
-                .transactionId("transactionId")
-                .timestamp(1427293286239L)
-                .eventName("AM-ACCESS-ATTEMPT")
-                .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
-                .toEvent();
-
-        // when
-        String formattedEvent = syslogFormatter.format("access", auditEvent.getValue());
-        SyslogMessage syslogMessage = readSyslogMessage(formattedEvent);
-
-        // then
-        assertThat(syslogMessage.structuredData.get("authorizationId.roles"))
-                .isEqualTo("[ \"openidm-admin\", \"openidm-authorized\" ]");
-    }
-
 
     private SyslogFormatter newSyslogFormatter(String productName, Facility facility, String localHostName)
             throws Exception {
+        return newSyslogFormatter(productName, facility, localHostName, Collections.<SeverityFieldMapping>emptyList());
+    }
+
+    private SyslogFormatter newSyslogFormatter(String productName, Facility facility, String localHostName,
+            List<SeverityFieldMapping> severityFieldMappings) throws Exception {
 
         Map<String, JsonValue> auditEventDefinitions = loadAuditEventDefinitions();
 
         SyslogAuditEventHandlerConfiguration config = new SyslogAuditEventHandlerConfiguration();
         config.setProductName(productName);
         config.setFacility(facility);
+        config.setSeverityFieldMappings(severityFieldMappings);
 
         LocalHostNameProvider localHostNameProvider = mock(LocalHostNameProvider.class);
         given(localHostNameProvider.getLocalHostName()).willReturn(localHostName);
@@ -327,6 +514,29 @@ public class SyslogFormatterTest {
             }
         }
         return events;
+    }
+
+    private static TestTopicBuilder firstTestTopic() {
+        return new TestTopicBuilder();
+    }
+
+    private static TestTopicBuilder secondTestTopic() {
+        return new TestTopicBuilder();
+    }
+
+    private static class TestTopicBuilder extends AuditEventBuilder<TestTopicBuilder> {
+
+        public final TestTopicBuilder field1(String field2, String field3) {
+            jsonValue.put("field1", json(object(
+                    field("field2", field2),
+                    field("field3", field3))));
+            return this;
+        }
+
+        public final TestTopicBuilder field4(String field4) {
+            jsonValue.put("field4", field4);
+            return this;
+        }
     }
 
 }

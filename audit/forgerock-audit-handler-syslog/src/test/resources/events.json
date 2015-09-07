@@ -1,5 +1,5 @@
 {
-  "access": {
+  "firstTestTopic": {
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
       "id": "/",
@@ -17,191 +17,24 @@
         "eventName": {
           "type": "string"
         },
-        "authentication": {
+        "field1": {
           "type": "object",
           "properties": {
-            "id": {
+            "field2": {
+              "type": "string"
+            },
+            "field3": {
               "type": "string"
             }
           }
         },
-        "server": {
-          "type": "object",
-          "properties": {
-            "ip": {
-              "type": "string"
-            },
-            "port": {
-              "type": "string"
-            }
-          }
-        },
-        "client": {
-          "type": "object",
-          "properties": {
-            "host": {
-              "type": "string"
-            },
-            "ip": {
-              "type": "string"
-            },
-            "port": {
-              "type": "string"
-            }
-          }
-        },
-        "authorizationId": {
-          "type": "object",
-          "properties": {
-            "roles": {
-              "type": "array",
-              "items": {
-                "id": "1",
-                "type": "string"
-              }
-            },
-            "component": {
-              "type": "string"
-            },
-            "id": {
-              "type": "string"
-            }
-          }
-        },
-        "resourceOperation": {
-          "type": "object",
-          "properties": {
-            "uri": {
-              "type": "string"
-            },
-            "protocol": {
-              "type": "string"
-            },
-            "operation": {
-              "type": "object",
-              "properties": {
-                "method": {
-                  "type": "string"
-                },
-                "detail": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "http": {
-          "type": "object",
-          "properties": {
-            "method": {
-              "type": "string"
-            },
-            "path": {
-              "type": "string"
-            },
-            "queryString": {
-              "type": "string"
-            },
-            "headers": {
-              "type": "array",
-              "items": {
-                "id": "0",
-                "type": "string"
-              }
-            }
-          }
-        },
-        "response": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "string"
-            },
-            "statusCode": {
-              "type": "string"
-            },
-            "detail": {
-              "type": "string"
-            },
-            "elapsedTime": {
-              "type": "string"
-            }
-          }
-        }
-      }
-    }
-  },
-  "activity": {
-    "schema": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
-      "id": "/",
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "timestamp": {
-          "type": "string"
-        },
-        "transactionId": {
-          "type": "string"
-        },
-        "eventName": {
-          "type": "string"
-        },
-        "authentication": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            }
-          }
-        },
-        "runAs": {
-          "type": "string"
-        },
-        "resourceOperation": {
-          "type": "object",
-          "properties": {
-            "uri": {
-              "type": "string"
-            },
-            "protocol": {
-              "type": "string"
-            },
-            "operation": {
-              "type": "object",
-              "properties": {
-                "method": {
-                  "type": "string"
-                },
-                "detail": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        },
-        "before": {
-          "type": "string"
-        },
-        "after": {
-          "type": "string"
-        },
-        "changedFields": {
-          "type": "array",
-          "items": {
-            "id": "1",
-            "type": "string"
-          }
-        },
-        "revision": {
+        "field4": {
           "type": "string"
         }
       }
     }
   },
-  "authentication": {
+  "secondTestTopic": {
     "schema": {
       "$schema": "http://json-schema.org/draft-04/schema#",
       "id": "/",
@@ -219,116 +52,18 @@
         "eventName": {
           "type": "string"
         },
-        "authentication": {
+        "field1": {
           "type": "object",
           "properties": {
-            "id": {
-              "type": "string"
-            }
-          }
-        },
-        "result": {
-          "type": "string"
-        },
-        "principal": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "context": {
-          "type": "object",
-          "properties": {}
-        },
-        "sessionId": {
-          "type": "string"
-        },
-        "entries": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "moduleId": {
-                "type": "string"
-              },
-              "result": {
-                "type": "string"
-              },
-              "info": {
-                "type": "object",
-                "properties": {}
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "config": {
-    "schema": {
-      "$schema": "http://json-schema.org/draft-04/schema#",
-      "id": "/",
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "timestamp": {
-          "type": "string"
-        },
-        "transactionId": {
-          "type": "string"
-        },
-        "eventName": {
-          "type": "string"
-        },
-        "authentication": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            }
-          }
-        },
-        "runAs": {
-          "type": "string"
-        },
-        "resourceOperation": {
-          "type": "object",
-          "properties": {
-            "uri": {
+            "field2": {
               "type": "string"
             },
-            "protocol": {
+            "field3": {
               "type": "string"
-            },
-            "operation": {
-              "type": "object",
-              "properties": {
-                "method": {
-                  "type": "string"
-                },
-                "detail": {
-                  "type": "string"
-                }
-              }
             }
           }
         },
-        "before": {
-          "type": "string"
-        },
-        "after": {
-          "type": "string"
-        },
-        "changedFields": {
-          "type": "array",
-          "items": {
-            "id": "1",
-            "type": "string"
-          }
-        },
-        "revision": {
+        "field4": {
           "type": "string"
         }
       }

@@ -26,6 +26,8 @@ import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.extractValue;
 
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration.SeverityFieldMapping;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.Reject;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -53,6 +56,7 @@ public class SyslogFormatter {
     private static final String NIL_VALUE = "-";
 
     private final Map<String, StructuredDataFormatter> structuredDataFormatters;
+    private final Map<String, SeverityFieldMapping> severityFieldMappings;
     private final String hostname;
     private final String appName;
     private final String procId;
@@ -74,6 +78,8 @@ public class SyslogFormatter {
         this.procId = String.valueOf(SyslogFormatter.class.hashCode());
         this.appName = config.getProductName();
         this.facility = config.getFacility();
+        this.severityFieldMappings =
+                createSeverityFieldMappings(config.getSeverityFieldMappings(), auditEventsMetaData);
         this.structuredDataFormatters = Collections.unmodifiableMap(
                 createStructuredDataFormatters(appName, auditEventsMetaData));
     }
@@ -92,7 +98,7 @@ public class SyslogFormatter {
 
         Reject.ifFalse(canFormat(topic), "Unknown event topic");
 
-        final Severity severity = Severity.INFORMATIONAL; // TODO: Establish from auditEvent, (schema-dependent)
+        final Severity severity = getSeverityLevel(topic, auditEvent);
         final String priority = String.valueOf(calculatePriorityValue(facility, severity));
         final String timestamp = auditEvent.get(TIMESTAMP).asString();
         final String msgId = auditEvent.get(EVENT_NAME).asString();
@@ -122,6 +128,46 @@ public class SyslogFormatter {
         return structuredDataFormatters.containsKey(topic);
     }
 
+    private Map<String, SeverityFieldMapping> createSeverityFieldMappings(
+            List<SeverityFieldMapping> mappings, Map<String, JsonValue> auditEventsMetaData) {
+
+        Map<String, SeverityFieldMapping> results = new HashMap<>(mappings.size());
+        for (SeverityFieldMapping mapping : mappings) {
+
+            if (results.containsKey(mapping.getTopic())) {
+                logger.warn("Multiple Syslog severity field mappings defined for {} topic", mapping.getTopic());
+                continue;
+            }
+
+            if (!auditEventsMetaData.containsKey(mapping.getTopic())) {
+                logger.warn("Syslog severity field mapping defined for unknown topic {}", mapping.getTopic());
+                continue;
+            }
+
+            JsonValue auditEventMetaData = auditEventsMetaData.get(mapping.getTopic());
+            JsonValue auditEventSchema;
+            try {
+                auditEventSchema = getAuditEventSchema(auditEventMetaData);
+            } catch (ResourceException e) {
+                logger.warn(e.getMessage());
+                continue;
+            }
+            Set<String> topicFieldPointers = generateJsonPointers(auditEventSchema);
+            String mappedField = mapping.getField();
+            if (mappedField != null && !mappedField.startsWith("/")) {
+                mappedField = "/" + mappedField;
+            }
+            if (! topicFieldPointers.contains(mappedField)) {
+                logger.warn("Syslog severity field mapping for topic {} references unknown field {}",
+                        mapping.getTopic(), mapping.getField());
+                continue;
+            }
+
+            results.put(mapping.getTopic(), mapping);
+        }
+        return results;
+    }
+
     private Map<String, StructuredDataFormatter> createStructuredDataFormatters(
             String productName,
             Map<String, JsonValue> auditEventsMetaData) {
@@ -131,6 +177,29 @@ public class SyslogFormatter {
             results.put(entry.getKey(), new StructuredDataFormatter(productName, entry.getKey(), entry.getValue()));
         }
         return results;
+    }
+
+    private Severity getSeverityLevel(String topic, JsonValue auditEvent) {
+        if (severityFieldMappings.containsKey(topic)) {
+            SeverityFieldMapping severityFieldMapping = severityFieldMappings.get(topic);
+            String severityField = severityFieldMapping.getField();
+            if (severityField != null && !severityField.startsWith("/")) {
+                severityField = "/" + severityField;
+            }
+            JsonValue jsonValue = auditEvent.get(new JsonPointer(severityField));
+            String severityValue = jsonValue == null ? null : jsonValue.asString();
+            if (severityValue == null) {
+                logger.debug("{} value not set; defaulting to INFORMATIONAL Syslog SEVERITY level", severityField);
+            } else {
+                try {
+                    return Severity.valueOf(severityValue);
+                } catch (IllegalArgumentException ex) {
+                    logger.debug("{} is not a valid Syslog SEVERITY level; defaulting to INFORMATIONAL", severityValue);
+                }
+            }
+        }
+        // if no mapping was defined or the value wasn't a valid severity, default to INFORMATIONAL
+        return Severity.INFORMATIONAL;
     }
 
     /**
