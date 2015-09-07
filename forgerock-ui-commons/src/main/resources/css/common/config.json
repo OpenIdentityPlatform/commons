@@ -11,7 +11,7 @@
         "@brand-info": "#5bc0de",
         "@brand-warning": "#f0ad4e",
         "@brand-danger": "#d9534f",
-        "@body-bg": "#fff",
+        "@body-bg": "#f7f7f7",
         "@text-color": "#2a2f32",
         "@link-color": "#519387",
         "@link-hover-color": "#777777",
@@ -430,5 +430,5 @@
         "scrollspy.js",
         "transition.js"
     ],
-    "customizerUrl": "http://getbootstrap.com/customize/?id=638b7d810e0c795c2b3d"
+    "customizerUrl": "http://getbootstrap.com/customize/?id=da99d25c6c681dbd59f4"
 }
