@@ -28,7 +28,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.forgerock</groupId>
     <artifactId>forgerock-parent</artifactId>
-    <version>2.0.4-SNAPSHOT</version>
+    <version>2.0.4</version>
     <packaging>pom</packaging>
     <name>ForgeRock Parent</name>
     <description>Parent POM for ForgeRock projects. Provides default project build configuration.</description>
@@ -144,7 +144,7 @@
         <targetJdk>${maven.compiler.target}</targetJdk>
 
         <!-- maven-checkstyle-plugin -->
-        <checkstylePluginVersion>2.9.1</checkstylePluginVersion>
+        <checkstylePluginVersion>2.16</checkstylePluginVersion>
         <checkstyleSourceConfigLocation>org/forgerock/checkstyle/check-src-default.xml</checkstyleSourceConfigLocation>
         <checkstyleDocTargetConfigLocation>org/forgerock/checkstyle/check-src-doc-target.xml</checkstyleDocTargetConfigLocation>
         <checkstyleUnitTestSuppressionsLocation>org/forgerock/checkstyle/unit-test-suppressions.xml</checkstyleUnitTestSuppressionsLocation>
@@ -215,7 +215,7 @@
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
         <!--  ForgeRock build tools version -->
-        <forgerockBuildToolsVersion>1.0.2</forgerockBuildToolsVersion>
+        <forgerockBuildToolsVersion>1.0.3</forgerockBuildToolsVersion>
 
         <!-- Forgerock binary license name -->
         <binary.license.name>Forgerock_License.txt</binary.license.name>
@@ -274,7 +274,13 @@
                             <artifactId>forgerock-build-tools</artifactId>
                             <version>${forgerockBuildToolsVersion}</version>
                         </dependency>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>6.6</version>
+                        </dependency>
                     </dependencies>
+
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
