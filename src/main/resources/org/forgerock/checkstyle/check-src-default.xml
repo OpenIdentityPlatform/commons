@@ -100,11 +100,6 @@
       CHECKS
       
   -->
-
-  <!-- Require a new line at the end of all source files. This was more of a
-       requirement from CVS, but since some editors add one automatically we
-       should require it anyway in order to avoid obfuscated diffs -->
-  <module name="NewlineAtEndOfFile" />
   
   <!-- Disallow all tab characters. Tabs are bad bad bad -->
   <module name="FileTabCharacter">
@@ -304,9 +299,6 @@
     <module name="EmptyStatement" />
     <module name="EqualsHashCode" />    
     <module name="IllegalInstantiation" />
-    <module name="RedundantThrows">
-      <property name="allowSubclasses" value="true" />
-    </module>
     <module name="SimplifyBooleanExpression" />
     <module name="SimplifyBooleanReturn" />
     
