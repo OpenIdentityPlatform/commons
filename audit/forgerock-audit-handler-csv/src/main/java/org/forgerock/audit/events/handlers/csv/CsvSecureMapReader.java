@@ -13,12 +13,14 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.events.handlers.csv;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.ICsvMapReader;
 
@@ -27,9 +29,12 @@ import org.supercsv.io.ICsvMapReader;
  * It does not do any checking regarding the HMAC validity.
  *
  */
-public class CsvHmacMapReader implements ICsvMapReader {
+public class CsvSecureMapReader implements ICsvMapReader {
+
+    private static final Logger logger = LoggerFactory.getLogger(CsvSecureMapReader.class);
 
     private static final String HMAC = "HMAC";
+    private static final String SIGNATURE = "SIGNATURE";
 
     private ICsvMapReader delegate;
 
@@ -38,7 +43,7 @@ public class CsvHmacMapReader implements ICsvMapReader {
      *
      * @param delegate the real CsvMapReader to read from.
      */
-    public CsvHmacMapReader(ICsvMapReader delegate) {
+    public CsvSecureMapReader(ICsvMapReader delegate) {
         this.delegate = delegate;
     }
 
@@ -54,9 +59,17 @@ public class CsvHmacMapReader implements ICsvMapReader {
 
     @Override
     public Map<String, String> read(String... nameMapping) throws IOException {
-        String[] newNameMapping = addExtraColumn(nameMapping);
+        Map<String, Object> values = read(nameMapping, new CellProcessor[nameMapping.length]);
 
-        return dropExtraColumn(delegate.read(newNameMapping));
+        Map<String, String> result = new HashMap<>(values.size());
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+
+            result.put(key, value == null ? null : value.toString());
+        }
+        
+        return result;
     }
 
     @Override
@@ -65,8 +78,8 @@ public class CsvHmacMapReader implements ICsvMapReader {
         if (header == null) {
             return null;
         }
-        // The last column is the HMAC one.
-        String[] result = new String[header.length-1];
+        // The 2 last columns are the HMAC and SIGNATURE one.
+        String[] result = new String[header.length-2];
         System.arraycopy(header, 0, result, 0, result.length);
 
         return result;
@@ -76,11 +89,12 @@ public class CsvHmacMapReader implements ICsvMapReader {
     public Map<String, Object> read(String[] nameMapping, CellProcessor[] processors) throws IOException {
         String[] newNameMapping = addExtraColumn(nameMapping);
 
-        CellProcessor[] newProcessors = new CellProcessor[processors.length + 1];
+        CellProcessor[] newProcessors = new CellProcessor[newNameMapping.length];
         System.arraycopy(processors, 0, newProcessors, 0, processors.length);
         newProcessors[processors.length] = null;
+        newProcessors[processors.length + 1] = null;
 
-        return dropExtraColumn(delegate.read(newNameMapping, newProcessors));
+        return dropExtraColumns(delegate.read(newNameMapping, newProcessors));
     }
 
     @Override
@@ -104,17 +118,18 @@ public class CsvHmacMapReader implements ICsvMapReader {
     }
 
     private String[] addExtraColumn(String... header) {
-        String[] newHeader = new String[header.length + 1];
+        String[] newHeader = new String[header.length + 2];
         System.arraycopy(header, 0, newHeader, 0, header.length);
         newHeader[header.length] = HMAC;
+        newHeader[header.length + 1] = SIGNATURE;
         return newHeader;
     }
 
-    private <T> Map<String, T> dropExtraColumn(Map<String, T> source) {
+    private <T> Map<String, T> dropExtraColumns(Map<String, T> source) {
         if (source != null) {
             source.remove(HMAC);
+            source.remove(SIGNATURE);
         }
         return source;
     }
-
 }

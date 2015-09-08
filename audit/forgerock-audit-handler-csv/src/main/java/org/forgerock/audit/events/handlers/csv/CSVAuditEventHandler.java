@@ -13,7 +13,6 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.events.handlers.csv;
 
 import static org.forgerock.audit.events.AuditEventHelper.*;
@@ -27,9 +26,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +40,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
@@ -59,16 +57,16 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.cellprocessor.Optional;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.CsvMapReader;
-import org.supercsv.io.CsvMapWriter;
 import org.supercsv.io.ICsvMapReader;
-import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.util.CsvContext;
@@ -79,19 +77,19 @@ import org.supercsv.util.CsvContext;
 public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHandlerConfiguration> {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
+    private static final ObjectMapper mapper;
 
     private Map<String, JsonValue> auditEvents;
     private String auditLogDirectory;
     private CsvPreference csvPreference;
-    private final Map<String, ICsvMapWriter> writers = new HashMap<>();
+    private final Map<String, CsvWriter> writers = new HashMap<>();
     private final Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
 
     private CSVAuditEventHandlerConfiguration config;
     private boolean secure;
     private String keystoreFilename;
     private String keystorePassword;
-
-    private static final ObjectMapper mapper;
+    private Duration signatureInterval;
 
     static {
         JsonFactory jsonFactory = new JsonFactory();
@@ -112,7 +110,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 fieldOrderByTopic.put(topic, fieldOrder);
                 openWriter(topic, auditLogFile);
             } catch (IOException e) {
-                logger.info("Error when creating audit file: " + auditLogFile, e);
+                logger.error("Error when creating audit file: " + auditLogFile, e);
             }
         }
     }
@@ -141,10 +139,18 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
             }
             csvPreference = createCsvPreference(config);
-            secure = config.getSecurity().isEnabled();
+            final CSVAuditEventHandlerConfiguration.CsvSecurity security = config.getSecurity();
+            secure = security.isEnabled();
             if (secure) {
-                keystoreFilename = config.getSecurity().getFilename();
-                keystorePassword = config.getSecurity().getPassword();
+                keystoreFilename = security.getFilename();
+                keystorePassword = security.getPassword();
+                Duration duration = Duration.duration(security.getSignatureInterval());
+                if (duration.isZero() || duration.isUnlimited()) {
+                    throw ResourceException.getException(ResourceException.NOT_SUPPORTED,
+                                                         "The signature interval can't be zero nor unlimited.");
+                }
+                signatureInterval = duration;
+
             }
         }
     }
@@ -202,9 +208,9 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      */
     private void publishEventWithRetry(final String topic, final JsonValue event, boolean mustFlush)
                     throws ResourceException {
-        ICsvMapWriter csvWriter = null;
+        CsvWriter csvWriter = writers.get(topic);
         try {
-            csvWriter = writeEvent(topic, event, mustFlush);
+            writeEvent(topic, csvWriter, event, mustFlush);
         } catch (IOException ex) {
             // Re-try once in case the writer stream became closed for some reason
             logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
@@ -217,16 +223,15 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
             }
             try {
-                writeEvent(topic, event, mustFlush);
+                writeEvent(topic, csvWriter, event, mustFlush);
             } catch (IOException e) {
                 throw new BadRequestException(e);
             }
         }
     }
 
-    private ICsvMapWriter writeEvent(final String topic, final JsonValue event, boolean mustFlush)
+    private CsvWriter writeEvent(final String topic, CsvWriter csvWriter, final JsonValue event, boolean mustFlush)
                     throws IOException, InternalServerErrorException {
-        ICsvMapWriter csvWriter = writers.get(topic);
         writeEntry(topic, csvWriter, event);
         // TODO: uncomment the following statements once super-csv is released with unwrapped buffer
         // EventBufferingConfiguration bufferConfig = config.getBuffering();
@@ -245,49 +250,25 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     private void openWriter(final String topic, File auditFile)
             throws IOException {
-        boolean auditFileIsNew = !auditFile.exists();
-        final ICsvMapWriter writer = createCsvMapWriter(auditFile);
-        if (auditFileIsNew) {
-            // Need to create the header
-            Set<String> fieldOrder = fieldOrderByTopic.get(topic);
-            writer.writeHeader(buildHeaders(fieldOrder));
-        }
+        final CsvWriter writer = createCsvMapWriter(auditFile, topic);
         writers.put(topic, writer);
     }
 
-    private ICsvMapWriter createCsvMapWriter(final File auditTmpFile) throws IOException {
-        final CsvMapWriter csvWriter = createCsvWriter(auditTmpFile, config.getBuffering());
+    private synchronized CsvWriter createCsvMapWriter(final File auditFile, String topic) throws IOException {
+        String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
         if (secure) {
-            HmacCalculator hmacCalculator = setupHmacCalculator();
-            return new CsvHmacMapWriter(csvWriter, hmacCalculator);
+            return new CsvWriter(auditFile, headers, csvPreference, config.getBuffering(), keystoreFilename, 
+                    keystorePassword, signatureInterval);
         } else {
-            return csvWriter;
+            return new CsvWriter(auditFile, headers, csvPreference, config.getBuffering(), null, null, null);
         }
-    }
-
-    private CsvMapWriter createCsvWriter(final File auditTmpFile, EventBufferingConfiguration bufferConfig)
-            throws IOException {
-        if (bufferConfig.isEnabled()) {
-            TextWriter writer = new TextWriter.Stream(new FileOutputStream(auditTmpFile, true));
-            AsynchronousTextWriter asyncWriter = new AsynchronousTextWriter(
-                    "CsvHandler", bufferConfig.getMaxSize(), bufferConfig.isAutoFlush(), writer);
-            return new CsvMapWriter(new SuperCsvTextWriterAdapter(asyncWriter), csvPreference);
-        } else {
-            return new CsvMapWriter(new FileWriter(auditTmpFile, true), csvPreference);
-        }
-    }
-
-    HmacCalculator setupHmacCalculator() {
-        final HmacCalculator hmacCalculator = new HmacCalculator(keystoreFilename, keystorePassword);
-        hmacCalculator.init();
-        return hmacCalculator;
     }
 
     private ICsvMapReader createCsvMapReader(final File auditFile) throws IOException {
         CsvMapReader csvReader = new CsvMapReader(new FileReader(auditFile), csvPreference);
 
         if (secure) {
-            return new CsvHmacMapReader(csvReader);
+            return new CsvSecureMapReader(csvReader);
         } else {
             return csvReader;
         }
@@ -346,7 +327,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         return new File(auditLogDirectory, type + ".csv");
     }
 
-    private void writeEntry(final String topic, final ICsvMapWriter csvWriter, final JsonValue obj)
+    private void writeEntry(final String topic, final CsvWriter csvWriter, final JsonValue obj)
             throws IOException {
         Set<String> fieldOrder = fieldOrderByTopic.get(topic);
         Map<String, String> cells = new HashMap<>(fieldOrder.size());
@@ -356,12 +337,12 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 cells.put(jsonPointerToDotNotation(key), value);
             }
         }
-        csvWriter.write(cells, buildHeaders(fieldOrder));
+        csvWriter.writeRow(cells);
     }
 
-    private void resetWriter(final String auditEventType, final ICsvMapWriter writerToReset) {
+    private void resetWriter(final String auditEventType, final CsvWriter writerToReset) {
         synchronized (writers) {
-            final ICsvMapWriter existingWriter = writers.get(auditEventType);
+            final CsvWriter existingWriter = writers.get(auditEventType);
             if (existingWriter != null && writerToReset != null && existingWriter == writerToReset) {
                 writers.remove(auditEventType);
                 // attempt clean-up close
@@ -391,10 +372,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             queryFilter = QueryFilter.alwaysTrue();
         }
         if (auditFile.exists()) {
-            ICsvMapReader reader = null;
-            try {
-                reader = createCsvMapReader(auditFile);
-
+            try (ICsvMapReader reader = createCsvMapReader(auditFile)) {
                 // the header elements are used to map the values to the bean (names must match)
                 final String[] header = convertDotNotationToSlashes(reader.getHeader(true));
                 final CellProcessor[] processors = createCellProcessors(auditEntryType, header);
@@ -407,10 +385,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                     }
                 }
 
-            } finally {
-                if (reader != null) {
-                    reader.close();
-                }
             }
         }
         return results;
@@ -466,7 +440,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private void cleanup() throws ResourceException {
         auditLogDirectory = null;
         try {
-            for (ICsvMapWriter csvWriter : writers.values()) {
+            for (CsvWriter csvWriter : writers.values()) {
                 if (csvWriter != null) {
                     csvWriter.flush();
                     csvWriter.close();

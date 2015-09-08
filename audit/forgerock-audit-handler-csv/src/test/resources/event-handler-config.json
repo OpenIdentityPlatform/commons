@@ -11,7 +11,8 @@
     "security" : {
       "enabled" : "true",
       "filename" : "/path/to/keystore.jks",
-      "password" : "correcthorsebatterystaple"
+      "password" : "correcthorsebatterystaple",
+      "signatureInterval" : "3 seconds"
     },
     "buffering" : {
       "enabled" : "true",

@@ -16,18 +16,16 @@
 package org.forgerock.audit.events.handlers.csv;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import javax.crypto.spec.SecretKeySpec;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import javax.crypto.spec.SecretKeySpec;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
-
 import org.testng.annotations.Test;
 
 public class HmacCalculatorTest {
@@ -47,10 +45,7 @@ public class HmacCalculatorTest {
 
     @Test
     public void shouldCalculateHMAC() throws Exception {
-        HmacCalculator hmacCalculator = spy(new HmacCalculator(keystoreFile.getAbsolutePath(), "forgerock"));
-        doReturn(new SecretKeySpec("forgerock".getBytes("UTF-8"), "HmacSHA256")).when(hmacCalculator).generateRandomKey();
-
-        hmacCalculator.init();
+        HmacCalculator hmacCalculator = spy(new HmacCalculator(new SecretKeySpec("forgerock".getBytes("UTF-8"), "HmacSHA256"), "HmacSHA256"));
 
         byte[] data = "rockstar".getBytes("UTF-8");
         String base64HMAC;
@@ -61,45 +56,6 @@ public class HmacCalculatorTest {
         // The key is updated after each generated HMAC so the HMAC for the same data must not be the same.
         base64HMAC = hmacCalculator.calculate(data);
         assertThat(base64HMAC).isEqualTo("xDSrLEfpe3V1t5Y9y2I4bCIUIdWcQKum9HiVDHXfHFQ=");
-    }
-
-    @Test
-    public void shouldStoreInitialKeyIntoKeystore() throws Exception {
-        HmacCalculator hmacCalculator = spy(new HmacCalculator(keystoreFile.getAbsolutePath(), "forgerock2"));
-        doReturn(new SecretKeySpec("forgerock".getBytes("UTF-8"), "HmacSHA256")).when(hmacCalculator).generateRandomKey();
-        hmacCalculator.init();
-
-        byte[] data = "rockstar".getBytes("UTF-8");
-        String base64HMAC;
-
-        base64HMAC = hmacCalculator.calculate(data);
-        assertThat(base64HMAC).isEqualTo("m9Yir8xEvAS4leA6IZGJQ++OGkyMMHnf334N94AlVIs=");
-
-        // Instantiate another HmacCalculator but this time, the keystore exists so it get the same stored initial key.
-        HmacCalculator hmacCalculator2 = new HmacCalculator(keystoreFile.getAbsolutePath(), "forgerock2");
-        hmacCalculator2.init();
-        assertThat(hmacCalculator2.calculate(data)).isEqualTo("m9Yir8xEvAS4leA6IZGJQ++OGkyMMHnf334N94AlVIs=");
-    }
-
-    @Test
-    public void shouldInitialKeyBeDifferentForEachInstance() throws Exception {
-        File keystoreFile1 = File.createTempFile("test-secure-audit", ".jks");
-        keystoreFile1.delete();
-
-        File keystoreFile2 = File.createTempFile("test-secure-audit", ".jks");
-        keystoreFile2.delete();
-
-        HmacCalculator hmacCalculator1 = new HmacCalculator(keystoreFile1.getAbsolutePath(), "forgerock");
-        hmacCalculator1.init();
-        HmacCalculator hmacCalculator2 = new HmacCalculator(keystoreFile2.getAbsolutePath(), "forgerock");
-        hmacCalculator2.init();
-
-        byte[] data = "rockstar".getBytes("UTF-8");
-        String base64HMAC1 = hmacCalculator1.calculate(data);
-        String base64HMAC2 = hmacCalculator2.calculate(data);
-
-        // 2 differents instances of HmacCalculator should not produce the same HMAC
-        assertThat(base64HMAC1).isNotEqualTo(base64HMAC2);
     }
 
 }

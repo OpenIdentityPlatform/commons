@@ -15,9 +15,11 @@
  */
 package org.forgerock.audit.events.handlers.csv;
 
+
 import static org.assertj.core.api.Assertions.assertThat;
-import java.io.StringReader;
+
 import java.io.Reader;
+import java.io.StringReader;
 import java.util.Collections;
 import java.util.Map;
 
@@ -26,34 +28,31 @@ import org.supercsv.io.ICsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.Test;
 
-
-public class CsvHmacMapReaderTest {
+public class CsvSecureMapReaderTest {
 
     @Test
-    public void shouldIgnoreHMACColumn() throws Exception {
-        String line = "bar,myHMAC";
+    public void shouldIgnoreExtraColumn() throws Exception {
+        String line = "foo,HMAC,SIGNATURE\nbar,uLkBIiPY0+yyseXNACJX5SBwqV4RDSN8Ab8Jz7c3cYI=,";
         Reader reader = new StringReader(line);
-        ICsvMapReader csvMapReader = new CsvMapReader(reader, CsvPreference.STANDARD_PREFERENCE);
-        CsvHmacMapReader csvHMACReader = new CsvHmacMapReader(csvMapReader);
-
-        String nameMapping = "foo";
-        Map<String, String> values = csvHMACReader.read(nameMapping);
-
-        csvHMACReader.close();
+        ICsvMapReader csvMapReader = new CsvMapReader(reader, CsvPreference.EXCEL_PREFERENCE);
+        Map<String, String> values;
+        try (CsvSecureMapReader csvHMACReader = new CsvSecureMapReader(csvMapReader)) {
+            String[] header = csvHMACReader.getHeader(true);
+            values = csvHMACReader.read(header);
+        }
 
         assertThat(values).isEqualTo(Collections.singletonMap("foo", "bar"));
     }
 
     @Test
     public void shouldIgnoreHMACHeader() throws Exception {
-        String line = "foo,HMAC";
+        String line = "foo,HMAC,SIGNATURE";
         Reader reader = new StringReader(line);
         ICsvMapReader csvMapReader = new CsvMapReader(reader, CsvPreference.STANDARD_PREFERENCE);
-        CsvHmacMapReader csvHMACReader = new CsvHmacMapReader(csvMapReader);
-
-        String[] header = csvHMACReader.getHeader(false);
-
-        csvHMACReader.close();
+        String[] header;
+        try (CsvSecureMapReader csvHMACReader = new CsvSecureMapReader(csvMapReader)) {
+            header = csvHMACReader.getHeader(false);
+        }
 
         assertThat(header).isEqualTo(new String[] { "foo" });
     }

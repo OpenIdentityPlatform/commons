@@ -183,6 +183,9 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
         @JsonPropertyDescription("audit.handlers.csv.security.password")
         private String password;
 
+        @JsonPropertyDescription("audit.handlers.csv.security.signatureInterval")
+        private String signatureInterval;
+
         /**
          * Enables tamper evident logging. By default tamper evident logging is disabled.
          * @param enabled True - To enable tamper evident logging.
@@ -232,6 +235,22 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
          */
         public String getPassword() {
             return password;
+        }
+
+        /**
+         * Sets the signature's interval.
+         * @param signatureInterval The time's interval to insert periodically a signature.
+         */
+        public void setSignatureInterval(String signatureInterval) {
+            this.signatureInterval = signatureInterval;
+        }
+
+        /**
+         * Gets the signature's interval.
+         * @return The time's interval to insert periodically a signature.
+         */
+        public String getSignatureInterval() {
+            return signatureInterval;
         }
 
     }

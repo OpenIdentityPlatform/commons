@@ -32,14 +32,13 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.json.AuditJsonConfig;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryFilters;
@@ -50,13 +49,13 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("javadoc")
 public class CSVAuditEventHandlerTest {
@@ -119,7 +118,7 @@ public class CSVAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
         final Context context = new RootContext();
 
         final CreateRequest createRequest = makeCreateRequest();
@@ -145,7 +144,7 @@ public class CSVAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
         final Context context = new RootContext();
 
         final ResourceResponse event = createAccessEvent(csvHandler);
@@ -190,7 +189,7 @@ public class CSVAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
         final Context context = new RootContext();
 
         final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
@@ -255,7 +254,7 @@ public class CSVAuditEventHandlerTest {
     public void testCreateCsvLogEntryWritesToFile() throws Exception {
         final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
         final Context context = new RootContext();
 
         final JsonValue content = json(
@@ -267,8 +266,8 @@ public class CSVAuditEventHandlerTest {
 
         csvHandler.publishEvent(context, "access", createRequest.getContent());
 
-        final String expectedContent = "\"_id\",\"timestamp\",\"transactionId\",\"HMAC\"\n"
-                + "\"1\",\"123456\",\"A10000\",\"l3jKX9DpKEWpALEBefJxOUKtLQttianWfqISvnk2HgE=\"";
+        String expectedContent = "\"_id\",\"timestamp\",\"transactionId\"\n"
+                + "\"1\",\"123456\",\"A10000\"";
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }
 
@@ -296,7 +295,7 @@ public class CSVAuditEventHandlerTest {
 
         // Force the initial key so we'll have reproductible builds.
         SecretKey secretKey = new SecretKeySpec(Base64.decode("zmq4EoprX52XLGyLkMENcin0gv0jwYyrySi3YOqfhFY="), "RAW");
-        HmacCalculator.writeToKeyStore(secretKey, csvSecurity.getFilename(), "InitialKey", csvSecurity.getPassword());
+        CsvSecureUtils.writeToKeyStore(secretKey, csvSecurity.getFilename(), "InitialKey", csvSecurity.getPassword());
 
         return csvSecurity;
     }
