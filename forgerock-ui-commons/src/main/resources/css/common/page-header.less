@@ -37,14 +37,13 @@
     }
 
     h4.page-type {
-
+        display: inline-block;
         text-transform: uppercase;
         font-size: 13px;
         letter-spacing: 1px;
         margin: 10px 0;
         color: #666;
         font-weight: 600;
-
     }
 
     .header-icon {
@@ -55,12 +54,17 @@
     }
 
     .page-header-button-group {
-      float: right;
-      padding-top: 6px;
+        float: right;
+        padding-top: 6px;
     }
 
     &.page-header-list-page {
         border-bottom: none;
+    }
+
+    .page-header-link-with-border {
+        border-left: 1px solid #ccc;
+        padding-left: 10px;
     }
 }
 
