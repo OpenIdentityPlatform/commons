@@ -77,8 +77,8 @@ Copyright 2014-2015 ForgeRock AS.
     </ciManagement>
 
     <properties>
-        <java.source.version>1.6</java.source.version>
-        <java.target.version>1.6</java.target.version>
+        <java.source.version>1.7</java.source.version>
+        <java.target.version>1.7</java.target.version>
 
         <slf4j.api.version>1.7.10</slf4j.api.version>
         <guice.version>3.0</guice.version>
