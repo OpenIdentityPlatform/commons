@@ -32,7 +32,7 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
-import org.forgerock.http.context.HttpRequestContext;
+import org.forgerock.http.context.AttributesContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.promise.Promise;
@@ -121,7 +121,7 @@ public class AuthModuleOne implements AsyncServerAuthModule {
     public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
             Subject clientSubject, Subject serviceSubject) {
 
-        HttpRequestContext httpContext = messageInfo.asContext(HttpRequestContext.class);
+        AttributesContext httpContext = messageInfo.asContext(AttributesContext.class);
         HttpServletRequest request = (HttpServletRequest) httpContext.getAttributes().get(HttpServletRequest.class.getName());
 
         String header = request.getHeader(AUTH_MODULE_ONE_VALIDATE_REQUEST_HEADER_NAME.toLowerCase());
@@ -184,7 +184,7 @@ public class AuthModuleOne implements AsyncServerAuthModule {
     public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
             Subject serviceSubject) {
 
-        HttpRequestContext httpContext = messageInfo.asContext(HttpRequestContext.class);
+        AttributesContext httpContext = messageInfo.asContext(AttributesContext.class);
         HttpServletRequest request = (HttpServletRequest) httpContext.getAttributes().get(HttpServletRequest.class.getName());
 
         String header = request.getHeader(AUTH_MODULE_ONE_SECURE_RESPONSE_HEADER_NAME.toLowerCase());

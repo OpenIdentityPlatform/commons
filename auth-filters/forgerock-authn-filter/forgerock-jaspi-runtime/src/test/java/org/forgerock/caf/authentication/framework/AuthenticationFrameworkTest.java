@@ -33,7 +33,8 @@ import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.Session;
-import org.forgerock.http.context.HttpRequestContext;
+import org.forgerock.http.context.AttributesContext;
+import org.forgerock.http.context.SessionContext;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -79,9 +80,9 @@ public class AuthenticationFrameworkTest {
                 initializationPromise);
     }
 
-    private HttpRequestContext mockContext() {
+    private AttributesContext mockContext() {
         Session session = mock(Session.class);
-        return new HttpRequestContext(new RootContext(), session);
+        return new AttributesContext(new SessionContext(new RootContext(), session));
     }
 
     private Handler mockHandler(Request request, Promise<Response, NeverThrowsException> response) {
@@ -161,7 +162,7 @@ public class AuthenticationFrameworkTest {
     public void whenMessageProcessingSucceedsResourceResponseShouldBeReturned() {
 
         //Given
-        HttpRequestContext context = mockContext();
+        AttributesContext context = mockContext();
         Request request = new Request();
         Handler next = mockHandler(request,
                 Promises.<Response, NeverThrowsException>newResultPromise(successfulResponse));

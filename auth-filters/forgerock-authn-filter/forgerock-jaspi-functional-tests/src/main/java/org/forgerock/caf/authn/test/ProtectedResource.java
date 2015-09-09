@@ -24,7 +24,7 @@ import java.util.Map;
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.context.HttpRequestContext;
+import org.forgerock.http.context.AttributesContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
@@ -62,8 +62,8 @@ public class ProtectedResource implements Handler {
 
         response.getHeaders().putSingle(RESOURCE_CALLED_HEADER, "true");
 
-        String principal = (String) context.asContext(HttpRequestContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL);
-        Map<String, Object> requestContextMap = (Map<String, Object>) context.asContext(HttpRequestContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
+        String principal = (String) context.asContext(AttributesContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL);
+        Map<String, Object> requestContextMap = (Map<String, Object>) context.asContext(AttributesContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
 
         JsonValue json = json(object());
         json.put("data", "RESOURCE_DATA");
