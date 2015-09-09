@@ -33,6 +33,12 @@ public class GuiceTestCaseTest extends GuiceTestCase {
     @Override
     public void configure(Binder binder) {
         binder.bind(Key.get(new TypeLiteral<ArrayList<Object>>() { })).to(BoundOne.class);
+        binder.bind(BoundThree.class).to(BoundThreeA.class);
+    }
+
+    @Override
+    protected void configureOverrideBindings(Binder binder) {
+        binder.bind(BoundThree.class).to(BoundThreeB.class);
     }
 
     @Test
@@ -41,6 +47,7 @@ public class GuiceTestCaseTest extends GuiceTestCase {
                 .isInstanceOf(BoundOne.class);
         assertThat(InjectorHolder.getInstance(Key.get(new TypeLiteral<HashMap<String, Object>>() { })))
                 .isInstanceOf(BoundTwo.class);
+        assertThat(InjectorHolder.getInstance(BoundThree.class)).isInstanceOf(BoundThreeB.class);
     }
 
     public static class BoundOne extends ArrayList<Object> {
@@ -51,11 +58,18 @@ public class GuiceTestCaseTest extends GuiceTestCase {
         private static final long serialVersionUID = 0L;
     }
 
-    public static class ExtraModule implements Module {
+    public interface BoundThree {
+    }
 
+    public static class BoundThreeA implements BoundThree {
+    }
+
+    public static class BoundThreeB implements BoundThree {
+    }
+
+    public static class ExtraModule implements Module {
         public void configure(Binder binder) {
             binder.bind(Key.get(new TypeLiteral<HashMap<String, Object>>() { })).to(BoundTwo.class);
         }
-
     }
 }

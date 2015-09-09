@@ -19,6 +19,7 @@ package org.forgerock.guice.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.inject.util.Modules;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
@@ -53,8 +54,15 @@ public abstract class GuiceTestCase implements Module {
             }
         }
 
+        final GuiceTestCase testCase = this;
+        Module overrideModule = new Module() {
+            public void configure(Binder binder) {
+                testCase.configureOverrideBindings(binder);
+            }
+        };
+
         this.oldInjector = InjectorHolder.getInjector();
-        Injector injector = Guice.createInjector(modules);
+        Injector injector = Guice.createInjector(Modules.override(modules).with(overrideModule));
         InjectorHolder.INSTANCE.register(injector);
     }
 
@@ -72,6 +80,15 @@ public abstract class GuiceTestCase implements Module {
      * @param binder The Guice binder.
      */
     public void configure(Binder binder) {
+    }
 
+    /**
+     * Bindings specified on this {@literal binder} will be used to override
+     * bindings specified in {@link #configure(Binder)} and via the
+     * {@link GuiceModules} annotation.
+     *
+     * @param binder The Guice binder.
+     */
+    protected void configureOverrideBindings(Binder binder) {
     }
 }

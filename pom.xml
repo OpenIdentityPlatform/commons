@@ -20,7 +20,7 @@ Copyright 2014-2015 ForgeRock AS.
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.9</version>
+        <version>2.0.3</version>
     </parent>
 
     <groupId>org.forgerock.commons</groupId>
@@ -77,16 +77,8 @@ Copyright 2014-2015 ForgeRock AS.
     </ciManagement>
 
     <properties>
-        <java.source.version>1.7</java.source.version>
-        <java.target.version>1.7</java.target.version>
-
-        <slf4j.api.version>1.7.10</slf4j.api.version>
         <guice.version>3.0</guice.version>
         <servlet.api.version>2.5</servlet.api.version>
-
-        <testng.version>6.8.17</testng.version>
-        <mockito.version>1.10.19</mockito.version>
-        <assertj.version>1.7.1</assertj.version>
     </properties>
 
     <modules>
@@ -122,6 +114,13 @@ Copyright 2014-2015 ForgeRock AS.
         <dependencies>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-bom</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-guice-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -131,11 +130,6 @@ Copyright 2014-2015 ForgeRock AS.
                 <version>${project.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.api.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
@@ -155,26 +149,10 @@ Copyright 2014-2015 ForgeRock AS.
                 <version>${servlet.api.version}</version>
                 <scope>provided</scope>
             </dependency>
-
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-nop</artifactId>
-                <version>${slf4j.api.version}</version>
+                <version>1.7.12</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
@@ -185,7 +163,6 @@ Copyright 2014-2015 ForgeRock AS.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.4</version>
                 <reportSets>
                     <reportSet>
                         <reports>
