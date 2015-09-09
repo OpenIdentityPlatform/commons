@@ -460,12 +460,39 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
+    //This function exists to catch any legacy jqConfirms.
+    //Once completly updated across the applications this function can be removed.
+    obj.jqConfirm  = function(message, confirmCallback){
+        this.confirmDialog(message, "default", confirmCallback);
+    };
 
-    obj.jqConfirm = function(message, confirmCallback, width){
+    /**
+     * @param {string} message The text provided in the main body of the dialog
+     * @param {string} type The type of dialog to display
+     * @param {Function} confirmCallback Fired when the confirm button is clicked
+     * default
+     * info
+     * primary
+     * success
+     * warning
+     * danger
+     *
+     * @example
+     *  UIUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDelete"), "danger",s _.bind(function(){
+     *      //Useful stuff here
+     *  }, this));
+     */
+    obj.confirmDialog = function(message, type, confirmCallback){
         ModuleLoader.load("bootstrap-dialog").then(function (BootstrapDialog) {
+            var btnType = "btn-" +type;
+
+            if(type === "default") {
+                btnType = "btn-primary";
+            }
+
             BootstrapDialog.show({
                 title: $.t('common.form.confirm'),
-                type: BootstrapDialog.TYPE_DEFAULT,
+                type: "type-" +type,
                 message: message,
                 buttons: [
                     {
@@ -476,7 +503,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     },
                     {
                         label: $.t('common.form.ok'),
-                        cssClass: "btn-primary",
+                        cssClass: btnType,
                         action: function(dialog) {
                             if(confirmCallback) {
                                 confirmCallback();
