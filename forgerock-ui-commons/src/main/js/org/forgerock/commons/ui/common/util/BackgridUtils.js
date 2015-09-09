@@ -23,7 +23,6 @@
  */
 
 /*global define */
-
 define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     "jquery",
     "underscore",
@@ -33,22 +32,24 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     "moment",
     "backgrid-filter"
 ], function ($, _, Backgrid, DateUtil, UIUtils, moment) {
-    var obj = {};
-    
     /**
      * @exports org/forgerock/commons/ui/common/util/BackgridUtils
      */
-    
+    var obj = {};
+
     /**
-    * Makes the provided table drag and droppable
-    *
-    * @param {object} data
-    * @param {object} data.grid - jQuery ref to a table
-    * @params {array} data.rows - array of the rows in the table
-    * @param {object} callback - called on row drop
-    * 
-    */
-    obj.sortable = function(data, callback) {
+     * Makes the provided table drag and droppable
+     * @param {Object} data TODO Add parameter description
+     * @param {Object} data.grid - jQuery ref to a table
+     * @params {array} data.rows - array of the rows in the table
+     * @param {Object} callback - called on row drop
+     * @example
+     * BackgridUtils.sortable({
+     *   "grid": this.$el.find("#attributesGridHolder table"),
+     *   "rows": _.clone(this.model.mappingProperties, true)
+     * }, _.bind(this.setMappingProperties, this));
+     */
+    obj.sortable = function (data, callback) {
         if (data.grid && data.rows.length > 0) {
 
             var offset = 0,
@@ -58,14 +59,14 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
                 table;
 
             /*
-             * TODO: when jQuery UI is removed from the stack, we need to go back to using 
+             * TODO: when jQuery UI is removed from the stack, we need to go back to using
              *       the plain "sortable" plugin instead of "nestingSortable"
              */
             data.grid.nestingSortable({
-                containerSelector: 'table',
-                itemPath: '> tbody',
-                itemSelector: 'tr',
-                placeholder: '<tr class="placeholder"/>',
+                containerSelector: "table",
+                itemPath: "> tbody",
+                itemSelector: "tr",
+                placeholder: "<tr class='placeholder'/>",
                 onMousedown: function ($item, _super, event) {
                     table = $item.closest(this.containerSelector);
                     topBounds = table.offset().top;
@@ -76,7 +77,7 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
                     startIndex = table.find("tbody tr").index($item);
 
                     // set a fixed width of all cells so that when dragging, our cells width doesn't collapse
-                    $('td, th', 'table').each(function () {
+                    $("td, th", "table").each(function () {
                         var cell = $(this);
                         cell.width(cell.width());
                     });
@@ -104,9 +105,9 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
                     }
 
                     // remove fixed width so that if content/table is resized then
-                    $('td, th', 'table').each(function () {
+                    $("td, th", "table").each(function () {
                         var cell = $(this);
-                        cell.css('width', '');
+                        cell.css("width", "");
                     });
 
                     _super($item, container, _super, event);
@@ -119,9 +120,9 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
         }
     };
 
-    obj.formatDate = function(date) {
+    obj.formatDate = function (date) {
         var returnDate = "";
-        if(date) {
+        if (date) {
             returnDate = DateUtil.formatDate(date, "MMM dd, yyyy") +
             " <small class='text-muted'>" +
             DateUtil.formatDate(date, "h:mm:ss TT") +
@@ -133,8 +134,8 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
 
     /**
      * The date cell will search the model attributes for the provided property and format that into a standard date.
-     * @param dateProperty{string}
-     * @returns {*}
+     * @param {string} dateProperty TODO Add parameter description
+     * @returns {*} TODO Add returns description
      */
     obj.DateCell = function (dateProperty) {
         var _this = this;
@@ -149,7 +150,7 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
             }
         });
     };
-    
+
     /**
      * Datetime Ago Cell Renderer
      * <p>
@@ -173,27 +174,28 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
      * The button cell allows you to define an array of icons to insert into a single cell.
      * The icons will be given the class name and will execute the callback on click.
      *
-     * @param buttons {array}
-     *      EXAMPLE:
-     *       cell: CustomCells.ButtonCell([{
-     *           className: "fa fa-pencil grid-icon",
-     *           callback: function(){alert(this.model.get("createTime"));}
-     *       }, {
-     *           className: "fa fa-plus grid-icon",
-     *           callback: function(){alert(this.model.get("assignee"));}
-     *       }])
-     * @returns {Backgrid.Cell}
+     * @param {Object[]} buttons TODO Add parameter description
+     * @param {Function} renderCallback TODO Add parameter description
+     * @returns {Backgrid.Cell} TODO Add returns description
+     * @example
+     * cell: CustomCells.ButtonCell([{
+     *   className: "fa fa-pencil grid-icon",
+     *   callback: function(){alert(this.model.get("createTime"));}
+     * }, {
+     *   className: "fa fa-plus grid-icon",
+     *   callback: function(){alert(this.model.get("assignee"));}
+     * }])
      */
     obj.ButtonCell = function (buttons, renderCallback) {
         var events = {},
             html = "";
 
-        _.each(buttons, function(button, index) {
-            if(button.href) {
-                html += ("<a href=\"" +button.href +"\"><i class=\"button-" + index + " " + button.className +  "\"></i></a>");
+        _.each(buttons, function (button, index) {
+            if (button.href) {
+                html += ("<a href=\"" + button.href + "\"><i class=\"button-" + index + " " + button.className + "\"></i></a>");
             } else {
-                events["click .button-"+index] = button.callback;
-                html += ("<i class=\"button-" + index + " " + button.className +  "\"></i>");
+                events["click .button-" + index] = button.callback;
+                html += ("<i class=\"button-" + index + " " + button.className + "\"></i>");
             }
         });
 
@@ -214,16 +216,17 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
 
     /**
      * In the case that a grid needs to sort on a property other than the one displayed, use this custom cell.
-     * EXAMPLE: Will sort on "taskName" and display "name"
-     *    {
-     *        label: "Task",
-     *        name: "taskName",
-     *        cell: CustomCells.DisplayNameCell(name),
-     *        sortable: true,
-     *        editable: false
-     *    }
-     * @param displayProperty
-     * @returns {*}
+     * @param {string} displayProperty TODO Add parameter description
+     * @returns {Backgrid.Cell} TODO Add return description
+     * @example
+     * // Will sort on "taskName" and display "name"
+     * {
+     *   label: "Task",
+     *   name: "taskName",
+     *   cell: CustomCells.DisplayNameCell(name),
+     *   sortable: true,
+     *   editable: false
+     * }
      */
     obj.DisplayNameCell = function (displayProperty) {
         return Backgrid.Cell.extend({
@@ -244,96 +247,92 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
      *
      * the "hideColumnLabel" param can be passed in to display the cell with no label
      * for the associated value
-     *
-     * @param cols {array}
-     * @param hideColumnLabels {boolean}
-     * @returns {array}
-     *
+     * @param {Object[]} cols TODO Add parameter description
+     * @param {boolean} hideColumnLabels TODO Add parameter description
+     * @returns {Object[]} TODO Add returns description
      */
-
     obj.addSmallScreenCell = function (cols, hideColumnLabels) {
         var smallScreenCell = Backgrid.Cell.extend({
-            className: "smallScreenCell",
-            events: {},
-            render: function () {
-                var html = "",
-                    filteredCols = _.reject(cols, function (c) {
-                        return c.name === "smallScreenCell";
-                    });
+                className: "smallScreenCell",
+                events: {},
+                render: function () {
+                    var html = "",
+                        filteredCols = _.reject(cols, function (c) {
+                            return c.name === "smallScreenCell";
+                        });
 
-                _.each(filteredCols, _.bind(function (col) {
-                    var cellView,
-                        label = "<span class='text-muted'>" + col.label + ":</span> ",
-                        cellWrapper;
+                    _.each(filteredCols, _.bind(function (col) {
+                        var cellView,
+                            label = "<span class='text-muted'>" + col.label + ":</span> ",
+                            cellWrapper;
 
-                    if (_.isObject(col.cell)) {
-                        cellView = new col.cell({ model: this.model, column: col});
-                        cellView.$el = $("<span>");
-                        cellView.render();
+                        if (_.isObject(col.cell)) {
+                            cellView = new col.cell({ model: this.model, column: col });
+                            cellView.$el = $("<span>");
+                            cellView.render();
 
-                        if (!_.isEmpty(_.omit(cellView.events, "click"))) {
-                            cellWrapper = $("<p class='pull-right show'></p>");
+                            if (!_.isEmpty(_.omit(cellView.events, "click"))) {
+                                cellWrapper = $("<p class='pull-right show'></p>");
 
-                            if (cellView.$el.html().length && !hideColumnLabels && col.label) {
-                                cellWrapper.append(label);
+                                if (cellView.$el.html().length && !hideColumnLabels && col.label) {
+                                    cellWrapper.append(label);
+                                }
+
+                                cellWrapper.append(cellView.$el);
+
+                                this.$el.prepend(cellWrapper);
+                            } else {
+                                cellWrapper = $("<p>");
+
+                                if (cellView.$el.html().length && !hideColumnLabels && col.label) {
+                                    cellWrapper.append(label);
+                                }
+
+                                cellWrapper.append(cellView.$el);
+
+                                this.$el.append(cellWrapper);
                             }
-
-                            cellWrapper.append(cellView.$el);
-
-                            this.$el.prepend(cellWrapper);
                         } else {
                             cellWrapper = $("<p>");
-
-                            if (cellView.$el.html().length && !hideColumnLabels && col.label) {
+                            if (this.model.get(col.name) && this.model.get(col.name).length && !hideColumnLabels && col.label) {
                                 cellWrapper.append(label);
                             }
 
-                            cellWrapper.append(cellView.$el);
+                            cellWrapper.append(this.model.get(col.name));
 
                             this.$el.append(cellWrapper);
                         }
-                    } else {
-                        cellWrapper = $("<p>");
-                        if (this.model.get(col.name) && this.model.get(col.name).length && !hideColumnLabels && col.label) {
-                            cellWrapper.append(label);
-                        }
+                    }, this));
 
-                        cellWrapper.append(this.model.get(col.name));
-
-                        this.$el.append(cellWrapper);
-                    }
-                }, this));
-
-                return this;
-            }
-        }),
-        newCol = {
-            name: "smallScreenCell",
-            editable: false,
-            sortable: false,
-            cell: smallScreenCell
-        };
+                    return this;
+                }
+            }),
+            newCol = {
+                name: "smallScreenCell",
+                editable: false,
+                sortable: false,
+                cell: smallScreenCell
+            };
 
         cols.push(newCol);
 
         return cols;
     };
-    
-    
+
     /**
      * Handlebars Template Cell Renderer
      * <p>
-     * You must extend this renderer and specify a "template" attribute e.g.
-     * <p>
-     * MyCell = backgridUtils.TemplateCell.extend({
-     *     template: "templates/MyTemplate.html"
+     * You must extend this renderer and specify a "template" attribute
+     * @example
+     * BackgridUtils.TemplateCell.extend({
+     *   template: "templates/MyTemplate.html"
      * });
      */
     obj.TemplateCell = Backgrid.Cell.extend({
-        className: 'template-cell',
+        className: "template-cell",
 
         events: {
-            'click': '_onClick'
+            "click": "_onClick"
         },
 
         render: function () {
@@ -358,7 +357,6 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
             }
         }
     });
-    
 
     /**
      * Object Cell
@@ -372,7 +370,7 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
             this.$el.empty();
 
             var object = this.model.get(this.column.attributes.name),
-                result = '<dl class="dl-horizontal">',
+                result = "<dl class='dl-horizontal'>",
                 prop;
 
             for (prop in object) {
@@ -469,7 +467,7 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     });
 
     obj.sortKeys = function () {
-        return this.state.order === 1 ? '-' + this.state.sortKey : this.state.sortKey;
+        return this.state.order === 1 ? "-" + this.state.sortKey : this.state.sortKey;
     };
 
     // FIXME: Workaround to fix "Double sort indicators" issue
@@ -482,7 +480,7 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
             });
 
         _.each(filtered, function (model) {
-            model.set('direction', null);
+            model.set("direction", null);
         });
     };
 
@@ -491,5 +489,4 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     };
 
     return obj;
-
 });
