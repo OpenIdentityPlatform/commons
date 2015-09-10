@@ -22,6 +22,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.forgerock.caf.authentication.api.MessageContext;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.jaspi.modules.session.jwt.JwtSessionCookie;
+
 /**
  * This class creates an API which bridges the differences between the Servlet 2.5 and 3.0 Cookie APIs, as the Servlet
  * 2.5 API does not support HttpOnly cookies and provides no methods to create a HttpOnly cookie.
@@ -29,7 +33,7 @@ import java.util.Set;
  * @see javax.servlet.http.Cookie
  * @since 1.5.0
  */
-public class Cookie {
+public class Cookie implements JwtSessionCookie {
 
     //So as to test both Servlet 2.5 or 3.0 being present
     static boolean isServlet3xPresent = isHttpOnlyCookieSupported();
@@ -58,6 +62,7 @@ public class Cookie {
      *
      * @return The current value of this Cookie.
      */
+    @Override
     public final String getValue() {
         return cookie.getValue();
     }

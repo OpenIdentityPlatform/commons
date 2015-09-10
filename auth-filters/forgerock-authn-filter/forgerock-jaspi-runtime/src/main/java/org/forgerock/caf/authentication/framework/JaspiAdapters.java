@@ -26,6 +26,7 @@ import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -46,7 +47,12 @@ import org.forgerock.util.promise.Promises;
  *
  * @since 2.0.0
  */
-final class JaspiAdapters {
+public final class JaspiAdapters {
+
+    /**
+     * Message Info Map Key for {@link MessageContext}.
+     */
+    public static final String MESSAGE_INFO_CONTEXT_KEY = "_messageInfoContext";
 
     private JaspiAdapters() {
         //Private utility constructor
@@ -88,7 +94,7 @@ final class JaspiAdapters {
      * @param messageInfoContext The {@code MessageContextInfo} to adapt.
      * @return An {@code MessageInfo}.
      */
-    static MessageInfo adapt(MessageInfoContext messageInfoContext) {
+    public static MessageInfo adapt(MessageInfoContext messageInfoContext) {
         return new MessageInfoAdapter(messageInfoContext);
     }
 
@@ -201,9 +207,26 @@ final class JaspiAdapters {
     private static final class MessageInfoAdapter implements MessageInfo {
 
         private final MessageInfoContext messageInfoContext;
+        private final Map<String, Object> requestContextMap;
 
-        private MessageInfoAdapter(MessageInfoContext messageInfoContext) {
+        private MessageInfoAdapter(final MessageInfoContext messageInfoContext) {
             this.messageInfoContext = messageInfoContext;
+            Map<String, Object> temp = new HashMap<>();
+            temp.put(MESSAGE_INFO_CONTEXT_KEY, messageInfoContext);
+            this.requestContextMap = new HashMap<String, Object>(temp) {
+                @Override
+                public Object put(String key, Object value) {
+                    messageInfoContext.getRequestContextMap().put(key, value);
+                    return super.put(key, value);
+                }
+
+                @Override
+                public void putAll(Map<? extends String, ?> m) {
+                    messageInfoContext.getRequestContextMap().putAll(m);
+                    super.putAll(m);
+                }
+            };
+            requestContextMap.putAll(messageInfoContext.getRequestContextMap());
         }
 
         @Override
@@ -231,7 +254,7 @@ final class JaspiAdapters {
         @SuppressWarnings("rawtypes")
         @Override
         public Map getMap() {
-            return messageInfoContext.getRequestContextMap();
+            return requestContextMap;
         }
     }
 }

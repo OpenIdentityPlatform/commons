@@ -16,6 +16,8 @@
 
 package org.forgerock.caf.authentication.framework;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.caf.authentication.framework.JaspiAdapters.MESSAGE_INFO_CONTEXT_KEY;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
@@ -30,6 +32,7 @@ import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.config.ServerAuthContext;
 import javax.security.auth.message.module.ServerAuthModule;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
@@ -41,7 +44,6 @@ import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.promise.Promise;
-import org.mockito.Matchers;
 import org.testng.annotations.Test;
 
 public class JaspiAdaptersTest {
@@ -430,12 +432,17 @@ public class JaspiAdaptersTest {
 
         //Given
         MessageInfoContext messageInfoContext = mock(MessageInfoContext.class);
+        Map<String, Object> requestContextMap = new HashMap<>();
+        given(messageInfoContext.getRequestContextMap()).willReturn(requestContextMap);
+        requestContextMap.put("KEY1", "VALUE1");
 
         //When
         MessageInfo messageInfo = JaspiAdapters.adapt(messageInfoContext);
-        messageInfo.getMap();
+        messageInfo.getMap().put("KEY2", "VALUE2");
 
         //Then
-        verify(messageInfoContext).getRequestContextMap();
+        assertThat(messageInfo.getMap().get(MESSAGE_INFO_CONTEXT_KEY)).isEqualTo(messageInfoContext);
+        assertThat(messageInfo.getMap().get("KEY1")).isEqualTo("VALUE1");
+        assertThat(messageInfoContext.getRequestContextMap().get("KEY2")).isEqualTo("VALUE2");
     }
 }

@@ -61,9 +61,9 @@ import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class JwtSessionModuleTest {
+public class ServletJwtSessionModuleTest {
 
-    private JwtSessionModule jwtSessionModule;
+    private ServletJwtSessionModule jwtSessionModule;
 
     private JwtBuilderFactory jwtBuilderFactory;
 
@@ -72,7 +72,7 @@ public class JwtSessionModuleTest {
 
         jwtBuilderFactory = mock(JwtBuilderFactory.class);
 
-        jwtSessionModule = new JwtSessionModule(jwtBuilderFactory) {
+        jwtSessionModule = new ServletJwtSessionModule(jwtBuilderFactory) {
             @Override
             protected String rebuildEncryptedJwt(EncryptedJwt jwt, RSAPublicKey publicKey) {
                 return "REBUILT_ENCRYPTED_JWT";
@@ -701,7 +701,6 @@ public class JwtSessionModuleTest {
         calendar.add(Calendar.MINUTE, 1);
         assertEquals(exp, calendar.getTime());
 
-
         Cookie jwtSessionCookie = cookieCaptor.getValue();
         assertEquals(jwtSessionCookie.getPath(), "/");
         assertEquals(jwtSessionCookie.getValue(), "ENCRYPTED_JWT");
@@ -785,7 +784,6 @@ public class JwtSessionModuleTest {
         assertEquals(idle, (Long) (calendar.getTime().getTime() / 1000L));
         calendar.add(Calendar.MINUTE, 2);
         assertEquals(exp, calendar.getTime());
-
 
         Cookie jwtSessionCookie = cookieCaptor.getValue();
         assertEquals(jwtSessionCookie.getPath(), "/");
@@ -911,7 +909,6 @@ public class JwtSessionModuleTest {
         calendar.add(Calendar.MINUTE, 1);
         assertEquals(idle, (Long) (calendar.getTime().getTime() / 1000L));
 
-
         Cookie jwtSessionCookie = cookieCaptor.getValue();
         assertEquals(jwtSessionCookie.getPath(), "/");
         assertEquals(jwtSessionCookie.getValue(), "ENCRYPTED_JWT");
@@ -999,7 +996,6 @@ public class JwtSessionModuleTest {
         calendar.add(Calendar.MINUTE, -10);
         assertEquals(idle, (Long) (calendar.getTime().getTime() / 1000L));
 
-
         Cookie jwtSessionCookie = cookieCaptor.getValue();
         assertEquals(jwtSessionCookie.getPath(), "/");
         assertEquals(jwtSessionCookie.getValue(), "ENCRYPTED_JWT");
@@ -1067,7 +1063,7 @@ public class JwtSessionModuleTest {
         given(messageInfo.getResponseMessage()).willReturn(response);
 
         //When
-        jwtSessionModule.deleteSessionJwtCookie(response);
+        jwtSessionModule.deleteSessionJwtCookie(messageInfo);
 
         //Then
         ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
@@ -1127,7 +1123,8 @@ public class JwtSessionModuleTest {
         options.put(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, "1");
 
         //when
-        jwtSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+        jwtSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options)
+                .getOrThrowUninterruptibly();
 
         //then
         //should never get here
@@ -1145,7 +1142,8 @@ public class JwtSessionModuleTest {
         options.put(JwtSessionModule.MAX_TOKEN_LIFE_IN_SECONDS_KEY, "1");
 
         //when
-        jwtSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+        jwtSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options)
+                .getOrThrowUninterruptibly();
 
         //then
         //should never get here
