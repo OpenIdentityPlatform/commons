@@ -30,6 +30,21 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
         getMVCCRev : function () {
             return this.get("_rev") || "*";
         },
+        get: function(key) {
+            //if the key has a leading "/" then trim it off
+            //this assumes the key will never look like "/aProp.aSubProp"
+            if (key.indexOf("/") === 0) {
+                key = key.substring(1);
+            }
+            
+            return _.reduce(key.split("/"), function(attr, key) {
+                if (attr instanceof Backbone.Model) {
+                    return attr.attributes[key];
+                }
+
+                return attr[key];
+            }, this.attributes);
+        },
         sync: function (method, model, options) {
             switch (method) {
                 case "create":
