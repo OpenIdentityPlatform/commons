@@ -15,7 +15,6 @@
  */
 
 /**
- * This package defines the common authorization API interfaces and classes used by both the CREST API and CHF HTTP
- * API.
+ * This package defines the authorization framework implementation classes for use in a CHF HTTP environment.
  */
-package org.forgerock.authz.filter.api;
+package org.forgerock.authz.filter.http;

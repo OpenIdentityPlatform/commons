@@ -14,7 +14,12 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.authz.filter.api;
+package org.forgerock.authz.filter.http.api;
+
+import org.forgerock.authz.filter.api.AuthorizationAttribute;
+import org.forgerock.authz.filter.api.AuthorizationContext;
+import org.forgerock.authz.filter.http.api.HttpAuthorizationContext;
+import org.forgerock.http.Context;
 
 /**
  * <p>Provides a convenience layer on top of {@link AuthorizationContext} to simplify access to particular attributes in
@@ -36,9 +41,9 @@ package org.forgerock.authz.filter.api;
  * @param <T> The type of the attribute.
  * @since 1.4.0
  */
-public final class AuthorizationAttribute<T> {
+public final class HttpAuthorizationAttribute<T> {
 
-    private final String key;
+    private final AuthorizationAttribute<T> attribute;
 
     /**
      * Constructs an authorization attribute for the given authorization context key.
@@ -46,11 +51,8 @@ public final class AuthorizationAttribute<T> {
      * @param key The key to use for this attribute in the {@link AuthorizationContext}.
      * @throws NullPointerException If the key is null.
      */
-    public AuthorizationAttribute(String key) {
-        if (key == null) {
-            throw new NullPointerException("key is null");
-        }
-        this.key = key;
+    public HttpAuthorizationAttribute(String key) {
+        this.attribute = new AuthorizationAttribute<>(key);
     }
 
     /**
@@ -63,7 +65,20 @@ public final class AuthorizationAttribute<T> {
      */
     @SuppressWarnings("unchecked")
     public T get(AuthorizationContext context) {
-        return context.getAttribute(key);
+        return attribute.get(context);
+    }
+
+    /**
+     * Gets this attribute from the authorization context associated with the given request context.
+     *
+     * @param context The request context to get this attribute from.
+     * @return The attribute associated with this request in the authorization context or null if not set.
+     * @throws ClassCastException If an entry exists in the context for this key but has the wrong type or if the
+     * context attribute in the request is itself of the wrong type.
+     * @throws NullPointerException If the request is null.
+     */
+    public T get(Context context) {
+        return get(HttpAuthorizationContext.forRequest(context));
     }
 
     /**
@@ -74,39 +89,19 @@ public final class AuthorizationAttribute<T> {
      * @throws NullPointerException If the context is null.
      */
     public void set(AuthorizationContext context, T value) {
-        context.setAttribute(key, value);
+        attribute.set(context, value);
     }
 
     /**
-     * {@inheritDoc}
+     * Sets this attribute in the authorization context associated with the given request to the given value.
+     *
+     * @param context The request context to set this authorization attribute for.
+     * @param value The value to associate with this attribute.
+     * @throws NullPointerException If the request is null.
+     * @throws ClassCastException If the authorization context in the request is of the wrong type (i.e., not an actual
+     * authorization context).
      */
-    @SuppressWarnings("rawtypes")
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof AuthorizationAttribute)) {
-            return false;
-        }
-
-        AuthorizationAttribute that = (AuthorizationAttribute) o;
-
-        return key.equals(that.key);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int hashCode() {
-        return key.hashCode();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String toString() {
-        return "AuthorizationAttribute{key='" + key + "'}";
+    public void set(Context context, T value) {
+        set(HttpAuthorizationContext.forRequest(context), value);
     }
 }

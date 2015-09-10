@@ -25,9 +25,10 @@ import org.testng.annotations.Test;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
 
-@Test(testName = "AuthorizationContext")
-public class AuthorizationContextTestCases {
+@Test(testName = "BasicHttpTestCases")
+public class BasicHttpTestCases {
 
     @BeforeClass
     public void setUp() {
@@ -40,13 +41,26 @@ public class AuthorizationContextTestCases {
     }
 
     @Test
-    public void shouldReturnAuthorizationContextContents() {
+    public void usersAllowed() {
 
         given().
             expect().
                 statusCode(200).
-                body("AuthorizationResult", equalTo("success")).
             when().
                 get("/basic/http/users");
+    }
+
+    @Test
+    public void rolesNotAllowed() {
+
+        given().
+            expect().
+                statusCode(403).
+                body("code", equalTo(403)).
+                body("reason", equalTo("Forbidden")).
+                body("message", equalTo("Not authorized for endpoint: roles")).
+                body("detail", hasEntry("internalCode", 123)).
+            when().
+                get("/basic/http/roles");
     }
 }

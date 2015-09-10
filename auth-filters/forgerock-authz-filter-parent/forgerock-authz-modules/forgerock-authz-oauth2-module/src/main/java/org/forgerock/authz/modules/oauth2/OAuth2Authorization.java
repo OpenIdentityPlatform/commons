@@ -24,7 +24,7 @@ import static org.forgerock.json.JsonValue.object;
 
 /**
  * Utility class providing convenience methods for creating both {@link OAuth2CrestAuthorizationModule}s and
- * {@link OAuth2HttpServletAuthorizationModule}s.
+ * {@link OAuth2HttpAuthorizationModule}s.
  *
  * @since 1.5.0
  */
@@ -107,19 +107,17 @@ public final class OAuth2Authorization {
     }
 
     /**
-     * Creates a new {@code OAuth2HttpServletAuthorizationModule} with the provided configuration parameters.
+     * Creates a new {@code OAuth2HttpAuthorizationModule} with the provided configuration parameters.
      *
      * @param accessTokenValidator A {@code OAuth2AccessTokenValidator} instance.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
      * @param cacheEnabled {@code true} if the cache should be used.
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to {@code true}.
-     * @return A new {@code OAuth2HttpServletAuthorizationModule} instance.
+     * @return A new {@code OAuth2HttpAuthorizationModule} instance.
      */
-    public static OAuth2HttpServletAuthorizationModule forHttpServlet(OAuth2AccessTokenValidator accessTokenValidator,
-                                                                      Set<String> requiredScopes,
-                                                                      boolean cacheEnabled,
-                                                                      int cacheSize) {
-        return new OAuth2HttpServletAuthorizationModule(new OAuth2Module(accessTokenValidator,
+    public static OAuth2HttpAuthorizationModule forHttp(OAuth2AccessTokenValidator accessTokenValidator,
+            Set<String> requiredScopes, boolean cacheEnabled, int  cacheSize) {
+        return new OAuth2HttpAuthorizationModule(new OAuth2Module(accessTokenValidator,
                                                                          requiredScopes,
                                                                          cacheEnabled,
                                                                          cacheSize),
@@ -127,7 +125,7 @@ public final class OAuth2Authorization {
     }
 
     /**
-     * Creates a new {@code OAuth2HttpServletAuthorizationModule} with the provided configuration parameters.
+     * Creates a new {@code OAuth2HttpAuthorizationModule} with the provided configuration parameters.
      *
      * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
@@ -135,27 +133,24 @@ public final class OAuth2Authorization {
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
      * @param cacheEnabled {@code true} if the cache should be used.
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to {@code true}.
-     * @return A new {@code OAuth2HttpServletAuthorizationModule} instance.
+     * @return A new {@code OAuth2HttpAuthorizationModule} instance.
      */
-    public static OAuth2HttpServletAuthorizationModule forHttpServlet(RestResourceFactory resourceFactory,
-                                                                      String tokenInfoEndpoint,
-                                                                      String userInfoEndpoint,
-                                                                      Set<String> requiredScopes,
-                                                                      boolean cacheEnabled,
-                                                                      int cacheSize) {
-        return forHttpServlet(new RestOAuth2AccessTokenValidator(
-                                      json(
-                                              object(
-                                                      field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
-                                                      field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint))),
-                                      resourceFactory),
-                              requiredScopes,
-                              cacheEnabled,
-                              cacheSize);
+    public static OAuth2HttpAuthorizationModule forHttp(RestResourceFactory resourceFactory,
+            String tokenInfoEndpoint, String userInfoEndpoint, Set<String> requiredScopes, boolean cacheEnabled,
+            int cacheSize) {
+        return forHttp(new RestOAuth2AccessTokenValidator(
+                        json(
+                                object(
+                                        field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
+                                        field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint))),
+                        resourceFactory),
+                requiredScopes,
+                cacheEnabled,
+                cacheSize);
     }
 
     /**
-     * <p>Creates a new {@code OAuth2HttpServletAuthorizationModule} with the provided configuration parameters.</p>
+     * <p>Creates a new {@code OAuth2HttpAuthorizationModule} with the provided configuration parameters.</p>
      *
      * <p>Disables the cache.</p>
      *
@@ -163,12 +158,10 @@ public final class OAuth2Authorization {
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
-     * @return A new {@code OAuth2HttpServletAuthorizationModule} instance.
+     * @return A new {@code OAuth2HttpAuthorizationModule} instance.
      */
-    public static OAuth2HttpServletAuthorizationModule forHttpServlet(RestResourceFactory resourceFactory,
-                                                                      String tokenInfoEndpoint,
-                                                                      String userInfoEndpoint,
-                                                                      Set<String> requiredScopes) {
-        return forHttpServlet(resourceFactory, tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
+    public static OAuth2HttpAuthorizationModule forHttp(RestResourceFactory resourceFactory,
+            String tokenInfoEndpoint, String userInfoEndpoint, Set<String> requiredScopes) {
+        return forHttp(resourceFactory, tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
     }
 }
