@@ -16,22 +16,30 @@
 
 package org.forgerock.jaspi.modules.iwa;
 
+import static javax.security.auth.message.AuthStatus.*;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.jaspi.modules.iwa.wdsso.WDSSO;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Authentication module that uses IWA for authentication.
@@ -39,29 +47,35 @@ import org.forgerock.jaspi.modules.iwa.wdsso.WDSSO;
  * @author Phill Cunningon
  * @since 1.0.0
  */
-public class IWAModule implements ServerAuthModule {
+public class IWAModule implements AsyncServerAuthModule {
 
     private static final String IWA_FAILED = "iwa-failed";
 
     private CallbackHandler handler;
     private Map options;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
-            Map options) throws AuthException {
-        this.handler = handler;
-        this.options = options;
+    public String getModuleId() {
+        return "IWA";
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Class[] getSupportedMessageTypes() {
-        return new Class[]{HttpServletRequest.class, HttpServletResponse.class};
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
+            CallbackHandler handler, Map<String, Object> options) {
+        this.handler = handler;
+        this.options = options;
+        return newResultPromise(null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Collection<Class<?>> getSupportedMessageTypes() {
+        return Arrays.asList(new Class<?>[]{Request.class, Response.class});
     }
 
     /**
@@ -75,34 +89,32 @@ public class IWAModule implements ServerAuthModule {
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    public AuthStatus validateRequest(MessageInfo messageInfo, Subject clientSubject, Subject serviceSubject)
-            throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
+            Subject clientSubject, Subject serviceSubject) {
 
         LOG.debug("IWAModule: validateRequest START");
 
-        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        HttpServletResponse response = (HttpServletResponse) messageInfo.getResponseMessage();
+        Request request = messageInfo.getRequest();
+        Response response = messageInfo.getResponse();
 
-        String httpAuthorization = request.getHeader("Authorization");
+        String httpAuthorization = request.getHeaders().getFirst("Authorization");
 
         try {
             if (httpAuthorization == null || "".equals(httpAuthorization)) {
                 LOG.debug("IWAModule: Authorization Header NOT set in request.");
 
-                response.addHeader("WWW-Authenticate", "Negotiate");
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                try {
-                    response.getWriter().write("{\"failure\":true,\"reason\":\"" + IWA_FAILED + "\"}");
-                } catch (IOException e) {
-                    LOG.debug("IWAModule: Error writing Negotiate header to Response. {}", e.getMessage());
-                    throw new AuthException("Error writing to Response");
-                }
+                response.getHeaders().putSingle("WWW-Authenticate", "Negotiate");
+                response.setStatus(Status.UNAUTHORIZED);
+                Map<String, Object> entity = new HashMap<>();
+                entity.put("failure", true);
+                entity.put("recason", IWA_FAILED);
+                response.setEntity(entity);
 
-                return AuthStatus.SEND_CONTINUE;
+                return newResultPromise(SEND_CONTINUE);
             } else {
                 LOG.debug("IWAModule: Authorization Header set in request.");
                 try {
-                    final String username = new WDSSO().process(options, request);
+                    final String username = new WDSSO().process(options, messageInfo, request);
                     LOG.debug("IWAModule: IWA successful with username, {}", username);
 
                     clientSubject.getPrincipals().add(new Principal() {
@@ -112,10 +124,10 @@ public class IWAModule implements ServerAuthModule {
                     });
                 } catch (Exception e) {
                     LOG.debug("IWAModule: IWA has failed. {}", e.getMessage());
-                    throw new AuthException("IWA has failed");
+                    return newExceptionPromise(new AuthenticationException("IWA has failed"));
                 }
 
-                return AuthStatus.SUCCESS;
+                return newResultPromise(SUCCESS);
             }
         } finally {
             LOG.debug("IWAModule: validateRequest END");
@@ -130,14 +142,16 @@ public class IWAModule implements ServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public AuthStatus secureResponse(MessageInfo messageInfo, Subject serviceSubject) {
-        return AuthStatus.SEND_SUCCESS;
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
+            Subject serviceSubject) {
+        return newResultPromise(SEND_SUCCESS);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void cleanSubject(MessageInfo messageInfo, Subject subject) throws AuthException {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject subject) {
+        return newResultPromise(null);
     }
 }

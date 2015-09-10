@@ -37,7 +37,6 @@ import static org.forgerock.caf.authentication.framework.AuthenticationFramework
 import javax.security.auth.Subject;
 import javax.security.auth.login.Configuration;
 import javax.security.auth.login.LoginContext;
-import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.security.Principal;
@@ -48,6 +47,9 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.http.Context;
+import org.forgerock.http.context.AttributesContext;
+import org.forgerock.http.protocol.Request;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -120,17 +122,17 @@ public class WDSSO /*extends AMLoginModule*/ {
     }
 
     private static String user;
-    public String process(Map<String, String> options, HttpServletRequest request) throws Exception {
+    public String process(Map<String, String> options, Context context, Request request) throws Exception {
 
 //        try {
 
 //        int result = ISAuthConstants.LOGIN_IGNORE;
 
         // Check to see if the Rest Auth Endpoint has signified that IWA has failed.
-        if (hasWDSSOFailed(request)) {                 //TODO this is not required in the context of IB/IDM
+        if (hasWDSSOFailed(context)) {                 //TODO this is not required in the context of IB/IDM
 //            return ISAuthConstants.LOGIN_IGNORE;
 //            return AuthStatus.SEND_CONTINUE;
-            return "SEND_CONTINE";
+            return "SEND_CONTINUE";
         }
 
         if (!getConfigParams(options)) {
@@ -367,16 +369,16 @@ public class WDSSO /*extends AMLoginModule*/ {
     /**
      * Checks the request for an attribute "iwa-failed".
      *
-     * @param request THe HttpServletRequest.
+     * @param context The message info context.
      * @return If the attribute is present and set to true true is returned otherwise false is returned.
      */
-    private boolean hasWDSSOFailed(HttpServletRequest request) {
-        return Boolean.valueOf((String) request.getAttribute("iwa-failed"));
+    private boolean hasWDSSOFailed(Context context) {
+        return Boolean.valueOf((String) context.asContext(AttributesContext.class).getAttributes().get("iwa-failed"));
     }
 
-    private byte[] getSPNEGOTokenFromHTTPRequest(HttpServletRequest req) {
+    private byte[] getSPNEGOTokenFromHTTPRequest(Request req) {
         byte[] spnegoToken = null;
-        String header = req.getHeader("Authorization");
+        String header = req.getHeaders().getFirst("Authorization");
         if ((header != null) && header.startsWith("Negotiate")) {
             header = header.substring("Negotiate".length()).trim();
             LOG.debug("IWA WDSSO: \"Authorization\" header set, {}", header);
