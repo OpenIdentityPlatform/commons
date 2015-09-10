@@ -16,46 +16,77 @@
 
 package org.forgerock.jaspi.modules.session.openam;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import javax.net.ssl.TrustManager;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.Client;
+import org.forgerock.http.Context;
+import org.forgerock.http.Handler;
+import org.forgerock.http.handler.HttpClientHandler;
+import org.forgerock.http.header.CookieHeader;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
-import org.mockito.ArgumentCaptor;
+import org.forgerock.util.Options;
+import org.forgerock.util.Pair;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class OpenAMSessionModuleTest {
 
-    private OpenAMSessionModule openAMSessionModule;
+    private OpenAMSessionModule sessionModule;
 
-    private RestClient restClient;
+    private Options httpClientOptions;
+    private Handler httpHandler;
+    private String trustStorePath;
+    private String trustStoreType;
+    private String trustStoreAlgorithm;
+    private String trustStorePassword;
 
     @BeforeMethod
-    public void setUp() {
+    public void setup() {
+        httpHandler = mock(Handler.class);
+        httpClientOptions = null;
 
-        restClient = mock(RestClient.class);
+        sessionModule = new OpenAMSessionModule() {
+            @Override
+            Client createHttpClient(Options options) {
+                httpClientOptions = options;
+                return new Client(httpHandler);
+            }
 
-        openAMSessionModule = new OpenAMSessionModule(restClient);
+            @Override
+            TrustManager[] getTrustManagers(String truststoreFile, String type, String algorithm,
+                    String password) throws AuthenticationException {
+                trustStorePath = truststoreFile;
+                trustStoreType = type;
+                trustStoreAlgorithm = algorithm;
+                trustStorePassword = password;
+                return new TrustManager[0];
+            }
+        };
     }
 
     @Test
@@ -69,7 +100,7 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("openamDeploymentUrl property must be set"));
@@ -89,7 +120,7 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("openamDeploymentUrl property must be set"));
@@ -109,7 +140,7 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("openamSSOTokenCookieName property must be set"));
@@ -130,7 +161,7 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("openamSSOTokenCookieName property must be set"));
@@ -151,7 +182,7 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("openamUserAttribute property must be set"));
@@ -173,7 +204,7 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("openamUserAttribute property must be set"));
@@ -194,10 +225,10 @@ public class OpenAMSessionModuleTest {
         options.put("openamUserAttribute", "OPENAM_USER_ATTRIBUTE");
 
         //When
-        openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+        sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
 
         //Then
-        verifyZeroInteractions(restClient);
+        verifyZeroInteractions(httpHandler);
     }
 
     @Test
@@ -215,11 +246,11 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("truststorePath property must be set"));
-            verifyZeroInteractions(restClient);
+            verifyZeroInteractions(httpHandler);
         }
     }
 
@@ -239,11 +270,11 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("truststorePath property must be set"));
-            verifyZeroInteractions(restClient);
+            verifyZeroInteractions(httpHandler);
         }
     }
 
@@ -263,11 +294,11 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("truststoreType property must be set"));
-            verifyZeroInteractions(restClient);
+            verifyZeroInteractions(httpHandler);
         }
     }
 
@@ -288,11 +319,11 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("truststoreType property must be set"));
-            verifyZeroInteractions(restClient);
+            verifyZeroInteractions(httpHandler);
         }
     }
 
@@ -313,11 +344,11 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("truststorePassword property must be set"));
-            verifyZeroInteractions(restClient);
+            verifyZeroInteractions(httpHandler);
         }
     }
 
@@ -339,11 +370,11 @@ public class OpenAMSessionModuleTest {
 
         //When
         try {
-            openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+            sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
         } catch (IllegalArgumentException e) {
             //Then
             assertTrue(e.getMessage().contains("truststorePassword property must be set"));
-            verifyZeroInteractions(restClient);
+            verifyZeroInteractions(httpHandler);
         }
     }
 
@@ -364,17 +395,15 @@ public class OpenAMSessionModuleTest {
         options.put("truststorePassword", "TRUST_STORE_PASSWORD");
 
         //When
-        openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+        sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
 
         //Then
-        final ArgumentCaptor<SslConfiguration> sslConfigurationCaptor = ArgumentCaptor.forClass(SslConfiguration.class);
-        verify(restClient).setSslConfiguration(sslConfigurationCaptor.capture());
-
-        final SslConfiguration sslConfiguration = sslConfigurationCaptor.getValue();
-        assertEquals(sslConfiguration.getTrustManagerAlgorithm(), "SunX509");
-        assertEquals(sslConfiguration.getTrustStorePath(), "TRUST_STORE_PATH");
-        assertEquals(sslConfiguration.getTrustStoreType(), "TRUST_STORE_TYPE");
-        assertEquals(sslConfiguration.getTrustStorePassword(), "TRUST_STORE_PASSWORD".toCharArray());
+        assertThat(httpClientOptions.get(HttpClientHandler.OPTION_SSLCONTEXT_ALGORITHM)).isEqualTo("TLS");
+        assertThat(httpClientOptions.get(HttpClientHandler.OPTION_TRUST_MANAGERS)).isNotNull();
+        assertThat(trustStorePath).isEqualTo("TRUST_STORE_PATH");
+        assertThat(trustStoreType).isEqualTo("TRUST_STORE_TYPE");
+        assertThat(trustStoreAlgorithm).isEqualTo("SunX509");
+        assertThat(trustStorePassword).isEqualTo("TRUST_STORE_PASSWORD");
     }
 
     @Test
@@ -396,31 +425,27 @@ public class OpenAMSessionModuleTest {
         options.put("trustManagerAlgorithm", "TRUST_MANAGER_ALGORITHM");
 
         //When
-        openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+        sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
 
         //Then
-        final ArgumentCaptor<SslConfiguration> sslConfigurationCaptor = ArgumentCaptor.forClass(SslConfiguration.class);
-        verify(restClient).setSslConfiguration(sslConfigurationCaptor.capture());
-
-        final SslConfiguration sslConfiguration = sslConfigurationCaptor.getValue();
-        assertEquals(sslConfiguration.getTrustManagerAlgorithm(), "TRUST_MANAGER_ALGORITHM");
-        assertEquals(sslConfiguration.getTrustStorePath(), "TRUST_STORE_PATH");
-        assertEquals(sslConfiguration.getTrustStoreType(), "TRUST_STORE_TYPE");
-        assertEquals(sslConfiguration.getTrustStorePassword(), "TRUST_STORE_PASSWORD".toCharArray());
+        assertThat(httpClientOptions.get(HttpClientHandler.OPTION_SSLCONTEXT_ALGORITHM)).isEqualTo("TLS");
+        assertThat(httpClientOptions.get(HttpClientHandler.OPTION_TRUST_MANAGERS)).isNotNull();
+        assertThat(trustStorePath).isEqualTo("TRUST_STORE_PATH");
+        assertThat(trustStoreType).isEqualTo("TRUST_STORE_TYPE");
+        assertThat(trustStoreAlgorithm).isEqualTo("TRUST_MANAGER_ALGORITHM");
+        assertThat(trustStorePassword).isEqualTo("TRUST_STORE_PASSWORD");
     }
 
     @Test
     public void shouldGetSupportedMessageTypes() {
 
-        //Given
-
         //When
-        final Class<?>[] supportedMessageTypes = openAMSessionModule.getSupportedMessageTypes();
+        final Collection<Class<?>> supportedMessageTypes = sessionModule.getSupportedMessageTypes();
 
         //Then
-        assertEquals(supportedMessageTypes.length, 2);
-        assertTrue(Arrays.asList(supportedMessageTypes).contains(HttpServletRequest.class));
-        assertTrue(Arrays.asList(supportedMessageTypes).contains(HttpServletResponse.class));
+        assertThat(supportedMessageTypes)
+                .hasSize(2)
+                .containsExactly(Request.class, Response.class);
     }
 
     private void initialise() {
@@ -442,201 +467,174 @@ public class OpenAMSessionModuleTest {
 
         options.put("trustManagerAlgorithm", "TRUST_MANAGER_ALGORITHM");
 
-        openAMSessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
+        sessionModule.initialize(requestMessagePolicy, responseMessagePolicy, callbackHandler, options);
     }
 
     @Test
-    public void validateRequestShouldReturnSendFailureWhenSsoTokenNotOnRequest() throws AuthenticationException {
+    public void validateRequestShouldReturnSendFailureWhenSsoTokenNotOnRequest() throws Exception {
 
         //Given
         initialise();
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final Request request = new Request();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn(null);
-        given(request.getCookies()).willReturn(null);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
     @Test
-    public void validateRequestShouldReturnSendFailureWhenSsoTokenNotInCookies() throws AuthenticationException {
+    public void validateRequestShouldReturnSendFailureWhenSsoTokenNotInCookies() throws Exception {
 
         //Given
         initialise();
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
-        final Cookie cookie = mock(Cookie.class);
-        final Cookie[] cookies = new Cookie[]{cookie};
+        final Request request = new Request();
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn(null);
-        given(request.getCookies()).willReturn(cookies);
-        given(cookie.getName()).willReturn("NOT_SSO_COOKIE_NAME");
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
+        request.getHeaders().putSingle(CookieHeader.valueOf("NOT_SSO_COOKIE_NAME=cookieVal"));
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void validateRequestShouldReturnSendFailureWhenRestResponseIsEmpty() throws ResourceException,
-            AuthenticationException {
+    public void validateRequestShouldReturnSendFailureWhenRestResponseIsEmpty() throws Exception {
 
         //Given
         initialise();
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final Request request = new Request();
         final JsonValue restResponse = json(object());
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn("SSO_TOKEN_ID");
-        given(restClient.post(eq("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class))).willReturn(restResponse);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        mockHttpRequests(
+                Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate", restResponse));
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
-        final ArgumentCaptor<Map> queryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).post(anyString(), queryParameterCaptor.capture(), anyMapOf(String.class, String.class));
-        assertEquals(queryParameterCaptor.getValue().get("_action"), "validate");
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void validateRequestShouldReturnSendFailureWhenRestResponseIsInvalidSession() throws ResourceException,
-            AuthenticationException {
+    public void validateRequestShouldReturnSendFailureWhenRestResponseIsInvalidSession() throws Exception {
 
         //Given
         initialise();
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final Request request = new Request();
         final JsonValue restResponse = json(object(field("valid", false)));
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn("SSO_TOKEN_ID");
-        given(restClient.post(eq("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class))).willReturn(restResponse);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        mockHttpRequests(
+                Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate", restResponse));
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
-        final ArgumentCaptor<Map> queryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).post(anyString(), queryParameterCaptor.capture(), anyMapOf(String.class, String.class));
-        assertEquals(queryParameterCaptor.getValue().get("_action"), "validate");
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void validateRequestShouldReturnSuccessWhenSsoTokenIsValid() throws ResourceException, AuthenticationException {
+    public void validateRequestShouldReturnSuccessWhenSsoTokenIsValid() throws Exception {
 
         //Given
         initialise();
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final Request request = new Request();
         final JsonValue restValidateResponse = json(object(field("valid", true), field("uid", "UID"),
                 field("realm", "/REALM")));
         final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn("SSO_TOKEN_ID");
-        given(restClient.post(eq("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
-                .willReturn(restValidateResponse);
-        given(restClient.get(eq("https://OPENAM_DEPLOYMENT_URI/json/REALM/users/UID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
-                .willReturn(restUsersResponse);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        mockHttpRequests(Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate",
+                        restValidateResponse),
+                Pair.of("https://OPENAM_DEPLOYMENT_URI/json/REALM/users/UID?_fields=OPENAM_USER_ATTRIBUTE",
+                        restUsersResponse));
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SUCCESS);
-        final ArgumentCaptor<Map> validateQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).post(anyString(), validateQueryParameterCaptor.capture(),
-                anyMapOf(String.class, String.class));
-        assertEquals(validateQueryParameterCaptor.getValue().get("_action"), "validate");
-        final ArgumentCaptor<Map> usersQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).get(anyString(), usersQueryParameterCaptor.capture(), anyMapOf(String.class, String.class));
-        assertEquals(usersQueryParameterCaptor.getValue().get("_fields"), "OPENAM_USER_ATTRIBUTE");
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void initialiseShouldAddTrailingSlashToOpenAMDeploymentURL() throws ResourceException, AuthenticationException {
+    public void initialiseShouldAddTrailingSlashToOpenAMDeploymentURL() throws Exception {
 
         //Given
         initialise("https://OPENAM_DEPLOYMENT_URI");
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final Request request = new Request();
         final JsonValue restValidateResponse = json(object(field("valid", true), field("uid", "UID"),
                 field("realm", "/REALM")));
         final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn("SSO_TOKEN_ID");
-        given(restClient.post(eq("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
-                .willReturn(restValidateResponse);
-        given(restClient.get(eq("https://OPENAM_DEPLOYMENT_URI/json/REALM/users/UID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
-                .willReturn(restUsersResponse);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        mockHttpRequests(Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate",
+                        restValidateResponse),
+                Pair.of("https://OPENAM_DEPLOYMENT_URI/json/REALM/users/UID?_fields=OPENAM_USER_ATTRIBUTE",
+                        restUsersResponse));
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SUCCESS);
-        final ArgumentCaptor<Map> validateQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).post(anyString(), validateQueryParameterCaptor.capture(),
-                anyMapOf(String.class, String.class));
-        assertEquals(validateQueryParameterCaptor.getValue().get("_action"), "validate");
-        final ArgumentCaptor<Map> usersQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).get(anyString(), usersQueryParameterCaptor.capture(), anyMapOf(String.class, String.class));
-        assertEquals(usersQueryParameterCaptor.getValue().get("_fields"), "OPENAM_USER_ATTRIBUTE");
     }
 
     @Test
-    public void validateRequestShouldReturnSendFailureWhenRestCallFails() throws ResourceException, AuthenticationException {
+    public void validateRequestShouldReturnSendFailureWhenRestCallFails() throws Exception {
 
         //Given
         initialise();
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
+        final Request request = new Request();
+        Promise<Response, NeverThrowsException> badRequestPromise = newResultPromise(new Response(Status.BAD_REQUEST));
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn("SSO_TOKEN_ID");
-        doThrow(ResourceException.class).when(restClient).post(anyString(), anyMapOf(String.class, String.class),
-                anyMapOf(String.class, String.class));
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        given(httpHandler.handle(any(Context.class), any(Request.class))).willReturn(badRequestPromise);
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
@@ -648,95 +646,71 @@ public class OpenAMSessionModuleTest {
 
         //Given
         initialise();
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
-        final Cookie cookieOne = mock(Cookie.class);
-        final Cookie cookieTwo = mock(Cookie.class);
-        final Cookie[] cookies = new Cookie[]{cookieOne, cookieTwo};
+        final Request request = new Request();
         final JsonValue restValidateResponse = json(object(field("valid", true), field("uid", "UID"),
                 field("realm", "/REALM")));
         final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn(null);
-        given(request.getCookies()).willReturn(cookies);
-        given(cookieOne.getName()).willReturn("NOT_SSO_COOKIE_NAME");
-        given(cookieTwo.getName()).willReturn("OPENAM_SSO_TOKEN_COOKIE_NAME");
-        given(cookieTwo.getValue()).willReturn("SSO_TOKEN_ID");
-        given(restClient.post(eq("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
-                .willReturn(restValidateResponse);
-        given(restClient.get(eq("https://OPENAM_DEPLOYMENT_URI/json/REALM/users/UID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
-                .willReturn(restUsersResponse);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
+        request.getHeaders().putSingle(
+                CookieHeader.valueOf("NOT_SSO_COOKIE_NAME=cookieVal,OPENAM_SSO_TOKEN_COOKIE_NAME=SSO_TOKEN_ID"));
+        mockHttpRequests(Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate",
+                        restValidateResponse),
+                Pair.of("https://OPENAM_DEPLOYMENT_URI/json/REALM/users/UID?_fields=OPENAM_USER_ATTRIBUTE",
+                        restUsersResponse));
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SUCCESS);
-        final ArgumentCaptor<Map> validateQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).post(anyString(), validateQueryParameterCaptor.capture(),
-                anyMapOf(String.class, String.class));
-        assertEquals(validateQueryParameterCaptor.getValue().get("_action"), "validate");
-        final ArgumentCaptor<Map> usersQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).get(anyString(), usersQueryParameterCaptor.capture(), anyMapOf(String.class, String.class));
-        assertEquals(usersQueryParameterCaptor.getValue().get("_fields"), "OPENAM_USER_ATTRIBUTE");
     }
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
     public void validateRequestShouldReturnSuccessWhenAccessingRootRealm() throws ResourceException, AuthenticationException {
 
         //Given
         initialise();
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
         final Subject serviceSubject = new Subject();
-        final HttpServletRequest request = mock(HttpServletRequest.class);
-        final Cookie cookieOne = mock(Cookie.class);
-        final Cookie[] cookies = new Cookie[]{cookieOne};
+        final Request request = new Request();
         final JsonValue restValidateResponse = json(object(field("valid", true), field("uid", "UID"),
                 field("realm", "/")));
         final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
 
-        given(messageInfo.getRequestMessage()).willReturn(request);
-        given(request.getHeader("OPENAM_SSO_TOKEN_COOKIE_NAME")).willReturn(null);
-        given(request.getCookies()).willReturn(cookies);
-        given(cookieOne.getName()).willReturn("OPENAM_SSO_TOKEN_COOKIE_NAME");
-        given(cookieOne.getValue()).willReturn("SSO_TOKEN_ID");
-        given(restClient.post(eq("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
-                .willReturn(restValidateResponse);
-        given(restClient.get(eq("https://OPENAM_DEPLOYMENT_URI/json/users/UID"),
-                anyMapOf(String.class, String.class), anyMapOf(String.class, String.class)))
-                .willReturn(restUsersResponse);
+        given(messageInfo.getRequest()).willReturn(request);
+        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
+        request.getHeaders().putSingle(
+                CookieHeader.valueOf("OPENAM_SSO_TOKEN_COOKIE_NAME=SSO_TOKEN_ID"));
+        mockHttpRequests(Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate",
+                        restValidateResponse),
+                Pair.of("https://OPENAM_DEPLOYMENT_URI/json/users/UID?_fields=OPENAM_USER_ATTRIBUTE",
+                        restUsersResponse));
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.validateRequest(messageInfo, clientSubject, serviceSubject);
+        final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SUCCESS);
-        final ArgumentCaptor<Map> validateQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).post(anyString(), validateQueryParameterCaptor.capture(),
-                anyMapOf(String.class, String.class));
-        assertEquals(validateQueryParameterCaptor.getValue().get("_action"), "validate");
-        final ArgumentCaptor<Map> usersQueryParameterCaptor = ArgumentCaptor.forClass(Map.class);
-        verify(restClient).get(anyString(), usersQueryParameterCaptor.capture(), anyMapOf(String.class, String.class));
-        assertEquals(usersQueryParameterCaptor.getValue().get("_fields"), "OPENAM_USER_ATTRIBUTE");
     }
 
     @Test
-    public void secureResponseShouldReturnSendSuccess() {
+    public void secureResponseShouldReturnSendSuccess() throws Exception {
 
         //Given
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject serviceSubject = new Subject();
 
         //When
-        final AuthStatus authStatus = openAMSessionModule.secureResponse(messageInfo, serviceSubject);
+        final AuthStatus authStatus = sessionModule.secureResponse(messageInfo, serviceSubject)
+                .getOrThrowUninterruptibly();
 
         //Then
         assertEquals(authStatus, AuthStatus.SEND_SUCCESS);
@@ -746,13 +720,29 @@ public class OpenAMSessionModuleTest {
     public void cleanSubjectShouldDoNothing() {
 
         //Given
-        final MessageInfo messageInfo = mock(MessageInfo.class);
+        final MessageInfoContext messageInfo = mock(MessageInfoContext.class);
         final Subject clientSubject = new Subject();
 
         //When
-        openAMSessionModule.cleanSubject(messageInfo, clientSubject);
+        sessionModule.cleanSubject(messageInfo, clientSubject);
 
         //Then
-        verifyZeroInteractions(messageInfo, restClient);
+        verifyZeroInteractions(messageInfo, httpHandler);
+    }
+
+    private void mockHttpRequests(final Pair<String, JsonValue>... requests) {
+        given(httpHandler.handle(any(Context.class), any(Request.class)))
+                .willAnswer(new Answer<Promise<Response, NeverThrowsException>>() {
+                    @Override
+                    public Promise<Response, NeverThrowsException> answer(InvocationOnMock invocationOnMock) {
+                        Request request = (Request) invocationOnMock.getArguments()[1];
+                        for (Pair<String, JsonValue> req : requests) {
+                            if (req.getFirst().equals(request.getUri().toString())) {
+                                return newResultPromise(new Response(Status.OK).setEntity(req.getSecond().getObject()));
+                            }
+                        }
+                        return null;
+                    }
+                });
     }
 }

@@ -16,30 +16,52 @@
 
 package org.forgerock.jaspi.modules.session.openam;
 
+import static java.lang.String.format;
+import static javax.security.auth.message.AuthStatus.*;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.util.Utils.closeSilently;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.Collections;
+import java.security.KeyStore;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.Client;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.handler.HttpClientHandler;
+import org.forgerock.http.protocol.Cookie;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.RequestCookies;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Function;
+import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
+import org.forgerock.util.annotations.VisibleForTesting;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
 
 /**
  * A JASPI Session Module which uses OpenAM to validate SSO Tokens issued by an OpenAM instance.
@@ -48,35 +70,22 @@ import org.forgerock.util.Reject;
  *
  * @since 1.4.0
  */
-public class OpenAMSessionModule implements ServerAuthModule {
+public class OpenAMSessionModule implements AsyncServerAuthModule {
 
     private static final String JSON_REST_ROOT_ENDPOINT = "json";
     private static final String JSON_SESSIONS_RELATIVE_URI = JSON_REST_ROOT_ENDPOINT + "/sessions/";
     private static final String JSON_USERS_ENDPOINT = "users/";
 
-    private final RestClient restClient;
+    private Client httpClient;
 
     private CallbackHandler handler;
     private String openamDeploymentUrl;
     private String openamSSOTokenCookieName;
     private String openamUserAttribute;
 
-    /**
-     * Constructs a new OpenAMSessionModule instance.
-     */
-    public OpenAMSessionModule() {
-        this(new RestletRestClient());
-    }
-
-    /**
-     * Constructs a new OpenAMSessionModule instance with the specified RestClient.
-     * <br/>
-     * For test use.
-     *
-     * @param restClient The RestClient instance.
-     */
-    OpenAMSessionModule(final RestClient restClient) {
-        this.restClient = restClient;
+    @Override
+    public String getModuleId() {
+        return "OpenAM Session";
     }
 
     /**
@@ -103,16 +112,16 @@ public class OpenAMSessionModule implements ServerAuthModule {
      * </tbody>
      * </table>
      *
-     * @param requestMessagePolicy {@inheritDoc}
-     * @param responseMessagePolicy {@inheritDoc}
+     * @param requestPolicy {@inheritDoc}
+     * @param responsePolicy {@inheritDoc}
      * @param callbackHandler {@inheritDoc}
      * @param options {@inheritDoc}
      * @throws java.lang.IllegalArgumentException If any of the required configuration properties are not set.
      */
     @SuppressWarnings("rawtypes")
     @Override
-    public void initialize(final MessagePolicy requestMessagePolicy, final MessagePolicy responseMessagePolicy,
-            final CallbackHandler callbackHandler, final Map options) {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
+            CallbackHandler callbackHandler, Map<String, Object> options) {
         this.handler = callbackHandler;
 
         openamDeploymentUrl = (String) options.get("openamDeploymentUrl");
@@ -132,24 +141,36 @@ public class OpenAMSessionModule implements ServerAuthModule {
         try {
             useSSL = !"http".equals(URI.create(openamDeploymentUrl).toURL().getProtocol());
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("OpenAM Deployment URL malformed.");
+            return newExceptionPromise(new AuthenticationException(
+                    new IllegalArgumentException("OpenAM Deployment URL malformed.")));
         }
 
         LOG.debug("Using SSL? {}", useSSL);
-
-        if (useSSL) {
-            restClient.setSslConfiguration(configureSsl(options));
+        try {
+            Options httpClientOptions = Options.defaultOptions();
+            if (useSSL) {
+                configureSsl(options, httpClientOptions);
+            }
+            this.httpClient = createHttpClient(httpClientOptions);
+        } catch (HttpApplicationException e) {
+            return newExceptionPromise(new AuthenticationException("Failed to get HTTP Client", e));
+        } catch (AuthenticationException e) {
+            return newExceptionPromise(e);
         }
+        return newResultPromise(null);
+    }
+
+    @VisibleForTesting
+    Client createHttpClient(Options options) throws HttpApplicationException {
+        return new Client(new HttpClientHandler(options));
     }
 
     /**
      * Configures the REST connections to use SSL.
      *
      * @param options The configuration options of the module.
-     * @throws java.lang.IllegalArgumentException If any of the required configuration properties are not set.
      */
-    @SuppressWarnings("rawtypes")
-    private SslConfiguration configureSsl(final Map options) {
+    private void configureSsl(Map<String, Object> options, Options httpClientOptions) throws AuthenticationException {
 
         final String trustStorePath = (String) options.get("truststorePath");
         final String trustStoreType = (String) options.get("truststoreType");
@@ -167,14 +188,40 @@ public class OpenAMSessionModule implements ServerAuthModule {
         LOG.debug("SSL configuration:  Trust Manager Algorithm = {}, Trust Store Path = {}, Trust Store Type = {}",
                 trustManagerAlgorithm, trustStorePath, trustStoreType);
 
-        final SslConfiguration sslConfiguration = new SslConfiguration();
+        TrustManager[] trustManagers = getTrustManagers(trustStorePath, trustStoreType, trustManagerAlgorithm,
+                trustStorePassword);
 
-        sslConfiguration.setTrustManagerAlgorithm(trustManagerAlgorithm);
-        sslConfiguration.setTrustStorePath(trustStorePath);
-        sslConfiguration.setTrustStoreType(trustStoreType);
-        sslConfiguration.setTrustStorePassword(trustStorePassword.toCharArray());
+        httpClientOptions.set(HttpClientHandler.OPTION_SSLCONTEXT_ALGORITHM, "TLS");
+        httpClientOptions.set(HttpClientHandler.OPTION_TRUST_MANAGERS, trustManagers);
+    }
 
-        return sslConfiguration;
+    @VisibleForTesting
+    TrustManager[] getTrustManagers(String truststoreFile, String type, String algorithm,
+            String password) throws AuthenticationException {
+        try {
+            TrustManagerFactory factory = TrustManagerFactory.getInstance(algorithm);
+            KeyStore store = buildKeyStore(truststoreFile, type, password);
+            factory.init(store);
+            return factory.getTrustManagers();
+        } catch (Exception e) {
+            throw new AuthenticationException(
+                    format("Cannot build TrustManagerFactory[alg:%s] from KeyStore[type:%s] stored in %s", algorithm,
+                            type, truststoreFile), e);
+        }
+    }
+
+    private KeyStore buildKeyStore(final String keystoreFile, final String type,
+            final String password) throws Exception {
+        final KeyStore keyStore = KeyStore.getInstance(type);
+        InputStream keyInput = null;
+        try {
+            keyInput = new FileInputStream(keystoreFile);
+            final char[] credentials = password == null ? null : password.toCharArray();
+            keyStore.load(keyInput, credentials);
+        } finally {
+            closeSilently(keyInput);
+        }
+        return keyStore;
     }
 
     /**
@@ -193,8 +240,8 @@ public class OpenAMSessionModule implements ServerAuthModule {
      * @return An array of the HttpServletRequest and HttpServletResponse classes.
      */
     @Override
-    public Class<?>[] getSupportedMessageTypes() {
-        return new Class<?>[]{HttpServletRequest.class, HttpServletResponse.class};
+    public Collection<Class<?>> getSupportedMessageTypes() {
+        return Arrays.asList(new Class<?>[]{Request.class, Response.class});
     }
 
     /**
@@ -210,54 +257,117 @@ public class OpenAMSessionModule implements ServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
-     * @return {@inheritDoc}
-     * @throws AuthenticationException If an error occurs when setting the authenticated principal on the client subject.
+     * @return A Promise which will be completed with either a successful
+     * AuthStatus value or a AuthenticationException If an error occurs when
+     * setting the authenticated principal on the client subject.
      */
     @Override
-    public AuthStatus validateRequest(final MessageInfo messageInfo, final Subject clientSubject,
-            final Subject serviceSubject) throws AuthenticationException {
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
+            final Subject clientSubject, Subject serviceSubject) {
 
-        final String tokenId = getSsoTokenId((HttpServletRequest) messageInfo.getRequestMessage());
+        final String tokenId = getSsoTokenId(messageInfo.getRequest());
         LOG.debug("SSO Token found.");
         LOG.trace("SSO Token value, {}", tokenId);
 
         if (tokenId == null) {
             LOG.trace("SSO Token not found on request.");
-            return AuthStatus.SEND_FAILURE;
+            return newResultPromise(SEND_FAILURE);
         }
 
-        try {
-            final JsonValue validationResponse = restClient.post(openamDeploymentUrl + JSON_SESSIONS_RELATIVE_URI
-                            + tokenId, Collections.singletonMap("_action", "validate"),
-                    Collections.<String, String>emptyMap());
+        Request validateRequest = new Request()
+                .setUri(URI.create(openamDeploymentUrl + JSON_SESSIONS_RELATIVE_URI + tokenId
+                        + "?_action=validate"));
+        return httpClient.send(validateRequest)
+                .thenAsync(onValidateSuccess(tokenId, clientSubject), onValidateFailure());
+    }
 
-            if (validationResponse.isDefined("valid") && validationResponse.get("valid").asBoolean()) {
-                LOG.debug("REST validation call returned true.");
+    private AsyncFunction<Response, AuthStatus, AuthenticationException> onValidateSuccess(final String tokenId,
+            final Subject clientSubject) {
+        return new AsyncFunction<Response, AuthStatus, AuthenticationException>() {
+            @Override
+            public Promise<AuthStatus, AuthenticationException> apply(Response response) {
+                try {
+                    if (!response.getStatus().isSuccessful()) {
+                        LOG.error("REST validation call returned non HTTP 200 response",
+                                response.getEntity().getString());
+                        return newResultPromise(SEND_FAILURE);
+                    }
+                    JsonValue validationResponse = json(response.getEntity().getJson());
+                    if (validationResponse.isDefined("valid") && validationResponse.get("valid").asBoolean()) {
+                        LOG.debug("REST validation call returned true.");
 
-                final String uid = validationResponse.get("uid").asString();
-                final String realm = validationResponse.get("realm").asString();
+                        final String uid = validationResponse.get("uid").asString();
+                        final String realm = validationResponse.get("realm").asString();
 
-                JsonValue response = restClient.get(openamDeploymentUrl + JSON_REST_ROOT_ENDPOINT
-                                + normalizeRealm(realm) + JSON_USERS_ENDPOINT + uid,
-                        Collections.singletonMap("_fields", openamUserAttribute),
-                        Collections.singletonMap(openamSSOTokenCookieName, tokenId));
+                        Request usersRequest = new Request()
+                                .setUri(URI.create(openamDeploymentUrl + JSON_REST_ROOT_ENDPOINT
+                                        + normalizeRealm(realm) + JSON_USERS_ENDPOINT + uid + "?_fields="
+                                        + openamUserAttribute));
+                        usersRequest.getHeaders().putSingle(openamSSOTokenCookieName, tokenId);
+                        return httpClient.send(usersRequest)
+                                .then(onUserResponse(clientSubject), onUserRequestFailure());
+                    }
 
-                handler.handle(new Callback[]{
-                        new CallerPrincipalCallback(clientSubject, response.get(openamUserAttribute).get(0).asString())
-                });
-
-                return AuthStatus.SUCCESS;
+                    LOG.debug("REST validation call returned false.");
+                    return newResultPromise(SEND_FAILURE);
+                } catch (IOException e) {
+                    return newExceptionPromise(new AuthenticationException(
+                            new InternalServerErrorException(e.getMessage(), e)));
+                }
             }
+        };
+    }
 
-            LOG.debug("REST validation call returned false.");
-            return AuthStatus.SEND_FAILURE;
+    private AsyncFunction<NeverThrowsException, AuthStatus, AuthenticationException> onValidateFailure() {
+        return new AsyncFunction<NeverThrowsException, AuthStatus, AuthenticationException>() {
+            @Override
+            public Promise<AuthStatus, AuthenticationException> apply(NeverThrowsException e) {
+                //This can never happen but the exception handler is needed
+                // to change the types of the returned Promise.
+                throw new IllegalStateException(
+                        "HTTP Client threw a NeverThrowsException?!");
+            }
+        };
+    }
 
-        } catch (ResourceException e) {
-            LOG.error("REST validation call returned non HTTP 200 response", e);
-            return AuthStatus.SEND_FAILURE;
-        } catch (UnsupportedCallbackException | IOException e) {
-            throw new AuthenticationException(e.getMessage(), e);
-        }
+    private Function<Response, AuthStatus, AuthenticationException> onUserResponse(final Subject clientSubject) {
+        return new Function<Response, AuthStatus, AuthenticationException>() {
+            @Override
+            public AuthStatus apply(Response response) throws AuthenticationException {
+                if (!response.getStatus().isSuccessful()) {
+                    try {
+                        LOG.error("REST validation call returned non HTTP 200 response",
+                                response.getEntity().getString());
+                        return SEND_FAILURE;
+                    } catch (IOException e) {
+                        throw new AuthenticationException(e);
+                    }
+                }
+                try {
+                    JsonValue usersResponse = json(response.getEntity().getJson());
+                    handler.handle(new Callback[]{
+                            new CallerPrincipalCallback(clientSubject, usersResponse.get(openamUserAttribute)
+                                    .get(0).asString())
+                    });
+                    return SUCCESS;
+                } catch (IOException | UnsupportedCallbackException e) {
+                    throw new AuthenticationException(
+                            new InternalServerErrorException(e.getMessage(), e));
+                }
+            }
+        };
+    }
+
+    private Function<NeverThrowsException, AuthStatus, AuthenticationException> onUserRequestFailure() {
+        return new Function<NeverThrowsException, AuthStatus, AuthenticationException>() {
+            @Override
+            public AuthStatus apply(NeverThrowsException e) {
+                //This can never happen but the exception handler is needed
+                // to change the types of the returned Promise.
+                throw new IllegalStateException(
+                        "HTTP Client threw a NeverThrowsException?!");
+            }
+        };
     }
 
     private String normalizeRealm(String realm) {
@@ -279,23 +389,21 @@ public class OpenAMSessionModule implements ServerAuthModule {
      * @return The SSO Token Id on the request. Will be {@code null} if the request contains no header or cookie with
      * the OpenAM SSO Token name.
      */
-    private String getSsoTokenId(final HttpServletRequest request) {
+    private String getSsoTokenId(Request request) {
 
-        final String ssoTokenId = request.getHeader(openamSSOTokenCookieName);
+        final String ssoTokenId = request.getHeaders().getFirst(openamSSOTokenCookieName);
         if (ssoTokenId != null) {
             LOG.debug("Found SSO Token in header with name, {}", openamSSOTokenCookieName);
             return ssoTokenId;
         }
 
         Cookie ssoTokenCookie = null;
-        final Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (final Cookie cookie : cookies) {
-                if (openamSSOTokenCookieName.equals(cookie.getName())) {
-                    LOG.debug("SSO Token cookie found");
-                    ssoTokenCookie = cookie;
-                    break;
-                }
+        RequestCookies cookies = request.getCookies();
+        if (cookies.containsKey(openamSSOTokenCookieName)) {
+            for (Cookie cookie : cookies.get(openamSSOTokenCookieName)) {
+                LOG.debug("SSO Token cookie found");
+                ssoTokenCookie = cookie;
+                break;
             }
         }
 
@@ -318,8 +426,9 @@ public class OpenAMSessionModule implements ServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public AuthStatus secureResponse(final MessageInfo messageInfo, final Subject serviceSubject) {
-        return AuthStatus.SEND_SUCCESS;
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
+            Subject serviceSubject) {
+        return newResultPromise(SEND_SUCCESS);
     }
 
     /**
@@ -329,6 +438,7 @@ public class OpenAMSessionModule implements ServerAuthModule {
      * @param clientSubject {@inheritDoc}
      */
     @Override
-    public void cleanSubject(final MessageInfo messageInfo, final Subject clientSubject) {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
+        return newResultPromise(null);
     }
 }

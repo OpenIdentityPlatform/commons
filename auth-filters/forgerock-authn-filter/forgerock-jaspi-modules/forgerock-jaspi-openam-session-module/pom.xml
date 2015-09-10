@@ -31,14 +31,9 @@
             <artifactId>forgerock-jaspi-runtime</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.security.auth.message</artifactId>
         </dependency>
-
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -48,10 +43,8 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-util</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.httpclient</artifactId>
-        </dependency>
+
+
         <dependency>
             <groupId>org.restlet.osgi</groupId>
             <artifactId>org.restlet.ext.httpclient</artifactId>
