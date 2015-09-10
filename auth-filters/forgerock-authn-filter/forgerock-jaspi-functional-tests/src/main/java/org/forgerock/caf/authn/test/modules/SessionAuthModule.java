@@ -22,7 +22,6 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
-import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.HashSet;
@@ -32,7 +31,6 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
-import org.forgerock.http.context.AttributesContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.util.promise.Promise;
@@ -124,11 +122,10 @@ public class SessionAuthModule implements AsyncServerAuthModule {
     }
 
     /**
-     * Returns the {@code HttpServletRequest} and {@code HttpServletResponse} classes.
+     * Returns the {@code Request} and {@code Response} classes.
      *
      * @return {@inheritDoc}
      */
-    @SuppressWarnings("rawtypes")
     @Override
     public Collection<Class<?>> getSupportedMessageTypes() {
         Collection<Class<?>> supportedMessageTypes = new HashSet<>();
@@ -150,10 +147,8 @@ public class SessionAuthModule implements AsyncServerAuthModule {
     public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
             Subject clientSubject, Subject serviceSubject) {
 
-        AttributesContext httpContext = messageInfo.asContext(AttributesContext.class);
-        HttpServletRequest request = (HttpServletRequest) httpContext.getAttributes().get(HttpServletRequest.class.getName());
-
-        String header = request.getHeader(SESSION_VALIDATE_REQUEST_HEADER_NAME.toLowerCase());
+        Request request = messageInfo.getRequest();
+        String header = request.getHeaders().getFirst(SESSION_VALIDATE_REQUEST_HEADER_NAME.toLowerCase());
 
         Map<String, Object> context =
                 (Map<String, Object>) messageInfo.getRequestContextMap().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
@@ -212,10 +207,8 @@ public class SessionAuthModule implements AsyncServerAuthModule {
     public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
             Subject serviceSubject) {
 
-        AttributesContext httpContext = messageInfo.asContext(AttributesContext.class);
-        HttpServletRequest request = (HttpServletRequest) httpContext.getAttributes().get(HttpServletRequest.class.getName());
-
-        String header = request.getHeader(SESSION_SECURE_RESPONSE_HEADER_NAME.toLowerCase());
+        Request request = messageInfo.getRequest();
+        String header = request.getHeaders().getFirst(SESSION_SECURE_RESPONSE_HEADER_NAME.toLowerCase());
 
         if (SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {
             return Promises.newResultPromise(AuthStatus.SUCCESS);

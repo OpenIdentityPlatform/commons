@@ -235,9 +235,9 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
     }
 
     /**
-     * Will return an array of classes indicating that the Http Servlet JASPI profile is supported.
+     * Will return an array of classes indicating that the CHF Http profile is supported.
      *
-     * @return An array of the HttpServletRequest and HttpServletResponse classes.
+     * @return An array of the Request and Response classes.
      */
     @Override
     public Collection<Class<?>> getSupportedMessageTypes() {
@@ -385,7 +385,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
      * name. If no header is found, or the value is empty, then the methods tries to find a cookie on the request
      * with the OpenAM SSO Token name.
      *
-     * @param request The HttpServletRequest
+     * @param request The Request
      * @return The SSO Token Id on the request. Will be {@code null} if the request contains no header or cookie with
      * the OpenAM SSO Token name.
      */

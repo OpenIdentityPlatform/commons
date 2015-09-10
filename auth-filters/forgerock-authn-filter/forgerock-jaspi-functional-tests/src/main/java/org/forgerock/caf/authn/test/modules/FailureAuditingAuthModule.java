@@ -69,11 +69,10 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
     }
 
     /**
-     * Returns the {@code HttpServletRequest} and {@code HttpServletResponse} classes.
+     * Returns the {@code Request} and {@code Response} classes.
      *
      * @return {@inheritDoc}
      */
-    @SuppressWarnings("rawtypes")
     @Override
     public Collection<Class<?>> getSupportedMessageTypes() {
         Collection<Class<?>> supportedMessageTypes = new HashSet<>();

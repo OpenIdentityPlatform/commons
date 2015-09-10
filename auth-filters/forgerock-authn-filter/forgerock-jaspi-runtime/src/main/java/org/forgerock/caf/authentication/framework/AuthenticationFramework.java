@@ -68,19 +68,19 @@ public final class AuthenticationFramework {
     public static final Logger LOG = LoggerFactory.getLogger(AuthenticationFramework.class);
 
     /**
-     * The name of the HTTP Servlet Request attribute where the principal name of the user/client
+     * The name of the HTTP Request attribute where the principal name of the user/client
      * making the request will be set.
      */
     public static final String ATTRIBUTE_AUTH_PRINCIPAL = "org.forgerock.authentication.principal";
 
     /**
-     * The name of the HTTP Servlet Request attribute where any additional authentication context
+     * The name of the HTTP Request attribute where any additional authentication context
      * information will be set. It MUST contain a {@code Map} if present.
      */
     public static final String ATTRIBUTE_AUTH_CONTEXT = "org.forgerock.authentication.context";
 
     /**
-     * The name of the HTTP Servlet Request attribute where the unique id of the request will be
+     * The name of the HTTP Request attribute where the unique id of the request will be
      * set.
      */
     public static final String ATTRIBUTE_REQUEST_ID = "org.forgerock.authentication.request.id";

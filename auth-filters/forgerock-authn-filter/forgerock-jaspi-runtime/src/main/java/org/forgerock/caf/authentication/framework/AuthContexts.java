@@ -319,10 +319,10 @@ final class AuthContexts {
                                 // nothing to do here just carry on
                                 logger.debug("Successfully secured response.");
                             } else if (isSendFailure(authStatus)) {
-                                // Send HttpServletResponse to client and exit.
+                                // Send Response to client and exit.
                                 logger.debug("Failed to secured response, included response message");
                             } else if (isSendContinue(authStatus)) {
-                                // Send HttpServletResponse to client and exit.
+                                // Send Response to client and exit.
                                 logger.debug("Has not finished securing response. "
                                         + "Requires more information from client.");
                             } else {
