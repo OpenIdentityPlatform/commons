@@ -19,8 +19,10 @@ package org.forgerock.json.resource;
 import static org.forgerock.http.routing.RouteMatchers.resourceApiVersionMatcher;
 import static org.forgerock.http.routing.RouteMatchers.uriMatcher;
 
+import java.util.List;
+
+import org.forgerock.guava.common.collect.Lists;
 import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.routing.ResourceApiVersionBehaviourManager;
 import org.forgerock.http.routing.RouteMatch;
 import org.forgerock.http.routing.RouteMatcher;
@@ -91,15 +93,15 @@ public final class RouteMatchers {
      */
     private static final class RequestUriRouteMatcher extends RouteMatcher<Request> {
 
-        private final RouteMatcher<ResourcePath> delegate;
+        private final RouteMatcher<List<String>> delegate;
 
-        private RequestUriRouteMatcher(RouteMatcher<ResourcePath> delegate) {
+        private RequestUriRouteMatcher(RouteMatcher<List<String>> delegate) {
             this.delegate = delegate;
         }
 
         @Override
         public RouteMatch evaluate(Context context, Request request) {
-            return delegate.evaluate(context, request.getResourcePathObject());
+            return delegate.evaluate(context, Lists.newArrayList(request.getResourcePathObject()));
         }
 
         @Override

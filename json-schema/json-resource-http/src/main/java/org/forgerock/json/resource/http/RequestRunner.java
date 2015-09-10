@@ -33,7 +33,6 @@ import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
@@ -54,6 +53,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.AsyncFunction;
@@ -75,7 +75,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private final Context context;
     private final org.forgerock.http.protocol.Request httpRequest;
     private final Response httpResponse;
-    private final Request request;
+    private final Request<?> request;
     private final JsonGenerator writer;
 
     RequestRunner(Context context, Request request, org.forgerock.http.protocol.Request httpRequest,

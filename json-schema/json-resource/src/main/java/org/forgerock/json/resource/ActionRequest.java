@@ -16,17 +16,12 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.http.routing.Version;
-
-import java.util.List;
 
 /**
  * An implementation specific action, or operation, upon a JSON resource.
  */
-public interface ActionRequest extends Request {
+public interface ActionRequest extends Request<ActionRequest> {
     /**
      * The name of the field which contains the action ID in the JSON
      * representation.
@@ -44,23 +39,6 @@ public interface ActionRequest extends Request {
      * operations.
      */
     String ACTION_ID_CREATE = "create";
-
-    /**
-     * {@inheritDoc}
-     */
-    <R, P> R accept(RequestVisitor<R, P> v, P p);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ActionRequest addField(JsonPointer... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ActionRequest addField(String... fields);
 
     /**
      * Returns the ID of the action to be performed by this action request.
@@ -97,30 +75,6 @@ public interface ActionRequest extends Request {
     JsonValue getContent();
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    List<JsonPointer> getFields();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    RequestType getRequestType();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourcePath();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ResourcePath getResourcePathObject();
-
-    /**
      * Sets the ID of the action to be performed by this action request.
      *
      * @param id
@@ -144,25 +98,4 @@ public interface ActionRequest extends Request {
      *             content.
      */
     ActionRequest setContent(JsonValue content);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    Request setResourcePath(ResourcePath path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ActionRequest setResourcePath(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ActionRequest setAdditionalParameter(String name, String value) throws BadRequestException;
-
-    @Override
-    ActionRequest setResourceVersion(Version resourceVersion);
 }
