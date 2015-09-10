@@ -16,76 +16,8 @@
 
 package org.forgerock.json.resource;
 
-import java.util.List;
-
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.JsonPointer;
-import org.forgerock.http.routing.Version;
-
 /**
  * A request to read a single identified JSON resource.
  */
-public interface ReadRequest extends Request {
-
-    /**
-     * {@inheritDoc}
-     */
-    <R, P> R accept(RequestVisitor<R, P> v, P p);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ReadRequest addField(JsonPointer... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ReadRequest addField(String... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    List<JsonPointer> getFields();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    RequestType getRequestType();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourcePath();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ResourcePath getResourcePathObject();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    Request setResourcePath(ResourcePath path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ReadRequest setResourcePath(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ReadRequest setAdditionalParameter(String name, String value) throws BadRequestException;
-
-    @Override
-    ReadRequest setResourceVersion(Version resourceVersion);
+public interface ReadRequest extends Request<ReadRequest> {
 }

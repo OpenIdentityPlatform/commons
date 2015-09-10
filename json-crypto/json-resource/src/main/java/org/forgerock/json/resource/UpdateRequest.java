@@ -16,18 +16,13 @@
 
 package org.forgerock.json.resource;
 
-import java.util.List;
-
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.http.routing.Version;
 
 /**
  * A request to update a JSON resource by replacing its existing content with
  * new content.
  */
-public interface UpdateRequest extends Request {
+public interface UpdateRequest extends Request<UpdateRequest> {
 
     /**
      * The name of the field which contains the resource content in the JSON
@@ -42,52 +37,11 @@ public interface UpdateRequest extends Request {
     String FIELD_REVISION = "revision";
 
     /**
-     * {@inheritDoc}
-     */
-    <R, P> R accept(RequestVisitor<R, P> v, P p);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    UpdateRequest addField(JsonPointer... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    UpdateRequest addField(String... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    List<JsonPointer> getFields();
-
-    /**
      * Returns the content of the JSON resource to be replaced.
      *
      * @return The content of the JSON resource to be replaced.
      */
     JsonValue getContent();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    RequestType getRequestType();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourcePath();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ResourcePath getResourcePathObject();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -118,18 +72,6 @@ public interface UpdateRequest extends Request {
     UpdateRequest setContent(JsonValue content);
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    Request setResourcePath(ResourcePath path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    UpdateRequest setResourcePath(String path);
-
-    /**
      * Sets the expected version information associated with the JSON resource
      * to be updated. Version information can be used in order to implement
      * multi-version concurrency control (MVCC).
@@ -149,13 +91,4 @@ public interface UpdateRequest extends Request {
      *             information.
      */
     UpdateRequest setRevision(String version);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    UpdateRequest setAdditionalParameter(String name, String value) throws BadRequestException;
-
-    @Override
-    UpdateRequest setResourceVersion(Version resourceVersion);
 }
