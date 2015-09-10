@@ -19,7 +19,6 @@ package org.forgerock.json.resource;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.http.routing.Version;
@@ -27,7 +26,7 @@ import org.forgerock.http.routing.Version;
 /**
  * Common attributes of all JSON resource requests.
  */
-public interface Request {
+public interface Request<R extends Request<R>> {
 
     // TODO: many of these fields are not used by action requests. Perhaps they
     // should be pushed down? For example, a bulk update operation would not use
@@ -56,7 +55,7 @@ public interface Request {
     /**
      * Applies a {@code RequestVisitor} to this {@code Request}.
      *
-     * @param <R>
+     * @param <VR>
      *            The return type of the visitor's methods.
      * @param <P>
      *            The type of the additional parameters to the visitor's
@@ -67,7 +66,7 @@ public interface Request {
      *            Optional additional visitor parameter.
      * @return A result as specified by the visitor.
      */
-    <R, P> R accept(final RequestVisitor<R, P> v, final P p);
+    <VR, P> VR accept(final RequestVisitor<VR, P> v, final P p);
 
     /**
      * Adds one or more fields which should be included with each JSON resource
@@ -80,7 +79,7 @@ public interface Request {
      * @throws UnsupportedOperationException
      *             If this request does not permit changes to the fields.
      */
-    Request addField(JsonPointer... fields);
+    R addField(JsonPointer... fields);
 
     /**
      * Adds one or more fields which should be included with each JSON resource
@@ -96,7 +95,7 @@ public interface Request {
      * @throws UnsupportedOperationException
      *             If this request does not permit changes to the fields.
      */
-    Request addField(String... fields);
+    R addField(String... fields);
 
     /**
      * Returns the list of fields which should be included with each JSON
@@ -198,7 +197,7 @@ public interface Request {
      *             If this request does not permit changes to the JSON resource
      *             path.
      */
-    Request setResourcePath(String path);
+    R setResourcePath(String path);
 
     /**
      * Sets the non-{@code null} path of the JSON resource to which this request
@@ -217,7 +216,7 @@ public interface Request {
      *             If this request does not permit changes to the JSON resource
      *             path.
      */
-    Request setResourcePath(ResourcePath path);
+    R setResourcePath(ResourcePath path);
 
     /**
      * Sets an additional parameter which should be used to control the behavior
@@ -234,7 +233,7 @@ public interface Request {
      *             If this request does not permit changes to the
      *             additional parameters.
      */
-    Request setAdditionalParameter(String name, String value) throws BadRequestException;
+    R setAdditionalParameter(String name, String value) throws BadRequestException;
 
     /**
      * Sets the requested API version of the resource.
@@ -242,7 +241,7 @@ public interface Request {
      * @param resourceVersion The requested API version of the resource.
      * @return This request.
      */
-    Request setResourceVersion(Version resourceVersion);
+    R setResourceVersion(Version resourceVersion);
 
     /**
      * Return a JsonValue representation of this request.

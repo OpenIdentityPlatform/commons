@@ -18,17 +18,14 @@ package org.forgerock.json.resource;
 
 import java.util.List;
 
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.http.routing.Version;
 
 /**
  * A request to update a JSON resource by applying a set of changes to its
  * existing content. See the documentation for {@link PatchOperation} for more
  * details regarding the various types of patch operation, and their semantics.
  */
-public interface PatchRequest extends Request {
+public interface PatchRequest extends Request<PatchRequest> {
 
     /**
      * The name of the field which contains the patch content in the JSON
@@ -47,23 +44,6 @@ public interface PatchRequest extends Request {
      * representation.
      */
     String FIELD_REVISION = "revision";
-
-    /**
-     * {@inheritDoc}
-     */
-    <R, P> R accept(RequestVisitor<R, P> v, P p);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    PatchRequest addField(JsonPointer... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    PatchRequest addField(String... fields);
 
     /**
      * Adds one or more patch operations which should be performed against the
@@ -97,12 +77,6 @@ public interface PatchRequest extends Request {
     PatchRequest addPatchOperation(String operation, String field, JsonValue value);
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    List<JsonPointer> getFields();
-
-    /**
      * Returns the list of patch operations which should be performed against
      * the targeted resource.
      *
@@ -110,24 +84,6 @@ public interface PatchRequest extends Request {
      *         the targeted resource (never null).
      */
     List<PatchOperation> getPatchOperations();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    RequestType getRequestType();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourcePath();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ResourcePath getResourcePathObject();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -144,18 +100,6 @@ public interface PatchRequest extends Request {
      *         resource to be patched.
      */
     String getRevision();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    Request setResourcePath(ResourcePath path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    PatchRequest setResourcePath(String path);
 
     /**
      * Sets the expected version information associated with the JSON resource
@@ -177,13 +121,4 @@ public interface PatchRequest extends Request {
      *             information.
      */
     PatchRequest setRevision(String version);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    PatchRequest setAdditionalParameter(String name, String value) throws BadRequestException;
-
-    @Override
-    PatchRequest setResourceVersion(Version resourceVersion);
 }

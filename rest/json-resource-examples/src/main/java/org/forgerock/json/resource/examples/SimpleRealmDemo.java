@@ -24,7 +24,6 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 import java.util.Collections;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.Connection;
@@ -32,6 +31,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.util.promise.Promise;
