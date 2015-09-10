@@ -25,7 +25,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
@@ -36,7 +35,7 @@ import org.forgerock.json.JsonValue;
  * manipulating requests.
  */
 public final class Requests {
-    private static abstract class AbstractRequestImpl<T extends Request> implements Request {
+    private static abstract class AbstractRequestImpl<T extends Request<T>> implements Request<T> {
         private final List<JsonPointer> fields = new LinkedList<>();
         private ResourcePath resourcePath;
         private final Map<String, String> parameters = new LinkedHashMap<>(2);

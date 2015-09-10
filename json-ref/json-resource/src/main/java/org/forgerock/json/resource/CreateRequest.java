@@ -16,17 +16,12 @@
 
 package org.forgerock.json.resource;
 
-import java.util.List;
-
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.http.routing.Version;
 
 /**
  * A request to create a new JSON resource.
  */
-public interface CreateRequest extends Request {
+public interface CreateRequest extends Request<CreateRequest> {
 
     /**
      * The name of the field which contains the resource content in the JSON
@@ -47,34 +42,11 @@ public interface CreateRequest extends Request {
     String ACTION_ID_CREATE = ActionRequest.ACTION_ID_CREATE;
 
     /**
-     * {@inheritDoc}
-     */
-    <R, P> R accept(RequestVisitor<R, P> v, P p);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    CreateRequest addField(JsonPointer... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    CreateRequest addField(String... fields);
-
-    /**
      * Returns the content of the JSON resource to be created.
      *
      * @return The content of the JSON resource to be created.
      */
     JsonValue getContent();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    List<JsonPointer> getFields();
 
     /**
      * Returns the client provided ID of the resource to be created. The new
@@ -94,12 +66,6 @@ public interface CreateRequest extends Request {
     String getNewResourceId();
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    RequestType getRequestType();
-
-    /**
      * Returns the path of the JSON resource container beneath which the new
      * resource should be created.
      * <p>
@@ -113,12 +79,6 @@ public interface CreateRequest extends Request {
      */
     @Override
     String getResourcePath();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ResourcePath getResourcePathObject();
 
     /**
      * Sets the content of the JSON resource to be created.
@@ -155,12 +115,6 @@ public interface CreateRequest extends Request {
     CreateRequest setNewResourceId(String id);
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    Request setResourcePath(ResourcePath path);
-
-    /**
      * Sets the path of the JSON resource container beneath which the new
      * resource should be created.
      * <p>
@@ -179,13 +133,4 @@ public interface CreateRequest extends Request {
      */
     @Override
     CreateRequest setResourcePath(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    CreateRequest setAdditionalParameter(String name, String value) throws BadRequestException;
-
-    @Override
-    CreateRequest setResourceVersion(Version resourceVersion);
 }

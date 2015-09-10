@@ -16,63 +16,16 @@
 
 package org.forgerock.json.resource;
 
-import java.util.List;
-
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.JsonPointer;
-import org.forgerock.http.routing.Version;
-
 /**
  * A request to delete a JSON resource.
  */
-public interface DeleteRequest extends Request {
+public interface DeleteRequest extends Request<DeleteRequest> {
 
     /**
      * The name of the field which contains the resource version in the JSON
      * representation.
      */
     String FIELD_REVISION = "revision";
-
-    /**
-     * {@inheritDoc}
-     */
-    <R, P> R accept(RequestVisitor<R, P> v, P p);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    DeleteRequest addField(JsonPointer... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    DeleteRequest addField(String... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    List<JsonPointer> getFields();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    RequestType getRequestType();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourcePath();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ResourcePath getResourcePathObject();
 
     /**
      * Returns the expected version information associated with the JSON
@@ -89,18 +42,6 @@ public interface DeleteRequest extends Request {
      *         resource to be deleted.
      */
     String getRevision();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    Request setResourcePath(ResourcePath path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    DeleteRequest setResourcePath(String path);
 
     /**
      * Sets the expected version information associated with the JSON resource
@@ -122,13 +63,4 @@ public interface DeleteRequest extends Request {
      *             information.
      */
     DeleteRequest setRevision(String version);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    DeleteRequest setAdditionalParameter(String name, String value) throws BadRequestException;
-
-    @Override
-    DeleteRequest setResourceVersion(Version resourceVersion);
 }

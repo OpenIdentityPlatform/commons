@@ -19,7 +19,6 @@ package org.forgerock.json.resource;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 
-import org.forgerock.http.ResourcePath;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.forgerock.http.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
@@ -53,6 +52,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -173,7 +173,7 @@ final class HttpAdapter implements Handler {
                 case QUERY:
                     return doQuery(context, request);
                 default:
-                    return fail(request, new NotSupportedException("Operation " + requestType + " not supported"));
+                    throw new NotSupportedException("Operation " + requestType + " not supported");
             }
         } catch (ResourceException e) {
             return fail(request, e);

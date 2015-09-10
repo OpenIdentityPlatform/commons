@@ -16,11 +16,9 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.JsonPointer;
-import org.forgerock.http.routing.Version;
-
 import java.util.List;
+
+import org.forgerock.json.JsonPointer;
 
 /**
  * A request to search for all JSON resources matching a user specified set of
@@ -42,7 +40,7 @@ import java.util.List;
  * accessing this form of query for security reasons.
  * </ul>
  */
-public interface QueryRequest extends Request {
+public interface QueryRequest extends Request<QueryRequest> {
     /**
      * The name of the field which contains the paged results cookie in the JSON
      * representation.
@@ -92,23 +90,6 @@ public interface QueryRequest extends Request {
     String FIELD_SORT_KEYS = "sortKeys";
 
     /**
-     * {@inheritDoc}
-     */
-    <R, P> R accept(RequestVisitor<R, P> v, P p);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    QueryRequest addField(JsonPointer... fields);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    QueryRequest addField(String... fields);
-
-    /**
      * Adds one or more sort keys which will be used for ordering the JSON
      * resources returned by this query request.
      *
@@ -137,12 +118,6 @@ public interface QueryRequest extends Request {
      *             keys.
      */
     QueryRequest addSortKey(String... keys);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    List<JsonPointer> getFields();
 
     /**
      * Returns the opaque cookie which is used by the resource provider to track
@@ -245,24 +220,6 @@ public interface QueryRequest extends Request {
      * @see QueryRequest#getQueryFilter()
      */
     String getQueryId();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    RequestType getRequestType();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    String getResourcePath();
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    ResourcePath getResourcePathObject();
 
     /**
      * Returns the sort keys which should be used for ordering the JSON
@@ -411,25 +368,4 @@ public interface QueryRequest extends Request {
      * @see QueryRequest#setQueryFilter(org.forgerock.util.query.QueryFilter)
      */
     QueryRequest setQueryId(String id);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    Request setResourcePath(ResourcePath path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    QueryRequest setResourcePath(String path);
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    QueryRequest setAdditionalParameter(String name, String value) throws BadRequestException;
-
-    @Override
-    QueryRequest setResourceVersion(Version resourceVersion);
 }
