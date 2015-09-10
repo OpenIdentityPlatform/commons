@@ -57,7 +57,6 @@
     </issueManagement>
 
     <modules>
-        <module>forgerock-auth-filter-common</module>
         <module>forgerock-authn-filter</module>
         <module>forgerock-authz-filter-parent</module>
     </modules>
@@ -172,11 +171,6 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-auth-filter-common</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-jaspi-runtime</artifactId>

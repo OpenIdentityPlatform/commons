@@ -52,12 +52,6 @@
             <artifactId>chf-http-core</artifactId>
         </dependency>
 
-        <!-- TODO remove -->
-        <dependency> <!-- Required for deprecated Logging framework in JaspiRuntime#LOG -->
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-auth-filter-common</artifactId>
-        </dependency>
-
         <dependency> <!-- Required for JsonValue and ResourceException -->
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource</artifactId>

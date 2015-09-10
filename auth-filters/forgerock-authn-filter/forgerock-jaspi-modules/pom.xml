@@ -35,11 +35,4 @@
         <module>forgerock-jaspi-iwa-module</module>
         <module>forgerock-jaspi-openam-session-module</module>
     </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-auth-filter-common</artifactId>
-        </dependency>
-    </dependencies>
 </project>
