@@ -47,10 +47,6 @@
             <artifactId>forgerock-jaspi-runtime</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-web-token</artifactId>
         </dependency>

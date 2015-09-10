@@ -16,7 +16,11 @@
 
 package org.forgerock.jaspi.modules.openid;
 
+import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
+import static javax.security.auth.message.AuthStatus.SEND_SUCCESS;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -24,16 +28,19 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
-import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverService;
@@ -45,12 +52,13 @@ import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.util.promise.Promise;
 
 /**
  * OpenID Connect module that allows access when a valid OpenID Connect JWT which
  * our server trusts is presented in the specific header field.
  */
-public class OpenIdConnectModule implements ServerAuthModule {
+public class OpenIdConnectModule implements AsyncServerAuthModule {
 
     /**
      * Default read timeout for HTTP connections.
@@ -108,19 +116,26 @@ public class OpenIdConnectModule implements ServerAuthModule {
     OpenIdConnectModule(final OpenIdResolverServiceConfigurator serviceConfigurator,
                         final JwtReconstruction constructor,
                         final OpenIdResolverService service,
-                        final CallbackHandler callback) {
+                        final CallbackHandler callback,
+                        final String openIdConnectHeader) {
         this.serviceConfigurator = serviceConfigurator;
         this.constructor = constructor;
         this.resolverService = service;
         this.callbackHandler = callback;
+        this.openIdConnectHeader = openIdConnectHeader;
+    }
+
+    @Override
+    public String getModuleId() {
+        return "OpenIdConnect";
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void initialize(final MessagePolicy requestPolicy, final MessagePolicy responsePolicy,
-                           final CallbackHandler callbackHandler, final Map config) throws AuthException {
+    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
+            CallbackHandler callbackHandler, Map<String, Object> config) {
 
         this.openIdConnectHeader = (String) config.get(OpenIdConnectModule.HEADER_KEY);
         this.callbackHandler = callbackHandler;
@@ -130,7 +145,7 @@ public class OpenIdConnectModule implements ServerAuthModule {
 
         if (openIdConnectHeader == null || openIdConnectHeader.isEmpty()) {
             LOG.debug("OpenIdConnectModule config is invalid. You must include the header key parameter");
-            throw new AuthException("OpenIdConnectModule configuration is invalid.");
+            return newExceptionPromise(new AuthenticationException("OpenIdConnectModule configuration is invalid."));
         }
 
         if (readTimeout == null || readTimeout < 0) {
@@ -152,9 +167,10 @@ public class OpenIdConnectModule implements ServerAuthModule {
         //error out here
         if (!serviceConfigurator.configureService(resolverService, resolvers)) {
             LOG.debug("OpenIdConnectModule config is invalid. You must configure at least one valid resolver.");
-            throw new AuthException("OpenIdConnectModule configuration is invalid.");
+            return newExceptionPromise(new AuthenticationException("OpenIdConnectModule configuration is invalid."));
         }
 
+        return newResultPromise(null);
     }
 
     /**
@@ -168,18 +184,19 @@ public class OpenIdConnectModule implements ServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param clientSubject {@inheritDoc}
      * @param serviceSubject {@inheritDoc}
-     * @return AuthStatus.SUCCESS is sent if everything validates. Otherwise AuthStatus.SEND_FAILURE.
-     * @throws AuthException if there are issues handling the request caused by improper config
+     * @return A Promise completed with AuthStatus.SUCCESS if everything validates or with AuthStatus.SEND_FAILURE
+     * in the case of a failure, or completed with an exception if there are issues handling the request caused
+     * by improper config.
      */
     @Override
-    public AuthStatus validateRequest(final MessageInfo messageInfo, final Subject clientSubject,
-                                      final Subject serviceSubject) throws AuthException {
+    public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
+            Subject clientSubject, Subject serviceSubject) {
 
-        final HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
-        final String jwtValue = request.getHeader(openIdConnectHeader);
+        final Request request = messageInfo.getRequest();
+        final String jwtValue = request.getHeaders().getFirst(openIdConnectHeader);
 
         if (jwtValue == null || jwtValue.isEmpty()) {
-            return AuthStatus.SEND_FAILURE;
+            return newResultPromise(SEND_FAILURE);
         }
 
         final SignedJwt retrievedJwt;
@@ -188,10 +205,10 @@ public class OpenIdConnectModule implements ServerAuthModule {
             retrievedJwt = constructor.reconstructJwt(jwtValue, SignedJwt.class);
         } catch (InvalidJwtException ije) {
             LOG.debug("Invalid JWS in supplied header", ije);
-            return AuthStatus.SEND_FAILURE;
+            return newResultPromise(SEND_FAILURE);
         } catch (JwtReconstructionException jre) {
             LOG.debug("Unable to reconstruct JWS from supplied header", jre);
-            return AuthStatus.SEND_FAILURE;
+            return newResultPromise(SEND_FAILURE);
         }
 
         final JwtClaimsSet jwtClaimSet = retrievedJwt.getClaimsSet();
@@ -201,7 +218,7 @@ public class OpenIdConnectModule implements ServerAuthModule {
         //if no resolver for this issuer found, abort
         if (resolver == null) {
             LOG.debug("No resolver found for the issuer: {}", jwtClaimSet.getIssuer());
-            return AuthStatus.SEND_FAILURE;
+            return newResultPromise(SEND_FAILURE);
         }
 
         try {
@@ -213,13 +230,13 @@ public class OpenIdConnectModule implements ServerAuthModule {
 
         } catch (OpenIdConnectVerificationException oice) {
             LOG.debug("Unable to validate authenticated identity from JWT.", oice);
-            return AuthStatus.SEND_FAILURE;
+            return newResultPromise(SEND_FAILURE);
         } catch (IOException | UnsupportedCallbackException e) {
             LOG.debug("Error setting user principal", e);
-            throw new AuthException(e.getMessage());
+            return newExceptionPromise(new AuthenticationException(e.getMessage()));
         }
 
-        return AuthStatus.SUCCESS;
+        return newResultPromise(AuthStatus.SUCCESS);
     }
 
     /**
@@ -232,8 +249,9 @@ public class OpenIdConnectModule implements ServerAuthModule {
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    public AuthStatus secureResponse(final MessageInfo messageInfo, final Subject subject) throws AuthException {
-        return AuthStatus.SEND_SUCCESS;
+    public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
+            Subject subject) {
+        return newResultPromise(SEND_SUCCESS);
     }
 
     /**
@@ -244,15 +262,15 @@ public class OpenIdConnectModule implements ServerAuthModule {
      * @throws AuthException {@inheritDoc}
      */
     @Override
-    public void cleanSubject(final MessageInfo messageInfo, final Subject subject) throws AuthException {
+    public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject subject) {
+        return newResultPromise(null);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Class[] getSupportedMessageTypes() {
-        return new Class[]{ HttpServletRequest.class, HttpServletResponse.class };
+    public Collection<Class<?>> getSupportedMessageTypes() {
+        return Arrays.asList(new Class<?>[]{Request.class, Response.class});
     }
-
 }

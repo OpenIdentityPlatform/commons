@@ -16,21 +16,30 @@
 
 package org.forgerock.jaspi.modules.openid;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
 import org.forgerock.jaspi.modules.openid.resolvers.service.OpenIdResolverService;
@@ -40,17 +49,6 @@ import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -68,7 +66,8 @@ public class OpenIdConnectModuleTest {
         mockReconstruction = mock(JwtReconstruction.class);
         mockService = mock(OpenIdResolverService.class);
         mockCallback = mock(CallbackHandler.class);
-        testModule = new OpenIdConnectModule(mockConfigurator, mockReconstruction, mockService, mockCallback);
+        testModule = new OpenIdConnectModule(mockConfigurator, mockReconstruction, mockService, mockCallback,
+                OpenIdConnectModule.HEADER_KEY);
     }
 
     private Map<String, Object> getConfig() throws UnsupportedEncodingException {
@@ -80,7 +79,7 @@ public class OpenIdConnectModuleTest {
     }
 
     @Test(expectedExceptions = AuthException.class)
-    public void shouldThrowAuthExceptionWithNoHeaderInConfig() throws AuthException, UnsupportedEncodingException {
+    public void shouldThrowAuthExceptionWithNoHeaderInConfig() throws Exception {
         //given
         MessagePolicy requestPolicy = mock(MessagePolicy.class);
         MessagePolicy responsePolicy =  mock(MessagePolicy.class);
@@ -88,14 +87,13 @@ public class OpenIdConnectModuleTest {
         Map<String, Object> config = new HashMap<>();
 
         //when
-        testModule.initialize(requestPolicy, responsePolicy, callback, config);
+        testModule.initialize(requestPolicy, responsePolicy, callback, config).getOrThrowUninterruptibly();
 
         //then - covered by caught exception
     }
 
     @Test(expectedExceptions = AuthException.class)
-    public void shouldThrowAuthExceptionWhenConfigureServiceFails() throws AuthException,
-            UnsupportedEncodingException {
+    public void shouldThrowAuthExceptionWhenConfigureServiceFails() throws Exception {
         //given
         MessagePolicy requestPolicy = mock(MessagePolicy.class);
         MessagePolicy responsePolicy =  mock(MessagePolicy.class);
@@ -105,7 +103,7 @@ public class OpenIdConnectModuleTest {
         given(mockConfigurator.configureService(any(OpenIdResolverService.class), any(List.class))).willReturn(false);
 
         //when
-        testModule.initialize(requestPolicy, responsePolicy, callback, config);
+        testModule.initialize(requestPolicy, responsePolicy, callback, config).getOrThrowUninterruptibly();
 
         //then - covered by caught exception
     }
@@ -113,176 +111,165 @@ public class OpenIdConnectModuleTest {
     @Test
     public void shouldReturnFailureWhenNoJwtInRequest() throws AuthException {
         //given
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        MessageInfo mockMessage = mock(MessageInfo.class);
+        MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         String jwtInRequest = null;
 
-        given(mockMessage.getRequestMessage()).willReturn(mockRequest);
-        given(mockMessage.getResponseMessage()).willReturn(mockResponse);
+        given(mockMessage.getRequest()).willReturn(request);
+        given(mockMessage.getResponse()).willReturn(response);
 
-        given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
+        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
 
         //when
-        AuthStatus res = testModule.validateRequest(mockMessage, null, null);
+        AuthStatus res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
 
         //then
         assertEquals(res, AuthStatus.SEND_FAILURE);
-        verifyZeroInteractions(mockResponse);
     }
 
     @Test
     public void shouldReturnFailureWhenEmptyJwtInRequest() throws AuthException {
         //given
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        MessageInfo mockMessage = mock(MessageInfo.class);
+        MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         String jwtInRequest = "";
 
-        given(mockMessage.getRequestMessage()).willReturn(mockRequest);
-        given(mockMessage.getResponseMessage()).willReturn(mockResponse);
+        given(mockMessage.getRequest()).willReturn(request);
+        given(mockMessage.getResponse()).willReturn(response);
 
-        given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
+        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
 
         //when
-        AuthStatus res = testModule.validateRequest(mockMessage, null, null);
+        AuthStatus res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
 
         //then
         assertEquals(res, AuthStatus.SEND_FAILURE);
-        verifyZeroInteractions(mockResponse);
     }
 
     @Test
     public void shouldReturnFailureWhenInvalidJwtInRequest() throws AuthException {
         //given
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        MessageInfo mockMessage = mock(MessageInfo.class);
+        MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         String jwtInRequest = "jwt";
 
-        given(mockMessage.getRequestMessage()).willReturn(mockRequest);
-        given(mockMessage.getResponseMessage()).willReturn(mockResponse);
+        given(mockMessage.getRequest()).willReturn(request);
+        given(mockMessage.getResponse()).willReturn(response);
 
-        given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
-        given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willThrow(InvalidJwtException.class);
+        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        doThrow(InvalidJwtException.class).when(mockReconstruction).reconstructJwt(anyString(), any(Class.class));
 
         //when
-        AuthStatus res = testModule.validateRequest(mockMessage, null, null);
+        AuthStatus res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
 
         //then
         assertEquals(res, AuthStatus.SEND_FAILURE);
-        verifyZeroInteractions(mockResponse);
     }
-
-
 
     @Test
     public void shouldReturnFailureWhenInvalidJwtPartsInRequest() throws AuthException {
         //given
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        MessageInfo mockMessage = mock(MessageInfo.class);
+        MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         String jwtInRequest = "jwt";
 
-        given(mockMessage.getRequestMessage()).willReturn(mockRequest);
-        given(mockMessage.getResponseMessage()).willReturn(mockResponse);
+        given(mockMessage.getRequest()).willReturn(request);
+        given(mockMessage.getResponse()).willReturn(response);
 
-        given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
-        given(mockReconstruction.reconstructJwt(anyString(), any(Class.class)))
-                .willThrow(JwtReconstructionException.class);
+        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        doThrow(JwtReconstructionException.class)
+                .when(mockReconstruction).reconstructJwt(anyString(), any(Class.class));
 
         //when
-        AuthStatus res = testModule.validateRequest(mockMessage, null, null);
+        AuthStatus res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
 
         //then
         assertEquals(res, AuthStatus.SEND_FAILURE);
-        verifyZeroInteractions(mockResponse);
     }
 
     @Test
-    public void shouldReturnFailureWhenUnableToFindResolverForIssuer() throws AuthException,
-            UnsupportedEncodingException {
+    public void shouldReturnFailureWhenUnableToFindResolverForIssuer() throws Exception {
         //given
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        MessageInfo mockMessage = mock(MessageInfo.class);
+        MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         String jwtInRequest = "jwt";
         SignedJwt jws = mock(SignedJwt.class);
         JwtClaimsSet claimSet = mock(JwtClaimsSet.class);
 
         given(jws.getClaimsSet()).willReturn(claimSet);
 
-        given(mockMessage.getRequestMessage()).willReturn(mockRequest);
-        given(mockMessage.getResponseMessage()).willReturn(mockResponse);
+        given(mockMessage.getRequest()).willReturn(request);
+        given(mockMessage.getResponse()).willReturn(response);
 
-        given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
+        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
 
         //when
-        AuthStatus res = testModule.validateRequest(mockMessage, null, null);
+        AuthStatus res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
 
         //then
         assertEquals(res, AuthStatus.SEND_FAILURE);
-        verifyZeroInteractions(mockResponse);
     }
 
     @Test
-    public void shouldReturnFailureWhenUnableToValidateJwtWithCorrectResolver() throws UnsupportedEncodingException,
-            AuthException, OpenIdConnectVerificationException {
+    public void shouldReturnFailureWhenUnableToValidateJwtWithCorrectResolver() throws Exception {
         //given
         OpenIdResolver mockResolver = mock(OpenIdResolver.class);
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        MessageInfo mockMessage = mock(MessageInfo.class);
+        MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         String jwtInRequest = "jwt";
         SignedJwt jws = mock(SignedJwt.class);
         JwtClaimsSet claimSet = mock(JwtClaimsSet.class);
 
         given(jws.getClaimsSet()).willReturn(claimSet);
 
-        given(mockMessage.getRequestMessage()).willReturn(mockRequest);
-        given(mockMessage.getResponseMessage()).willReturn(mockResponse);
+        given(mockMessage.getRequest()).willReturn(request);
+        given(mockMessage.getResponse()).willReturn(response);
 
-        given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
+        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
 
         doThrow(new OpenIdConnectVerificationException()).when(mockResolver).validateIdentity(jws);
 
         //when
-        AuthStatus res = testModule.validateRequest(mockMessage, null, null);
+        AuthStatus res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
 
         //then
         assertEquals(res, AuthStatus.SEND_FAILURE);
-        verifyZeroInteractions(mockResponse);
     }
 
     @Test
-    public void shouldReturnFailureWhenUnableToSetPrincipal() throws IOException, AuthException,
-            UnsupportedCallbackException, OpenIdConnectVerificationException {
+    public void shouldReturnFailureWhenUnableToSetPrincipal() throws Exception {
         //given
         OpenIdResolver mockResolver = mock(OpenIdResolver.class);
-        HttpServletRequest mockRequest = mock(HttpServletRequest.class);
-        HttpServletResponse mockResponse = mock(HttpServletResponse.class);
+        Request request = new Request();
+        Response response = new Response();
 
-        MessageInfo mockMessage = mock(MessageInfo.class);
+        MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         String jwtInRequest = "jwt";
         SignedJwt jws = mock(SignedJwt.class);
         JwtClaimsSet claimSet = mock(JwtClaimsSet.class);
 
         given(jws.getClaimsSet()).willReturn(claimSet);
 
-        given(mockMessage.getRequestMessage()).willReturn(mockRequest);
-        given(mockMessage.getResponseMessage()).willReturn(mockResponse);
+        given(mockMessage.getRequest()).willReturn(request);
+        given(mockMessage.getResponse()).willReturn(response);
 
-        given(mockRequest.getHeader(anyString())).willReturn(jwtInRequest);
+        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
         given(mockService.getResolverForIssuer(anyString())).willReturn(mockResolver);
@@ -294,25 +281,24 @@ public class OpenIdConnectModuleTest {
         //when
         AuthStatus res = null;
         try {
-            res = testModule.validateRequest(mockMessage, null, null);
-        } catch (AuthException ae) {
+            res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
+        } catch (AuthenticationException ae) {
             errored = true;
         }
 
         //then
         assertTrue(errored);
         verify(mockResolver, times(1)).validateIdentity(jws);
-        verifyZeroInteractions(mockResponse);
         assertNull(res);
     }
 
     @Test
-    public void shouldReturnSecureSuccess() throws AuthException {
+    public void shouldReturnSecureSuccess() throws Exception {
 
         Subject mockSubject = null;
-        MessageInfo mockInfo = mock(MessageInfo.class);
+        MessageInfoContext mockInfo = mock(MessageInfoContext.class);
 
-        AuthStatus response = testModule.secureResponse(mockInfo, mockSubject);
+        AuthStatus response = testModule.secureResponse(mockInfo, mockSubject).getOrThrowUninterruptibly();
 
         //then
         assertEquals(response, AuthStatus.SEND_SUCCESS);
@@ -323,12 +309,12 @@ public class OpenIdConnectModuleTest {
         //Given
 
         //When
-        Class[] supportedMessageTypes = testModule.getSupportedMessageTypes();
+        Collection<Class<?>> supportedMessageTypes = testModule.getSupportedMessageTypes();
 
         //Then
-        assertEquals(supportedMessageTypes.length, 2);
-        assertEquals(supportedMessageTypes[0], HttpServletRequest.class);
-        assertEquals(supportedMessageTypes[1], HttpServletResponse.class);
+        assertThat(supportedMessageTypes)
+                .hasSize(2)
+                .containsExactly(Request.class, Response.class);
     }
 
 }
