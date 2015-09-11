@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.annotations.Delete;
 import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Read;

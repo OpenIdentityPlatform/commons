@@ -18,7 +18,7 @@ package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.http.HttpUtils.*;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.filter.Filters;

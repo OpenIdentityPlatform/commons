@@ -18,9 +18,9 @@ package org.forgerock.json.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.ClientContext;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.ClientContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.http.routing.UriRouterContext;
 import org.testng.annotations.Test;
 

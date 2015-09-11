@@ -19,7 +19,7 @@ package org.forgerock.json.resource;
 import java.io.Closeable;
 import java.util.Collection;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**

@@ -32,7 +32,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.mail.internet.ContentType;
 import javax.mail.internet.ParseException;
 
-import org.forgerock.http.Context;
+import com.fasterxml.jackson.core.JsonGenerator;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
@@ -62,8 +63,6 @@ import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
-
-import com.fasterxml.jackson.core.JsonGenerator;
 
 /**
  * Common request processing.
