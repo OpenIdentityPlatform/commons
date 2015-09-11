@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-import org.forgerock.http.context.AbstractContext;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.AbstractContext;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 

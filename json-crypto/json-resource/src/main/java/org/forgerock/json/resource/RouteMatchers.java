@@ -22,12 +22,12 @@ import static org.forgerock.http.routing.RouteMatchers.uriMatcher;
 import java.util.List;
 
 import org.forgerock.guava.common.collect.Lists;
-import org.forgerock.http.Context;
 import org.forgerock.http.routing.ResourceApiVersionBehaviourManager;
-import org.forgerock.http.routing.RouteMatch;
-import org.forgerock.http.routing.RouteMatcher;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.routing.Version;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.routing.RouteMatch;
+import org.forgerock.services.routing.RouteMatcher;
 
 /**
  * A utility class that contains methods for creating route matchers.
