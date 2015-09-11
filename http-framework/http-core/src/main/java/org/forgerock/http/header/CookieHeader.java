@@ -24,7 +24,7 @@ import java.util.List;
 
 import org.forgerock.http.protocol.Cookie;
 import org.forgerock.http.protocol.Header;
-import org.forgerock.http.protocol.Message;
+import org.forgerock.http.protocol.Request;
 
 /**
  * Processes the <strong>{@code Cookie}</strong> request message header. For
@@ -92,13 +92,13 @@ public class CookieHeader implements Header {
     }
 
     /**
-     * Constructs a new header, initialized from the specified message.
+     * Constructs a new header, initialized from the specified request message.
      *
      * @param message
-     *            The message to initialize the header from.
+     *            The request message to initialize the header from.
      * @return The parsed header.
      */
-    public static CookieHeader valueOf(final Message message) {
+    public static CookieHeader valueOf(final Request message) {
         return valueOf(parseMultiValuedHeader(message, NAME));
     }
 

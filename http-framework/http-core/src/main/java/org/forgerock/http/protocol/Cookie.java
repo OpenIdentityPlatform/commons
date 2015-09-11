@@ -168,8 +168,8 @@ public class Cookie {
      * @return {@code true} if the user agent should make the cookie
      *         inaccessible to client side script.
      */
-    public Boolean getHttpOnly() {
-        return httpOnly;
+    public Boolean isHttpOnly() {
+        return httpOnly == null ? false : httpOnly;
     }
 
     /**
@@ -217,8 +217,8 @@ public class Cookie {
      * @return {@code true} if the user agent should use only secure means to
      *         send back this cookie.
      */
-    public Boolean getSecure() {
-        return secure;
+    public Boolean isSecure() {
+        return secure == null ? false : secure;
     }
 
     /**

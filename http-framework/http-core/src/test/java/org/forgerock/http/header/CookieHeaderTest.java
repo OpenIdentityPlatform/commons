@@ -96,7 +96,7 @@ public class CookieHeaderTest {
 
     @Test
     public void testCookieHeaderFromStringAllowsNullMessage() {
-        final CookieHeader ch = CookieHeader.valueOf((Response) null);
+        final CookieHeader ch = CookieHeader.valueOf((Request) null);
         assertEquals(ch.getCookies().size(), 0);
     }
 
