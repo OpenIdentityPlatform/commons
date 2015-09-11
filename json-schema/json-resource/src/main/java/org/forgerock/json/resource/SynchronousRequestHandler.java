@@ -18,7 +18,7 @@ package org.forgerock.json.resource;
 
 import java.util.Collection;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * An interface for implementing synchronous {@link RequestHandler}s. A

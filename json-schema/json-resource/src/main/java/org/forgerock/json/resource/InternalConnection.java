@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 

@@ -18,7 +18,7 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 class InterfaceSingletonHandler implements RequestHandler {

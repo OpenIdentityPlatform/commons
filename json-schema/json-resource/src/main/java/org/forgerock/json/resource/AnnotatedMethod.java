@@ -21,7 +21,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.annotations.Create;
 import org.forgerock.json.resource.annotations.Patch;
 import org.forgerock.json.resource.annotations.Query;
