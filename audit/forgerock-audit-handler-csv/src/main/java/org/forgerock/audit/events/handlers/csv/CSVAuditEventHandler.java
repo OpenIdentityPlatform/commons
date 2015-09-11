@@ -40,8 +40,8 @@ import java.util.Set;
 
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.events.handlers.TopicAndEvent;
-import org.forgerock.audit.util.JsonSchemaUtils;
+import org.forgerock.audit.events.handlers.AuditEventTopicState;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -153,7 +153,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
+    public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
         try {
             checkTopic(topic);
             publishEventWithRetry(topic, event, getFieldOrder(topic), true);
@@ -165,12 +165,12 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     @Override
-    public synchronized void publishEvents(List<TopicAndEvent> events) {
+    public synchronized void publishEvents(List<AuditEventTopicState> events) {
         Map<String, Set<String>> topicCache = new HashMap<String, Set<String>>();
         // publish all events
         int nbPublished = 0;
         try {
-            for (TopicAndEvent topicAndEvent : events) {
+            for (AuditEventTopicState topicAndEvent : events) {
                 String topic = topicAndEvent.getTopic();
                 Set<String> fieldOrder = topicCache.get(topic);
                 if (fieldOrder == null) {
@@ -202,7 +202,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         }
     }
 
-    private void checkTopic(String topic) throws ResourceException, InternalServerErrorException {
+    private void checkTopic(String topic) throws ResourceException {
         final JsonValue auditEventProperties = AuditEventHelper.getAuditEventProperties(auditEvents.get(topic));
         if (auditEventProperties == null || auditEventProperties.isNull()) {
             throw new InternalServerErrorException("No audit event properties defined for audit event: " + topic);
@@ -252,8 +252,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     /** Returns the audit file to use for logging the event. It may imply its creation. */
-    private File getOrCreateAuditFile(final String auditEventType, final Set<String> fieldOrder) throws IOException,
-            InternalServerErrorException {
+    private File getOrCreateAuditFile(final String auditEventType, final Set<String> fieldOrder) throws IOException {
         File auditFile = getAuditLogFile(auditEventType);
         // Create header if creating a new file
         if (!auditFile.exists()) {
@@ -319,6 +318,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      */
     @Override
     public Promise<QueryResponse, ResourceException> queryEvents(
+            Context context,
             String topic,
             QueryRequest query,
             QueryResourceHandler handler) {
@@ -337,7 +337,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
+    public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         try {
             final Set<JsonValue> entry = getEntries(topic, QueryFilters.parse("/_id eq \"" + resourceId + "\""));
             if (entry.isEmpty()) {
@@ -402,10 +402,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
      * @param auditEntryType the audit log type
      * @param queryFilter the query filter to apply to the entries
      * @return  A audit log entry; null if no entry exists
-     * @throws Exception
+     * @throws IOException If unable to get an entry from the CSV file.
      */
     private Set<JsonValue> getEntries(final String auditEntryType, QueryFilter<JsonPointer> queryFilter)
-            throws IOException, ResourceException {
+            throws IOException {
         final File auditFile = getAuditLogFile(auditEntryType);
         final Set<JsonValue> results = new HashSet<>();
         if (queryFilter == null) {

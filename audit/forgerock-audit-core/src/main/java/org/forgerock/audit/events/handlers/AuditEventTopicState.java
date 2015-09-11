@@ -15,27 +15,33 @@
  */
 package org.forgerock.audit.events.handlers;
 
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 /**
- * Represents a (topic, event as Json) pair.
+ * Stores the state of the details sent to {@link AuditEventHandler#publishEvent(Context, String, JsonValue)}.
+ * The state contains the context, topic, and event content.
  */
-public final class TopicAndEvent {
+public final class AuditEventTopicState {
 
+    private final Context context;
     private final String topic;
     private final JsonValue event;
 
     /**
      * Creates a (topic,event) pair.
      *
+     * @param context
+     *         The context that triggered the audit event.
      * @param topic
      *         The topic.
      * @param event
      *         The event content.
      */
-    public TopicAndEvent(String topic, JsonValue event) {
+    public AuditEventTopicState(Context context, String topic, JsonValue event) {
         Reject.ifNull(topic, event);
+        this.context = context;
         this.topic = topic;
         this.event = event;
     }
@@ -48,6 +54,7 @@ public final class TopicAndEvent {
     public String getTopic() {
         return topic;
     }
+
     /**
      * Returns the event content.
      *
@@ -57,12 +64,22 @@ public final class TopicAndEvent {
         return event;
     }
 
+    /**
+     * Returns the context that triggered the event.
+     *
+     * @return the context
+     */
+    public Context getContext() {
+        return context;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
         result = prime * result + topic.hashCode();
         result = prime * result + event.asMap().hashCode();
+        result = prime * result + context.toJsonValue().asMap().hashCode();
         return result;
     }
     @Override
@@ -70,18 +87,19 @@ public final class TopicAndEvent {
         if (this == obj) {
             return true;
         }
-        if (obj instanceof TopicAndEvent) {
-            TopicAndEvent other = (TopicAndEvent) obj;
-            if (!topic.equals(other.topic)) {
-                return false;
+        if (obj instanceof AuditEventTopicState) {
+            AuditEventTopicState other = (AuditEventTopicState) obj;
+            if (topic.equals(other.topic)
+                    && event.asMap().equals(other.event.asMap())
+                    && context.toJsonValue().asMap().equals(other.context.toJsonValue().asMap())) {
+                return true;
             }
-            return event.asMap().equals(other.event.asMap());
         }
         return false;
     }
 
     @Override
     public String toString() {
-        return "TopicAndEvent [topic=" + topic + ", event=" + event + "]";
+        return String.format("AuditEventTopicState [topic=%s, event=%s, contextId=%s]", topic, event, context.getId());
     }
 }

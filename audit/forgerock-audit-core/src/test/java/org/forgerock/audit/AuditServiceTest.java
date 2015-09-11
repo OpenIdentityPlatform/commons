@@ -204,7 +204,7 @@ public class AuditServiceTest {
                 auditService.handleRead(context, readRequest);
 
         //then
-        verify(queryAuditEventHandler).readEvent(eq("access"), eq("1234"));
+        verify(queryAuditEventHandler).readEvent(any(Context.class), eq("access"), eq("1234"));
         verifyZeroInteractions(auditEventHandler);
     }
 
@@ -279,7 +279,7 @@ public class AuditServiceTest {
         final Promise<QueryResponse, ResourceException> emptyPromise = newQueryResponse().asPromise();
         auditService.register(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"));
         when(auditEventHandler.queryEvents(
-                any(String.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
+                any(Context.class), any(String.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
             .thenReturn(emptyPromise);
 
         //when
@@ -290,7 +290,7 @@ public class AuditServiceTest {
 
         //then
         verify(auditEventHandler).queryEvents(
-                any(String.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+                any(Context.class), any(String.class), any(QueryRequest.class), any(QueryResourceHandler.class));
         assertThat(promise).isSameAs(emptyPromise);
     }
 
@@ -320,7 +320,7 @@ public class AuditServiceTest {
 
         // No timestamp in the JSON content
         final JsonValue content = json(object(field("_id", "_id"),
-                                              field("transactionId", "transactionId")));
+                field("transactionId", "transactionId")));
 
         final CreateRequest createRequest = newCreateRequest("access", content);
         final ResultHandler<ResourceResponse> resultHandler = mockResultHandler(ResourceResponse.class);

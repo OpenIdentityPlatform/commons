@@ -15,8 +15,6 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
-import static java.lang.String.*;
-
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -33,13 +31,12 @@ import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.ConnectionPool;
 import org.forgerock.audit.handlers.jdbc.TableMappingAndParameters.FieldValuePair;
+import org.forgerock.http.Context;
 import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CountPolicy;
-import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -137,7 +134,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
+    public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
         try {
             LOGGER.info("Create called for audit event {} with content {}", topic, event);
             final Connection connection = dataSource.getConnection();
@@ -163,7 +160,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResponse, ResourceException> queryEvents(final String topic,
+    public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String topic,
             final QueryRequest queryRequest, final QueryResourceHandler queryResourceHandler) {
         try {
             LOGGER.info("Query called for audit event: {} with queryFilter: {}", topic,
@@ -196,7 +193,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
+    public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         JsonValue result;
         try {
             LOGGER.info("Read called for audit event {} with id {}", topic, resourceId);

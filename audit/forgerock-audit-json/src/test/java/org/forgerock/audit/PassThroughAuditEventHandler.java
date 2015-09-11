@@ -20,6 +20,7 @@ import static org.forgerock.json.resource.Responses.*;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
@@ -59,7 +60,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
+    public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
         logger.info("Added an entry. Message: " + message);
         return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, new JsonValue(event))
                 .asPromise();
@@ -70,8 +71,8 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResponse, ResourceException> queryEvents(
-            String topic, QueryRequest query, QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryEvents(Context context, String topic,
+            QueryRequest query, QueryResourceHandler handler) {
         return ResourceExceptionsUtil.adapt(
                 new NotSupportedException("The " + RequestType.QUERY + " operation is not supported.")).asPromise();
     }
@@ -81,7 +82,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
+    public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         return ResourceExceptionsUtil.adapt(
                 new NotSupportedException("The " + RequestType.READ + " operation is not supported.")).asPromise();
     }

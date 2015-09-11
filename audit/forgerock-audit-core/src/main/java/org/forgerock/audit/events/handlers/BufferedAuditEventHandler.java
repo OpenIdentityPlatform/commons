@@ -17,19 +17,19 @@ package org.forgerock.audit.events.handlers;
 
 import static java.util.concurrent.Executors.*;
 
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.promise.Promise;
 
@@ -41,13 +41,13 @@ import org.forgerock.util.promise.Promise;
  */
 public class BufferedAuditEventHandler<CFG extends EventHandlerConfiguration>
     extends AuditEventHandlerBase<CFG>
-    implements BufferCallback<TopicAndEvent> {
+    implements BufferCallback<AuditEventTopicState> {
 
     /** The underlying audit event handler which is decorated. */
     private final AuditEventHandler<CFG> delegate;
 
     /** The buffer for events. */
-    private Buffer<TopicAndEvent> eventBuffer;
+    private Buffer<AuditEventTopicState> eventBuffer;
 
     /** Indicates if buffer must be flushed before performing a read or query event. */
     private boolean forceFlushBeforeRead;
@@ -67,7 +67,7 @@ public class BufferedAuditEventHandler<CFG extends EventHandlerConfiguration>
         EventBufferingConfiguration bufferConf = config.getBufferingConfig();
         forceFlushBeforeRead = bufferConf.isForceFlushBeforeRead();
         ScheduledExecutorService pool = newScheduledThreadPool(2);
-        this.eventBuffer = new Buffer<TopicAndEvent>(pool, this, bufferConf.getMaxTime(), bufferConf.getMaxSize());
+        this.eventBuffer = new Buffer<>(pool, this, bufferConf.getMaxTime(), bufferConf.getMaxSize());
 
         delegate.configure(config);
     }
@@ -84,28 +84,28 @@ public class BufferedAuditEventHandler<CFG extends EventHandlerConfiguration>
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
-        eventBuffer.add(new TopicAndEvent(topic, event));
-        return newResultPromise(Responses.newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
-                null, event));
+    public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
+        eventBuffer.add(new AuditEventTopicState(context, topic, event));
+        return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
+                null, event).asPromise();
     }
 
     @Override
-    public void bufferFlush(List<TopicAndEvent> events) {
+    public void bufferFlush(List<AuditEventTopicState> events) {
         delegate.publishEvents(events);
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
+    public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         forceFlushIfNeeded();
-        return delegate.readEvent(topic, resourceId);
+        return delegate.readEvent(context, topic, resourceId);
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> queryEvents(String topic, QueryRequest query,
+    public Promise<QueryResponse, ResourceException> queryEvents(Context context, String topic, QueryRequest query,
             QueryResourceHandler handler) {
         forceFlushIfNeeded();
-        return this.delegate.queryEvents(topic, query, handler);
+        return this.delegate.queryEvents(context, topic, query, handler);
     }
 
     /** Force the flush of buffer to ensure all events are available for a read or a query. */

@@ -35,6 +35,8 @@ import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.BufferedAuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryFilters;
@@ -59,22 +61,23 @@ public class CSVAuditEventHandlerTest {
     @Test
     public void testCreatingAuditLogEntryWithBuffering() throws Exception {
         //given
-        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
-        AuditEventHandler<CSVAuditEventHandlerConfiguration> bufferedHandler =
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final AuditEventHandler<CSVAuditEventHandlerConfiguration> bufferedHandler =
                 new BufferedAuditEventHandler<>(csvHandler);
+        final Context context = new RootContext();
         try {
             bufferedHandler.configure(getConfigWithBuffering(logDirectory, 0, 2));
 
             // when
-            bufferedHandler.publishEvent("access", buildEvent(1));
-            bufferedHandler.publishEvent("access", buildEvent(2));
+            bufferedHandler.publishEvent(context, "access", buildEvent(1));
+            bufferedHandler.publishEvent(context, "access", buildEvent(2));
 
             // then
-            String expectedContent = "\"_id\",\"timestamp\",\"transactionId\"\n"
+            final String expectedContent = "\"_id\",\"timestamp\",\"transactionId\"\n"
                     + "\"_id1\",\"timestamp\",\"transactionId-X\"\n" + "\"_id2\",\"timestamp\",\"transactionId-X\"";
-            File file = logDirectory.resolve("access.csv").toFile();
+            final File file = logDirectory.resolve("access.csv").toFile();
             int tries = 0;
             while ((!file.exists() || file.length() < expectedContent.length()) && tries < 10) {
                 Thread.sleep(10);
@@ -89,15 +92,16 @@ public class CSVAuditEventHandlerTest {
     @Test
     public void testCreatingAuditLogEntry() throws Exception {
         //given
-        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final Context context = new RootContext();
 
         final CreateRequest createRequest = makeCreateRequest();
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
-                csvHandler.publishEvent("access", createRequest.getContent());
+        final Promise<ResourceResponse, ResourceException> promise =
+                csvHandler.publishEvent(context, "access", createRequest.getContent());
 
         //then
         assertThat(promise)
@@ -114,17 +118,18 @@ public class CSVAuditEventHandlerTest {
     @Test
     public void testReadingAuditLogEntry() throws Exception {
         //given
-        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final Context context = new RootContext();
 
-        ResourceResponse event = createAccessEvent(csvHandler);
+        final ResourceResponse event = createAccessEvent(csvHandler);
 
         final ReadRequest readRequest = Requests.newReadRequest("access", event.getId());
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
-                csvHandler.readEvent("access", readRequest.getResourcePathObject().tail(1).toString());
+        final Promise<ResourceResponse, ResourceException> promise =
+                csvHandler.readEvent(context, "access", readRequest.getResourcePathObject().tail(1).toString());
 
         //then
         assertThat(promise)
@@ -158,23 +163,21 @@ public class CSVAuditEventHandlerTest {
     @Test
     public void testQueryOnAuditLogEntry() throws Exception{
         //given
-        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final Context context = new RootContext();
 
         final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
         final ArgumentCaptor<ResourceResponse> resourceCaptor = ArgumentCaptor.forClass(ResourceResponse.class);
 
-        ResourceResponse event = createAccessEvent(csvHandler);
+        final ResourceResponse event = createAccessEvent(csvHandler);
 
         final QueryRequest queryRequest = Requests.newQueryRequest("access")
                 .setQueryFilter(QueryFilters.parse("/_id eq \"_id0\""));
         //when
-        Promise<QueryResponse, ResourceException> promise =
-                csvHandler.queryEvents(
-                        "access",
-                        queryRequest,
-                        queryResourceHandler);
+        final Promise<QueryResponse, ResourceException> promise =
+                csvHandler.queryEvents(context, "access", queryRequest, queryResourceHandler);
 
         //then
         assertThat(promise).succeeded();
@@ -211,11 +214,10 @@ public class CSVAuditEventHandlerTest {
 
     private ResourceResponse createAccessEvent(AuditEventHandler<?> auditEventHandler) throws Exception {
         final CreateRequest createRequest = makeCreateRequest();
-        final ResultHandler<ResourceResponse> createResultHandler = mockResultHandler(ResourceResponse.class);
-        final ArgumentCaptor<ResourceResponse> createArgument = ArgumentCaptor.forClass(ResourceResponse.class);
+        final Context context = new RootContext();
 
-        Promise<ResourceResponse, ResourceException> promise =
-                auditEventHandler.publishEvent("access", createRequest.getContent());
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditEventHandler.publishEvent(context, "access", createRequest.getContent());
 
         assertThat(promise)
                 .succeeded()
@@ -227,19 +229,21 @@ public class CSVAuditEventHandlerTest {
 
     @Test
     public void testCreateCsvLogEntryWritesToFile() throws Exception {
-        Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, true);
+        final Context context = new RootContext();
+
         final JsonValue content = json(
                 object(
                         field("_id", "1"),
                         field("timestamp", "123456"),
                         field("transactionId", "A10000")));
-        CreateRequest createRequest = Requests.newCreateRequest("access", content);
+        final CreateRequest createRequest = Requests.newCreateRequest("access", content);
 
-        csvHandler.publishEvent("access", createRequest.getContent());
+        csvHandler.publishEvent(context, "access", createRequest.getContent());
 
-        String expectedContent = "\"_id\",\"timestamp\",\"transactionId\",\"HMAC\"\n"
+        final String expectedContent = "\"_id\",\"timestamp\",\"transactionId\",\"HMAC\"\n"
                 + "\"1\",\"123456\",\"A10000\",\"l3jKX9DpKEWpALEBefJxOUKtLQttianWfqISvnk2HgE=\"";
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }

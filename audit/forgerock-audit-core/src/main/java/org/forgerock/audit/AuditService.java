@@ -239,7 +239,7 @@ public class AuditService implements RequestHandler {
                 final String id = request.getResourcePathObject().size() > 1
                         ? request.getResourcePathObject().tail(1).toString() : null;
                 final String topic = parseTopicFromPath(request.getResourcePathObject());
-                return allAuditEventHandlers.get(queryHandlerName).readEvent(topic, id);
+                return allAuditEventHandlers.get(queryHandlerName).readEvent(context, topic, id);
             }
             String error = String.format(
                     "The handler defined for queries, '%s', has not been registered to the audit service.",
@@ -266,9 +266,7 @@ public class AuditService implements RequestHandler {
                 throw new BadRequestException(
                         "Audit service called without specifying audit type in the identifier");
             }
-            // Audit create called for /access with {timestamp=2013-07-30T18:10:03.773Z, principal=openidm-admin,
-            // status=SUCCESS, roles=[openidm-admin, openidm-authorized], action=authenticate, userid=openidm-admin,
-            // ip=127.0.0.1}
+
             logger.debug(
                     "Audit create called for {} with {}",
                     request.getResourcePath(),
@@ -312,7 +310,7 @@ public class AuditService implements RequestHandler {
 
             // Otherwise, let the event handlers set the response
             for (AuditEventHandler<?> auditEventHandler : auditEventHandlersForEvent) {
-                promise = auditEventHandler.publishEvent(topic, request.getContent());
+                promise = auditEventHandler.publishEvent(context, topic, request.getContent());
             }
             // TODO CAUD-24 last one wins!
             return promise;
@@ -380,7 +378,7 @@ public class AuditService implements RequestHandler {
             logger.debug("Audit query called for {}", request.getResourcePath());
             if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
                 final String topic = parseTopicFromPath(request.getResourcePathObject());
-                return getRegisteredHandler(queryHandlerName).queryEvents(topic, request, handler);
+                return getRegisteredHandler(queryHandlerName).queryEvents(context, topic, request, handler);
             }
             String error = String.format(
                     "The handler defined for queries, '%s', has not been registered to the audit service.",

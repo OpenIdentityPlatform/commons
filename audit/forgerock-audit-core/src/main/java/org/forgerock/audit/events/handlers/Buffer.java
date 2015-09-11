@@ -16,9 +16,7 @@
 package org.forgerock.audit.events.handlers;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;

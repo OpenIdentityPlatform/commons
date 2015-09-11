@@ -15,8 +15,6 @@
  */
 package org.forgerock.audit.events.handlers;
 
-import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
-
 import java.util.List;
 import java.util.Map;
 
@@ -59,10 +57,10 @@ public abstract class AuditEventHandlerBase<CFG extends EventHandlerConfiguratio
      * Implementing classes should override this method to optimize the publication.
      */
     @Override
-    public synchronized void publishEvents(List<TopicAndEvent> events) {
+    public synchronized void publishEvents(List<AuditEventTopicState> events) {
         try {
-            for (TopicAndEvent event : events) {
-                publishEvent(event.getTopic(), event.getEvent());
+            for (AuditEventTopicState event : events) {
+                publishEvent(event.getContext(), event.getTopic(), event.getEvent());
             }
         } catch (Exception e) {
             logger.error(

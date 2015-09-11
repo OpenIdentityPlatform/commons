@@ -23,6 +23,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -127,7 +128,7 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
+    public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
 
         try {
             final String syslogMessage = formatAsSyslogMessage(topic, event);
@@ -158,6 +159,7 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
 
     @Override
     public Promise<QueryResponse, ResourceException> queryEvents(
+            Context context,
             String topic,
             QueryRequest queryRequest,
             QueryResourceHandler queryResourceHandler) {
@@ -165,7 +167,7 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
+    public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         return new NotSupportedException("query operations are not supported").asPromise();
     }
 

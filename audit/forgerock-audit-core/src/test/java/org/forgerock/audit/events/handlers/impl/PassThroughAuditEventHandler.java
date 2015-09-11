@@ -16,11 +16,11 @@
 
 package org.forgerock.audit.events.handlers.impl;
 
-import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.*;
 
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
+import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
@@ -55,7 +55,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> publishEvent(String topic, JsonValue event) {
+    public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
         return newResourceResponse(
                         event.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
                         null,
@@ -68,7 +68,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      */
     @Override
     public Promise<QueryResponse, ResourceException> queryEvents(
-            String topic, QueryRequest query, QueryResourceHandler handler) {
+            Context context, String topic, QueryRequest query, QueryResourceHandler handler) {
         return newQueryResponse().asPromise();
     }
 
@@ -77,7 +77,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readEvent(String topic, String resourceId) {
+    public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         return ResourceExceptionsUtil.adapt(
                 new NotSupportedException("The " + RequestType.READ + " operation is not supported.")).asPromise();
     }

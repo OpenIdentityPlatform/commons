@@ -25,6 +25,8 @@ import static org.mockito.Mockito.*;
 import java.util.Arrays;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.http.Context;
+import org.forgerock.http.context.RootContext;
 import org.mockito.InOrder;
 import org.testng.annotations.Test;
 
@@ -38,16 +40,17 @@ public class BufferedAuditEventHandlerTest {
     @Test
     public void shouldFlushWhenSizeIsReachedAndNoTimer() throws Exception {
         AuditEventHandler<SomeHandlerConfig> handler = mock(AuditEventHandler.class);
+        Context context = new RootContext();
         BufferedAuditEventHandler<SomeHandlerConfig> bufferedHandler = new BufferedAuditEventHandler<>(handler);
         try {
             bufferedHandler.configure(config(0L, 3));
 
-            TopicAndEvent e1 = event(1);
-            TopicAndEvent e2 = event(2);
-            TopicAndEvent e3 = event(3);
-            bufferedHandler.publishEvent(e1.getTopic(), e1.getEvent());
-            bufferedHandler.publishEvent(e2.getTopic(), e2.getEvent());
-            bufferedHandler.publishEvent(e3.getTopic(), e3.getEvent());
+            AuditEventTopicState e1 = event(1, context);
+            AuditEventTopicState e2 = event(2, context);
+            AuditEventTopicState e3 = event(3, context);
+            bufferedHandler.publishEvent(context, e1.getTopic(), e1.getEvent());
+            bufferedHandler.publishEvent(context, e2.getTopic(), e2.getEvent());
+            bufferedHandler.publishEvent(context, e3.getTopic(), e3.getEvent());
 
             // wait for callback to publish the events
             Thread.yield();
@@ -66,15 +69,16 @@ public class BufferedAuditEventHandlerTest {
     public void shouldFlushWhenMaxTimeIsReached() throws Exception {
         long maxTimeInMillis = 100L;
         AuditEventHandler<SomeHandlerConfig> handler = mock(AuditEventHandler.class);
+        Context context = new RootContext();
         long startTime = System.currentTimeMillis();
         BufferedAuditEventHandler<SomeHandlerConfig> bufferedHandler = new BufferedAuditEventHandler<>(handler);
         try {
             bufferedHandler.configure(config(maxTimeInMillis, 1000));
 
-            TopicAndEvent e1 = event(1);
-            TopicAndEvent e2 = event(2);
-            bufferedHandler.publishEvent(e1.getTopic(), e1.getEvent());
-            bufferedHandler.publishEvent(e2.getTopic(), e2.getEvent());
+            AuditEventTopicState e1 = event(1, context);
+            AuditEventTopicState e2 = event(2, context);
+            bufferedHandler.publishEvent(context, e1.getTopic(), e1.getEvent());
+            bufferedHandler.publishEvent(context, e2.getTopic(), e2.getEvent());
 
             // wait for time-based flush
             long elapsedTime = 0;
@@ -96,27 +100,28 @@ public class BufferedAuditEventHandlerTest {
 
     @Test
     public void shouldFlushWhenMaxSizeIsReachedAndMaxTimeIsReached() throws Exception {
-        long maxTimeInMillis = 100L;
+        long maxTimeInMillis = 200L;
         AuditEventHandler<SomeHandlerConfig> handler = mock(AuditEventHandler.class);
+        Context context = new RootContext();
         BufferedAuditEventHandler<SomeHandlerConfig> bufferedHandler = new BufferedAuditEventHandler<>(handler);
         try {
             bufferedHandler.configure(config(maxTimeInMillis, 3));
 
             long startTime = System.currentTimeMillis();
 
-            TopicAndEvent e1 = event(1);
-            TopicAndEvent e2 = event(2);
-            TopicAndEvent e3 = event(3);
-            bufferedHandler.publishEvent(e1.getTopic(), e1.getEvent());
-            bufferedHandler.publishEvent(e2.getTopic(), e2.getEvent());
-            bufferedHandler.publishEvent(e3.getTopic(), e3.getEvent());
+            AuditEventTopicState e1 = event(1, context);
+            AuditEventTopicState e2 = event(2, context);
+            AuditEventTopicState e3 = event(3, context);
+            bufferedHandler.publishEvent(context, e1.getTopic(), e1.getEvent());
+            bufferedHandler.publishEvent(context, e2.getTopic(), e2.getEvent());
+            bufferedHandler.publishEvent(context, e3.getTopic(), e3.getEvent());
 
             // buffer should be flushed because max size is reached
             assertThat(bufferedHandler.isBufferEmpty()).isTrue();
 
             // add another event and wait for time-based flush
-            TopicAndEvent e4 = new TopicAndEvent(TOPIC, json(object(field("f4", "v4"))));
-            bufferedHandler.publishEvent(e4.getTopic(), e4.getEvent());
+            AuditEventTopicState e4 = new AuditEventTopicState(context, TOPIC, json(object(field("f4", "v4"))));
+            bufferedHandler.publishEvent(context, e4.getTopic(), e4.getEvent());
             long elapsedTime = 0;
             long timeout = maxTimeInMillis * 2;
             while (!bufferedHandler.isBufferEmpty() && elapsedTime < timeout) {
@@ -164,7 +169,7 @@ public class BufferedAuditEventHandlerTest {
     }
 
     /** Returns an event with a single field and value named after the provided number. */
-    private TopicAndEvent event(int number) {
-        return new TopicAndEvent(TOPIC, json(object(field("field" + number, "value" + number))));
+    private AuditEventTopicState event(int number, Context context) {
+        return new AuditEventTopicState(context, TOPIC, json(object(field("field" + number, "value" + number))));
     }
 }
