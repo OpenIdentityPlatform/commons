@@ -1,0 +1,45 @@
+{
+    "root": true,
+    "extends": "eslint-config-forgerock",
+    "env": {
+        "browser": true
+    },
+    "rules": {
+        /*
+         * --------------------------------------------------------------------------------
+         * ERROR RULES
+         *
+         * Violating these rules will cause the build to fail.
+         * --------------------------------------------------------------------------------
+         */
+
+        /*
+         * --------------------------------------------------------------------------------
+         * WARNING RULES
+         *
+         * These are rules that we want to turn into errors but can't yet because there are
+         * too many violations. As we fix the violations, we will transition them into
+         * error rules.
+         * --------------------------------------------------------------------------------
+         */
+
+        /**
+         * Require a capital letter for constructors.
+         *
+         * var f = Foo(); # bad
+         *
+         * var f = new Foo(); # good
+         */
+        "new-cap": [1, {
+            "capIsNew": false
+        }],
+        /**
+         * Multiple spaces not allowed.
+         *
+         * var fruit···=··"apples" # bad
+         *
+         * var fruit·=·"apples" # good
+         */
+        "no-multi-spaces": 1
+    }
+}
