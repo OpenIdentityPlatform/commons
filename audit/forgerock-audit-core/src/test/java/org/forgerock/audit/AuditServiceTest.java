@@ -343,7 +343,7 @@ public class AuditServiceTest {
         JsonValue additionalEventTypes = json(object(field("foo", "bar")));
         //given
         final AuditService auditService =
-                getAuditServiceWithAdditionalEventTypes(QUERY_HANDLER_NAME, additionalEventTypes);
+                getAuditServiceWithAdditionalEventTypes(QUERY_HANDLER_NAME, additionalEventTypes, json(object()));
 
         PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
         // Only interested about the foo events.
@@ -367,17 +367,46 @@ public class AuditServiceTest {
         assertThat(resource.getContent().asMap()).isEqualTo(createRequestAccess.getContent().asMap());
     }
 
+    @Test
+    public void testExtendingEventTopicWithNoAdditionalPropertiesDefined() throws Exception {
+        JsonValue extendedEventTopic = json(object(field("access", "bar")));
+        //given
+        final AuditService auditService =
+                getAuditServiceWithAdditionalEventTypes(QUERY_HANDLER_NAME, json(object()), extendedEventTopic);
+
+        PassThroughAuditEventHandler auditEventHandler = new PassThroughAuditEventHandler();
+        // Only interested about the foo events.
+        auditService.register(auditEventHandler, "pass-through", Collections.singleton("access"));
+
+        final CreateRequest createRequestAccess = makeCreateRequest("access");
+
+        //when
+        Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleCreate(new RootContext(), createRequestAccess);
+
+        //then
+        assertThat(promise)
+                .succeeded()
+                .withObject()
+                .isInstanceOf(ResourceResponse.class);
+
+        // TODO should use AssertJResourceResponseAssert
+        final ResourceResponse resource = promise.get();
+        assertThat(resource).isNotNull();
+        assertThat(resource.getContent().asMap()).isEqualTo(createRequestAccess.getContent().asMap());
+    }
+
     private AuditService getAuditService(String queryHandlerName) throws ResourceException {
-        return getAuditServiceWithAdditionalEventTypes(queryHandlerName, json(object()));
+        return getAuditServiceWithAdditionalEventTypes(queryHandlerName, json(object()), json(object()));
     }
 
     private AuditService getAuditServiceWithAdditionalEventTypes(
-            String queryHandlerName, JsonValue additionalEventTypes) throws ResourceException {
+            String queryHandlerName, JsonValue additionalEventTopics, JsonValue extendedEventTopics) throws ResourceException {
         AuditServiceConfiguration config = new AuditServiceConfiguration();
         config.setHandlerForQueries(queryHandlerName);
         config.setAvailableAuditEventHandlers(
                 asList("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler"));
-        AuditService auditService = new AuditService(json(object()), additionalEventTypes);
+        AuditService auditService = new AuditService(extendedEventTopics, additionalEventTopics);
         auditService.configure(config);
         return auditService;
     }

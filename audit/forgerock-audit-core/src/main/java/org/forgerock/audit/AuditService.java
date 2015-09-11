@@ -81,7 +81,8 @@ public class AuditService implements RequestHandler {
 
     private static final ObjectMapper MAPPER;
 
-    private static final JsonPointer SCHEMA_PROPERTIES_POINTER = new JsonPointer("/schema/properties");
+    private static final String SCHEMA = "schema";
+    private static final String PROPERTIES = "properties";
 
     static {
         final JsonFactory jsonFactory = new JsonFactory();
@@ -437,8 +438,8 @@ public class AuditService implements RequestHandler {
         for (String eventTypeName : extendedEventTypes.keys()) {
             if (auditEvents.containsKey(eventTypeName)) {
                 JsonValue coreEventType = auditEvents.get(eventTypeName);
-                JsonValue coreProperties = coreEventType.get(SCHEMA_PROPERTIES_POINTER);
-                JsonValue extendedProperties = extendedEventTypes.get(eventTypeName).get(SCHEMA_PROPERTIES_POINTER);
+                JsonValue coreProperties = coreEventType.get(SCHEMA).get(PROPERTIES);
+                JsonValue extendedProperties = extendedEventTypes.get(eventTypeName).get(SCHEMA).get(PROPERTIES);
 
                 for (String property : extendedProperties.keys()) {
                     if (coreProperties.isDefined(property)) {
