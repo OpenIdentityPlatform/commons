@@ -18,13 +18,13 @@ package org.forgerock.http.header;
 
 import static org.forgerock.http.header.HeaderUtil.parseSingleValuedHeader;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 import org.forgerock.http.protocol.Cookie;
 import org.forgerock.http.protocol.Header;
@@ -97,16 +97,22 @@ public class SetCookieHeader implements Header {
         }
     }
 
+    private static final String EXPIRES_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
+
+    private static SimpleDateFormat getDateFormatter() {
+        SimpleDateFormat formatter = new SimpleDateFormat(EXPIRES_DATE_FORMAT, Locale.ROOT);
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return formatter;
+    }
+
     private static Date parseDate(String s) {
         try {
-            return EXPIRES_DATE_FORMAT.parse(s);
+            return getDateFormatter().parse(s);
         } catch (ParseException e) {
             return null;
         }
     }
 
-    private static final DateFormat EXPIRES_DATE_FORMAT = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
-            Locale.ROOT);
     private final Cookie cookie;
 
     /**
@@ -138,7 +144,7 @@ public class SetCookieHeader implements Header {
         if (cookie.getName() != null) {
             sb.append(cookie.getName()).append("=").append(cookie.getValue());
             if (cookie.getExpires() != null) {
-                sb.append("; ").append("Expires").append("=").append(EXPIRES_DATE_FORMAT.format(cookie.getExpires()));
+                sb.append("; ").append("Expires").append("=").append(getDateFormatter().format(cookie.getExpires()));
             }
             if (cookie.getMaxAge() != null && cookie.getMaxAge() > 0) {
                 sb.append("; ").append("Max-Age").append("=").append(cookie.getMaxAge());

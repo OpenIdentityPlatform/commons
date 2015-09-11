@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 public class SetCookieHeaderTest {
 
     private static final Date EXPIRES_DATE = new Date(1441963573000L);
-    private static final String EXPIRES_DATE_STRING = "Fri, 11 Sep 2015 10:26:13 BST";
+    private static final String EXPIRES_DATE_STRING = "Fri, 11 Sep 2015 09:26:13 GMT";
 
     @Test
     public void shouldCreateSetCookieHeaderWithNameAndValue() {
