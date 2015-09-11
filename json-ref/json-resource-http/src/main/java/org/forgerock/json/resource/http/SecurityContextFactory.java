@@ -18,8 +18,8 @@ package org.forgerock.json.resource.http;
 
 import java.util.Map;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.AttributesContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.AttributesContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SecurityContext;

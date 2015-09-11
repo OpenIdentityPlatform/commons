@@ -16,13 +16,13 @@
 
 package org.forgerock.json.resource.http;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourceException;
 
 /**
  * A factory which is responsible for creating new request {@code Context}s for
  * each JSON request. The returned context must include a
- * {@link org.forgerock.http.context.RootContext} as its root and may include
+ * {@link org.forgerock.services.context.RootContext} as its root and may include
  * zero or more sub-contexts.
  * <p>
  * As an example, a context factory may return a context chain which includes

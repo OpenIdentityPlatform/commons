@@ -47,7 +47,7 @@ public interface QueryResourceHandler {
      * this method will be invoked 10 times, once for each matching resource.
      *
      * <p>Refer to
-     * {@link RequestHandler#handleQuery(org.forgerock.http.Context, QueryRequest, QueryResourceHandler)}
+     * {@link RequestHandler#handleQuery(org.forgerock.services.context.Context, QueryRequest, QueryResourceHandler)}
      * for information regarding the concurrency and the order in which events
      * are processed.</p>
      *

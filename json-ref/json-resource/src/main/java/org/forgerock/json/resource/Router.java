@@ -26,14 +26,14 @@ import static org.forgerock.json.resource.RouteMatchers.requestResourceApiVersio
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.routing.AbstractRouter;
 import org.forgerock.http.routing.ApiVersionRouterContext;
-import org.forgerock.http.routing.IncomparableRouteMatchException;
-import org.forgerock.http.routing.RouteMatcher;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.routing.AbstractRouter;
+import org.forgerock.services.routing.IncomparableRouteMatchException;
+import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.Promise;
 

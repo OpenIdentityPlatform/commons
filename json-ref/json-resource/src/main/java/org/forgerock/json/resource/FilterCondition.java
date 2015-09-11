@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * A condition which controls whether or not a filter will be invoked or not.
