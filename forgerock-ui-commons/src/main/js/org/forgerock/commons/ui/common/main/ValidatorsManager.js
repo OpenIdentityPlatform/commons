@@ -276,7 +276,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     };
 
     obj.formValidated = function(el) {
-        return el.find("[data-validation-status=error]").length === 0;
+        return el.find("[data-validation-status=error]:visible").length === 0;
     };
 
     // deprecated

@@ -185,6 +185,14 @@
                 "tryAgain": "Try Registering Again",
                 "return": "Return to Login Page"
             },
+            "kba" : {
+                "description": "The Security Question selected and corresponding answer provided by you will be used to help identify you in the event that you forget your password.",
+                "provideAnother": "Add another question",
+                "selectQuestion": "Select a security question",
+                "provideYourOwn": "Provide your own",
+                "customQuestion": "Custom Security Question",
+                "answer": "Security Answer"
+            },
             "userIdValidation" : "Enter the username or email address associated with your account. We will send you an email with a link that will allow you to reset your password.",
             "emailValidation" : "Enter your email address to proceed. We will send you an email with a link that will allow you to continue registering.",
             "send": "Send",

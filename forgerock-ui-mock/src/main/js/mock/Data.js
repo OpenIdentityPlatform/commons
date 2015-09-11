@@ -67,7 +67,7 @@
                     headers = { "Content-Type": "application/json;charset=UTF-8" };
                 switch (requestContent.token) {
                     case undefined:
-                        if (_.isObject(requestContent, "input") && _.isString(requestContent.input.mail)) {
+                        if (_.isObject(requestContent.input) && _.isString(requestContent.input.mail)) {
                             request.respond(
                                 200,
                                 headers,
@@ -104,7 +104,7 @@
                         }
                     break;
                     case "mockToken1":
-                        if (_.isObject(requestContent, "input") &&
+                        if (_.isObject(requestContent.input) &&
                             _.isString(requestContent.input.code) &&
                             requestContent.input.code === "12345") {
                                 request.respond(
@@ -143,7 +143,7 @@
                         }
                     break;
                     case "mockToken2":
-                        if (_.isObject(requestContent, "input") &&
+                        if (_.isObject(requestContent.input) &&
                             _.isString(requestContent.input.password)) {
                             request.respond(
                                 200,
@@ -222,7 +222,7 @@
                     headers = { "Content-Type": "application/json;charset=UTF-8" };
                 switch (requestContent.token) {
                     case undefined:
-                    if (_.isObject(requestContent, "input") && _.isString(requestContent.input.mail)) {
+                    if (_.isObject(requestContent.input) && _.isString(requestContent.input.mail)) {
                         request.respond(
                             200,
                             headers,
@@ -259,7 +259,7 @@
                     }
                 break;
                 case "mockToken1":
-                    if (_.isObject(requestContent, "input") &&
+                    if (_.isObject(requestContent.input) &&
                         _.isString(requestContent.input.code) &&
                         requestContent.input.code === "12345") {
                             request.respond(
@@ -267,7 +267,7 @@
                                 headers,
                                 JSON.stringify({
                                     "token": "mockToken2",
-                                    "type": "selfRegistration",
+                                    "type": "userDetails",
                                     "tag": "initial",
                                     "requirements": {
                                         "$schema": "http://json-schema.org/draft-04/schema#",
@@ -303,9 +303,113 @@
                     }
                 break;
                 case "mockToken2":
-                    if (_.isObject(requestContent, "input") &&
+                    if (_.isObject(requestContent.input) &&
                         _.isString(requestContent.input.userId) &&
-                        _.isObject(requestContent.input, "user")) {
+                        _.isObject(requestContent.input.user)) {
+                        request.respond(
+                            200,
+                            headers,
+                            JSON.stringify({
+                              "type": "kbaStage",
+                              "tag": "initial",
+                              "requirements": {
+                                "$schema": "http://json-schema.org/draft-04/schema#",
+                                "description": "Knowledge based questions",
+                                "type": "object",
+                                "required": [
+                                  "kba"
+                                ],
+                                "properties": {
+                                  "kba": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "object",
+                                      "oneOf": [
+                                        {
+                                          "$ref": "#/definitions/systemQuestion"
+                                        },
+                                        {
+                                          "$ref": "#/definitions/userQuestion"
+                                        }
+                                      ]
+                                    },
+                                    "questions": [
+                                      {
+                                        "id": "1",
+                                        "question": {
+                                          "en_GB": "What's your favorite colour?",
+                                          "fr": "Quelle est votre couleur préférée?",
+                                          "en": "What's your favorite color?"
+                                        }
+                                      },
+                                      {
+                                        "id": "2",
+                                        "question": {
+                                          "en": "Who was your first employer?"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                "definitions": {
+                                  "userQuestion": {
+                                    "description": "User Question",
+                                    "type": "object",
+                                    "required": [
+                                      "customQuestion",
+                                      "answer"
+                                    ],
+                                    "properties": {
+                                      "customQuestion": {
+                                        "description": "Question defined by the user",
+                                        "type": "string"
+                                      },
+                                      "answer": {
+                                        "description": "Answer to the question",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "additionalProperties": false
+                                  },
+                                  "systemQuestion": {
+                                    "description": "System Question",
+                                    "type": "object",
+                                    "required": [
+                                      "questionId",
+                                      "answer"
+                                    ],
+                                    "properties": {
+                                      "questionId": {
+                                        "description": "Id of predefined question",
+                                        "type": "string"
+                                      },
+                                      "answer": {
+                                        "description": "Answer to the referenced question",
+                                        "type": "string"
+                                      }
+                                    },
+                                    "additionalProperties": false
+                                  }
+                                }
+                              },
+                              "token": "mockToken3"
+                            })
+                        );
+                    } else {
+                        request.respond(
+                            400,
+                            headers,
+                            JSON.stringify({
+                                "code": 400,
+                                "reason": "Bad Request",
+                                "message": "Missing required input"
+                            })
+                        );
+                    }
+                break;
+                case "mockToken3":
+                    if (_.isObject(requestContent.input) &&
+                        _.isObject(requestContent.input.kba)) {
                         request.respond(
                             200,
                             headers,

@@ -53,6 +53,28 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             return new Handlebars.SafeString(result);
         });
 
+        /**
+         * @param {object} map Each key in the map is a locale, each value is a string in that locale
+         * @example
+            {{mapTranslate map}} where map is an object like so:
+            {
+                "en_GB": "What's your favorite colour?",
+                "fr": "Quelle est votre couleur préférée?",
+                "en": "What's your favorite color?"
+            }
+        */
+        Handlebars.registerHelper("mapTranslate", function(map) {
+            var fallback;
+            if (_.has(map, $.i18n.options.lng)) {
+                return new Handlebars.SafeString(map[$.i18n.options.lng]);
+            } else {
+                fallback = _.find($.i18n.options.fallbackLng, function (lng) {
+                    return _.has(map, lng);
+                });
+                return new Handlebars.SafeString(fallback);
+            }
+        });
+
         var locales = [],
             opts = {},
             nameSpace = options.nameSpace ? options.nameSpace : "translation";

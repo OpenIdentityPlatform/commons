@@ -25,11 +25,60 @@
 /*global define */
 
 define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
-    "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView"
-], function(AnonymousProcessView) {
+    "jquery",
+    "lodash",
+    "form2js",
+    "handlebars",
+    "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function($, _, form2js, Handlebars, AnonymousProcessView, ValidatorsManager) {
     var SelfRegistrationView = AnonymousProcessView.extend({
+        partials: [
+            "partials/form/_kbaItem.html"
+        ],
+        events: _.extend({
+            "click #kbaStage #provideAnother": "addKBAQuestion",
+            "change #kbaStage .kbaQuestions": "toggleCustomQuestion"
+        }, AnonymousProcessView.prototype.events),
         endpoint: "registration",
-        i18nBase: "common.user.selfRegistration"
+        i18nBase: "common.user.selfRegistration",
+        addKBAQuestion: function (e) {
+            e.preventDefault();
+            var nextIndex = this.$el.find("#kbaItems li").length,
+                newQuestion = $("<li>").html(
+                Handlebars.compile("{{> form/_kbaItem}}")(
+                    _.extend({index: nextIndex}, this.stateData)
+                )
+            );
+            this.$el.find("#kbaItems").append(newQuestion);
+            ValidatorsManager.bindValidators(this.$el);
+            ValidatorsManager.validateAllFields(this.$el);
+        },
+        toggleCustomQuestion: function (e) {
+            var questionValue = $(e.target).val(),
+                customQuestion = $(e.target).closest(".kbaSet").find(".custom-question");
+            if (questionValue === "custom") {
+                customQuestion.toggleClass("hidden", false);
+            } else {
+                customQuestion.toggleClass("hidden", true).find(":input").val("");
+            }
+            ValidatorsManager.validateAllFields(this.$el);
+        },
+        getFormContent: function () {
+            var $form = $(this.element).find("form");
+            if ($form.attr("id") === "kbaStage") {
+                return {
+                    "kba": _.map(form2js($form[0]).kba, function (kbaSet) {
+                        if (kbaSet.questionId === "custom") {
+                            delete kbaSet.questionId;
+                        }
+                        return kbaSet;
+                    })
+                };
+            } else {
+                return form2js($form[0]);
+            }
+        }
     });
 
     return new SelfRegistrationView();

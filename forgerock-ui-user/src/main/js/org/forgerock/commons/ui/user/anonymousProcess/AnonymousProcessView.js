@@ -63,8 +63,12 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
             i18n: {}
         },
 
+        getFormContent: function () {
+            return form2js($(this.element).find("form")[0]);
+        },
+
         formSubmit: function(event) {
-            var formContent = form2js($(this.element).find("form")[0]);
+            var formContent = this.getFormContent();
 
             event.preventDefault();
 
@@ -77,6 +81,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
 
         render: function(args, callback) {
             var params = Router.convertCurrentUrlToJSON().params;
+            this.stateData = {};
 
             if (!this.delegate || args[0] !== "/continue") {
                 this.setDelegate(this.endpoint, params.token);
@@ -119,21 +124,21 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
         restartProcess: function (e) {
             e.preventDefault();
             delete this.delegate;
+            delete this.stateData;
             EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, { route: Router.currentRoute });
         },
 
         renderProcessState: function (response) {
             var processStatePromise = $.Deferred(),
                 baseTemplateUrl = "templates/user/process/",
-                stateData,
-                loadGenericTemplate = function () {
+                loadGenericTemplate = function (stateData) {
                     UIUtils.fillTemplateWithData(
                         baseTemplateUrl + (_.has(response, "requirements") ? "GenericInputForm.html" : "GenericEndPage.html"),
                         stateData,
                         processStatePromise.resolve
                     );
                 },
-                attemptCustomTemplate = function () {
+                attemptCustomTemplate = function (stateData) {
                     UIUtils.fillTemplateWithData(
                         baseTemplateUrl + response.type + "-" + response.tag + ".html",
                         stateData,
@@ -146,31 +151,32 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                             if (typeof renderedTemplate === "string") {
                                 processStatePromise.resolve(renderedTemplate);
                             } else {
-                                loadGenericTemplate();
+                                loadGenericTemplate(stateData);
                             }
                         }
                     );
                 };
 
             if (_.has(response, "requirements")) {
-                stateData = _.extend({
+                this.stateData = _.extend({
                     requirements: response.requirements
                 }, this.data);
             } else {
-                stateData = _.extend({
+                this.stateData = _.extend({
                     status: response.status
                 }, this.data);
             }
 
             if (_.has(response, "type") && _.has(response, "tag")) {
-                attemptCustomTemplate();
+                attemptCustomTemplate(this.stateData);
             } else {
-                loadGenericTemplate();
+                loadGenericTemplate(this.stateData);
             }
 
             processStatePromise.then(_.bind(function (content) {
                 this.$el.find("#processContent").html(content);
                 ValidatorsManager.bindValidators(this.$el);
+                ValidatorsManager.validateAllFields(this.$el);
                 this.$el.find(":input:first").focus();
             }, this));
 
