@@ -23,8 +23,11 @@ import static org.mockito.Mockito.mock;
 
 import java.net.URI;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.protocol.Request;
+import org.forgerock.services.routing.IncomparableRouteMatchException;
+import org.forgerock.services.routing.RouteMatch;
+import org.forgerock.services.routing.RouteMatcher;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

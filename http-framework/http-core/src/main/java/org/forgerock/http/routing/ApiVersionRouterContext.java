@@ -18,8 +18,8 @@ package org.forgerock.http.routing;
 
 import static org.forgerock.http.routing.Version.version;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.AbstractContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.AbstractContext;
 import org.forgerock.json.JsonValue;
 
 /**

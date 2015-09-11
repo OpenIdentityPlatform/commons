@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http.context;
+package org.forgerock.services.context;
 
 import static java.util.Arrays.asList;
 
@@ -28,7 +28,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.encode.Base64;
 

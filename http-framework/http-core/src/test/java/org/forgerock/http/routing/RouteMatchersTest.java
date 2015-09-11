@@ -22,8 +22,8 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.http.protocol.Request;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;

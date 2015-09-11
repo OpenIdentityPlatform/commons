@@ -18,7 +18,10 @@ package org.forgerock.http.routing;
 
 import java.util.Objects;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.routing.IncomparableRouteMatchException;
+import org.forgerock.services.routing.RouteMatch;
+import org.forgerock.services.routing.RouteMatcher;
 
 /**
  * A {@link RouteMatcher} which routes requests using the resource API version

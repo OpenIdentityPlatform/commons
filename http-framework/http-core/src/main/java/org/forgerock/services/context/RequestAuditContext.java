@@ -14,14 +14,12 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.context;
+package org.forgerock.services.context;
 
-import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 
 /**
- * A context for audit information for an incoming request. Strictly speaking, this is independent
- * of the HTTP transport, but it is added here as it lives with the Context interface.
+ * A context for audit information for an incoming request.
  */
 public class RequestAuditContext extends AbstractContext {
     private static final String NAME = "requestAudit";

@@ -14,9 +14,9 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.routing;
+package org.forgerock.services.routing;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * Contains the result of routing to a particular route.

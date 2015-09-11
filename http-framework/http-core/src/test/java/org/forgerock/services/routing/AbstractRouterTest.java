@@ -14,14 +14,14 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.routing;
+package org.forgerock.services.routing;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.util.Pair;

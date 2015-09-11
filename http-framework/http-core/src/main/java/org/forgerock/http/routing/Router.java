@@ -20,12 +20,16 @@ import static org.forgerock.http.HttpApplication.LOGGER;
 import static org.forgerock.http.routing.RouteMatchers.getRemainingRequestUri;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
+import org.forgerock.services.routing.AbstractRouter;
+import org.forgerock.services.routing.IncomparableRouteMatchException;
+import org.forgerock.services.routing.RouteMatch;
+import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;

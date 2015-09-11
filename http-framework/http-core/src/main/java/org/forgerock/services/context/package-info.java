@@ -15,6 +15,8 @@
  */
 
 /**
- * {@link org.forgerock.http.Context} implementations.
+ * This package contains the {@link org.forgerock.services.context.Context} interface and various common protocol
+ * independent implementations. A detailed explanation of contexts and their use cases can be found in the class
+ * documentation for {@link org.forgerock.services.context.Context}.
  */
-package org.forgerock.http.context;
+package org.forgerock.services.context;

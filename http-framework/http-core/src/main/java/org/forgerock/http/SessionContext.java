@@ -15,26 +15,27 @@
  *
  */
 
-package org.forgerock.http.context;
+package org.forgerock.http;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.Session;
 import org.forgerock.json.JsonValue;
+import org.forgerock.services.context.AbstractContext;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 
 /**
  * A {@code SessionContext} is a mechanism for maintaining state between components when processing a successive
- * requests from the same logical client or end-user. For example, a filter may store information about the end-user in
- * the {@code SessionContext} which can then be accessed in subsequent filters and handlers in order to perform access
- * control decisions, routing decisions, etc.
+ * requests from the same logical client or end-user. For example, a filter may store information about the end-user
+ * in the {@code SessionContext} which can then be accessed in subsequent filters and handlers in order to perform
+ * access control decisions, routing decisions, etc.
  * <p/>
- * Unlike an {@link AttributesContext}, a {@code SessionContext} has a life-cycle that spans successive requests from
- * the same client, although its content may be lost after periods of inactivity. The exact details of how a "session"
- * is associated with a client, how it is persisted between requests, and if and when it is expired are the
- * responsibility of the {@link Session} and {@link org.forgerock.http.SessionManager SessionManager} implementation.
+ * Unlike an {@link org.forgerock.services.context.AttributesContext AttributesContext}, a {@code SessionContext} has
+ * a life-cycle that spans successive requests from the same client, although its content may be lost after periods
+ * of inactivity. The exact details of how a "session" is associated with a client, how it is persisted between
+ * requests, and if and when it is expired are the responsibility of the {@link Session} and
+ * {@link org.forgerock.http.SessionManager SessionManager} implementation.
  * <p/>
- * Use an {@link AttributesContext} for transferring transient state between components when processing a single
- * request.
+ * Use an {@link org.forgerock.services.context.AttributesContext AttributesContext} for transferring transient
+ * state between components when processing a single request.
  */
 public final class SessionContext extends AbstractContext {
 

@@ -14,31 +14,23 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.http.context;
+package org.forgerock.services.context;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
 import java.lang.reflect.Constructor;
 
-import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
 /**
- * A base implementation of the context associated with a request currently
- * being processed by a {@code Handler}. A request context can be used to
- * query state information about the request. Implementations may provide
- * additional information, time-stamp information, HTTP headers, etc. Contexts
- * are linked together to form a parent-child chain of context, whose root is a
- * {@link RootContext}.
- * <p>
- * Derived Contexts <b>MUST</b> support persistence by providing
+ * A base implementation of the {@link Context} interface. Derived Contexts <b>MUST</b> support persistence by providing
  * <ul>
  * <li>a <b>public</b> constructor having the same declaration as
  * {@link #AbstractContext(JsonValue, ClassLoader)}</li>
  * <li>a <b>public</b> method having the same declaration as
- * {@link org.forgerock.http.Context#toJsonValue}</li>
+ * {@link Context#toJsonValue}</li>
  * </ul>
  * See the documentation for more details.
  * <p>
@@ -56,7 +48,6 @@ import org.forgerock.util.Reject;
  * </pre>
  */
 public abstract class AbstractContext implements Context {
-
 
     // Persisted attribute names.
     private static final String ATTR_CLASS = "class";
@@ -232,7 +223,7 @@ public abstract class AbstractContext implements Context {
             return null;
         } catch (final Exception e) {
             throw new IllegalArgumentException(
-                    "Unable to instantiate Context implementation class '" + clazz.getName().toString() + "'", e);
+                    "Unable to instantiate Context implementation class '" + clazz.getName() + "'", e);
         }
     }
 

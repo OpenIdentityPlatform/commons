@@ -14,9 +14,9 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.routing;
+package org.forgerock.services.routing;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * A matcher for evaluating whether a route matches the incoming request.
@@ -27,8 +27,6 @@ import org.forgerock.http.Context;
  * <p>Implementing classes must implement both {@link #equals(Object)} and
  * {@link #hashCode()} methods as each instance of a {@code RouteMatcher}
  * will be used as the key for a route.</p>
- *
- * @see UriRouteMatcher
  *
  * @param <R> The type of the request.
  */

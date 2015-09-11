@@ -17,7 +17,6 @@
 package org.forgerock.http.routing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.MapEntry.entry;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -25,11 +24,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
+import org.forgerock.services.routing.IncomparableRouteMatchException;
+import org.forgerock.services.routing.RouteMatch;
+import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -49,32 +51,6 @@ public class RouterTest {
 
         context = mock(Context.class);
         request = new Request();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    public void creatingRouterFromExistingRouterShouldCopyAllRoutes() {
-
-        //Given
-        RouteMatcher<Request> routeOneMatcher = mock(RouteMatcher.class);
-        RouteMatcher<Request> routeTwoMatcher = mock(RouteMatcher.class);
-        Handler routeOneHandler = mock(Handler.class);
-        Handler routeTwoHandler = mock(Handler.class);
-
-        router.addRoute(routeOneMatcher, routeOneHandler);
-        router.addRoute(routeTwoMatcher, routeTwoHandler);
-
-        Handler defaultRouteHandler = mock(Handler.class);
-        router.setDefaultRoute(defaultRouteHandler);
-
-        //When
-        Router newRouter = new Router(router);
-
-        //Then
-        assertThat(newRouter.getRoutes()).contains(
-                entry(routeOneMatcher, routeOneHandler),
-                entry(routeTwoMatcher, routeTwoHandler));
-        assertThat(newRouter.getDefaultRoute()).isEqualTo(defaultRouteHandler);
     }
 
     @Test

@@ -14,16 +14,34 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.services.context;
 
 import org.forgerock.json.JsonValue;
 
 /**
- * The context associated with a request currently being processed by a {@code Handler}.
- * A request context can be used to query state information
- * about the request. Implementations may provide additional information,
- * time-stamp information, HTTP headers, etc. Contexts are linked together to
- * form a parent-child chain of context, whose root is a {@link org.forgerock.http.context.RootContext}.
+ * Type-safe contextual information associated with the processing of a request in an application.
+ * Contexts are linked together in a stack with a {@link RootContext} at the bottom of the stack. Each context
+ * maintains a reference to its parent context which can be accessed using the {@link #getParent()}} method.
+ * Context implementations may provide information about the client, the end-user, auditing information, routing
+ * decisions, etc. While contexts are arranged in a stack, application code will usually access contexts using the
+ * {@link #asContext(Class)} method:
+ *
+ * <pre>
+ *     Context context = ...; // Opaque reference to the context stack
+ *
+ *     String remoteHost = context.asContext(ClientContext.class).getRemoteHost();
+ *     context.asContext(AttributesContext.class).getAttributes().put("key", "value");
+ * </pre>
+ *
+ * Alternatively, scripted applications will usually access contexts by name:
+ *
+ * <pre>
+ *     var remoteHost = context.client.remoteHost;
+ *     context.attributes.key = "value";
+ * </pre>
+ *
+ * Context implementations should inherit from {@link AbstractContext} and ensure that they can be serialized to and
+ * from JSON.
  */
 public interface Context {
 

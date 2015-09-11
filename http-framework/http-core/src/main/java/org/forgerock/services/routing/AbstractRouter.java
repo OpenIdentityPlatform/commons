@@ -14,40 +14,27 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.routing;
+package org.forgerock.services.routing;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Pair;
 
 /**
- * A router which routes requests based on route matchers. Each route is
- * comprised of a {@link RouteMatcher route matcher} and a corresponding
- * handler, when routing a request the router will call
- * {@link RouteMatcher#evaluate(Context, Object)} for each registered route
- * and use the returned {@link RouteMatch} to determine which route best
- * matches the request.
- *
- * <p>Routes may be added and removed from a router as follows:</p>
- *
- * <pre>
- * Handler users = ...;
- * Router router = new Router();
- * RouteMatcher routeOne = new UriRouteMatcher(EQUALS, &quot;users&quot;);
- * RouteMatcher routeTwo = new UriRouteMatcher(EQUALS, &quot;users/{userId}&quot;);
- * router.addRoute(routeOne, users);
- * router.addRoute(routeTwo, users);
- *
- * // Deregister a route.
- * router.removeRoute(routeOne, routeTwo);
- * </pre>
- *
- * @see Router
- * @see UriRouteMatcher
- * @see RouteMatchers
+ * An abstract base class for implementing routers. Routers are common in applications which need to process incoming
+ * requests based on varying criteria such as the target endpoint, API version expectations, client criteria (e.g.
+ * source address), etc. This base class is designed to be protocol and framework independent. Frameworks should
+ * sub-class an abstract router in order to provide framework specific behavior.
+ * <p/>
+ * Generally speaking a router comprises of a series of routes, each of which is composed of a {@link RouteMatcher}
+ * and a handler (H). When a request (R) is received the router invokes each {@code RouteMatcher} to see if it
+ * matches and then invokes the associated handler if it is the best match.
+ * <p/>
+ * Concrete implementations of {@code AbstractRouter} existing in both {@link org.forgerock.http.routing.Router CHF}
+ * and CREST.
  *
  * @param <T> The type of the router.
  * @param <R> The type of the request.
@@ -59,7 +46,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H>, R, H> {
     private volatile H defaultRoute;
 
     /**
-     * Creates a new router with no routes defined.
+     * Creates a new abstract router with no routes defined.
      */
     protected AbstractRouter() {
     }
@@ -78,9 +65,9 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H>, R, H> {
     }
 
     /**
-     * Returns this {@code AbstractUriRouter} instance, typed correctly.
+     * Returns this {@code AbstractRouter} instance, typed correctly.
      *
-     * @return This {@code AbstractUriRouter} instance.
+     * @return This {@code AbstractRouter} instance.
      */
     protected abstract T getThis();
 
@@ -144,7 +131,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H>, R, H> {
      *
      * @return The handler to be used as the default route.
      */
-    public final H getDefaultRoute() {
+    final H getDefaultRoute() {
         return defaultRoute;
     }
 

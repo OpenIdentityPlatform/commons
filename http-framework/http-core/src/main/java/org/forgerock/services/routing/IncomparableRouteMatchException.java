@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.http.routing;
+package org.forgerock.services.routing;
 
 /**
  * An exception which is thrown when two incompatible {@link RouteMatch}

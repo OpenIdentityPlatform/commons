@@ -18,11 +18,13 @@ package org.forgerock.http.routing;
 
 import java.util.List;
 
-import org.forgerock.http.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.util.Paths;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.routing.RouteMatch;
+import org.forgerock.services.routing.RouteMatcher;
 
 /**
  * A utility class that contains methods for creating route matchers.

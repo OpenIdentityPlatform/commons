@@ -24,7 +24,7 @@ import java.io.IOException;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;

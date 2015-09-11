@@ -14,12 +14,11 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.http.context;
+package org.forgerock.services.context;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.forgerock.http.Context;
 import org.forgerock.json.JsonValue;
 
 /**
