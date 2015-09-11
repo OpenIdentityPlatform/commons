@@ -26,6 +26,7 @@
 
 
 define([
+    "backbone",
     "bootstrap-dialog",
     "sinon",
     "org/forgerock/commons/ui/common/util/Base64",
@@ -40,7 +41,7 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "./getLoggedUser"
-], function (BootstrapDialog, sinon, Base64, CookieHelper, Configuration, Constants, Dialog, EventManager, Mime, ModuleLoader, ObjectUtil, Router,  UIUtils, getLoggedUser) {
+], function (Backbone, BootstrapDialog, sinon, Base64, CookieHelper, Configuration, Constants, Dialog, EventManager, Mime, ModuleLoader, ObjectUtil, Router,  UIUtils, getLoggedUser) {
     return {
         executeAll: function (server, parameters) {
 
@@ -71,10 +72,10 @@ define([
                                 $("#password", loginView.$el).val(parameters.password).trigger('keyup');
 
                                 EventManager.whenComplete(Constants.EVENT_LOGIN_REQUEST).always(function () {
-                                    QUnit.ok(Configuration.loggedUser.userName === parameters.username, "Logged-in user information saved in configuration scope");
+                                    QUnit.ok(Configuration.loggedUser.get("userName") === parameters.username, "Logged-in user information saved in configuration scope");
 
                                     EventManager.whenComplete(Constants.EVENT_CHANGE_VIEW).always(function () {
-                                        QUnit.equal("#profile/", window.location.hash, "After login, should be on the profile page");
+                                        QUnit.equal("#profile/details", window.location.hash, "After login, should be on the profile page");
                                         QUnit.start();
                                     });
                                 });
@@ -99,15 +100,15 @@ define([
 
                 $("#qunit-fixture").append("<div id='menu'></div>");
 
-                Configuration.loggedUser = {
+                Configuration.loggedUser = new Backbone.Model({
                     "userName": "test",
                     "roles": [
                         "ui-user"
                     ]
-                };
+                });
 
                 nav.init(function () {
-                    QUnit.equal($("#user_name").text(), Configuration.loggedUser.userName, "Login Bar 'user_name' reflects logged user");
+                    QUnit.equal($("#user_name").text(), Configuration.loggedUser.get("userName"), "Login Bar 'user_name' reflects logged user");
                     QUnit.ok($("#logout_link").length, "Log out link available");
 
                     $.when(
@@ -327,41 +328,47 @@ define([
             });
 
 
-            QUnit.test("AbstractDelegate - getDifferences (CUI-53)", function () {
-                var AbstractDelegate = require("org/forgerock/commons/ui/common/main/AbstractDelegate"),
-                    abTest = new AbstractDelegate(""),
-                    differences;
+            QUnit.asyncTest("AbstractDelegate - getDifferences (CUI-53)", function () {
+                ModuleLoader.load("org/forgerock/commons/ui/common/main/AbstractDelegate").then(function (AbstractDelegate) {
+                    var abTest = new AbstractDelegate(""),
+                        differences;
 
-                differences = abTest.getDifferences({"a": "b"}, {"a": "b"});
-                QUnit.equal(differences.length, 0, "No differences for equal, simple objects");
+                    differences = abTest.getDifferences({"a": "b"}, {"a": "b"});
+                    QUnit.equal(differences.length, 0, "No differences for equal, simple objects");
 
-                differences = abTest.getDifferences({"a": "b"}, {"a": "c"});
-                QUnit.ok(differences.length === 1 && differences[0].value === 'c', "One difference found for trivial change");
+                    differences = abTest.getDifferences({"a": "b"}, {"a": "c"});
+                    QUnit.ok(differences.length === 1 && differences[0].value === 'c', "One difference found for trivial change");
 
-                differences = abTest.getDifferences({"a": ["b"]}, {"a": ["b"]});
-                QUnit.equal(differences.length, 0, "No differences for equal complex objects");
+                    differences = abTest.getDifferences({"a": ["b"]}, {"a": ["b"]});
+                    QUnit.equal(differences.length, 0, "No differences for equal complex objects");
+
+                    QUnit.start();
+                });
             });
 
-            QUnit.test("AbstractDelegate - patchEntity (CUI-54)", function () {
-                var AbstractDelegate = require("org/forgerock/commons/ui/common/main/AbstractDelegate"),
-                    abTest = new AbstractDelegate(""),
-                    stub = sinon.stub(abTest, "serviceCall", function (params) {
-                        return JSON.parse(params.data);
-                    }),
-                    patchDef = [{"field": "/abc", "operation": "replace", "value": "test"}],
+            QUnit.asyncTest("AbstractDelegate - patchEntity (CUI-54)", function () {
+                ModuleLoader.load("org/forgerock/commons/ui/common/main/AbstractDelegate").then(function (AbstractDelegate) {
+                    var abTest = new AbstractDelegate(""),
+                        stub = sinon.stub(abTest, "serviceCall", function (params) {
+                            return JSON.parse(params.data);
+                        }),
+                        patchDef = [{"field": "/abc", "operation": "replace", "value": "test"}],
+                        response = abTest.patchEntity({"id": 1, "rev": 1}, patchDef);
+
+                    QUnit.equal(response[0].field, "/abc", "Field not changed when using proper JSON Pointer");
+
+                    patchDef = [{"field": "abc", "operation": "replace", "value": "test"}];
                     response = abTest.patchEntity({"id": 1, "rev": 1}, patchDef);
+                    QUnit.equal(response[0].field, "/abc", "Field changed to proper JSON Pointer");
 
-                QUnit.equal(response[0].field, "/abc", "Field not changed when using proper JSON Pointer");
+                    patchDef = [{"field": "ab/c", "operation": "replace", "value": "test"}];
+                    response = abTest.patchEntity({"id": 1, "rev": 1}, patchDef);
+                    QUnit.equal(response[0].field, "/ab/c", "Field changed to proper JSON Pointer");
 
-                patchDef = [{"field": "abc", "operation": "replace", "value": "test"}];
-                response = abTest.patchEntity({"id": 1, "rev": 1}, patchDef);
-                QUnit.equal(response[0].field, "/abc", "Field changed to proper JSON Pointer");
+                    stub.restore();
+                    QUnit.start();
+                });
 
-                patchDef = [{"field": "ab/c", "operation": "replace", "value": "test"}];
-                response = abTest.patchEntity({"id": 1, "rev": 1}, patchDef);
-                QUnit.equal(response[0].field, "/ab/c", "Field changed to proper JSON Pointer");
-
-                stub.restore();
             });
 
             QUnit.asyncTest("Data scope not shared between views (CUI-57)", function () {

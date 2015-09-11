@@ -30,86 +30,118 @@
  * @author Eugenia Sergueeva
  */
 
-define("org/forgerock/mock/ui/common/main/LocalStorage", function () {
+define("org/forgerock/mock/ui/common/main/LocalStorage",[
+    "underscore"
+], function (_) {
     var mockPrefix = 'forgerock-mock-';
 
     function isLocalStorageSupported() {
         return typeof localStorage !== 'undefined';
     }
 
-    return isLocalStorageSupported() ? {
-        /**
-         * Adds data.
-         *
-         * @param key
-         * @param data
-         * @returns {Object} newly added data
-         */
-        add: function (key, data) {
-            if (!this.get(key)) {
-                console.log('Adding item to localStorage: ' + data);
-                localStorage.setItem(mockPrefix + key, JSON.stringify(data));
-                return key;
-            }
-
-            return null;
-        },
-
-        /**
-         * Patches data.
-         *
-         * @param key
-         * @param data
-         * @returns {Object} patched data
-         */
-        patch: function (key, data) {
-            var item = this.get(key),
-                dataLength = data.length,
-                i;
-
-            if (item) {
-                for (i = 0; i < dataLength; i++) {
-                    item[data[i].field] = data[i].value;
+    if (isLocalStorageSupported()) {
+        return {
+            /**
+             * Adds data.
+             *
+             * @param key
+             * @param data
+             * @returns {Object} newly added data
+             */
+            add: function (key, data) {
+                if (!this.get(key)) {
+                    console.log('Adding item to localStorage: ' + data);
+                    localStorage.setItem(mockPrefix + key, JSON.stringify(data));
+                    return key;
                 }
-                localStorage.setItem(mockPrefix + key, JSON.stringify(item));
+
+                return null;
+            },
+
+            /**
+             * Applies a patch definition object to an item in localstorage
+             *
+             * @param key
+             * @param data
+             * @returns {Object} patched data
+             */
+            patch: function (key, data) {
+                var item = this.get(key),
+                    dataLength = data.length,
+                    i,
+                    node,
+                    pathParts;
+
+                if (item) {
+
+                    _.each(data, function (patchEntry) {
+
+                        pathParts = _.filter(patchEntry.field.split('/'), function (part) {
+                            return part.length > 0;
+                        });
+
+                        node = item;
+
+                        _.each(pathParts, function (part, index) {
+                            if (index !== (pathParts.length-1)) {
+                                node = node[part];
+                            } else if (index === (pathParts.length-1)) {
+                                if (patchEntry.operation === "add" || patchEntry.operation === "replace") {
+                                    node[part] = patchEntry.value;
+                                } else if (patchEntry.operation === "remove") {
+                                    delete node[part];
+                                }
+                            }
+                        });
+
+                    });
+
+                    localStorage.setItem(mockPrefix + key, JSON.stringify(item));
+                }
+                return item;
+            },
+
+            /**
+             * Gets data by key.
+             *
+             * @param key
+             * @returns {Object}
+             */
+            get: function (key) {
+                return JSON.parse(localStorage.getItem(mockPrefix + key));
+            },
+
+            /**
+             * Removes data by key.
+             *
+             * @param key
+             * @returns {boolean} whether data was removed
+             */
+            remove: function (key) {
+                return delete localStorage[mockPrefix + key];
             }
-            return item;
-        },
+        };
 
-        /**
-         * Gets data by key.
-         *
-         * @param key
-         * @returns {Object}
-         */
-        get: function (key) {
-            return JSON.parse(localStorage.getItem(mockPrefix + key));
-        },
+    } else {
 
-        /**
-         * Removes data by key.
-         *
-         * @param key
-         * @returns {boolean} whether data was removed
-         */
-        remove: function (key) {
-            return delete localStorage[mockPrefix + key];
-        }
-    } : {
-        add: function () {
-            console.log('LocalStorage is not supported');
-        },
+         return {
+            add: function () {
+                console.log('LocalStorage is not supported');
+            },
 
-        patch: function () {
-            console.log('LocalStorage is not supported');
-        },
+            patch: function () {
+                console.log('LocalStorage is not supported');
+            },
 
-        get: function () {
-            console.log('LocalStorage is not supported');
-        },
+            get: function () {
+                console.log('LocalStorage is not supported');
+            },
 
-        remove: function () {
-            console.log('LocalStorage is not supported');
-        }
-    };
+            remove: function () {
+                console.log('LocalStorage is not supported');
+            }
+        };
+
+    }
+
 });

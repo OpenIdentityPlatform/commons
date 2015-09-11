@@ -22,63 +22,76 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global window, define, $, _, document, console */
+/*global define, document */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/commons/ui/user/profile/UserProfileView", [
+    "jquery",
+    "underscore",
     "form2js",
     "js2form",
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/util/UIUtils",
-    "UserDelegate",
-    "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/commons/ui/common/components/Navigation",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/components/ChangesPending",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/components/ChangesPending"
+    "org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "bootstrap"
+], function($, _, form2js, js2form,
+    AbstractView,
+    ChangesPending,
+    Configuration,
+    ConfirmPasswordDialog,
+    Constants,
+    EventManager,
+    Router,
+    ValidatorsManager) {
 
-], function(form2js, js2form, AbstractView, validatorsManager, uiUtils, userDelegate, router, navigation, eventManager, constants, conf, ChangesPending) {
     var UserProfileView = AbstractView.extend({
         template: "templates/user/UserProfileTemplate.html",
-        baseTemplate: "templates/common/DefaultBaseTemplate.html",
-        delegate: userDelegate,
+        partials: [
+            "partials/form/_basicInput.html",
+            "partials/form/_basicSaveReset.html"
+        ],
         events: {
-            "click #changeSecurity": "changeSecurity",
-            "click input[name=saveButton]": "formSubmit",
-            "click input[name=resetButton]": "reloadData",
+            "click input[type=submit]": "formSubmit",
+            "click input[type=reset]": "resetForm",
+            "click a[role=tab]": "updateRoute",
+            "shown.bs.tab": "focusInput",
             "onValidate": "onValidate",
-            "change input": "checkChanges",
-            "change select": "checkChanges"
+            "change :input": "checkChanges"
         },
 
-        data:{},
-
-        changeSecurity: function() {
-            eventManager.sendEvent(constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG);
+        focusInput: function (e) {
+            $($(e.target).attr("href")).find(":input:not([readonly]):first").focus();
         },
 
-        submit: function(){
-            this.delegate.updateUser(conf.loggedUser, this.data, _.bind(function(newUserData) {
-                this.changesPendingWidget.saveChanges();
-                if (_.has(newUserData, "_rev")) {
-                    this.data._rev = newUserData._rev;
-                }
-                $.extend(conf.loggedUser, this.data);
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-            }, this ),
-            _.bind(function(e) {
-                console.log('errorCallback', e.responseText);
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
-                this.reloadData();
-            }, this));
+        updateRoute: function (e) {
+            var tabPane = $($(e.target).attr("href")),
+                form = tabPane.find("form"),
+                tabRoute = form.attr("id");
+
+            EventManager.sendEvent(Constants.ROUTE_REQUEST, {routeName: "profile", args: [tabRoute], trigger: false});
+        },
+
+        submit: function(formId, formData) {
+            Configuration.loggedUser.save(formData, {patch: true}).then(
+                _.bind(function() {
+                    this.changesPendingWidgets[formId].saveChanges();
+                    this.data.user = Configuration.loggedUser.toJSON();
+                    this.reloadFormData(document.getElementById(formId));
+                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
+                }, this),
+                _.bind(function(e) {
+                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
+                }, this)
+            );
         },
 
         checkChanges: function(e) {
-            this.changesPendingWidget.makeChanges({ loggedUser: this.getFormData() });
+            var form = $(e.target).closest("form");
+            this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: form2js(form[0], ".", false) });
         },
 
         formSubmit: function(event) {
@@ -86,66 +99,81 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             event.preventDefault();
             event.stopPropagation();
 
-            var _this = this,
-                changedProtected = [];
+            var changedProtected = [],
+                form = $(event.target).closest("form"),
+                formData = form2js(form[0], ".", false);
 
-            if (validatorsManager.formValidated(this.$el)) {
+            if (ValidatorsManager.formValidated(form)) {
 
-                this.data = this.getFormData();
-
-                _.each(conf.globalData.protectedUserAttributes, function(attr){
-                    if(_this.data[attr] && conf.loggedUser[attr] !== _this.data[attr]){
-                        changedProtected.push(" "+_this.$el.find("label[for="+attr+"]").text());
-                    }
-                });
+                changedProtected = _.chain(Configuration.loggedUser.getProtectedAttributes())
+                    .filter(function(attr) {
+                        return _.has(formData, attr) && Configuration.loggedUser.get(attr) !== formData[attr];
+                    }, this)
+                    .map(function (attr) {
+                        return this.$el.find("label[for=input-"+attr+"]").text();
+                    }, this)
+                    .value();
 
                 if (changedProtected.length === 0) {
-                    this.submit();
+                    this.submit(form.attr("id"), formData);
                 } else {
-                    this.data.changedProtected = changedProtected;
-                    eventManager.sendEvent(constants.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG, "ConfirmPasswordDialog");
+                    ConfirmPasswordDialog.render(changedProtected, _.bind(function (currentPassword) {
+                        Configuration.loggedUser.setCurrentPassword(currentPassword);
+                        this.submit(form.attr("id"), formData);
+                    }, this));
                 }
 
             }
-        },
-
-        getFormData: function() {
-            var data = form2js(this.el, '.', false);
-
-            // buttons will be included in this structure, so remove those.
-            _.each(data, function (value, key, list) {
-                if (this.$el.find("input[name=" + key + "]").hasClass('btn')) {
-                    delete data[key];
-                }
-            }, this);
-
-            return data;
         },
 
         render: function(args, callback) {
+            var tabName = args[0] || "details";
+
+            this.data.user = Configuration.loggedUser.toJSON();
+
             this.parentRender(function() {
-                validatorsManager.bindValidators( this.$el, this.delegate.getUserResourceName(conf.loggedUser), _.bind(function () {
-                    this.reloadData();
-                    this.changesPendingWidget = ChangesPending.watchChanges({
-                        element: this.$el.find(".user-profile-changes-pending"),
-                        watchedObj: { loggedUser: this.getFormData() },
-                        watchedProperties: ["loggedUser"]
+                var selectedTabId = this.$el.find('form#'+tabName).closest(".tab-pane").attr("id"),
+                    selectedTab = this.$el.find("ul.nav-tabs a[href='#"+selectedTabId+"']");
+
+                this.loadAllFormData();
+
+                selectedTab.tab('show');
+
+                this.changesPendingWidgets = {};
+
+                _.each(this.$el.find("form"), function (form) {
+
+                    ValidatorsManager.bindValidators($(form));
+                    ValidatorsManager.validateAllFields($(form));
+
+                    this.changesPendingWidgets[$(form).attr('id')] = ChangesPending.watchChanges({
+                        element: $(".changes-pending", form),
+                        watchedObj: { subform: form2js(form, ".", false) },
+                        watchedProperties: ["subform"],
+                        alertClass: "alert-warning alert-sm"
                     });
-                    if (callback) {
-                        callback();
-                    }
-                }, this ));
+                }, this);
+
+                this.$el.find("#" + selectedTabId).find(":input:not([readonly]):first").focus();
+
+                if (callback) {
+                    callback();
+                }
             });
         },
 
-        reloadData: function() {
-            js2form(this.$el.find("#userProfileForm")[0], conf.loggedUser);
-            this.$el.find("input[name=saveButton]").val($.t("common.form.update"));
-            this.$el.find("input[name=resetButton]").val($.t("common.form.reset"));
-            validatorsManager.validateAllFields(this.$el);
-            if (this.changesPendingWidget) {
-                this.changesPendingWidget.makeChanges({ loggedUser: this.getFormData() });
-            }
+        reloadFormData: function (form) {
+            $("input[type=password]", form).val("");
+            js2form(form, this.data.user);
+        },
+        resetForm: function (e) {
+            e.preventDefault();
+            var form = this.$el.find(e.target).closest("form");
+            this.reloadFormData(form[0]);
+            this.checkChanges(e);
+        },
+        loadAllFormData: function() {
+            _.each(this.$el.find("form"), this.reloadFormData, this);
         }
     });
 

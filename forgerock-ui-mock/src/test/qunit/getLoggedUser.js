@@ -25,9 +25,9 @@
 /*global define */
 
 
-define(function () {
+define(["org/forgerock/mock/ui/user/UserModel"], function (UserModel) {
     return function () {
-        return {
+        UserModel.set({
             "_id": "test",
             "_rev": "1",
             "component": "mock/repo/internal/user",
@@ -41,6 +41,8 @@ define(function () {
             "givenName": "Jack",
             "sn": "White",
             "mail": "white@test.com"
-        };
+        });
+        UserModel.hideAttribute("password");
+        return UserModel;
     };
 });

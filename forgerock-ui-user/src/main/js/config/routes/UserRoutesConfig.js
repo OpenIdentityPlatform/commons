@@ -29,13 +29,14 @@ define("config/routes/UserRoutesConfig", [
 ], function() {
     //definitions for views here are generic
     //the actual path to each view is defined in config/AppConfiguration.js
-    //view files are loaded when the GenericRouteInterfaceMap module is initialized
+    //view files are mapped aliases registered within requirejs
     var obj = {
         "profile": {
             view: "UserProfileView",
             role: "ui-user",
-            url: "profile/" ,
-            forceUpdate: true
+            url: /profile\/(.*)/,
+            pattern: "profile/?",
+            defaults: ["details"]
         },
         "passwordReset": {
             view: "PasswordResetView",
@@ -50,12 +51,6 @@ define("config/routes/UserRoutesConfig", [
             pattern: "register??",
             argumentNames: ["realm", "additionalParameters"],
             defaults: ["/",""]
-        },
-        "changeSecurityData": {
-            base: "profile",
-            view: "ChangeSecurityDataDialog",
-            role: "ui-user,ui-admin",
-            url: "profile/change_security_data/"
         },
         "examplesPage" : {
             view: "org/forgerock/mock/ui/examples/ExamplesView",

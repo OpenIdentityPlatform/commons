@@ -26,12 +26,13 @@
 
 define([
         "sinon",
+        "underscore",
         "org/forgerock/commons/ui/common/main/Configuration",
         "org/forgerock/commons/ui/common/util/Constants",
         "org/forgerock/commons/ui/common/main/EventManager",
         "org/forgerock/commons/ui/common/util/ModuleLoader",
         "org/forgerock/commons/ui/common/main/Router"
-    ], function (sinon, conf, Constants, EventManager, ModuleLoader, Router) {
+    ], function (sinon, _, conf, Constants, EventManager, ModuleLoader, Router) {
     return {
         executeAll: function (server, loggedUser) {
 
@@ -49,83 +50,85 @@ define([
                     userProfileView.render([],function() {
 
                         var testVals = {
-                                uid                 : 'Username',
                                 givenName           : 'John',
                                 mail                : 'test@test.com',
                                 sn                  : 'Doe',
                                 telephoneNumber     : '123456789'
                             },
-                            modifiedUser = _.extend(_.clone(conf.loggedUser), testVals);
+                            modifiedUser = _.extend(conf.loggedUser.toJSON(), testVals);
 
                         // Testing inputs
-                        QUnit.ok($('input[name="saveButton"]', userProfileView.$el).length          , "Update button appears to be defined");
-                        QUnit.ok($('input[name="resetButton"]', userProfileView.$el).length         , "Reset button appears to be defined");
-                        QUnit.ok($('input[name="uid"]', userProfileView.$el).length                 , "Username input appears to be defined");
-                        QUnit.ok($('input[name="givenName"]', userProfileView.$el).length           , "First name input appears to be defined");
-                        QUnit.ok($('input[name="mail"]', userProfileView.$el).length                , "Email address input appears to be defined");
-                        QUnit.ok($('input[name="sn"]', userProfileView.$el).length                  , "Last Name input appears to be defined");
-                        QUnit.ok($('input[name="telephoneNumber"]', userProfileView.$el).length     , "Mobile Phone input appears to be defined");
 
+                        // docment.activeElement - a hack around testing for .is(":focus") bug in phantomjs: https://github.com/guard/guard-jasmine/issues/48
+                        QUnit.equal($("input[name=givenName]", userProfileView.$el)[0], document.activeElement, "First name field has focus on page load");
+                        QUnit.equal($('input[type="submit"]', userProfileView.$el).length, 2, "Update button appears to be defined for each tab");
+                        QUnit.equal($('input[type="reset"]', userProfileView.$el).length, 2, "Reset button appears to be defined");
 
-                       // Testing user data
-                        QUnit.equal($('input[name="uid"]', userProfileView.$el).val(), conf.loggedUser.uid                          , "Username populated");
-                        QUnit.equal($('input[name="givenName"]', userProfileView.$el).val(), conf.loggedUser.givenName              , "First name populated");
-                        QUnit.equal($('input[name="mail"]', userProfileView.$el).val(), conf.loggedUser.mail                        , "Email address populated");
-                        QUnit.equal($('input[name="sn"]', userProfileView.$el).val(), conf.loggedUser.sn                            , "Last Name populated");
-                        QUnit.equal($('input[name="telephoneNumber"]', userProfileView.$el).val(), conf.loggedUser.telephoneNumber  , "Mobile Phone populated");
-
-
-                        // Testing validation
-
-                        QUnit.equal($('input[name="givenName"]', userProfileView.$el).attr('data-validation-status'),          'ok', 'First name input passes validation');
-                        QUnit.equal($('input[name="mail"]', userProfileView.$el).attr('data-validation-status'),               'ok', 'Email address input passes validation');
-                        QUnit.equal($('input[name="sn"]', userProfileView.$el).attr('data-validation-status'),                 'ok', 'Last Name input passes validation');
-                        QUnit.equal($('input[name="telephoneNumber"]', userProfileView.$el).attr('data-validation-status'),    'ok', 'Mobile Phone input passes validation');
-
-                        //Testing Buttons
-
-                        $('input[name="uid"]', userProfileView.$el).val(testVals.uid).trigger('change');
-                        $('input[name="givenName"]', userProfileView.$el).val(testVals.givenName).trigger('change');
-                        $('input[name="mail"]', userProfileView.$el).val(testVals.mail).trigger('change');
-                        $('input[name="sn"]', userProfileView.$el).val(testVals.sn).trigger('change');
-                        $('input[name="telephoneNumber"]', userProfileView.$el).val(testVals.telephoneNumber).trigger('change');
-
-                        EventManager.whenComplete(Constants.EVENT_DISPLAY_MESSAGE_REQUEST).always(function () {
-
-                            QUnit.equal(conf.loggedUser.uid, testVals.uid                             , "Username changed");
-                            QUnit.equal(conf.loggedUser.givenName, testVals.givenName                 , "First name changed");
-                            QUnit.equal(conf.loggedUser.mail, testVals.mail                           , "Email changed");
-                            QUnit.equal(conf.loggedUser.sn, testVals.sn                               , "Last Name changed");
-                            QUnit.equal(conf.loggedUser.telephoneNumber, testVals.telephoneNumber     , "Mobile Phone changed");
-
-                            QUnit.ok(_.isEqual(conf.loggedUser, modifiedUser)                         , "User object doesn't have any unexpected changes");
-
-                            //reset button
-
-                            $('input[name="uid"]', userProfileView.$el).val('AnotherUsername').trigger('change');
-                            $('input[name="givenName"]', userProfileView.$el).val('Jane').trigger('change');
-                            $('input[name="mail"]', userProfileView.$el).val('test2@test.com').trigger('change');
-                            $('input[name="sn"]', userProfileView.$el).val('Doe').trigger('change');
-                            $('input[name="telephoneNumber"]', userProfileView.$el).val('987654321').trigger('change');
-
-                            //clicking reset button
-                            $('input[name="resetButton"]', userProfileView.$el).trigger('click');
-
-                            QUnit.equal($('input[name="uid"]', userProfileView.$el).val(), testVals.uid                             , "Username was reset");
-                            QUnit.equal($('input[name="givenName"]', userProfileView.$el).val(), testVals.givenName                 , "First name was reset");
-                            QUnit.equal($('input[name="mail"]', userProfileView.$el).val(), testVals.mail                           , "Email was reset");
-                            QUnit.equal($('input[name="sn"]', userProfileView.$el).val(), testVals.sn                               , "Last Name was reset");
-                            QUnit.equal($('input[name="telephoneNumber"]', userProfileView.$el).val(), testVals.telephoneNumber     , "Mobile Phone was reset");
-
-                            QUnit.start();
-
+                        _.each(_.keys(testVals), function (prop) {
+                            QUnit.ok($('input[name="'+prop+'"]', userProfileView.$el).length, prop + " input appears to be defined");
+                            QUnit.equal($('input[name="'+prop+'"]', userProfileView.$el).val(), conf.loggedUser.get(prop), prop + " populated");
+                            $('input[name="'+prop+'"]', userProfileView.$el).val(modifiedUser[prop]).trigger('change');
                         });
 
-                        // a slight delay is necessary to ensure that validation has completed
-                        _.delay(function () {
-                            //clicking submit button
-                            $('input[name="saveButton"]', userProfileView.$el).trigger('click');
-                        }, 100);
+                        QUnit.ok($('input[name="password"]', userProfileView.$el).length, "Password input appears to be defined");
+
+                        $('#userDetailsTab input[type=submit]', userProfileView.$el).trigger('click');
+
+                        _.each(_.keys(testVals), function (prop) {
+                            QUnit.equal(conf.loggedUser.get(prop), testVals[prop], prop + " changed");
+                        });
+
+                        QUnit.ok(_.isEqual(conf.loggedUser.toJSON(), modifiedUser), "User object doesn't have any unexpected changes");
+
+                        //reset button
+
+                        $('input[name="uid"]', userProfileView.$el).val('AnotherUsername').trigger('change');
+                        $('input[name="givenName"]', userProfileView.$el).val('Jane').trigger('change');
+                        $('input[name="mail"]', userProfileView.$el).val('test2@test.com').trigger('change');
+                        $('input[name="sn"]', userProfileView.$el).val('Doe').trigger('change');
+                        $('input[name="telephoneNumber"]', userProfileView.$el).val('987654321').trigger('change');
+
+                        $('#userDetailsTab input[type=reset]', userProfileView.$el).trigger('click');
+
+                        _.each(_.keys(testVals), function (prop) {
+                            QUnit.equal($('input[name="'+prop+'"]', userProfileView.$el).val(), testVals[prop], prop + "  was reset");
+                        });
+
+                        var routePromise = EventManager.whenComplete(Constants.ROUTE_REQUEST);
+                        // change password
+                        $(".nav-tabs li a[href='#userPasswordTab']", userProfileView.$el).click();
+
+                        routePromise.then(function () {
+                            QUnit.equal(window.location.hash, "#profile/password", "Route updates on tab change");
+
+                            QUnit.equal($("input[name=password]", userProfileView.$el)[0], document.activeElement, "First name field has focus on page load");
+
+                            $("#userPasswordTab #input-password", userProfileView.$el).val("newPassword").trigger('change');
+                            $("#userPasswordTab #input-confirmPassword", userProfileView.$el).val("newPassword").trigger('change');
+
+                            $("body").one("shown.bs.modal", function () {
+                                QUnit.ok(/Password/.test($("#confirmPasswordFormExplanation em").text()), "Password change triggers confirm password dialog");
+
+                                $("#confirmPasswordForm #currentPassword").val("bad").trigger("change");
+                                $(".modal.in #btnUpdate").trigger("click");
+
+                                QUnit.ok($("#userPasswordTab .changes-pending").is(":visible"), "Changes still pending after bad password provided");
+
+                                $("body").one("shown.bs.modal", function () {
+
+                                    $("#confirmPasswordForm #currentPassword").val("test").trigger("change");
+
+                                    $("body").one("hidden.bs.modal", function () {
+                                        QUnit.ok($("#userPasswordTab .changes-pending").is(":visible") === false, "Changes pending not visible after good password provided");
+                                        QUnit.start();
+                                    });
+
+                                    $(".modal.in #btnUpdate").trigger("click");
+                                });
+                                $('#userPasswordTab input[type=submit]', userProfileView.$el).trigger('click');
+                            });
+                            $('#userPasswordTab input[type=submit]', userProfileView.$el).trigger('click');
+                        });
 
                     });
 
@@ -133,38 +136,7 @@ define([
 
             });
 
-            QUnit.test("Client-side Validators", function () {
-                var validatorsManager = require("org/forgerock/commons/ui/common/main/ValidatorsManager"),
-                    userDelegate = require("UserDelegate"),
-                    testElement = $('<div><input data-validator="resetPasswordCorrectLogin"></div>'),
-                    spy;
-
-                    validatorsManager.bindValidators(testElement);
-
-
-                    userDelegate.getSecurityQuestionForUserName = function (value, successCallback, errorCallback) {
-                        if (value === "testUser") {
-                            successCallback(1);
-                        } else {
-                            errorCallback();
-                        }
-                    };
-
-                    spy = sinon.spy(userDelegate, "getSecurityQuestionForUserName");
-
-                    testElement.find("input").val("t").trigger("keyup");
-                    QUnit.equal(spy.callCount, 0, "Delegate function should not be called after keyup event");
-
-                    testElement.find("input").val("test").trigger("blur");
-                    QUnit.equal(spy.callCount, 1, "Delegate function should have been called once after keyup event");
-                    QUnit.equal(testElement.find("input").attr('data-validation-status'), "error", "Validation status should be error when provided with incorrect value");
-
-                    testElement.find("input").val("testUser").trigger("blur");
-                    QUnit.equal(testElement.find("input").attr('data-validation-status'), "ok", "Validation status should be ok when provided with correct value");
-
-            });
-
-
+/*
             QUnit.asyncTest("Unauthorized Request Behavior", function () {
                 conf.loggedUser = loggedUser;
                 delete conf.globalData.authorizationFailurePending;
@@ -192,7 +164,7 @@ define([
 
                             EventManager.sendEvent(Constants.EVENT_UNAUTHORIZED, {error: {type:"GET", status: 403} }).then(function () {
                                 QUnit.ok(!conf.loggedUser, "User info should be discarded after UNAUTHORIZED GET error");
-                                QUnit.ok(conf.gotoURL === "#profile/", "gotoURL should be preserved after UNAUTHORIZED GET error");
+                                QUnit.equal(conf.gotoURL, "#profile/details", "gotoURL should be preserved after UNAUTHORIZED GET error");
                                 QUnit.equal(window.location.hash, "#login/", "Redirected to main login page")
                                 delete conf.gotoURL;
                                 QUnit.start();
@@ -204,7 +176,7 @@ define([
 
                 })
             });
-
+*/
         }
     };
 });

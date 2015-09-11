@@ -38,8 +38,13 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                 configuration: {
-                    remoteConfig: true,
-                    delegate: "org/forgerock/mock/ui/common/delegates/SiteConfigurationDelegate"
+                    "passwordResetLink": "",
+                    "selfRegistration": true,
+                    "passwordReset": true,
+                    "roles": {
+                        "ui-user": "User"
+                    },
+                    "lang": "en"
                 }
             },
 
@@ -48,7 +53,6 @@ define("config/AppConfiguration", [
                 configuration: {
                     processConfigurationFiles: [
                         "config/process/MockConfig",
-                        "config/process/UserConfig",
                         "config/process/CommonConfig"
                     ]
                 }
@@ -98,13 +102,13 @@ define("config/AppConfiguration", [
                      userBar: [
                          {
                              "id": "profile_link",
-                             "href": "#profile/",
+                             "href": "#profile/details",
                              "i18nKey": "common.user.profile"
                          },
                          {
-                             "id": "security_link",
-                             "event": Constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
-                             "i18nKey": "templates.user.UserProfileTemplate.changeSecurityData"
+                             "id": "change_password",
+                             "href": "#profile/password",
+                             "i18nKey": "common.user.changePassword"
                          },
                          {
                              "id": "logout_link",
@@ -135,10 +139,8 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/commons/ui/common/main/ValidatorsManager",
                 configuration: {
-                    policyDelegate: "org/forgerock/mock/ui/common/delegates/PolicyDelegate",
                     validators: { },
                     loader: [
-                        {"validators": "config/validators/UserValidators"},
                         {"validators": "config/validators/CommonValidators"}
                     ]
                 }
