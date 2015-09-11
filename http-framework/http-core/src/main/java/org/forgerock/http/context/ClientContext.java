@@ -241,7 +241,7 @@ public final class ClientContext extends AbstractContext {
                           String userAgent,
                           boolean isExternal,
                           boolean isSecure) {
-        super(parent, "clientContext");
+        super(parent, "client");
         // Maintain the real list of certificates for Java API
         this.certificates = certificates;
 
