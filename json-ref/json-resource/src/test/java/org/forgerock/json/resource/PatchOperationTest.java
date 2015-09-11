@@ -95,6 +95,19 @@ public class PatchOperationTest {
         PatchOperation.valueOf(json);
     }
 
+    @Test
+    public void testPatchValueOfCopyOperationWithNoValue() throws Exception {
+        final JsonValue json = new JsonValue(new LinkedHashMap<>());
+        json.put(PatchOperation.FIELD_OPERATION, "copy");
+        json.put(PatchOperation.FIELD_FIELD, "/users/0");
+        json.put(PatchOperation.FIELD_FROM, "/users/1");
+        PatchOperation operation = PatchOperation.valueOf(json);
+        assertThat(operation.getOperation()).isEqualTo("copy");
+        assertThat(operation.getField()).isEqualTo(new JsonPointer("/users/0"));
+        assertThat(operation.getFrom()).isEqualTo(new JsonPointer("/users/1"));
+        assertThat(operation.getValue().getObject()).isNull();
+    }
+
     @Test(expectedExceptions = NullPointerException.class)
     public void testPatchWithNullOperation() throws Exception {
         PatchOperation.operation(null, "users/0", "Dummy");
