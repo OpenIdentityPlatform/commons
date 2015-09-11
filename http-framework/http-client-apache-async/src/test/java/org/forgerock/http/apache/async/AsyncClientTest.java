@@ -16,16 +16,13 @@
 
 package org.forgerock.http.apache.async;
 
-import static com.xebialabs.restito.builder.stub.StubHttp.whenHttp;
+import static com.xebialabs.restito.builder.stub.StubHttp.*;
 import static com.xebialabs.restito.semantics.Action.composite;
-import static com.xebialabs.restito.semantics.Action.ok;
-import static com.xebialabs.restito.semantics.Action.stringContent;
-import static com.xebialabs.restito.semantics.Condition.post;
-import static java.lang.String.format;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.xebialabs.restito.semantics.Action.*;
+import static com.xebialabs.restito.semantics.Condition.*;
+import static java.lang.String.*;
+import static org.assertj.core.api.Assertions.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import org.forgerock.http.Client;
@@ -35,7 +32,6 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.ResultHandler;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
@@ -82,39 +78,6 @@ public class AsyncClientTest {
         Response response = client.send(request).get();
         assertThat(response.getStatus()).isEqualTo(Status.OK);
         assertThat(response.getEntity().getString()).isEqualTo("Pong");
-    }
-
-    @Test
-    public void shouldProcessResponsesAsynchronouslyNotWithCallerThread() throws Exception {
-
-        whenHttp(server).match(post("/ping"))
-                        .then(composite(ok()));
-
-        // By default, the client has a pool of less than 10 threads
-        Client client = new Client(new HttpClientHandler());
-        List<Promise<Response, NeverThrowsException>> promises = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
-            Request request = new Request();
-            request.setMethod("POST");
-            request.setUri(format("http://localhost:%d/ping", server.getPort()));
-            promises.add(client.send(request)
-                               .thenOnResult(new ResultHandler<Response>() {
-                                   @Override
-                                   public void handleResult(final Response result) {
-                                       String name = Thread.currentThread().getName();
-                                       result.getHeaders().putSingle("thread-name", name);
-                                   }
-                               }));
-        }
-
-        // Ensure response processing thread is different from the calling thread
-        String threadName = Thread.currentThread().getName();
-        for (Promise<Response, NeverThrowsException> promise : promises) {
-            // Wait for each response
-            Response response = promise.get();
-            assertThat(response.getHeaders().getFirst("thread-name")).isNotEqualTo(threadName);
-        }
-
     }
 
     /**
