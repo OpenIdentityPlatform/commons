@@ -25,7 +25,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.audit.dependencies.LocalHostNameProvider;
+import org.forgerock.audit.providers.LocalHostNameProvider;
+import org.forgerock.audit.providers.ProductInfoProvider;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration.SeverityFieldMapping;
@@ -392,14 +393,16 @@ public class SyslogFormatterTest {
         Map<String, JsonValue> auditEventDefinitions = loadAuditEventDefinitions();
 
         SyslogAuditEventHandlerConfiguration config = new SyslogAuditEventHandlerConfiguration();
-        config.setProductName(productName);
         config.setFacility(facility);
         config.setSeverityFieldMappings(severityFieldMappings);
 
         LocalHostNameProvider localHostNameProvider = mock(LocalHostNameProvider.class);
         given(localHostNameProvider.getLocalHostName()).willReturn(localHostName);
 
-        return new SyslogFormatter(auditEventDefinitions, config, localHostNameProvider);
+        ProductInfoProvider productInfoProvider = mock(ProductInfoProvider.class);
+        given(productInfoProvider.getProductName()).willReturn(productName);
+
+        return new SyslogFormatter(auditEventDefinitions, config, localHostNameProvider, productInfoProvider);
     }
 
     private SyslogMessage readSyslogMessage(String message) {

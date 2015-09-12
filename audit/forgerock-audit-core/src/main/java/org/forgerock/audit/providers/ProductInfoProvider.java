@@ -14,8 +14,17 @@
  * Copyright 2015 ForgeRock AS.
  */
 
+package org.forgerock.audit.providers;
+
 /**
- * Dependencies that can be made available to the {@link org.forgerock.audit.AuditService} via a
- * {@link org.forgerock.audit.DependencyProvider}.
+ * Strategy for obtaining the information relating to the product in which the AuditService is deployed.
  */
-package org.forgerock.audit.dependencies;
+public interface ProductInfoProvider {
+
+    /**
+     * Returns the name of the application hosting the {@link org.forgerock.audit.AuditService}.
+     *
+     * @return the name of the product.
+     */
+    String getProductName();
+}

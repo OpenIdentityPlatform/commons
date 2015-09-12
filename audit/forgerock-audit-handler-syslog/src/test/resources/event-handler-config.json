@@ -6,7 +6,6 @@
     "host" : "localhost",
     "port" : 514,
     "facility" : "LOCAL0",
-    "productName" : "OpenAM",
     "severityFieldMappings": [{
       "topic" : "system-status",
       "field"  : "level",

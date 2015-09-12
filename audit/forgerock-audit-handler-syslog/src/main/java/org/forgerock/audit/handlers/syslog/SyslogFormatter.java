@@ -26,7 +26,8 @@ import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.extractValue;
 
 import org.forgerock.audit.AuditService;
-import org.forgerock.audit.dependencies.LocalHostNameProvider;
+import org.forgerock.audit.providers.LocalHostNameProvider;
+import org.forgerock.audit.providers.ProductInfoProvider;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration.SeverityFieldMapping;
 import org.forgerock.json.JsonPointer;
@@ -70,15 +71,16 @@ public class SyslogFormatter {
      * @param auditEventsMetaData Schemas and additional meta-data for known audit event topics.
      * @param config Configuration options.
      * @param localHostNameProvider Strategy for obtaining hostname of current server.
+     * @param productInfoProvider Strategy for obtaining name of the hosting application.
      */
     public SyslogFormatter(Map<String, JsonValue> auditEventsMetaData, SyslogAuditEventHandlerConfiguration config,
-            LocalHostNameProvider localHostNameProvider) {
+            LocalHostNameProvider localHostNameProvider, ProductInfoProvider productInfoProvider) {
 
         Reject.ifNull(localHostNameProvider, "LocalHostNameProvider must not be null");
 
         this.hostname = getLocalHostName(localHostNameProvider);
         this.procId = String.valueOf(SyslogFormatter.class.hashCode());
-        this.appName = config.getProductName();
+        this.appName = getProductName(productInfoProvider);
         this.facility = config.getFacility();
         this.severityFieldMappings =
                 createSeverityFieldMappings(config.getSeverityFieldMappings(), auditEventsMetaData);
@@ -207,7 +209,7 @@ public class SyslogFormatter {
     /**
      * Calculates the Syslog message PRI value.
      *
-     * @see <a href=https://tools.ietf.org/html/rfc5424#section-6.2.1>RFC-5424 section 6.2.1</a>
+     * @see <a href="https://tools.ietf.org/html/rfc5424#section-6.2.1">RFC-5424 section 6.2.1</a>
      */
     private int calculatePriorityValue(Facility facility, Severity severityLevel) {
         return (facility.getCode() * 8) + severityLevel.getCode();
@@ -216,11 +218,21 @@ public class SyslogFormatter {
     /**
      * Calculates the Syslog message HOSTNAME value.
      *
-     * @see <a href=https://tools.ietf.org/html/rfc5424#section-6.2.4>RFC-5424 section 6.2.4</a>
+     * @see <a href="https://tools.ietf.org/html/rfc5424#section-6.2.4">RFC-5424 section 6.2.4</a>
      */
     private String getLocalHostName(LocalHostNameProvider localHostNameProvider) {
         String localHostName = localHostNameProvider.getLocalHostName();
         return localHostName != null ? localHostName : NIL_VALUE;
+    }
+
+    /**
+     * Calculates the Syslog message APP-NAME value.
+     *
+     * @see <a href="https://tools.ietf.org/html/rfc5424#section-6.2.5">RFC-5424 section 6.2.5</a>
+     */
+    private String getProductName(ProductInfoProvider productInfoProvider) {
+        String productName = productInfoProvider.getProductName();
+        return productName != null ? productName : NIL_VALUE;
     }
 
     /**

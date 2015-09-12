@@ -22,7 +22,8 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.audit.DependencyProvider;
-import org.forgerock.audit.dependencies.LocalHostNameProvider;
+import org.forgerock.audit.providers.LocalHostNameProvider;
+import org.forgerock.audit.providers.ProductInfoProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
@@ -100,7 +101,17 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
 
     private void updateFormatter() {
         if (dependencyProvider != null && auditEventsMetaData != null && config != null) {
-            formatter = new SyslogFormatter(auditEventsMetaData, config, getLocalHostNameProvider());
+            formatter = new SyslogFormatter(
+                    auditEventsMetaData, config, getLocalHostNameProvider(), getProductNameProvider());
+        }
+    }
+
+    private ProductInfoProvider getProductNameProvider() {
+        try {
+            return dependencyProvider.getDependency(ProductInfoProvider.class);
+        } catch (ClassNotFoundException e) {
+            logger.debug("No {} provided; using default.", ProductInfoProvider.class.getSimpleName());
+            return new DefaultProductInfoProvider();
         }
     }
 
@@ -176,6 +187,19 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
     @Override
     public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         return new NotSupportedException("query operations are not supported").asPromise();
+    }
+
+    /**
+     * Default implementation of ProductNameProvider.
+     * <p/>
+     * Products can provide an alternative via {@link DependencyProvider}.
+     */
+    private static class DefaultProductInfoProvider implements ProductInfoProvider {
+
+        @Override
+        public String getProductName() {
+            return null;
+        }
     }
 
     /**

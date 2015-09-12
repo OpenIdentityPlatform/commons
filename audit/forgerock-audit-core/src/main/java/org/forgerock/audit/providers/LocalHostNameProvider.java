@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.audit.dependencies;
+package org.forgerock.audit.providers;
 
 /**
  * Strategy for obtaining the server's local hostname.

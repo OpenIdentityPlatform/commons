@@ -39,7 +39,6 @@ import java.util.Map;
       "port" : 6514,
       "connectTimeout" : 30000,
       "facility" : "local0",
-      "productName" : "OpenAM",
       "severityFieldMappings": [{
         "topic" : "system-status",
         "field"  : "level",
@@ -67,9 +66,6 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
 
     @JsonProperty(required=true)
     private Facility facility;
-
-    @JsonProperty(required=true)
-    private String productName;
 
     @JsonProperty
     private List<SeverityFieldMapping> severityFieldMappings = new ArrayList<>();
@@ -175,29 +171,6 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
      */
     public void setFacility(Facility facility) {
         this.facility = facility;
-    }
-
-    /**
-     * Returns the product name constant that should be applied to all Syslog messages.
-     *
-     * @return the product name.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc5424#section-6.2.5">RFC-5424 section 6.2.5</a>
-     */
-    public String getProductName() {
-        return productName;
-    }
-
-    /**
-     * Sets the product name constant that should be applied to all Syslog messages.
-     *
-     * @param productName
-     *          the product name.
-     *
-     * @see <a href="https://tools.ietf.org/html/rfc5424#section-6.2.5">RFC-5424 section 6.2.5</a>
-     */
-    public void setProductName(String productName) {
-        this.productName = productName;
     }
 
     /**
