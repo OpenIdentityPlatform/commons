@@ -22,6 +22,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.audit.DependencyProvider;
+import org.forgerock.audit.dependencies.LocalHostNameProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;

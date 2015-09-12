@@ -26,6 +26,7 @@ import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.extractValue;
 
 import org.forgerock.audit.AuditService;
+import org.forgerock.audit.dependencies.LocalHostNameProvider;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration.SeverityFieldMapping;
 import org.forgerock.json.JsonPointer;

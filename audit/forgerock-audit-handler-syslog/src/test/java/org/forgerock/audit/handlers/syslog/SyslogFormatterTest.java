@@ -25,6 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.audit.dependencies.LocalHostNameProvider;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration.SeverityFieldMapping;

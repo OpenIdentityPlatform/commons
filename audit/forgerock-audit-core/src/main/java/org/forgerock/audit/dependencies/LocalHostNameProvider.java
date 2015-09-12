@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.audit.handlers.syslog;
+package org.forgerock.audit.dependencies;
 
 /**
  * Strategy for obtaining the server's local hostname.
