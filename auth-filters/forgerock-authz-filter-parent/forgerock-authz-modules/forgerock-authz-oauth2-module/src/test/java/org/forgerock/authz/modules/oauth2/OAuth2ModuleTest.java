@@ -16,12 +16,15 @@
 
 package org.forgerock.authz.modules.oauth2;
 
-import org.forgerock.authz.filter.api.AuthorizationContext;
-import org.forgerock.authz.filter.api.AuthorizationException;
-import org.forgerock.authz.filter.api.AuthorizationResult;
-import org.forgerock.util.promise.Promise;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.authz.modules.oauth2.OAuth2Module.AccessTokenValidationCacheFactory;
+import static org.forgerock.authz.modules.oauth2.OAuth2Module.OAUTH2_PROFILE_INFO_CONTEXT_KEY;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.*;
+import static org.mockito.internal.verification.VerificationModeFactory.times;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,17 +32,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import static org.forgerock.authz.modules.oauth2.OAuth2Module.AccessTokenValidationCacheFactory;
-import static org.forgerock.authz.modules.oauth2.OAuth2Module.OAUTH2_PROFILE_INFO_CONTEXT_KEY;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.forgerock.authz.filter.api.AuthorizationContext;
+import org.forgerock.authz.filter.api.AuthorizationException;
+import org.forgerock.authz.filter.api.AuthorizationResult;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class OAuth2ModuleTest {
 
@@ -78,11 +77,10 @@ public class OAuth2ModuleTest {
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
         //When
-        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
+        AuthorizationResult result = oAuth2Module.authorize(accessToken, context).getOrThrowUninterruptibly();
 
         //Then
-        assertTrue(promise.isDone());
-        assertTrue(promise.getOrThrowUninterruptibly().isAuthorized());
+        assertThat(result.isAuthorized()).isTrue();
     }
 
     @Test
@@ -99,11 +97,10 @@ public class OAuth2ModuleTest {
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
         //When
-        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
+        AuthorizationResult result = oAuth2Module.authorize(accessToken, context).getOrThrowUninterruptibly();
 
         //Then
-        assertTrue(promise.isDone());
-        assertFalse(promise.getOrThrowUninterruptibly().isAuthorized());
+        assertThat(result.isAuthorized()).isFalse();
     }
 
     @Test
@@ -120,11 +117,10 @@ public class OAuth2ModuleTest {
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
         //When
-        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
+        AuthorizationResult result = oAuth2Module.authorize(accessToken, context).getOrThrowUninterruptibly();
 
         //Then
-        assertTrue(promise.isDone());
-        assertFalse(promise.getOrThrowUninterruptibly().isAuthorized());
+        assertThat(result.isAuthorized()).isFalse();
     }
 
     @Test
@@ -137,7 +133,7 @@ public class OAuth2ModuleTest {
 
         createOAuth2Module(true);
         given(cache.get("ACCESS_TOKEN")).willReturn(null);
-        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
+        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(Promises.<AccessTokenValidationResponse, OAuth2Exception>newResultPromise(validationResponse));
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
@@ -156,12 +152,14 @@ public class OAuth2ModuleTest {
         String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
+        Promise<AccessTokenValidationResponse, OAuth2Exception> validationResponsePromise =
+                newResultPromise(validationResponse);
 
         createOAuth2Module(true);
         given(cache.get("ACCESS_TOKEN"))
                 .willReturn(null)
                 .willReturn(validationResponse);
-        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
+        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponsePromise);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
@@ -182,9 +180,11 @@ public class OAuth2ModuleTest {
         String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
+        Promise<AccessTokenValidationResponse, OAuth2Exception> validationResponsePromise =
+                newResultPromise(validationResponse);
 
         createOAuth2Module(false);
-        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
+        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponsePromise);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
@@ -204,10 +204,12 @@ public class OAuth2ModuleTest {
         String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
+        Promise<AccessTokenValidationResponse, OAuth2Exception> validationResponsePromise =
+                newResultPromise(validationResponse);
         Map<String, Object> profileInfo = new HashMap<>();
 
         createOAuth2Module(false);
-        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
+        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponsePromise);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getProfileInformation()).willReturn(profileInfo);
 
@@ -225,9 +227,11 @@ public class OAuth2ModuleTest {
         String accessToken = "ACCESS_TOKEN";
         AuthorizationContext context = mock(AuthorizationContext.class);
         AccessTokenValidationResponse validationResponse = mock(AccessTokenValidationResponse.class);
+        Promise<AccessTokenValidationResponse, OAuth2Exception> validationResponsePromise =
+                newResultPromise(validationResponse);
 
         createOAuth2Module(false);
-        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponse);
+        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(validationResponsePromise);
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
@@ -249,13 +253,12 @@ public class OAuth2ModuleTest {
         AuthorizationContext context = mock(AuthorizationContext.class);
 
         createOAuth2Module(false);
-        doThrow(OAuth2Exception.class).when(tokenValidator).validate("ACCESS_TOKEN");
+        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(Promises.<AccessTokenValidationResponse, OAuth2Exception>newExceptionPromise(mock(OAuth2Exception.class)));
 
         //When
-        Promise<AuthorizationResult, AuthorizationException> promise = oAuth2Module.authorize(accessToken, context);
+        oAuth2Module.authorize(accessToken, context).getOrThrowUninterruptibly();
 
         //Then
-        assertTrue(promise.isDone());
-        promise.getOrThrowUninterruptibly();
+        // Expected AuthorizationException
     }
 }

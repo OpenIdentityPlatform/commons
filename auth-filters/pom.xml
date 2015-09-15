@@ -137,7 +137,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
-                <version>2.10</version>
             </plugin>
             <plugin>
                 <groupId>org.forgerock.maven.plugins</groupId>
@@ -176,11 +175,6 @@
                 <artifactId>forgerock-jaspi-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-authz-filter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
@@ -188,38 +182,6 @@
                 <version>${forgerock-bom.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.restlet.osgi</groupId>
-                <artifactId>org.restlet</artifactId>
-                <version>${restlet.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.restlet.osgi</groupId>
-                <artifactId>org.restlet.ext.httpclient</artifactId>
-                <version>${restlet.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.restlet.osgi</groupId>
-                <artifactId>org.restlet.ext.net</artifactId>
-                <version>${restlet.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.restlet.osgi</groupId>
-                <artifactId>org.restlet.ext.json</artifactId>
-                <version>${restlet.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.restlet.osgi</groupId>
-                        <artifactId>org.restlet.lib.org.json</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>org.json</groupId>
-                <artifactId>json</artifactId>
-                <version>20140107</version>
             </dependency>
 
             <dependency>
@@ -260,7 +222,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -273,7 +234,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.4</version>
                 <reportSets>
                     <reportSet>
                         <reports>

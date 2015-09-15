@@ -16,18 +16,30 @@
 
 package org.forgerock.authz.modules.oauth2;
 
-import org.forgerock.json.JsonValue;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.forgerock.authz.modules.oauth2.OAuth2Authorization.TOKEN_INFO_ENDPOINT_KEY;
+import static org.forgerock.authz.modules.oauth2.OAuth2Authorization.USER_INFO_ENDPOINT_KEY;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.forgerock.authz.modules.oauth2.OAuth2Authorization.TOKEN_INFO_ENDPOINT_KEY;
-import static org.forgerock.authz.modules.oauth2.OAuth2Authorization.USER_INFO_ENDPOINT_KEY;
+import org.forgerock.http.Client;
+import org.forgerock.http.Handler;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Function;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Access Token Validator for validating OAuth2 tokens issued by an OAuth2 Provider using REST requests.
@@ -45,65 +57,110 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
 
     private final Logger logger = LoggerFactory.getLogger(RestOAuth2AccessTokenValidator.class);
 
-    private final RestResourceFactory restResourceFactory;
+    private final Client httpClient;
     private final String tokenInfoEndpoint;
     private final String userProfileEndpoint;
+
 
     /**
      * Creates a new instance of the RestOAuth2AccessTokenValidator.
      *
      * @param config The configuration for the validator.
-     * @param restResourceFactory An instance of the RestResourceFactory.
+     * @param httpClient The {@link Handler} to use to make HTTP requests.
      */
-    public RestOAuth2AccessTokenValidator(JsonValue config, RestResourceFactory restResourceFactory) {
+    public RestOAuth2AccessTokenValidator(JsonValue config, Client httpClient) {
         tokenInfoEndpoint = config.get(TOKEN_INFO_ENDPOINT_KEY).required().asString();
         // userInfo endpoint is optional
         userProfileEndpoint = config.get(USER_INFO_ENDPOINT_KEY).asString();
-        this.restResourceFactory = restResourceFactory;
+        this.httpClient = httpClient;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public AccessTokenValidationResponse validate(String accessToken) {
+    public Promise<AccessTokenValidationResponse, OAuth2Exception> validate(final String accessToken) {
+        Request request = new Request()
+                .setMethod("GET")
+                .setUri(URI.create(tokenInfoEndpoint + "?access_token=" + accessToken));
+        return httpClient.send(request)
+                .thenAsync(new AsyncFunction<Response, AccessTokenValidationResponse, OAuth2Exception>() {
+                    @Override
+                    public Promise<AccessTokenValidationResponse, OAuth2Exception> apply(Response response)
+                            throws OAuth2Exception {
+                        try {
+                            if (response.getStatus().isClientError()) {
+                                return newResultPromise(new AccessTokenValidationResponse(0));
+                            } else if (!response.getStatus().isSuccessful()) {
+                                logger.error(response.getEntity().getString());
+                                throw new OAuth2Exception(response.getEntity().getString());
+                            }
 
-        RestResource tokenInfoRequest = restResourceFactory
-                .resource(tokenInfoEndpoint + "?access_token=" + accessToken);
+                            JsonValue tokenInfo = json(response.getEntity().getJson());
 
-        try {
-            final JsonValue tokenInfo = tokenInfoRequest.get();
+                            // If response contains "error" then token is invalid
+                            if (tokenInfo.isDefined("error")) {
+                                return newResultPromise(new AccessTokenValidationResponse(0));
+                            }
 
-            // If response contains "error" then token is invalid
-            if (tokenInfo.isDefined("error")) {
-                return new AccessTokenValidationResponse(0);
-            }
+                            // expires_in is expressed in seconds, and we compare it later with milliseconds since epoch
+                            long expiresIn = tokenInfo.get("expires_in").required().asLong() * 1_000;
+                            Set<String> scopes = getScope(tokenInfo);
+                            if (userProfileEndpoint != null && expiresIn > 0) {
+                                return augmentWithUserProfile(accessToken, expiresIn, scopes);
+                            } else {
+                                return newResultPromise(new AccessTokenValidationResponse(
+                                        expiresIn + System.currentTimeMillis(), new HashMap<String, Object>(), scopes));
+                            }
+                        } catch (IOException e) {
+                            throw new OAuth2Exception(e.getMessage(), e);
+                        }
+                    }
+                }, new AsyncFunction<NeverThrowsException, AccessTokenValidationResponse, OAuth2Exception>() {
+                    @Override
+                    public Promise<AccessTokenValidationResponse, OAuth2Exception> apply(NeverThrowsException e) {
+                        //This can never happen but the exception handler is needed
+                        // to change the types of the returned Promise.
+                        throw new IllegalStateException("HTTP Client threw a NeverThrowsException?!");
+                    }
+                });
+    }
 
-            // expires_in is expressed in seconds, and we compare it later with milliseconds since epoch
-            final long expiresIn = tokenInfo.get("expires_in").required().asLong() * 1_000;
-            final Set<String> scopes = getScope(tokenInfo);
-
-            final Map<String, Object> profileInfo = new HashMap<>();
-            if (userProfileEndpoint != null && expiresIn > 0) {
-                logger.debug("Fetching user profile information from endpoint");
-                final RestResource userProfileRequest = restResourceFactory.resource(userProfileEndpoint);
-                userProfileRequest.addHeader("Authorization", "Bearer " + accessToken);
-                final JsonValue userProfile = userProfileRequest.get();
-                profileInfo.putAll(userProfile.asMap());
-            }
-
-            return new AccessTokenValidationResponse(expiresIn + System.currentTimeMillis(), profileInfo, scopes);
-        } catch (RestResourceException e) {
-            // If the error is from the 400 series, it should be treated as an authentication error
-            final RestResourceException.StatusCode status = e.getStatus();
-            if (status != null) {
-                if (status.getCode() >= 400 && status.getCode() < 500) {
-                    return new AccessTokenValidationResponse(0);
-                }
-            }
-            logger.error(e.getMessage(), e);
-            throw new OAuth2Exception(e.getMessage(), e);
-        }
+    private Promise<AccessTokenValidationResponse, OAuth2Exception> augmentWithUserProfile(String accessToken,
+            final long expiresIn, final Set<String> scopes) {
+        logger.debug("Fetching user profile information from endpoint");
+        Request request = new Request()
+                .setMethod("GET")
+                .setUri(URI.create(userProfileEndpoint));
+        request.getHeaders().putSingle("Authorization", "Bearer " + accessToken);
+        return httpClient.send(request)
+                .then(new Function<Response, AccessTokenValidationResponse, OAuth2Exception>() {
+                    @Override
+                    public AccessTokenValidationResponse apply(Response response) throws OAuth2Exception {
+                        try {
+                            if (response.getStatus().isClientError()) {
+                                return new AccessTokenValidationResponse(0);
+                            } else if (!response.getStatus().isSuccessful()) {
+                                logger.error(response.getEntity().getString());
+                                throw new OAuth2Exception(response.getEntity().getString());
+                            }
+                            JsonValue userProfile = json(response.getEntity().getJson());
+                            Map<String, Object> profileInfo = new HashMap<>();
+                            profileInfo.putAll(userProfile.asMap());
+                            return new AccessTokenValidationResponse(expiresIn + System.currentTimeMillis(),
+                                    profileInfo, scopes);
+                        } catch (IOException e) {
+                            throw new OAuth2Exception(e.getMessage(), e);
+                        }
+                    }
+                }, new Function<NeverThrowsException, AccessTokenValidationResponse, OAuth2Exception>() {
+                    @Override
+                    public AccessTokenValidationResponse apply(NeverThrowsException e) {
+                        //This can never happen but the exception handler is needed
+                        // to change the types of the returned Promise.
+                        throw new IllegalStateException("HTTP Client threw a NeverThrowsException?!");
+                    }
+                });
     }
 
     /**

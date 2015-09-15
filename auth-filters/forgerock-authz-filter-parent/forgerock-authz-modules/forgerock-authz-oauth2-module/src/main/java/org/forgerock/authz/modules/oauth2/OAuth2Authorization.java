@@ -16,11 +16,13 @@
 
 package org.forgerock.authz.modules.oauth2;
 
+import static org.forgerock.json.JsonValue.*;
+
 import java.util.Set;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import org.forgerock.http.Client;
+import org.forgerock.http.Handler;
+import org.forgerock.http.handler.HttpClientHandler;
 
 /**
  * Utility class providing convenience methods for creating both {@link OAuth2CrestAuthorizationModule}s and
@@ -63,7 +65,7 @@ public final class OAuth2Authorization {
     /**
      * Creates a new {@code OAuth2CrestAuthorizationModule} with the provided configuration parameters.
      *
-     * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
+     * @param httpClientHandler The {@link Handler} to use to make HTTP requests.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
@@ -71,7 +73,7 @@ public final class OAuth2Authorization {
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to {@code true}.
      * @return A new {@code OAuth2CrestAuthorizationModule} instance.
      */
-    public static OAuth2CrestAuthorizationModule forCrest(RestResourceFactory resourceFactory,
+    public static OAuth2CrestAuthorizationModule forCrest(HttpClientHandler httpClientHandler,
                                                           String tokenInfoEndpoint,
                                                           String userInfoEndpoint,
                                                           Set<String> requiredScopes,
@@ -82,7 +84,7 @@ public final class OAuth2Authorization {
                                         object(
                                                 field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
                                                 field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint))),
-                                resourceFactory),
+                                new Client(httpClientHandler)),
                         requiredScopes,
                         cacheEnabled,
                         cacheSize);
@@ -93,17 +95,17 @@ public final class OAuth2Authorization {
      *
      * <p>Disables the cache.</p>
      *
-     * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
+     * @param httpClientHandler The {@link Handler} to use to make HTTP requests.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
      * @return A new {@code OAuth2CrestAuthorizationModule} instance.
      */
-    public static OAuth2CrestAuthorizationModule forCrest(RestResourceFactory resourceFactory,
+    public static OAuth2CrestAuthorizationModule forCrest(HttpClientHandler httpClientHandler,
                                                           String tokenInfoEndpoint,
                                                           String userInfoEndpoint,
                                                           Set<String> requiredScopes) {
-        return forCrest(resourceFactory, tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
+        return forCrest(httpClientHandler, tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
     }
 
     /**
@@ -127,7 +129,7 @@ public final class OAuth2Authorization {
     /**
      * Creates a new {@code OAuth2HttpAuthorizationModule} with the provided configuration parameters.
      *
-     * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
+     * @param httpClientHandler The {@link Handler} to use to make HTTP requests.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
@@ -135,7 +137,7 @@ public final class OAuth2Authorization {
      * @param cacheSize The size of the cache. Only used if {@code cacheEnabled} is set to {@code true}.
      * @return A new {@code OAuth2HttpAuthorizationModule} instance.
      */
-    public static OAuth2HttpAuthorizationModule forHttp(RestResourceFactory resourceFactory,
+    public static OAuth2HttpAuthorizationModule forHttp(HttpClientHandler httpClientHandler,
             String tokenInfoEndpoint, String userInfoEndpoint, Set<String> requiredScopes, boolean cacheEnabled,
             int cacheSize) {
         return forHttp(new RestOAuth2AccessTokenValidator(
@@ -143,7 +145,7 @@ public final class OAuth2Authorization {
                                 object(
                                         field(TOKEN_INFO_ENDPOINT_KEY, tokenInfoEndpoint),
                                         field(USER_INFO_ENDPOINT_KEY, userInfoEndpoint))),
-                        resourceFactory),
+                        new Client(httpClientHandler)),
                 requiredScopes,
                 cacheEnabled,
                 cacheSize);
@@ -154,14 +156,14 @@ public final class OAuth2Authorization {
      *
      * <p>Disables the cache.</p>
      *
-     * @param resourceFactory {@link RestResourceFactory} used to get content from REST endpoints.
+     * @param httpClientHandler The {@link Handler} to use to make HTTP requests.
      * @param tokenInfoEndpoint The URI for the OAuth2 token info endpoint.
      * @param userInfoEndpoint The URI for the OAuth2 user info endpoint.
      * @param requiredScopes The required OAuth2 scopes for the request to be authorized.
      * @return A new {@code OAuth2HttpAuthorizationModule} instance.
      */
-    public static OAuth2HttpAuthorizationModule forHttp(RestResourceFactory resourceFactory,
+    public static OAuth2HttpAuthorizationModule forHttp(HttpClientHandler httpClientHandler,
             String tokenInfoEndpoint, String userInfoEndpoint, Set<String> requiredScopes) {
-        return forHttp(resourceFactory, tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
+        return forHttp(httpClientHandler, tokenInfoEndpoint, userInfoEndpoint, requiredScopes, false, 0);
     }
 }

@@ -16,17 +16,20 @@
 
 package org.forgerock.authz.modules.oauth2;
 
-import org.forgerock.authz.filter.api.AuthorizationException;
-import org.forgerock.authz.filter.api.AuthorizationResult;
-import org.forgerock.authz.filter.api.AuthorizationContext;
-import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import org.forgerock.authz.filter.api.AuthorizationContext;
+import org.forgerock.authz.filter.api.AuthorizationException;
+import org.forgerock.authz.filter.api.AuthorizationResult;
+import org.forgerock.util.Function;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.ResultHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>OAuth2 authorization module that provide authorization based on an access token included in the request.</p>
@@ -97,49 +100,55 @@ public class OAuth2Module {
      * @throws AuthorizationException {@inheritDoc}
      */
     public Promise<AuthorizationResult, AuthorizationException> authorize(String accessToken,
-                                                                          AuthorizationContext context) {
+            final AuthorizationContext context) {
 
         if (accessToken != null) {
-
             // Verify is valid and not expired
-            final AccessTokenValidationResponse validationResponse;
-            try {
-                if (cacheEnabled) {
-                    final AccessTokenValidationResponse entry = cache.get(accessToken);
-                    if (entry != null) {
-                        validationResponse = entry;
-                    } else {
-                        validationResponse = validateAccessToken(accessToken);
-                    }
+            final Promise<AccessTokenValidationResponse, OAuth2Exception> validationResponse;
+            if (cacheEnabled) {
+                final AccessTokenValidationResponse entry = cache.get(accessToken);
+                if (entry != null) {
+                    validationResponse = newResultPromise(entry);
                 } else {
                     validationResponse = validateAccessToken(accessToken);
                 }
-
-                if (!validationResponse.isTokenValid()) {
-                    logger.debug("Access Token is invalid");
-                    return Promises.newResultPromise(AuthorizationResult.accessDenied("Access Token is invalid."));
-                }
-
-                // Verify scope is sufficient?...
-                final Set<String> tokenScopes = validationResponse.getTokenScopes();
-                if (!tokenScopes.containsAll(requiredScopes)) {
-                    logger.debug("Access Token does not contain required scopes");
-                    return Promises.newResultPromise(AuthorizationResult.accessDenied(
-                            "Access Token does not contain required scopes."));
-                }
-
-                // Get profile information?...
-                final Map<String, Object> profileInfo = validationResponse.getProfileInformation();
-                context.setAttribute(OAUTH2_PROFILE_INFO_CONTEXT_KEY, profileInfo);
-
-                return Promises.newResultPromise(AuthorizationResult.accessPermitted());
-            } catch (OAuth2Exception e) {
-                logger.error("Failed to validate Access Token.", e);
-                return Promises.newExceptionPromise(new AuthorizationException("Failed to validate Access Token.", e));
+            } else {
+                validationResponse = validateAccessToken(accessToken);
             }
-        }
 
-        return Promises.newResultPromise(AuthorizationResult.accessDenied("Access Token is null."));
+            return validationResponse
+                    .then(new Function<AccessTokenValidationResponse, AuthorizationResult, AuthorizationException>() {
+                        @Override
+                        public AuthorizationResult apply(AccessTokenValidationResponse validationResponse) {
+                            if (!validationResponse.isTokenValid()) {
+                                logger.debug("Access Token is invalid");
+                                return AuthorizationResult.accessDenied("Access Token is invalid.");
+                            }
+
+                            // Verify scope is sufficient?...
+                            final Set<String> tokenScopes = validationResponse.getTokenScopes();
+                            if (!tokenScopes.containsAll(requiredScopes)) {
+                                logger.debug("Access Token does not contain required scopes");
+                                return AuthorizationResult.accessDenied(
+                                        "Access Token does not contain required scopes.");
+                            }
+
+                            // Get profile information?...
+                            final Map<String, Object> profileInfo = validationResponse.getProfileInformation();
+                            context.setAttribute(OAUTH2_PROFILE_INFO_CONTEXT_KEY, profileInfo);
+
+                            return AuthorizationResult.accessPermitted();
+                        }
+                    }, new Function<OAuth2Exception, AuthorizationResult, AuthorizationException>() {
+                        @Override
+                        public AuthorizationResult apply(OAuth2Exception e) {
+                            logger.error("Failed to validate Access Token.", e);
+                            throw new AuthorizationException("Failed to validate Access Token.", e);
+                        }
+                    });
+        } else {
+            return newResultPromise(AuthorizationResult.accessDenied("Access Token is null."));
+        }
     }
 
     /**
@@ -150,12 +159,16 @@ public class OAuth2Module {
      * @return An AccessTokenValidationResponse containing the result of the validation.
      * @throws OAuth2Exception If the access token could not be validated.
      */
-    private AccessTokenValidationResponse validateAccessToken(final String accessToken) {
-        final AccessTokenValidationResponse validationResponse = accessTokenValidator.validate(accessToken);
-        if (cacheEnabled) {
-            cache.add(accessToken, validationResponse);
-        }
-        return validationResponse;
+    private Promise<AccessTokenValidationResponse, OAuth2Exception> validateAccessToken(final String accessToken) {
+        return accessTokenValidator.validate(accessToken)
+                .thenOnResult(new ResultHandler<AccessTokenValidationResponse>() {
+                    @Override
+                    public void handleResult(AccessTokenValidationResponse validationResponse) {
+                        if (cacheEnabled) {
+                            cache.add(accessToken, validationResponse);
+                        }
+                    }
+                });
     }
 
     /**

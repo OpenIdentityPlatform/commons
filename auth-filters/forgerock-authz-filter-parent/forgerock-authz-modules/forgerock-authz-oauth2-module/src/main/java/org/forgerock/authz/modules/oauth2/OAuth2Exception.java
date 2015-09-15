@@ -21,7 +21,7 @@ package org.forgerock.authz.modules.oauth2;
  *
  * @since 1.4.0
  */
-public class OAuth2Exception extends RuntimeException {
+public class OAuth2Exception extends Exception {
 
     /**
      * Serial Version UID.

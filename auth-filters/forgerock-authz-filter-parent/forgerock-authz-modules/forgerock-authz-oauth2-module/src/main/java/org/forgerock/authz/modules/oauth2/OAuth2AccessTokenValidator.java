@@ -16,6 +16,8 @@
 
 package org.forgerock.authz.modules.oauth2;
 
+import org.forgerock.util.promise.Promise;
+
 /**
  * Plugin interface for allowing different implementations for determining whether a OAuth2 Access Token is valid
  * and for retrieving scope on user profile information.
@@ -33,5 +35,5 @@ public interface OAuth2AccessTokenValidator {
      * information.
      * @throws OAuth2Exception If there is a problem validating the access token.
      */
-    AccessTokenValidationResponse validate(String accessToken);
+    Promise<AccessTokenValidationResponse, OAuth2Exception> validate(String accessToken);
 }

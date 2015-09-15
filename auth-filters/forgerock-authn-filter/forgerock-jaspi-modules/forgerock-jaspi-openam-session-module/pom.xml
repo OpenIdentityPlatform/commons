@@ -25,7 +25,6 @@
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-runtime</artifactId>
@@ -34,32 +33,13 @@
             <groupId>org.glassfish</groupId>
             <artifactId>javax.security.auth.message</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-util</artifactId>
         </dependency>
-
-
         <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.httpclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.net</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.json</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-http-core</artifactId>
         </dependency>
     </dependencies>
 </project>

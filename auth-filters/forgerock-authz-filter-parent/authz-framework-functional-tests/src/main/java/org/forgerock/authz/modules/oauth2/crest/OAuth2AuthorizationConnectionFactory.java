@@ -18,6 +18,7 @@ package org.forgerock.authz.modules.oauth2.crest;
 
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.Collections;
 
@@ -27,9 +28,11 @@ import org.forgerock.authz.modules.oauth2.AccessTokenValidationResponse;
 import org.forgerock.authz.modules.oauth2.OAuth2AccessTokenValidator;
 import org.forgerock.authz.modules.oauth2.OAuth2Authorization;
 import org.forgerock.authz.modules.oauth2.OAuth2CrestAuthorizationModule;
+import org.forgerock.authz.modules.oauth2.OAuth2Exception;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
+import org.forgerock.util.promise.Promise;
 
 /**
  * A factory class for creating an {@code ConnectionFactory} configured with an OAuth2 authorization filter.
@@ -59,13 +62,13 @@ public final class OAuth2AuthorizationConnectionFactory {
         OAuth2CrestAuthorizationModule authorizationModule = OAuth2Authorization.forCrest(
                 new OAuth2AccessTokenValidator() {
                     @Override
-                    public AccessTokenValidationResponse validate(String accessToken) {
+                    public Promise<AccessTokenValidationResponse, OAuth2Exception> validate(String accessToken) {
                         if ("VALID".equalsIgnoreCase(accessToken)) {
-                            return new AccessTokenValidationResponse(System.currentTimeMillis() + 5000,
+                            return newResultPromise(new AccessTokenValidationResponse(System.currentTimeMillis() + 5000,
                                     Collections.<String, Object>singletonMap("UID", "DEMO"),
-                                    Collections.singleton("SCOPE"));
+                                    Collections.singleton("SCOPE")));
                         } else {
-                            return new AccessTokenValidationResponse(0);
+                            return newResultPromise(new AccessTokenValidationResponse(0));
                         }
                     }
                 }, Collections.<String>emptySet(), false, 0);

@@ -16,54 +16,51 @@
 
 package org.forgerock.authz.modules.oauth2;
 
-import org.forgerock.json.JsonValue;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static java.util.Arrays.asList;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.forgerock.http.Client;
+import org.forgerock.http.Context;
+import org.forgerock.http.Handler;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
+import org.mockito.ArgumentCaptor;
+import org.mockito.BDDMockito;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class RestOAuth2AccessTokenValidatorTest {
 
     private RestOAuth2AccessTokenValidator accessTokenValidator;
 
     @Mock
-    private RestResourceFactory restResourceFactory;
-
-    @Mock
-    private RestResource tokenInfoRequest;
-
-    @Mock
-    private RestResource userProfileRequest;
+    private Handler httpClientHandler;
 
     @BeforeMethod
     public void setUp() {
-
-        MockitoAnnotations.initMocks(this);
-
-        JsonValue config = JsonValue.json(JsonValue.object(
-            JsonValue.field("token-info-endpoint", "TOKEN_INFO"),
-            JsonValue.field("user-info-endpoint", "USER-PROFILE")
+        initMocks(this);
+        JsonValue config = json(object(
+                field("token-info-endpoint", "TOKEN_INFO"),
+                field("user-info-endpoint", "USER-PROFILE")
         ));
-        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory);
-
-        given(restResourceFactory.resource(anyString()))
-                .willReturn(tokenInfoRequest)
-                .willReturn(userProfileRequest);
+        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, new Client(httpClientHandler));
     }
 
     @Test
@@ -71,22 +68,35 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("error", "ERROR");
-        JsonValue tokenInfoResponse = new JsonValue(jsonMap);
+        final Map<String, Object> tokenInfoResponse = new HashMap<>();
+        tokenInfoResponse.put("error", "ERROR");
 
-        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
+        mockHttpClientHandler(tokenInfoResponse);
 
         //When
-        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+        AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken).getOrThrowUninterruptibly();
 
         //Then
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(restResourceFactory).resource(captor.capture());
-        assertTrue(captor.getValue().contains("ACCESS_TOKEN"));
-        assertFalse(validate.isTokenValid());
-        assertTrue(validate.getProfileInformation().isEmpty());
-        assertTrue(validate.getTokenScopes().isEmpty());
+        ArgumentCaptor<Request> captor = ArgumentCaptor.forClass(Request.class);
+        verify(httpClientHandler).handle(any(Context.class), captor.capture());
+        assertThat(captor.getValue().getUri().getRawQuery()).isEqualTo("access_token=ACCESS_TOKEN");
+        assertThat(validate.isTokenValid()).isFalse();
+        assertThat(validate.getProfileInformation()).isEmpty();
+        assertThat(validate.getTokenScopes()).isEmpty();
+    }
+
+    private void mockHttpClientHandler(final Map<String, Object>... responses) {
+        BDDMockito.BDDMyOngoingStubbing<Promise<Response, NeverThrowsException>> given =
+                given(httpClientHandler.handle(any(Context.class), any(Request.class)));
+        for (final Map<String, Object> response : responses) {
+            given = given.willAnswer(new Answer<Promise<Response, NeverThrowsException>>() {
+                @Override
+                public Promise<Response, NeverThrowsException> answer(
+                        InvocationOnMock invocationOnMock) {
+                    return newResultPromise(new Response(Status.OK).setEntity(response));
+                }
+            });
+        }
     }
 
     @Test
@@ -94,20 +104,19 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("expires_in", -1);
-        jsonMap.put("scope", "A B C");
-        JsonValue tokenInfoResponse = new JsonValue(jsonMap);
+        Map<String, Object> tokenInfoResponse = new HashMap<>();
+        tokenInfoResponse.put("expires_in", -1);
+        tokenInfoResponse.put("scope", "A B C");
 
-        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
+        mockHttpClientHandler(tokenInfoResponse);
 
         //When
-        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+        AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken).getOrThrowUninterruptibly();
 
         //Then
-        assertFalse(validate.isTokenValid());
-        assertTrue(validate.getProfileInformation().isEmpty());
-        assertEquals(validate.getTokenScopes().size(), 3);
+        assertThat(validate.isTokenValid()).isFalse();
+        assertThat(validate.getProfileInformation()).isEmpty();
+        assertThat(validate.getTokenScopes()).hasSize(3);
     }
 
     /**
@@ -117,29 +126,28 @@ public class RestOAuth2AccessTokenValidatorTest {
     public void shouldReturnValidAccessTokenResponseWhenTokenIsNotExpired() throws Exception {
 
         //Given
-        JsonValue config = JsonValue.json(JsonValue.object(
-                JsonValue.field("token-info-endpoint", "TOKEN_INFO")
+        JsonValue config = json(object(
+                field("token-info-endpoint", "TOKEN_INFO")
                 // No user info endpoint
         ));
-        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory);
+        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, new Client(httpClientHandler));
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("expires_in", 10);
-        jsonMap.put("scope", "A B C");
-        JsonValue tokenInfoResponse = new JsonValue(jsonMap);
+        Map<String, Object> tokenInfoResponse = new HashMap<>();
+        tokenInfoResponse.put("expires_in", 10);
+        tokenInfoResponse.put("scope", "A B C");
 
-        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
+        mockHttpClientHandler(tokenInfoResponse);
 
         //When
-        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+        AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken).getOrThrowUninterruptibly();
 
         // Mimics a delay before re-using the response
         Thread.sleep(50);
 
         //Then
-        assertTrue(validate.isTokenValid());
-        assertTrue(validate.getProfileInformation().isEmpty());
-        assertEquals(validate.getTokenScopes().size(), 3);
+        assertThat(validate.isTokenValid()).isTrue();
+        assertThat(validate.getProfileInformation()).isEmpty();
+        assertThat(validate.getTokenScopes()).hasSize(3);
     }
 
     @Test
@@ -147,20 +155,19 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("expires_in", -1);
-        jsonMap.put("scope", "A B C");
-        JsonValue tokenInfoResponse = new JsonValue(jsonMap);
+        Map<String, Object> tokenInfoResponse = new HashMap<>();
+        tokenInfoResponse.put("expires_in", -1);
+        tokenInfoResponse.put("scope", "A B C");
 
-        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
+        mockHttpClientHandler(tokenInfoResponse);
 
         //When
-        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+        AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken).getOrThrowUninterruptibly();
 
         //Then
-        assertFalse(validate.isTokenValid());
-        assertTrue(validate.getProfileInformation().isEmpty());
-        assertEquals(validate.getTokenScopes().size(), 3);
+        assertThat(validate.isTokenValid()).isFalse();
+        assertThat(validate.getProfileInformation()).isEmpty();
+        assertThat(validate.getTokenScopes()).hasSize(3);
     }
 
     @Test
@@ -168,30 +175,28 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> tokenInfoMap = new HashMap<>();
-        tokenInfoMap.put("expires_in", 1);
-        tokenInfoMap.put("scope", "A B C");
-        JsonValue tokenInfoResponse = new JsonValue(tokenInfoMap);
+        Map<String, Object> tokenInfoResponse = new HashMap<>();
+        tokenInfoResponse.put("expires_in", 1);
+        tokenInfoResponse.put("scope", "A B C");
 
-        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
+        Map<String, Object> profileResponse = new HashMap<>();
+        profileResponse.put("KEY1", "VAL");
+        profileResponse.put("KEY2", "VAL");
 
-        Map<String, Object> userProfileMap = new HashMap<>();
-        userProfileMap.put("KEY1", "VAL");
-        userProfileMap.put("KEY2", "VAL");
-        JsonValue profileResponse = new JsonValue(userProfileMap);
-
-        given(userProfileRequest.get()).willReturn(profileResponse);
+        mockHttpClientHandler(tokenInfoResponse, profileResponse);
 
         //When
-        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+        AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken).getOrThrowUninterruptibly();
 
         //Then
-        ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
-        verify(userProfileRequest).addHeader(eq("Authorization"), captor.capture());
-        assertTrue(captor.getValue().equals("Bearer ACCESS_TOKEN"));
-        assertTrue(validate.isTokenValid());
-        assertEquals(validate.getProfileInformation().size(), 2);
-        assertEquals(validate.getTokenScopes().size(), 3);
+        ArgumentCaptor<Request> captor = ArgumentCaptor.forClass(Request.class);
+        verify(httpClientHandler, times(2)).handle(any(Context.class), captor.capture());
+        assertThat(captor.getAllValues()).hasSize(2);
+        assertThat(captor.getAllValues().get(1).getHeaders().getFirst("Authorization"))
+                .isEqualTo("Bearer ACCESS_TOKEN");
+        assertThat(validate.isTokenValid()).isTrue();
+        assertThat(validate.getProfileInformation()).hasSize(2);
+        assertThat(validate.getTokenScopes()).hasSize(3);
     }
 
     /**
@@ -201,26 +206,25 @@ public class RestOAuth2AccessTokenValidatorTest {
     @Test
     public void shouldNotFetchUserProfileIfEndPointNotConfigured() throws Exception {
         // Given
-        JsonValue config = JsonValue.json(JsonValue.object(
-                JsonValue.field("token-info-endpoint", "TOKEN_INFO")
+        JsonValue config = json(object(
+                field("token-info-endpoint", "TOKEN_INFO")
                 // No user info endpoint
         ));
-        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, restResourceFactory);
+        accessTokenValidator = new RestOAuth2AccessTokenValidator(config, new Client(httpClientHandler));
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> tokenInfoMap = new HashMap<>();
-        tokenInfoMap.put("expires_in", 1);
-        tokenInfoMap.put("scope", "A B C");
-        JsonValue tokenInfoResponse = new JsonValue(tokenInfoMap);
+        Map<String, Object> tokenInfoResponse = new HashMap<>();
+        tokenInfoResponse.put("expires_in", 1);
+        tokenInfoResponse.put("scope", "A B C");
 
-        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
+        mockHttpClientHandler(tokenInfoResponse);
 
 
         // When
-        AccessTokenValidationResponse response = accessTokenValidator.validate(accessToken);
+        AccessTokenValidationResponse response = accessTokenValidator.validate(accessToken).getOrThrowUninterruptibly();
 
         // Then
-        verifyZeroInteractions(userProfileRequest);
-        assertEquals(response.getProfileInformation(), Collections.emptyMap());
+        verify(httpClientHandler, times(1)).handle(any(Context.class), any(Request.class));
+        assertThat(response.getProfileInformation()).isEmpty();
     }
 
     @Test
@@ -228,18 +232,16 @@ public class RestOAuth2AccessTokenValidatorTest {
 
         //Given
         String accessToken = "ACCESS_TOKEN";
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("expires_in", -1);
-        jsonMap.put("scope", asList("A", "B", "C"));
-        JsonValue tokenInfoResponse = new JsonValue(jsonMap);
+        Map<String, Object> tokenInfoResponse = new HashMap<>();
+        tokenInfoResponse.put("expires_in", -1);
+        tokenInfoResponse.put("scope", asList("A", "B", "C"));
 
-        given(tokenInfoRequest.get()).willReturn(tokenInfoResponse);
+        mockHttpClientHandler(tokenInfoResponse);
 
         //When
-        final AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken);
+        AccessTokenValidationResponse validate = accessTokenValidator.validate(accessToken).getOrThrowUninterruptibly();
 
         //Then
-        assertEquals(validate.getTokenScopes().size(), 3);
+        assertThat(validate.getTokenScopes()).hasSize(3);
     }
-
 }
