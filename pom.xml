@@ -117,7 +117,7 @@
     <forgerock-http-framework.version>0.0.1-SNAPSHOT</forgerock-http-framework.version>
     <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
     <forgerock-auth-filters.version>2.0.0-SNAPSHOT</forgerock-auth-filters.version>
-    <forgerock-audit.version>0.3.0-SNAPSHOT</forgerock-audit.version>
+    <forgerock-audit.version>0.4.0-SNAPSHOT</forgerock-audit.version>
     <opendj.ldap-sdk.version>3.0.0-SNAPSHOT</opendj.ldap-sdk.version>
   </properties>
 
