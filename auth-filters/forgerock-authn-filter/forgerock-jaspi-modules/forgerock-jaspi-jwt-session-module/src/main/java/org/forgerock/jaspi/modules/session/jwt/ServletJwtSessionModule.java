@@ -18,6 +18,7 @@ package org.forgerock.jaspi.modules.session.jwt;
 
 import static org.forgerock.caf.http.Cookie.getCookies;
 import static org.forgerock.caf.http.Cookie.newCookie;
+import static org.forgerock.jaspi.modules.session.jwt.AbstractJwtSessionModule.LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -141,6 +142,13 @@ public class ServletJwtSessionModule extends AbstractJwtSessionModule<Cookie> im
     String getPrincipalFromRequest(MessageInfo messageInfo) {
         HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
         return (String) request.getAttribute(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL);
+    }
+
+    @Override
+    boolean isLogoutRequest(MessageInfo messageInfo) {
+        HttpServletRequest request = (HttpServletRequest) messageInfo.getRequestMessage();
+        Object isLogoutRequest = request.getAttribute(LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME);
+        return isLogoutRequest != null && (Boolean) request.getAttribute(LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME);
     }
 
     @Override

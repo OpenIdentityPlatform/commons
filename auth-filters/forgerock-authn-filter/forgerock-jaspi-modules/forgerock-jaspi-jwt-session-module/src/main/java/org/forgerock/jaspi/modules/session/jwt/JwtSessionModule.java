@@ -172,6 +172,14 @@ public class JwtSessionModule extends AbstractJwtSessionModule<CookieWrapper> im
     }
 
     @Override
+    boolean isLogoutRequest(MessageInfo messageInfo) {
+        MessageInfoContext messageInfoContext =
+                (MessageInfoContext) messageInfo.getMap().get(JaspiAdapters.MESSAGE_INFO_CONTEXT_KEY);
+        return (Boolean) messageInfoContext.asContext(AttributesContext.class).getAttributes()
+                .get(LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME);
+    }
+
+    @Override
     public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
         return newResultPromise(null);
     }

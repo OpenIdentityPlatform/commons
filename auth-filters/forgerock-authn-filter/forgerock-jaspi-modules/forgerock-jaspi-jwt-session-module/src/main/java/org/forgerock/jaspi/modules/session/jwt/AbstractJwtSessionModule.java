@@ -62,6 +62,8 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
     private static final String DEFAULT_JWT_SESSION_COOKIE_NAME = "session-jwt";
     private static final String SKIP_SESSION_PARAMETER_NAME = "skipSession";
+    /** Request attribute for logout requests which will cause this module to delete the session cookie. */
+    public static final String LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME = "logoutSession";
 
     /** The Key Alias configuration property key. */
     public static final String KEY_ALIAS_KEY = "keyAlias";
@@ -424,6 +426,11 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
             return AuthStatus.SEND_SUCCESS;
         }
 
+        if (isLogoutRequest(messageInfo)) {
+            deleteSessionJwtCookie(messageInfo);
+            return AuthStatus.SEND_SUCCESS;
+        }
+
         boolean jwtValidated = messageInfo.getMap().containsKey(JWT_VALIDATED_KEY);
         if (!jwtValidated) {
             // create jwt
@@ -437,6 +444,8 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
     }
 
     abstract String getPrincipalFromRequest(MessageInfo messageInfo);
+
+    abstract boolean isLogoutRequest(MessageInfo messageInfo);
 
     /**
      * Creates the session JWT, including the custom parameters in the payload and adding the expiration time and then

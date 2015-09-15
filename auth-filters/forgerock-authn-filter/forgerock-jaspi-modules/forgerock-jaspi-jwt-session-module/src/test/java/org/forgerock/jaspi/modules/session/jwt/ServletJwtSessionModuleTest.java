@@ -17,6 +17,7 @@
 package org.forgerock.jaspi.modules.session.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.jaspi.modules.session.jwt.AbstractJwtSessionModule.LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME;
 import static org.forgerock.json.JsonValue.json;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -1147,5 +1148,33 @@ public class ServletJwtSessionModuleTest {
 
         //then
         //should never get here
+    }
+
+    @Test(groups = "sessionCookieName")
+    public void shouldLogoutSession() throws Exception {
+
+        //Given
+        MessageInfo messageInfo = mock(MessageInfo.class);
+        Subject serviceSubject = new Subject();
+        HttpServletRequest request = mock(HttpServletRequest.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
+        given(messageInfo.getRequestMessage()).willReturn(request);
+        given(messageInfo.getResponseMessage()).willReturn(response);
+        given(messageInfo.getMap()).willReturn(new HashMap());
+        given(request.getAttribute(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL)).willReturn("PRINCIPAL");
+        given(request.getAttribute(LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME)).willReturn(true);
+
+        //When
+        AuthStatus authStatus = jwtSessionModule.secureResponse(messageInfo, serviceSubject);
+
+        //Then
+        assertThat(authStatus).isSameAs(AuthStatus.SEND_SUCCESS);
+        ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
+        verify(response).addCookie(cookieCaptor.capture());
+        assertThat(cookieCaptor.getValue().getName()).isEqualTo("my-custom-name");
+        assertThat(cookieCaptor.getValue().getValue()).isNull();
+        assertThat(cookieCaptor.getValue().getMaxAge()).isEqualTo(0);
+        assertThat(cookieCaptor.getValue().getPath()).isEqualTo("/");
     }
 }
