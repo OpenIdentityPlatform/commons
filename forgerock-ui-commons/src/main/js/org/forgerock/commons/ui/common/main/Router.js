@@ -30,8 +30,9 @@ define("org/forgerock/commons/ui/common/main/Router", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
-], function(_, eventManager, constants, conf, AbstractConfigurationAware) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
+    "org/forgerock/commons/ui/common/util/URIUtils"
+], function(_, eventManager, constants, conf, AbstractConfigurationAware, URIUtils) {
     /**
      * @exports org/forgerock/commons/ui/common/main/Router
      */
@@ -42,42 +43,33 @@ define("org/forgerock/commons/ui/common/main/Router", [
     obj.currentRoute = {};
 
 
-    obj.getUrl = function() {
-        return window.location.href;
-    };
-
-    obj.getCurrentUrlBasePart = function() {
-        return window.location.protocol + "//" + window.location.host;
-    };
-
     /**
-     * Returns the query string from the fragment component
-     * @returns {String} Unescaped query string or empty string if no query string was found
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentUrl}
      */
-    obj.getURIFragmentQueryString = function() {
-      var fragment = obj.getURIFragment(),
-          queryString = '';
-
-      if(fragment.indexOf('&') > -1) {
-        queryString = fragment.substring(fragment.indexOf('&') + 1);
-      }
-
-      return queryString;
-    };
-
-    /**
-     * Returns the query string from the URI
-     * @returns {String} Unescaped query string or empty string if no query string was found
-     */
-    obj.getURIQueryString = function() {
-      var queryString = window.location.search;
-
-      return queryString.substr(1, queryString.length);
-    };
+    obj.getUrl = URIUtils.getCurrentUrl;
 
     /**
      * @deprecated
-     * @see Use {@link module:org/forgerock/commons/ui/common/main/Router.getURIFragment}
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentOrigin}
+     */
+    obj.getCurrentUrlBasePart = URIUtils.getCurrentOrigin;
+
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentFragmentQueryString}
+     */
+    obj.getURIFragmentQueryString = URIUtils.getCurrentFragmentQueryString;
+
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentQueryString}
+     */
+    obj.getURIQueryString = URIUtils.getCurrentQueryString;
+
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentFragment}
      */
     obj.getCurrentHash = function() {
         if (obj.getUrl().indexOf('#') === -1) {
@@ -89,19 +81,14 @@ define("org/forgerock/commons/ui/common/main/Router", [
     };
 
     /**
-     * Returns the fragment component of the current URI
-     *
-     * Use instead of the inconsistent window.location.hash as Firefox unescapes this parameter incorrectly
-     * @see {@link https://bugzilla.mozilla.org/show_bug.cgi?id=135309}
-     * @returns {String} Unescaped fragment or empty string if no fragment was found
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentFragment}
      */
-    obj.getURIFragment = function() {
-        return obj.getUrl().split('#')[1] || '';
-    };
+    obj.getURIFragment = URIUtils.getCurrentFragment;
 
     /**
      * @deprecated
-     * @see Use {@link module:org/forgerock/commons/ui/common/main/Router.getCompositeQueryString}
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentCompositeQueryString}
      */
     obj.getCurrentUrlQueryParameters = function() {
         var hash = obj.getCurrentHash(),
@@ -114,23 +101,16 @@ define("org/forgerock/commons/ui/common/main/Router", [
     };
 
     /**
-     * Returns an unescaped composite query string constructed from:<br>
-     * <ul><li>Fragment query string</li>
-     * <li>URL query string</li></ul>
-     * <p>
-     * If a fragment query string is present it overrides the URL query string entirely
-     * @returns {String} Unescaped query string
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentCompositeQueryString}
      */
-    obj.getCompositeQueryString = function() {
-      var urlQueryString = obj.getURIQueryString(),
-          fragmentQueryString = obj.getURIFragmentQueryString();
+    obj.getCompositeQueryString = URIUtils.getCurrentCompositeQueryString;
 
-      return fragmentQueryString.length ? fragmentQueryString : urlQueryString;
-    };
-
-    obj.getCurrentPathName = function() {
-        return window.location.pathname;
-    };
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentPathName}
+     */
+    obj.getCurrentPathName = URIUtils.getCurrentPathName;
 
     obj.setUrl = function(url) {
         window.location.href = url;
@@ -150,36 +130,17 @@ define("org/forgerock/commons/ui/common/main/Router", [
         return result;
     };
 
-    obj.convertQueryParametersToJSON = function(queryParameters) {
-        if(queryParameters) {
-            //create a json object from a query string
-            //by taking a query string and splitting it up into individual key=value strings
-            return _.object(
-                //queryParameters.match(/([^&]+)/g) returns an array of key value pair strings
-                _.map(queryParameters.match(/([^&]+)/g), function (pair) {
-                   //convert each string into a an array 0 index being the key and 1 index being the value
-                   var keyAndValue = pair.match(/([^=]+)=?(.*)/).slice(1);
-                       //decode the value
-                       keyAndValue[1] = decodeURIComponent(keyAndValue[1]);
-                       return keyAndValue;
-                })
-            );
-        }
-        return {};
-    };
+    /**
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.parseQueryString}
+     */
+    obj.convertQueryParametersToJSON = URIUtils.parseQueryString;
 
     /**
-    * Takes a string and checks if there is a matching url parameter.
-    * @returns {String} parameter or null
-    */
-    obj.getParamByName = function(string){
-        var urlParams = obj.convertCurrentUrlToJSON().params;
-        if (urlParams && urlParams.hasOwnProperty(string)) {
-            return urlParams[string];
-        } else {
-            return null;
-        }
-    };
+     * @deprecated
+     * @see Use {@link module:org/forgerock/commons/ui/common/util/URIUtils.getCurrentQueryParam}
+     */
+    obj.getParamByName = URIUtils.getCurrentQueryParam;
 
     // returns undecoded route parameters for the provided hash
     obj.extractParameters = function (route, hash) {

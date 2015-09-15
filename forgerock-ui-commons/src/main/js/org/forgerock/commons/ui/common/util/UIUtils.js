@@ -31,31 +31,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
      */
     var obj = new AbstractConfigurationAware();
 
-    // these functions used to exist in this module, but they were moved to the
-    // Router module (they are all route-related, rather than UI)
-    // this remains so that old code doesn't just break;
-    _.each([
-        "getUrl",
-        "getCurrentUrlBasePart",
-        "getURIFragmentQueryString",
-        "getURIQueryString",
-        "getCurrentHash",
-        "getURIFragment",
-        "getCurrentUrlQueryParameters",
-        "getCompositeQueryString",
-        "getCurrentPathName",
-        "setUrl",
-        "normalizeSubPath",
-        "convertCurrentUrlToJSON",
-        "convertQueryParametersToJSON",
-        "getParamByName"
-    ], function (f) {
-        obj[f] = function () {
-            console.warn("Deprecated use of UIUtils." + f + "; Update code to use Router." + f);
-            return Router[f].apply(this, arguments);
-        };
-    });
-
     obj.templates = {};
 
     obj.renderTemplate = function(templateUrl, el, data, clb, mode, validation) {
