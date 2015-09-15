@@ -278,7 +278,7 @@ public final class Requests {
         @Override
         public JsonValue toJsonValue() {
             return super.toJsonValue()
-                    .put(FIELD_NEW_RESOURCE_ID, String.valueOf(getNewResourceId()))
+                    .put(FIELD_NEW_RESOURCE_ID, getNewResourceId())
                     .put(FIELD_CONTENT, getContent().getObject());
         }
 
