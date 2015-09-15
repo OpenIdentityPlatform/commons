@@ -50,6 +50,7 @@ import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
@@ -155,8 +156,8 @@ final class HttpAdapter implements Handler {
     public Promise<Response, NeverThrowsException> handle(Context context,
             org.forgerock.http.protocol.Request request) {
         try {
-            Operation operation = determineRequestOperation(request);
-            switch (operation) {
+            RequestType requestType = determineRequestType(request);
+            switch (requestType) {
                 case CREATE:
                     return doCreate(context, request);
                 case READ:
@@ -172,7 +173,7 @@ final class HttpAdapter implements Handler {
                 case QUERY:
                     return doQuery(context, request);
                 default:
-                    return fail(request, new NotSupportedException("Operation " + operation + " not supported"));
+                    return fail(request, new NotSupportedException("Operation " + requestType + " not supported"));
             }
         } catch (ResourceException e) {
             return fail(request, e);

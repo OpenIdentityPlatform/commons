@@ -63,6 +63,7 @@ import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -277,35 +278,35 @@ public final class HttpUtils {
      * @throws ResourceException If the request operation could not be
      * determined or is not supported.
      */
-    public static Operation determineRequestOperation(org.forgerock.http.protocol.Request request)
+    public static RequestType determineRequestType(org.forgerock.http.protocol.Request request)
             throws ResourceException {
         // Dispatch the request based on method, taking into account
         // method override header.
         final String method = getMethod(request);
         if (METHOD_DELETE.equals(method)) {
-            return Operation.DELETE;
+            return RequestType.DELETE;
         } else if (METHOD_GET.equals(method)) {
             if (hasParameter(request, PARAM_QUERY_ID) || hasParameter(request, PARAM_QUERY_EXPRESSION)
                     || hasParameter(request, PARAM_QUERY_FILTER)) {
-                return Operation.QUERY;
+                return RequestType.QUERY;
             } else {
-                return Operation.READ;
+                return RequestType.READ;
             }
         } else if (METHOD_PATCH.equals(method)) {
-            return Operation.PATCH;
+            return RequestType.PATCH;
         } else if (METHOD_POST.equals(method)) {
             final String action = asSingleValue(PARAM_ACTION, getParameter(request, PARAM_ACTION));
             if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
-                return Operation.CREATE;
+                return RequestType.CREATE;
             } else {
-                return Operation.ACTION;
+                return RequestType.ACTION;
             }
         } else if (METHOD_PUT.equals(method)) {
             final String rev = getIfNoneMatch(request);
             if (ETAG_ANY.equals(rev)) {
-                return Operation.CREATE;
+                return RequestType.CREATE;
             } else {
-                return Operation.UPDATE;
+                return RequestType.UPDATE;
             }
         } else {
             // TODO: i18n
