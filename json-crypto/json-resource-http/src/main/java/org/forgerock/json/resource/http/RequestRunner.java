@@ -110,7 +110,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                             writeApiVersionHeaders(result);
                             writeAdvice();
                             if (result != null) {
-                                writeJsonValue(result.getJsonContent());
+                                writer.writeObject(result.getJsonContent().getObject());
                             } else {
                                 // No content.
                                 httpResponse.setStatus(Status.NO_CONTENT);
@@ -204,7 +204,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
             public boolean handleResource(final ResourceResponse resource) {
                 try {
                     writeHeader(resource, isFirstResult);
-                    writeJsonValue(resource.getContent());
+                    writeResourceJsonContent(resource);
                     resultCount.incrementAndGet();
                     return true;
                 } catch (final Exception e) {
@@ -362,10 +362,6 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         };
     }
 
-    private void writeJsonValue(final JsonValue json) throws IOException {
-        writer.writeObject(json.getObject());
-    }
-
     private void writeTextValue(final JsonValue json) throws IOException {
         if (json.isMap() && !json.asMap().isEmpty()) {
             writeToResponse(json.asMap().entrySet().iterator().next().getValue().toString().getBytes());
@@ -413,12 +409,37 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         ContentType contentType = new ContentType(ContentTypeHeader.valueOf(httpResponse).toString());
 
         if (contentType.match(MIME_TYPE_APPLICATION_JSON)) {
-            writeJsonValue(resource.getContent());
+            writeResourceJsonContent(resource);
         } else if (contentType.match(MIME_TYPE_TEXT_PLAIN)) {
             writeTextValue(resource.getContent());
         } else {
             writeBinaryValue(resource.getContent());
         }
+    }
+
+    /*
+     * Writes a JSON resource taking care to ensure that the _id and _rev fields are always serialized regardless of
+     * the field filtering. It is essential that these fields are included so that clients can reconstruct
+     * ResourceResponse object's "id" and "revision" properties. In addition, it is reasonable to assume that query
+     * results should always include at least the _id field otherwise it will be difficult to perform any useful
+     * client side result processing.
+     */
+    private void writeResourceJsonContent(final ResourceResponse resource) throws IOException {
+        writer.writeStartObject();
+        {
+            if (resource.getId() != null && !resource.getContent().isDefined("_id")) {
+                writer.writeObjectField("_id", resource.getId());
+            }
+
+            if (resource.getRevision() != null && !resource.getContent().isDefined("_rev")) {
+                writer.writeObjectField("_rev", resource.getRevision());
+            }
+
+            for (Map.Entry<String, Object> property : resource.getContent().asMap().entrySet()) {
+                writer.writeObjectField(property.getKey(), property.getValue());
+            }
+        }
+        writer.writeEndObject();
     }
 
     private void writeApiVersionHeaders(org.forgerock.json.resource.Response response) {
