@@ -16,6 +16,10 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -180,6 +184,12 @@ public final class Responses {
         public Promise<ActionResponse, ResourceException> asPromise() {
             return Promises.<ActionResponse, ResourceException>newResultPromise(this);
         }
+
+        @Override
+        public String toString() {
+            return json(object(field("content", content.getObject()))).toString();
+        }
+
     }
 
     private static final class ResourceResponseImpl extends AbstractResponseImpl implements ResourceResponse {
