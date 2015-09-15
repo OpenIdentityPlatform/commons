@@ -43,7 +43,9 @@ public class JsonTest {
     private Object[][] emptyJson() {
         return new Object[][] {
             { "" },
-            { "\n" } };
+            { " " },
+            { "\n" },
+            { "\r\n" } };
     }
 
     @DataProvider
@@ -62,14 +64,35 @@ public class JsonTest {
             { "{ :'outputHandler', 'type': 'ClientHandler' }" }}; // Missing attribute name.
     }
 
-    @Test(dataProvider = "emptyJson")
-    public void shouldReturnsNullWhenSerializingEmptyString(final String json) throws Exception {
+    @Test(dataProvider = "emptyJson",
+          expectedExceptions = IOException.class)
+    public void shouldFailWhenSerializingEmptyString(final String json) throws Exception {
         assertThat(readJson(from(json))).isNull();
     }
 
     @Test(expectedExceptions = IOException.class)
     public void shouldFailToReadInvalidJson() throws Exception {
         readJson(from(INVALID_JSON));
+    }
+
+    @DataProvider
+    private Object[][] primitiveJsonValues() {
+        // @Checkstyle:off
+        return new Object[][] {
+                { "\"Hello World\"", "Hello World" },
+                { "true", Boolean.TRUE },
+                { "false", Boolean.FALSE },
+                { "null", null },
+                { "42", 42 },
+                { "-42", -42 },
+                { "1.3", 1.3 },
+        };
+        // @Checkstyle:on
+    }
+
+    @Test(dataProvider = "primitiveJsonValues")
+    public void shouldReadPrimitiveValues(String input, Object expected) throws Exception {
+        assertThat(readJson(from(input))).isEqualTo(expected);
     }
 
     @Test(dataProvider = "invalidJson", expectedExceptions = IOException.class)
@@ -79,28 +102,31 @@ public class JsonTest {
     }
 
     @Test
-    public void shouldParsingSucceedWhenCommentsEnabledBlockommentInsideBlock() throws Exception {
+    @SuppressWarnings("unchecked")
+    public void shouldParsingSucceedWhenCommentsEnabledBlockCommentInsideBlock() throws Exception {
         final String sample =
                 "{ 'name': 'outputHandler', 'type': 'ClientHandler' /* This is a comment */ } ";
-        final Map<String, Object> json = readJsonLenient(from(sample));
+        final Map<String, Object> json = (Map<String, Object>) readJsonLenient(from(sample));
         assertThat(json.get("name")).isEqualTo("outputHandler");
         assertThat(json.get("type")).isEqualTo("ClientHandler");
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldParsingSucceedWhenCommentsEnabledBlockCommentOutsideBlock() throws Exception {
         final String sample =
                 "{ 'name': 'outputHandler', 'type': 'ClientHandler' } /* This is a comment */ ";
-        final Map<String, Object> json = readJsonLenient(from(sample));
+        final Map<String, Object> json = (Map<String, Object>) readJsonLenient(from(sample));
         assertThat(json.get("name")).isEqualTo("outputHandler");
         assertThat(json.get("type")).isEqualTo("ClientHandler");
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldParsingSucceedWhenCommentsEnabledLineCommentOutsideBlock() throws Exception {
         final String sample =
                 "{ 'name': 'outputHandler', 'type': 'ClientHandler' } // This is a comment";
-        final Map<String, Object> json = readJsonLenient(from(sample));
+        final Map<String, Object> json = (Map<String, Object>) readJsonLenient(from(sample));
         assertThat(json.get("name")).isEqualTo("outputHandler");
         assertThat(json.get("type")).isEqualTo("ClientHandler");
     }
@@ -146,53 +172,59 @@ public class JsonTest {
      * </pre>
      */
     @Test(dataProvider = "newLine")
+    @SuppressWarnings("unchecked")
     public void shouldSucceedWhenContainingEol(final String newLine) throws IOException {
         final Map<String, Object> jackson =
-                readJsonLenient(from("{ 'comment': 'Two lines " + newLine + "of comment' }"));
+                (Map<String, Object>) readJsonLenient(from("{ 'comment': 'Two lines " + newLine + "of comment' }"));
         assertThat((String) jackson.get("comment")).matches("Two lines [\r\n]{1,2}of comment$");
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testAllowsSimpleQuote() throws Exception {
         final String sample = "{ 'condition': true } ";
-        final Map<String, Object> jackson = readJsonLenient(new StringReader(sample));
+        final Map<String, Object> jackson = (Map<String, Object>) readJsonLenient(new StringReader(sample));
 
         assertThat((Boolean) jackson.get("condition")).isTrue();
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testFromString() throws Exception {
-        final Map<String, Object> jackson = readJson(from(JSON_CONTENT));
+        final Map<String, Object> jackson = (Map<String, Object>) readJson(from(JSON_CONTENT));
 
         assertThat(jackson.get("name")).isEqualTo("outputHandler");
         assertThat(jackson.get("type")).isEqualTo("ClientHandler");
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testStringAllowNullAttributeValue() throws Exception {
 
         final String rawJson = "{ 'name': null, 'type': 'ClientHandler' } ";
-        final Map<String, Object> jackson = readJson(from(rawJson));
+        final Map<String, Object> jackson = (Map<String, Object>) readJson(from(rawJson));
 
         assertThat(jackson.get("name")).isNull();
         assertThat(jackson.get("type")).isEqualTo("ClientHandler");
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testJsonValueNumber() throws Exception {
 
         final String rawJson = "{ 'number': 23, 'other': '27' } ";
-        final Map<String, Object> jackson = readJson(from(rawJson));
+        final Map<String, Object> jackson = (Map<String, Object>) readJson(from(rawJson));
 
         assertThat(jackson.get("number")).isEqualTo(23);
         assertThat(jackson.get("other")).isEqualTo("27");
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testJsonValueSupportsLong() throws Exception {
 
         final String rawJson = "{ 'long': '" + MAX_VALUE + "'}";
-        final Map<String, Object> jackson = readJson(from(rawJson));
+        final Map<String, Object> jackson = (Map<String, Object>) readJson(from(rawJson));
 
         assertThat(parseLong(jackson.get("long").toString())).isEqualTo(MAX_VALUE);
     }
@@ -209,7 +241,7 @@ public class JsonTest {
 
     @Test
     public void shouldSucceedToParseArray2() throws IOException {
-        final String rawJson = singleQuotesToDouble("['The', { 'data':'outputHandler'} ]");
+        final String rawJson = singleQuotesToDouble("['The', { 'data':'outputHandler', 'array':[]} ]");
         final Object jsonNode = readJson(rawJson);
         assertThat(jsonNode).isInstanceOf(List.class);
         final List<?> values = (List<?>) jsonNode;
@@ -218,6 +250,7 @@ public class JsonTest {
         @SuppressWarnings("unchecked")
         final LinkedHashMap<String, Object> val2 = (LinkedHashMap<String, Object>) values.get(1);
         assertThat(val2.get("data")).isEqualTo("outputHandler");
+        //assertThat(val2.get("array")).isInstanceOf(LinkedList.class);
     }
 
     @Test

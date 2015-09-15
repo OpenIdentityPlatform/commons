@@ -16,19 +16,11 @@
 
 package org.forgerock.http.protocol;
 
-import static org.forgerock.http.util.Json.*;
-import static org.forgerock.util.Utils.*;
-import static java.nio.charset.StandardCharsets.*;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.http.header.ContentEncodingHeader;
-import org.forgerock.http.header.ContentLengthHeader;
-import org.forgerock.http.header.ContentTypeHeader;
-import org.forgerock.http.io.BranchingInputStream;
-import org.forgerock.http.io.IO;
+import static org.forgerock.http.util.Json.readJson;
+import static org.forgerock.http.util.Json.writeJson;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -37,13 +29,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
+
+import org.forgerock.http.header.ContentEncodingHeader;
+import org.forgerock.http.header.ContentLengthHeader;
+import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.io.BranchingInputStream;
+import org.forgerock.http.io.IO;
 
 /**
  * Message content. An entity wraps a BranchingInputStream and provides various
@@ -218,42 +213,6 @@ public final class Entity implements Closeable {
             }
         }
         return json;
-    }
-
-    // TODO move JsonValueUtil/Json in to http-core util and use that
-    private static <T> T parse(ObjectMapper mapper, Reader reader) throws IOException {
-        if (reader == null) {
-            return null;
-        }
-
-        final JsonParser jp = mapper.getFactory().createParser(reader);
-        final JsonToken jToken = jp.nextToken();
-        if (jToken != null) {
-            switch (jToken) {
-            case START_ARRAY:
-                return mapper.readValue(jp, new TypeReference<LinkedList<?>>() {
-                });
-            case START_OBJECT:
-                return mapper.readValue(jp, new TypeReference<LinkedHashMap<String, ?>>() {
-                });
-            case VALUE_FALSE:
-            case VALUE_TRUE:
-                return mapper.readValue(jp, new TypeReference<Boolean>() {
-                });
-            case VALUE_NUMBER_INT:
-                return mapper.readValue(jp, new TypeReference<Integer>() {
-                });
-            case VALUE_NUMBER_FLOAT:
-                return mapper.readValue(jp, new TypeReference<Float>() {
-                });
-            case VALUE_NULL:
-                return null;
-            default:
-                // This is very unlikely to happen.
-                throw new IOException("Invalid JSON content");
-            }
-        }
-        return null;
     }
 
     /**

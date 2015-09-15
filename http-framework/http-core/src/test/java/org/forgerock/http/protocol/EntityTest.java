@@ -107,10 +107,15 @@ public class EntityTest {
         }
     }
 
-    @Test
+    @Test(expectedExceptions = IOException.class)
     public void getJsonWhenEntityIsEmpty() throws Exception {
+        entity.getJson();
+    }
+
+    @Test
+    public void setNullAsJsonContent() throws Exception {
+        entity.setJson(null);
         assertThat(entity.getJson()).isNull();
-        assertThat(entity.mayContainData()).isFalse();
     }
 
     @Test
