@@ -32,7 +32,6 @@ import java.net.URI;
 import org.forgerock.http.Context;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -63,8 +62,10 @@ public class RequestRunnerTest {
     @Test
     public void testHandleResourceAnonymousQueryResourceHandlerInVisitQueryAsync() throws Exception {
         Response response = getAnonymousQueryResourceHandler(QUERY_RESULT,
-                newResourceResponse("id", "revision", new JsonValue("jsonValue")));
-        assertEquals(getResponseContent(response), "{" + "\"result\":[\"jsonValue\"],"
+                newResourceResponse("id", "rev",
+                                    json(object(field("intField", 42), field("stringField", "stringValue")))));
+        assertEquals(getResponseContent(response), "{" + "\"result\":["
+                + "{\"_id\":\"id\",\"_rev\":\"rev\",\"intField\":42,\"stringField\":\"stringValue\"}],"
                 + "\"resultCount\":1,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\","
                 + "\"totalPagedResults\":-1,\"remainingPagedResults\":-1}");
     }
@@ -73,13 +74,13 @@ public class RequestRunnerTest {
     public void testHandleResourceTwoAnonymousQueryResourceHandlerInVisitQueryAsync()
             throws Exception {
         Response response = getAnonymousQueryResourceHandler(QUERY_RESULT,
-                newResourceResponse("id", "revision",
+                newResourceResponse("id", "rev",
                         json(object(field("intField", 42), field("stringField", "stringValue")))),
-                newResourceResponse("id", "revision",
+                newResourceResponse("id", "rev",
                         json(object(field("intField", 43), field("stringField", "otherString")))));
         assertEquals(getResponseContent(response), "{" + "\"result\":["
-                + "{\"intField\":42,\"stringField\":\"stringValue\"},"
-                + "{\"intField\":43,\"stringField\":\"otherString\"}" + "],"
+                + "{\"_id\":\"id\",\"_rev\":\"rev\",\"intField\":42,\"stringField\":\"stringValue\"},"
+                + "{\"_id\":\"id\",\"_rev\":\"rev\",\"intField\":43,\"stringField\":\"otherString\"}" + "],"
                 + "\"resultCount\":2,\"pagedResultsCookie\":null,\"totalPagedResultsPolicy\":\"NONE\","
                 + "\"totalPagedResults\":-1,\"remainingPagedResults\":-1}");
     }
