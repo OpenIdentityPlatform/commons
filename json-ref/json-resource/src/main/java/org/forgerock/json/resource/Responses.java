@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonPointer;
@@ -177,6 +178,7 @@ public final class Responses {
 
         @Override
         public int hashCode() {
+            // FIXME Implies that content is both not null and doesn't wrap null
             return getJsonContent().getObject().hashCode();
         }
 
@@ -297,7 +299,8 @@ public final class Responses {
          *            results query request, or {@code null} if paged results were
          *            not requested, or if there are not more pages to be returned.
          * @param totalPagedResultsPolicy
-         *            The policy that was used to calculate {@link #totalPagedResults}
+         *            The policy that was used to calculate {@link #totalPagedResults}.
+         *            If none is specified ({@code null}), then {@link CountPolicy#NONE} is assumed.
          * @param totalPagedResults
          *            The total number of paged results requested in adherence to
          *            the {@link QueryRequest#getTotalPagedResultsPolicy()} in the request,
@@ -313,6 +316,9 @@ public final class Responses {
         private QueryResponseImpl(String pagedResultsCookie, CountPolicy totalPagedResultsPolicy,
                 int totalPagedResults, int remainingPagedResults) {
             this.pagedResultsCookie = pagedResultsCookie;
+            if (totalPagedResultsPolicy == null) {
+                totalPagedResultsPolicy = CountPolicy.NONE;
+            }
             this.totalPagedResultsPolicy = totalPagedResultsPolicy;
             this.totalPagedResults = totalPagedResults;
             this.remainingPagedResults = remainingPagedResults;
@@ -375,18 +381,29 @@ public final class Responses {
                 return false;
             }
             QueryResponseImpl that = (QueryResponseImpl) o;
-            return totalPagedResults == that.totalPagedResults && pagedResultsCookie.equals(that.pagedResultsCookie)
+            return totalPagedResults == that.totalPagedResults
+                    && Objects.equals(pagedResultsCookie, this.pagedResultsCookie)
                     && totalPagedResultsPolicy == that.totalPagedResultsPolicy
                     && remainingPagedResults == that.remainingPagedResults;
         }
 
         @Override
         public int hashCode() {
-            int result = pagedResultsCookie.hashCode();
+            int result = Objects.hashCode(pagedResultsCookie);
             result = 31 * result + totalPagedResultsPolicy.hashCode();
             result = 31 * result + totalPagedResults;
             result = 31 * result + remainingPagedResults;
             return result;
+        }
+
+        @Override
+        public String toString() {
+            final JsonValue wrapper = new JsonValue(new LinkedHashMap<>(4));
+            wrapper.add(FIELD_TOTAL_PAGED_RESULTS, totalPagedResults);
+            wrapper.add(FIELD_TOTAL_PAGED_RESULTS_POLICY, totalPagedResultsPolicy);
+            wrapper.add(FIELD_REMAINING_PAGED_RESULTS, remainingPagedResults);
+            wrapper.add(FIELD_PAGED_RESULTS_COOKIE, pagedResultsCookie);
+            return wrapper.toString();
         }
     }
 }
