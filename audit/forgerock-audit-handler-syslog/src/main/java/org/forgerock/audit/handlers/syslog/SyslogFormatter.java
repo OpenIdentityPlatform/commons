@@ -25,6 +25,7 @@ import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotati
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.extractValue;
 
+import org.forgerock.audit.AuditService;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration.SeverityFieldMapping;
 import org.forgerock.json.JsonPointer;
@@ -243,7 +244,7 @@ public class SyslogFormatter {
         /**
          * Construct a new StructuredDataFormatter.
          *
-         * @param productName Name of the ForgeRock product in which the {@link org.forgerock.audit.AuditService}
+         * @param productName Name of the ForgeRock product in which the {@link AuditService}
          *                    is executing; the SD-ID of each STRUCTURED-DATA element is derived from the
          *                    <code>productName</code> and <code>topic</code>.
          * @param topic Coarse-grained categorisation of the types of audit events that this formatter handles;

@@ -16,6 +16,7 @@
 
 package org.forgerock.audit;
 
+import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.audit.json.AuditJsonConfig.getJson;
 import static org.forgerock.audit.json.AuditJsonConfig.registerHandlerToService;
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
@@ -50,13 +51,16 @@ public final class AuditHttpApplication implements HttpApplication {
     @Override
     public Handler start() throws HttpApplicationException {
         final Router router = new Router();
-        final AuditService auditService = createAndConfigureAuditService();
+        final AuditServiceConfiguration auditServiceConfiguration = loadAuditServiceConfiguration();
+
+        AuditServiceBuilder auditServiceBuilder = newAuditService();
+        auditServiceBuilder.withConfiguration(auditServiceConfiguration);
 
         try (final InputStream eventHandlersConfig = this.getClass().getResourceAsStream(AUDIT_EVENT_HANDLERS_CONFIG)) {
             JsonValue auditEventHandlers = getJson(eventHandlersConfig).get(EVENT_HANDLERS);
             for (final JsonValue handlerConfig : auditEventHandlers) {
                 try {
-                    registerHandlerToService(handlerConfig, auditService, this.getClass().getClassLoader());
+                    registerHandlerToService(handlerConfig, auditServiceBuilder, this.getClass().getClassLoader());
                 } catch (Exception ex) {
                     logger.error("Unable to register handler defined by config: " + handlerConfig, ex);
                 }
@@ -66,6 +70,7 @@ public final class AuditHttpApplication implements HttpApplication {
             throw new HttpApplicationException(e);
         }
 
+        final AuditService auditService = auditServiceBuilder.build();
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, AUDIT_ROOT_PATH),
                 CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(auditService)));
         return router;
@@ -81,17 +86,18 @@ public final class AuditHttpApplication implements HttpApplication {
 
     }
 
-    /** Returns the audit service configured with provided JSON configuration. */
-    private static AuditService createAndConfigureAuditService() {
-        final AuditService auditService = new AuditService();
-        try (InputStream inputStream = auditService.getClass().getResourceAsStream("/conf/audit-service.json")) {
-            final AuditServiceConfiguration serviceConfig = AuditJsonConfig.parseAuditServiceConfiguration(inputStream);
-            auditService.configure(serviceConfig);
-            return auditService;
+    /** Loads the audit service configuration from JSON. */
+    private static AuditServiceConfiguration loadAuditServiceConfiguration() {
+        try (InputStream inputStream = getResourceAsStream("/conf/audit-service.json")) {
+            return AuditJsonConfig.parseAuditServiceConfiguration(inputStream);
         } catch (AuditException | IOException e) {
             final RuntimeException exception = new RuntimeException("Error while configuring the audit service", e);
             logger.error(exception.getMessage(), e);
             throw exception;
         }
+    }
+
+    private static InputStream getResourceAsStream(String path) {
+        return AuditHttpApplication.class.getResourceAsStream(path);
     }
 }

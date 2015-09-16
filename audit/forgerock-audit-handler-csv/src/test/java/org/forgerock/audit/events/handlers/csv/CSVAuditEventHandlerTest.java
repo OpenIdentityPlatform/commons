@@ -84,7 +84,7 @@ public class CSVAuditEventHandlerTest {
             }
             assertThat(file).hasContent(expectedContent);
         } finally {
-            bufferedHandler.close();
+            bufferedHandler.shutdown();
         }
     }
 

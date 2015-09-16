@@ -16,8 +16,10 @@
 package org.forgerock.audit.handlers.syslog;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 
 import org.forgerock.audit.AuditService;
+import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.json.JsonValue;
@@ -34,13 +36,15 @@ public class SyslogHandlerTest {
     @Test
     public void canConfigureSyslogHandlerFromJsonAndRegisterWithAuditService() throws Exception {
         // given
-        final AuditService auditService = new AuditService();
+        final AuditServiceBuilder auditServiceBuilder = newAuditService();
         final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler-config.json"));
 
         // when
-        AuditJsonConfig.registerHandlerToService(config, auditService);
+        AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
 
         // then
+        AuditService auditService = auditServiceBuilder.build();
+        auditService.startup();
         AuditEventHandler<?> registeredHandler = auditService.getRegisteredHandler("syslog");
         assertThat(registeredHandler).isNotNull();
     }

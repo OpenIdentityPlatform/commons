@@ -42,13 +42,21 @@ public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
      * @param config the configuration of the Audit Event Handler
      * @throws ResourceException if configuration fails
      */
-    public void configure(final CFG config) throws ResourceException;
+    void configure(final CFG config) throws ResourceException;
 
     /**
-     * Configures the Audit Event Handler with a config.
+     * Instruct this object to that it is safe to initialize file handles and network connections.
+     *
+     * @throws ResourceException if starting the AuditEventHandler fails
+     */
+    void startup() throws ResourceException;
+
+    /**
+     * Instruct this object to flush any buffers and close any open file handles or network connections.
+     *
      * @throws ResourceException if closing the AuditEventHandler fails
      */
-    public void close() throws ResourceException;
+    void shutdown() throws ResourceException;
 
     /**
      * Set the audit events that this EventHandler may have to handle. This method is supposed to be called by the
@@ -57,22 +65,22 @@ public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
      * @param auditEvents
      *            List of AuditEvents to handle.
      */
-    public void setAuditEventsMetaData(Map<String, JsonValue> auditEvents);
+    void setAuditEventsMetaData(Map<String, JsonValue> auditEvents);
 
     /**
-     * Set the dependency provider to satisfy dependencies of this EventHandler. This method is supposed to be
-     * called by the AuditService when registering this AuditEventHandler.
+     * Set the dependency provider to satisfy dependencies of this AuditEventHandler.
      *
      * @param dependencyProvider
-     *            An provider that provide dependencies to the EventHandler.
+     *            Dependency lookup abstraction for obtaining resources or objects from the
+     *            product which integrates this AuditEventHandler.
      */
-    public void setDependencyProvider(DependencyProvider dependencyProvider);
+    void setDependencyProvider(DependencyProvider dependencyProvider);
 
     /**
      * Gets the configuration class for the audit event handler.
      * @return the configuration class for the audit event handler
      */
-    public Class<CFG> getConfigurationClass();
+    Class<CFG> getConfigurationClass();
 
     /**
      * Publishes an event to the provided topic.
@@ -85,7 +93,7 @@ public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
      *          The event to publish.
      * @return a promise with either a response or an exception
      */
-    public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event);
+    Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event);
 
     /**
      * Publishes a list of events.
@@ -93,7 +101,7 @@ public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
      * @param events
      *          The list of (topic, event) pairs to publish.
      */
-    public void publishEvents(List<AuditEventTopicState> events);
+    void publishEvents(List<AuditEventTopicState> events);
 
     /**
      * Reads an event with the provided resource id from the provided topic.
@@ -106,7 +114,7 @@ public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
      *          The identifier of the event.
      * @return a promise with either a response or an exception
      */
-    public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId);
+    Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId);
 
     /**
      * Query some events from the provided topic.
@@ -121,7 +129,6 @@ public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
      *          The handler to process responses for the query.
      * @return a promise with either a response or an exception
      */
-    public Promise<QueryResponse, ResourceException> queryEvents(Context context, String topic, QueryRequest query,
+    Promise<QueryResponse, ResourceException> queryEvents(Context context, String topic, QueryRequest query,
             QueryResourceHandler handler);
-
 }

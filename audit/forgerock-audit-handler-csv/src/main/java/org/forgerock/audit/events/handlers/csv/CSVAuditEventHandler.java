@@ -140,9 +140,18 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         return builder.build();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void startup() throws ResourceException {
+        // TODO: Move all I/O initialization here to avoid possible interaction with another instance
+        // that references the same set of files.
+    }
+
     /** {@inheritDoc} */
     @Override
-    public void close() throws ResourceException {
+    public void shutdown() throws ResourceException {
         cleanup();
     }
 

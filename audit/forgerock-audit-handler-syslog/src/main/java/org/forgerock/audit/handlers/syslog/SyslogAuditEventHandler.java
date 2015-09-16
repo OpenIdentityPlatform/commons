@@ -117,11 +117,17 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
         return SyslogAuditEventHandlerConfiguration.class;
     }
 
+    /** {@inheritDoc} */
+    @Override
+    public void startup() {
+        // nothing to do
+    }
+
     /**
      * Closes the connections established by {@link SyslogPublisher}.
      */
     @Override
-    public void close() {
+    public void shutdown() {
         synchronized (publisher) {
             publisher.closeConnection();
         }

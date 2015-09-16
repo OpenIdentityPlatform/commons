@@ -4,7 +4,12 @@
       "name" : "csv",
       "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
       "config" : {
-        "logDirectory" : "/tmp/audit"
+        "logDirectory" : "/tmp/audit",
+        "bufferingConfig" : {
+          "enabled" : "true",
+          "forceFlushBeforeRead" : "false",
+          "maxSize" : "25"
+        }
       },
       "events": [
         "access",
@@ -21,7 +26,11 @@
         "host" : "localhost",
         "port" : 514,
         "facility" : "LOCAL0",
-        "productName" : "OpenAM"
+        "bufferingConfig" : {
+          "enabled" : "true",
+          "forceFlushBeforeRead" : "false",
+          "maxSize" : "25"
+        }
       },
       "events": [
         "access",

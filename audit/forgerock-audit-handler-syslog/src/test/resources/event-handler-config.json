@@ -15,7 +15,12 @@
         "WARNING" : "WARNING",
         "INFO" : "INFORMATIONAL"
       }
-    }]
+    }],
+    "bufferingConfig" : {
+      "enabled" : "true",
+      "forceFlushBeforeRead" : "false",
+      "maxSize" : "25"
+    }
   },
   "events": [
     "access",

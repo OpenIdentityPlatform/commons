@@ -24,7 +24,7 @@ public class StringSQLRenderer implements SQLRenderer<String> {
     /**
      * Constructor.
      *
-     * @param s the string to start
+     * @param s the string to startup
      */
     public StringSQLRenderer(String s) {
         sb.append(s);

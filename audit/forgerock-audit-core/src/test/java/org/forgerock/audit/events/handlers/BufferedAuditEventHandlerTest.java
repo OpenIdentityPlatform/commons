@@ -61,7 +61,7 @@ public class BufferedAuditEventHandlerTest {
             verify(handler).publishEvents(asList(e1, e2, e3));
             verifyNoMoreInteractions(handler);
         } finally {
-            bufferedHandler.close();
+            bufferedHandler.shutdown();
         }
     }
 
@@ -94,7 +94,7 @@ public class BufferedAuditEventHandlerTest {
             verify(handler).publishEvents(Arrays.asList(e1, e2));
             verifyNoMoreInteractions(handler);
         } finally {
-            bufferedHandler.close();
+            bufferedHandler.shutdown();
         }
     }
 
@@ -138,7 +138,7 @@ public class BufferedAuditEventHandlerTest {
             assertThat(bufferedHandler.isBufferEmpty()).isTrue();
             assertThat(elapsedTime).isBetween(maxTimeInMillis, maxTimeInMillis + 50);
         } finally {
-            bufferedHandler.close();
+            bufferedHandler.shutdown();
         }
     }
 
@@ -153,7 +153,7 @@ public class BufferedAuditEventHandlerTest {
             Thread.sleep(maxTimeInMillis + 25);
             verify(handler, never()).publishEvents(anyList());
         } finally {
-            bufferedHandler.close();
+            bufferedHandler.shutdown();
         }
     }
 

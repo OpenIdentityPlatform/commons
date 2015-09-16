@@ -73,9 +73,14 @@ public class BufferedAuditEventHandler<CFG extends EventHandlerConfiguration>
     }
 
     @Override
-    public void close() throws ResourceException {
+    public void startup() throws ResourceException {
+        // nothing to do
+    }
+
+    @Override
+    public void shutdown() throws ResourceException {
         eventBuffer.close();
-        delegate.close();
+        delegate.shutdown();
     }
 
     @Override

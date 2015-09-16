@@ -24,6 +24,7 @@ import java.util.Set;
 
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
+import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.BufferedAuditEventHandler;
@@ -246,14 +247,14 @@ public class AuditJsonConfig {
      *          The type of the configuration bean for the event handler.
      * @param jsonConfig
      *          The configuration of the audit event handler as JSON.
-     * @param auditService
-     *          The service the event handler will be registered to.
+     * @param auditServiceBuilder
+     *          The builder for the service the event handler will be registered to.
      * @throws AuditException
      *             If any error occurs during configuration or registration of the handler.
      */
-    public static <CFG> void registerHandlerToService(JsonValue jsonConfig, AuditService auditService)
+    public static <CFG> void registerHandlerToService(JsonValue jsonConfig, AuditServiceBuilder auditServiceBuilder)
             throws AuditException {
-        registerHandlerToService(jsonConfig, auditService, auditService.getClass().getClassLoader());
+        registerHandlerToService(jsonConfig, auditServiceBuilder, auditServiceBuilder.getClass().getClassLoader());
     }
 
     /**
@@ -264,19 +265,19 @@ public class AuditJsonConfig {
      *          The type of the configuration bean for the event handler.
      * @param jsonConfig
      *          The configuration of the audit event handler as JSON.
-     * @param auditService
-     *          The service the event handler will be registered to.
+     * @param auditServiceBuilder
+     *          The builder for the service the event handler will be registered to.
      * @param classLoader
      *          The class loader to use to load the handler and its configuration class.
      * @throws AuditException
      *             If any error occurs during configuration or registration of the handler.
      */
-    public static <CFG extends EventHandlerConfiguration> void registerHandlerToService(JsonValue jsonConfig, AuditService auditService,
-            ClassLoader classLoader) throws AuditException {
+    public static <CFG extends EventHandlerConfiguration> void registerHandlerToService(JsonValue jsonConfig,
+            AuditServiceBuilder auditServiceBuilder, ClassLoader classLoader) throws AuditException {
         String name = getHandlerName(jsonConfig);
         AuditEventHandler<CFG> handler = buildAuditEventHandler(name, jsonConfig, classLoader);
         Set<String> events = getEvents(name, jsonConfig);
-        auditService.register(handler, name, events);
+        auditServiceBuilder.withAuditEventHandler(handler, name, events);
     }
 
     /**

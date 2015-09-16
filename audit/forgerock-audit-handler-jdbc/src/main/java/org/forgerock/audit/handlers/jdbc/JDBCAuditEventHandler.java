@@ -116,7 +116,15 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
      * {@inheritDoc}
      */
     @Override
-    public void close() throws ResourceException {
+    public void startup() throws ResourceException {
+        // TODO: Move all I/O initialization here to avoid possible interaction with another instance
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void shutdown() throws ResourceException {
         this.config = null;
         if (dataSource != null && dataSource instanceof HikariDataSource) {
             ((HikariDataSource) dataSource).close();

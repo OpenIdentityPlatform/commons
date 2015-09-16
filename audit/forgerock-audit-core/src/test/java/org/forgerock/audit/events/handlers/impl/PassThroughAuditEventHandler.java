@@ -46,7 +46,13 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
 
     /** {@inheritDoc} */
     @Override
-    public void close() throws ResourceException {
+    public void startup() throws ResourceException {
+        // nothing to do
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public void shutdown() throws ResourceException {
         // nothing to do
     }
 

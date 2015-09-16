@@ -18,17 +18,16 @@ package org.forgerock.audit.json;
 import java.io.InputStream;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
+import static org.forgerock.audit.json.AuditJsonConfig.parseAuditServiceConfiguration;
 
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
+import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.PassThroughAuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ResourceException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -37,7 +36,8 @@ public class AuditJsonConfigTest {
 
     @Test
     public void testConfigureAuditService() throws Exception {
-        AuditService auditService = createAndConfigureAuditService();
+        AuditService auditService = newAuditService().withConfiguration(loadConfiguration()).build();
+        auditService.startup();
 
         AuditServiceConfiguration actualConfig = auditService.getConfig();
         assertThat(actualConfig).isNotNull();
@@ -48,11 +48,13 @@ public class AuditJsonConfigTest {
 
     @Test
     public void testRegisterHandler() throws Exception {
-        final AuditService auditService = createAndConfigureAuditService();
-        final JsonValue config = AuditJsonConfig.getJson(getResource("/audit-passthrough-handler.json"));
+        AuditServiceBuilder auditServiceBuilder = newAuditService().withConfiguration(loadConfiguration());
+        final JsonValue config = loadJsonValue("/audit-passthrough-handler.json");
 
-        AuditJsonConfig.registerHandlerToService(config, auditService);
+        AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
 
+        AuditService auditService = auditServiceBuilder.build();
+        auditService.startup();
         AuditEventHandler<?> registeredHandler = auditService.getRegisteredHandler("passthrough");
         assertThat(registeredHandler).isNotNull();
     }
@@ -68,10 +70,10 @@ public class AuditJsonConfigTest {
 
     @Test(dataProvider="eventHandlerBadJsonConfigurations", expectedExceptions=AuditException.class)
     public void testRegisterHandlerWhenConfigurationIsNotCorrect(String jsonResource) throws Exception {
-        final AuditService auditService = createAndConfigureAuditService();
-        final JsonValue config = AuditJsonConfig.getJson(getResource(jsonResource));
+        AuditServiceBuilder auditServiceBuilder = newAuditService().withConfiguration(loadConfiguration());
+        final JsonValue config = loadJsonValue(jsonResource);
 
-        AuditJsonConfig.registerHandlerToService(config, auditService);
+        AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
     }
 
     @Test
@@ -89,12 +91,12 @@ public class AuditJsonConfigTest {
         assertThat(schema.get("properties").get("bufferingConfig")).isNotNull();
     }
 
-    private AuditService createAndConfigureAuditService() throws AuditException, ResourceException {
-        final AuditService auditService = new AuditService();
-        AuditServiceConfiguration serviceConfig =
-                AuditJsonConfig.parseAuditServiceConfiguration(getResource("/audit-service.json"));
-        auditService.configure(serviceConfig);
-        return auditService;
+    private AuditServiceConfiguration loadConfiguration() throws AuditException {
+        return parseAuditServiceConfiguration(getResource("/audit-service.json"));
+    }
+
+    private JsonValue loadJsonValue(String path) throws AuditException {
+        return AuditJsonConfig.getJson(getResource(path));
     }
 
     private InputStream getResource(String resourceName) {
