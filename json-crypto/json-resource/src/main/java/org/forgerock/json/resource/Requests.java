@@ -45,7 +45,7 @@ public final class Requests {
             // Default constructor.
         }
 
-        protected AbstractRequestImpl(final Request request) {
+        protected AbstractRequestImpl(final Request<T> request) {
             this.resourcePath = request.getResourcePathObject();
             this.fields.addAll(request.getFields());
             this.parameters.putAll(request.getAdditionalParameters());
