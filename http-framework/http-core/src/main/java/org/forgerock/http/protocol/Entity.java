@@ -18,7 +18,7 @@ package org.forgerock.http.protocol;
 
 import static org.forgerock.http.util.Json.*;
 import static org.forgerock.util.Utils.*;
-import static org.forgerock.http.util.StandardCharsets.*;
+import static java.nio.charset.StandardCharsets.*;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
