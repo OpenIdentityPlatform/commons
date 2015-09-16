@@ -17,27 +17,29 @@
 package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.QueryResponse.*;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import javax.mail.internet.ContentType;
-import javax.mail.internet.ParseException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.ParseException;
+
 import org.forgerock.http.Context;
 import org.forgerock.http.ResourcePath;
 import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
-import org.forgerock.json.JsonValue;
 import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.AdviceContext;
@@ -60,6 +62,8 @@ import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 
 /**
  * Common request processing.
@@ -427,16 +431,25 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private void writeResourceJsonContent(final ResourceResponse resource) throws IOException {
         writer.writeStartObject();
         {
-            if (resource.getId() != null && !resource.getContent().isDefined("_id")) {
-                writer.writeObjectField("_id", resource.getId());
+            final JsonValue content = resource.getContent();
+
+            if (resource.getId() != null) {
+                writer.writeObjectField(FIELD_CONTENT_ID, resource.getId());
+            } else if (content.isDefined(FIELD_CONTENT_ID)) {
+                writer.writeObjectField(FIELD_CONTENT_ID, content.get(FIELD_CONTENT_ID));
             }
 
-            if (resource.getRevision() != null && !resource.getContent().isDefined("_rev")) {
-                writer.writeObjectField("_rev", resource.getRevision());
+            if (resource.getRevision() != null) {
+                writer.writeObjectField(FIELD_CONTENT_REVISION, resource.getRevision());
+            } else if (content.isDefined(FIELD_CONTENT_REVISION)) {
+                writer.writeObjectField(FIELD_CONTENT_REVISION, content.get(FIELD_CONTENT_REVISION));
             }
 
-            for (Map.Entry<String, Object> property : resource.getContent().asMap().entrySet()) {
-                writer.writeObjectField(property.getKey(), property.getValue());
+            for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
+                final String key = property.getKey();
+                if (!FIELD_CONTENT_ID.equals(key) && !FIELD_CONTENT_REVISION.equals(key)) {
+                    writer.writeObjectField(key, property.getValue());
+                }
             }
         }
         writer.writeEndObject();
