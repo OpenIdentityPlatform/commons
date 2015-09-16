@@ -36,7 +36,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
      * 3) defaultLang will be the default language set inside the Constants.DEFAULT_LANGUAGE.
      *
      * @param {object} options
-     * @param {string} options.paramLang which is a query string parameter (&locale=fr).
+     * @param {string} options.paramLang which is a query string parameter, optionally space separated, (&locale=zh fr).
      * @param {string} options.serverLang, a 2 digit language code passed in from server.
      * @param {string} options.defaultLang will be the default language set inside the Constants.DEFAULT_LANGUAGE.
      * @param {string} [options.nameSpace] The nameSpace is optional and will default to "translation"
@@ -57,8 +57,11 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             opts = {},
             nameSpace = options.nameSpace ? options.nameSpace : "translation";
         if (options.paramLang && options.paramLang.locale) {
-
-            options.serverLang = options.paramLang.locale;
+            locales = options.paramLang.locale.split(" ");
+            options.serverLang = locales.shift();
+        }
+        if (options.defaultLang) {
+            locales.push(options.defaultLang);
         }
 
         // return if the stored lang matches the new one.
@@ -68,12 +71,12 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
         obj.lang = options.serverLang;
 
         opts = {
-            fallbackLng: options.defaultLang,
+            fallbackLng: locales,
             detectLngQS: "locale",
             useCookie: false,
             getAsync: false,
             lng: options.serverLang,
-            load: "unspecific",
+            load: "current",
             ns: nameSpace,
             nsseparator: ":::",
             resGetPath: require.toUrl("locales/__lng__/__ns__.json")
