@@ -16,6 +16,9 @@
 
 package org.forgerock.selfservice.stages.utils;
 
+import static org.forgerock.json.JsonValue.json;
+
+import java.util.HashMap;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
@@ -50,6 +53,24 @@ public final class JsonUtils {
         } catch (IOException e) {
             throw new JsonException("Failed to parse json", e);
         }
+    }
+
+    /**
+     * Merges the provided json value instances.
+     * The right most json value will override properties that match the previous json values.
+     * @param jsons
+     *         json value instances to be merged
+     *
+     * @return json new json value; returns an empty json instance if inputs are null
+     */
+    public static JsonValue merge(JsonValue... jsons) {
+        Map<String, Object> results = new HashMap<>();
+        for (JsonValue json : jsons) {
+            if (json != null) {
+                results.putAll(json.asMap());
+            }
+        }
+        return json(results);
     }
 
 }

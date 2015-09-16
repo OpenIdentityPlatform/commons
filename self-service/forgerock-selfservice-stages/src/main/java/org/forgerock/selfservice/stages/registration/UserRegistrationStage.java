@@ -16,15 +16,10 @@
 
 package org.forgerock.selfservice.stages.registration;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.selfservice.stages.CommonStateFields.*;
-import static org.forgerock.json.JsonValue.*;
 
 import javax.inject.Inject;
-import org.forgerock.services.context.Context;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
@@ -34,12 +29,12 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 
 /**
- * Stage is responsible for request a new user json representation and passing it off
- * to the underlying service. It expects the "mail" field to be populated in the context
- * which it uses to verify against the email address specified in the passed user object.
+ * Stage is responsible for registering the user supplied data using the underlying service.
+ * It expects the "user" and userId fields to be populated in the context.
  *
  * @since 0.1.0
  */
@@ -61,40 +56,21 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context,
                                                UserRegistrationConfig config) throws ResourceException {
-        Reject.ifFalse(context.containsState(EMAIL_FIELD), "User registration stage expects mail in the context");
+        Reject.ifFalse(context.containsState(USER_FIELD),
+                "User registration stage expects user in the context");
+
+        Reject.ifFalse(context.containsState(USER_ID_FIELD),
+                "User registration stage expects user id filed in the context");
 
         return RequirementsBuilder
-                .newInstance("New user details")
-                .addRequireProperty(USER_ID_FIELD, "New user Id")
-                .addRequireProperty("user", "object", "User details")
-                .build();
+                .newEmptyRequirements();
     }
 
     @Override
     public StageResponse advance(ProcessContext context, UserRegistrationConfig config) throws ResourceException {
-        String userId = context
-                .getInput()
-                .get(USER_ID_FIELD)
-                .asString();
 
-        if (isEmpty(userId)) {
-            throw new BadRequestException("userId has not been specified");
-        }
-
-        JsonValue user = context
-            .getInput()
-            .get("user");
-
-        if (user.isNull()) {
-            throw new BadRequestException("user has not been specified");
-        }
-
-        String email = context
-            .getState(EMAIL_FIELD)
-            .asString();
-
-        user.put(new JsonPointer(config.getIdentityEmailField()), email);
-        createUser(context.getHttpContext(), userId, user, config);
+        JsonValue user = context.getState(USER_FIELD);
+        createUser(context.getHttpContext(), context.getState(USER_ID_FIELD).asString(), user, config);
 
         return StageResponse
                 .newBuilder()

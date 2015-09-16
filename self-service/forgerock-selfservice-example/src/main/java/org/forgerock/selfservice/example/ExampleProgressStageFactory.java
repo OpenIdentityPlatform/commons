@@ -25,6 +25,10 @@ import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
 import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
 import org.forgerock.selfservice.stages.email.VerifyUserIdStage;
+import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
+import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionStage;
+import org.forgerock.selfservice.stages.user.UserDetailsConfig;
+import org.forgerock.selfservice.stages.user.UserDetailsStage;
 import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
 import org.forgerock.selfservice.stages.registration.UserRegistrationStage;
 import org.forgerock.selfservice.stages.reset.ResetStage;
@@ -50,6 +54,8 @@ final class ExampleProgressStageFactory implements ProgressStageFactory {
         safePut(VerifyEmailAccountConfig.class, new VerifyEmailAccountStage(connectionFactory));
         safePut(VerifyUserIdConfig.class, new VerifyUserIdStage(connectionFactory));
         safePut(ResetStageConfig.class, new ResetStage(connectionFactory));
+        safePut(UserDetailsConfig.class, new UserDetailsStage(connectionFactory));
+        safePut(SecurityAnswerDefinitionConfig.class, new SecurityAnswerDefinitionStage(connectionFactory));
         safePut(UserRegistrationConfig.class, new UserRegistrationStage(connectionFactory));
     }
 

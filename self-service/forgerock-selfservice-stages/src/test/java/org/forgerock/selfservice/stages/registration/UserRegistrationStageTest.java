@@ -17,20 +17,19 @@ package org.forgerock.selfservice.stages.registration;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
-import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
-import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.services.context.Context;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -42,9 +41,11 @@ import org.testng.annotations.Test;
  *
  * @since 0.2.0
  */
-public class UserRegistrationStageTest {
+public final class UserRegistrationStageTest {
 
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
+    private static final String KBA_QUESTION_2 = "Who was your first employer?";
+    private static final String KBA_QUESTION_3 = "What is my favorite author?";
 
     private UserRegistrationStage userRegistrationStage;
     @Mock
@@ -55,6 +56,8 @@ public class UserRegistrationStageTest {
     private ConnectionFactory factory;
     @Mock
     private Connection connection;
+    @Mock
+    private ResourceResponse queryResponse;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -64,50 +67,54 @@ public class UserRegistrationStageTest {
         userRegistrationStage = new UserRegistrationStage(factory);
     }
 
+    @Test (expectedExceptions = IllegalArgumentException.class,
+            expectedExceptionsMessageRegExp = "User registration stage expects user in the context")
+    public void testGatherInitialRequirementsNoUserState() throws Exception {
+        // Given
+        given(context.getState(USER_FIELD)).willReturn(null);
+
+        // When
+        userRegistrationStage.gatherInitialRequirements(context, config);
+    }
+
+    @Test (expectedExceptions = IllegalArgumentException.class,
+            expectedExceptionsMessageRegExp = "User registration stage expects user id filed in the context")
+    public void testGatherInitialRequirementsNoUserId() throws Exception {
+        // Given
+        given(context.containsState(USER_FIELD)).willReturn(true);
+        given(context.getState(USER_FIELD)).willReturn(newEmptyJsonValue());
+
+        // When
+        userRegistrationStage.gatherInitialRequirements(context, config);
+    }
+
     @Test
     public void testGatherInitialRequirements() throws Exception {
         // Given
-        given(context.containsState(EMAIL_FIELD)).willReturn(true);
-        given(context.getState(EMAIL_FIELD)).willReturn(new JsonValue(TEST_EMAIL_ID));
+        given(context.containsState(USER_FIELD)).willReturn(true);
+        given(context.containsState(USER_ID_FIELD)).willReturn(true);
+        given(context.getState(USER_FIELD)).willReturn(newEmptyJsonValue());
+        given(context.getState(USER_ID_FIELD)).willReturn(newEmptyJsonValue());
 
         // When
         JsonValue jsonValue = userRegistrationStage.gatherInitialRequirements(context, config);
 
         // Then
-        assertThat(jsonValue).stringAt("description").isEqualTo("New user details");
-        assertThat(jsonValue).stringAt("properties/userId/description").isEqualTo("New user Id");
-        assertThat(jsonValue).stringAt("properties/user/description").isEqualTo("User details");
-    }
-
-    @Test (expectedExceptions = BadRequestException.class,
-        expectedExceptionsMessageRegExp = "userId has not been specified")
-    public void testAdvanceUserIdNotSpecified() throws Exception {
-        // Given
-        given(context.getInput()).willReturn(newEmptyJsonValue());
-
-        // When
-        StageResponse stageResponse = userRegistrationStage.advance(context, config);
-    }
-
-    @Test (expectedExceptions = BadRequestException.class,
-        expectedExceptionsMessageRegExp = "user has not been specified")
-    public void testAdvanceUserNotSpecified() throws Exception {
-        // Given
-        given(context.getInput()).willReturn(newJsonValueWithUserId());
-
-        // When
-        StageResponse stageResponse = userRegistrationStage.advance(context, config);
+        assertThat(jsonValue).isEmpty();
     }
 
     @Test
     public void testAdvance() throws Exception {
         // Given
-        given(context.getInput()).willReturn(newJsonValueWithAllInputs());
-        given(context.getState(EMAIL_FIELD)).willReturn(json(TEST_EMAIL_ID));
+        given(context.getState(USER_FIELD)).willReturn(newJsonValueUserAndKba());
+        given(context.getState(USER_ID_FIELD)).willReturn(newJsonValueEmailId());
+
+        given(context.getInput()).willReturn(newJsonValueInputUser());
+        given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueEmailId());
         given(factory.getConnection()).willReturn(connection);
 
         // When
-        StageResponse stageResponse = userRegistrationStage.advance(context, config);
+        userRegistrationStage.advance(context, config);
 
         // Then
         ArgumentCaptor<CreateRequest> createRequestArgumentCaptor =  ArgumentCaptor.forClass(CreateRequest.class);
@@ -118,34 +125,51 @@ public class UserRegistrationStageTest {
         assertThat(createRequest.getContent()).stringAt("sn").isEqualTo("testUserSecondName");
         assertThat(createRequest.getContent()).stringAt("password").isEqualTo("passwordTobeEncrypted");
         assertThat(createRequest.getContent()).stringAt("mail").isEqualTo(TEST_EMAIL_ID);
+        assertThat(createRequest.getContent()).stringAt("kba/0/customQuestion").isEqualTo(KBA_QUESTION_3);
+        assertThat(createRequest.getContent()).stringAt("kba/0/answer").isEqualTo("a1");
+        assertThat(createRequest.getContent()).stringAt("kba/1/selectedQuestion").isEqualTo(KBA_QUESTION_2);
+        assertThat(createRequest.getContent()).stringAt("kba/1/answer").isEqualTo("a2");
         Assertions.assertThat(createRequest.getNewResourceId()).isEqualTo(TEST_EMAIL_ID);
         Assertions.assertThat(createRequest.getResourcePath()).isEqualTo("users");
     }
 
     private UserRegistrationConfig newUserRegistrationConfig() {
         return new UserRegistrationConfig()
-            .setIdentityServiceUrl("/users")
-            .setIdentityEmailField("mail");
+                .setIdentityServiceUrl("/users");
+    }
+
+    private JsonValue newJsonValueEmailId() {
+        return json(TEST_EMAIL_ID);
     }
 
     private JsonValue newEmptyJsonValue() {
         return json(object());
     }
 
-    private JsonValue newJsonValueWithUserId() {
-        return json(object(field("userId", TEST_EMAIL_ID)));
+    private JsonValue newJsonValueInputUser() {
+        return json(
+                object(
+                        field("userId", TEST_EMAIL_ID),
+                                field("user", object(
+                                field("givenName", "testUser"),
+                                field("sn", "testUserSecondName"),
+                                field("password", "passwordTobeEncrypted")))));
     }
 
-    private JsonValue newJsonValueWithAllInputs() {
+    private JsonValue newJsonValueUserAndKba() {
         return json(
-            object(
-                field("userId", TEST_EMAIL_ID)
-                , field("user", object(
-                    field("givenName", "testUser"),
-                    field("sn", "testUserSecondName"),
-                    field("password", "passwordTobeEncrypted")
-                ))
-            )
-        );
+                object(
+                        field("givenName", "testUser"),
+                        field("sn", "testUserSecondName"),
+                        field("password", "passwordTobeEncrypted"),
+                        field("mail", TEST_EMAIL_ID),
+                        field("kba", array(
+                                object(
+                                        field("customQuestion", KBA_QUESTION_3),
+                                        field("answer", "a1")),
+                                object(
+                                        field("selectedQuestion", KBA_QUESTION_2),
+                                        field("answer", "a2"))))));
     }
+
 }

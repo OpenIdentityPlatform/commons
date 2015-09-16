@@ -14,40 +14,40 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.stages.registration;
+package org.forgerock.selfservice.stages.user;
 
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
- * Configuration for the user registration stage.
+ * Configuration for the user details stage.
  *
- * @since 0.1.0
+ * @since 0.2.0
  */
-public final class UserRegistrationConfig implements StageConfig {
+public final class UserDetailsConfig implements StageConfig {
 
-    private static final String NAME = "selfRegistration";
+    private static final String NAME = "userDetails";
 
-    private String identityServiceUrl;
+    private String identityEmailField;
 
     /**
-     * Gets the URL for the identity service.
+     * Gets the field name for the identity email address.
      *
-     * @return the identity service URL
+     * @return the identity email address field name
      */
-    public String getIdentityServiceUrl() {
-        return identityServiceUrl;
+    public String getIdentityEmailField() {
+        return identityEmailField;
     }
 
     /**
-     * Sets the URL for the identity service.
+     * Sets the field name for the identity email address.
      *
-     * @param identityServiceUrl
-     *         the identity service URL
+     * @param identityEmailField
+     *         the identity email address field name
      *
      * @return this config instance
      */
-    public UserRegistrationConfig setIdentityServiceUrl(String identityServiceUrl) {
-        this.identityServiceUrl = identityServiceUrl;
+    public UserDetailsConfig setIdentityEmailField(String identityEmailField) {
+        this.identityEmailField = identityEmailField;
         return this;
     }
 

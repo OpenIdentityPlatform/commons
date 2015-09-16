@@ -17,9 +17,13 @@
 package org.forgerock.selfservice.example;
 
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashSet;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
@@ -27,8 +31,10 @@ import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
@@ -38,14 +44,12 @@ import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
+import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
 import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
+import org.forgerock.selfservice.stages.user.UserDetailsConfig;
 import org.forgerock.util.Factory;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
 
 /**
  * Basic http application which initialises the user self service service.
@@ -81,7 +85,19 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
 
     private void registerCRESTServices() throws ResourceException {
         crestRouter.addRoute(uriTemplate("users"), new MemoryBackend());
+        crestRouter.addRoute(uriTemplate("kba/questions"), newMemoryBackendForKbaQuestions());
         crestRouter.addRoute(uriTemplate("email"), new ExampleEmailService(appConfig.get("mailserver")));
+    }
+
+    private MemoryBackend newMemoryBackendForKbaQuestions() {
+        MemoryBackend memoryBackend = new MemoryBackend();
+        CreateRequest request = Requests.newCreateRequest("/",
+                json(object(field("questions",
+                        array(
+                                "What was your pet's name?",
+                                "Who was your first employer?")))));
+        memoryBackend.createInstance(null, request);
+        return memoryBackend;
     }
 
     private Handler registerResetHandler() throws Exception {
@@ -129,12 +145,22 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
                 .setEmailVerificationLinkToken("%link%")
                 .setEmailVerificationLink("http://localhost:9999/example/#register/");
 
-        UserRegistrationConfig registrationConfig = new UserRegistrationConfig()
-                .setIdentityServiceUrl("/users")
+        SecurityAnswerDefinitionConfig securityAnswerDefinitionConfig = new SecurityAnswerDefinitionConfig()
+                .setKbaServiceUrl("/kba/questions/0")
+                .setKbaPropertyName("kbaInfo");
+
+        UserDetailsConfig userDetailsConfig = new UserDetailsConfig()
                 .setIdentityEmailField("mail");
 
+        UserRegistrationConfig registrationConfig = new UserRegistrationConfig()
+                .setIdentityServiceUrl("/users");
+
         ProcessInstanceConfig config = new ProcessInstanceConfig()
-                .setStageConfigs(Arrays.asList(emailConfig, registrationConfig))
+                .setStageConfigs(Arrays.asList(
+                        emailConfig,
+                        userDetailsConfig,
+                        securityAnswerDefinitionConfig,
+                        registrationConfig))
                 .setSnapshotTokenType(JwtTokenHandler.TYPE)
                 .setStorageType(StorageType.STATELESS.name());
 

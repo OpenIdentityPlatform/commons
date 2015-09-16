@@ -40,7 +40,7 @@ import org.testng.annotations.Test;
  *
  * @since 0.2.0
  */
-public class VerifyUserIdStageTest {
+public final class VerifyUserIdStageTest {
 
     private VerifyUserIdStage verifyUserIdStage;
     @Mock
@@ -77,11 +77,11 @@ public class VerifyUserIdStageTest {
         StageResponse.Builder builder = StageResponse.newBuilder();
 
         // When
-        String emailAddress = verifyUserIdStage.getEmailAddress(context, config, builder);
+        verifyUserIdStage.getEmailAddress(context, config, builder);
     }
 
     @Test (expectedExceptions = BadRequestException.class,
-        expectedExceptionsMessageRegExp = "Unable to find associated account")
+            expectedExceptionsMessageRegExp = "Unable to find associated account")
     public void testGetEmailAddressInvalidUsername() throws Exception {
         // Given
         given(context.getInput()).willReturn(newJsonValueWithUsername());
@@ -89,15 +89,15 @@ public class VerifyUserIdStageTest {
         given(factory.getConnection()).willReturn(connection);
 
         // When
-        String emailAddress = verifyUserIdStage.getEmailAddress(context, config, builder);
+        verifyUserIdStage.getEmailAddress(context, config, builder);
     }
 
     private VerifyUserIdConfig newVerifyUserIdConfig(VerifyEmailAccountConfig emailConfig) {
         return new VerifyUserIdConfig(emailConfig)
-            .setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")))
-            .setIdentityIdField("_id")
-            .setIdentityEmailField("mail")
-            .setIdentityServiceUrl("/users");
+                .setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")))
+                .setIdentityIdField("_id")
+                .setIdentityEmailField("mail")
+                .setIdentityServiceUrl("/users");
     }
 
     private JsonValue newEmptyJsonValue() {

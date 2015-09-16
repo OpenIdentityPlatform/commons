@@ -23,7 +23,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
@@ -31,7 +30,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.selfservice.core.ProcessContext;
-import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.services.context.Context;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -43,7 +42,7 @@ import org.testng.annotations.Test;
  *
  * @since 0.2.0
  */
-public class ResetStageTest {
+public final class ResetStageTest {
 
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
 
@@ -88,7 +87,7 @@ public class ResetStageTest {
         given(context.getInput()).willReturn(newJsonValueWithUserId());
 
         // When
-        StageResponse stageResponse = resetStage.advance(context, config);
+        resetStage.advance(context, config);
     }
 
     @Test
@@ -100,7 +99,7 @@ public class ResetStageTest {
         given(factory.getConnection()).willReturn(connection);
 
         // When
-        StageResponse stageResponse = resetStage.advance(context, config);
+        resetStage.advance(context, config);
 
         // Then
         ArgumentCaptor<PatchRequest> patchRequestArgumentCaptor =  ArgumentCaptor.forClass(PatchRequest.class);
@@ -116,8 +115,8 @@ public class ResetStageTest {
 
     private ResetStageConfig newResetStageConfig() {
         return new ResetStageConfig()
-            .setIdentityServiceUrl("/users")
-            .setIdentityPasswordField("password");
+                .setIdentityServiceUrl("/users")
+                .setIdentityPasswordField("password");
     }
 
     private JsonValue newJsonValueWithUserId() {
@@ -126,10 +125,8 @@ public class ResetStageTest {
 
     private JsonValue newJsonValueWithAllInputs() {
         return json(
-            object(
-                field("userId", TEST_EMAIL_ID) ,
-                field("password", "testUserPassword")
-            )
-        );
+                object(
+                        field("userId", TEST_EMAIL_ID) ,
+                        field("password", "testUserPassword")));
     }
 }

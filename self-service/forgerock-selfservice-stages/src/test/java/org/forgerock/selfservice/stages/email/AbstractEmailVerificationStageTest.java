@@ -46,7 +46,7 @@ import org.testng.annotations.Test;
  *
  * @since 0.2.0
  */
-public class AbstractEmailVerificationStageTest {
+public final class AbstractEmailVerificationStageTest {
 
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
 
@@ -68,15 +68,15 @@ public class AbstractEmailVerificationStageTest {
     }
 
     @Test (expectedExceptions = InternalServerErrorException.class,
-        expectedExceptionsMessageRegExp = "mail should not be empty")
+            expectedExceptionsMessageRegExp = "mail should not be empty")
     public void testAdvanceInitialStageWithoutEmailAddress() throws Exception {
         // Given
         given(context.getStageTag()).willReturn(INITIAL_TAG);
         given(verificationStage.getEmailAddress(any(ProcessContext.class), any(AbstractEmailVerificationConfig.class),
-            any(StageResponse.Builder.class))).willReturn(null);
+                any(StageResponse.Builder.class))).willReturn(null);
 
         // When
-        StageResponse stageResponse = verificationStage.advance(context, config);
+        verificationStage.advance(context, config);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class AbstractEmailVerificationStageTest {
         // Given
         given(context.getStageTag()).willReturn(INITIAL_TAG);
         given(verificationStage.getEmailAddress(any(ProcessContext.class), any(AbstractEmailVerificationConfig.class),
-            any(StageResponse.Builder.class))).willReturn(TEST_EMAIL_ID);
+                any(StageResponse.Builder.class))).willReturn(TEST_EMAIL_ID);
 
         // When
         StageResponse stageResponse = verificationStage.advance(context, config);
@@ -93,7 +93,7 @@ public class AbstractEmailVerificationStageTest {
         assertThat(stageResponse.getStageTag()).isSameAs("validateCode");
         assertThat(stageResponse.getRequirements()).stringAt("/description").isEqualTo("Verify emailed code");
         assertThat(stageResponse.getRequirements()).stringAt("properties/code/description")
-            .isEqualTo("Enter code emailed");
+                .isEqualTo("Enter code emailed");
         assertThat(stageResponse.getCallback()).isNotNull().isInstanceOf(SnapshotTokenCallback.class);
     }
 
@@ -102,10 +102,10 @@ public class AbstractEmailVerificationStageTest {
         // Given
         given(context.getStageTag()).willReturn(INITIAL_TAG);
         given(verificationStage.getEmailAddress(any(ProcessContext.class), any(AbstractEmailVerificationConfig.class),
-            any(StageResponse.Builder.class))).willReturn(TEST_EMAIL_ID);
+                any(StageResponse.Builder.class))).willReturn(TEST_EMAIL_ID);
         given(factory.getConnection()).willReturn(connection);
         given(config.getEmailMessage()).willReturn("<h3>This is your reset email.</h3>"
-            + "<h4><a href=\"%link%\">Email verification link</a></h4>");
+                + "<h4><a href=\"%link%\">Email verification link</a></h4>");
         given(config.getEmailVerificationLinkToken()).willReturn("%link%");
         given(config.getEmailVerificationLink()).willReturn("http://localhost:9999/example/#passwordReset/");
         given(config.getEmailServiceUrl()).willReturn("/email");
@@ -129,7 +129,7 @@ public class AbstractEmailVerificationStageTest {
         assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(infoEmailId);
         assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(emailSubject);
         assertThat(actionRequest.getContent()).stringAt("/message").matches(
-            "<h3>This is your reset email\\.</h3><h4>"
+                "<h3>This is your reset email\\.</h3><h4>"
                 + "<a href=\"http://localhost:9999/example/#passwordReset/&token=token1&code="
                 + "[\\w\\d]{8}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{12}\">Email verification link</a></h4>"
         );
@@ -143,7 +143,7 @@ public class AbstractEmailVerificationStageTest {
         given(context.getInput()).willReturn(json(object(field("code", null))));
 
         // When
-        StageResponse stageResponse = verificationStage.advance(context, config);
+        verificationStage.advance(context, config);
     }
 
     @Test (expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp = "Invalid code")
@@ -154,7 +154,7 @@ public class AbstractEmailVerificationStageTest {
         given(context.getInput()).willReturn(json(object(field("code", "code2"))));
 
         // When
-        StageResponse stageResponse = verificationStage.advance(context, config);
+        verificationStage.advance(context, config);
     }
 
     @Test

@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
  *
  * @since 0.2.0
  */
-public class VerifyEmailAccountStageTest {
+public final class VerifyEmailAccountStageTest {
 
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
 
@@ -72,7 +72,7 @@ public class VerifyEmailAccountStageTest {
         StageResponse.Builder builder = StageResponse.newBuilder();
 
         // When
-        String emailAddress = verifyEmailStage.getEmailAddress(context, config, builder);
+        verifyEmailStage.getEmailAddress(context, config, builder);
     }
 
     @Test
