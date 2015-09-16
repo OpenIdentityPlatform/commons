@@ -35,8 +35,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -51,6 +49,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.Reject;
