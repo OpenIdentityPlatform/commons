@@ -435,14 +435,24 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
 
             if (resource.getId() != null) {
                 writer.writeObjectField(FIELD_CONTENT_ID, resource.getId());
-            } else if (content.isDefined(FIELD_CONTENT_ID)) {
-                writer.writeObjectField(FIELD_CONTENT_ID, content.get(FIELD_CONTENT_ID));
+            } else {
+                // Defensively extract an object instead of a string in case application code has stored a UUID
+                // object, or some other non-JSON primitive. Also assume that a null ID means no ID.
+                final Object id = content.get(FIELD_CONTENT_ID).getObject();
+                if (id != null) {
+                    writer.writeObjectField(FIELD_CONTENT_ID, id.toString());
+                }
             }
 
             if (resource.getRevision() != null) {
                 writer.writeObjectField(FIELD_CONTENT_REVISION, resource.getRevision());
-            } else if (content.isDefined(FIELD_CONTENT_REVISION)) {
-                writer.writeObjectField(FIELD_CONTENT_REVISION, content.get(FIELD_CONTENT_REVISION));
+            } else {
+                // Defensively extract an object instead of a string in case application code has stored a Number
+                // object, or some other non-JSON primitive. Also assume that a null revision means no revision.
+                final Object rev = content.get(FIELD_CONTENT_REVISION).getObject();
+                if (rev != null) {
+                    writer.writeObjectField(FIELD_CONTENT_REVISION, rev.toString());
+                }
             }
 
             for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
