@@ -16,10 +16,16 @@
 
 package org.forgerock.http;
 
-import static org.forgerock.http.util.Uris.create;
+import static java.util.Collections.*;
+import static org.forgerock.http.util.Paths.joinPath;
+import static org.forgerock.http.util.Uris.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.forgerock.http.util.Paths;
 
 /**
  * A MutableUri is a modifiable {@link URI} substitute.
@@ -29,6 +35,7 @@ import java.net.URISyntaxException;
  * @see URI
  */
 public final class MutableUri implements Comparable<MutableUri> {
+
 
     /**
      * Factory method for avoiding typing {@code new MutableUri("http://...")}.
@@ -44,7 +51,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      * The real URI, hidden by this class. Recreated each time a field is updated.
      */
     private URI uri;
-    private ResourcePath resourcePath;
+    private List<String> pathElements;
 
     /**
      * Builds a new MutableUri using the given URI.
@@ -52,7 +59,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      */
     public MutableUri(final URI uri) {
         this.uri = uri;
-        setResourcePath(uri.getRawPath());
+        setPathElements(uri.getRawPath());
     }
 
     /**
@@ -251,7 +258,7 @@ public final class MutableUri implements Comparable<MutableUri> {
                      rawPath,
                      uri.getRawQuery(),
                      uri.getRawFragment());
-        setResourcePath(uri.getRawPath());
+        setPathElements(uri.getRawPath());
     }
 
     /**
@@ -353,23 +360,30 @@ public final class MutableUri implements Comparable<MutableUri> {
     }
 
     /**
-     * Sets the {@literal resourcePath} from the URI path (encoded value).
-     *
-     * <p>This method does not set or recreate the {@literal uri}, this is the
-     * responsibility of the method caller.</p>
+     * Sets the {@literal pathElements} from the URI path (encoded value).
+     * <p>
+     * This method does not set or recreate the {@literal uri}, this is the
+     * responsibility of the method caller.
      *
      * @param rawPath The raw (URI-encoded) path.
      */
-    private void setResourcePath(String rawPath) {
-        this.resourcePath = ResourcePath.valueOf(rawPath);
+    private void setPathElements(final String rawPath) {
+        this.pathElements = new ArrayList<String>(Paths.getPathElements(rawPath)) {
+            @Override
+            public String toString() {
+                return joinPath(this);
+            }
+        };
     }
 
     /**
-     * Return the URI path element as a {@code ResourcePath}.
-     * @return The URI path element as a {@code ResourcePath}.
+     * Return the URI path elements as an immutable {@code List}. The {@code toString} method of the
+     * returned object will return the URL-encoded path elements joined with {@code "/"}.
+     *
+     * @return The URI path elements as an immutable {@code List}.
      */
-    public ResourcePath getResourcePath() {
-        return resourcePath;
+    public List<String> getPathElements() {
+        return unmodifiableList(pathElements);
     }
 
     /**
@@ -425,7 +439,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      */
     public MutableUri relativize(final MutableUri uri) {
         this.uri = this.uri.relativize(uri.asURI());
-        setResourcePath(this.uri.getRawPath());
+        setPathElements(this.uri.getRawPath());
         return this;
     }
 
@@ -437,7 +451,7 @@ public final class MutableUri implements Comparable<MutableUri> {
      */
     public MutableUri resolve(final MutableUri uri) {
         this.uri = this.uri.resolve(uri.asURI());
-        setResourcePath(this.uri.getRawPath());
+        setPathElements(this.uri.getRawPath());
         return this;
     }
 

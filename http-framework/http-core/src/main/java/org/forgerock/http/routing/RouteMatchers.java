@@ -16,11 +16,13 @@
 
 package org.forgerock.http.routing;
 
+import java.util.List;
+
 import org.forgerock.http.Context;
 import org.forgerock.http.Filter;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.protocol.Request;
+import org.forgerock.http.util.Paths;
 
 /**
  * A utility class that contains methods for creating route matchers.
@@ -40,7 +42,7 @@ public final class RouteMatchers {
      * @param template The uri template.
      * @return A {@code RouteMatcher} instance.
      */
-    public static RouteMatcher<ResourcePath> uriMatcher(RoutingMode mode, String template) {
+    public static RouteMatcher<List<String>> uriMatcher(RoutingMode mode, String template) {
         return new UriRouteMatcher(mode, template);
     }
 
@@ -53,7 +55,7 @@ public final class RouteMatchers {
      * @return A {@code RouteMatcher} instance.
      */
     public static RouteMatcher<Request> requestUriMatcher(RoutingMode mode, String template) {
-        RouteMatcher<ResourcePath> delegate = uriMatcher(mode, template);
+        RouteMatcher<List<String>> delegate = uriMatcher(mode, template);
         return new RequestUriRouteMatcher(delegate);
     }
 
@@ -112,9 +114,9 @@ public final class RouteMatchers {
      */
     private static final class RequestUriRouteMatcher extends RouteMatcher<Request> {
 
-        private final RouteMatcher<ResourcePath> delegate;
+        private final RouteMatcher<List<String>> delegate;
 
-        private RequestUriRouteMatcher(RouteMatcher<ResourcePath> delegate) {
+        private RequestUriRouteMatcher(RouteMatcher<List<String>> delegate) {
             this.delegate = delegate;
         }
 
@@ -146,11 +148,11 @@ public final class RouteMatchers {
         }
     }
 
-    static ResourcePath getRemainingRequestUri(Context context, Request request) {
-        ResourcePath path = request.getUri().getResourcePath();
+    static List<String> getRemainingRequestUri(Context context, Request request) {
+        List<String> path = request.getUri().getPathElements();
         if (context.containsContext(UriRouterContext.class)) {
-            ResourcePath matchedUri = ResourcePath.valueOf(context.asContext(UriRouterContext.class).getBaseUri());
-            path = path.tail(matchedUri.size());
+            List<String> matchedUri = Paths.getPathElements(context.asContext(UriRouterContext.class).getBaseUri());
+            path = path.subList(matchedUri.size(), path.size());
         }
         return path;
     }

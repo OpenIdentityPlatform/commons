@@ -20,9 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 
 import org.forgerock.http.Context;
-import org.forgerock.http.ResourcePath;
 import org.forgerock.http.context.RootContext;
 import org.forgerock.http.protocol.Request;
 import org.testng.annotations.BeforeClass;
@@ -54,10 +54,14 @@ public class RouteMatchersTest {
     public void shouldGetUri(Context context, String expectedUri) {
 
         //When
-        ResourcePath uri = RouteMatchers.getRemainingRequestUri(context, request);
+        List<String> uri = RouteMatchers.getRemainingRequestUri(context, request);
 
         //Then
-        assertThat(uri.toString()).isEqualTo(expectedUri);
+        if (expectedUri.isEmpty()) {
+            assertThat(uri).isEmpty();
+        } else {
+            assertThat(uri).containsExactly(expectedUri.split("/"));
+        }
     }
 
     private UriRouterContext newContext(Context parentContext, String matchedUri) {

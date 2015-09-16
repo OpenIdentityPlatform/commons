@@ -329,7 +329,7 @@ public class MutableUriTest {
         uri.setPath("/" + character);
         assertThat(uri.getPath()).isEqualTo("/" + character);
         assertThat(uri.getRawPath()).isEqualTo("/" + character);
-        assertThat(uri.getResourcePath().toString()).isEqualTo(character);
+        assertThat(uri.getPathElements()).containsExactly(character);
     }
 
     @DataProvider
@@ -343,7 +343,7 @@ public class MutableUriTest {
         uri.setPath("/" + character);
         assertThat(uri.getPath()).isEqualTo("/" + character);
         assertThat(uri.getRawPath()).isEqualTo("/" + urlEncode(character));
-        assertThat(uri.getResourcePath().toString()).isEqualTo(urlEncode(character));
+        assertThat(uri.getPathElements().toString()).isEqualTo(urlEncode(character));
     }
 
     @DataProvider
@@ -483,7 +483,7 @@ public class MutableUriTest {
         MutableUri uri = uri("http://www.example.com/a%20b/");
         MutableUri relativized = uri.relativize(uri("http://www.example.com/a%20b/c%3Dd"));
         assertThat(relativized).isEqualTo(uri("c%3Dd"));
-        assertThat(relativized.getResourcePath().toString()).isEqualTo("c%3Dd");
+        assertThat(relativized.getPathElements().toString()).isEqualTo("c=d");
     }
 
     @Test
@@ -491,7 +491,7 @@ public class MutableUriTest {
         MutableUri uri = uri("http://www.example.com/a%20b/");
         MutableUri resolved = uri.resolve(uri("c%3Dd"));
         assertThat(resolved).isEqualTo(uri("http://www.example.com/a%20b/c%3Dd"));
-        assertThat(resolved.getResourcePath().toString()).isEqualTo("a%20b/c%3Dd");
+        assertThat(resolved.getPathElements().toString()).isEqualTo("a%20b/c=d");
     }
 
     @Test
@@ -499,7 +499,7 @@ public class MutableUriTest {
         MutableUri uri = uri("http://www.example.com/a%20b/");
         MutableUri resolved = uri.resolve(uri("/c%3Dd"));
         assertThat(resolved).isEqualTo(uri("http://www.example.com/c%3Dd"));
-        assertThat(resolved.getResourcePath().toString()).isEqualTo("c%3Dd");
+        assertThat(resolved.getPathElements().toString()).isEqualTo("c=d");
     }
 
     @Test
@@ -509,6 +509,13 @@ public class MutableUriTest {
         // Do not use uri() here because resolution knows %3d is a path element
         // where http://...comc%3Dd is see as part of the hostname (no path element)
         assertThat(resolved.toString()).isEqualTo("http://www.example.comc%3Dd");
-        assertThat(resolved.getResourcePath().toString()).isEqualTo("c%3Dd");
+        assertThat(resolved.getPathElements().toString()).isEqualTo("c=d");
+    }
+
+    @Test
+    public void shouldNotFailForInvalidResourcePaths() throws Exception {
+        MutableUri uri = uri("http://www.example.com///");
+        assertThat(uri.toString()).isEqualTo("http://www.example.com///");
+        assertThat(uri.getPathElements()).containsExactly("", "", "");
     }
 }
