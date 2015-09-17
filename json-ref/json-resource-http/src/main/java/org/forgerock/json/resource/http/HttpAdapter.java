@@ -26,7 +26,6 @@ import java.util.Map;
 
 import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
 import org.forgerock.http.protocol.Response;
@@ -191,10 +190,12 @@ final class HttpAdapter implements Handler {
             preprocessRequest(req);
             rejectIfNoneMatch(req);
 
+            // use the version-1 meaning of getIfMatch; i.e., treat * as null
+            final String ifMatchRevision = getIfMatch(req, PROTOCOL_VERSION_1);
             final Form parameters = req.getForm();
             final DeleteRequest request =
                     Requests.newDeleteRequest(getResourcePath(context, req))
-                            .setRevision(getIfMatch(req))
+                            .setRevision(ifMatchRevision)
                             .setResourceVersion(requestedResourceVersion);
             for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
@@ -369,10 +370,12 @@ final class HttpAdapter implements Handler {
                         "Use of If-None-Match not supported for PATCH requests");
             }
 
+            // use the version 1 meaning of getIfMatch; i.e., treat * as null
+            final String ifMatchRevision = getIfMatch(req, PROTOCOL_VERSION_1);
             final Form parameters = req.getForm();
             final PatchRequest request =
                     Requests.newPatchRequest(getResourcePath(context, req))
-                            .setRevision(getIfMatch(req))
+                            .setRevision(ifMatchRevision)
                             .setResourceVersion(requestedResourceVersion);
             request.getPatchOperations().addAll(getJsonPatchContent(req));
             for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
@@ -427,8 +430,7 @@ final class HttpAdapter implements Handler {
                         && req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
                     // FIXME: i18n
                     throw new PreconditionFailedException(
-                            "Simultaneous use of If-Match and If-None-Match not "
-                                    + "supported for PUT requests");
+                            "Simultaneous use of If-Match and If-None-Match not supported for PUT requests");
                 }
 
                 final Form parameters = req.getForm();
@@ -514,16 +516,17 @@ final class HttpAdapter implements Handler {
                     && req.getHeaders().getFirst(HEADER_IF_NONE_MATCH) != null) {
                 // FIXME: i18n
                 throw new PreconditionFailedException(
-                        "Simultaneous use of If-Match and If-None-Match not "
-                                + "supported for PUT requests");
+                        "Simultaneous use of If-Match and If-None-Match not supported for PUT requests");
             }
 
+            // use the version 1 meaning of getIfMatch; i.e., treat * as null
+            final String ifMatchRevision = getIfMatch(req, PROTOCOL_VERSION_1);
             final Form parameters = req.getForm();
             final JsonValue content = getJsonContent(req);
 
             final UpdateRequest request =
                     Requests.newUpdateRequest(getResourcePath(context, req), content)
-                            .setRevision(getIfMatch(req))
+                            .setRevision(ifMatchRevision)
                             .setResourceVersion(requestedResourceVersion);
             for (final Map.Entry<String, List<String>> p : parameters.entrySet()) {
                 final String name = p.getKey();
@@ -648,33 +651,4 @@ final class HttpAdapter implements Handler {
         }
     }
 
-    /**
-     * Attempts to parse the version header and return a corresponding resource {@link Version} representation.
-     * Further validates that the specified versions are valid. That being not in the future and no earlier
-     * that the current major version.
-     *
-     * @param req
-     *         The HTTP servlet request
-     *
-     * @return A non-null resource  {@link Version} instance
-     *
-     * @throws BadRequestException
-     *         If an invalid version is requested
-     */
-    private Version getRequestedResourceVersion(org.forgerock.http.protocol.Request req) throws BadRequestException {
-        AcceptApiVersionHeader apiVersionHeader;
-        try {
-            apiVersionHeader = AcceptApiVersionHeader.valueOf(req);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException(e);
-        }
-        Version protocolVersion = apiVersionHeader.getProtocolVersion();
-        if (protocolVersion != null && protocolVersion.getMajor() != PROTOCOL_VERSION.getMajor()) {
-            throw new BadRequestException("Unsupported major version: " + protocolVersion);
-        }
-        if (protocolVersion != null && protocolVersion.getMinor() > PROTOCOL_VERSION.getMinor()) {
-            throw new BadRequestException("Unsupported minor version: " + protocolVersion);
-        }
-        return apiVersionHeader.getResourceVersion();
-    }
 }

@@ -19,6 +19,7 @@ package org.forgerock.json.resource.http;
 import static org.forgerock.json.resource.QueryResponse.*;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
+import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -39,14 +40,17 @@ import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.AdviceContext;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
@@ -74,6 +78,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private final Context context;
     private final org.forgerock.http.protocol.Request httpRequest;
     private final Response httpResponse;
+    private final Version protocolVersion;
     private final Request<?> request;
     private final JsonGenerator writer;
 
@@ -83,7 +88,22 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         this.request = request;
         this.httpRequest = httpRequest;
         this.httpResponse = httpResponse;
+        // cache the request's protocol version to avoid repeated BadRequestExceptions at call-sites
+        this.protocolVersion = getRequestedProtocolVersion(httpRequest);
         this.writer = getJsonGenerator(httpRequest, httpResponse);
+    }
+
+    /**
+     * Determine if upsert is supported for this request.
+     *
+     * @param request the CreateRequest that failed
+     * @return whether we can instead try an update for the failed create
+     */
+    private boolean isUpsertSupported(final CreateRequest request) {
+        // protocol version 2 supports upsert -- update on create-failure
+        return (protocolVersion.getMajor() >= 2
+                && getIfNoneMatch(httpRequest) == null
+                && request.getNewResourceId() != null);
     }
 
     public final Promise<Response, NeverThrowsException> handleError(final ResourceException error) {
@@ -159,8 +179,22 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                     }
                 }, new AsyncFunction<ResourceException, Response, NeverThrowsException>() {
                     @Override
-                    public Promise<Response, NeverThrowsException> apply(ResourceException e) {
-                        return handleError(e);
+                    public Promise<Response, NeverThrowsException> apply(ResourceException resourceException) {
+                        try {
+                            // treat as update to existing resource (if supported)
+                            // if create failed because object already exists
+                            if (resourceException instanceof PreconditionFailedException && isUpsertSupported(request)) {
+                                return visitUpdateRequest(p,
+                                        newUpdateRequest(
+                                                request.getResourcePathObject().child(request.getNewResourceId()),
+                                                request.getContent()));
+                            } else {
+                                return handleError(resourceException);
+                            }
+                        } catch (Exception e) {
+                            onError(e);
+                        }
+                        return newResultPromise(httpResponse);
                     }
                 });
     }
@@ -467,7 +501,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private void writeApiVersionHeaders(org.forgerock.json.resource.Response response) {
         if (response.getResourceApiVersion() != null) {
             httpResponse.getHeaders().putSingle(
-                    new ContentApiVersionHeader(PROTOCOL_VERSION, response.getResourceApiVersion()));
+                    new ContentApiVersionHeader(protocolVersion, response.getResourceApiVersion()));
         }
     }
 

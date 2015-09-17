@@ -146,8 +146,12 @@ public final class HttpUtils {
 
     /** The name of the protocol in use. */
     public static final String PROTOCOL_NAME = "crest";
-    /** The version of the named protocol. */
-    public static final Version PROTOCOL_VERSION = version("1.0");
+    /** Protocol Version 1 */
+    public static final Version PROTOCOL_VERSION_1 = version(1);
+    /** Protocol Version 2 - supports upsert on PUT */
+    public static final Version PROTOCOL_VERSION_2 = version(2);
+    /** The default version of the named protocol. */
+    public static final Version DEFAULT_PROTOCOL_VERSION = PROTOCOL_VERSION_2;
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
@@ -270,50 +274,6 @@ public final class HttpUtils {
         return fail0(req, resp, t);
     }
 
-    /**
-     * Determines which CREST operation (CRUDPAQ) of the incoming request.
-     *
-     * @param request The request.
-     * @return The Operation.
-     * @throws ResourceException If the request operation could not be
-     * determined or is not supported.
-     */
-    public static RequestType determineRequestType(org.forgerock.http.protocol.Request request)
-            throws ResourceException {
-        // Dispatch the request based on method, taking into account
-        // method override header.
-        final String method = getMethod(request);
-        if (METHOD_DELETE.equals(method)) {
-            return RequestType.DELETE;
-        } else if (METHOD_GET.equals(method)) {
-            if (hasParameter(request, PARAM_QUERY_ID) || hasParameter(request, PARAM_QUERY_EXPRESSION)
-                    || hasParameter(request, PARAM_QUERY_FILTER)) {
-                return RequestType.QUERY;
-            } else {
-                return RequestType.READ;
-            }
-        } else if (METHOD_PATCH.equals(method)) {
-            return RequestType.PATCH;
-        } else if (METHOD_POST.equals(method)) {
-            final String action = asSingleValue(PARAM_ACTION, getParameter(request, PARAM_ACTION));
-            if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
-                return RequestType.CREATE;
-            } else {
-                return RequestType.ACTION;
-            }
-        } else if (METHOD_PUT.equals(method)) {
-            final String rev = getIfNoneMatch(request);
-            if (ETAG_ANY.equals(rev)) {
-                return RequestType.CREATE;
-            } else {
-                return RequestType.UPDATE;
-            }
-        } else {
-            // TODO: i18n
-            throw new NotSupportedException("Method " + method + " not supported");
-        }
-    }
-
     private static Promise<Response, NeverThrowsException> fail0(org.forgerock.http.protocol.Request req,
             org.forgerock.http.protocol.Response resp, Throwable t) {
         final ResourceException re = adapt(t);
@@ -334,7 +294,165 @@ public final class HttpUtils {
         }
     }
 
-    static String getIfMatch(org.forgerock.http.protocol.Request req) {
+    /**
+     * Determines which CREST operation (CRUDPAQ) of the incoming request.
+     *
+     * @param request The request.
+     * @return The Operation.
+     * @throws ResourceException If the request operation could not be
+     * determined or is not supported.
+     */
+    public static RequestType determineRequestType(org.forgerock.http.protocol.Request request)
+            throws ResourceException {
+        // Dispatch the request based on method, taking into account
+        // method override header.
+        final String method = getMethod(request);
+        if (METHOD_DELETE.equals(method)) {
+            return RequestType.DELETE;
+        } else if (METHOD_GET.equals(method)) {
+            if (hasParameter(request, PARAM_QUERY_ID)
+                    || hasParameter(request, PARAM_QUERY_EXPRESSION)
+                    || hasParameter(request, PARAM_QUERY_FILTER)) {
+                return RequestType.QUERY;
+            } else {
+                return RequestType.READ;
+            }
+        } else if (METHOD_PATCH.equals(method)) {
+            return RequestType.PATCH;
+        } else if (METHOD_POST.equals(method)) {
+            final String action = asSingleValue(PARAM_ACTION, getParameter(request, PARAM_ACTION));
+            if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
+                return RequestType.CREATE;
+            } else {
+                return RequestType.ACTION;
+            }
+        } else if (METHOD_PUT.equals(method)) {
+            return determinePutRequestType(request);
+        } else {
+            // TODO: i18n
+            throw new NotSupportedException("Method " + method + " not supported");
+        }
+    }
+
+    /**
+     * Determine whether the PUT request should be interpreted as a CREATE or an UPDATE depending on
+     * If-None-Match header, If-Match header, and protocol version.
+     *
+     * @param request The request.
+     * @return true if request is interpreted as a create; false if interpreted as an update
+     */
+    private static RequestType determinePutRequestType(org.forgerock.http.protocol.Request request)
+            throws BadRequestException {
+
+        final Version protocolVersion = getRequestedProtocolVersion(request);
+        final String ifNoneMatch = getIfNoneMatch(request);
+        final String ifMatch = getIfMatch(request, protocolVersion);
+
+        // For protocol version 1:
+        //
+        //  - "If-None-Match: *" is present; this is a create which will fail if the object already exists.
+        //  - "If-None-Match: *" is not present:
+        //          This is an update which will fail if the object does not exist.  There are two ways to
+        //          perform the update, using the value of the If-Match header:
+        //           - "If-Match: <rev>" : update the object if its revision matches the header value
+        //           - "If-Match: * : update the object regardless of the object's revision
+        //           - "If-Match:" header is not present : same as "If-Match: *"; update regardless of object revision
+        //
+        // For protocol version 2 onward:
+        //
+        // Two methods of create are implied by PUT:
+        //
+        //  - "If-None-Match: *" is present, this is a create which will fail if the object already exists.
+        //  - "If-Match" is present; this is an update only:
+        //           - "If-Match: <rev>" : update the object if its revision matches the header value
+        //           - "If-Match: * : update the object regardless of the object's revision
+        //  - Neither "If-None-Match" nor "If-Match" are present, this is either a create or an update ("upsert"):
+        //          Attempt a create; if it fails, attempt an update.  If the update fails, return an error
+        //          (the record could have been deleted between the create-failure and the update, for example).
+
+        if (ETAG_ANY.equals(ifNoneMatch)) {
+            return RequestType.CREATE;
+        } else if (ifNoneMatch == null && ifMatch == null && protocolVersion.getMajor() >= 2) {
+            return RequestType.CREATE;
+        } else {
+            return RequestType.UPDATE;
+        }
+    }
+
+    /**
+     * Attempts to parse the version header and return a corresponding resource {@link Version} representation.
+     * Further validates that the specified versions are valid. That being not in the future and no earlier
+     * that the current major version.
+     *
+     * @param req
+     *         The HTTP servlet request
+     *
+     * @return A non-null resource  {@link Version} instance
+     *
+     * @throws BadRequestException
+     *         If an invalid version is requested
+     */
+    static Version getRequestedResourceVersion(org.forgerock.http.protocol.Request req) throws BadRequestException {
+        return getAcceptApiVersionHeader(req).getResourceVersion();
+    }
+
+    /**
+     * Attempts to parse the version header and return a corresponding protocol {@link Version} representation.
+     * Further validates that the specified versions are valid. That being not in the future and no earlier
+     * that the current major version.
+     *
+     * @param req
+     *         The HTTP servlet request
+     *
+     * @return A non-null resource  {@link Version} instance
+     *
+     * @throws BadRequestException
+     *         If an invalid version is requested
+     */
+    static Version getRequestedProtocolVersion(org.forgerock.http.protocol.Request req) throws BadRequestException {
+        Version protocolVersion = getAcceptApiVersionHeader(req).getProtocolVersion();
+        return protocolVersion != null ? protocolVersion : DEFAULT_PROTOCOL_VERSION;
+    }
+
+    /**
+     * Validate and return the AcceptApiVersionHeader.
+     *
+     * @param req
+     *         The HTTP servlet request
+     *
+     * @return A non-null resource  {@link Version} instance
+     *
+     * @throws BadRequestException
+     *         If an invalid version is requested
+     */
+    private static AcceptApiVersionHeader getAcceptApiVersionHeader(org.forgerock.http.protocol.Request req)
+            throws BadRequestException {
+        AcceptApiVersionHeader apiVersionHeader;
+        try {
+            apiVersionHeader = AcceptApiVersionHeader.valueOf(req);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException(e);
+        }
+        validateProtocolVersion(apiVersionHeader.getProtocolVersion());
+        return apiVersionHeader;
+    }
+
+    /**
+     * Validate the Protocol version as not in the future.
+     *
+     * @param protocolVersion the protocol version from the request
+     * @throws BadRequestException if the request marks a protocol version greater than the current version
+     */
+    private static void validateProtocolVersion(Version protocolVersion) throws BadRequestException {
+        if (protocolVersion != null && protocolVersion.getMajor() > DEFAULT_PROTOCOL_VERSION.getMajor()) {
+            throw new BadRequestException("Unsupported major version: " + protocolVersion);
+        }
+        if (protocolVersion != null && protocolVersion.getMinor() > DEFAULT_PROTOCOL_VERSION.getMinor()) {
+            throw new BadRequestException("Unsupported minor version: " + protocolVersion);
+        }
+    }
+
+    static String getIfMatch(org.forgerock.http.protocol.Request req, Version protocolVersion) {
         final String etag = req.getHeaders().getFirst(HEADER_IF_MATCH);
         if (etag != null) {
             if (etag.length() >= 2) {
@@ -342,8 +460,8 @@ public final class HttpUtils {
                 if (etag.charAt(0) == '"') {
                     return etag.substring(1, etag.length() - 1);
                 }
-            } else if (etag.equals(ETAG_ANY)) {
-                // If-Match * is implied anyway.
+            } else if (etag.equals(ETAG_ANY) && protocolVersion.getMajor() < 2) {
+                // If-Match * is implied prior to version 2
                 return null;
             }
         }

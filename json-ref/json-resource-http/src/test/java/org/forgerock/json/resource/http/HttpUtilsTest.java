@@ -18,6 +18,7 @@ package org.forgerock.json.resource.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
+import static org.forgerock.json.resource.http.HttpUtils.determineRequestType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,12 +28,15 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 
+import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.util.encode.Base64url;
 import org.testng.annotations.BeforeClass;
@@ -389,6 +393,99 @@ public class HttpUtilsTest {
             throw e;
         }
     }
+
+    @DataProvider
+    public Object[][] requestToRequestType() {
+        return new Object[][] {
+            { RequestType.READ, getRequestNoParams() },
+            { RequestType.QUERY, getRequestQueryParam() },
+            { RequestType.DELETE, deleteRequest() },
+            { RequestType.PATCH, patchRequest() },
+            { RequestType.ACTION, postRequestNonCreateActionParam() },
+            { RequestType.CREATE, postRequestCreateActionParam() },
+
+            // Protocol 1.0 PUT tests
+            { RequestType.CREATE, putRequest("1.0", HttpUtils.ETAG_ANY, null) },
+            { RequestType.UPDATE, putRequest("1.0", null, HttpUtils.ETAG_ANY) },
+            { RequestType.UPDATE, putRequest("1.0", null, "1") },
+            { RequestType.UPDATE, putRequest("1.0", null, null) },
+            // Protocol 2.0 PUT tests
+            { RequestType.CREATE, putRequest("2.0", HttpUtils.ETAG_ANY, null) },
+            { RequestType.UPDATE, putRequest("2.0", null, "1") },
+            { RequestType.UPDATE, putRequest("2.0", null, HttpUtils.ETAG_ANY) },
+            // This changes in protocol=2: A PUT with neither If-None-Match/If-Match header
+            // is an "upsert" -- it starts as a CREATE, but if the create fails because the
+            // resource exists, an UPDATE will be attempted (CREST-100).
+            // see also RequestRunner#visitCreateRequest
+            { RequestType.CREATE, putRequest("2.0", null, null) },
+
+            // No protocol specified == version 2.0 behavior
+            { RequestType.CREATE, putRequest(null, HttpUtils.ETAG_ANY, null) },
+            { RequestType.UPDATE, putRequest(null, null, "1") },
+            { RequestType.UPDATE, putRequest(null, null, HttpUtils.ETAG_ANY) },
+            { RequestType.CREATE, putRequest(null, null, null) }
+        };
+    }
+
+    @Test(dataProvider = "requestToRequestType")
+    public void testDetermineRequestType(RequestType requestType, Request request) throws ResourceException {
+        assertThat(determineRequestType(request)).isEqualTo(requestType);
+    }
+
+    private Request getRequestNoParams() {
+        Request request = newRequest()
+                .setMethod(HttpUtils.METHOD_GET);
+        return request;
+    }
+
+    private Request getRequestQueryParam() {
+        Request request = newRequest()
+                .setMethod(HttpUtils.METHOD_GET);
+        request.setUri(URI.create("?" + HttpUtils.PARAM_QUERY_FILTER + "=true"));
+        return request;
+    }
+
+    private Request deleteRequest() {
+        Request request = newRequest()
+                .setMethod(HttpUtils.METHOD_DELETE);
+        return request;
+    }
+
+    private Request patchRequest() {
+        Request request = newRequest()
+                .setMethod(HttpUtils.METHOD_PATCH);
+        return request;
+    }
+
+    private Request postRequestNonCreateActionParam() {
+        Request request = newRequest()
+                .setMethod(HttpUtils.METHOD_POST);
+        request.setUri(URI.create("?" + HttpUtils.PARAM_ACTION + "=test"));
+        return request;
+    }
+
+    private Request postRequestCreateActionParam() {
+        Request request = newRequest()
+                .setMethod(HttpUtils.METHOD_POST);
+        request.setUri(URI.create("?" + HttpUtils.PARAM_ACTION + "=" + ActionRequest.ACTION_ID_CREATE));
+        return request;
+    }
+
+    private Request putRequest(String protocolVersion, String ifNoneMatch, String ifMatch) {
+        Request request = newRequest()
+                .setMethod(HttpUtils.METHOD_PUT);
+        if (protocolVersion != null) {
+            request.getHeaders().putSingle(AcceptApiVersionHeader.NAME, "protocol=" + protocolVersion + ",resource=1.0");
+        }
+        if (ifNoneMatch != null) {
+            request.getHeaders().putSingle(HttpUtils.HEADER_IF_NONE_MATCH, ifNoneMatch);
+        }
+        if (ifMatch != null) {
+            request.getHeaders().putSingle(HttpUtils.HEADER_IF_MATCH, ifMatch);
+        }
+        return request;
+    }
+
 
     private Request newRequest() {
         Request request = new Request();

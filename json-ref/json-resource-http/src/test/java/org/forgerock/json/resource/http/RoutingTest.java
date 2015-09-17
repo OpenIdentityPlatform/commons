@@ -104,7 +104,7 @@ public class RoutingTest {
 
         //Then
         if (expectedContentResourceApiVersion != null) {
-            assertThat(response.getHeaders().getFirst(ContentApiVersionHeader.NAME)).isEqualTo("protocol=1.0,resource="
+            assertThat(response.getHeaders().getFirst(ContentApiVersionHeader.NAME)).isEqualTo("protocol=2.0,resource="
                     + expectedContentResourceApiVersion);
         } else {
             assertThat(response.getHeaders().getFirst(ContentApiVersionHeader.NAME)).isNull();
