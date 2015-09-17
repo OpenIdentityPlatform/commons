@@ -217,9 +217,9 @@
         "@jumbotron-heading-color": "inherit",
         "@jumbotron-font-size": "ceil((@font-size-base * 1.5))",
         "@jumbotron-heading-font-size": "ceil((@font-size-base * 4.5))",
-        "@state-success-text": "#3c763d",
-        "@state-success-bg": "#dff0d8",
-        "@state-success-border": "darken(spin(@state-success-bg, -10), 5%)",
+        "@state-success-text": "#3A776C",
+        "@state-success-bg": "#d4ece6",
+        "@state-success-border": "#CBE2DC",
         "@state-info-text": "#31708f",
         "@state-info-bg": "#d9edf7",
         "@state-info-border": "darken(spin(@state-info-bg, -10), 7%)",
@@ -336,12 +336,12 @@
         "@thumbnail-caption-padding": "9px",
         "@well-bg": "#f5f5f5",
         "@well-border": "darken(@well-bg, 7%)",
-        "@badge-color": "#fff",
+        "@badge-color": "#555",
         "@badge-link-hover-color": "#fff",
-        "@badge-bg": "#519387",
+        "@badge-bg": "rgba(0,0,0,.1);",
         "@badge-active-color": "@link-color",
         "@badge-active-bg": "#fff",
-        "@badge-font-weight": "bold",
+        "@badge-font-weight": "400",
         "@badge-line-height": "1",
         "@badge-border-radius": "10px",
         "@breadcrumb-padding-vertical": "8px",
@@ -430,5 +430,5 @@
         "scrollspy.js",
         "transition.js"
     ],
-    "customizerUrl": "http://getbootstrap.com/customize/?id=da99d25c6c681dbd59f4"
+    "customizerUrl": "http://getbootstrap.com/customize/?id=57f87304b26491888164"
 }
