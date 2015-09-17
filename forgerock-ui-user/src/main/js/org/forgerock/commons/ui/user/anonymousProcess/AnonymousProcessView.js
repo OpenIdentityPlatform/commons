@@ -78,25 +78,42 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
         render: function(args, callback) {
             var params = Router.convertCurrentUrlToJSON().params;
 
-            // if a token is passed to us via the url, submit it along with whatever other parameters were included and reset the URL hash
-            if (params.token) {
-                this.delegate = new AnonymousProcessDelegate(this.endpoint, params.token);
-                this.delegate.submit(_.omit(params, 'token')).then(function () {
-                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, { route: Router.currentRoute, args: ["/continue"] });
-                });
-                return;
-            } else if (!this.delegate || args[0] !== "/continue") {
-                this.delegate = new AnonymousProcessDelegate(this.endpoint);
+            if (!this.delegate || args[0] !== "/continue") {
+                this.setDelegate(this.endpoint, params.token);
             }
 
-            // each instance of this module can define their own i18nBase value to provide specific translation values
+            if (params.token) {
+                this.submitDelegate(params, function () {
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                        route: Router.currentRoute,
+                        args: ["/continue"]
+                    });
+                });
+                return;
+            }
+
+            this.setTranslationBase();
+            this.parentRender();
+        },
+
+        parentRender: function () {
+            AbstractView.prototype.parentRender.call(this, _.bind(function () {
+                this.delegate.start().then(_.bind(this.renderProcessState, this));
+            }, this));
+        },
+
+        setDelegate: function (endpoint, token) {
+            this.delegate = new AnonymousProcessDelegate(endpoint, token);
+        },
+
+        submitDelegate: function (params, onSubmit) {
+            this.delegate.submit(_.omit(params, "token")).then(onSubmit());
+        },
+
+        setTranslationBase: function () {
             _.each(["title", "completed", "failed", "tryAgain", "return"], function (key) {
                 this.data.i18n[key] = this.i18nBase + "." + key;
             }, this);
-
-            this.parentRender(_.bind(function () {
-                this.delegate.start().then(_.bind(this.renderProcessState, this));
-            }, this));
         },
 
         restartProcess: function (e) {
