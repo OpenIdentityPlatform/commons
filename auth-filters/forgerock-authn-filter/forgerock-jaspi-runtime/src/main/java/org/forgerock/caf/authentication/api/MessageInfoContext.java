@@ -18,7 +18,7 @@ package org.forgerock.caf.authentication.api;
 
 import java.util.Map;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 

@@ -36,7 +36,7 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.caf.authentication.framework.JaspiAdapters;
-import org.forgerock.http.context.AttributesContext;
+import org.forgerock.services.context.AttributesContext;
 import org.forgerock.http.header.SetCookieHeader;
 import org.forgerock.http.protocol.Cookie;
 import org.forgerock.http.protocol.Headers;

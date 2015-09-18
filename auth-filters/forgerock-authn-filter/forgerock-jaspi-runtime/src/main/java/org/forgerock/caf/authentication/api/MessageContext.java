@@ -17,7 +17,7 @@
 package org.forgerock.caf.authentication.api;
 
 import org.forgerock.caf.authentication.framework.AuditTrail;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * <p>The authentication framework uses this {@code MessageContext} to pass messages and message

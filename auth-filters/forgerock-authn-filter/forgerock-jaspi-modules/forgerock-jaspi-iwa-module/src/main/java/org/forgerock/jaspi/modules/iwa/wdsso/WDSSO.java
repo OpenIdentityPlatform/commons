@@ -47,8 +47,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.Set;
 
-import org.forgerock.http.Context;
-import org.forgerock.http.context.AttributesContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.AttributesContext;
 import org.forgerock.http.protocol.Request;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;

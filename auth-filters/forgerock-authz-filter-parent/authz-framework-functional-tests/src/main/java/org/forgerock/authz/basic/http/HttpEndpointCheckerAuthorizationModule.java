@@ -22,7 +22,7 @@ import org.forgerock.authz.filter.api.AuthorizationContext;
 import org.forgerock.authz.filter.api.AuthorizationException;
 import org.forgerock.authz.filter.api.AuthorizationResult;
 import org.forgerock.authz.filter.http.api.HttpAuthorizationModule;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.util.promise.Promise;

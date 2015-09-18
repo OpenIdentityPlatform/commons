@@ -24,9 +24,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import org.forgerock.authz.filter.api.AuthorizationResult;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;

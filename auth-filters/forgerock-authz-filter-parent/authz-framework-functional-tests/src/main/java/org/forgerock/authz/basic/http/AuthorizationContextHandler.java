@@ -20,7 +20,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.authz.filter.api.AuthorizationContext;
 import org.forgerock.authz.filter.http.api.HttpAuthorizationContext;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;

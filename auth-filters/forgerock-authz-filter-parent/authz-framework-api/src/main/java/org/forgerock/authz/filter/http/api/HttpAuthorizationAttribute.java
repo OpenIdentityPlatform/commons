@@ -19,7 +19,7 @@ package org.forgerock.authz.filter.http.api;
 import org.forgerock.authz.filter.api.AuthorizationAttribute;
 import org.forgerock.authz.filter.api.AuthorizationContext;
 import org.forgerock.authz.filter.http.api.HttpAuthorizationContext;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 
 /**
  * <p>Provides a convenience layer on top of {@link AuthorizationContext} to simplify access to particular attributes in

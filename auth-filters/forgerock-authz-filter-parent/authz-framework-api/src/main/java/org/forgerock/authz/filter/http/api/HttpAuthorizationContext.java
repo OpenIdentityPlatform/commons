@@ -20,8 +20,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.forgerock.authz.filter.api.AuthorizationContext;
-import org.forgerock.http.Context;
-import org.forgerock.http.context.AttributesContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.AttributesContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

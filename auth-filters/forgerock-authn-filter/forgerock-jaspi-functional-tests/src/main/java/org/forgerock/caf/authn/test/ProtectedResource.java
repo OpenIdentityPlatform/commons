@@ -22,9 +22,9 @@ import static org.forgerock.json.JsonValue.object;
 import java.util.Map;
 
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.http.context.AttributesContext;
+import org.forgerock.services.context.AttributesContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;

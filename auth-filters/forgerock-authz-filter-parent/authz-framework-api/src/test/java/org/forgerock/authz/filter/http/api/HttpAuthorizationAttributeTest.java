@@ -26,8 +26,8 @@ import java.util.Map;
 
 import org.forgerock.authz.filter.api.AuthorizationAttribute;
 import org.forgerock.authz.filter.api.AuthorizationContext;
-import org.forgerock.http.context.AttributesContext;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.AttributesContext;
+import org.forgerock.services.context.RootContext;
 import org.testng.annotations.Test;
 
 /**

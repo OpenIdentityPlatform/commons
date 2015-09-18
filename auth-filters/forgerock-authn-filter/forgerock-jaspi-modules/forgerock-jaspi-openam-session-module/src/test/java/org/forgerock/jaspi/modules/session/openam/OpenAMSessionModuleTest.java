@@ -36,7 +36,7 @@ import java.util.Map;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.Client;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.header.CookieHeader;
