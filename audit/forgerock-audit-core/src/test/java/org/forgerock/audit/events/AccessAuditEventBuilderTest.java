@@ -35,11 +35,11 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.services.context.SecurityContext;
 import org.forgerock.json.resource.http.HttpContext;
 import org.testng.annotations.Test;
 
@@ -95,7 +95,7 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(SERVER).get(PORT).asLong()).isEqualTo(80);
         assertThat(value.get(HTTP).get(METHOD).asString()).isEqualTo("GET");
         assertThat(value.get(HTTP).get(HEADERS).asMapOfList(String.class)).isEqualTo(headers);
-        assertThat(value.get(AUTHORIZATION_ID).get(ID).asString()).isEqualTo("aegloff");
+        assertThat(value.get(AUTHORIZATION).get(ID).asString()).isEqualTo("aegloff");
         assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("action");
         assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("SUCCESS");
         assertThat(value.get(RESPONSE).get(STATUS_CODE).asString()).isEqualTo("200");
@@ -297,10 +297,10 @@ public class AccessAuditEventBuilderTest {
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(AUTHORIZATION_ID).get(COMPONENT).asString()).isEqualTo(COMPONENT);
-        assertThat(value.get(AUTHORIZATION_ID).get(ID).asString()).isEqualTo(ID);
-        assertThat(value.get(AUTHORIZATION_ID).get(ROLES).asList()).contains("role1");
-        assertThat(value.get(AUTHORIZATION_ID).get(ROLES).asList()).contains("role2");
+        assertThat(value.get(AUTHORIZATION).get(COMPONENT).asString()).isEqualTo(COMPONENT);
+        assertThat(value.get(AUTHORIZATION).get(ID).asString()).isEqualTo(ID);
+        assertThat(value.get(AUTHORIZATION).get(ROLES).asList()).contains("role1");
+        assertThat(value.get(AUTHORIZATION).get(ROLES).asList()).contains("role2");
     }
 
     private void assertEvent(AuditEvent event) {

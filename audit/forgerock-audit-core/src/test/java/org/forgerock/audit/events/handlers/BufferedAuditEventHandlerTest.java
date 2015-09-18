@@ -25,8 +25,8 @@ import static org.mockito.Mockito.*;
 import java.util.Arrays;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
-import org.forgerock.http.Context;
-import org.forgerock.http.context.RootContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.mockito.InOrder;
 import org.testng.annotations.Test;
 

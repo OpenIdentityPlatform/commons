@@ -21,7 +21,7 @@ import static org.forgerock.json.JsonValue.*;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,7 +80,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public static final String COMPONENT = "component";
     public static final String ID = "id";
     public static final String ROLES = "roles";
-    public static final String AUTHORIZATION_ID = "authorizationId";
+    public static final String AUTHORIZATION = "authorization";
     public static final String PATH = "path";
     public static final String QUERY_STRING = "queryString";
     public static final String HEADERS = "headers";
@@ -277,7 +277,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
             Object roleList = json(array(Arrays.copyOf(roles, roles.length, Object[].class)));
             object.put(ROLES, roleList);
         }
-        jsonValue.put(AUTHORIZATION_ID, object);
+        jsonValue.put(AUTHORIZATION, object);
         return self();
     }
 
@@ -292,16 +292,16 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         if (context.containsContext(SECURITY_CONTEXT_NAME)) {
             JsonValue securityContext = context.getContext(SECURITY_CONTEXT_NAME).toJsonValue();
             authorizationId(
-                    securityContext.get(AUTHORIZATION_ID).get(COMPONENT).asString(),
-                    securityContext.get(AUTHORIZATION_ID).get(ID).asString(),
+                    securityContext.get(AUTHORIZATION).get(COMPONENT).asString(),
+                    securityContext.get(AUTHORIZATION).get(ID).asString(),
                     getRoles(securityContext));
         }
         return self();
     }
 
     private String[] getRoles(JsonValue securityContext) {
-        if (securityContext.get(AUTHORIZATION_ID).isDefined(ROLES)) {
-            return securityContext.get(AUTHORIZATION_ID).get(ROLES).asList().toArray(new String[0]);
+        if (securityContext.get(AUTHORIZATION).isDefined(ROLES)) {
+            return securityContext.get(AUTHORIZATION).get(ROLES).asList().toArray(new String[0]);
         }
         return null;
     }

@@ -15,7 +15,7 @@
  */
 package org.forgerock.audit.events.handlers;
 
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 

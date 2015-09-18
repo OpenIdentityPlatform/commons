@@ -19,9 +19,9 @@ import static org.forgerock.json.JsonValue.*;
 
 import org.forgerock.audit.util.DateUtil;
 import org.forgerock.json.JsonValue;
-import org.forgerock.http.Context;
-import org.forgerock.http.context.RootContext;
-import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.Reject;
 
 /**
