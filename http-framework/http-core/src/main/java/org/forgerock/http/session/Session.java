@@ -15,7 +15,7 @@
  * Portions Copyright 2011-2014 ForgeRock AS.
  */
 
-package org.forgerock.http;
+package org.forgerock.http.session;
 
 import java.io.IOException;
 import java.util.Map;

@@ -20,6 +20,7 @@ package org.forgerock.services.context;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.http.session.SessionContext;
 import org.forgerock.json.JsonValue;
 
 /**
@@ -32,7 +33,7 @@ import org.forgerock.json.JsonValue;
  * attributes stored when processing one request will not be accessible when processing a subsequent request, even if it
  * is from the same logical client.
  * <p/>
- * Use a {@link org.forgerock.http.SessionContext SessionContext} for maintaining state between successive requests
+ * Use a {@link SessionContext SessionContext} for maintaining state between successive requests
  * from the same logical client.
  */
 public final class AttributesContext extends AbstractContext {

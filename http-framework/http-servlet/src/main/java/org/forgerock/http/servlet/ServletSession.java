@@ -30,7 +30,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.forgerock.http.Session;
+import org.forgerock.http.session.Session;
 import org.forgerock.http.protocol.Response;
 
 /**

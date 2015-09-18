@@ -22,7 +22,7 @@ import java.util.List;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
-import org.forgerock.http.SessionManager;
+import org.forgerock.http.session.SessionManager;
 import org.forgerock.http.handler.Handlers;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;

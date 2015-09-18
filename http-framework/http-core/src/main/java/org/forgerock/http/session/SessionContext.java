@@ -15,7 +15,7 @@
  *
  */
 
-package org.forgerock.http;
+package org.forgerock.http.session;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.services.context.AbstractContext;
@@ -32,7 +32,7 @@ import org.forgerock.util.Reject;
  * a life-cycle that spans successive requests from the same client, although its content may be lost after periods
  * of inactivity. The exact details of how a "session" is associated with a client, how it is persisted between
  * requests, and if and when it is expired are the responsibility of the {@link Session} and
- * {@link org.forgerock.http.SessionManager SessionManager} implementation.
+ * {@link SessionManager SessionManager} implementation.
  * <p/>
  * Use an {@link org.forgerock.services.context.AttributesContext AttributesContext} for transferring transient
  * state between components when processing a single request.
