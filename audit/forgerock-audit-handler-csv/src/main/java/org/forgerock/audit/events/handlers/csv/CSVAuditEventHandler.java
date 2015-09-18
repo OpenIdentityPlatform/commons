@@ -38,6 +38,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.events.handlers.AuditEventTopicState;
@@ -66,9 +68,6 @@ import org.supercsv.io.ICsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.util.CsvContext;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Handles AuditEvents by writing them to a CSV file.
@@ -182,7 +181,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 nbPublished++;
             }
         } catch (IOException e) {
-            String message = "Could not publish all buffered events." + "Size of events buffer: " + events.size()
+            String message = "Could not publish all buffered events. Size of events buffer: " + events.size()
                     + ", number of events published: " + nbPublished;
             logger.error(message.toString(), e);
         }
@@ -195,10 +194,9 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 nbFlushed++;
             }
         } catch (IOException e) {
-            StringBuilder message = new StringBuilder("Could not flush all topics for buffered events.")
-                .append("Number of topics: ").append(topicCache.size())
-                .append(", number topics flushed: ").append(nbFlushed);
-            logger.error(message.toString(), e);
+            String message = "Could not flush all topics for buffered events.Number of topics: "
+                    + topicCache.size() + ", number topics flushed: " + nbFlushed;
+            logger.error(message, e);
         }
     }
 
