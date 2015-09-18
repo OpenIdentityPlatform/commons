@@ -34,7 +34,7 @@ import org.forgerock.json.JsonValue;
  * that the client used during authentication. This might be a user name, an
  * email address, etc. The authentication ID may be used for logging or auditing
  * but SHOULD NOT be used when performing authorization decisions.
- * <li>an {@link #getAuthorizationId authorization ID} which is a map containing
+ * <li>an {@link #getAuthorization authorization ID} which is a map containing
  * additional principals associated with the client and which MAY be used when
  * performing authorization decisions. Examples of principals include a unique
  * identifier for the user, roles, or an LDAP distinguished name (DN).
@@ -44,7 +44,7 @@ import org.forgerock.json.JsonValue;
  *
  * <pre>
  * Context context = ...;
- * String realm = (String) context.asContext(SecurityContext.class).getAuthorizationId(AUTHZID_REALM);
+ * String realm = (String) context.asContext(SecurityContext.class).getAuthorization(AUTHZID_REALM);
  * </pre>
  *
  * <pre>
@@ -55,7 +55,7 @@ import org.forgerock.json.JsonValue;
  *       ...
  *   },
  *   "authenticationId" : "bjensen@example.com",
- *   "authorizationId" : {
+ *   "authorization" : {
  *       "id"        : "1230fb7e-f83b-464d-19ef-789b6af66456",
  *       "component" : "users",
  *       "roles"     : [
@@ -99,7 +99,7 @@ public final class SecurityContext extends AbstractContext {
 
     // Persisted attribute names
     private static final String ATTR_AUTHENTICATION_ID = "authenticationId";
-    private static final String ATTR_AUTHORIZATION_ID = "authorizationId";
+    private static final String ATTR_AUTHORIZATION = "authorization";
 
     /**
      * Creates a new security context having the provided parent and an ID
@@ -111,7 +111,7 @@ public final class SecurityContext extends AbstractContext {
      *            The authentication ID that the user provided during
      *            authentication, which may be {@code null} or empty indicating
      *            that the client is unauthenticated.
-     * @param authorizationId
+     * @param authorization
      *            The authorization information which should be used for
      *            authorizing requests may by the user, which may be
      *            {@code null} or empty indicating that the client is is to be
@@ -121,8 +121,8 @@ public final class SecurityContext extends AbstractContext {
      *            values.
      */
     public SecurityContext(final Context parent,
-            final String authenticationId, final Map<String, Object> authorizationId) {
-        this(null, parent, authenticationId, authorizationId); // no id
+            final String authenticationId, final Map<String, Object> authorization) {
+        this(null, parent, authenticationId, authorization); // no id
     }
 
     /**
@@ -136,7 +136,7 @@ public final class SecurityContext extends AbstractContext {
      *            The authentication ID that the user provided during
      *            authentication, which may be {@code null} or empty indicating
      *            that the client is unauthenticated.
-     * @param authorizationId
+     * @param authorization
      *            The authorization information which should be used for
      *            authorizing requests may by the user, which may be
      *            {@code null} or empty indicating that the client is is to be
@@ -146,11 +146,11 @@ public final class SecurityContext extends AbstractContext {
      *            values.
      */
     public SecurityContext(final String id, final Context parent,
-            final String authenticationId, final Map<String, Object> authorizationId) {
+            final String authenticationId, final Map<String, Object> authorization) {
         super(id, "security", checkNotNull(parent, "Cannot instantiate SecurityContext with null parent Context"));
         data.put(ATTR_AUTHENTICATION_ID, authenticationId != null ? authenticationId : "");
-        data.put(ATTR_AUTHORIZATION_ID, authorizationId != null
-                ? Collections.unmodifiableMap(new LinkedHashMap<String, Object>(authorizationId))
+        data.put(ATTR_AUTHORIZATION, authorization != null
+                ? Collections.unmodifiableMap(new LinkedHashMap<>(authorization))
                 : Collections.<String, Object>emptyMap());
     }
 
@@ -191,7 +191,7 @@ public final class SecurityContext extends AbstractContext {
      *
      * <pre>
      * Context context = ...;
-     * String realm = (String) context.asContext(SecurityContext.class).getAuthorizationId(AUTHZID_REALM);
+     * String realm = (String) context.asContext(SecurityContext.class).getAuthorization(AUTHZID_REALM);
      * </pre>
      *
      * @return An unmodifiable map containing additional principals associated
@@ -200,7 +200,7 @@ public final class SecurityContext extends AbstractContext {
      *         indicating that the client is is to be treated as an anonymous
      *         user.
      */
-    public Map<String, Object> getAuthorizationId() {
-        return data.get(ATTR_AUTHORIZATION_ID).asMap();
+    public Map<String, Object> getAuthorization() {
+        return data.get(ATTR_AUTHORIZATION).asMap();
     }
 }
