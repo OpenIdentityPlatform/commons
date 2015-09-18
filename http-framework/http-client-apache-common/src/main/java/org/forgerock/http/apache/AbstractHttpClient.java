@@ -124,8 +124,8 @@ public abstract class AbstractHttpClient implements HttpClient {
      */
     protected HttpUriRequest createHttpUriRequest(final Request request) {
         // Create the Http request depending if there is an entity or not
-        HttpRequestBase clientRequest = request.getEntity().mayContainData()
-                ? new EntityRequest(request) : new NonEntityRequest(request);
+        HttpRequestBase clientRequest = request.getEntity().isRawContentEmpty()
+                ? new NonEntityRequest(request) : new EntityRequest(request);
         clientRequest.setURI(request.getUri().asURI());
 
         // Parse request Connection headers to be suppressed in message

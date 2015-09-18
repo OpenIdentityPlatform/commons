@@ -64,7 +64,7 @@ public class EntityTest {
         assertThat(entity.getBytes()).isEmpty();
         assertThat(entity.getString()).isEmpty();
         assertThat(entity.toString()).isEmpty();
-        assertThat(entity.mayContainData()).isFalse();
+        assertThat(entity.isDecodedContentEmpty()).isTrue();
         entity.push();
         assertThat(entity.getRawContentInputStream().available()).isEqualTo(0);
         entity.pop();
@@ -76,7 +76,7 @@ public class EntityTest {
         entity.setRawContentInputStream(mockJsonContent1);
         assertThat(entity.getBytes()).isEqualTo(bytes(JSON_CONTENT1));
         assertThat(mockJsonContent1.available()).isEqualTo(JSON_CONTENT1.length());
-        assertThat(entity.mayContainData()).isTrue();
+        assertThat(entity.isDecodedContentEmpty()).isFalse();
         verify(mockJsonContent1, never()).close();
     }
 
@@ -97,7 +97,7 @@ public class EntityTest {
     public void getJsonWhenEntityContainsInvalidJsonThrowsIOException() throws Exception {
         mockJsonContent1 = mockContent(INVALID_JSON);
         entity.setRawContentInputStream(mockJsonContent1);
-        assertThat(entity.mayContainData()).isTrue();
+        assertThat(entity.isDecodedContentEmpty()).isFalse();
         try {
             entity.getJson();
         } finally {
@@ -140,7 +140,7 @@ public class EntityTest {
         entity.setRawContentInputStream(mockJsonContent1);
         assertThat(entity.getRawContentInputStream()).isSameAs(mockJsonContent1);
         assertThat(mockJsonContent1.available()).isEqualTo(JSON_CONTENT1.length());
-        assertThat(entity.mayContainData()).isTrue();
+        assertThat(entity.isDecodedContentEmpty()).isFalse();
         verify(mockJsonContent1, never()).close();
     }
 
@@ -149,7 +149,7 @@ public class EntityTest {
         entity.setRawContentInputStream(mockJsonContent1);
         assertThat(entity.getString()).isEqualTo(JSON_CONTENT1);
         assertThat(mockJsonContent1.available()).isEqualTo(JSON_CONTENT1.length());
-        assertThat(entity.mayContainData()).isTrue();
+        assertThat(entity.isDecodedContentEmpty()).isFalse();
         verify(mockJsonContent1, never()).close();
     }
 
@@ -262,20 +262,26 @@ public class EntityTest {
 
     @Test
     public void shouldMarkTheEntityAsEmpty() throws Exception {
-        // entity is initialized with some content by default
-        assertThat(entity.mayContainData()).isFalse();
+        assertThat(entity.isDecodedContentEmpty()).isTrue();
         entity.setJson(new HashMap<String, Object>());
-        assertThat(entity.mayContainData()).isTrue();
+        assertThat(entity.isDecodedContentEmpty()).isFalse();
         entity.setEmpty();
-        assertThat(entity.mayContainData()).isFalse();
+        assertThat(entity.isDecodedContentEmpty()).isTrue();
+    }
+
+    @Test
+    public void shouldNotChangeEntityContentWhenCallingIsEmpty() throws Exception {
+        entity.setJson(JSON_CONTENT1);
+        assertThat(entity.isDecodedContentEmpty()).isFalse();
+        assertThat(entity.getJson()).isSameAs(JSON_CONTENT1);
     }
 
     @Test
     public void shouldBeEmptyEvenInPushMode() throws Exception {
-        assertThat(entity.mayContainData()).isFalse();
+        assertThat(entity.isDecodedContentEmpty()).isTrue();
         entity.push();
         try {
-            assertThat(entity.mayContainData()).isFalse();
+            assertThat(entity.isDecodedContentEmpty()).isTrue();
         } finally {
             entity.pop();
         }

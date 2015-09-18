@@ -95,12 +95,30 @@ public final class Entity implements Closeable {
     }
 
     /**
-     * Returns {@code true} if this entity may contain data.
-     * @return {@code true} if this entity may contain data.
+     * Returns {@code true} if this entity's raw content is empty.
+     *
+     * @return {@code true} if this entity's raw content is empty.
      */
-    public boolean mayContainData() {
-        // Used reference equality intentionally (not equalsTo())
-        return trunk != EMPTY_STREAM;
+    public boolean isRawContentEmpty() {
+        return isDecodedContentEmpty();
+    }
+
+    /**
+     * Returns {@code true} if this entity's decoded content is empty.
+     *
+     * @return {@code true} if this entity's decoded content is empty.
+     */
+    public boolean isDecodedContentEmpty() {
+        try {
+            push();
+            try {
+                return head.read() == -1;
+            } finally {
+                pop();
+            }
+        } catch (IOException e) {
+            return true;
+        }
     }
 
     /**
