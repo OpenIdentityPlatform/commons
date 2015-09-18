@@ -23,7 +23,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;

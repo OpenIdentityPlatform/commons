@@ -21,7 +21,7 @@ import static org.forgerock.selfservice.stages.CommonStateFields.*;
 import static org.forgerock.json.JsonValue.*;
 
 import javax.inject.Inject;
-import org.forgerock.http.Context;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
