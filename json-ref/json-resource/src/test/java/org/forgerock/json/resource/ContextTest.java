@@ -22,6 +22,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.services.context.SecurityContext;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;

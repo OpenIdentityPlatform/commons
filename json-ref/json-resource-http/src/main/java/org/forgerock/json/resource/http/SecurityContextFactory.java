@@ -22,7 +22,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.SecurityContext;
+import org.forgerock.services.context.SecurityContext;
 
 /**
  * An HTTP context factory which will create a {@link SecurityContext} whose
@@ -55,7 +55,7 @@ import org.forgerock.json.resource.SecurityContext;
  * populate the attributes:
  *
  * <pre>
- * public Promise<Response, ResponseException> (Context context, org.forgerock.http.Request request, Handler next) {
+ * public Promise<Response, ResponseException> filter(Context context, Request request, Handler next) {
  *     // Authenticate the user.
  *     String authcid = getUserName(request);
  *     String password = getPassword(request);
@@ -67,12 +67,15 @@ import org.forgerock.json.resource.SecurityContext;
  *         authzid.put(AUTHZID_ID, id);
  *         ...
  *
- *         org.forgerock.http.HttpContext httpContext = context.asContext(org.forgerock.http.HttpContext.class);
- *         httpContext.getAttributes().put(ATTRIBUTE_AUTHCID, authcid);
- *         httpContext.getAttributes().put(ATTRIBUTE_AUTHZID, authzid);
+ *         AttributesContext attributesContext = context.asContext(AttributesContext.class);
+ *         attributesContext.getAttributes().put(ATTRIBUTE_AUTHCID, authcid);
+ *         attributesContext.getAttributes().put(ATTRIBUTE_AUTHZID, authzid);
  *     }
  * }
  * </pre>
+ *
+ * @deprecated This class will be removed once CAF has been migrated fully to CHF, at which point components should
+ * create {@link SecurityContext}s directly rather than via request attributes.
  */
 public final class SecurityContextFactory implements HttpContextFactory {
 
