@@ -95,7 +95,7 @@ public final class SecurityContextFactory implements HttpContextFactory {
      * attribute is {@code org.forgerock.authentication.context} and it MUST
      * contain a {@code Map<String, Object>} if it is present.
      *
-     * @see SecurityContext#getAuthorizationId()
+     * @see SecurityContext#getAuthorization()
      */
     public static final String ATTRIBUTE_AUTHZID = "org.forgerock.authentication.context";
 
