@@ -33,7 +33,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -508,11 +507,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     private String[] convertDotNotationToSlashes(final String[] entries) {
-        List<String> newList = new LinkedList<>();
-        for (String entry : entries) {
-            newList.add(dotNotationToJsonPointer(entry));
+        String[] result = new String[entries.length];
+        for (int i = 0; i < entries.length; i++) {
+            result[i] = dotNotationToJsonPointer(entries[i]);
         }
-        return newList.toArray(new String[newList.size()]);
+        return result;
     }
 
     /**
