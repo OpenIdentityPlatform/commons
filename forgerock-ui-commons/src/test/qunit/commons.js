@@ -456,6 +456,26 @@ define([
                     });
                 });
             });
+
+            QUnit.asyncTest("CUI-100 - Changes Pending works with empty object", function () {
+                ModuleLoader.load("org/forgerock/commons/ui/common/components/ChangesPending")
+                .then(function (ChangesPending) {
+                    var changesPendingElement = $("<div>"),
+                        watching = ChangesPending.watchChanges({
+                            "element": changesPendingElement,
+                            "watchedObj": { "empty": {} },
+                            "watchedProperties": ["empty"],
+                            "alertClass": "changesPending"
+                        });
+
+                    watching.makeChanges({ "empty": {} });
+                    QUnit.equal(changesPendingElement.css("display"), "none", "Should have no changes pending displayed when comparing empty objects");
+                    watching.makeChanges({ "empty": { "not": "empty" } });
+                    QUnit.equal(changesPendingElement.css("display"), "block", "Should display changes pending when formerly-empty object has changes");
+
+                    QUnit.start();
+                });
+            });
         }
     };
 });

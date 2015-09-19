@@ -122,19 +122,7 @@ define("org/forgerock/commons/ui/common/components/ChangesPending", [
              */
             checkChanges: function () {
                 var isChanged =  _.some(this.data.watchedProperties, function (prop) {
-
-                    // Numbers and booleans are considered "empty" so we explicitly check for their type
-                    if (_.isEmpty(this.data.changes[prop]) &&
-                        !_.isNumber(this.data.changes[prop]) &&
-                        !_.isBoolean(this.data.changes[prop])) {
-
-                        delete this.data.changes[prop];
-                    }
-
-                    if (!this.compareObjects(prop, this.data.watchedObj, this.data.changes)) {
-                        return true;
-                    }
-
+                    return !this.compareObjects(prop, this.data.watchedObj, this.data.changes);
                 }, this);
 
                 $(this.element).toggle(isChanged);
@@ -146,26 +134,27 @@ define("org/forgerock/commons/ui/common/components/ChangesPending", [
              * @param {string} property
              * @param {object} obj1
              * @param {object} obj2
-             * @returns {*}
+             * @returns {boolean} whether two passed objects are equal
              */
             compareObjects: function(property, obj1, obj2) {
-                function compare(val1, val2) {
-                    _.each(val1, function(property, key) {
-                        if (_.isEmpty(property) && !_.isNumber(property) && !_.isBoolean(property)) {
-                            delete val1[key];
-                        }
-                    });
+                var val1 = obj1[property],
+                    val2 = obj2[property],
+                    deleteEmptyProperties = function (obj) {
+                        _.each(obj, function(prop, key) {
+                            if (_.isEmpty(prop) && !_.isNumber(prop) && !_.isBoolean(prop)) {
+                                delete obj[key];
+                            }
+                        });
+                    };
 
-                    _.each(val2, function(property, key) {
-                        if (_.isEmpty(property) && !_.isNumber(property) && !_.isBoolean(property)) {
-                            delete val2[key];
-                        }
-                    });
-
-                    return _.isEqual(val1, val2);
+                if (_.isObject(val1) && _.isObject(val2)) {
+                    deleteEmptyProperties(val1);
+                    deleteEmptyProperties(val2);
+                } else if (!val1 && !val2){
+                    return true;
                 }
 
-                return compare(obj1[property], obj2[property]);
+                return _.isEqual(val1, val2);
             }
         });
 
