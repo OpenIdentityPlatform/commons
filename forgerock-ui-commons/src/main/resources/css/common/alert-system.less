@@ -1,12 +1,12 @@
 .alert-system {
-    position:fixed;
+    position: fixed;
     margin: 5px auto 0;
-    z-index:10000;
+    z-index: 10000;
     left: 0;
     right: 0;
-    width:400px;
+    width: 400px;
     min-height: 50px;
-    background-image:none;
+    background-image: none;
 }
 
 .logged-user .alert-system {
@@ -16,11 +16,11 @@
 .alert-message.alert-warning {
     .alert-message-icon {
         .fa-icon();
-        font-weight:bold;
+        font-weight: bold;
         margin-right: 15px;
 
         &:before {
-            content:@fa-var-times-circle-o;
+          content: @fa-var-exclamation-circle;
         }
     }
 }
@@ -28,11 +28,11 @@
 .alert-message.alert-danger{
     .alert-message-icon {
         .fa-icon();
-        font-weight:bold;
+        font-weight: bold;
         margin-right: 15px;
 
         &:before {
-            content:@fa-var-exclamation-circle;
+          content: @fa-var-exclamation-circle;
         }
     }
 }
@@ -41,10 +41,23 @@
     .alert-message-icon {
         .fa-icon();
         margin-right: 15px;
-        font-weight:bold;
+        font-weight: bold;
 
         &:before {
-            content:@fa-var-info-circle;
+          content: @fa-var-info-circle;
         }
     }
 }
+
+.alert-message.alert-success {
+  .alert-message-icon {
+    .fa-icon();
+    margin-right: 15px;
+    font-weight: bold;
+
+    &:before {
+      content: @fa-var-check-circle-o;
+    }
+  }
+}
+

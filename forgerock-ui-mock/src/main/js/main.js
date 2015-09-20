@@ -47,6 +47,7 @@ require.config({
         "backgrid": "libs/backgrid.min-0.3.5-min",
         "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
         "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
+        selectize : "libs/selectize-0.12.1-min",
         underscore: "libs/lodash-2.4.1-min",
         js2form: "libs/js2form-2.0",
         form2js: "libs/form2js-2.0",
@@ -101,6 +102,9 @@ require.config({
             deps: ["jquery", "underscore","backbone", "bootstrap"]
         },
         placeholder: {
+            deps: ["jquery"]
+        },
+        selectize: {
             deps: ["jquery"]
         },
         xdate: {

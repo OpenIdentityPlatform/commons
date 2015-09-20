@@ -56,6 +56,11 @@ define("config/routes/UserRoutesConfig", [
             view: "ChangeSecurityDataDialog",
             role: "ui-user,ui-admin",
             url: "profile/change_security_data/"
+        },
+        "examplesPage" : {
+            view: "org/forgerock/mock/ui/examples/ExamplesView",
+            role: "ui-user",
+            url: "examples/"
         }
     };
 

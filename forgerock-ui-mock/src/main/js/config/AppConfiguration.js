@@ -87,11 +87,10 @@ define("config/AppConfiguration", [
                     links: {
                         user: {
                             urls: {
-                                dashboard: {
-                                    url: "#profile/",
-                                    name: "Resources",
-                                    icon: "fa fa-cogs",
-                                    inactive: false
+                                examples: {
+                                    url : "#examples/",
+                                    name: "Style Guide",
+                                    icon: "fa fa-compass"
                                 }
                             }
                         }
