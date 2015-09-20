@@ -338,16 +338,23 @@ define("config/process/CommonConfig", [
             startEvent: Constants.ROUTE_REQUEST,
             description: "",
             dependencies: [
+                "org/forgerock/commons/ui/common/components/Navigation",
                 "org/forgerock/commons/ui/common/main/Router",
-                "org/forgerock/commons/ui/common/components/Navigation"
+                "org/forgerock/commons/ui/common/main/ViewManager"
             ],
-            processDescription: function(event, router, navigation) {
-                if(event.trigger === false) {
-                    router.routeTo(router.configuration.routes[event.routeName], {trigger: false, args: event.args});
-                } else {
-                    router.routeTo(router.configuration.routes[event.routeName], {trigger: true, args: event.args});
+            processDescription: function(event, Navigation, Router, ViewManager) {
+                var route = Router.configuration.routes[event.routeName];
+
+                // trigger defaults to true
+                if (event.trigger === undefined) {
+                    event.trigger = true;
+                } else if (event.trigger === false) {
+                    ViewManager.currentView = route.view;
+                    ViewManager.currentViewArgs = event.args;
                 }
-                navigation.reload();
+
+                Router.routeTo(route, event);
+                Navigation.reload();
             }
         },
         {
