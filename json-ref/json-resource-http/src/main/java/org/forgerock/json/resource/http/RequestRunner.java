@@ -17,25 +17,23 @@
 package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.QueryResponse.*;
+import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
-import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import javax.mail.internet.ContentType;
+import javax.mail.internet.ParseException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.mail.internet.ContentType;
-import javax.mail.internet.ParseException;
-
 import com.fasterxml.jackson.core.JsonGenerator;
-import org.forgerock.services.context.Context;
 import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Response;
@@ -46,7 +44,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.AdviceContext;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -62,6 +59,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.ExceptionHandler;
@@ -463,40 +461,44 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
      * client side result processing.
      */
     private void writeResourceJsonContent(final ResourceResponse resource) throws IOException {
-        writer.writeStartObject();
-        {
-            final JsonValue content = resource.getContent();
+        if (getRequestedProtocolVersion(httpRequest).getMajor() >= PROTOCOL_VERSION_2.getMajor()) {
+            writer.writeStartObject();
+            {
+                final JsonValue content = resource.getContent();
 
-            if (resource.getId() != null) {
-                writer.writeObjectField(FIELD_CONTENT_ID, resource.getId());
-            } else {
-                // Defensively extract an object instead of a string in case application code has stored a UUID
-                // object, or some other non-JSON primitive. Also assume that a null ID means no ID.
-                final Object id = content.get(FIELD_CONTENT_ID).getObject();
-                if (id != null) {
-                    writer.writeObjectField(FIELD_CONTENT_ID, id.toString());
+                if (resource.getId() != null) {
+                    writer.writeObjectField(FIELD_CONTENT_ID, resource.getId());
+                } else {
+                    // Defensively extract an object instead of a string in case application code has stored a UUID
+                    // object, or some other non-JSON primitive. Also assume that a null ID means no ID.
+                    final Object id = content.get(FIELD_CONTENT_ID).getObject();
+                    if (id != null) {
+                        writer.writeObjectField(FIELD_CONTENT_ID, id.toString());
+                    }
+                }
+
+                if (resource.getRevision() != null) {
+                    writer.writeObjectField(FIELD_CONTENT_REVISION, resource.getRevision());
+                } else {
+                    // Defensively extract an object instead of a string in case application code has stored a Number
+                    // object, or some other non-JSON primitive. Also assume that a null revision means no revision.
+                    final Object rev = content.get(FIELD_CONTENT_REVISION).getObject();
+                    if (rev != null) {
+                        writer.writeObjectField(FIELD_CONTENT_REVISION, rev.toString());
+                    }
+                }
+
+                for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
+                    final String key = property.getKey();
+                    if (!FIELD_CONTENT_ID.equals(key) && !FIELD_CONTENT_REVISION.equals(key)) {
+                        writer.writeObjectField(key, property.getValue());
+                    }
                 }
             }
-
-            if (resource.getRevision() != null) {
-                writer.writeObjectField(FIELD_CONTENT_REVISION, resource.getRevision());
-            } else {
-                // Defensively extract an object instead of a string in case application code has stored a Number
-                // object, or some other non-JSON primitive. Also assume that a null revision means no revision.
-                final Object rev = content.get(FIELD_CONTENT_REVISION).getObject();
-                if (rev != null) {
-                    writer.writeObjectField(FIELD_CONTENT_REVISION, rev.toString());
-                }
-            }
-
-            for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
-                final String key = property.getKey();
-                if (!FIELD_CONTENT_ID.equals(key) && !FIELD_CONTENT_REVISION.equals(key)) {
-                    writer.writeObjectField(key, property.getValue());
-                }
-            }
+            writer.writeEndObject();
+        } else {
+            writer.writeObject(resource.getContent().getObject());
         }
-        writer.writeEndObject();
     }
 
     private void writeApiVersionHeaders(org.forgerock.json.resource.Response response) {
