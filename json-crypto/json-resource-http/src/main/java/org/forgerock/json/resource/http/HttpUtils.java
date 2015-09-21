@@ -152,6 +152,8 @@ public final class HttpUtils {
     public static final Version PROTOCOL_VERSION_2 = version(2);
     /** The default version of the named protocol. */
     public static final Version DEFAULT_PROTOCOL_VERSION = PROTOCOL_VERSION_2;
+    static final String FIELDS_DELIMITER = ",";
+    static final String SORT_KEYS_DELIMITER = ",";
 
     private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
