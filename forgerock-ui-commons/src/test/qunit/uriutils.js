@@ -22,41 +22,41 @@
 * "Portions Copyrighted [year] [name of copyright owner]"
 */
 
-define(["org/forgerock/commons/ui/common/main/Router"], function(subject) {
+define(["org/forgerock/commons/ui/common/util/URIUtils"], function(subject) {
     return {
         executeAll: function (server, parameters) {
-            module("org/forgerock/commons/ui/common/main/Router");
-            ['getCurrentHash', 'getURIFragment'].forEach(function(func) {
+            module("org/forgerock/commons/ui/common/util/URIUtils");
+            ['getCurrentFragment'].forEach(function(func) {
                 test('#' + func, sinon.test(function() {
-                    this.stub(subject, 'getUrl').returns('http://www.example.com/XUI#login');
+                    this.stub(subject, 'getCurrentUrl').returns('http://www.example.com/XUI#login');
 
                     equal(subject[func](), 'login', 'returns fragment');
                 }));
 
                 test('#' + func + ' when there is no fragment', sinon.test(function() {
-                    this.stub(subject, 'getUrl').returns('http://www.example.com/XUI');
+                    this.stub(subject, 'getCurrentUrl').returns('http://www.example.com/XUI');
 
                     equal(subject[func](), '', 'returns empty string');
                 }));
             });
 
-            ['getCurrentUrlQueryParameters', 'getCompositeQueryString'].forEach(function(func) {
+            ['getCurrentCompositeQueryString'].forEach(function(func) {
                 test('#' + func + ' when a URI query string is present', sinon.test(function() {
-                    this.stub(subject, 'getUrl').returns('http://www.example.com/XUI');
-                    this.stub(subject, 'getURIQueryString').returns('key=value');
+                    this.stub(subject, 'getCurrentUrl').returns('http://www.example.com/XUI');
+                    this.stub(subject, 'getCurrentQueryString').returns('key=value');
 
                     equal(subject[func](), 'key=value', 'returns URI query string');
                 }));
 
                 test('#' + func + ' when a fragment query string is present', sinon.test(function() {
-                    this.stub(subject, 'getUrl').returns('http://www.example.com/XUI#login&key=value');
+                    this.stub(subject, 'getCurrentUrl').returns('http://www.example.com/XUI#login&key=value');
 
                     equal(subject[func](), 'key=value', 'returns fragment query string');
                 }));
 
                 test('#' + func + ' when a URI and fragment query strings are present', sinon.test(function() {
-                    this.stub(subject, 'getUrl').returns('http://www.example.com/XUI#login&key=fragment');
-                    this.stub(subject, 'getURIQueryString').returns('?key=url');
+                    this.stub(subject, 'getCurrentUrl').returns('http://www.example.com/XUI#login&key=fragment');
+                    this.stub(subject, 'getCurrentQueryString').returns('?key=url');
 
                     equal(subject[func](), 'key=fragment', 'returns fragment query string');
                 }));

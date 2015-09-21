@@ -33,8 +33,8 @@ define([
     "../test/tests/user",
     "../test/tests/mock",
     "../test/tests/getLoggedUser",
-    "../test/tests/router"
-], function ($, doTimeout, constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, routerTests) {
+    "../test/tests/uriutils"
+], function ($, doTimeout, constants, eventManager, commonsTests, userTests, mockTests, getLoggedUser, uriTests) {
 
     $.doTimeout = function (name, time, func) {
         func(); // run the function immediately rather than delayed.
@@ -71,7 +71,7 @@ define([
                     // mockTests disabled pending some major changes expected to be coming soon in this area
                     // not worth the time investment in fixing them, owing to those changes.
                     //mockTests.executeAll(server, userParams);
-                    routerTests.executeAll();
+                    uriTests.executeAll();
                 }, 500);
 
                 QUnit.done(function () {

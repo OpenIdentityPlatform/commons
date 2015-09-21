@@ -43,7 +43,7 @@ define("org/forgerock/commons/ui/common/util/URIUtils", ["underscore"], function
      * @returns {String} Unescaped fragment or empty string if no fragment was found
      */
     obj.getCurrentFragment = function() {
-        return window.location.href.split('#')[1] || '';
+        return obj.getCurrentUrl().split('#')[1] || '';
     };
 
     /**
