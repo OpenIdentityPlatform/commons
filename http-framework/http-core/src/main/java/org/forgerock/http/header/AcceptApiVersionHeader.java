@@ -127,9 +127,15 @@ public final class AcceptApiVersionHeader implements Header {
     private Version protocolVersion;
     private Version resourceVersion;
 
-    private AcceptApiVersionHeader(Version protocolVersion, Version resourceVersion) {
-        this.protocolVersion = protocolVersion;
-        this.resourceVersion = resourceVersion;
+    /**
+     * Constructs a new header, initialized with the specified protocol and resource versions.
+     *
+     * @param protocol The accepted protocol version.
+     * @param resource The accepted resource version.
+     */
+    public AcceptApiVersionHeader(Version protocol, Version resource) {
+        this.protocolVersion = protocol;
+        this.resourceVersion = resource;
     }
 
     @Override

@@ -17,31 +17,56 @@
 package org.forgerock.http.header;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.http.routing.Version.version;
 
 import org.forgerock.http.routing.Version;
-import org.forgerock.util.Pair;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class AcceptApiVersionHeaderTest {
 
     @DataProvider
-    private Object[][] parseData() {
-        return new Object[][]{
-            {"protocol=1.0,resource=2.0"},
-            {"protocol=1.0, resource=2.0"},
-            {"resource=1.0, protocol=2.0"},
+    private Object[][] acceptedValues() {
+        // @Checkstyle:off
+        return new Object[][] {
+            { "protocol=1.0,resource=2.0",  version(1),    version(2) },
+            { "protocol=1,resource=2",      version(1),    version(2) },
+            { "protocol=1.1, resource=2.4", version(1, 1), version(2, 4) },
+            { "resource=1.0",               null,          version(1) },
+            { "",                           null,          null  },
+            { null,                         null,          null  },
         };
+        // @Checkstyle:on
     }
 
-    @Test(dataProvider = "parseData")
-    public void shouldParse(String versionString) {
+    @Test(dataProvider = "acceptedValues")
+    public void shouldParse(String versionString, Version protocol, Version resource) {
 
         //When
-        Pair<Version, Version> version = AcceptApiVersionHeader.parse(versionString);
+        AcceptApiVersionHeader header = AcceptApiVersionHeader.valueOf(versionString);
 
         //Then
-        assertThat(version.getFirst()).isEqualTo(Version.version(1));
-        assertThat(version.getSecond()).isEqualTo(Version.version(2));
+        assertThat(header.getProtocolVersion()).isEqualTo(protocol);
+        assertThat(header.getResourceVersion()).isEqualTo(resource);
+    }
+
+    @DataProvider
+    private Object[][] invalidValues() {
+        // @Checkstyle:off
+        return new Object[][] {
+                { "PROTOCOL=1.0, RESOURCE=2.0" },
+                { "protocol=2.0 resource=1.0" },
+                { "protocol=2.0, resource=1.0, blah=3.0" },
+                { "protocol=, resource=" },
+                { "protocol=2.0.0, resource=1.0.0" },
+                { "protocol=a, resource=b" },
+                };
+        // @Checkstyle:on
+    }
+
+    @Test(dataProvider = "invalidValues", expectedExceptions = IllegalArgumentException.class)
+    public void shouldFailParsing(String versionString) {
+        AcceptApiVersionHeader.valueOf(versionString);
     }
 }
