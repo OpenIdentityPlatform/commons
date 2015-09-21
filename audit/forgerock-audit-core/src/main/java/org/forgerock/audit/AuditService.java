@@ -373,19 +373,15 @@ public class AuditService implements RequestHandler {
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) {
-        try {
-            logger.debug("Audit query called for {}", request.getResourcePath());
-            if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
-                final String topic = parseTopicFromPath(request.getResourcePathObject());
-                return getRegisteredHandler(queryHandlerName).queryEvents(context, topic, request, handler);
-            }
-            String error = String.format(
-                    "The handler defined for queries, '%s', has not been registered to the audit service.",
-                    queryHandlerName);
-            return adapt(new AuditException(error)).asPromise();
-        } catch (Exception e) {
-            return adapt(e).asPromise();
+        logger.debug("Audit query called for {}", request.getResourcePath());
+        if (queryHandlerName != null && allAuditEventHandlers.containsKey(queryHandlerName)) {
+            final String topic = parseTopicFromPath(request.getResourcePathObject());
+            return getRegisteredHandler(queryHandlerName).queryEvents(context, topic, request, handler);
         }
+        String error = String.format(
+                "The handler defined for queries, '%s', has not been registered to the audit service.",
+                    queryHandlerName);
+        return adapt(new AuditException(error)).asPromise();
     }
 
     /**
