@@ -313,9 +313,9 @@ public class AuditService implements RequestHandler {
             }
             // TODO CAUD-24 last one wins!
             return promise;
-        } catch (Exception e) {
-            logger.warn(e.getMessage());
-            return adapt(e).asPromise();
+        } catch (BadRequestException | NotSupportedException e) {
+            logger.warn(e.getMessage(), e);
+            return e.asPromise();
         }
     }
 
