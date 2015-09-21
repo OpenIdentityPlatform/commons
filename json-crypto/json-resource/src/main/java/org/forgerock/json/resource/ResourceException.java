@@ -439,6 +439,9 @@ public class ResourceException extends IOException implements Response {
     /** Additional detail which can be evaluated by applications. */
     private JsonValue detail = new JsonValue(null);
 
+    /** Resource API Version. */
+    private Version resourceApiVersion;
+
     /**
      * Constructs a new exception with the specified exception code, and
      * {@code null} as its detail message. If the error code corresponds with a
@@ -616,12 +619,12 @@ public class ResourceException extends IOException implements Response {
 
     @Override
     public void setResourceApiVersion(Version version) {
-
+        this.resourceApiVersion = version;
     }
 
     @Override
     public Version getResourceApiVersion() {
-        return null;
+        return resourceApiVersion;
     }
 
     /**
