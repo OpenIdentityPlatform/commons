@@ -308,9 +308,23 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
      });
 
 
+    /**
+     * @description A handlebars helper checking the equality of two provided parameters, if
+     *      the parameters are not equal and there is an else block, the else block will be rendered.
+     *
+     * @example:
+     *
+     * {{#equals "testParam" "testParam"}}
+     *      <span>Equals Block!</span>
+     * {{else}}
+     *      <span> Not Equals Block!</span>
+     * {{/equals}}
+     */
     Handlebars.registerHelper('equals', function(val, val2, options) {
-        if(val === val2){
+        if (val === val2) {
             return options.fn(this);
+        } else {
+            return options.inverse(this);
         }
     });
 
