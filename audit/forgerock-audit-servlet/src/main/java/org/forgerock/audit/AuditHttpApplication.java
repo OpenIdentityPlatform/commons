@@ -63,6 +63,7 @@ public final class AuditHttpApplication implements HttpApplication {
             }
         } catch (AuditException | IOException e) {
             logger.error("Unable to start audit service", e);
+            throw new HttpApplicationException(e);
         }
 
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, AUDIT_ROOT_PATH),
