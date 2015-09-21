@@ -91,9 +91,6 @@ import org.forgerock.util.promise.Promise;
  */
 final class HttpAdapter implements Handler {
 
-    private static final String FIELDS_DELIMITER = ",";
-    private static final String SORT_KEYS_DELIMITER = ",";
-
     private final ConnectionFactory connectionFactory;
     private final HttpContextFactory contextFactory;
 

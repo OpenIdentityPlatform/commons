@@ -18,6 +18,8 @@ package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.http.HttpUtils.*;
 
+import java.net.URI;
+
 import org.forgerock.services.context.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
@@ -97,6 +99,26 @@ public final class CrestHttp {
     public static Handler newHttpHandler(RequestHandler handler) {
         Reject.ifNull(handler);
         return Handlers.chainOf(new HttpAdapter(Resources.newInternalConnectionFactory(handler)), newOptionsFilter());
+    }
+
+    /**
+     * Creates a new {@link RequestHandler} that map back and forth JSON resource objects to CHF objects.
+     *
+     * @param handler
+     *         HTTP {@link Handler} responsible for emitting the HTTP request build from JSON resource {@link
+     *         org.forgerock.json.resource.Request}s.
+     * @param uri
+     *         base URI used to build the target URI for built HTTP message
+     * @return a JSON resource {@link RequestHandler}
+     */
+    public static RequestHandler newRequestHandler(Handler handler, final URI uri) {
+        return new CrestAdapter(handler, uri);
+    }
+
+    // Convenience method. Note that ConnectionFactory is going to be removed
+    // soon, so you may not need this.
+    public static ConnectionFactory newConnectionFactory(Handler handler, final URI uri) {
+        return Resources.newInternalConnectionFactory(newRequestHandler(handler, uri));
     }
 
     private static Filter newOptionsFilter() {
