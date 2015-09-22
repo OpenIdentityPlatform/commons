@@ -77,8 +77,8 @@ public final class AcceptApiVersionHeader implements Header {
             protocolVersion = version(matcher.group(5));
             resourceVersion = version(matcher.group(7));
         } else {
-            protocolVersion = version(matcher.group(9));
-            resourceVersion = version(matcher.group(11));
+            resourceVersion = version(matcher.group(9));
+            protocolVersion = version(matcher.group(11));
         }
         return Pair.of(protocolVersion, resourceVersion);
     }
@@ -90,11 +90,9 @@ public final class AcceptApiVersionHeader implements Header {
     private static final String EQUALS = "=";
 
     /**
-     * Regex that accepts a comma separated protocol and resource version. The
-     * protocol version, if present, MUST come first followed, optionally, by
-     * the resource version. The version {@code String}s can either by
-     * {@code Integer}s or {@code Double}s. It is invalid to contain neither a
-     * protocol or resource version.
+     * Regex that accepts a comma separated protocol and resource version.
+     * The version {@code String}s can either by {@code Integer}s or {@code Double}s.
+     * It is invalid to contain neither a protocol or resource version.
      *
      * Pattern matches:
      * <ul>
@@ -119,10 +117,10 @@ public final class AcceptApiVersionHeader implements Header {
     private static final String PROTOCOL_VERSION_REGEX = PROTOCOL + "=(\\d+(\\.\\d+)?)";
     private static final String RESOURCE_VERSION_REGEX = RESOURCE + "=(\\d+(\\.\\d+)?)";
     private static final Pattern EXPECTED_VERSION_FORMAT =
-            Pattern.compile("^" + PROTOCOL_VERSION_REGEX + "$|^"
-                    + RESOURCE_VERSION_REGEX + "$|^"
-                    + PROTOCOL_VERSION_REGEX + "\\s*,\\s*" + RESOURCE_VERSION_REGEX + "$|^"
-                    + RESOURCE_VERSION_REGEX + "\\s*,\\s*" + PROTOCOL_VERSION_REGEX + "$");
+            Pattern.compile("^" + PROTOCOL_VERSION_REGEX + "$"
+                                    + "|^" + RESOURCE_VERSION_REGEX + "$"
+                                    + "|^" + PROTOCOL_VERSION_REGEX + "\\s*,\\s*" + RESOURCE_VERSION_REGEX + "$"
+                                    + "|^" + RESOURCE_VERSION_REGEX + "\\s*,\\s*" + PROTOCOL_VERSION_REGEX + "$");
 
     private Version protocolVersion;
     private Version resourceVersion;

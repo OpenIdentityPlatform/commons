@@ -33,6 +33,7 @@ public class AcceptApiVersionHeaderTest {
             { "protocol=1.0,resource=2.0",  version(1),    version(2) },
             { "protocol=1,resource=2",      version(1),    version(2) },
             { "protocol=1.1, resource=2.4", version(1, 1), version(2, 4) },
+            { "resource=1.0, protocol=2.0", version(2),    version(1) },
             { "resource=1.0",               null,          version(1) },
             { "",                           null,          null  },
             { null,                         null,          null  },
