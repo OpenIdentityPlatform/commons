@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.QueryResponse.*;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Requests.newUpdateRequest;
@@ -383,7 +384,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                         final String rev = getIfNoneMatch(httpRequest);
                         if (rev != null && rev.equals(result.getRevision())) {
                             // No change so 304.
-                            Map<String, Object> responseBody = ResourceException.getException(304)
+                            Map<String, Object> responseBody = newResourceException(304)
                                     .setReason("Not Modified").toJsonValue().asMap();
                             return newResultPromise(new Response().setStatus(Status.valueOf(304))
                                     .setEntity(responseBody));

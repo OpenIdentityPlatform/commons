@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.Test;
 
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -30,7 +31,7 @@ public class ResourceExceptionTest {
     public void shouldReturnFalseForIsServerSideErrorWithCodeLessThan500() {
 
         //Given
-        ResourceException resourceException = ResourceException.getException(499);
+        ResourceException resourceException = newResourceException(499);
 
         //When
         boolean isServerSideError = resourceException.isServerError();
@@ -43,7 +44,7 @@ public class ResourceExceptionTest {
     public void shouldReturnTrueForIsServerSideErrorWith500Code() {
 
         //Given
-        ResourceException resourceException = ResourceException.getException(500);
+        ResourceException resourceException = newResourceException(500);
 
         //When
         boolean isServerSideError = resourceException.isServerError();
@@ -56,7 +57,7 @@ public class ResourceExceptionTest {
     public void shouldReturnTrueForIsServerSideErrorWith599Code() {
 
         //Given
-        ResourceException resourceException = ResourceException.getException(599);
+        ResourceException resourceException = newResourceException(599);
 
         //When
         boolean isServerSideError = resourceException.isServerError();
@@ -69,7 +70,7 @@ public class ResourceExceptionTest {
     public void shouldReturnFalseForIsServerSideErrorWithCodeMoreThan599() {
 
         //Given
-        ResourceException resourceException = ResourceException.getException(600);
+        ResourceException resourceException = newResourceException(600);
 
         //When
         boolean isServerSideError = resourceException.isServerError();
