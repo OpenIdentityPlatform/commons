@@ -16,10 +16,10 @@
 
 package org.forgerock.audit.util;
 
-import org.forgerock.json.JsonValue;
-
 import java.util.LinkedHashSet;
 import java.util.Set;
+
+import org.forgerock.json.JsonValue;
 
 /**
  * Contains Utility methods for dealing with JsonSchema data.
