@@ -186,16 +186,21 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         }
         // flushes writers for all topics
         int nbFlushed = 0;
-        try {
-            for (String topic : topicCache.keySet()) {
+        boolean flushError = false;
+        for (String topic : topicCache.keySet()) {
+            try {
                 ICsvMapWriter writer = getWriter(topic, null, false);
                 writer.flush();
                 nbFlushed++;
+            } catch (IOException e) {
+                logger.error("Error while flushing the writer related to the topic " + topic, e);
+                flushError = true;
             }
-        } catch (IOException e) {
+        }
+        if (flushError) {
             String message = "Could not flush all topics for buffered events.Number of topics: "
                     + topicCache.size() + ", number topics flushed: " + nbFlushed;
-            logger.error(message, e);
+            logger.error(message);
         }
     }
 
