@@ -139,13 +139,18 @@ For font awesome
 .wordwrap{
     white-space: initial;
     word-wrap: break-word;
-    word-break: break-word;
+    word-break: break-all;
 }
 
 .ellipsis{
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
+}
+
+.ellipsis-wrap{
+    .ellipsis;
+    white-space: normal;
 }
 
 .light {
