@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
@@ -47,7 +48,7 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class RequestRunnerTest {
 
-    private static final ResourceException EXCEPTION = ResourceException.getException(ResourceException.NOT_FOUND);
+    private static final ResourceException EXCEPTION = newResourceException(ResourceException.NOT_FOUND);
     private static final Promise<QueryResponse, ResourceException> QUERY_RESULT = newResultPromise(newQueryResponse());
     private static final Promise<QueryResponse, ResourceException> RESOURCE_EXCEPTION = newExceptionPromise(EXCEPTION);
 

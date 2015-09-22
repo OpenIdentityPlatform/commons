@@ -146,12 +146,21 @@ public class ResourceException extends IOException implements Response {
      * HTTP status codes to the relevant Java exception type. The type of the
      * returned exception will be a sub-type of {@code ResourceException}.
      *
+     * <p>If the type of the expected exception is known in advance, prefer to
+     * directly instantiate the exception type as usual:
+     *
+     * <pre>
+     *     {@code
+     *     throw new InternalServerErrorException("Server failed");
+     *     }
+     * </pre>
+     *
      * @param code
      *            The HTTP error code.
      * @return A resource exception having the provided HTTP error code.
      */
-    public static ResourceException getException(final int code) {
-        return getException(code, null);
+    public static ResourceException newResourceException(final int code) {
+        return newResourceException(code, null);
     }
 
     /**
@@ -161,14 +170,23 @@ public class ResourceException extends IOException implements Response {
      * type of the returned exception will be a sub-type of
      * {@code ResourceException}.
      *
+     * <p>If the type of the expected exception is known in advance, prefer to
+     * directly instantiate the exception type as usual:
+     *
+     * <pre>
+     *     {@code
+     *     throw new InternalServerErrorException("Server failed");
+     *     }
+     * </pre>
+     *
      * @param code
      *            The HTTP error code.
      * @param message
      *            The detail message.
      * @return A resource exception having the provided HTTP error code.
      */
-    public static ResourceException getException(final int code, final String message) {
-        return getException(code, message, null);
+    public static ResourceException newResourceException(final int code, final String message) {
+        return newResourceException(code, message, null);
     }
 
     /**
@@ -176,6 +194,15 @@ public class ResourceException extends IOException implements Response {
      * and cause, and a default reason phrase. Useful for translating HTTP
      * status codes to the relevant Java exception type. The type of the
      * returned exception will be a sub-type of {@code ResourceException}.
+     *
+     * <p>If the type of the expected exception is known in advance, prefer to
+     * directly instantiate the exception type as usual:
+     *
+     * <pre>
+     *     {@code
+     *     throw new InternalServerErrorException("Server failed");
+     *     }
+     * </pre>
      *
      * @param code
      *            The HTTP error code.
@@ -185,8 +212,9 @@ public class ResourceException extends IOException implements Response {
      *            The exception which caused this exception to be thrown.
      * @return A resource exception having the provided HTTP error code.
      */
-    public static ResourceException getException(final int code, final String message,
-            final Throwable cause) {
+    public static ResourceException newResourceException(final int code,
+                                                         final String message,
+                                                         final Throwable cause) {
         final ResourceException ex;
         switch (code) {
         case BAD_REQUEST:
@@ -244,6 +272,62 @@ public class ResourceException extends IOException implements Response {
             ex = new UncategorizedException(code, message, cause);
         }
         return ex;
+    }
+
+    /**
+     * Returns an exception with the specified HTTP error code, but no detail
+     * message or cause, and a default reason phrase. Useful for translating
+     * HTTP status codes to the relevant Java exception type. The type of the
+     * returned exception will be a sub-type of {@code ResourceException}.
+     *
+     * @param code
+     *            The HTTP error code.
+     * @return A resource exception having the provided HTTP error code.
+     * @deprecated in favor of {@link #newResourceException(int)}
+     */
+    @Deprecated
+    public static ResourceException getException(final int code) {
+        return newResourceException(code, null);
+    }
+
+    /**
+     * Returns an exception with the specified HTTP error code and detail
+     * message, but no cause, and a default reason phrase. Useful for
+     * translating HTTP status codes to the relevant Java exception type. The
+     * type of the returned exception will be a sub-type of
+     * {@code ResourceException}.
+     *
+     * @param code
+     *            The HTTP error code.
+     * @param message
+     *            The detail message.
+     * @return A resource exception having the provided HTTP error code.
+     * @deprecated in favor of {@link #newResourceException(int, String)}
+     */
+    @Deprecated
+    public static ResourceException getException(final int code, final String message) {
+        return newResourceException(code, message, null);
+    }
+
+    /**
+     * Returns an exception with the specified HTTP error code, detail message,
+     * and cause, and a default reason phrase. Useful for translating HTTP
+     * status codes to the relevant Java exception type. The type of the
+     * returned exception will be a sub-type of {@code ResourceException}.
+     *
+     * @param code
+     *            The HTTP error code.
+     * @param message
+     *            The detail message.
+     * @param cause
+     *            The exception which caused this exception to be thrown.
+     * @return A resource exception having the provided HTTP error code.
+     * @deprecated in favor of {@link #newResourceException(int, String, Throwable)}
+     */
+    @Deprecated
+    public static ResourceException getException(final int code, final String message,
+            final Throwable cause) {
+        return newResourceException(code, message, cause);
     }
 
     /**
