@@ -53,12 +53,15 @@ define("org/forgerock/commons/ui/common/components/ChangesPending", [
                     undoMsg: $.t("templates.user.ChangesPendingTemplate.undo"),
                     watchedObj: {},
                     changes: null,
-                    watchedProperties: [],
                     undoCallback: _.noop
                 };
 
                 this.data = _.extend(defaults, _.clone(args, true));
                 this.element = args.element;
+
+                if (!this.data.watchedProperties) {
+                    this.data.watchedProperties = _.keys(this.data.watchedObj);
+                }
 
                 if (!this.data.changes) {
                     this.data.changes = _.clone(this.data.watchedObj, true);
@@ -162,7 +165,8 @@ define("org/forgerock/commons/ui/common/components/ChangesPending", [
      * @param {object} args
      * @param {object} args.element - the jQuery element to render the widget to
      * @param {object} args.watchedObj - the object containing properties to watch for changes
-     * @param {array} args.watchedProperties - a list of property names to watch for changes
+     * @param {array} [args.watchedProperties=_.keys(args.watchedObj)] - a list of property names to watch for changes,
+     *                                                                   defaults to watchedObj keys if not present
      * @param {boolean} [args.undo=false] - enables the undo functionality
      * @param {string} [args.undoMsg="Undo Changes"] - the text on the undo link
      * @param {string} [args.undoCallback] - The function called when the undo link is clicked
