@@ -176,7 +176,7 @@ final class AuditServiceImpl implements AuditService {
         try {
             logger.debug("Audit create called for {} with {}", request.getResourcePath(), request.getContent().asMap());
             checkLifecycleStateIsRunning();
-            if (context.containsContext(AuditContext.class)) {
+            if (context.containsContext(AuditingContext.class)) {
                 // Don't audit the audit log
                 return newResourceResponse(null, null, request.getContent().copy()).asPromise();
             }

@@ -23,12 +23,12 @@ import org.forgerock.json.resource.ResourceException;
 /**
  * A Context used when auditing over the router.
  */
-public class AuditContext extends AbstractContext {
-    public AuditContext(final Context parent) {
+public class AuditingContext extends AbstractContext {
+    public AuditingContext(final Context parent) {
         super(parent, "audit");
     }
 
-    public AuditContext(final JsonValue savedContext, final ClassLoader classLoader) throws ResourceException {
+    public AuditingContext(final JsonValue savedContext, final ClassLoader classLoader) throws ResourceException {
         super(savedContext, classLoader);
     }
 }
