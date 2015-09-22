@@ -28,11 +28,11 @@ import org.forgerock.util.Pair;
  * requests based on varying criteria such as the target endpoint, API version expectations, client criteria (e.g.
  * source address), etc. This base class is designed to be protocol and framework independent. Frameworks should
  * sub-class an abstract router in order to provide framework specific behavior.
- * <p/>
+ * <p>
  * Generally speaking a router comprises of a series of routes, each of which is composed of a {@link RouteMatcher}
  * and a handler (H). When a request (R) is received the router invokes each {@code RouteMatcher} to see if it
  * matches and then invokes the associated handler if it is the best match.
- * <p/>
+ * <p>
  * Concrete implementations of {@code AbstractRouter} existing in both {@link org.forgerock.http.routing.Router CHF}
  * and CREST.
  *

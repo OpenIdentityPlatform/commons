@@ -28,11 +28,11 @@ import org.forgerock.json.JsonValue;
  * single request. For example, a filter may store information about the end-user in the {@code AttributeContext} which
  * can then be accessed in subsequent filters and handlers in order to perform access control decisions, routing
  * decisions, etc.
- * <p/>
+ * <p>
  * The {@code AttributesContext} has the same life-cycle as the request with which it is associated. Specifically, any
  * attributes stored when processing one request will not be accessible when processing a subsequent request, even if it
  * is from the same logical client.
- * <p/>
+ * <p>
  * Use a {@link SessionContext SessionContext} for maintaining state between successive requests
  * from the same logical client.
  */
