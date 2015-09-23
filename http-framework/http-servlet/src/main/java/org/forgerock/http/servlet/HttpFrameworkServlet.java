@@ -84,12 +84,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
             Arrays.asList("GET", "HEAD", "TRACE", "DELETE"));
 
     /**
-     * Servlet 3.x defines ServletContext.TEMPDIR constant, but this does not
-     * exist in Servlet 2.5, hence the constant redefined here.
-     */
-    private static final String SERVLET_TEMP_DIR = "javax.servlet.context.tempdir";
-
-    /**
      * Servlet init-param for configuring the routing base for the
      * {@link HttpApplication}.
      *
@@ -129,7 +123,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         }
         storage = application.getBufferFactory();
         if (storage == null) {
-            final File tmpDir = (File) getServletContext().getAttribute(SERVLET_TEMP_DIR);
+            final File tmpDir = (File) getServletContext().getAttribute(ServletContext.TEMPDIR);
             storage = newTemporaryStorage(tmpDir);
         }
         try {
