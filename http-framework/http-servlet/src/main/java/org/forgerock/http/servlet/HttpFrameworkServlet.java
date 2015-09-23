@@ -21,12 +21,6 @@ import static org.forgerock.http.io.IO.newBranchingInputStream;
 import static org.forgerock.http.io.IO.newTemporaryStorage;
 import static org.forgerock.util.Utils.closeSilently;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -36,23 +30,30 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.ServiceLoader;
 
-import org.forgerock.services.context.Context;
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.session.Session;
-import org.forgerock.services.context.AttributesContext;
-import org.forgerock.services.context.ClientContext;
-import org.forgerock.services.context.RequestAuditContext;
-import org.forgerock.services.context.RootContext;
-import org.forgerock.http.session.SessionContext;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.http.session.Session;
+import org.forgerock.http.session.SessionContext;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.http.util.Uris;
+import org.forgerock.services.context.AttributesContext;
+import org.forgerock.services.context.ClientContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RequestAuditContext;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -202,42 +203,35 @@ public final class HttpFrameworkServlet extends HttpServlet {
 
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
-        final Promise<Response, NeverThrowsException> promise =
-                handler.handle(context, request)
-                        .thenOnResult(new ResultHandler<Response>() {
-                            @Override
-                            public void handleResult(Response response) {
-                                try {
-                                    writeResponse(sessionContext, resp, response);
-                                } catch (IOException e) {
-                                    log("Failed to write success response", e);
-                                } finally {
-                                    closeSilently(request, response);
-                                    sync.signalAndComplete();
+        try {
+            final Promise<Response, NeverThrowsException> promise =
+                    handler.handle(context, request)
+                            .thenOnResult(new ResultHandler<Response>() {
+                                @Override
+                                public void handleResult(Response response) {
+                                    writeResponse(request, response, resp, sessionContext, sync);
                                 }
-                            }
-                        });
-        promise.thenOnRuntimeException(new RuntimeExceptionHandler() {
-            @Override
-            public void handleRuntimeException(RuntimeException e) {
-                Response response = new Response(Status.INTERNAL_SERVER_ERROR);
-                try {
-                    writeResponse(sessionContext, resp, response);
-                } catch (IOException ioe) {
-                    log("Failed to write success response", e);
-                } finally {
-                    closeSilently(request, response);
-                    sync.signalAndComplete();
+                            });
+            promise.thenOnRuntimeException(new RuntimeExceptionHandler() {
+                @Override
+                public void handleRuntimeException(RuntimeException e) {
+                    writeResponse(request, new Response(Status.INTERNAL_SERVER_ERROR), resp, sessionContext, sync);
                 }
-            }
-        });
+            });
 
-        sync.setAsyncListener(new Runnable() {
-            @Override
-            public void run() {
-                promise.cancel(true);
-            }
-        });
+            sync.setAsyncListener(new Runnable() {
+                @Override
+                public void run() {
+                    promise.cancel(true);
+                }
+            });
+        } catch (Throwable throwable) {
+            // Guard against any kind of Throwable that may be thrown synchronously (not caught by promise
+            // RuntimeExceptionHandler), possibly leaving a stale response in the web container :'(
+            // Servlet specification indicates that it's the responsibility of the Servlet implementer to call
+            // AsyncContext.complete()
+            writeResponse(request, new Response(Status.INTERNAL_SERVER_ERROR), resp, sessionContext, sync);
+        }
 
         try {
             sync.awaitIfNeeded();
@@ -290,31 +284,41 @@ public final class HttpFrameworkServlet extends HttpServlet {
         return new UriRouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
     }
 
-    private void writeResponse(SessionContext context, HttpServletResponse resp, Response response)
-            throws IOException {
-        /*
-         * Support for OPENIG-94/95 - The wrapped servlet may have already
-         * committed its response w/o creating a new OpenIG Response instance in
-         * the exchange.
-         */
-        if (response != null) {
-            // response status-code (reason-phrase deprecated in Servlet API)
-            resp.setStatus(response.getStatus().getCode());
+    private void writeResponse(final Request request,
+                               final Response response,
+                               final HttpServletResponse servletResponse,
+                               final SessionContext sessionContext,
+                               final ServletSynchronizer synchronizer) {
+        try {
+            /*
+             * Support for OPENIG-94/95 - The wrapped servlet may have already
+             * committed its response w/o creating a new OpenIG Response instance in
+             * the exchange.
+             */
+            if (response != null) {
+                // response status-code (reason-phrase deprecated in Servlet API)
+                servletResponse.setStatus(response.getStatus().getCode());
 
-            // ensure that the session has been written back to the response
-            context.getSession().save(response);
+                // ensure that the session has been written back to the response
+                sessionContext.getSession().save(response);
 
-            // response headers
-            for (String name : response.getHeaders().keySet()) {
-                for (String value : response.getHeaders().get(name)) {
-                    if (value != null && value.length() > 0) {
-                        resp.addHeader(name, value);
+                // response headers
+                for (String name : response.getHeaders().keySet()) {
+                    for (String value : response.getHeaders().get(name)) {
+                        if (value != null && value.length() > 0) {
+                            servletResponse.addHeader(name, value);
+                        }
                     }
                 }
+                // response entity (if applicable)
+                // TODO does this also set content length?
+                response.getEntity().copyRawContentTo(servletResponse.getOutputStream());
             }
-            // response entity (if applicable)
-            // TODO does this also set content length?
-            response.getEntity().copyRawContentTo(resp.getOutputStream());
+        } catch (IOException e) {
+            log("Failed to write success response", e);
+        } finally {
+            closeSilently(request, response);
+            synchronizer.signalAndComplete();
         }
     }
 
