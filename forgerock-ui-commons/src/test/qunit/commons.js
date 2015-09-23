@@ -441,16 +441,16 @@ define([
                         Navigation.addLink({"url": "#test/", "name": "New top-level link"}, "user");
                         QUnit.equal(_.size(Navigation.configuration.links.user.urls), 2, "New top-level link was not added as it is already present at this level");
 
-                        Navigation.addLink({"url": "#test/", "name": "New second-level link"}, "user", "dashboard");
+                        Navigation.addLink({"url": "#test/", "name": "New second-level link"}, "user", "examples");
                         QUnit.equal(_.size(Navigation.configuration.links.user.urls), 2, "New second-level link was not added as there is no second level for this link");
 
-                        Navigation.configuration.links.user.urls.dashboard.urls = [];
+                        Navigation.configuration.links.user.urls.examples.urls = [];
 
-                        Navigation.addLink({"url": "#test/", "name": "New second-level link"}, "user", "dashboard");
-                        QUnit.equal(Navigation.configuration.links.user.urls.dashboard.urls.length, 1, "New second-level link was added to the link which has second level");
+                        Navigation.addLink({"url": "#test/", "name": "New second-level link"}, "user", "examples");
+                        QUnit.equal(Navigation.configuration.links.user.urls.examples.urls.length, 1, "New second-level link was added to the link which has second level");
 
-                        Navigation.addLink({"url": "#test/", "name": "New second-level link"}, "user", "dashboard");
-                        QUnit.equal(Navigation.configuration.links.user.urls.dashboard.urls.length, 1, "New second-level link was not added as it is already present at this level");
+                        Navigation.addLink({"url": "#test/", "name": "New second-level link"}, "user", "examples");
+                        QUnit.equal(Navigation.configuration.links.user.urls.examples.urls.length, 1, "New second-level link was not added as it is already present at this level");
 
                         QUnit.start();
                     });
