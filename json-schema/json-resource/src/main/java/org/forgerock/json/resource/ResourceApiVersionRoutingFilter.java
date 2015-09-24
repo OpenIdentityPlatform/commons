@@ -95,7 +95,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
     }
 
     private <V extends Response> Promise<V, ResourceException> wrapWithApiVersionInfo(
-            final ApiVersionRouterContext apiVersionRouterContext, final Request<?> request,
+            final ApiVersionRouterContext apiVersionRouterContext, final Request request,
             Promise<V, ResourceException> promise) {
         return promise
                 .thenOnResult(new ResultHandler<V>() {
@@ -112,7 +112,7 @@ public class ResourceApiVersionRoutingFilter extends org.forgerock.http.routing.
                 });
     }
 
-    static void setApiVersionInfo(ApiVersionRouterContext apiVersionRouterContext, Request<?> request, Response response) {
+    static void setApiVersionInfo(ApiVersionRouterContext apiVersionRouterContext, Request request, Response response) {
         Version resourceVersion = apiVersionRouterContext.getResourceVersion();
         if (resourceVersion != null) {
             response.setResourceApiVersion(resourceVersion);
