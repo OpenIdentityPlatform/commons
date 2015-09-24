@@ -77,6 +77,7 @@ import org.forgerock.services.context.SecurityContext;
  * @deprecated This class will be removed once CAF has been migrated fully to CHF, at which point components should
  * create {@link SecurityContext}s directly rather than via request attributes.
  */
+@Deprecated
 public final class SecurityContextFactory implements HttpContextFactory {
 
     /**
