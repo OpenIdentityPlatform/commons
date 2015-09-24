@@ -83,7 +83,7 @@ public final class FiltersTest {
     public void testAnd(final List<FilterCondition> conditions, final boolean andExpected,
             final boolean orExpected) {
         final FilterCondition condition = Filters.and(conditions.toArray(new FilterCondition[0]));
-        final Request<?> request = Requests.newActionRequest("", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isEqualTo(andExpected);
     }
 
@@ -117,7 +117,7 @@ public final class FiltersTest {
     public void testMatchRequestTypeManyFalse() {
         final FilterCondition condition =
                 Filters.matchRequestType(RequestType.READ, RequestType.DELETE);
-        final Request<?> request = Requests.newActionRequest("", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
@@ -125,49 +125,49 @@ public final class FiltersTest {
     public void testMatchRequestTypeManyTrue() {
         final FilterCondition condition =
                 Filters.matchRequestType(RequestType.ACTION, RequestType.DELETE);
-        final Request<?> request = Requests.newActionRequest("", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isTrue();
     }
 
     @Test
     public void testMatchRequestTypeSingleFalse() {
         final FilterCondition condition = Filters.matchRequestType(RequestType.READ);
-        final Request<?> request = Requests.newActionRequest("", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
     @Test
     public void testMatchRequestTypeSingleTrue() {
         final FilterCondition condition = Filters.matchRequestType(RequestType.ACTION);
-        final Request<?>request = Requests.newActionRequest("", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isTrue();
     }
 
     @Test
     public void testMatchResourcePathFalse() {
         final FilterCondition condition = Filters.matchResourcePath("nomatch/name");
-        final Request<?>request = Requests.newActionRequest("resource/name", "test");
+        final Request request = Requests.newActionRequest("resource/name", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
     @Test
     public void testMatchResourcePathTrue() {
         final FilterCondition condition = Filters.matchResourcePath("resource/.*");
-        final Request<?>request = Requests.newActionRequest("resource/name", "test");
+        final Request request = Requests.newActionRequest("resource/name", "test");
         assertThat(condition.matches(null, request)).isTrue();
     }
 
     @Test
     public void testNotFalse() {
         final FilterCondition condition = Filters.not(c(true));
-        final Request<?>request = Requests.newActionRequest("", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isFalse();
     }
 
     @Test
     public void testNotTrue() {
         final FilterCondition condition = Filters.not(c(false));
-        final Request<?>request = Requests.newActionRequest("", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isTrue();
     }
 
@@ -175,7 +175,7 @@ public final class FiltersTest {
     public void testOr(final List<FilterCondition> conditions, final boolean andExpected,
             final boolean orExpected) {
         final FilterCondition condition = Filters.or(conditions.toArray(new FilterCondition[0]));
-        final Request<?>request = Requests.newActionRequest("", "test");
+        final Request request = Requests.newActionRequest("", "test");
         assertThat(condition.matches(null, request)).isEqualTo(orExpected);
     }
 
@@ -183,7 +183,7 @@ public final class FiltersTest {
         return new FilterCondition() {
 
             @Override
-            public boolean matches(final Context context, final Request<?>request) {
+            public boolean matches(final Context context, final Request request) {
                 return value;
             }
 
@@ -251,7 +251,7 @@ public final class FiltersTest {
         return type == RequestType.QUERY ? mock(QueryResourceHandler.class) : null;
     }
 
-    private Request<?>request(final RequestType type) {
+    private Request request(final RequestType type) {
         switch (type) {
         case ACTION:
             return ACTION_REQUEST;

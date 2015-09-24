@@ -125,7 +125,7 @@ public final class Filters {
     public static FilterCondition and(final Collection<FilterCondition> conditions) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final Context context, final Request<?> request) {
+            public boolean matches(final Context context, final Request request) {
                 for (final FilterCondition condition : conditions) {
                     if (!condition.matches(context, request)) {
                         return false;
@@ -187,7 +187,7 @@ public final class Filters {
     public static FilterCondition matchRequestType(final Set<RequestType> types) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final Context context, final Request<?> request) {
+            public boolean matches(final Context context, final Request request) {
                 return types.contains(request.getRequestType());
             }
         };
@@ -206,7 +206,7 @@ public final class Filters {
     public static FilterCondition matchResourcePath(final Pattern regex) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final Context context, final Request<?> request) {
+            public boolean matches(final Context context, final Request request) {
                 return regex.matcher(request.getResourcePath()).matches();
             }
         };
@@ -237,7 +237,7 @@ public final class Filters {
     public static FilterCondition not(final FilterCondition condition) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final Context context, final Request<?> request) {
+            public boolean matches(final Context context, final Request request) {
                 return !condition.matches(context, request);
             }
         };
@@ -254,7 +254,7 @@ public final class Filters {
     public static FilterCondition or(final Collection<FilterCondition> conditions) {
         return new FilterCondition() {
             @Override
-            public boolean matches(final Context context, final Request<?> request) {
+            public boolean matches(final Context context, final Request request) {
                 for (final FilterCondition condition : conditions) {
                     if (condition.matches(context, request)) {
                         return true;
