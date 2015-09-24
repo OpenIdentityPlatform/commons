@@ -81,7 +81,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private final Request<?> request;
     private final JsonGenerator writer;
 
-    RequestRunner(Context context, Request<?> request, org.forgerock.http.protocol.Request httpRequest,
+    RequestRunner(Context context, Request request, org.forgerock.http.protocol.Request httpRequest,
             Response httpResponse) throws Exception {
         this.context = context;
         this.request = request;
