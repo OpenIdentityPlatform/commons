@@ -450,7 +450,7 @@ public class RouterTest {
         return new UriRouterContext(parentContext, "MATCHED_URI", remainingUri, Collections.<String, String>emptyMap());
     }
 
-    private <T extends Request> T mockRequest(Class<T> clazz, String resourcePath) {
+    private <T extends Request<T>> T mockRequest(Class<T> clazz, String resourcePath) {
         T request = mock(clazz);
         given(request.getResourcePath()).willReturn(resourcePath);
         given(request.getResourcePathObject()).willReturn(ResourcePath.valueOf(resourcePath));

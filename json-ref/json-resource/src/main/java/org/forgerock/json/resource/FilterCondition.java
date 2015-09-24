@@ -36,5 +36,5 @@ public interface FilterCondition {
      *            The request to be filtered.
      * @return {@code true} if the conditional filter should be invoked.
      */
-    boolean matches(Context context, Request request);
+    boolean matches(Context context, Request<?> request);
 }
