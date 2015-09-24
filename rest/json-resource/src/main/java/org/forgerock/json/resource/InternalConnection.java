@@ -97,7 +97,7 @@ final class InternalConnection extends AbstractAsynchronousConnection {
                              .then(filterResponse(request));
     }
 
-    private Function<ResourceResponse, ResourceResponse, ResourceException> filterResponse(final Request request) {
+    private Function<ResourceResponse, ResourceResponse, ResourceException> filterResponse(final Request<?> request) {
         return new Function<ResourceResponse, ResourceResponse, ResourceException>() {
             @Override
             public ResourceResponse apply(final ResourceResponse response)

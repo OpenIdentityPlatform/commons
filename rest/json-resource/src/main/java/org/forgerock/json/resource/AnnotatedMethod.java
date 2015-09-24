@@ -60,11 +60,12 @@ final class AnnotatedMethod {
         this.numberOfParameters = numberOfParameters;
     }
 
-    <T> Promise<T, ResourceException> invoke(Context context, Request request, String id) {
+    <T> Promise<T, ResourceException> invoke(Context context, Request<?> request, String id) {
         return invoke(context, request, null, id);
     }
 
-    <T> Promise<T, ResourceException> invoke(Context context, Request request,
+    @SuppressWarnings("unchecked")
+    <T> Promise<T, ResourceException> invoke(Context context, Request<?> request,
             QueryResourceHandler queryHandler, String id) {
         if (method == null) {
             return new NotSupportedException(operation + " not supported").asPromise();
