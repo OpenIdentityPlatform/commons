@@ -13,17 +13,15 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.events.handlers.writers;
 
 import java.io.IOException;
 import java.io.Writer;
 
-import org.forgerock.audit.events.handlers.writers.TextWriter;
-
 /**
- * A text writer compatible with SuperCsv library, which is used to output CSV format.
+ * Wraps a {@link TextWriter} in  a {@link Writer}.
  */
-class SuperCsvTextWriterAdapter extends Writer implements TextWriter {
+public class TextWriterAdapter extends Writer implements TextWriter {
 
     private final TextWriter delegate;
 
@@ -33,7 +31,7 @@ class SuperCsvTextWriterAdapter extends Writer implements TextWriter {
      * @param delegate
      *          Delegate writer.
      */
-    SuperCsvTextWriterAdapter(TextWriter delegate) {
+    public TextWriterAdapter(TextWriter delegate) {
         this.delegate = delegate;
     }
 

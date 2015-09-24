@@ -18,9 +18,19 @@
           "signatureInterval" : "3 seconds"
         },
         "buffering" : {
-          "enabled" : "true",
-          "autoFlush" : "true",
-          "maxSize" : "25"
+          "enabled": "true",
+          "autoFlush": "true",
+          "maxSize": "25"
+        },
+        "fileRotation" : {
+          "rotationFileSuffix" : "-MM.dd.yy-kk.mm.ss",
+          "rotationEnabled" : true,
+          "rotationInterval" : "5 seconds",
+          "maxFileSize" : 50,
+          "rotationFilePrefix" : "prefix-"
+        },
+        "fileRetention" : {
+          "maxNumberOfHistoryFiles": 0
         }
       }
     },

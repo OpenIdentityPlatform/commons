@@ -15,9 +15,16 @@
  */
 package org.forgerock.audit.events.handlers.csv;
 
-import static org.forgerock.audit.events.AuditEventHelper.*;
+import static org.forgerock.audit.events.AuditEventHelper.ARRAY_TYPE;
+import static org.forgerock.audit.events.AuditEventHelper.OBJECT_TYPE;
+import static org.forgerock.audit.events.AuditEventHelper.dotNotationToJsonPointer;
+import static org.forgerock.audit.events.AuditEventHelper.getAuditEventProperties;
+import static org.forgerock.audit.events.AuditEventHelper.getAuditEventSchema;
+import static org.forgerock.audit.events.AuditEventHelper.getPropertyType;
+import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotation;
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
-import static org.forgerock.audit.util.JsonValueUtils.*;
+import static org.forgerock.audit.util.JsonValueUtils.JSONVALUE_FILTER_VISITOR;
+import static org.forgerock.audit.util.JsonValueUtils.expand;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -217,7 +224,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
     }
 
     private CsvWriter writeEvent(final String topic, CsvWriter csvWriter, final JsonValue event)
-                    throws IOException, InternalServerErrorException {
+                    throws IOException {
         writeEntry(topic, csvWriter, event);
         // TODO: uncomment the following statements once super-csv is released with unwrapped buffer
         // EventBufferingConfiguration bufferConfig = configuration.getBuffering();
@@ -241,8 +248,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
     private synchronized CsvWriter createCsvMapWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
-        return new CsvWriter(
-                auditFile, headers, csvPreference, configuration.getBuffering(), configuration.getSecurity());
+        return new CsvWriter(auditFile, headers, csvPreference, configuration);
     }
 
     private ICsvMapReader createCsvMapReader(final File auditFile) throws IOException {

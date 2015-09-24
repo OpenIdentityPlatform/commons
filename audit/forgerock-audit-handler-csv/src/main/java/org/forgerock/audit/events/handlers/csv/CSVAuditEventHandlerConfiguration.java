@@ -18,7 +18,7 @@ package org.forgerock.audit.events.handlers.csv;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
 
@@ -40,7 +40,7 @@ import org.forgerock.util.time.Duration;
  *  }
  * </pre>
  */
-public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration {
+public class CSVAuditEventHandlerConfiguration extends FileBasedEventHandlerConfiguration {
 
     @JsonProperty(required=true)
     @JsonPropertyDescription("audit.handlers.csv.logDirectory")

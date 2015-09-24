@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
@@ -29,8 +28,9 @@ import java.util.Map;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
+import org.forgerock.audit.events.handlers.writers.RotatableWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriter;
-import org.forgerock.util.time.Duration;
+import org.forgerock.audit.events.handlers.writers.TextWriterAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapReader;
@@ -50,10 +50,12 @@ public class CsvWriter implements AutoCloseable {
 
     private final String[] headers;
     private ICsvMapWriter csvWriter;
+    private RotatableWriter rotatableWriter;
 
-    CsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, EventBufferingConfiguration bufferConfig,
-              CsvSecurity securityConfiguration) throws IOException {
+    CsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, CSVAuditEventHandlerConfiguration config)
+            throws IOException {
         boolean fileAlreadyInitialized = csvFile.exists();
+        final CsvSecurity securityConfiguration = config.getSecurity();
         CsvSecureVerifier verifier = null;
         if (fileAlreadyInitialized) {
             // Run the CsvVerifier to check that the file was not tampered,
@@ -90,34 +92,48 @@ public class CsvWriter implements AutoCloseable {
         }
         this.headers = checkNotNull(headers, "The headers can't be null.");
 
-        csvWriter = new CsvMapWriter(constructWriter(csvFile, fileAlreadyInitialized, bufferConfig), csvPreference);
+        csvWriter = new CsvMapWriter(constructWriter(csvFile, fileAlreadyInitialized, config), csvPreference, false);
         if (securityConfiguration.isEnabled()) {
             csvWriter = new CsvSecureMapWriter(csvWriter, securityConfiguration.getFilename(),
                     securityConfiguration.getPassword(), securityConfiguration.getSignatureIntervalDuration(),
                     fileAlreadyInitialized);
+            CsvSecureMapWriter csvSecureWriter = (CsvSecureMapWriter) csvWriter;
             if (fileAlreadyInitialized) {
-                CsvSecureMapWriter csvSecureWriter = (CsvSecureMapWriter) csvWriter;
                 csvSecureWriter.setHeader(headers);
                 csvSecureWriter.setLastHMAC(verifier.getLastHMAC());
                 csvSecureWriter.setLastSignature(verifier.getLastSignature());
             }
+
+            if (rotatableWriter != null) {
+                rotatableWriter.registerRotationHooks(csvSecureWriter);
+            }
+        } else if (rotatableWriter != null) {
+            rotatableWriter.registerRotationHooks(new CsvRotationHooks(csvWriter, headers));
         }
 
         if (!fileAlreadyInitialized) {
             csvWriter.writeHeader(headers);
+            csvWriter.flush();
         }
     }
 
-    private Writer constructWriter(File csvFile, boolean append, EventBufferingConfiguration bufferConfig)
-            throws IOException {
-        if (bufferConfig.isEnabled()) {
-            TextWriter textWriter = new TextWriter.Stream(new FileOutputStream(csvFile, append));
-            AsynchronousTextWriter asyncWriter = new AsynchronousTextWriter("CsvHandler", bufferConfig.getMaxSize(),
-                    bufferConfig.isAutoFlush(), textWriter);
-            return new SuperCsvTextWriterAdapter(asyncWriter);
-        } else {
-            return new FileWriter(csvFile, append);
+    private Writer constructWriter(File csvFile, boolean append, CSVAuditEventHandlerConfiguration config)
+                    throws IOException {
+        TextWriter textWriter;
+        if (config.getFileRotation().isRotationEnabled()) {
+            rotatableWriter = new RotatableWriter(csvFile, config, append);
+            textWriter = rotatableWriter;
         }
+        else {
+            textWriter = new TextWriter.Stream(new FileOutputStream(csvFile, append));
+        }
+
+        if (config.getBuffering().isEnabled()) {
+            EventBufferingConfiguration bufferConfig = config.getBuffering();
+            textWriter = new AsynchronousTextWriter("CsvHandler", bufferConfig.getMaxSize(),
+                    bufferConfig.isAutoFlush(), textWriter);
+        }
+        return new TextWriterAdapter(textWriter);
     }
 
     /**

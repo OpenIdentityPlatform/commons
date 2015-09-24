@@ -35,7 +35,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.UnrecoverableEntryException;
 import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -45,10 +44,10 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.ReentrantLock;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
@@ -62,7 +61,7 @@ import org.supercsv.io.ICsvMapWriter;
  * The column HMAC is filled with the HMAC calculation of the current row and a key.
  * The column SIGNATURE is filled with the signature calculation of the last HMAC and the last signature if any.
  */
-public class CsvSecureMapWriter implements ICsvMapWriter {
+public class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvSecureMapWriter.class);
 
@@ -192,14 +191,18 @@ public class CsvSecureMapWriter implements ICsvMapWriter {
         }
         signatureLock.lock();
         try {
-            if (scheduledSignature != null && scheduledSignature.cancel(false)) {
-                // We were able to cancel it before it starts, so let's generate the signature now.
-                writeSignature();
-            }
+            forceWriteSignature();
         } finally {
             signatureLock.unlock();
         }
         delegate.close();
+    }
+
+    private void forceWriteSignature() throws IOException {
+        if (scheduledSignature != null && scheduledSignature.cancel(false)) {
+            // We were able to cancel it before it starts, so let's generate the signature now.
+            writeSignature();
+        }
     }
 
     @Override
@@ -237,6 +240,7 @@ public class CsvSecureMapWriter implements ICsvMapWriter {
         try {
             lastSignature = calculateSignature();
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
+            logger.info("Writing signature :" + lastSignature);
             write(values, header);
 
             // Store the current signature into the Keystore
@@ -323,6 +327,35 @@ public class CsvSecureMapWriter implements ICsvMapWriter {
 
     void setLastSignature(byte[] lastSignature) {
         this.lastSignature = lastSignature;
+    }
+
+    @Override
+    public void postRotationAction() throws IOException {
+        // ensure
+        writeHeader(header);
+        writeLastSignature();
+        flush();
+    }
+
+    @Override
+    public void preRotationAction() throws IOException {
+        // ensure the final signature is written
+        forceWriteSignature();
+    }
+
+    void writeLastSignature() throws IOException {
+        // We have to prevent from writing another line between the signature calculation
+        // and the signature's row write, as the calculation uses the lastHMAC.
+        signatureLock.lock();
+        try {
+            Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
+            write(values, header);
+        } catch (IOException ex) {
+            logger.error(ex.getMessage(), ex);
+            throw new IOException(ex);
+        } finally {
+            signatureLock.unlock();
+        }
     }
 
 }

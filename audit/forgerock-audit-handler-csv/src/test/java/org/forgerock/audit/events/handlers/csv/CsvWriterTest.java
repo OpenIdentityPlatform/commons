@@ -30,6 +30,9 @@ import java.util.Map;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.retention.TimestampFilenameFilter;
+import org.forgerock.util.time.Duration;
+import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapReader;
@@ -39,16 +42,17 @@ import org.testng.annotations.Test;
 public class CsvWriterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvWriterTest.class);
+    public static final String TIME_STAMP_FORMAT = "-MM.dd.yy-kk.mm.ss.SSS";
+    public static final String PREFIX = "Prefix-";
 
     @Test
     public void shouldCreateBufferedSecureCsvFile() throws Exception {
         final CsvPreference csvPreference = CsvPreference.EXCEL_PREFERENCE;
-        String[] header;
+        final String[] header = new String[] { "child1", "child2", "child3" };;
 
         File csvFile = new File("target/test-classes/CsvWriterTest.csv");
         csvFile.delete();
 
-        header = new String[] { "child1", "child2", "child3" };
         EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
         bufferConfig.setEnabled(true);
         bufferConfig.setMaxSize(3);
@@ -57,12 +61,11 @@ public class CsvWriterTest {
         csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
         csvSecurity.setEnabled(true);
         csvSecurity.setSignatureInterval("3 seconds");
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, csvSecurity)) {
-            Map<String, String> values = new HashMap<>(3);
-            values.put(header[0], "pim");
-            values.put(header[1], "pam");
-            values.put(header[2], "poum");
-
+        CSVAuditEventHandlerConfiguration configuration = new CSVAuditEventHandlerConfiguration();
+        configuration.setBufferingConfiguration(bufferConfig);
+        configuration.setSecurity(csvSecurity);
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
+            Map<String, String> values = getValues(header, "one-a", "one-b", "one-c");
             writer.writeRow(values);
         }
 
@@ -92,16 +95,15 @@ public class CsvWriterTest {
         csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
         csvSecurity.setEnabled(true);
         csvSecurity.setSignatureInterval("3 seconds");
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, csvSecurity)) {
-            Map<String, String> values = new HashMap<>(3);
-            values.put(header[0], "pim");
-            values.put(header[1], "pam");
-            values.put(header[2], "poum");
-
+        CSVAuditEventHandlerConfiguration configuration = new CSVAuditEventHandlerConfiguration();
+        configuration.setBufferingConfiguration(bufferConfig);
+        configuration.setSecurity(csvSecurity);
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
+            Map<String, String> values = getValues(header, "one-a", "one-b", "one-c");
             writer.writeRow(values);
         }
 
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, csvSecurity)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "riri");
             values.put(header[1], "fifi");
@@ -118,7 +120,7 @@ public class CsvWriterTest {
 
         // Expecting to fail
         header = new String[] { "child1", "child2", "child3", "enfant4" };
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, csvSecurity)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "Joe");
             values.put(header[1], "William");
@@ -135,18 +137,96 @@ public class CsvWriterTest {
     @Test
     public void shouldAddHeadersToEmptyCsvFile() throws Exception {
         final File csvFile = org.assertj.core.util.Files.newTemporaryFile();
-        final String[] headers = new String[] { "child1", "child2", "child3" };
+        final String[] headers = new String[]{"child1", "child2", "child3"};
         final CsvPreference csvPreference = CsvPreference.EXCEL_PREFERENCE;
         final EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
         bufferConfig.setEnabled(false);
         CsvSecurity csvSecurity = new CsvSecurity();
         csvSecurity.setEnabled(false);
+        CSVAuditEventHandlerConfiguration configuration = new CSVAuditEventHandlerConfiguration();
+        configuration.setBufferingConfiguration(bufferConfig);
+        configuration.setSecurity(csvSecurity);
 
-        final CsvWriter csvWriter = new CsvWriter(csvFile, headers, csvPreference, bufferConfig, csvSecurity);
+        final CsvWriter csvWriter = new CsvWriter(csvFile, headers, csvPreference, configuration);
         csvWriter.close();
 
         final List<String> contents = Files.readAllLines(csvFile.toPath(), Charset.defaultCharset());
         assertThat(contents.size()).isEqualTo(1);
         assertThat(contents.get(0)).isEqualTo("child1,child2,child3");
+    }
+
+    @Test(enabled = true)
+    public void shouldCreateNewAuditFileAfterRotation() throws Exception {
+
+        final CsvPreference csvPreference = CsvPreference.EXCEL_PREFERENCE;
+        String[] header;
+
+        File csvFile = new File("target/test-classes/CsvWriterTest.csv");
+        csvFile.delete();
+
+        header = new String[] { "child1", "child2", "child3" };
+        EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
+        bufferConfig.setEnabled(false);
+        CsvSecurity csvSecurity = new CsvSecurity();
+        csvSecurity.setFilename(CsvSecureMapWriterTest.KEYSTORE_FILENAME);
+        csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+        csvSecurity.setEnabled(true);
+        csvSecurity.setSignatureInterval("3 seconds");
+        CSVAuditEventHandlerConfiguration configuration =
+                createCSVAuditEventHandlerConfigurationWithRotation(bufferConfig, 1000L);
+        configuration.setSecurity(csvSecurity);
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
+            writeNRows(header, writer, 12);
+        }
+
+        // TODO - Commenting this test part out until the verifier can verify a rotated log file.
+        // verify the new audit file that was created after the rotation
+        //try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
+        //    CsvSecureVerifier verifier = new CsvSecureVerifier(reader, CsvSecureMapWriterTest.KEYSTORE_FILENAME,
+        //            CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+        //    assertThat(verifier.verify()).isTrue();
+        //}
+
+        // Verify the archived audit file.
+        final TimestampFilenameFilter timestampFilenameFilter =
+                new TimestampFilenameFilter(csvFile, PREFIX, DateTimeFormat.forPattern(TIME_STAMP_FORMAT));
+        final File[] files = csvFile.getParentFile().listFiles(timestampFilenameFilter);
+        assertThat(files).isNotEmpty();
+        for (File file : files) {
+            file.deleteOnExit();
+        }
+        try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(files[0])), csvPreference)) {
+            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, CsvSecureMapWriterTest.KEYSTORE_FILENAME,
+                    CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+            assertThat(verifier.verify()).isTrue();
+        }
+    }
+
+    private Map<String, String> getValues(String[] header, String val1, String val2, String val3) {
+        Map<String, String> values = new HashMap<>(3);
+        values.put(header[0], val1);
+        values.put(header[1], val2);
+        values.put(header[2], val3);
+        return values;
+    }
+
+    private CSVAuditEventHandlerConfiguration createCSVAuditEventHandlerConfigurationWithRotation(
+            final EventBufferingConfiguration eventBufferingConfiguration, long maxFileSize) {
+        CSVAuditEventHandlerConfiguration configuration = new CSVAuditEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFileSuffix(TIME_STAMP_FORMAT);
+        configuration.getFileRotation().setRotationFilePrefix(PREFIX);
+        configuration.getFileRotation().setRotationInterval("disabled");
+        configuration.getFileRotation().setMaxFileSize(maxFileSize);
+        configuration.getFileRetention().setMaxNumberOfHistoryFiles(3);
+        configuration.setBufferingConfiguration(eventBufferingConfiguration);
+        return configuration;
+    }
+
+    private void writeNRows(String[] header, CsvWriter writer, int nbRows) throws IOException {
+        for (int i = 1; i <= nbRows; i++) {
+            String number = "________________" + String.valueOf(i);
+            writer.writeRow(getValues(header, number + "-A", number + "-B", number + "-C"));
+        }
     }
 }
