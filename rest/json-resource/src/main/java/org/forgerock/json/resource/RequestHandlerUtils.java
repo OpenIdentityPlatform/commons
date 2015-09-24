@@ -24,16 +24,16 @@ import org.forgerock.util.promise.Promise;
  */
 final class RequestHandlerUtils {
 
-    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request<?> request) {
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request request) {
         return method.invoke(context, request, null);
     }
 
-    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request<?> request,
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request request,
             QueryResourceHandler queryResourceHandler) {
         return method.invoke(context, request, queryResourceHandler, null);
     }
 
-    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request<?> request,
+    static <T> Promise<T, ResourceException> handle(AnnotatedMethod method, Context context, Request request,
             String id) {
         return method.invoke(context, request, id);
     }

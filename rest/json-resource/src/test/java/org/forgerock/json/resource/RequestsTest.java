@@ -49,7 +49,7 @@ public final class RequestsTest {
     @Test(dataProvider = "containerPaths")
     public void testResourcePathConcatenation(final String container,
             final String id, final String expectedResourcePath) {
-        final Request<?> request = newReadRequest(container, id);
+        final Request request = newReadRequest(container, id);
         assertThat(request.getResourcePath()).isEqualTo(expectedResourcePath);
     }
 
@@ -64,13 +64,13 @@ public final class RequestsTest {
     // updating the ResourcePath to null using the setter
     @Test(expectedExceptions = NullPointerException.class)
     public void testSetNullResourcePath() {
-        final Request<?> request = newReadRequest("/hello");
+        final Request request = newReadRequest("/hello");
         request.setResourcePath((ResourcePath) null);
     }
 
     @Test
     public void testResourceIdEscaping1() {
-        Request<?> r = Requests.newReadRequest("test/users/forward%2fslash");
+        Request r = Requests.newReadRequest("test/users/forward%2fslash");
         assertThat(r.getResourcePath()).isEqualTo("test/users/forward%2fslash");
         assertThat(r.getResourcePathObject().leaf()).isEqualTo("forward/slash");
         assertThat(r.getResourcePathObject().iterator()).hasSize(3);
@@ -78,7 +78,7 @@ public final class RequestsTest {
 
     @Test
     public void testResourceIdEscaping2() {
-        Request<?> r = Requests.newReadRequest("test/users", "forward/slash");
+        Request r = Requests.newReadRequest("test/users", "forward/slash");
         assertThat(r.getResourcePath()).isEqualTo("test/users/forward%2Fslash");
         assertThat(r.getResourcePathObject().leaf()).isEqualTo("forward/slash");
         assertThat(r.getResourcePathObject().iterator()).hasSize(3);

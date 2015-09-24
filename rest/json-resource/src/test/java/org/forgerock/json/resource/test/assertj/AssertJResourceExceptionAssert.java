@@ -67,7 +67,7 @@ public class AssertJResourceExceptionAssert extends AbstractThrowableAssert<Asse
      * Returns an asserter for asserting the contained {@code JsonValue} detail.
      * @return A {@code AbstractJsonValueAssert} for this {@code ResourceException}.
      */
-    public AssertJJsonValueAssert.AbstractJsonValueAssert<?> withDetail() {
+    public AssertJJsonValueAssert.AbstractJsonValueAssert withDetail() {
         return AssertJJsonValueAssert.assertThat(actual.getDetail());
     }
 
