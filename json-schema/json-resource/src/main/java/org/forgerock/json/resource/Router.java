@@ -62,7 +62,7 @@ import org.forgerock.util.promise.Promise;
  * @see AbstractRouter
  * @see RouteMatchers
  */
-public class Router extends AbstractRouter<Router, Request, RequestHandler> implements RequestHandler {
+public class Router extends AbstractRouter<Router, Request<?>, RequestHandler> implements RequestHandler {
 
     /**
      * Creates a new router with no routes defined.
@@ -78,7 +78,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      *
      * @param router The router to be copied.
      */
-    public Router(AbstractRouter<Router, Request, RequestHandler> router) {
+    public Router(AbstractRouter<Router, Request<?>, RequestHandler> router) {
         super(router);
     }
 
@@ -114,8 +114,8 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      * @return The {@link RouteMatcher} for the route that can be used to
      * remove the route at a later point.
      */
-    public RouteMatcher<Request> addRoute(UriTemplate uriTemplate, CollectionResourceProvider provider) {
-        RouteMatcher<Request> routeMatcher = requestUriMatcher(STARTS_WITH, uriTemplate.template);
+    public RouteMatcher<Request<?>> addRoute(UriTemplate uriTemplate, CollectionResourceProvider provider) {
+        RouteMatcher<Request<?>> routeMatcher = requestUriMatcher(STARTS_WITH, uriTemplate.template);
         addRoute(routeMatcher, newCollection(provider));
         return routeMatcher;
     }
@@ -133,8 +133,8 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      * @return The {@link RouteMatcher} for the route that can be used to
      * remove the route at a later point.
      */
-    public RouteMatcher<Request> addRoute(UriTemplate uriTemplate, SingletonResourceProvider provider) {
-        RouteMatcher<Request> routeMatcher = requestUriMatcher(EQUALS, uriTemplate.template);
+    public RouteMatcher<Request<?>> addRoute(UriTemplate uriTemplate, SingletonResourceProvider provider) {
+        RouteMatcher<Request<?>> routeMatcher = requestUriMatcher(EQUALS, uriTemplate.template);
         addRoute(routeMatcher, newSingleton(provider));
         return routeMatcher;
     }
@@ -153,8 +153,8 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      * @return The {@link RouteMatcher} for the route that can be used to
      * remove the route at a later point.
      */
-    public RouteMatcher<Request> addRoute(RoutingMode mode, UriTemplate uriTemplate, RequestHandler handler) {
-        RouteMatcher<Request> routeMatcher = requestUriMatcher(mode, uriTemplate.template);
+    public RouteMatcher<Request<?>> addRoute(RoutingMode mode, UriTemplate uriTemplate, RequestHandler handler) {
+        RouteMatcher<Request<?>> routeMatcher = requestUriMatcher(mode, uriTemplate.template);
         addRoute(routeMatcher, handler);
         return routeMatcher;
     }
@@ -181,7 +181,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      * @return The {@link RouteMatcher} for the route that can be used to
      * remove the route at a later point.
      */
-    public RouteMatcher<Request> addRoute(Version version, CollectionResourceProvider provider) {
+    public RouteMatcher<Request<?>> addRoute(Version version, CollectionResourceProvider provider) {
         return addRoute(version, newCollection(provider));
     }
 
@@ -196,7 +196,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      * @return The {@link RouteMatcher} for the route that can be used to
      * remove the route at a later point.
      */
-    public RouteMatcher<Request> addRoute(Version version, SingletonResourceProvider provider) {
+    public RouteMatcher<Request<?>> addRoute(Version version, SingletonResourceProvider provider) {
         return addRoute(version, newSingleton(provider));
     }
 
@@ -210,13 +210,13 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      * @return The {@link RouteMatcher} for the route that can be used to
      * remove the route at a later point.
      */
-    public RouteMatcher<Request> addRoute(Version version, RequestHandler handler) {
-        RouteMatcher<Request> routeMatcher = requestResourceApiVersionMatcher(version);
+    public RouteMatcher<Request<?>> addRoute(Version version, RequestHandler handler) {
+        RouteMatcher<Request<?>> routeMatcher = requestResourceApiVersionMatcher(version);
         addRoute(routeMatcher, handler);
         return routeMatcher;
     }
 
-    private Pair<Context, RequestHandler> getBestMatch(Context context, Request request)
+    private Pair<Context, RequestHandler> getBestMatch(Context context, Request<?> request)
             throws ResourceException {
         try {
             Pair<Context, RequestHandler> bestMatch = getBestRoute(context, request);

@@ -94,7 +94,7 @@ public class AssertJActionResponseAssert extends AbstractAssert<AssertJActionRes
      * Returns an asserter for asserting the contained {@code JsonValue}.
      * @return A {@code AbstractJsonValueAssert} for this {@code ActionResponse}.
      */
-    public AbstractJsonValueAssert withContent() {
+    public AbstractJsonValueAssert<?> withContent() {
         return AssertJJsonValueAssert.assertThat(actual.getJsonContent());
     }
 }

@@ -45,7 +45,7 @@ public final class RouteMatchers {
      * @param template The uri template.
      * @return A {@code RouteMatcher} instance.
      */
-    public static RouteMatcher<Request> requestUriMatcher(RoutingMode mode, String template) {
+    public static RouteMatcher<Request<?>> requestUriMatcher(RoutingMode mode, String template) {
         return new RequestUriRouteMatcher(uriMatcher(mode, template));
     }
 
@@ -82,7 +82,7 @@ public final class RouteMatchers {
      * @param version The API version of the resource.
      * @return A {@code RouteMatcher} instance.
      */
-    public static RouteMatcher<Request> requestResourceApiVersionMatcher(Version version) {
+    public static RouteMatcher<Request<?>> requestResourceApiVersionMatcher(Version version) {
         return new RequestApiVersionRouteMatcher(resourceApiVersionMatcher(version));
     }
 
@@ -91,7 +91,7 @@ public final class RouteMatchers {
      * resource name from a {@code Request} and passes it as a
      * {@code ResourcePath} to the common {@code ResourcePath} route predicate.
      */
-    private static final class RequestUriRouteMatcher extends RouteMatcher<Request> {
+    private static final class RequestUriRouteMatcher extends RouteMatcher<Request<?>> {
 
         private final RouteMatcher<List<String>> delegate;
 
@@ -100,7 +100,7 @@ public final class RouteMatchers {
         }
 
         @Override
-        public RouteMatch evaluate(Context context, Request request) {
+        public RouteMatch evaluate(Context context, Request<?> request) {
             return delegate.evaluate(context, Lists.newArrayList(request.getResourcePathObject()));
         }
 
@@ -132,7 +132,7 @@ public final class RouteMatchers {
      * version from a {@code Request} and passes it to the common
      * {@code Version} route matcher.
      */
-    private static final class RequestApiVersionRouteMatcher extends RouteMatcher<Request> {
+    private static final class RequestApiVersionRouteMatcher extends RouteMatcher<Request<?>> {
 
         private final RouteMatcher<Version> delegate;
 
@@ -141,7 +141,7 @@ public final class RouteMatchers {
         }
 
         @Override
-        public RouteMatch evaluate(Context context, Request request) {
+        public RouteMatch evaluate(Context context, Request<?> request) {
             return delegate.evaluate(context, request.getResourceVersion());
         }
 

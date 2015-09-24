@@ -541,7 +541,7 @@ final class HttpAdapter implements Handler {
     }
 
     private Promise<Response, NeverThrowsException> doRequest(Context context, org.forgerock.http.protocol.Request req,
-            Response resp, Request request) throws Exception {
+            Response resp, Request<?> request) throws Exception {
 
         Context ctx = newRequestContext(context, req);
         final RequestRunner runner = new RequestRunner(ctx, request, req, resp);
@@ -599,7 +599,7 @@ final class HttpAdapter implements Handler {
     }
 
     private boolean parseCommonParameter(final String name, final List<String> values,
-            final Request request) throws ResourceException {
+            final Request<?> request) throws ResourceException {
         if (name.equalsIgnoreCase(PARAM_FIELDS)) {
             for (final String s : values) {
                 try {
