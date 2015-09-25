@@ -19,8 +19,8 @@
 package org.forgerock.http.protocol;
 
 
-import static org.forgerock.http.util.Uris.urlDecode;
-import static org.forgerock.http.util.Uris.urlEncode;
+import static org.forgerock.http.util.Uris.urlFormDecode;
+import static org.forgerock.http.util.Uris.urlFormEncode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -57,7 +57,7 @@ public class Form extends MultiValueMap<String, String> {
         for (String param : s.split("&")) {
             String[] nv = param.split("=", 2);
             if (nv.length == 2) {
-                add(urlDecode(nv[0]), urlDecode(nv[1]));
+                add(urlFormDecode(nv[0]), urlFormDecode(nv[1]));
             }
         }
         return this;
@@ -76,7 +76,7 @@ public class Form extends MultiValueMap<String, String> {
                 if (sb.length() > 0) {
                     sb.append('&');
                 }
-                sb.append(urlEncode(name)).append('=').append(urlEncode(value));
+                sb.append(urlFormEncode(name)).append('=').append(urlFormEncode(value));
             }
         }
         return sb.toString();

@@ -179,9 +179,19 @@ public final class HttpFrameworkServlet extends HttpServlet {
     @Override
     protected void service(final HttpServletRequest req, final HttpServletResponse resp)
             throws ServletException, IOException {
-        final Request request = createRequest(req);
         final Session session = new ServletSession(req);
         final SessionContext sessionContext = new SessionContext(new RootContext(), session);
+
+        final Request request;
+        try {
+            request = createRequest(req);
+        } catch (URISyntaxException e) {
+            Response response = new Response(Status.BAD_REQUEST);
+            response.setEntity(e.getMessage());
+            writeResponse(response, resp, sessionContext);
+            return;
+        }
+
         final AttributesContext attributesContext = new AttributesContext(new RequestAuditContext(sessionContext));
 
         /* TODO
@@ -242,16 +252,20 @@ public final class HttpFrameworkServlet extends HttpServlet {
         }
     }
 
-    private Request createRequest(HttpServletRequest req) throws ServletException, IOException {
+    private Request createRequest(HttpServletRequest req) throws IOException, URISyntaxException {
         // populate request
         Request request = new Request();
         request.setMethod(req.getMethod());
-        try {
-            request.setUri(Uris.create(req.getScheme(), null, req.getServerName(),
-                                       req.getServerPort(), req.getRequestURI(), req.getQueryString(), null));
-        } catch (URISyntaxException use) {
-            throw new ServletException(use);
-        }
+
+        /* CHF-81: containers are generally quite tolerant of invalid query strings, so we'll try to be as well
+         * by decoding the query string and re-encoding it correctly before constructing the URI. */
+        request.setUri(Uris.createNonStrict(req.getScheme(),
+                                            null,
+                                            req.getServerName(),
+                                            req.getServerPort(),
+                                            req.getRequestURI(),
+                                            req.getQueryString(),
+                                            null));
 
         // request headers
         for (Enumeration<String> e = req.getHeaderNames(); e.hasMoreElements();) {
@@ -289,6 +303,16 @@ public final class HttpFrameworkServlet extends HttpServlet {
     private void writeResponse(Request request, Response response, HttpServletResponse servletResponse,
             SessionContext sessionContext, ServletSynchronizer synchronizer) {
         try {
+            writeResponse(response, servletResponse, sessionContext);
+        } finally {
+            closeSilently(request);
+            synchronizer.signalAndComplete();
+        }
+    }
+
+    private void writeResponse(final Response response, final HttpServletResponse servletResponse,
+            final SessionContext sessionContext) {
+        try {
             /*
              * Support for OPENIG-94/95 - The wrapped servlet may have already
              * committed its response w/o creating a new OpenIG Response instance in
@@ -316,8 +340,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         } catch (IOException e) {
             log("Failed to write response", e);
         } finally {
-            closeSilently(request, response);
-            synchronizer.signalAndComplete();
+            closeSilently(response);
         }
     }
 

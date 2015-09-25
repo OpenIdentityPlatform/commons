@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -20,8 +20,10 @@ package org.forgerock.http.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.forgerock.http.protocol.Form;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -71,4 +73,66 @@ public class UrisTest {
                 "https://doot.doot.doo.org/all/good/things");
     }
 
+    @DataProvider
+    private Object[][] illegalQueryStrings() {
+        return new Object[][] {
+            { "param1=white space&param2=value2", "param1=white%20space&param2=value2" },
+            { "param1=\"double quotes\"&param2=value2", "param1=%22double%20quotes%22&param2=value2" },
+            { "param1=white%20space&param2=\"double quotes\"", "param1=white%20space&param2=%22double%20quotes%22"}
+        };
+    }
+
+    @Test(expectedExceptions = URISyntaxException.class, dataProvider = "illegalQueryStrings")
+    public void testCreateRejectsIllegalQueryStrings(String unsafeQuery, String safeQuery) throws Exception {
+        Uris.create("http", null, "localhost", 8080, "raw/path", unsafeQuery, null);
+    }
+
+    @Test(dataProvider = "illegalQueryStrings")
+    public void testCreateNonStrictAcceptsIllegalQueryStrings(String unsafeQuery, String safeQuery) throws Exception {
+        URI uri = Uris.createNonStrict("http", null, "localhost", 8080, "raw/path", unsafeQuery, null);
+        assertThat(uri.getRawQuery()).isEqualTo(safeQuery);
+    }
+
+    @DataProvider
+    private Object[][] urlEncodings() {
+        // decoded, path encoded, query encoded, form encoded
+        return new Object[][] {
+            { "",            "",            "",            "" },                                // empty
+            { " ",           "%20",         "%20",         "+" },                               // whitespace
+            { "azAZ09-._~",  "azAZ09-._~",  "azAZ09-._~",  "azAZ09-._%7E" },                    // unreserved
+            { "!$&'()*+,;=", "!$&'()*+,;=", "!$&'()*+,;=", "%21%24%26%27%28%29*%2B%2C%3B%3D" }, // sub-delims
+            { ":@",          ":@",          ":@",          "%3A%40" },                          // pchar
+            { "/?",          "%2F%3F",      "/?",          "%2F%3F" },                          // query
+        };
+    }
+
+    @Test(dataProvider = "urlEncodings")
+    public void testUrlPathEncode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
+        assertThat(Uris.urlPathEncode(decoded)).isEqualTo(pathEncoded);
+    }
+
+    @Test(dataProvider = "urlEncodings")
+    public void testUrlQueryEncode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
+        assertThat(Uris.urlQueryEncode(decoded)).isEqualTo(queryEncoded);
+    }
+
+    @Test(dataProvider = "urlEncodings")
+    public void testUrlFormEncode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
+        assertThat(Uris.urlFormEncode(decoded)).isEqualTo(formEncoded);
+    }
+
+    @Test(dataProvider = "urlEncodings")
+    public void testUrlPathDecode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
+        assertThat(Uris.urlPathDecode(pathEncoded)).isEqualTo(decoded);
+    }
+
+    @Test(dataProvider = "urlEncodings")
+    public void testUrlQueryDecode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
+        assertThat(Uris.urlQueryDecode(queryEncoded)).isEqualTo(decoded);
+    }
+
+    @Test(dataProvider = "urlEncodings")
+    public void testUrlFormDecode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
+        assertThat(Uris.urlFormDecode(formEncoded)).isEqualTo(decoded);
+    }
 }

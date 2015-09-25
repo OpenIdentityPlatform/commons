@@ -18,7 +18,7 @@ package org.forgerock.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.MutableUri.uri;
-import static org.forgerock.http.util.Uris.urlEncode;
+import static org.forgerock.http.util.Uris.urlFormEncode;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -315,7 +315,7 @@ public class MutableUriTest {
         MutableUri uri = uri("http://www.example.com");
         uri.setQuery(character);
         assertThat(uri.getQuery()).isEqualTo(character);
-        assertThat(uri.getRawQuery()).isEqualTo(urlEncode(character));
+        assertThat(uri.getRawQuery()).isEqualTo(urlFormEncode(character));
     }
 
     @DataProvider
@@ -342,8 +342,8 @@ public class MutableUriTest {
         MutableUri uri = uri("http://www.example.com");
         uri.setPath("/" + character);
         assertThat(uri.getPath()).isEqualTo("/" + character);
-        assertThat(uri.getRawPath()).isEqualTo("/" + urlEncode(character));
-        assertThat(uri.getPathElements().toString()).isEqualTo(urlEncode(character));
+        assertThat(uri.getRawPath()).isEqualTo("/" + urlFormEncode(character));
+        assertThat(uri.getPathElements().toString()).isEqualTo(urlFormEncode(character));
     }
 
     @DataProvider
@@ -374,7 +374,7 @@ public class MutableUriTest {
         MutableUri uri = uri("http://www.example.com");
         uri.setFragment(character);
         assertThat(uri.getFragment()).isEqualTo(character);
-        assertThat(uri.getRawFragment()).isEqualTo(urlEncode(character));
+        assertThat(uri.getRawFragment()).isEqualTo(urlFormEncode(character));
     }
 
     @DataProvider
@@ -400,7 +400,7 @@ public class MutableUriTest {
         MutableUri uri = uri("http://www.example.com");
         uri.setUserInfo(character);
         assertThat(uri.getUserInfo()).isEqualTo(character);
-        assertThat(uri.getRawUserInfo()).isEqualTo(urlEncode(character));
+        assertThat(uri.getRawUserInfo()).isEqualTo(urlFormEncode(character));
     }
 
     @Test
