@@ -32,20 +32,7 @@
             color: #555;
         }
     }
-
 }
-
-/*
-  FIXME
-  Revisit this style after discussion on how to handle tabs with panels
-
-.tab-pane {
-  &>.panel.panel-default {
-    border-top: 0;
-    border-radius: 0;
-  }
-}
-*/
 
 .tab-menu {
     margin-bottom: -1px;
@@ -56,6 +43,14 @@
     // Please use .nav-tab-content to create the classic tabbed views.
 }
 
+.panel.fr-panel-tab {
+  border-top: 0;
+  border-radius: 0;
+}
+
+/*
+  Deprecated - Please use tab/panel combination for same effect.
+*/
 .nav-tab-content {
     background-color: #fff;
     border: 1px solid #ddd;

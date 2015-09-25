@@ -263,6 +263,13 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>titatoggle</artifactId>
+            <version>1.2.6</version>
+            <classifier>min</classifier>
+            <type>css</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>selectize</artifactId>
             <classifier>min</classifier>
             <type>js</type>

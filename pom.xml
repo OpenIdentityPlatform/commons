@@ -184,7 +184,6 @@
                 <classifier>custom</classifier>
                 <type>css</type>
             </dependency>
-
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>bootstrap-dialog</artifactId>

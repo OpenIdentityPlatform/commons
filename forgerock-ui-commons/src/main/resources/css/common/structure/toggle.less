@@ -1,0 +1,57 @@
+/*
+ Aniamtion
+*/
+.checkbox-slider--b input+span:before {
+  transition: background .2s ease-out;
+  box-shadow: none;
+}
+
+.checkbox-slider--b input:not(:checked)+span:after {
+  animation: popOut ease-in 0s normal;
+}
+
+.checkbox-slider--b input:checked+span:after {
+  animation: popIn ease-in 0s normal;
+}
+
+/*
+  Adjust colors
+*/
+.checkbox-slider-info.checkbox-slider--default input:checked + span:after,
+.checkbox-slider-info.checkbox-slider--c-weight input:checked + span:after {
+  background: #5bc0de;
+  background-clip: content-box;
+}
+
+.checkbox-slider-info.checkbox-slider--b input:checked + span:before,
+.checkbox-slider-info.checkbox-slider--b-flat input:checked + span:before {
+  background: #5bc0de;
+}
+.checkbox-slider-warning.checkbox-slider--default input:checked + span:after {
+  background: #f0ad4e;
+  background-clip: content-box;
+}
+
+.checkbox-slider-warning.checkbox-slider--b input:checked + span:before,
+.checkbox-slider-warning.checkbox-slider--b-flat input:checked + span:before {
+  background: #f0ad4e;
+}
+.checkbox-slider-danger.checkbox-slider--default input:checked + span:after {
+  background: @failure-color;
+  background-clip: content-box;
+}
+
+.checkbox-slider-danger.checkbox-slider--b input:checked + span:before,
+.checkbox-slider-danger.checkbox-slider--b-flat input:checked + span:before {
+  background: @failure-color;
+}
+
+.checkbox-slider-primary.checkbox-slider--default input:checked + span:after {
+  background: @base-theme-color;
+  background-clip: content-box;
+}
+
+.checkbox-slider-primary.checkbox-slider--b input:checked + span:before,
+.checkbox-slider-primary.checkbox-slider--b-flat input:checked + span:before {
+  background: @base-theme-color;
+}

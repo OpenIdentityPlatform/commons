@@ -77,6 +77,20 @@
         margin-bottom:15px;
     }
 
+    .sub-header .admin-only {
+        font-size:10px;
+        font-weight:bold;
+        color:#777;
+        text-transform: uppercase;
+    }
+
+    .sub-header .under-discussion {
+        font-size:10px;
+        font-weight:bold;
+        color:#a94442;
+        text-transform: uppercase;
+    }
+
     /*
         Swatch
     */
@@ -249,7 +263,7 @@
 
                             <div class="tab-content">
                                 <div role="tabpanel" class="tab-pane active" id="tabpanel1">
-                                    <div class="panel panel-default">
+                                    <div class="panel panel-default fr-panel-tab">
                                         <div class="panel-body">
                                             Body
                                         </div>
@@ -259,7 +273,7 @@
                                     </div>
                                 </div>
                                 <div role="tabpanel" class="tab-pane" id="tabpanel2">
-                                    <div class="panel panel-default">
+                                    <div class="panel panel-default fr-panel-tab">
                                         <div class="panel-body">
                                             Body 2
                                         </div>
@@ -293,6 +307,50 @@
                 </div>
             </section>
             <section class="resource-section">
+                <h1 id="toggles">
+                    Toggles
+                </h1>
+                <p class="text-muted">Library: <a href="http://kleinejan.github.io/titatoggle/">http://kleinejan.github.io/titatoggle/</a></p>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">
+                            Toggles <span class="admin-only">Admin Only</span>
+                        </h4>
+
+                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-lg">
+                            <label>
+                                <input type="checkbox"><span></span>
+                            </label>
+                        </div>
+                        <div class="checkbox checkbox-slider-warning checkbox-slider checkbox-slider--b checkbox-slider-lg">
+                            <label>
+                                <input type="checkbox"><span></span>
+                            </label>
+                        </div>
+                        <div class="checkbox checkbox-slider-danger checkbox-slider checkbox-slider--b checkbox-slider-lg">
+                            <label>
+                                <input type="checkbox"><span></span>
+                            </label>
+                        </div>
+                        <div class="checkbox checkbox-slider-info checkbox-slider checkbox-slider--b checkbox-slider-lg">
+                            <label>
+                                <input type="checkbox"><span></span>
+                            </label>
+                        </div>
+                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--c checkbox-slider-lg">
+                            <label>
+                                <input type="checkbox"><span></span>
+                            </label>
+                        </div>
+                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--a checkbox-slider-lg">
+                            <label>
+                                <input type="checkbox"><span></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="resource-section">
                 <h1 id="buttons">
                     Buttons
                 </h1>
@@ -306,7 +364,7 @@
                             <button type="button" class="btn btn-default">Three</button>
                         </div>
 
-                        <h4 class="sub-header">Dark Button Group</h4>
+                        <h4 class="sub-header">Dark Button Group <span class="admin-only">Admin Only</span></h4>
 
                         <div class="btn-group btn-icon" data-toggle="btns">
                             <a class="btn toggle-view-btn fr-btn-secondary active" href="#connectorCardContainer" data-toggle="tab"><i class="fa fa-th"></i></a>
@@ -549,6 +607,7 @@
                 <li><a href="#typography">Typography</a></li>
                 <li><a href="#tabs">Tabs</a></li>
                 <li><a href="#panels">Panels</a></li>
+                <li><a href="#toggles">Toggles</a></li>
                 <li><a href="#buttons">Buttons</a></li>
                 <li><a href="#alerts">Alerts</a></li>
                 <li><a href="#selectize">Selectize</a></li>
