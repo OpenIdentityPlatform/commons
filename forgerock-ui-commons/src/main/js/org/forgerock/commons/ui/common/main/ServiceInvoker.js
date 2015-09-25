@@ -17,10 +17,11 @@
 /*global define*/
 define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
     "jquery",
+    "underscore",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function($, AbstractConfigurationAware, Constants, EventManager) {
+], function($, _, AbstractConfigurationAware, Constants, EventManager) {
     /**
      * @exports org/forgerock/commons/ui/common/main/ServiceInvoker
      */
@@ -119,6 +120,13 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
          * included in CORS requests.
          */
         options.headers["X-Requested-With"] = "XMLHttpRequest";
+
+        /**
+         * Default to disabled caching for all AJAX requests. Can be overriden in the rare cases when caching AJAX is needed
+         */
+        if (!_.has(options.headers, "Cache-Control")) {
+            options.headers["Cache-Control"] = "no-cache";
+        }
 
         return $.ajax(options);
     };
