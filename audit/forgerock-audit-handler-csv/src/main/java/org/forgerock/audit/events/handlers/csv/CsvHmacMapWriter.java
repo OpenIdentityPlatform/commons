@@ -16,13 +16,15 @@
 
 package org.forgerock.audit.events.handlers.csv;
 
+import static org.forgerock.util.Utils.joinAsString;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
+import org.forgerock.util.Utils;
 import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.ICsvMapWriter;
 
@@ -116,7 +118,7 @@ public class CsvHmacMapWriter implements ICsvMapWriter {
 
     private byte[] dataToSign(Map<String, ?> values, String...nameMapping) {
         try {
-            return StringUtils.join(nameMapping).getBytes("UTF-8");
+            return joinAsString("", (Object[]) nameMapping).getBytes("UTF-8");
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException("UTF-8 is mandatory in any JVM implementation");
         }

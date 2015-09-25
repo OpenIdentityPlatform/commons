@@ -18,11 +18,11 @@ package org.forgerock.audit.handlers.jdbc;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.Utils.joinAsString;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.AuditEvent;
@@ -65,6 +65,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.forgerock.util.Utils;
 
 /**
  * Implements a {@link AuditEventHandler} to write {@link AuditEvent}s to a JDBC repository.
@@ -320,7 +322,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
                 keys.add("${" + tokenName + "}" + (sortKey.isAscendingOrder() ? " ASC" : " DESC"));
                 replacementTokens.put(tokenName, sortKey.getField().toString().substring(1));
             }
-            pageClause = " ORDER BY " + StringUtils.join(keys, ", ") + pageClause;
+            pageClause = " ORDER BY " + joinAsString(", ", keys) + pageClause;
         }
         return "SELECT * FROM " + tableMappingAndParameters.getTableMapping().getTable() + " "
                 + getFilterString(queryRequest.getQueryFilter(), tableMappingAndParameters)
@@ -455,20 +457,36 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
         hikariConfig.setMaximumPoolSize(connectionPool.getMaximumPoolSize());
         hikariConfig.setMaxLifetime(connectionPool.getMaxLifetime());
         hikariConfig.setMinimumIdle(connectionPool.getMinimumIdle());
-        if (!StringUtils.isBlank(connectionPool.getJdbcUrl())) {
+        if (!isBlank(connectionPool.getJdbcUrl())) {
             hikariConfig.setJdbcUrl(connectionPool.getJdbcUrl());
         }
-        if (!StringUtils.isBlank(connectionPool.getDataSourceClassName())) {
+        if (!isBlank(connectionPool.getDataSourceClassName())) {
             hikariConfig.setDataSourceClassName(connectionPool.getDataSourceClassName());
         }
-        if (!StringUtils.isBlank(connectionPool.getUsername())) {
+        if (!isBlank(connectionPool.getUsername())) {
             hikariConfig.setUsername(connectionPool.getUsername());
         }
-        if (!StringUtils.isBlank(connectionPool.getPassword())) {
+        if (!isBlank(connectionPool.getPassword())) {
             hikariConfig.setPassword(connectionPool.getPassword());
         }
-        if (!StringUtils.isBlank(connectionPool.getPoolName())) {
+        if (!isBlank(connectionPool.getPoolName())) {
             hikariConfig.setPoolName(connectionPool.getPoolName());
         }
+    }
+
+    private static boolean isBlank(CharSequence charSeq) {
+        if (charSeq == null) {
+            return true;
+        }
+        final int length = charSeq.length();
+        if (length == 0) {
+            return true;
+        }
+        for (int i = 0; i < length; i++) {
+            if (Character.isWhitespace(charSeq.charAt(i)) == false) {
+                return false;
+            }
+        }
+        return true;
     }
 }

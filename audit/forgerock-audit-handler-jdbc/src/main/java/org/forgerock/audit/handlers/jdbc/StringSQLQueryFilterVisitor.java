@@ -15,14 +15,14 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
-import java.util.List;
-import java.util.Map;
+import static org.forgerock.util.Utils.joinAsString;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.List;
 
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
+import org.forgerock.util.Utils;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 
@@ -65,15 +65,15 @@ public class StringSQLQueryFilterVisitor
             List<QueryFilter<JsonPointer>> subFilters, String operand) {
         final String operandDelimiter = new StringBuilder(" ").append(operand).append(" ").toString();
         return new StringSQLRenderer("(")
-                .append(StringUtils.join(
+                .append(joinAsString(
+                        operandDelimiter,
                         FluentIterable.from(subFilters)
                                 .transform(new Function<QueryFilter<JsonPointer>, String>() {
                                     @Override
                                     public String apply(QueryFilter<JsonPointer> filter) {
                                         return filter.accept(StringSQLQueryFilterVisitor.this, parameters).toSQL();
                                     }
-                                }),
-                        operandDelimiter))
+                                })))
                 .append(")");
     }
 

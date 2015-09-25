@@ -39,7 +39,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.events.handlers.AuditEventTopicState;
@@ -379,7 +378,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         Map<String, String> cells = new HashMap<>(fieldOrder.size());
         for (String key : fieldOrder) {
             final String value = extractValue(obj, key);
-            if (!StringUtils.isEmpty(value)) {
+            if (value != null && !value.isEmpty()) {
                 cells.put(jsonPointerToDotNotation(key), value);
             }
         }

@@ -16,16 +16,12 @@
 
 package org.forgerock.audit.events;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Helper methods for AuditEvents.
@@ -131,7 +127,7 @@ public final class AuditEventHelper {
         if (fieldName.startsWith("/")) {
             newPath = fieldName.substring(1);
         }
-        return StringUtils.replace(newPath, "/", ".");
+        return (newPath == null) ? null : newPath.replace('/', '.');
     }
 
     /**
@@ -141,7 +137,7 @@ public final class AuditEventHelper {
      * @return The field name in JsonPointer form.
      */
     public static String dotNotationToJsonPointer(final String fieldName) {
-        return StringUtils.replace(fieldName, ".", "/");
+        return (fieldName == null) ? null : fieldName.replace('.', '/');
     }
 
 }
