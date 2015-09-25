@@ -20,10 +20,10 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.testng.Assert.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
@@ -56,7 +56,7 @@ public final class VerifyUserIdStageTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        config = newVerifyUserIdConfig(new VerifyEmailAccountConfig());
+        config = newVerifyUserIdConfig();
         verifyUserIdStage = new VerifyUserIdStage(factory);
     }
 
@@ -92,12 +92,12 @@ public final class VerifyUserIdStageTest {
         verifyUserIdStage.getEmailAddress(context, config, builder);
     }
 
-    private VerifyUserIdConfig newVerifyUserIdConfig(VerifyEmailAccountConfig emailConfig) {
-        return new VerifyUserIdConfig(emailConfig)
-                .setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")))
-                .setIdentityIdField("_id")
-                .setIdentityEmailField("mail")
-                .setIdentityServiceUrl("/users");
+    private VerifyUserIdConfig newVerifyUserIdConfig() {
+        return new VerifyUserIdConfig()
+            .setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")))
+            .setIdentityIdField("_id")
+            .setIdentityEmailField("mail")
+            .setIdentityServiceUrl("/users");
     }
 
     private JsonValue newEmptyJsonValue() {

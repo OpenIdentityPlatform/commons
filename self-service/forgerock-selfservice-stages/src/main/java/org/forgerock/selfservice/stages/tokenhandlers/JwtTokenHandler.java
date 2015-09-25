@@ -43,11 +43,6 @@ import java.util.Date;
  */
 public final class JwtTokenHandler implements SnapshotTokenHandler {
 
-    /**
-     * JWT snapshot token handle type.
-     */
-    public static final String TYPE = "JWT_TOKEN_TYPE";
-
     private final JwtBuilderFactory jwtBuilderFactory;
     private final JweAlgorithm jweAlgorithm;
     private final EncryptionMethod jweMethod;

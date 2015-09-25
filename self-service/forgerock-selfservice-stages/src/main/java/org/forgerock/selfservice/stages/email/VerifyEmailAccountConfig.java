@@ -21,9 +21,9 @@ package org.forgerock.selfservice.stages.email;
  *
  * @since 0.1.0
  */
-public final class VerifyEmailAccountConfig implements AbstractEmailVerificationConfig {
+public class VerifyEmailAccountConfig implements AbstractEmailVerificationConfig {
 
-    private static final String NAME = "emailValidation";
+    public static final String NAME = "emailValidation";
 
     private String emailServiceUrl;
     private String emailSubject;

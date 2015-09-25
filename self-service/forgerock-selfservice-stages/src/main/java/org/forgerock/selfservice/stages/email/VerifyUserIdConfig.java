@@ -16,8 +16,6 @@
 
 package org.forgerock.selfservice.stages.email;
 
-import org.forgerock.util.Reject;
-
 import java.util.Set;
 
 /**
@@ -25,26 +23,14 @@ import java.util.Set;
  *
  * @since 0.1.0
  */
-public final class VerifyUserIdConfig implements AbstractEmailVerificationConfig {
+public final class VerifyUserIdConfig extends VerifyEmailAccountConfig implements AbstractEmailVerificationConfig {
 
-    private static final String NAME = "userIdValidation";
+    public static final String NAME = "userIdValidation";
 
-    private final VerifyEmailAccountConfig emailStageConfig;
     private String identityServiceUrl;
     private String identityIdField;
     private String identityEmailField;
     private Set<String> queryFields;
-
-    /**
-     * Constructs a new configuration.
-     *
-     * @param verifyEmailAccountConfig
-     *         the email configuration
-     */
-    public VerifyUserIdConfig(VerifyEmailAccountConfig verifyEmailAccountConfig) {
-        Reject.ifNull(verifyEmailAccountConfig);
-        this.emailStageConfig = verifyEmailAccountConfig;
-    }
 
     /**
      * Gets the URL for the identity service.
@@ -132,36 +118,6 @@ public final class VerifyUserIdConfig implements AbstractEmailVerificationConfig
     public VerifyUserIdConfig setQueryFields(Set<String> queryFields) {
         this.queryFields = queryFields;
         return this;
-    }
-
-    @Override
-    public String getEmailServiceUrl() {
-        return emailStageConfig.getEmailServiceUrl();
-    }
-
-    @Override
-    public String getEmailSubject() {
-        return emailStageConfig.getEmailSubject();
-    }
-
-    @Override
-    public String getEmailMessage() {
-        return emailStageConfig.getEmailMessage();
-    }
-
-    @Override
-    public String getEmailFrom() {
-        return emailStageConfig.getEmailFrom();
-    }
-
-    @Override
-    public String getEmailVerificationLinkToken() {
-        return emailStageConfig.getEmailVerificationLinkToken();
-    }
-
-    @Override
-    public String getEmailVerificationLink() {
-        return emailStageConfig.getEmailVerificationLink();
     }
 
     @Override

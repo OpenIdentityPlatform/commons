@@ -19,7 +19,7 @@ package org.forgerock.selfservice.stages.utils;
 import static org.forgerock.json.JsonValue.json;
 
 import java.util.HashMap;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 

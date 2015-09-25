@@ -1,0 +1,59 @@
+{
+  "stageConfigs": [
+    {
+      "name" : "emailValidation",
+      "emailServiceUrl" : "/email",
+      "emailSubject" : "Verify your email address",
+      "emailMessage" : "Is this correct",
+      "emailFrom" : "noreply@example.com",
+      "emailVerificationLink" : "/verifyemail",
+      "emailVerificationLinkToken" : "abc123"
+    },
+    {
+      "name" : "userDetails",
+      "identityEmailField" : "mail"
+    },
+    {
+      "name" : "kbaStage",
+      "kbaServiceUrl": "/kba/questions/0",
+      "kbaPropertyName" : "kbaInfo"
+    },
+    {
+      "name" : "selfRegistration",
+      "identityServiceUrl" : "/users"
+    },
+    {
+      "name" : "userIdValidation",
+      "queryFields" : [
+        "_id",
+        "mail"
+      ],
+      "identityIdField" : "_id",
+      "identityEmailField" : "mail",
+      "identityServiceUrl" : "/users",
+
+      "emailServiceUrl" : "/email",
+      "emailFrom" : "info@admin.org",
+      "emailSubject" : "Reset password email",
+      "emailMessage" : "<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+      "emailVerificationLinkToken" : "%link%",
+      "emailVerificationLink" : "http://localhost:9999/example/#passwordReset/"
+    },
+    {
+      "name" : "resetStage",
+      "identityServiceUrl" : "/users",
+      "identityPasswordField" : "password"
+    }
+  ],
+  "snapshotToken" : {
+    "type": "jwt",
+    "sharedKey" : "1234abcd",
+    "keyPairAlgorithm" : "RSA",
+    "keyPairSize" : 1024,
+    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+    "encryptionMethod" : "A128CBC_HS256",
+    "jwsAlgorithm" : "HS256",
+    "tokenExpiry": 180
+  },
+  "storage": "stateless"
+}

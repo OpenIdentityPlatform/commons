@@ -15,6 +15,7 @@
  */
 package org.forgerock.selfservice.stages.reset;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
@@ -22,7 +23,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
-import org.assertj.core.api.Assertions;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
@@ -107,10 +107,10 @@ public final class ResetStageTest {
         PatchRequest createRequest = patchRequestArgumentCaptor.getValue();
 
         PatchOperation patchOperation = createRequest.getPatchOperations().get(0);
-        Assertions.assertThat(patchOperation.getOperation()).isEqualTo("replace");
-        Assertions.assertThat(patchOperation.getField().leaf()).isEqualTo("password");
-        Assertions.assertThat(patchOperation.getValue().asString()).isEqualTo("testUserPassword");
-        Assertions.assertThat(createRequest.getResourcePath()).isEqualTo("users/testUser");
+        assertThat(patchOperation.getOperation()).isEqualTo("replace");
+        assertThat(patchOperation.getField().leaf()).isEqualTo("password");
+        assertThat(patchOperation.getValue().asString()).isEqualTo("testUserPassword");
+        assertThat(createRequest.getResourcePath()).isEqualTo("users/testUser");
     }
 
     private ResetStageConfig newResetStageConfig() {
@@ -129,4 +129,5 @@ public final class ResetStageTest {
                         field("userId", TEST_EMAIL_ID) ,
                         field("password", "testUserPassword")));
     }
+
 }

@@ -25,7 +25,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
  */
 public final class SecurityAnswerDefinitionConfig implements StageConfig {
 
-    private static final String NAME = "kbaStage";
+    public static final String NAME = "kbaStage";
 
     private String kbaServiceUrl;
 

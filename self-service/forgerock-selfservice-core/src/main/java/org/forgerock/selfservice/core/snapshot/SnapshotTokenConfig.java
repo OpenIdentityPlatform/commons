@@ -13,24 +13,22 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.selfservice.core.snapshot;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
- * Factory for delivering up for snapshot token handlers.
+ * Represents the configuration for an {@link SnapshotTokenHandler}.
  *
- * @since 0.1.0
+ * @since 0.2.0
  */
-public interface SnapshotTokenHandlerFactory {
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+public interface SnapshotTokenConfig {
 
     /**
-     * Given the token type, provide a token handler instance.
+     * Gets the type of the snapshot token represented by this configuration.
      *
-     * @param snapshotTokenConfig
-     *         snapshot token configuration
-     *
-     * @return snapshot token handler
+     * @return the token type
      */
-    SnapshotTokenHandler get(SnapshotTokenConfig snapshotTokenConfig);
-
+    String getType();
 }

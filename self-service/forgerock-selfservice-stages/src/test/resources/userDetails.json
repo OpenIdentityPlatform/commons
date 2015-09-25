@@ -1,0 +1,4 @@
+{
+  "name" : "userDetails",
+  "identityEmailField" : "mail"
+}

@@ -1,0 +1,9 @@
+{
+  "name" : "emailValidation",
+  "emailServiceUrl" : "/email",
+  "emailSubject" : "Verify your email address",
+  "emailMessage" : "Is this correct",
+  "emailFrom" : "noreply@example.com",
+  "emailVerificationLink" : "/verifyemail",
+  "emailVerificationLinkToken" : "abc123"
+}

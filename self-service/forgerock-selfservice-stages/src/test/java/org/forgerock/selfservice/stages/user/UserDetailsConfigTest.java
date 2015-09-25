@@ -13,47 +13,33 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.selfservice.stages.user;
 
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.forgerock.selfservice.core.config.StageConfig;
+import org.testng.annotations.Test;
 
 /**
- * Configuration for the user details stage.
+ * Unit test for {@link UserDetailsConfig}.
  *
  * @since 0.2.0
  */
-public final class UserDetailsConfig implements StageConfig {
+public final class UserDetailsConfigTest {
 
-    public static final String NAME = "userDetails";
+    @Test
+    public void testConfigFromJson() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerSubtypes(
+                new NamedType(UserDetailsConfig.class, UserDetailsConfig.NAME)
+        );
+        StageConfig config = mapper.readValue(getClass().getResource("/userDetails.json"), StageConfig.class);
 
-    private String identityEmailField;
-
-    /**
-     * Gets the field name for the identity email address.
-     *
-     * @return the identity email address field name
-     */
-    public String getIdentityEmailField() {
-        return identityEmailField;
+        assertThat(config).isInstanceOf(UserDetailsConfig.class);
+        UserDetailsConfig kbaConfig = (UserDetailsConfig) config;
+        assertThat(kbaConfig.getIdentityEmailField()).isEqualTo("mail");
     }
-
-    /**
-     * Sets the field name for the identity email address.
-     *
-     * @param identityEmailField
-     *         the identity email address field name
-     *
-     * @return this config instance
-     */
-    public UserDetailsConfig setIdentityEmailField(String identityEmailField) {
-        this.identityEmailField = identityEmailField;
-        return this;
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
 }

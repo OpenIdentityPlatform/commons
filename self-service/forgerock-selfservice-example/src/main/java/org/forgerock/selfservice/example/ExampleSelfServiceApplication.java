@@ -21,9 +21,7 @@ import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.HashSet;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
@@ -40,16 +38,12 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.selfservice.core.AnonymousProcessService;
-import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
-import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
-import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
-import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
-import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
-import org.forgerock.selfservice.stages.reset.ResetStageConfig;
-import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
-import org.forgerock.selfservice.stages.user.UserDetailsConfig;
 import org.forgerock.util.Factory;
+
+import org.forgerock.selfservice.json.JsonConfig;
+
+import java.util.Map;
 
 /**
  * Basic http application which initialises the user self service service.
@@ -101,7 +95,13 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     }
 
     private Handler registerResetHandler() throws Exception {
-        VerifyEmailAccountConfig emailConfig = new VerifyEmailAccountConfig()
+        /*
+        VerifyUserIdConfig verifyUserIdConfig = new VerifyUserIdConfig()
+                .setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")))
+                .setIdentityIdField("_id")
+                .setIdentityEmailField("mail")
+                .setIdentityServiceUrl("/users")
+
                 .setEmailServiceUrl("/email")
                 .setEmailFrom("info@admin.org")
                 .setEmailSubject("Reset password email")
@@ -110,32 +110,38 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
                 .setEmailVerificationLinkToken("%link%")
                 .setEmailVerificationLink("http://localhost:9999/example/#passwordReset/");
 
-        VerifyUserIdConfig verifyUserIdConfig = new VerifyUserIdConfig(emailConfig)
-                .setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")))
-                .setIdentityIdField("_id")
-                .setIdentityEmailField("mail")
-                .setIdentityServiceUrl("/users");
-
         ResetStageConfig resetConfig = new ResetStageConfig()
                 .setIdentityServiceUrl("/users")
                 .setIdentityPasswordField("password");
 
+        JwtTokenHandlerConfig jwtTokenConfig = new JwtTokenHandlerConfig()
+                .setSharedKey("!tHiSsOmEsHaReDkEy!")
+                .setKeyPairAlgorithm("RSA")
+                .setKeyPairSize(1024)
+                .setJweAlgorithm(JweAlgorithm.RSAES_PKCS1_V1_5)
+                .setEncryptionMethod(EncryptionMethod.A128CBC_HS256)
+                .setJwsAlgorithm(JwsAlgorithm.HS256)
+                .setTokenLifeTimeInSeconds(3L * 60L);
+
         ProcessInstanceConfig config = new ProcessInstanceConfig()
                 .setStageConfigs(Arrays.asList(verifyUserIdConfig, resetConfig))
-                .setSnapshotTokenType(JwtTokenHandler.TYPE)
-                .setStorageType(StorageType.STATELESS.name());
+                .setSnapshotTokenConfig(jwtTokenConfig)
+                .setStorageType(StorageType.STATELESS);
+        */
 
-        byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(StandardCharsets.UTF_8);
-        long tokenLifeTimeInSeconds = 3L * 60L;
+        ObjectMapper mapper = new ObjectMapper();
+        JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/reset.json"), Map.class));
+        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
                 new ExampleProgressStageFactory(crestConnectionFactory),
-                new ExampleTokenHandlerFactory(sharedKey, tokenLifeTimeInSeconds), new SimpleInMemoryStore());
+                new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
     }
 
     private Handler registerRegistrationHandler() throws Exception {
+        /*
         VerifyEmailAccountConfig emailConfig = new VerifyEmailAccountConfig()
                 .setEmailServiceUrl("/email")
                 .setEmailFrom("info@admin.org")
@@ -155,21 +161,32 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         UserRegistrationConfig registrationConfig = new UserRegistrationConfig()
                 .setIdentityServiceUrl("/users");
 
+        JwtTokenHandlerConfig jwtTokenConfig = new JwtTokenHandlerConfig()
+                .setSharedKey("!tHiSsOmEsHaReDkEy!")
+                .setKeyPairAlgorithm("RSA")
+                .setKeyPairSize(1024)
+                .setJweAlgorithm(JweAlgorithm.RSAES_PKCS1_V1_5)
+                .setEncryptionMethod(EncryptionMethod.A128CBC_HS256)
+                .setJwsAlgorithm(JwsAlgorithm.HS256)
+                .setTokenLifeTimeInSeconds(3L * 60L);
+
         ProcessInstanceConfig config = new ProcessInstanceConfig()
                 .setStageConfigs(Arrays.asList(
                         emailConfig,
                         userDetailsConfig,
                         securityAnswerDefinitionConfig,
                         registrationConfig))
-                .setSnapshotTokenType(JwtTokenHandler.TYPE)
-                .setStorageType(StorageType.STATELESS.name());
+                .setSnapshotTokenConfig(jwtTokenConfig)
+                .setStorageType(StorageType.STATELESS);
+        */
 
-        byte[] sharedKey = "!tHiSsOmEsHaReDkEy!".getBytes(StandardCharsets.UTF_8);
-        long tokenLifeTimeInSeconds = 3L * 60L;
+        ObjectMapper mapper = new ObjectMapper();
+        JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/registration.json"), Map.class));
+        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
                 new ExampleProgressStageFactory(crestConnectionFactory),
-                new ExampleTokenHandlerFactory(sharedKey, tokenLifeTimeInSeconds), new SimpleInMemoryStore());
+                new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
     }

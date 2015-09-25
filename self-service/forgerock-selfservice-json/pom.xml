@@ -25,11 +25,11 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>forgerock-selfservice-stages</artifactId>
+    <artifactId>forgerock-selfservice-json</artifactId>
     <packaging>bundle</packaging>
-    <name>Self Service Stages</name>
+    <name>Self Service Json Config</name>
     <description>
-        Implementation of common self service stages.
+        Json configuration of the self service framework.
     </description>
 
     <dependencies>
@@ -40,24 +40,26 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-resource</artifactId>
+            <artifactId>forgerock-selfservice-stages</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-web-token</artifactId>
+            <artifactId>json-resource</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -70,11 +72,6 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-test-utils</artifactId>
-        </dependency>
-
     </dependencies>
 
 </project>

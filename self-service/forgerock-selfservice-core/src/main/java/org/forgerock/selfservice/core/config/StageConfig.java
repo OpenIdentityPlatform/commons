@@ -16,11 +16,14 @@
 
 package org.forgerock.selfservice.core.config;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
 /**
  * Represents the configuration for a given progress stage.
  *
  * @since 0.1.0
  */
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 public interface StageConfig {
 
     /**

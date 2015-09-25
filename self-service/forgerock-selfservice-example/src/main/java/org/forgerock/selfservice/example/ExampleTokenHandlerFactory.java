@@ -16,14 +16,13 @@
 
 package org.forgerock.selfservice.example;
 
-import org.forgerock.json.jose.jwe.EncryptionMethod;
-import org.forgerock.json.jose.jwe.JweAlgorithm;
-import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
+import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
 
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
@@ -35,39 +34,31 @@ import java.security.NoSuchAlgorithmException;
  */
 final class ExampleTokenHandlerFactory implements SnapshotTokenHandlerFactory {
 
-    private final byte[] sharedKey;
-    private final long tokenLifeTimeInSeconds;
-
-    ExampleTokenHandlerFactory(byte[] sharedKey, long tokenLifeTimeInSeconds) {
-        this.sharedKey = sharedKey;
-        this.tokenLifeTimeInSeconds = tokenLifeTimeInSeconds;
-    }
-
     @Override
-    public SnapshotTokenHandler get(String snapshotTokenType) {
-        switch (snapshotTokenType) {
-        case JwtTokenHandler.TYPE:
-            return createJwtTokenHandler();
+    public SnapshotTokenHandler get(SnapshotTokenConfig snapshotTokenConfig) {
+        switch (snapshotTokenConfig.getType()) {
+        case JwtTokenHandlerConfig.TYPE:
+            return createJwtTokenHandler((JwtTokenHandlerConfig) snapshotTokenConfig);
         default:
-            throw new IllegalArgumentException("Unknown type " + snapshotTokenType);
+            throw new IllegalArgumentException("Unknown type " + snapshotTokenConfig.getType());
         }
     }
 
-    private SnapshotTokenHandler createJwtTokenHandler() {
+    private SnapshotTokenHandler createJwtTokenHandler(JwtTokenHandlerConfig config) {
         try {
             SigningManager signingManager = new SigningManager();
-            SigningHandler signingHandler = signingManager.newHmacSigningHandler(sharedKey);
+            SigningHandler signingHandler = signingManager.newHmacSigningHandler(config.getSharedKey());
 
-            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance("RSA");
-            keyPairGen.initialize(1024);
+            KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(config.getKeyPairAlgorithm());
+            keyPairGen.initialize(config.getKeyPairSize());
 
             return new JwtTokenHandler(
-                    JweAlgorithm.RSAES_PKCS1_V1_5,
-                    EncryptionMethod.A128CBC_HS256,
+                    config.getJweAlgorithm(),
+                    config.getEncryptionMethod(),
                     keyPairGen.generateKeyPair(),
-                    JwsAlgorithm.HS256,
+                    config.getJwsAlgorithm(),
                     signingHandler,
-                    tokenLifeTimeInSeconds);
+                    config.getTokenLifeTimeInSeconds());
 
         } catch (NoSuchAlgorithmException nsaE) {
             throw new RuntimeException("Unable to create key pair for encryption", nsaE);

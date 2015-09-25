@@ -15,6 +15,7 @@
  */
 package org.forgerock.selfservice.stages.registration;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.stages.CommonStateFields.*;
@@ -22,7 +23,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 
-import org.assertj.core.api.Assertions;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -129,8 +129,8 @@ public final class UserRegistrationStageTest {
         assertThat(createRequest.getContent()).stringAt("kba/0/answer").isEqualTo("a1");
         assertThat(createRequest.getContent()).stringAt("kba/1/selectedQuestion").isEqualTo(KBA_QUESTION_2);
         assertThat(createRequest.getContent()).stringAt("kba/1/answer").isEqualTo("a2");
-        Assertions.assertThat(createRequest.getNewResourceId()).isEqualTo(TEST_EMAIL_ID);
-        Assertions.assertThat(createRequest.getResourcePath()).isEqualTo("users");
+        assertThat(createRequest.getNewResourceId()).isEqualTo(TEST_EMAIL_ID);
+        assertThat(createRequest.getResourcePath()).isEqualTo("users");
     }
 
     private UserRegistrationConfig newUserRegistrationConfig() {

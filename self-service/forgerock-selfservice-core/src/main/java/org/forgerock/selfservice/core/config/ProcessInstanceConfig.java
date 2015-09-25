@@ -16,7 +16,9 @@
 
 package org.forgerock.selfservice.core.config;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.selfservice.core.StorageType;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
 import org.forgerock.util.Reject;
 
 import java.util.ArrayList;
@@ -30,7 +32,9 @@ import java.util.List;
 public final class ProcessInstanceConfig {
 
     private List<StageConfig> stageConfigs;
-    private String snapshotTokenType;
+    @JsonProperty("snapshotToken")
+    private SnapshotTokenConfig snapshotTokenConfig;
+    @JsonProperty("storage")
     private StorageType storageType;
 
     /**
@@ -60,14 +64,14 @@ public final class ProcessInstanceConfig {
     /**
      * Sets the snapshot token type to use.
      *
-     * @param snapshotTokenType
-     *         the snapshot token type
+     * @param snapshotTokenConfig
+     *         the snapshot token config
      *
      * @return this config
      */
-    public ProcessInstanceConfig setSnapshotTokenType(String snapshotTokenType) {
-        Reject.ifNull(snapshotTokenType);
-        this.snapshotTokenType = snapshotTokenType;
+    public ProcessInstanceConfig setSnapshotTokenConfig(SnapshotTokenConfig snapshotTokenConfig) {
+        Reject.ifNull(snapshotTokenConfig);
+        this.snapshotTokenConfig = snapshotTokenConfig;
         return this;
     }
 
@@ -76,8 +80,8 @@ public final class ProcessInstanceConfig {
      *
      * @return the snapshot token type
      */
-    public String getSnapshotTokenType() {
-        return snapshotTokenType;
+    public SnapshotTokenConfig getSnapshotTokenConfig() {
+        return snapshotTokenConfig;
     }
 
     /**
@@ -88,9 +92,9 @@ public final class ProcessInstanceConfig {
      *
      * @return this config
      */
-    public ProcessInstanceConfig setStorageType(String storageType) {
+    public ProcessInstanceConfig setStorageType(StorageType storageType) {
         Reject.ifNull(storageType);
-        this.storageType = StorageType.valueOf(storageType);
+        this.storageType = storageType;
         return this;
     }
 

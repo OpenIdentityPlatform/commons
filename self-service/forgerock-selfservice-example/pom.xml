@@ -44,6 +44,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-selfservice-json</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-selfservice-example-ui</artifactId>
             <version>${project.version}</version>
             <classifier>www</classifier>
