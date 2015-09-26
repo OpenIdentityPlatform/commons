@@ -136,17 +136,19 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          * change color of submit button.
          */
         onValidate: function(event, input, msg, validatorType) {
-            var button = this.$el.find("input[type=submit]"),
+            var $input = $(input, this.$el),
+                $form = $input.closest("form"),
+                $button = $form.find("input[type=submit]"),
                 validationMessage = (msg && !_.isArray(msg)) ? msg.split("<br>") : [];
 
             // necessary to load bootstrap for popover support (which isn't always necessary for AbstractView)
             ModuleLoader.load("bootstrap").then(_.bind(function () {
 
                 //clean up existing popover if no message is present
-                if (!msg && $(input, this.$el).data()["bs.popover"]) {
-                    $(input, this.$el).popover('destroy');
+                if (!msg && $input.data()["bs.popover"]) {
+                    $input.popover('destroy');
                 }
-                $(input, this.$el).parents(".form-group").removeClass('has-feedback has-error');
+                $input.parents(".form-group").removeClass('has-feedback has-error');
 
                 if(msg && _.isArray(msg)){
                     validationMessage = msg;
@@ -155,29 +157,29 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                 if(msg === "inProgress") {
                     return;
                 }
-                if (!button.length) {
-                    button = this.$el.find("#submit");
+                if (!$button.length) {
+                    $button = $form.find("#submit");
                 }
-                if (ValidatorsManager.formValidated(this.$el)) {
-                    button.prop('disabled', false);
-                    this.$el.find(".input-validation-message").hide();
+                if (ValidatorsManager.formValidated($form)) {
+                    $button.prop('disabled', false);
+                    $form.find(".input-validation-message").hide();
                 } else {
-                    button.prop('disabled', true);
-                    this.$el.find(".input-validation-message").show();
+                    $button.prop('disabled', true);
+                    $form.find(".input-validation-message").show();
                 }
 
                 if (msg === "disabled") {
-                    ValidatorsUtils.hideValidation(input, this.$el);
+                    ValidatorsUtils.hideValidation($input, $form);
                     return;
                 } else {
-                    ValidatorsUtils.showValidation(input, this.$el);
+                    ValidatorsUtils.showValidation($input, $form);
                     if(validationMessage.length){
-                        $(input, this.$el).parents(".form-group").addClass('has-feedback has-error');
+                        $input.parents(".form-group").addClass('has-feedback has-error');
                         //clean up existing popover if validation messsage is different
-                        if ($(input, this.$el).data()["bs.popover"] && !_.isEqual(validationMessage,$(input, this.$el).data()["bs.popover"].options.validationMessage)) {
-                            $(input, this.$el).popover('destroy');
+                        if ($input.data()["bs.popover"] && !_.isEqual(validationMessage,$input.data()["bs.popover"].options.validationMessage)) {
+                            $input.popover('destroy');
                         }
-                        $(input, this.$el).popover({
+                        $input.popover({
                             validationMessage: validationMessage,
                             content: '<i class="fa fa-exclamation-circle"></i> ' + validationMessage.join('<br><i class="fa fa-exclamation-circle"></i> '),
                             trigger:'hover',
@@ -188,13 +190,13 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                     }
                 }
 
-                this.$el.find("div.validation-message[for='" + input.attr('name') + "']").html(msg ? msg : '');
+                $form.find("div.validation-message[for='" + $input.attr('name') + "']").html(msg ? msg : '');
 
                 if (validatorType) {
-                    ValidatorsUtils.setErrors(this.$el, validatorType, msg);
+                    ValidatorsUtils.setErrors($form, validatorType, msg);
                 }
 
-                this.$el.trigger("customValidate", [input, msg, validatorType]);
+                $form.trigger("customValidate", [$input, msg, validatorType]);
 
             }, this));
 
