@@ -16,26 +16,25 @@
 
 package org.forgerock.caf.authn;
 
-import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
-import static org.forgerock.caf.authn.AuditParameters.auditParams;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
-import static org.forgerock.caf.authn.BodyMatcher.resourceMatcher;
-import static org.forgerock.caf.authn.TestFramework.runTest;
-import static org.forgerock.caf.authn.TestFramework.setUpConnection;
-import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_CONTEXT_ENTRY;
-import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_PRINCIPAL;
+import static org.forgerock.caf.authn.AuditParameters.Entry.*;
+import static org.forgerock.caf.authn.AuditParameters.*;
+import static org.forgerock.caf.authn.AuthModuleParameters.*;
+import static org.forgerock.caf.authn.BodyMatcher.*;
+import static org.forgerock.caf.authn.TestFramework.*;
+import static org.forgerock.caf.authn.test.modules.AuthModuleOne.*;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.Condition;
 import org.forgerock.caf.authn.test.modules.AuthModuleOne;
 import org.forgerock.caf.authn.test.modules.SessionAuthModule;
-import org.hamcrest.Matcher;
+import org.forgerock.caf.authn.test.runtime.GuiceModule;
+import org.forgerock.guice.core.GuiceModules;
+import org.forgerock.json.JsonPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -45,14 +44,10 @@ import org.testng.annotations.Test;
  * @since 1.5.0
  */
 @Test(testName = "CommittedResponse")
-public class CommittedResponseIT {
+@GuiceModules(GuiceModule.class)
+public class CommittedResponseIT extends HandlerHolder {
 
     private final Logger logger = LoggerFactory.getLogger(CommittedResponseIT.class);
-
-    @BeforeClass
-    public void setUp() {
-        setUpConnection();
-    }
 
     @DataProvider(name = "sessionModuleOnlyData")
     private Object[][] sessionModuleOnlyData() {
@@ -325,30 +320,30 @@ public class CommittedResponseIT {
     @Test (enabled = false, dataProvider = "sessionModuleOnlyData")
     public void sessionModuleOnlyWithResourceCommittingResponse(String dataName,
             AuthModuleParameters sessionModuleParams, List<AuthModuleParameters> authModuleParametersList,
-            int expectedResponseStatus, boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody,
-            AuditParameters auditParams) {
+            int expectedResponseStatus, boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody,
+            AuditParameters auditParams) throws Exception {
         logger.info("Running sessionModuleOnlyWithResourceCommittingResponse test with data set: " + dataName);
-        runTest("/protected/resource/committing", sessionModuleParams, authModuleParametersList,
+        runTest(handler, "/protected/resource/committing", sessionModuleParams, authModuleParametersList,
                 expectedResponseStatus, expectResourceToBeCalled, expectedBody, auditParams);
     }
 
     @Test (enabled = false, dataProvider = "authModuleOnlyData")
     public void authModuleOnlyWithResourceCommittingResponse(String dataName,
             AuthModuleParameters sessionModuleParams, List<AuthModuleParameters> authModuleParametersList,
-            int expectedResponseStatus, boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody,
-            AuditParameters auditParams) {
+            int expectedResponseStatus, boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody,
+            AuditParameters auditParams) throws Exception {
         logger.info("Running authModuleOnlyWithResourceCommittingResponse test with data set: " + dataName);
-        runTest("/protected/resource/committing", sessionModuleParams, authModuleParametersList,
+        runTest(handler, "/protected/resource/committing", sessionModuleParams, authModuleParametersList,
                 expectedResponseStatus, expectResourceToBeCalled, expectedBody, auditParams);
     }
 
     @Test (enabled = false, dataProvider = "sessionModuleAndAuthModuleData")
     public void sessionModuleAndAuthModuleWithResourceCommittingResponse(String dataName,
             AuthModuleParameters sessionModuleParams, List<AuthModuleParameters> authModuleParametersList,
-            int expectedResponseStatus, boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody,
-            AuditParameters auditParams) {
+            int expectedResponseStatus, boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody,
+            AuditParameters auditParams) throws Exception {
         logger.info("Running sessionModuleAndAuthModuleWithResourceCommittingResponse test with data set: " + dataName);
-        runTest("/protected/resource/committing", sessionModuleParams, authModuleParametersList,
+        runTest(handler, "/protected/resource/committing", sessionModuleParams, authModuleParametersList,
                 expectedResponseStatus, expectResourceToBeCalled, expectedBody, auditParams);
     }
 }

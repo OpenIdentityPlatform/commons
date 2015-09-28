@@ -16,28 +16,28 @@
 
 package org.forgerock.caf.authn;
 
-import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
-import static org.forgerock.caf.authn.AuditParameters.auditParams;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
-import static org.forgerock.caf.authn.BodyMatcher.noData;
-import static org.forgerock.caf.authn.TestFramework.runTest;
-import static org.forgerock.caf.authn.TestFramework.setUpConnection;
-import static org.forgerock.caf.authn.test.modules.AuthModuleOne.AUTH_MODULE_ONE_PRINCIPAL;
-import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.AUTH_MODULE_TWO_PRINCIPAL;
+import static org.forgerock.caf.authn.AuditParameters.Entry.*;
+import static org.forgerock.caf.authn.AuditParameters.*;
+import static org.forgerock.caf.authn.AuthModuleParameters.*;
+import static org.forgerock.caf.authn.BodyMatcher.*;
+import static org.forgerock.caf.authn.TestFramework.*;
+import static org.forgerock.caf.authn.test.modules.AuthModuleOne.*;
+import static org.forgerock.caf.authn.test.modules.AuthModuleTwo.*;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.Condition;
 import org.forgerock.caf.authn.test.modules.AuthModuleOne;
 import org.forgerock.caf.authn.test.modules.AuthModuleTwo;
 import org.forgerock.caf.authn.test.modules.SessionAuthModule;
-import org.hamcrest.Matcher;
+import org.forgerock.caf.authn.test.runtime.GuiceModule;
+import org.forgerock.guice.core.GuiceModules;
+import org.forgerock.json.JsonPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -47,14 +47,10 @@ import org.testng.annotations.Test;
  * @since 1.5.0
  */
 @Test(testName = "SendContinueSupport")
-public class SendContinueSupportIT {
+@GuiceModules(GuiceModule.class)
+public class SendContinueSupportIT extends HandlerHolder {
 
     private final Logger logger = LoggerFactory.getLogger(SendContinueSupportIT.class);
-
-    @BeforeClass
-    public void setUp() {
-        setUpConnection();
-    }
 
     @DataProvider(name = "sendContinueSupportData")
     private Object[][] sendContinueSupportData() {
@@ -288,7 +284,7 @@ public class SendContinueSupportIT {
 
     static RequestParameters request(AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
-            boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody, AuditParameters auditParams) {
+            boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams) {
         return new RequestParameters(sessionModuleParams, authModuleParametersList, expectedResponseStatus,
                 expectResourceToBeCalled, expectedBody, auditParams);
     }
@@ -299,12 +295,12 @@ public class SendContinueSupportIT {
         private final List<AuthModuleParameters> authModuleParametersList;
         private final int expectedResponseStatus;
         private final boolean expectResourceToBeCalled;
-        private final Map<String, Matcher<?>> expectedBody;
+        private final Map<JsonPointer, Condition<?>> expectedBody;
         private final AuditParameters auditParams;
 
         private RequestParameters(AuthModuleParameters sessionModuleParams,
                 List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
-                boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody, AuditParameters auditParams) {
+                boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams) {
             this.sessionModuleParams = sessionModuleParams;
             this.authModuleParametersList = authModuleParametersList;
             this.expectedResponseStatus = expectedResponseStatus;
@@ -329,7 +325,7 @@ public class SendContinueSupportIT {
             return expectResourceToBeCalled;
         }
 
-        public Map<String, Matcher<?>> getExpectedBody() {
+        public Map<JsonPointer, Condition<?>> getExpectedBody() {
             return expectedBody;
         }
 
@@ -339,7 +335,7 @@ public class SendContinueSupportIT {
     }
 
     @Test (dataProvider = "sendContinueSupportData")
-    public void sendContinueSupport(String dataName, List<RequestParameters> requestParametersList) {
+    public void sendContinueSupport(String dataName, List<RequestParameters> requestParametersList) throws Exception {
         logger.info("Running sendContinueSupport test with data set: " + dataName);
         for (RequestParameters requestParameters : requestParametersList) {
             runRequest(requestParameters.getSessionModuleParams(), requestParameters.getAuthModuleParametersList(),
@@ -351,8 +347,9 @@ public class SendContinueSupportIT {
 
     private void runRequest(AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
-            boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody, AuditParameters auditParams) {
-        runTest("/protected/resource", sessionModuleParams, authModuleParametersList, expectedResponseStatus,
+            boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams)
+            throws Exception {
+        runTest(handler, "/protected/resource", sessionModuleParams, authModuleParametersList, expectedResponseStatus,
                 expectResourceToBeCalled, expectedBody, auditParams);
     }
 }

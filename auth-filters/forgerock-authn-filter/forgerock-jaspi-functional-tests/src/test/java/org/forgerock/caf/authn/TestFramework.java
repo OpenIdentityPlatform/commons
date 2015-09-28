@@ -16,30 +16,34 @@
 
 package org.forgerock.caf.authn;
 
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
 import static org.forgerock.caf.authn.test.ProtectedResource.RESOURCE_CALLED_HEADER;
 import static org.forgerock.json.JsonValue.*;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.nullValue;
 import static org.testng.Assert.fail;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.EncoderConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.parsing.Parser;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+
+import org.assertj.core.api.Condition;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.http.Handler;
+import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.protocol.Headers;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.hamcrest.Matcher;
+import org.forgerock.services.context.AttributesContext;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Test framework for running tests and verifing results against the JASPI runtime.
@@ -51,22 +55,6 @@ class TestFramework {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
-     * Sets up RestAssured with the correct settings for connecting to the JASPI Test Server.
-     */
-    static void setUpConnection() {
-        RestAssured.port = Integer.parseInt(System.getProperty("HTTP_PORT"));
-        RestAssured.baseURI = "http://" + System.getProperty("HOSTNAME");
-        RestAssured.basePath = System.getProperty("CONTEXT_URI");
-//        RestAssured.port = 8081;
-//        RestAssured.baseURI = "http://localhost";
-//        RestAssured.basePath = "jaspi";
-
-        RestAssured.defaultParser = Parser.JSON;
-        RestAssured.config = RestAssuredConfig.newConfig()
-                .encoderConfig(EncoderConfig.encoderConfig().defaultContentCharset("UTF-8"));
-    }
-
-    /**
      * <p>Configures the runtime with the provided "Session" auth module and auth modules array.</p>
      *
      * <p>Pass {@code null} in as the first parameter for no "Session" auth module.</p>
@@ -74,11 +62,11 @@ class TestFramework {
      * @param sessionModule The "Session" auth module class.
      * @param authModules An array of auth module classes.
      */
-    private static void configureRuntime(Class<? extends AsyncServerAuthModule> sessionModule,
-            List<Class<? extends AsyncServerAuthModule>> authModules) {
+    private static void configureRuntime(Handler handler, Class<? extends AsyncServerAuthModule> sessionModule,
+            List<Class<? extends AsyncServerAuthModule>> authModules) throws Exception {
 
         JsonValue config = json(object());
-        JsonValue configuration = json(object(field("serverAuthContext", config)));
+        JsonValue configuration = json(object(field("serverAuthContext", config.getObject())));
 
         if (sessionModule != null) {
             config.put("sessionModule", object(field("className", sessionModule.getName())));
@@ -91,15 +79,13 @@ class TestFramework {
             }
         }
 
-        RequestSpecification given = com.jayway.restassured.RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(configuration.toString());
-
-        ResponseSpecification expect = given.expect()
-                .statusCode(200);
-
-        expect.when()
-                .put("/configuration");
+        final Request request = new Request().setUri("/configuration")
+                .setEntity(configuration.getObject()).setMethod("PUT");
+        request.getHeaders().add(ContentTypeHeader.valueOf("application/json; charset=UTF-8"));
+        request.getHeaders().add("If-Match", "*");
+        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()), request);
+        assertThat(result).succeeded();
+        assertThat(result.get().getStatus()).isEqualTo(Status.OK);
     }
 
     /**
@@ -109,22 +95,14 @@ class TestFramework {
      * information.
      */
     @SuppressWarnings("unchecked")
-    static JsonValue getAuditRecords() {
-
-        RequestSpecification given = com.jayway.restassured.RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body("{}");
-
-        ResponseSpecification expect = given.expect()
-                .statusCode(200);
-
-        try {
-            return json(OBJECT_MAPPER.readValue(expect.when()
-                    .post("/auditrecords?_action=readAndClear")
-                    .getBody().asString(), List.class));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    static JsonValue getAuditRecords(Handler handler) throws Exception {
+        final Request request = new Request().setUri("/auditrecords?_action=readAndClear")
+                .setEntity("{}").setMethod("POST");
+        request.getHeaders().add(ContentTypeHeader.valueOf("application/json; charset=UTF-8"));
+        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()), request);
+        assertThat(result).succeeded();
+        assertThat(result.get().getStatus()).isEqualTo(Status.OK);
+        return json(result.get().getEntity().getJson());
     }
 
     /**
@@ -135,20 +113,22 @@ class TestFramework {
      * @param authModuleParametersList A {@code List} of configuration and parameters for the auth modules.
      * @return A RestAssured RequestSpecification instance.
      */
-    static RequestSpecification given(AuthModuleParameters sessionModuleParams,
-            List<AuthModuleParameters> authModuleParametersList) {
+    static Request given(Handler handler, AuthModuleParameters sessionModuleParams,
+            List<AuthModuleParameters> authModuleParametersList) throws Exception {
+        Request request = new Request();
+        Headers headers = request.getHeaders();
+
         Class<? extends AsyncServerAuthModule> sessionModuleClass = null;
         List<Class<? extends AsyncServerAuthModule>> authModuleClasses = new ArrayList<>();
 
-        RequestSpecification given = com.jayway.restassured.RestAssured.given();
         if (sessionModuleParams != null) {
             sessionModuleClass = sessionModuleParams.getModuleClass();
             if (sessionModuleParams.validateRequestReturnValue() != null) {
-                given.header("X-JASPI-" + sessionModuleParams.getModuleName() + "-VALIDATE-REQUEST",
+                headers.add("X-JASPI-" + sessionModuleParams.getModuleName() + "-VALIDATE-REQUEST",
                         sessionModuleParams.validateRequestReturnValue());
             }
             if (sessionModuleParams.secureResponseReturnValue() != null) {
-                given.header("X-JASPI-" + sessionModuleParams.getModuleName() + "-SECURE-RESPONSE",
+                headers.add("X-JASPI-" + sessionModuleParams.getModuleName() + "-SECURE-RESPONSE",
                         sessionModuleParams.secureResponseReturnValue());
             }
         }
@@ -157,17 +137,17 @@ class TestFramework {
             for (AuthModuleParameters authModuleParams : authModuleParametersList) {
                 authModuleClasses.add(authModuleParams.getModuleClass());
                 if (authModuleParams.validateRequestReturnValue() != null) {
-                    given.header("X-JASPI-" + authModuleParams.getModuleName() + "-VALIDATE-REQUEST",
+                    headers.add("X-JASPI-" + authModuleParams.getModuleName() + "-VALIDATE-REQUEST",
                             authModuleParams.validateRequestReturnValue());
                 }
                 if (authModuleParams.secureResponseReturnValue() != null) {
-                    given.header("X-JASPI-" + authModuleParams.getModuleName() + "-SECURE-RESPONSE",
+                    headers.add("X-JASPI-" + authModuleParams.getModuleName() + "-SECURE-RESPONSE",
                             authModuleParams.secureResponseReturnValue());
                 }
             }
         }
-        configureRuntime(sessionModuleClass, authModuleClasses);
-        return given;
+        configureRuntime(handler, sessionModuleClass, authModuleClasses);
+        return request;
     }
 
     /**
@@ -182,34 +162,38 @@ class TestFramework {
      * @param expectedBody A {@code Map} of the JSON path and {@code Matcher}s to verify the response body.
      * @param auditParams The expected audit operations to have occurred.
      */
-    static void runTest(String resourceName, AuthModuleParameters sessionModuleParams,
+    static void runTest(Handler handler, String resourceName, AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
-            boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody, AuditParameters auditParams) {
+            boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams)
+            throws Exception{
 
         /* Ensure audit records are cleared before running test. */
-        getAuditRecords();
+        getAuditRecords(handler);
 
-        RequestSpecification given = given(sessionModuleParams, authModuleParametersList);
+        Request request = given(handler, sessionModuleParams, authModuleParametersList)
+                .setUri(resourceName);
 
-        ResponseSpecification expect = given.expect()
-                .statusCode(expectedResponseStatus);
+        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()), request);
+        assertThat(result).succeeded();
+
+        Response response = result.get();
+
         if (expectResourceToBeCalled) {
-            expect.header(RESOURCE_CALLED_HEADER, equalTo("true"));
+            assertThat(response.getHeaders().getFirst(RESOURCE_CALLED_HEADER)).isEqualTo("true");
         } else {
-            expect.header(RESOURCE_CALLED_HEADER, nullValue());
+            assertThat(response.getHeaders().getFirst(RESOURCE_CALLED_HEADER)).isNull();
         }
-        for (Map.Entry<String, Matcher<?>> bodyMatcher : expectedBody.entrySet()) {
+        for (Map.Entry<JsonPointer, Condition<?>> bodyMatcher : expectedBody.entrySet()) {
             if (bodyMatcher.getKey() == null) {
-                expect.body(bodyMatcher.getValue());
+                assertThat(response.getEntity().getString()).is((Condition<? super String>) bodyMatcher.getValue());
             } else {
-                expect.body(bodyMatcher.getKey(), bodyMatcher.getValue());
+                final JsonValue json = json(response.getEntity().getJson());
+                final JsonValue jsonValue = json.get(bodyMatcher.getKey());
+                assertThat(jsonValue == null ? null : jsonValue.getObject()).is((Condition<? super Object>) bodyMatcher.getValue());
             }
         }
 
-        expect.when()
-                .get(resourceName);
-
-        JsonValue auditRecords = getAuditRecords();
+        JsonValue auditRecords = getAuditRecords(handler);
         if (auditParams != null) {
             assertThat(auditRecords).hasSize(1);
 

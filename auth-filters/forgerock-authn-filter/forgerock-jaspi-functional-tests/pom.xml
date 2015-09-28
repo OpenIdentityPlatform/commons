@@ -24,7 +24,6 @@
     </parent>
 
     <artifactId>forgerock-jaspi-functional-tests</artifactId>
-    <packaging>war</packaging>
 
     <name>ForgeRock JASPI (JSR-196) Functional Tests</name>
     <description>Functional Test framework for running functional tests against the Jaspi runtime.</description>
@@ -35,7 +34,7 @@
         <context.uri>jaspi</context.uri>
         <servlet.ajp.port>18009</servlet.ajp.port>
 
-        <forgerock.guice.version>1.0.1</forgerock.guice.version>
+        <forgerock.guice.version>1.1.0-SNAPSHOT</forgerock.guice.version>
     </properties>
 
     <build>
@@ -88,56 +87,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.cargo</groupId>
-                <artifactId>cargo-maven2-plugin</artifactId>
-                <version>1.4.7</version>
-                <configuration>
-                    <!-- Container configuration -->
-                    <container>
-                        <containerId>tomcat7x</containerId>
-                        <zipUrlInstaller>
-                            <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.54/bin/apache-tomcat-7.0.54.zip</url>
-                            <downloadDir>${project.build.directory}/downloads</downloadDir>
-                            <extractDir>${project.build.directory}/extracts</extractDir>
-                        </zipUrlInstaller>
-                    </container>
-                    <!-- Configuration to use with the container or the deployer -->
-                    <configuration>
-                        <home>${project.build.directory}/deploy</home>
-                        <properties>
-                            <cargo.servlet.port>${servlet.http.port}</cargo.servlet.port>
-                            <cargo.tomcat.ajp.port>${servlet.ajp.port}</cargo.tomcat.ajp.port>
-                        </properties>
-                    </configuration>
-                    <deployables>
-                        <deployable>
-                            <groupId>org.forgerock.commons</groupId>
-                            <artifactId>forgerock-jaspi-functional-tests</artifactId>
-                            <type>war</type>
-                            <properties>
-                                <context>${context.uri}</context>
-                            </properties>
-                        </deployable>
-                    </deployables>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>start-container</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>stop-container</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
         </plugins>
     </build>
 
@@ -160,10 +109,10 @@
             <version>${forgerock.guice.version}</version>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <scope>provided</scope>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-guice-test</artifactId>
+            <version>${forgerock.guice.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.jayway.restassured</groupId>

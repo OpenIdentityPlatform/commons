@@ -30,6 +30,8 @@ import java.util.List;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
+
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.framework.AuditApi;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
@@ -46,7 +48,6 @@ import org.slf4j.LoggerFactory;
  *
  * @since 1.5.0
  */
-@org.forgerock.guice.core.GuiceModule
 public class GuiceModule extends AbstractModule {
 
     /**
@@ -55,6 +56,7 @@ public class GuiceModule extends AbstractModule {
     @Override
     protected void configure() {
         bind(AuditApi.class).to(TestAuditApi.class);
+        bind(ConfigurationResource.class).in(Scopes.SINGLETON);
     }
 
     @Provides

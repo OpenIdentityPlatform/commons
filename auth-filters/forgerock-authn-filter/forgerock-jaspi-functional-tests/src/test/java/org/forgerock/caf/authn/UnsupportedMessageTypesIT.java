@@ -16,21 +16,21 @@
 
 package org.forgerock.caf.authn;
 
-import static org.forgerock.caf.authn.AuditParameters.auditParams;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
-import static org.forgerock.caf.authn.BodyMatcher.exceptionMatcher;
-import static org.forgerock.caf.authn.TestFramework.runTest;
-import static org.forgerock.caf.authn.TestFramework.setUpConnection;
+import static org.forgerock.caf.authn.AuditParameters.*;
+import static org.forgerock.caf.authn.AuthModuleParameters.*;
+import static org.forgerock.caf.authn.BodyMatcher.*;
+import static org.forgerock.caf.authn.TestFramework.*;
 
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.Condition;
 import org.forgerock.caf.authn.test.modules.AuthModuleUnsupportedMessageTypes;
-import org.hamcrest.Matcher;
+import org.forgerock.caf.authn.test.runtime.GuiceModule;
+import org.forgerock.guice.core.GuiceModules;
+import org.forgerock.json.JsonPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -40,14 +40,10 @@ import org.testng.annotations.Test;
  * @since 1.5.0
  */
 @Test(testName = "UnsupportedMessageTypes")
-public class UnsupportedMessageTypesIT {
+@GuiceModules(GuiceModule.class)
+public class UnsupportedMessageTypesIT extends HandlerHolder {
 
     private final Logger logger = LoggerFactory.getLogger(UnsupportedMessageTypesIT.class);
-
-    @BeforeClass
-    public void setUp() {
-        setUpConnection();
-    }
 
     @DataProvider(name = "unsupportedMessageTypesData")
     private Object[][] unsupportedMessageTypesData() {
@@ -112,10 +108,10 @@ public class UnsupportedMessageTypesIT {
     @Test (enabled = false, dataProvider = "unsupportedMessageTypesData")
     public void unsupportedMessageTypes(String dataName,
             AuthModuleParameters sessionModuleParams, List<AuthModuleParameters> authModuleParametersList,
-            int expectedResponseStatus, boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody,
-            AuditParameters auditParams) {
+            int expectedResponseStatus, boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody,
+            AuditParameters auditParams) throws Exception {
         logger.info("Running unsupportedMessageTypes test with data set: " + dataName);
-        runTest("/protected/resource", sessionModuleParams, authModuleParametersList,
+        runTest(handler, "/protected/resource", sessionModuleParams, authModuleParametersList,
                 expectedResponseStatus, expectResourceToBeCalled, expectedBody, auditParams);
     }
 }

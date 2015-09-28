@@ -11,13 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
 
+import org.assertj.core.api.Condition;
+import org.assertj.core.api.StringAssert;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.util.test.assertj.Conditions;
 import org.hamcrest.Matcher;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static org.forgerock.json.JsonValue.field;
@@ -41,14 +46,14 @@ final class BodyMatcher {
      * @return A {@code Map} of {@code Matcher}s.
      */
     @SuppressWarnings("unchecked")
-    static Map<String, Matcher<?>> exceptionMatcher(int code) {
-        return (Map<String, Matcher<?>>) object(
-                field("code", is(code)),
-                field("message", notNullValue()),
-                field("data", nullValue()),
-                field("principal", nullValue()),
-                field("context", nullValue())
-        );
+    static Map<JsonPointer, Condition<?>> exceptionMatcher(int code) {
+        Map<JsonPointer, Condition<?>> matchers = new HashMap<>();
+        matchers.put(new JsonPointer("data"), NULL_CONDITION);
+        matchers.put(new JsonPointer("principal"), NULL_CONDITION);
+        matchers.put(new JsonPointer("context"), NULL_CONDITION);
+        matchers.put(new JsonPointer("code"), Conditions.equalTo(code));
+        matchers.put(new JsonPointer("message"), NOT_NULL_CONDITION);
+        return matchers;
     }
 
     /**
@@ -59,14 +64,14 @@ final class BodyMatcher {
      * @return A {@code Map} of {@code Matcher}s.
      */
     @SuppressWarnings("unchecked")
-    static Map<String, Matcher<?>> exceptionMatcher(int code, Matcher<?> messageMatcher) {
-        return (Map<String, Matcher<?>>) object(
-                field("code", is(code)),
-                field("message", messageMatcher),
-                field("data", nullValue()),
-                field("principal", nullValue()),
-                field("context", nullValue())
-        );
+    static Map<JsonPointer, Condition<?>> exceptionMatcher(int code, Matcher<?> messageMatcher) {
+        Map<JsonPointer, Condition<?>> matchers = new HashMap<>();
+        matchers.put(new JsonPointer("data"), NULL_CONDITION);
+        matchers.put(new JsonPointer("principal"), NULL_CONDITION);
+        matchers.put(new JsonPointer("context"), NULL_CONDITION);
+        matchers.put(new JsonPointer("code"), Conditions.equalTo(code));
+        matchers.put(new JsonPointer("message"), new MatcherCondition<>(messageMatcher));
+        return matchers;
     }
 
     /**
@@ -75,14 +80,14 @@ final class BodyMatcher {
      * @return A {@code Map} of {@code Matcher}s.
      */
     @SuppressWarnings("unchecked")
-    static Map<String, Matcher<?>> resourceMatcher() {
-        return (Map<String, Matcher<?>>) object(
-                field("data", is("RESOURCE_DATA")),
-                field("principal", nullValue()),
-                field("context", nullValue()),
-                field("code", nullValue()),
-                field("message", nullValue())
-        );
+    static Map<JsonPointer, Condition<?>> resourceMatcher() {
+        Map<JsonPointer, Condition<?>> matchers = new HashMap<>();
+        matchers.put(new JsonPointer("data"), Conditions.equalTo("RESOURCE_DATA"));
+        matchers.put(new JsonPointer("principal"), NULL_CONDITION);
+        matchers.put(new JsonPointer("context"), NULL_CONDITION);
+        matchers.put(new JsonPointer("code"), NULL_CONDITION);
+        matchers.put(new JsonPointer("message"), NULL_CONDITION);
+        return matchers;
     }
 
     /**
@@ -93,16 +98,15 @@ final class BodyMatcher {
      * @return A {@code Map} of {@code Matcher}s.
      */
     @SuppressWarnings("unchecked")
-    static Map<String, Matcher<?>> resourceMatcher(String principal, String... contextEntries) {
-        Map<String, Matcher<?>> object = (Map<String, Matcher<?>>) object(
-                field("data", is("RESOURCE_DATA")),
-                field("principal", is(principal)),
-                field("code", nullValue()),
-                field("message", nullValue())
-        );
+    static Map<JsonPointer, Condition<?>> resourceMatcher(String principal, String... contextEntries) {
+        Map<JsonPointer, Condition<?>> object = new HashMap<>();
+        object.put(new JsonPointer("data"), Conditions.equalTo("RESOURCE_DATA"));
+        object.put(new JsonPointer("principal"), Conditions.equalTo(principal));
+        object.put(new JsonPointer("code"), NULL_CONDITION);
+        object.put(new JsonPointer("message"), NULL_CONDITION);
 
         for (String contextEntry : contextEntries) {
-            object.put("context." + contextEntry, is(true));
+            object.put(new JsonPointer("context/" + contextEntry), Conditions.equalTo(true));
         }
 
         return object;
@@ -114,9 +118,37 @@ final class BodyMatcher {
      * @return A {@code Map} of {@code Matcher}s.
      */
     @SuppressWarnings("unchecked")
-    static Map<String, Matcher<?>> noData() {
-        return (Map<String, Matcher<?>>) object(
-                field(null, is(""))
+    static Map<JsonPointer, Condition<?>> noData() {
+        return (Map<JsonPointer, Condition<?>>) object(
+                field(null, Conditions.equalTo(""))
         );
+    }
+
+    private static final Condition<Object> NULL_CONDITION = new Condition<Object>() {
+        @Override
+        public boolean matches(Object o) {
+            return o == null;
+        }
+    };
+
+    private static final Condition<Object> NOT_NULL_CONDITION = new Condition<Object>() {
+        @Override
+        public boolean matches(Object o) {
+            return o != null;
+        }
+    };
+
+    private static class MatcherCondition<T> extends Condition<T> {
+
+        private final Matcher<T> matcher;
+
+        MatcherCondition(Matcher<T> matcher) {
+            this.matcher = matcher;
+        }
+
+        @Override
+        public boolean matches(T t) {
+            return matcher.matches(t);
+        }
     }
 }

@@ -16,26 +16,26 @@
 
 package org.forgerock.caf.authn;
 
-import static org.forgerock.caf.authn.AuditParameters.Entry.entry;
-import static org.forgerock.caf.authn.AuditParameters.auditParams;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
-import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
+import static org.forgerock.caf.authn.AuditParameters.Entry.*;
+import static org.forgerock.caf.authn.AuditParameters.*;
+import static org.forgerock.caf.authn.AuthModuleParameters.*;
 import static org.forgerock.caf.authn.BodyMatcher.*;
-import static org.forgerock.caf.authn.TestFramework.runTest;
-import static org.forgerock.caf.authn.TestFramework.setUpConnection;
+import static org.forgerock.caf.authn.TestFramework.*;
 import static org.forgerock.caf.authn.test.modules.AuthModuleOne.*;
 import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.Condition;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.caf.authn.test.modules.AuthModuleOne;
-import org.hamcrest.Matcher;
+import org.forgerock.caf.authn.test.runtime.GuiceModule;
+import org.forgerock.guice.core.GuiceModules;
+import org.forgerock.json.JsonPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -45,14 +45,10 @@ import org.testng.annotations.Test;
  * @since 1.5.0
  */
 @Test(testName = "SingleAuthModuleOnly")
-public class SingleAuthModuleOnlyIT {
+@GuiceModules(GuiceModule.class)
+public class SingleAuthModuleOnlyIT extends HandlerHolder {
 
     private final Logger logger = LoggerFactory.getLogger(SingleAuthModuleOnlyIT.class);
-
-    @BeforeClass
-    public void setUp() {
-        setUpConnection();
-    }
 
     @DataProvider(name = "validUsage")
     private Object[][] validUsage() {
@@ -442,18 +438,20 @@ public class SingleAuthModuleOnlyIT {
     @Test (dataProvider = "validUsage")
     public void singleAuthModuleOnlyValidUsage(String dataName, AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
-            boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody, AuditParameters auditParams) {
+            boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams)
+            throws Exception {
         logger.info("Running singleAuthModuleOnlyValidUsage test with data set: " + dataName);
-        runTest("/protected/resource", sessionModuleParams, authModuleParametersList, expectedResponseStatus,
+        runTest(handler, "/protected/resource", sessionModuleParams, authModuleParametersList, expectedResponseStatus,
                 expectResourceToBeCalled, expectedBody, auditParams);
     }
 
     @Test (dataProvider = "invalidUsage")
     public void singleAuthModuleOnlyInvalidUsage(String dataName, AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
-            boolean expectResourceToBeCalled, Map<String, Matcher<?>> expectedBody, AuditParameters auditParams) {
+            boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams)
+            throws Exception {
         logger.info("Running singleAuthModuleOnlyInvalidUsage test with data set: " + dataName);
-        runTest("/protected/resource", sessionModuleParams, authModuleParametersList, expectedResponseStatus,
+        runTest(handler, "/protected/resource", sessionModuleParams, authModuleParametersList, expectedResponseStatus,
                 expectResourceToBeCalled, expectedBody, auditParams);
     }
 }

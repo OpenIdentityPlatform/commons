@@ -60,7 +60,7 @@ public class ProtectedResource implements Handler {
 
         Response response = new Response().setStatus(Status.OK);
 
-        response.getHeaders().putSingle(RESOURCE_CALLED_HEADER, "true");
+        response.getHeaders().put(RESOURCE_CALLED_HEADER, "true");
 
         String principal = (String) context.asContext(AttributesContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL);
         Map<String, Object> requestContextMap = (Map<String, Object>) context.asContext(AttributesContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);

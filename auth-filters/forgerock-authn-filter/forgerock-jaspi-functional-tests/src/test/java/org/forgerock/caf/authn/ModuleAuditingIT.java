@@ -17,6 +17,7 @@
 package org.forgerock.caf.authn;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
@@ -27,16 +28,22 @@ import static org.testng.Assert.fail;
 import java.util.List;
 import java.util.Map;
 
-import com.jayway.restassured.specification.RequestSpecification;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.caf.authn.test.modules.AuditingAuthModule;
 import org.forgerock.caf.authn.test.modules.AuditingSessionAuthModule;
 import org.forgerock.caf.authn.test.modules.FailureAuditingAuthModule;
+import org.forgerock.caf.authn.test.runtime.GuiceModule;
+import org.forgerock.guice.core.GuiceModules;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
+import org.forgerock.services.context.AttributesContext;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -46,14 +53,10 @@ import org.testng.annotations.Test;
  * @since 1.5.0
  */
 @Test(testName = "ModuleAuditing")
-public class ModuleAuditingIT {
+@GuiceModules(GuiceModule.class)
+public class ModuleAuditingIT extends HandlerHolder {
 
     private final Logger logger = LoggerFactory.getLogger(CommittedResponseIT.class);
-
-    @BeforeClass
-    public void setUp() {
-        setUpConnection();
-    }
 
     @DataProvider(name = "auditing")
     private Object[][] validUsage() {
@@ -152,18 +155,17 @@ public class ModuleAuditingIT {
     public void auditing(String dataName, AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus, String auditResult,
             boolean sessionPresent, String moduleId, MapEntry[] moduleAuditInfo,
-            MapEntry[] auditReasonMatchers) {
+            MapEntry[] auditReasonMatchers) throws Exception {
         logger.info("Running ModuleAuditing test with data set: " + dataName);
 
-        RequestSpecification given = given(sessionModuleParams, authModuleParametersList);
+        Request request = given(handler, sessionModuleParams, authModuleParametersList)
+                .setUri("http://localhost/protected/resource").setMethod("GET");
 
-        given.expect()
-                .statusCode(expectedResponseStatus);
+        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()), request);
+        assertThat(result).succeeded();
+        assertThat(result.get().getStatus().getCode()).isEqualTo(expectedResponseStatus);
 
-        given.when()
-                .get("/protected/resource");
-
-        JsonValue auditRecords = getAuditRecords();
+        JsonValue auditRecords = getAuditRecords(handler);
 
         assertThat(auditRecords).hasSize(1);
 

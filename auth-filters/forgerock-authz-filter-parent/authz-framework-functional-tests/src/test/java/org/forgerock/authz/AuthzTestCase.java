@@ -27,12 +27,12 @@ public class AuthzTestCase {
 
     @BeforeClass
     public void setup() {
-        RestAssured.port = 8080;
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.basePath = "/";
-//        RestAssured.port = Integer.parseInt(System.getProperty("AUTHZ_PORT"));
-//        RestAssured.baseURI = "http://" + System.getProperty("AUTHZ_HOST");
-//        RestAssured.basePath = System.getProperty("AUTHZ_URI");
+//        RestAssured.port = 8080;
+//        RestAssured.baseURI = "http://localhost";
+//        RestAssured.basePath = "/";
+        RestAssured.port = Integer.parseInt(System.getProperty("AUTHZ_PORT"));
+        RestAssured.baseURI = "http://" + System.getProperty("AUTHZ_HOST");
+        RestAssured.basePath = System.getProperty("AUTHZ_URI");
         RestAssured.defaultParser = Parser.JSON;
         RestAssured.config = RestAssuredConfig.newConfig()
                 .encoderConfig(EncoderConfig.encoderConfig().defaultContentCharset("UTF-8"));
