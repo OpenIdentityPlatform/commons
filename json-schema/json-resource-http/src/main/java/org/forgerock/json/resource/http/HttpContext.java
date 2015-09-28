@@ -25,6 +25,7 @@ import java.util.TreeMap;
 
 import org.forgerock.services.context.AbstractContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.http.protocol.Header;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Factory;
 import org.forgerock.util.LazyMap;
@@ -70,10 +71,9 @@ public final class HttpContext extends AbstractContext {
                 @Override
                 public Map<String, List<String>> newInstance() {
                     Map<String, List<String>> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-                    Set<Map.Entry<String, List<String>>> headers = req.getHeaders().entrySet();
-                    for (Map.Entry<String, List<String>> header : headers) {
+                    for (Map.Entry<String, Header> header : req.getHeaders().asMapOfHeaders().entrySet()) {
                         String name = header.getKey();
-                        List<String> values = header.getValue();
+                        List<String> values = header.getValue().getValues();
                         result.put(name, values);
                     }
                     return result;
