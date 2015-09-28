@@ -653,13 +653,12 @@ public final class HttpUtils {
             String mimeType = req.getForm().getFirst(PARAM_MIME_TYPE);
             if (METHOD_GET.equalsIgnoreCase(getMethod(req)) && mimeType != null && !mimeType.isEmpty()) {
                 ContentType contentType = new ContentType(mimeType);
-                resp.getHeaders().putSingle(new ContentTypeHeader(contentType.toString(), CHARACTER_ENCODING, null));
+                resp.getHeaders().put(new ContentTypeHeader(contentType.toString(), CHARACTER_ENCODING, null));
             } else {
-                resp.getHeaders().putSingle(
-                        new ContentTypeHeader(MIME_TYPE_APPLICATION_JSON, CHARACTER_ENCODING, null));
+                resp.getHeaders().put(new ContentTypeHeader(MIME_TYPE_APPLICATION_JSON, CHARACTER_ENCODING, null));
             }
 
-            resp.getHeaders().putSingle(HEADER_CACHE_CONTROL, CACHE_CONTROL);
+            resp.getHeaders().put(HEADER_CACHE_CONTROL, CACHE_CONTROL);
             return resp;
         } catch (ParseException e) {
             throw new BadRequestException("The mime type parameter '" + req.getForm().getFirst(PARAM_MIME_TYPE)
@@ -670,8 +669,7 @@ public final class HttpUtils {
     static void rejectIfMatch(org.forgerock.http.protocol.Request req) throws ResourceException {
         if (req.getHeaders().getFirst(HEADER_IF_MATCH) != null) {
             // FIXME: i18n
-            throw new PreconditionFailedException("If-Match not supported for " + getMethod(req)
-                    + " requests");
+            throw new PreconditionFailedException("If-Match not supported for " + getMethod(req) + " requests");
         }
     }
 
@@ -819,7 +817,7 @@ public final class HttpUtils {
     private static Object parseJsonBody(org.forgerock.http.protocol.Request req, boolean allowEmpty)
             throws ResourceException {
         try {
-            boolean isMultiPartRequest = isMultiPartRequest(ContentTypeHeader.valueOf(req).toString());
+            boolean isMultiPartRequest = isMultiPartRequest(req.getHeaders().getFirst(ContentTypeHeader.class));
             MimeMultipart mimeMultiparts = null;
             JsonParser jsonParser;
             if (isMultiPartRequest) {
@@ -895,7 +893,7 @@ public final class HttpUtils {
         }
 
         public String getContentType() {
-            return ContentTypeHeader.valueOf(request).toString();
+            return request.getHeaders().getFirst(ContentTypeHeader.class);
         }
 
         public String getName() {

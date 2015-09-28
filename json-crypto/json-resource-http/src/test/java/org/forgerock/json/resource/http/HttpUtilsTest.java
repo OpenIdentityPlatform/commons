@@ -19,6 +19,7 @@ package org.forgerock.json.resource.http;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.forgerock.json.resource.http.HttpUtils.determineRequestType;
+import static org.forgerock.json.resource.http.HttpUtils.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.util.List;
 
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.header.GenericHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
@@ -133,7 +135,7 @@ public class HttpUtilsTest {
 
     private void setUpRequestMock(org.forgerock.http.protocol.Request request, String contentType)
             throws IOException {
-        request.getHeaders().putSingle(ContentTypeHeader.NAME, contentType);
+        request.getHeaders().put(ContentTypeHeader.NAME, contentType);
         request.setEntity(requestInputStreamData);
     }
 
@@ -301,7 +303,7 @@ public class HttpUtilsTest {
                                            final String method,
                                            final String contentType) throws URISyntaxException {
         httpRequest.setMethod(method);
-        httpRequest.getHeaders().putSingle(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE, method);
+        httpRequest.getHeaders().put(HttpUtils.HEADER_X_HTTP_METHOD_OVERRIDE, method);
         httpRequest.getUri().setQuery(HttpUtils.PARAM_MIME_TYPE + "=" + contentType);
     }
 
@@ -319,9 +321,9 @@ public class HttpUtilsTest {
         //then
         assertThat(httpResponse.getHeaders())
                 .contains(
-                        entry(ContentTypeHeader.NAME, Collections.singletonList(
-                                new ContentTypeHeader(result, HttpUtils.CHARACTER_ENCODING, null).toString())),
-                        entry(HttpUtils.HEADER_CACHE_CONTROL, Collections.singletonList(HttpUtils.CACHE_CONTROL)));
+                        entry(ContentTypeHeader.NAME,
+                                new ContentTypeHeader(result, CHARACTER_ENCODING, null)),
+                        entry(HEADER_CACHE_CONTROL, new GenericHeader(HEADER_CACHE_CONTROL, CACHE_CONTROL)));
     }
 
     @Test(expectedExceptions = BadRequestException.class)
@@ -364,9 +366,9 @@ public class HttpUtilsTest {
         //then
         assertThat(httpResponse.getHeaders())
                 .contains(
-                        entry(ContentTypeHeader.NAME, Collections.singletonList(
-                                new ContentTypeHeader(result, HttpUtils.CHARACTER_ENCODING, null).toString())),
-                        entry(HttpUtils.HEADER_CACHE_CONTROL, Collections.singletonList(HttpUtils.CACHE_CONTROL)));
+                        entry(ContentTypeHeader.NAME,
+                                new ContentTypeHeader(result, CHARACTER_ENCODING, null)),
+                        entry(HEADER_CACHE_CONTROL, new GenericHeader(HEADER_CACHE_CONTROL, CACHE_CONTROL)));
     }
 
     @DataProvider
@@ -475,13 +477,13 @@ public class HttpUtilsTest {
         Request request = newRequest()
                 .setMethod(HttpUtils.METHOD_PUT);
         if (protocolVersion != null) {
-            request.getHeaders().putSingle(AcceptApiVersionHeader.NAME, "protocol=" + protocolVersion + ",resource=1.0");
+            request.getHeaders().put(AcceptApiVersionHeader.NAME, "protocol=" + protocolVersion + ",resource=1.0");
         }
         if (ifNoneMatch != null) {
-            request.getHeaders().putSingle(HttpUtils.HEADER_IF_NONE_MATCH, ifNoneMatch);
+            request.getHeaders().put(HttpUtils.HEADER_IF_NONE_MATCH, ifNoneMatch);
         }
         if (ifMatch != null) {
-            request.getHeaders().putSingle(HttpUtils.HEADER_IF_MATCH, ifMatch);
+            request.getHeaders().put(HttpUtils.HEADER_IF_MATCH, ifMatch);
         }
         return request;
     }

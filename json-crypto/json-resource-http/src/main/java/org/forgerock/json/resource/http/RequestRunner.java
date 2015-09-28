@@ -165,8 +165,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                             writeApiVersionHeaders(result);
                             writeAdvice();
                             if (result.getId() != null) {
-                                httpResponse.getHeaders().putSingle(HEADER_LOCATION, getResourceURL(request,
-                                        result));
+                                httpResponse.getHeaders().put(HEADER_LOCATION, getResourceURL(request, result));
                             }
                             httpResponse.setStatus(Status.CREATED);
                             writeResource(result);
@@ -439,10 +438,10 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
             builder.append('"');
             builder.append(resource.getRevision());
             builder.append('"');
-            httpResponse.getHeaders().putSingle(HEADER_ETAG, builder.toString());
+            httpResponse.getHeaders().put(HEADER_ETAG, builder.toString());
         }
 
-        ContentType contentType = new ContentType(ContentTypeHeader.valueOf(httpResponse).toString());
+        ContentType contentType = new ContentType(httpResponse.getHeaders().getFirst(ContentTypeHeader.class));
 
         if (contentType.match(MIME_TYPE_APPLICATION_JSON)) {
             writeResourceJsonContent(resource);
@@ -503,7 +502,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
 
     private void writeApiVersionHeaders(org.forgerock.json.resource.Response response) {
         if (response.getResourceApiVersion() != null) {
-            httpResponse.getHeaders().putSingle(
+            httpResponse.getHeaders().put(
                     new ContentApiVersionHeader(protocolVersion, response.getResourceApiVersion()));
         }
     }
