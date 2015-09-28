@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.util.Utils.asEnum;
+import static org.forgerock.util.Utils.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +29,7 @@ import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.i18n.PreferredLocales;
 
 /**
  * A utility class containing various factory methods for creating and
@@ -40,6 +41,7 @@ public final class Requests {
         private ResourcePath resourcePath;
         private final Map<String, String> parameters = new LinkedHashMap<>(2);
         private Version resourceVersion;
+        private PreferredLocales preferredLocales;
 
         protected AbstractRequestImpl() {
             // Default constructor.
@@ -50,6 +52,7 @@ public final class Requests {
             this.fields.addAll(request.getFields());
             this.parameters.putAll(request.getAdditionalParameters());
             this.resourceVersion = request.getResourceVersion();
+            this.preferredLocales = request.getPreferredLocales();
         }
 
         @Override
@@ -146,6 +149,17 @@ public final class Requests {
         @Override
         public String toString() {
             return toJsonValue().toString();
+        }
+
+        @Override
+        public PreferredLocales getPreferredLocales() {
+            return preferredLocales;
+        }
+
+        @Override
+        public Request setPreferredLocales(PreferredLocales preferredLocales) {
+            this.preferredLocales = preferredLocales;
+            return this;
         }
     }
 

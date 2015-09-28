@@ -17,15 +17,15 @@
 package org.forgerock.json.resource.http;
 
 import static org.forgerock.json.resource.http.HttpUtils.*;
-import static org.forgerock.util.Reject.checkNotNull;
+import static org.forgerock.util.Reject.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
+import org.forgerock.http.header.AcceptLanguageHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
 import org.forgerock.http.protocol.Response;
@@ -53,7 +53,9 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
@@ -542,8 +544,13 @@ final class HttpAdapter implements Handler {
 
     private Promise<Response, NeverThrowsException> doRequest(Context context, org.forgerock.http.protocol.Request req,
             Response resp, Request request) throws Exception {
-
         Context ctx = newRequestContext(context, req);
+        final AcceptLanguageHeader acceptLanguageHeader = req.getHeaders().get(AcceptLanguageHeader.class);
+        if (acceptLanguageHeader != null) {
+            request.setPreferredLocales(acceptLanguageHeader.getLocales());
+        } else {
+            request.setPreferredLocales(new PreferredLocales(null));
+        }
         final RequestRunner runner = new RequestRunner(ctx, request, req, resp);
         return connectionFactory.getConnectionAsync()
                 .thenAsync(new AsyncFunction<Connection, Response, NeverThrowsException>() {
