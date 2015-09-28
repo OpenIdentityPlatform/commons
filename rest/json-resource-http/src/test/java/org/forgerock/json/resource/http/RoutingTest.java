@@ -94,7 +94,7 @@ public class RoutingTest {
         //Given
         Context context = mockContext();
         if (requestedResourceApiVersion != null) {
-            request.getHeaders().putSingle(AcceptApiVersionHeader.valueOf("resource=" + requestedResourceApiVersion));
+            request.getHeaders().put(AcceptApiVersionHeader.valueOf("resource=" + requestedResourceApiVersion));
         }
 
         apiVersionBehaviourManager.setDefaultVersionBehaviour(defaultVersionBehaviour);
@@ -152,7 +152,7 @@ public class RoutingTest {
                     .setMethod("PUT")
                     .setUri(URI.create("json/users/demo"))
                     .setEntity(new HashMap<>());
-            request.getHeaders().putSingle(HEADER_IF_NONE_MATCH, ETAG_ANY);
+            request.getHeaders().put(HEADER_IF_NONE_MATCH, ETAG_ANY);
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
             requestData.add(newData);
@@ -180,7 +180,7 @@ public class RoutingTest {
                     .setMethod("PUT")
                     .setUri(URI.create("json/users/USER_ID"))
                     .setEntity(new HashMap<>());
-            request.getHeaders().putSingle("If-Match", "\"*\"");
+            request.getHeaders().put("If-Match", "\"*\"");
             Object[] newData = Arrays.copyOf(data, data.length + 1);
             newData[data.length] = request;
             requestData.add(newData);

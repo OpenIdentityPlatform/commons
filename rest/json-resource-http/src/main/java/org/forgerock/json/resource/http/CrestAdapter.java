@@ -444,7 +444,7 @@ final class CrestAdapter implements RequestHandler {
 
     private static void setRequestedResourceVersion(Request request, Version resourceVersion) {
         // Force protocol version to 2.0 (current) at least
-        request.getHeaders().putSingle(new AcceptApiVersionHeader(DEFAULT_PROTOCOL_VERSION,
+        request.getHeaders().put(new AcceptApiVersionHeader(DEFAULT_PROTOCOL_VERSION,
                                                                   resourceVersion));
     }
 
@@ -469,11 +469,11 @@ final class CrestAdapter implements RequestHandler {
         if (revision != null) {
             value = format("\"%s\"", revision);
         }
-        request.getHeaders().putSingle(HEADER_IF_MATCH, value);
+        request.getHeaders().put(HEADER_IF_MATCH, value);
     }
 
     private static void setIfNoneMatchToAny(final Request request) {
-        request.getHeaders().putSingle(HEADER_IF_NONE_MATCH, ETAG_ANY);
+        request.getHeaders().put(HEADER_IF_NONE_MATCH, ETAG_ANY);
     }
 
     private void prepareHttpRequest(final org.forgerock.json.resource.Request<?> request, final Request httpRequest) {
