@@ -15,8 +15,6 @@
  */
 package org.forgerock.selfservice.json;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
@@ -53,11 +51,21 @@ public final class JsonConfig {
                         new NamedType(SecurityAnswerDefinitionConfig.class, SecurityAnswerDefinitionConfig.NAME),
 
                         // token handler config object mapping
-                        new NamedType(JwtTokenHandlerConfig.class, JwtTokenHandlerConfig.TYPE)
-                );
+                        new NamedType(JwtTokenHandlerConfig.class, JwtTokenHandlerConfig.TYPE));
     }
 
-    public static ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) throws IOException {
+    private JsonConfig() {
+
+    }
+
+    /**
+     * Builds ProcessInstanceConfig instance from a JsonValue instance.
+     * @param json
+     *         the value to be converted
+     * @return ProcessInstanceConfig
+     *         the one built from the provided json
+     */
+    public static ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) {
         //return objectMapper.readValue(objectMapper.writeValueAsString(json.getObject()), ProcessInstanceConfig.class);
         return objectMapper.convertValue(json.getObject(), ProcessInstanceConfig.class);
     }

@@ -25,6 +25,9 @@ import org.forgerock.selfservice.core.config.StageConfig;
  */
 public final class UserDetailsConfig implements StageConfig {
 
+    /**
+     * Name of the stage configuration.
+     */
     public static final String NAME = "userDetails";
 
     private String identityEmailField;

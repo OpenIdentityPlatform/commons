@@ -25,6 +25,9 @@ import java.util.Set;
  */
 public final class VerifyUserIdConfig extends VerifyEmailAccountConfig implements AbstractEmailVerificationConfig {
 
+    /**
+     * Name of the stage configuration.
+     */
     public static final String NAME = "userIdValidation";
 
     private String identityServiceUrl;

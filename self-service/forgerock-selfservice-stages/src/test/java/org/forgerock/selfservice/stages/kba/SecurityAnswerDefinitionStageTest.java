@@ -17,21 +17,16 @@ package org.forgerock.selfservice.stages.kba;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.eq;
-import static org.forgerock.selfservice.stages.CommonStateFields.*;
 import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
-import org.forgerock.services.context.Context;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -45,8 +40,6 @@ import org.testng.annotations.Test;
  */
 public final class SecurityAnswerDefinitionStageTest {
 
-    private static final String KBA_QUESTION_1 = "What was your pet's name?";
-    private static final String KBA_QUESTION_2 = "Who was your first employer?";
     private static final String KBA_QUESTION_3 = "What is my favorite author?";
 
     private SecurityAnswerDefinitionStage securityAnswerDefinitionStage;
@@ -69,37 +62,52 @@ public final class SecurityAnswerDefinitionStageTest {
         securityAnswerDefinitionStage = new SecurityAnswerDefinitionStage(factory);
     }
 
+    @Test (expectedExceptions = IllegalArgumentException.class,
+            expectedExceptionsMessageRegExp = "KBA questions are not defined")
+    public void testGatherInitialRequirementsException() throws Exception {
+        // Given
+        config = new SecurityAnswerDefinitionConfig();
+
+        // When
+        securityAnswerDefinitionStage.gatherInitialRequirements(context, config);
+    }
+
     @Test
     public void testGatherInitialRequirements() throws Exception {
-        // Given
-        given(factory.getConnection()).willReturn(connection);
-        given(queryResponse.getContent()).willReturn(
-                json(object(field("questions",
-                        array(KBA_QUESTION_1, KBA_QUESTION_2))))
-        );
-        given(connection.read(any(Context.class), any(ReadRequest.class))).willReturn(queryResponse);
 
         // When
         JsonValue jsonValue = securityAnswerDefinitionStage.gatherInitialRequirements(context, config);
 
         // Then
-        assertThat(jsonValue).stringAt("description").isEqualTo("KBA details");
-        assertThat(jsonValue).stringAt("properties/kba/items/description").isEqualTo("KBA questions");
-        assertThat(jsonValue).stringAt("properties/kba/items/properties/selectedQuestion/type")
-                .isEqualTo("string");
-        assertThat(jsonValue).stringAt("properties/kba/items/properties/customQuestion/type")
-                .isEqualTo("string");
-        assertThat(jsonValue).stringAt("properties/kba/questions/0").isEqualTo(KBA_QUESTION_1);
-        assertThat(jsonValue).stringAt("properties/kba/questions/1").isEqualTo(KBA_QUESTION_2);
+        assertThat(jsonValue).stringAt("description").isEqualTo("Knowledge based questions");
+
+        assertThat(jsonValue).stringAt("properties/kba/questions/0/id").isEqualTo("1");
+        assertThat(jsonValue).stringAt("properties/kba/questions/0/question/en")
+                .isEqualTo("What's your favorite color?");
+        assertThat(jsonValue).stringAt("properties/kba/questions/0/question/fr")
+                .isEqualTo("Quelle est votre couleur préférée?");
+        assertThat(jsonValue).stringAt("properties/kba/questions/1/id").isEqualTo("2");
+        assertThat(jsonValue).stringAt("properties/kba/questions/1/question/en")
+                .isEqualTo("Who was your first employer?");
+
+        assertThat(jsonValue).stringAt("properties/kba/type").isEqualTo("array");
+
+        assertThat(jsonValue).stringAt("properties/kba/items/oneOf/0/$ref")
+                .isEqualTo("#/definitions/systemQuestion");
+        assertThat(jsonValue).stringAt("properties/kba/items/oneOf/1/$ref")
+                .isEqualTo("#/definitions/userQuestion");
+
+        assertThat(jsonValue).stringAt("definitions/systemQuestion/properties/questionId/description")
+                .isEqualTo("Id of predefined question");
+        assertThat(jsonValue).booleanAt("definitions/systemQuestion/additionalProperties")
+                .isEqualTo(false);
+
     }
 
     @Test
     public void testAdvanceWithoutUserInState() throws Exception {
         // Given
         given(context.getInput()).willReturn(newJsonValueKba());
-        given(factory.getConnection()).willReturn(connection);
-        given(context.getState(SecurityAnswerDefinitionStage.CTX_KEY_KBA_QUESTIONS))
-                .willReturn(newJsonValueContextKbaQuestions());
 
         // When
         securityAnswerDefinitionStage.advance(context, config);
@@ -113,8 +121,8 @@ public final class SecurityAnswerDefinitionStageTest {
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/customQuestion")
                 .isEqualTo(KBA_QUESTION_3);
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer").isEqualTo("a1");
-        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/selectedQuestion")
-                .isEqualTo(KBA_QUESTION_2);
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/questionId")
+                .isEqualTo("1");
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer").isEqualTo("a2");
 
     }
@@ -124,9 +132,6 @@ public final class SecurityAnswerDefinitionStageTest {
         // Given
         given(context.getInput()).willReturn(newJsonValueKba());
         given(context.getState(USER_FIELD)).willReturn(newJsonValueUser());
-        given(factory.getConnection()).willReturn(connection);
-        given(context.getState(SecurityAnswerDefinitionStage.CTX_KEY_KBA_QUESTIONS))
-                .willReturn(newJsonValueContextKbaQuestions());
 
         // When
         securityAnswerDefinitionStage.advance(context, config);
@@ -143,22 +148,24 @@ public final class SecurityAnswerDefinitionStageTest {
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/customQuestion")
                 .isEqualTo(KBA_QUESTION_3);
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer").isEqualTo("a1");
-        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/selectedQuestion")
-                .isEqualTo(KBA_QUESTION_2);
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/questionId")
+                .isEqualTo("1");
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer").isEqualTo("a2");
     }
 
     private SecurityAnswerDefinitionConfig newKbaConfig() {
         return new SecurityAnswerDefinitionConfig()
-                .setKbaServiceUrl("/kba/questions/0")
-                .setKbaPropertyName("kba1");
-    }
-
-    private JsonValue newJsonValueContextKbaQuestions() {
-        Map<String, String> kbaQuestions = new HashMap<>();
-        kbaQuestions.put("0", KBA_QUESTION_1);
-        kbaQuestions.put("1", KBA_QUESTION_2);
-        return json(kbaQuestions);
+                .setKbaPropertyName("kba1")
+                .addQuestion(
+                        new KbaQuestion()
+                                .setId("1")
+                                .put("en", "What's your favorite color?")
+                                .put("en_GB", "What's your favorite colour?")
+                                .put("fr", "Quelle est votre couleur préférée?"))
+                .addQuestion(
+                        new KbaQuestion()
+                                .setId("2")
+                                .put("en", "Who was your first employer?"));
     }
 
     private JsonValue newJsonValueUser() {
@@ -177,7 +184,7 @@ public final class SecurityAnswerDefinitionStageTest {
                                         field("customQuestion", KBA_QUESTION_3),
                                         field("answer", "a1")),
                                 object(
-                                        field("selectedQuestion", 1),
+                                        field("questionId", "1"),
                                         field("answer", "a2"))))));
     }
 }

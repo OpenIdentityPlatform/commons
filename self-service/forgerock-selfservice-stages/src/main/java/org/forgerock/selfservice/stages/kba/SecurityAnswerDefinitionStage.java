@@ -17,9 +17,10 @@
 package org.forgerock.selfservice.stages.kba;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.*;
-import static org.forgerock.selfservice.stages.CommonStateFields.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,17 +28,13 @@ import javax.inject.Inject;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
-import org.forgerock.services.context.Context;
+import org.forgerock.util.Reject;
 
 /**
  * Stage is responsible for supplying the KBA questions to the user and capturing the answers provided by the user.
@@ -45,8 +42,6 @@ import org.forgerock.services.context.Context;
  * @since 0.2.0
  */
 public final class SecurityAnswerDefinitionStage implements ProgressStage<SecurityAnswerDefinitionConfig> {
-
-    static final String CTX_KEY_KBA_QUESTIONS = "kbaQuestions";
 
     private final ConnectionFactory connectionFactory;
 
@@ -65,63 +60,45 @@ public final class SecurityAnswerDefinitionStage implements ProgressStage<Securi
     public JsonValue gatherInitialRequirements(ProcessContext context,
                                                SecurityAnswerDefinitionConfig config) throws ResourceException {
 
-        JsonValue kbaJsonValue = getKbaQuestionsFromRestEndpoint(context.getHttpContext(), config);
-        List<String> kbaQuestions = kbaJsonValue.get(new JsonPointer("questions")).asList(String.class);
-        Map<String, String> questions = getKbaQuestionsWithIndex(kbaQuestions);
-        if (questions.size() == 0) {
-            throw new BadRequestException("There are no valid KBA questions defined. Service URL:"
-                    + config.getKbaServiceUrl());
-        }
-        context.putState(CTX_KEY_KBA_QUESTIONS, questions);
+        List<KbaQuestion> questions = config.questionsAsList();
+        Reject.ifTrue(questions.isEmpty(), "KBA questions are not defined");
+        List<Map<String, Object>> kbaQuestions = convertToCollections(questions);
 
         return RequirementsBuilder
-                .newInstance("KBA details")
+                .newInstance("Knowledge based questions")
                 .addRequireProperty("kba",
                         newArray(
-                                newObject("KBA questions")
-                                        .addProperty("selectedQuestion",
-                                                "Reference to the unique id of predefined question")
-                                        .addProperty("customQuestion", "Question defined by the user")
-                                        .addProperty("answer", "Answer to the referenced question"))
+                                oneOf(
+                                        json(object(field("$ref", "#/definitions/systemQuestion"))),
+                                        json(object(field("$ref", "#/definitions/userQuestion")))))
                                 .addCustomField("questions", json(kbaQuestions)))
+                .addDefinition("systemQuestion",
+                        newObject("System Question")
+                                .addRequireProperty("questionId", "Id of predefined question")
+                                .addRequireProperty("answer", "Answer to the referenced question")
+                                .addCustomField("additionalProperties", json(false)))
+                .addDefinition("userQuestion",
+                        newObject("User Question")
+                                .addRequireProperty("customQuestion", "Question defined by the user")
+                                .addRequireProperty("answer", "Answer to the question")
+                                .addCustomField("additionalProperties", json(false)))
                 .build();
     }
 
-    private JsonValue getKbaQuestionsFromRestEndpoint(Context httpContext,
-                                                      SecurityAnswerDefinitionConfig config) throws ResourceException {
-        JsonValue kbaJsonValue;
-        ReadRequest request = Requests.newReadRequest(config.getKbaServiceUrl());
-        try (Connection connection = connectionFactory.getConnection()) {
-            ResourceResponse readResponse = connection.read(httpContext, request);
-            kbaJsonValue = readResponse.getContent();
+    private List<Map<String, Object>> convertToCollections(List<KbaQuestion> questions) {
+        List<Map<String, Object>> jsonValueList = new ArrayList<>();
+        for (KbaQuestion kbaQuestion : questions) {
+            Map<String, Object> qMap = convertToCollections(kbaQuestion);
+            jsonValueList.add(qMap);
         }
-        if (kbaJsonValue == null) {
-            throw new BadRequestException("KBA questions are not defined. Service URL:" + config.getKbaServiceUrl());
-        }
-        return kbaJsonValue;
+        return jsonValueList;
     }
 
-    private Map<String, String> getKbaQuestionsWithIndex(List<String> kbaQuestions) {
-        Map<String, String> questionsIndexed = new HashMap<>();
-        int index = 0;
-        for (String q : kbaQuestions) {
-            String question = trimToNull(q);
-            if (question == null) {
-                continue;
-            }
-            questionsIndexed.put(String.valueOf(index++), question);
-        }
-        return questionsIndexed;
-    }
-
-    private String trimToNull(String str) {
-        if (str != null) {
-            str = str.trim();
-            if (str.length() > 0) {
-                return str;
-            }
-        }
-        return null;
+    private Map<String, Object> convertToCollections(KbaQuestion kbaQuestion) {
+        Map<String, Object> results = new HashMap<>();
+        results.put("id", kbaQuestion.getId());
+        results.put("question", kbaQuestion.questionsAsMap());
+        return results;
     }
 
     @Override
@@ -132,10 +109,6 @@ public final class SecurityAnswerDefinitionStage implements ProgressStage<Securi
         if (kba.isNull()) {
             throw new BadRequestException("KBA has not been specified");
         }
-
-        JsonValue kbaQuestions = context.getState(CTX_KEY_KBA_QUESTIONS);
-        Map<String, String> questions = kbaQuestions.asMap(String.class);
-        kba = replaceKbaQuestionIndex(kba, questions);
 
         addKbaToContext(context, config, kba);
 
@@ -155,19 +128,6 @@ public final class SecurityAnswerDefinitionStage implements ProgressStage<Securi
             context.putState(USER_FIELD, user);
         }
         return user;
-    }
-
-    private JsonValue replaceKbaQuestionIndex(JsonValue kba, Map<String, String> kbaQuestions) {
-        for (Map.Entry<String, String> entry : kbaQuestions.entrySet()) {
-            String index = entry.getKey();
-            String question = entry.getValue();
-            JsonPointer pointerPredefinedQuestion = new JsonPointer(index + "/selectedQuestion");
-            JsonValue predefinedQuestion = kba.get(pointerPredefinedQuestion);
-            if (predefinedQuestion != null) {
-                kba.put(pointerPredefinedQuestion, question);
-            }
-        }
-        return kba;
     }
 
 }

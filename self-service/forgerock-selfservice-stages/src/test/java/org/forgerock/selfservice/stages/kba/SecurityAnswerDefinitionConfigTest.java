@@ -40,7 +40,14 @@ public final class SecurityAnswerDefinitionConfigTest {
 
         assertThat(config).isInstanceOf(SecurityAnswerDefinitionConfig.class);
         SecurityAnswerDefinitionConfig kbaConfig = (SecurityAnswerDefinitionConfig) config;
-        assertThat(kbaConfig.getKbaServiceUrl()).isEqualTo("/kba/questions/0");
         assertThat(kbaConfig.getKbaPropertyName()).isEqualTo("kbaInfo");
+        assertThat(kbaConfig.questionsAsList().get(0).getId()).isEqualTo("1");
+        assertThat(kbaConfig.questionsAsList().get(0).get("en")).isEqualTo("What's your favorite color?");
+        assertThat(kbaConfig.questionsAsList().get(0).get("en_GB")).isEqualTo("What's your favorite colour?");
+        assertThat(kbaConfig.questionsAsList().get(0).get("fr")).isEqualTo("Quelle est votre couleur préférée?");
+        assertThat(kbaConfig.questionsAsList().get(1).getId()).isEqualTo("2");
+        assertThat(kbaConfig.questionsAsList().get(1).get("en")).isEqualTo("Who was your first employer?");
+
+
     }
 }

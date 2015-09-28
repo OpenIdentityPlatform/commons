@@ -16,6 +16,10 @@
 
 package org.forgerock.selfservice.stages.kba;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
@@ -25,31 +29,42 @@ import org.forgerock.selfservice.core.config.StageConfig;
  */
 public final class SecurityAnswerDefinitionConfig implements StageConfig {
 
+    /**
+     * Name of the stage configuration.
+     */
     public static final String NAME = "kbaStage";
 
-    private String kbaServiceUrl;
+    @JsonProperty
+    private final List<KbaQuestion> questions;
 
     private String kbaPropertyName;
 
     /**
-     * Gets the URL for the REST endpoint for fetching the KBA questions.
-     *
-     * @return the KBA service URL
+     * Creates a new SecurityAnswerDefinitionConfig.
      */
-    public String getKbaServiceUrl() {
-        return kbaServiceUrl;
+    public SecurityAnswerDefinitionConfig() {
+        questions = new ArrayList<>();
     }
 
     /**
-     * Sets the URL for the REST endpoint to fetch the KBA questions.
+     * Gets the unmodifiable list view of questions.
      *
-     * @param kbaServiceUrl
-     *         the KBA service URL
+     * @return list of KbaQuestions
+     */
+    public List<KbaQuestion> questionsAsList() {
+        return Collections.unmodifiableList(questions);
+    }
+
+    /**
+     * Adds the KbaQuestion instance to this config.
+     *
+     * @param question
+     *         the KBA question to be added
      *
      * @return this config instance
      */
-    public SecurityAnswerDefinitionConfig setKbaServiceUrl(String kbaServiceUrl) {
-        this.kbaServiceUrl = kbaServiceUrl;
+    public SecurityAnswerDefinitionConfig addQuestion(KbaQuestion question) {
+        questions.add(question);
         return this;
     }
 

@@ -15,8 +15,7 @@
  */
 package org.forgerock.selfservice.stages.utils;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.*;
 
@@ -48,7 +47,17 @@ public final class RequirementsBuilderTest {
                                                         .addCustomField("questions",
                                                                 json(array(
                                                                         "What was your pet's name?",
-                                                                        "Who was your first employer?")))));
+                                                                        "Who was your first employer?")))))
+                        .addRequireProperty("kbaV2",
+                                newArray(
+                                        oneOf(
+                                                json(object(field("$ref", "#/definitions/systemQuestion"))),
+                                                json(object(field("$ref", "#/definitions/userQuestion"))))))
+                        .addDefinition("systemQuestion",
+                                newObject("System Question")
+                                        .addRequireProperty("questionId", "Id of predefined question")
+                                        .addRequireProperty("answer", "Answer to the referenced question")
+                                        .addCustomField("additionalProperties", json(false)));
 
         // When
         JsonValue jsonValue = builder.build();
@@ -66,6 +75,10 @@ public final class RequirementsBuilderTest {
                 .isEqualTo("What was your pet's name?");
         assertThat(jsonValue).stringAt("properties/user/properties/kba/questions/1")
                 .isEqualTo("Who was your first employer?");
+        assertThat(jsonValue).stringAt("properties/kbaV2/items/oneOf/0/$ref")
+                .isEqualTo("#/definitions/systemQuestion");
+        assertThat(jsonValue).stringAt("definitions/systemQuestion/properties/questionId/description")
+                .isEqualTo("Id of predefined question");
     }
 
     @Test

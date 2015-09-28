@@ -36,16 +36,18 @@ public final class RequirementsBuilder {
 
     private final static String JSON_SCHEMA = "http://json-schema.org/draft-04/schema#";
 
-    private enum BuilderType { JSON_SCHEMA, OBJECT, ARRAY }
+    private enum BuilderType { JSON_SCHEMA, OBJECT, ARRAY, ONE_OF }
 
     private final JsonValue jsonValue;
     private final List<String> requiredProperties;
     private final Map<String, Object> properties;
+    private final Map<String, Object> definitions;
     private final BuilderType builderType;
 
     private RequirementsBuilder(BuilderType type, String description) {
         requiredProperties = new ArrayList<>();
         properties = new HashMap<>();
+        definitions = new HashMap<>();
         jsonValue = json(object());
         builderType = type;
 
@@ -58,10 +60,14 @@ public final class RequirementsBuilder {
                     .add("description", description)
                     .add("type", "object")
                     .add("required", requiredProperties)
-                    .add("properties", properties);
+                    .add("properties", properties)
+                    .add("definitions", definitions);
             break;
         case ARRAY:
             jsonValue.add("type", "array");
+            break;
+        case ONE_OF:
+            jsonValue.add("type", "object");
             break;
         default:
             throw new IllegalArgumentException("Unknown type " + builderType);
@@ -171,6 +177,22 @@ public final class RequirementsBuilder {
     }
 
     /**
+     * Add a definition to the main object.
+     *
+     * @param name
+     *         property name
+     * @param builder
+     *         definition value builder
+     *
+     * @return this builder
+     */
+    public RequirementsBuilder addDefinition(String name, RequirementsBuilder builder) {
+        Reject.ifNull(name, builder);
+        definitions.put(name, prepareChildJsonValue(builder));
+        return this;
+    }
+
+    /**
      * Add a custom Json snippet.
      *
      * @param name
@@ -181,6 +203,7 @@ public final class RequirementsBuilder {
      * @return this builder
      */
     public RequirementsBuilder addCustomField(String name, JsonValue customJsonValue) {
+        Reject.ifNull(name, customJsonValue);
         jsonValue.add(name, getUnderlyingObject(customJsonValue));
         return this;
     }
@@ -194,7 +217,17 @@ public final class RequirementsBuilder {
         if (BuilderType.JSON_SCHEMA == builderType) {
             Reject.ifTrue(properties.isEmpty(), "There must be at least one property");
         }
+        removePropertiesIfEmpty("definitions", jsonValue);
+        removePropertiesIfEmpty("required", jsonValue);
         return jsonValue;
+    }
+
+    private void removePropertiesIfEmpty(String propertyName, JsonValue jsonValue) {
+        if (jsonValue.get(propertyName) != null) {
+            if (jsonValue.get(propertyName).size() == 0) {
+                jsonValue.remove(propertyName);
+            }
+        }
     }
 
     /**
@@ -239,18 +272,31 @@ public final class RequirementsBuilder {
         jsonValue.add("items", prepareChildJsonValue(builder));
     }
 
-    private Object prepareChildJsonValue(RequirementsBuilder builder) {
-        JsonValue jsonValue = builder.build();
-        removeRequiredPropertiesIfEmpty(jsonValue);
-        return getUnderlyingObject(jsonValue);
+    /**
+     * Creates a new builder instance for oneOf keyword.
+     *
+     * @param oneOfElements
+     *         for the oneOf keyword
+     *
+     * @return a new builder instance
+     */
+    public static RequirementsBuilder oneOf(JsonValue... oneOfElements) {
+        RequirementsBuilder newBuilder = new RequirementsBuilder(BuilderType.ONE_OF, null);
+        newBuilder.addOneOfElements(oneOfElements);
+        return newBuilder;
     }
 
-    private void removeRequiredPropertiesIfEmpty(JsonValue jsonValue) {
-        if (jsonValue.get("required") != null) {
-            if (jsonValue.get("required").size() == 0) {
-                jsonValue.remove("required");
-            }
+    private void addOneOfElements(JsonValue... oneOfElements) {
+        List<Object> elements = new ArrayList<>();
+        for (JsonValue jv : oneOfElements) {
+            elements.add(getUnderlyingObject(jv));
         }
+        jsonValue.add("oneOf", elements);
+    }
+
+    private Object prepareChildJsonValue(RequirementsBuilder builder) {
+        JsonValue jsonValue = builder.build();
+        return getUnderlyingObject(jsonValue);
     }
 
     private Object getUnderlyingObject(JsonValue jsonValue) {

@@ -30,6 +30,9 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
  */
 public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
 
+    /**
+     * Type of the token handler.
+     */
     public static final String TYPE = "jwt";
 
     private final String sharedKey;
@@ -41,6 +44,24 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
     private final JwsAlgorithm jwsAlgorithm;
     private final long tokenLifeTimeInSeconds;
 
+    /**
+     * Creates a new JwtTokenHandlerConfig.
+     *
+     * @param sharedKey
+     *         the sharedKey
+     * @param keyPairAlgorithm
+     *         the keyPairAlgorithm
+     * @param keyPairSize
+     *         the keyPairSize
+     * @param jweAlgorithm
+     *         the jweAlgorithm
+     * @param encryptionMethod
+     *         the encryptionMethod
+     * @param jwsAlgorithm
+     *         the jwsAlgorithm
+     * @param tokenLifeTimeInSeconds
+     *         the tokenLifeTimeInSeconds
+     */
     @JsonCreator
     public JwtTokenHandlerConfig(
             @JsonProperty("sharedKey") String sharedKey,
@@ -60,34 +81,74 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
 
     }
 
+    /**
+     * Gets token handler type.
+     *
+     * @return the type
+     */
     public String getType() {
         return TYPE;
     }
 
+    /**
+     * Gets the shared key.
+     *
+     * @return the shared key as bytes
+     */
     public byte[] getSharedKey() {
         return sharedKey.getBytes();
     }
 
+    /**
+     * Gets the key pair algorithm.
+     *
+     * @return the key pair algorithm
+     */
     public String getKeyPairAlgorithm() {
         return keyPairAlgorithm;
     }
 
+    /**
+     * Gets the key pair size.
+     *
+     * @return the key pair size
+     */
     public int getKeyPairSize() {
         return keyPairSize;
     }
 
+    /**
+     * Gets the jwe algorithm.
+     *
+     * @return the jwe algorithm
+     */
     public JweAlgorithm getJweAlgorithm() {
         return jweAlgorithm;
     }
 
+    /**
+     * Gets the encryption method.
+     *
+     * @return the encryption method
+     */
     public EncryptionMethod getEncryptionMethod() {
         return encryptionMethod;
     }
 
+    /**
+     * Gets the jws algorithm.
+     *
+     * @return the jws algorithm
+     */
     public JwsAlgorithm getJwsAlgorithm() {
         return jwsAlgorithm;
     }
 
+    /**
+     * Gets the token life time.
+     *
+     * @return the token life time in seconds
+     */
     public long getTokenLifeTimeInSeconds() {
         return tokenLifeTimeInSeconds;
     }

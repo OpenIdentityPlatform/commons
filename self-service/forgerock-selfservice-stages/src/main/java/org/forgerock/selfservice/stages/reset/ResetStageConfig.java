@@ -25,6 +25,9 @@ import org.forgerock.selfservice.core.config.StageConfig;
  */
 public final class ResetStageConfig implements StageConfig {
 
+    /**
+     * Name of the stage configuration.
+     */
     public static final String NAME = "resetStage";
 
     private String identityServiceUrl;
