@@ -303,7 +303,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
                                 .setUri(URI.create(openamDeploymentUrl + JSON_REST_ROOT_ENDPOINT
                                         + normalizeRealm(realm) + JSON_USERS_ENDPOINT + uid + "?_fields="
                                         + openamUserAttribute));
-                        usersRequest.getHeaders().putSingle(openamSSOTokenCookieName, tokenId);
+                        usersRequest.getHeaders().put(openamSSOTokenCookieName, tokenId);
                         return httpClient.send(usersRequest)
                                 .then(onUserResponse(clientSubject), onUserRequestFailure());
                     }

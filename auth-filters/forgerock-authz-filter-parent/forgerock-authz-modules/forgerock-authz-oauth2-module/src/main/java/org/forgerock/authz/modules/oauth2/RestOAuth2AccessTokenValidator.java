@@ -132,7 +132,7 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
         Request request = new Request()
                 .setMethod("GET")
                 .setUri(URI.create(userProfileEndpoint));
-        request.getHeaders().putSingle("Authorization", "Bearer " + accessToken);
+        request.getHeaders().put("Authorization", "Bearer " + accessToken);
         return httpClient.send(request)
                 .then(new Function<Response, AccessTokenValidationResponse, OAuth2Exception>() {
                     @Override

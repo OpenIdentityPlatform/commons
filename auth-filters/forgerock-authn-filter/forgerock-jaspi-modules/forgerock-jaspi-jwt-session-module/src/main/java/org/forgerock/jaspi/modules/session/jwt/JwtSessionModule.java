@@ -28,6 +28,7 @@ import javax.security.auth.message.MessagePolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -149,7 +150,7 @@ public class JwtSessionModule extends AbstractJwtSessionModule<CookieWrapper> im
         Response response = (Response) messageInfo.getResponseMessage();
         Headers headers = response.getHeaders();
         for (CookieWrapper cookieWrapper : cookies) {
-            headers.putSingle(new SetCookieHeader(cookieWrapper.getCookie()));
+            headers.put(new SetCookieHeader(Collections.singletonList(cookieWrapper.getCookie())));
         }
     }
 

@@ -11,35 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2.crest;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.EncoderConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.parsing.Parser;
-import org.testng.annotations.BeforeClass;
+import static com.jayway.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
+
+import org.forgerock.authz.AuthzTestCase;
 import org.testng.annotations.Test;
 
-import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItem;
-
 @Test(testName = "OAuth2Crest")
-public class OAuth2CrestAuthorizationModuleTestCases {
-
-    @BeforeClass
-    public void setUp() {
-        RestAssured.port = Integer.parseInt(System.getProperty("AUTHZ_PORT"));
-        RestAssured.baseURI = "http://" + System.getProperty("AUTHZ_HOST");
-        RestAssured.basePath = System.getProperty("AUTHZ_URI");
-        RestAssured.defaultParser = Parser.JSON;
-        RestAssured.config = RestAssuredConfig.newConfig()
-                .encoderConfig(EncoderConfig.encoderConfig().defaultContentCharset("UTF-8"));
-    }
+public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
 
     @Test
     public void createNotAllowedWhenNoAccessTokenHeaderSet() {
@@ -194,6 +178,7 @@ public class OAuth2CrestAuthorizationModuleTestCases {
         given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer VALID").
+                header("If-Match", "*").
                 body("{}").
             expect().
                 statusCode(200).

@@ -103,7 +103,7 @@ public class IWAModule implements AsyncServerAuthModule {
             if (httpAuthorization == null || "".equals(httpAuthorization)) {
                 LOG.debug("IWAModule: Authorization Header NOT set in request.");
 
-                response.getHeaders().putSingle("WWW-Authenticate", "Negotiate");
+                response.getHeaders().put("WWW-Authenticate", "Negotiate");
                 response.setStatus(Status.UNAUTHORIZED);
                 Map<String, Object> entity = new HashMap<>();
                 entity.put("failure", true);

@@ -120,7 +120,7 @@ public class OpenIdConnectModuleTest {
         given(mockMessage.getRequest()).willReturn(request);
         given(mockMessage.getResponse()).willReturn(response);
 
-        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
 
         //when
         AuthStatus res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
@@ -141,7 +141,7 @@ public class OpenIdConnectModuleTest {
         given(mockMessage.getRequest()).willReturn(request);
         given(mockMessage.getResponse()).willReturn(response);
 
-        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
 
         //when
         AuthStatus res = testModule.validateRequest(mockMessage, null, null).getOrThrowUninterruptibly();
@@ -162,7 +162,7 @@ public class OpenIdConnectModuleTest {
         given(mockMessage.getRequest()).willReturn(request);
         given(mockMessage.getResponse()).willReturn(response);
 
-        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         doThrow(InvalidJwtException.class).when(mockReconstruction).reconstructJwt(anyString(), any(Class.class));
 
         //when
@@ -184,7 +184,7 @@ public class OpenIdConnectModuleTest {
         given(mockMessage.getRequest()).willReturn(request);
         given(mockMessage.getResponse()).willReturn(response);
 
-        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         doThrow(JwtReconstructionException.class)
                 .when(mockReconstruction).reconstructJwt(anyString(), any(Class.class));
 
@@ -211,7 +211,7 @@ public class OpenIdConnectModuleTest {
         given(mockMessage.getRequest()).willReturn(request);
         given(mockMessage.getResponse()).willReturn(response);
 
-        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
 
@@ -239,7 +239,7 @@ public class OpenIdConnectModuleTest {
         given(mockMessage.getRequest()).willReturn(request);
         given(mockMessage.getResponse()).willReturn(response);
 
-        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
 
@@ -269,7 +269,7 @@ public class OpenIdConnectModuleTest {
         given(mockMessage.getRequest()).willReturn(request);
         given(mockMessage.getResponse()).willReturn(response);
 
-        request.getHeaders().putSingle(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
+        request.getHeaders().put(OpenIdConnectModule.HEADER_KEY, jwtInRequest);
         given(mockReconstruction.reconstructJwt(anyString(), any(Class.class))).willReturn(jws);
         given(claimSet.getIssuer()).willReturn("");
         given(mockService.getResolverForIssuer(anyString())).willReturn(mockResolver);

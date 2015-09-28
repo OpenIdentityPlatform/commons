@@ -481,7 +481,7 @@ public class OpenAMSessionModuleTest {
         final Request request = new Request();
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
 
         //When
         final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
@@ -502,8 +502,8 @@ public class OpenAMSessionModuleTest {
         final Request request = new Request();
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
-        request.getHeaders().putSingle(CookieHeader.valueOf("NOT_SSO_COOKIE_NAME=cookieVal"));
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
+        request.getHeaders().put(CookieHeader.valueOf("NOT_SSO_COOKIE_NAME=cookieVal"));
 
         //When
         final AuthStatus authStatus = sessionModule.validateRequest(messageInfo, clientSubject, serviceSubject)
@@ -525,7 +525,7 @@ public class OpenAMSessionModuleTest {
         final JsonValue restResponse = json(object());
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
         mockHttpRequests(
                 Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate", restResponse));
 
@@ -549,7 +549,7 @@ public class OpenAMSessionModuleTest {
         final JsonValue restResponse = json(object(field("valid", false)));
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
         mockHttpRequests(
                 Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate", restResponse));
 
@@ -575,7 +575,7 @@ public class OpenAMSessionModuleTest {
         final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
         mockHttpRequests(Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate",
                         restValidateResponse),
                 Pair.of("https://OPENAM_DEPLOYMENT_URI/json/REALM/users/UID?_fields=OPENAM_USER_ATTRIBUTE",
@@ -603,7 +603,7 @@ public class OpenAMSessionModuleTest {
         final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
         mockHttpRequests(Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate",
                         restValidateResponse),
                 Pair.of("https://OPENAM_DEPLOYMENT_URI/json/REALM/users/UID?_fields=OPENAM_USER_ATTRIBUTE",
@@ -629,7 +629,7 @@ public class OpenAMSessionModuleTest {
         Promise<Response, NeverThrowsException> badRequestPromise = newResultPromise(new Response(Status.BAD_REQUEST));
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", "SSO_TOKEN_ID");
         given(httpHandler.handle(any(Context.class), any(Request.class))).willReturn(badRequestPromise);
 
         //When
@@ -655,8 +655,8 @@ public class OpenAMSessionModuleTest {
         final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
-        request.getHeaders().putSingle(
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
+        request.getHeaders().put(
                 CookieHeader.valueOf("NOT_SSO_COOKIE_NAME=cookieVal,OPENAM_SSO_TOKEN_COOKIE_NAME=SSO_TOKEN_ID"));
         mockHttpRequests(Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate",
                         restValidateResponse),
@@ -685,8 +685,8 @@ public class OpenAMSessionModuleTest {
         final JsonValue restUsersResponse = json(object(field("OPENAM_USER_ATTRIBUTE", array("VALUE"))));
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
-        request.getHeaders().putSingle(
+        request.getHeaders().put("OPENAM_SSO_TOKEN_COOKIE_NAME", null);
+        request.getHeaders().put(
                 CookieHeader.valueOf("OPENAM_SSO_TOKEN_COOKIE_NAME=SSO_TOKEN_ID"));
         mockHttpRequests(Pair.of("https://OPENAM_DEPLOYMENT_URI/json/sessions/SSO_TOKEN_ID?_action=validate",
                         restValidateResponse),

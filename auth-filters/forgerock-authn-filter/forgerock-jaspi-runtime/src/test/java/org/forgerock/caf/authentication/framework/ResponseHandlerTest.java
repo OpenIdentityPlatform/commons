@@ -163,7 +163,7 @@ public class ResponseHandlerTest {
         ResourceException jre = ResourceException.getException(ResourceException.BAD_REQUEST, "BAD_REQUEST");
         AuthenticationException exception = new AuthenticationException(jre);
 
-        request.getHeaders().putSingle("Accept", accept);
+        request.getHeaders().put("Accept", accept);
         given(context.getRequest()).willReturn(request);
         given(context.getResponse()).willReturn(response);
         given(context.getAuditTrail()).willReturn(auditTrail);
@@ -186,7 +186,7 @@ public class ResponseHandlerTest {
 
         public void write(MessageContext context, AuthenticationException exception) {
             Response response = context.getResponse();
-            response.getHeaders().putSingle(ContentTypeHeader.valueOf(APPLICATION_XML));
+            response.getHeaders().put(ContentTypeHeader.valueOf(APPLICATION_XML));
             ResourceException jre = (ResourceException) exception.getCause();
             response.setEntity("Hello " + jre.getCode());
         }

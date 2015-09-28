@@ -170,7 +170,7 @@ class ResponseHandler {
             }
             Response response = context.getResponse();
             response.setStatus(Status.valueOf(jre.getCode()));
-            response.getHeaders().putSingle(ContentTypeHeader.valueOf(MediaType.JSON_UTF_8.toString()));
+            response.getHeaders().put(ContentTypeHeader.valueOf(MediaType.JSON_UTF_8.toString()));
             response.setEntity(jre.includeCauseInJsonValue().toJsonValue().asMap());
         }
 
