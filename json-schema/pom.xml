@@ -65,6 +65,7 @@
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
     </properties>
     <modules>
+        <module>forgerock-rest-docbook</module>
         <module>json-ref</module>
         <module>json-ref-jackson</module>
         <module>json-schema</module>
