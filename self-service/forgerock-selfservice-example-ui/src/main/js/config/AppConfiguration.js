@@ -48,7 +48,6 @@ define("config/AppConfiguration", [
                 moduleClass: "org/forgerock/commons/ui/common/main/ProcessConfiguration",
                 configuration: {
                     processConfigurationFiles: [
-                        "config/process/UserConfig",
                         "config/process/CommonConfig"
                     ]
                 }
@@ -110,7 +109,6 @@ define("config/AppConfiguration", [
                     policyDelegate: "org/forgerock/mock/ui/common/delegates/PolicyDelegate",
                     validators: { },
                     loader: [
-                        {"validators": "config/validators/UserValidators"},
                         {"validators": "config/validators/CommonValidators"}
                     ]
                 }

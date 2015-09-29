@@ -48,11 +48,13 @@ define("org/forgerock/selfservice/ui/ThemeManager", [
             href: theme.path + theme.icon
         }).appendTo("head");
 
-        $("<link/>", {
-            rel: "stylesheet",
-            type: "text/css",
-            href: theme.stylesheet
-        }).appendTo("head");
+        _.forEach(theme.stylesheets, function(stylesheet) {
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: stylesheet
+            }).appendTo("head");
+        });
     };
 
 
@@ -67,7 +69,7 @@ define("org/forgerock/selfservice/ui/ThemeManager", [
             return $.Deferred().resolve({
                 "path": "",
                 "icon": "favicon.ico",
-                "stylesheet": "css/styles.css",
+                "stylesheets": ["css/theme.css", "css/structure.css"],
                 "settings": {
                     "logo": {
                         "src": "images/logo-horizontal.png",

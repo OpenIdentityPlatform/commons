@@ -47,7 +47,8 @@ module.exports = function(grunt) {
         less: {
             mock: {
                 files: {
-                    "target/www/css/styles.css": "target/www/css/styles.less"
+                    "target/www/css/theme.css": "target/www/css/theme.less",
+                    "target/www/css/structure.css": "target/www/css/structure.less"
                 }
             }
         },
