@@ -139,22 +139,12 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                     );
                 },
                 attemptCustomTemplate = function (stateData) {
-                    UIUtils.fillTemplateWithData(
-                        baseTemplateUrl + response.type + "-" + response.tag + ".html",
-                        stateData,
-                        function (renderedTemplate) {
-                            /*
-                                If the template is loaded successfully, then it renderedTemplate a
-                                string containing the content of the rendered template. In the case
-                                of a failure to load, this function is passed the failed XHR object.
-                            */
-                            if (typeof renderedTemplate === "string") {
-                                processStatePromise.resolve(renderedTemplate);
-                            } else {
-                                loadGenericTemplate(stateData);
-                            }
-                        }
-                    );
+                    UIUtils.compileTemplate(baseTemplateUrl + response.type + "-" + response.tag + ".html", stateData)
+                        .then(function (renderedTemplate) {
+                            processStatePromise.resolve(renderedTemplate);
+                        }, function () {
+                            loadGenericTemplate(stateData);
+                        });
                 };
 
             if (_.has(response, "requirements")) {

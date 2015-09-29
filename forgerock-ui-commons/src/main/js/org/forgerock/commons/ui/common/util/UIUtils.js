@@ -14,7 +14,7 @@
  * Portions copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, i18n, sessionStorage */
+/*global define, i18n */
 
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
@@ -22,10 +22,12 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     "require",
     "handlebars",
     "i18next",
+    "ThemeManager",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/Router"
-], function ($, _, require, Handlebars, i18next, AbstractConfigurationAware, ModuleLoader, Router) {
+], function ($, _, require, Handlebars, i18next, ThemeManager, AbstractConfigurationAware, ModuleLoader, Router) {
+
     /**
      * @exports org/forgerock/commons/ui/common/util/UIUtils
      */
@@ -33,84 +35,128 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     obj.templates = {};
 
-    obj.renderTemplate = function(templateUrl, el, data, clb, mode, validation) {
-        obj.fillTemplateWithData(templateUrl, data, function(tpl) {
-            // if we were passed a validation function and it returns false, abort
+    function fetchTemplate(url) {
+        return $.ajax({ type: "GET", url: require.toUrl(url), dataType: "html" });
+    }
+
+    function fetchAndSaveTemplate(urlToFetch, urlToSave) {
+        return fetchTemplate(urlToFetch).done(function (template) {
+            obj.templates[urlToSave] = template;
+        });
+    }
+
+    function fetchAndCompileTemplate(urlToFetch, urlToSave, data) {
+        return fetchTemplate(urlToFetch).then(function (template) {
+            if (data !== "unknown" && data !== null) {
+                obj.templates[urlToSave] = template;
+                template = Handlebars.compile(template)(data);
+            }
+            return template;
+        });
+    }
+
+    function registerPartial(name, url) {
+        return fetchTemplate(url).then(function (data) {
+            Handlebars.registerPartial(name, Handlebars.compile(data));
+        });
+    }
+
+    /**
+     * Renders the template.
+     * @param {String} templateUrl - template url.
+     * @param {JQuery} el - element, in which the template should be rendered.
+     * @param {Object} data - template will be compiled with this data.
+     * @param {Function} callback - callback to be called after template is rendered.
+     * @param {String} mode - "append" means the template will be appended, provide any other value for
+     *                        replacing current contents of the element.
+     * @param {Function} validation - validation function.
+     */
+    obj.renderTemplate = function (templateUrl, el, data, callback, mode, validation) {
+        return obj.compileTemplate(templateUrl, data).then(function validateAndRender(template) {
             if (validation && !validation()) {
                 return false;
             }
 
             if (mode === "append") {
-                el.append(tpl);
+                el.append(template);
             } else {
-                el.html(tpl);
+                el.html(template);
             }
 
-            if (clb) {
-                clb();
+            if (callback) {
+                callback();
             }
         });
     };
 
-    obj.fillTemplateWithData = function(templateUrl, data, callback) {
+     /**
+      * @deprecated
+      * @see Use {@link module:org/forgerock/commons/ui/common/util/UIUtils.compileTemplate}
+      */
+    obj.fillTemplateWithData = function (templateUrl, data, compileCallback) {
+        return obj.compileTemplate(templateUrl, data).then(compileCallback);
+    };
+
+    /**
+     * Compiles template and returns the result of compilation.
+     * @param {String} templateUrl - template url.
+     * @param {Object} data - template will be compiled with this data.
+     * @returns {Promise} compiled template wrapped in a promise
+     */
+    obj.compileTemplate = function (templateUrl, data) {
         if (templateUrl) {
-            if (obj.templates[templateUrl]) {
-                var code = Handlebars.compile(obj.templates[templateUrl])(data);
+            return ThemeManager.getTheme().then(function (theme) {
+                var templateUrlWithPath = theme.path + templateUrl,
+                    templateSavedPath = theme.path ? templateUrlWithPath : templateUrl,
+                    compiledTemplate;
 
-                if (callback) {
-                    callback(code);
+                if (obj.templates[templateSavedPath]) {
+                    return Handlebars.compile(obj.templates[templateSavedPath])(data);
+                } else {
+                    if (theme.path) {
+                        return fetchAndCompileTemplate(templateUrlWithPath, templateUrlWithPath, data)
+                            .then(null, function fallBackToDefaultPath() {
+                                console.log(templateUrlWithPath + " was not found. Trying " + templateUrl);
+                                return fetchAndCompileTemplate(templateUrl, templateUrlWithPath, data);
+                            });
+                    } else {
+                        return fetchAndCompileTemplate(templateUrl, templateUrl, data);
+                    }
                 }
-
-                return code;
-            } else {
-                $.ajax({
-                    type: "GET",
-                    url: require.toUrl(templateUrl),
-                    dataType: "html",
-                    success: function(template) {
-                        if (data === "unknown" || data === null) {
-                            //don't fill the template
-                            if (callback) {
-                                callback(template);
-                            }
-                        } else {
-                            obj.templates[templateUrl] = template;
-
-                            //fill the template
-                            if (callback) {
-                                callback(Handlebars.compile(template)(data));
-                            }
-                        }
-                    },
-                    error: callback
-                });
-            }
+            });
+        } else {
+            return $.Deferred().resolve("");
         }
     };
 
     /**
-     * Preloads templates for their later usage.
-     * @param {(string|string[])} urls - Urls to be preloaded, can be either a string or an array.
-     */
-    obj.preloadTemplates = function(urls) {
+    * Preloads templates for their later usage.
+    * @param {(String|String[])} urls - Urls to be preloaded, can be either a string or an array.
+    */
+    obj.preloadTemplates = function (urls) {
         if (typeof urls === "string") {
             urls = [urls];
         }
 
-        _.each(urls, function(url) {
-            obj.reloadTemplate(url).done(function (data) {
-                obj.templates[url] = data;
-            }).fail(function() {
-                console.error("Template \"" + url + "\" failed to loaded");
-            });
-        });
-    };
+        return ThemeManager.getTheme().then(function (theme) {
+            var promises = [];
 
-    obj.reloadTemplate = function(url) {
-        return $.ajax({
-            type: "GET",
-            url: require.toUrl(url),
-            dataType: "html"
+            if (theme.path) {
+                _.each(urls, function (templateUrl) {
+                    var urlWithPath = theme.path + templateUrl;
+                    promises.push(
+                        fetchAndSaveTemplate(urlWithPath, urlWithPath).then(null, function fallBackToDefaultPath() {
+                            console.log(urlWithPath + " was not found. Trying " + templateUrl);
+                            promises.push(fetchAndSaveTemplate(templateUrl, urlWithPath));
+                        }));
+                });
+            } else {
+                _.each(urls, function (templateUrl) {
+                    promises.push(fetchAndSaveTemplate(templateUrl, templateUrl));
+                });
+            }
+
+            return $.when.apply($, promises);
         });
     };
 
@@ -128,18 +174,24 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
      * "partials/headers/_Title.html" => "headers/_Title"
      * <p>
      * Will not reload and register partials that are already loaded and registered
-     * @param  {String} url URL of partial to load in the format "partials/<path_to_partial>.html"
-     * @return {Promise.<Object>|false} Load promise or false if partial is already loaded
+     * @param {String} url URL of partial to load in the format "partials/<path_to_partial>.html"
+     * @return {Promise.<Object>} Load promise
      */
-    obj.preloadPartial = function(url) {
+    obj.preloadPartial = function (url) {
         var name = url.replace(/(^partials\/)|(\.html$)/g, "");
 
-        if (Handlebars.partials[name]) { return false; }
-
-        return obj.reloadTemplate(url).done(function (data) {
-            Handlebars.registerPartial(name, Handlebars.compile(data));
-        }).fail(function() {
-            console.error("Partial \"" + url + "\" failed to loaded");
+        return ThemeManager.getTheme().then(function (theme) {
+            if (Handlebars.partials[name]) {
+                return;
+            } else if (theme.path) {
+                return registerPartial(name, theme.path + url)
+                    .then(null, function fallBackToDefaultPath() {
+                        console.log(theme.path + url + " was not found. Trying " + url);
+                        return registerPartial(name, url);
+                    });
+            } else {
+                return registerPartial(name, url);
+            }
         });
     };
 
@@ -164,7 +216,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         return this.emptySelect().each(function() {
             if (this.tagName === "SELECT") {
                 var i, option, selectElement = this;
-                for(i=0;i<optionsDataArray.length;i++){
+                for(i = 0; i < optionsDataArray.length; i++){
                     option = new Option(optionsDataArray[i].value, optionsDataArray[i].key);
                     selectElement.options[selectElement.options.length] = option;
                 }
@@ -451,7 +503,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
 
     //This function exists to catch any legacy jqConfirms.
     //Once completly updated across the applications this function can be removed.
-    obj.jqConfirm  = function(message, confirmCallback){
+    obj.jqConfirm = function(message, confirmCallback) {
         this.confirmDialog(message, "default", confirmCallback);
     };
 

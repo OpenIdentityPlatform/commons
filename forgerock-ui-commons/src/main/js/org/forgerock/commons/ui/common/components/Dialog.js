@@ -1,32 +1,20 @@
 /**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
 
 /*global define */
-
-/**
- * @author mbilski
- */
 
 define("org/forgerock/commons/ui/common/components/Dialog", [
     "jquery",
@@ -36,11 +24,11 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function($, _, AbstractView, uiUtils, constants, eventManager, conf) {
+], function($, _, AbstractView, UIUtils, Constants, EventManager, Configuration) {
     /**
      * @exports org/forgerock/commons/ui/common/components/Dialog
      */
-    var Dialog = AbstractView.extend({
+    return AbstractView.extend({
         template: "templates/common/DialogTemplate.html",
         element: "#dialogs",
 
@@ -101,18 +89,17 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
          * Loads template from 'contentTemplate'
          */
         loadContent: function(callback) {
-            if(callback) {
-                uiUtils.renderTemplate(this.data.theme.path + this.contentTemplate, this.$el.find(".dialogContent"), _.extend({}, conf.globalData, this.data), _.bind(callback, this), "append");
-            } else {
-                uiUtils.renderTemplate(this.data.theme.path + this.contentTemplate, this.$el.find(".dialogContent"), _.extend({}, conf.globalData, this.data), null, "append");
-            }
+            UIUtils.renderTemplate(
+                this.contentTemplate,
+                this.$el.find(".dialogContent"),
+                _.extend({}, Configuration.globalData, this.data),
+                callback ? _.bind(callback, this) : _.noop(),
+                "append");
         },
 
         render: function() {
             this.show();
         },
-
-
 
         close: function(e) {
             if (e) {
@@ -125,7 +112,7 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
                 $("#dialogs").hide();
             }
 
-            eventManager.sendEvent(constants.EVENT_DIALOG_CLOSE);
+            EventManager.sendEvent(Constants.EVENT_DIALOG_CLOSE);
 
             this.$el.remove();
         },
@@ -149,6 +136,4 @@ define("org/forgerock/commons/ui/common/components/Dialog", [
             });
         }
     });
-
-    return Dialog;
 });
