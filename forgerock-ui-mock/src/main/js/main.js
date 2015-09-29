@@ -27,6 +27,7 @@
 require.config({
     map: {
         "*" : {
+            "Footer": "org/forgerock/mock/ui/common/components/Footer",
             "UserDelegate": "org/forgerock/mock/ui/user/delegates/UserDelegate",
             "ThemeManager": "org/forgerock/mock/ui/common/util/ThemeManager",
             "LoginView": "org/forgerock/commons/ui/common/LoginView",

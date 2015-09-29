@@ -40,6 +40,11 @@
 @import "structure/dropdown-menu.less";
 
 /*
+    Page Footer
+*/
+@import "structure/page-footer.less";
+
+/*
     Page Header
 */
 @import "structure/page-header.less";
@@ -114,20 +119,6 @@
 @version: '';
 .nocache-background-image(@url) {
     background-image: url("@{url}?v=@{version}");
-}
-
-/*
-Footer
-*/
-.footer {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: @footer-height;
-    text-align: center;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    background-color: rgba(0, 0, 0, 0.04);
-    padding: 10px;
 }
 
 /*
