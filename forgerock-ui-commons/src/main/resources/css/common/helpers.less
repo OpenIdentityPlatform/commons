@@ -136,9 +136,15 @@ For font awesome
     }
 }
 
+
 .wordwrap{
     white-space: initial;
     word-wrap: break-word;
+    word-break: break-word;
+}
+
+// Required because ff does not wrap properly in tables.
+.table .wordwrap {
     word-break: break-all;
 }
 
