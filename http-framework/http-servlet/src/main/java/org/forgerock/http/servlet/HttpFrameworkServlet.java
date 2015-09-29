@@ -289,22 +289,22 @@ public final class HttpFrameworkServlet extends HttpServlet {
     private void writeResponse(Request request, Response response, HttpServletResponse servletResponse,
             SessionContext sessionContext, ServletSynchronizer synchronizer) {
         try {
-        /*
-         * Support for OPENIG-94/95 - The wrapped servlet may have already
-         * committed its response w/o creating a new OpenIG Response instance in
-         * the exchange.
-         */
-        if (response != null) {
-            // response status-code (reason-phrase deprecated in Servlet API)
+            /*
+             * Support for OPENIG-94/95 - The wrapped servlet may have already
+             * committed its response w/o creating a new OpenIG Response instance in
+             * the exchange.
+             */
+            if (response != null) {
+                // response status-code (reason-phrase deprecated in Servlet API)
                 servletResponse.setStatus(response.getStatus().getCode());
 
-            // ensure that the session has been written back to the response
+                // ensure that the session has been written back to the response
                 sessionContext.getSession().save(response);
 
-            // response headers
-            for (String name : response.getHeaders().keySet()) {
-                for (String value : response.getHeaders().get(name).getValues()) {
-                    if (value != null && value.length() > 0) {
+                // response headers
+                for (String name : response.getHeaders().keySet()) {
+                    for (String value : response.getHeaders().get(name).getValues()) {
+                        if (value != null && value.length() > 0) {
                             servletResponse.addHeader(name, value);
                         }
                     }
