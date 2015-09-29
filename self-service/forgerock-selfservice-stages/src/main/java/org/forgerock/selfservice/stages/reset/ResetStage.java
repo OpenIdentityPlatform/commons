@@ -19,6 +19,7 @@ package org.forgerock.selfservice.stages.reset;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -92,7 +93,8 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
     private void patchUser(Context httpContext, String userId, String password,
                            ResetStageConfig config) throws ResourceException {
         try (Connection connection = connectionFactory.getConnection()) {
-            PatchOperation operation = PatchOperation.replace(config.getIdentityPasswordField(), password);
+            PatchOperation operation = PatchOperation.replace(
+                    new JsonPointer(config.getIdentityPasswordField()), password);
             PatchRequest request = Requests.newPatchRequest(config.getIdentityServiceUrl(), userId, operation);
             connection.patch(httpContext, request);
         }

@@ -85,13 +85,13 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
         }
 
         String userId = user
-                .get(config.getIdentityIdField())
+                .get(new JsonPointer(config.getIdentityIdField()))
                 .asString();
 
         context.putState(USER_ID_FIELD, userId);
 
         return user
-                .get(config.getIdentityEmailField())
+                .get(new JsonPointer(config.getIdentityEmailField()))
                 .asString();
     }
 
