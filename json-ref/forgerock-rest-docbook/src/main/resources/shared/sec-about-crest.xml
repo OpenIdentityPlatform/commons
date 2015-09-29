@@ -18,7 +18,8 @@
           xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://docbook.org/ns/docbook
-                              http://docbook.org/xml/5.0/xsd/docbook.xsd">
+                              http://docbook.org/xml/5.0/xsd/docbook.xsd"
+          xmlns:xinclude='http://www.w3.org/2001/XInclude'>
  <title>About ForgeRock Common REST</title>
 
  <para>
@@ -190,12 +191,13 @@
   <title>Common REST Parameters</title>
 
   <para>
-   Common REST query string parameter names all start with an underscore,
+   Common REST reserved query string parameter names start with an underscore,
    <literal>_</literal>.
   </para>
 
   <para>
-   Reserved query string parameters include the following.
+   Reserved query string parameters include, but are not limited to,
+   the following names:
   </para>
 
   <simplelist>
@@ -206,6 +208,7 @@
    <member><literal>_pagedResultsCookie</literal></member>
    <member><literal>_pagedResultsOffset</literal></member>
    <member><literal>_prettyPrint</literal></member>
+   <member><literal>_queryExpression</literal></member>
    <member><literal>_queryFilter</literal></member>
    <member><literal>_queryId</literal></member>
    <member><literal>_sortKeys</literal></member>
@@ -261,7 +264,7 @@
   </para>
 
   <programlisting language="http">
-POST /users?_action=create  HTTP/1.1
+POST /users?_action=create HTTP/1.1
 Host: example.com
 Accept: application/json
 Content-Length: ...
@@ -271,14 +274,14 @@ Content-Type: application/json
 
   <para>
    To create a resource using PUT, perform an HTTP PUT
-   including the case-sensitive identifier (<literal>_id</literal>)
-   for the resource with the JSON resource as a payload.
+   including the case-sensitive identifier for the resource in the URL path,
+   and the JSON resource as a payload.
    Use the <literal>If-None-Match: *</literal> header.
    Accept a JSON response.
   </para>
 
   <programlisting language="http">
-PUT /users/some-id  HTTP/1.1
+PUT /users/some-id HTTP/1.1
 Host: example.com
 Accept: application/json
 Content-Length: ...
@@ -288,8 +291,10 @@ If-None-Match: *
   </programlisting>
 
   <para>
-   The <literal>_id</literal> and content of the resource
-   depend on the server implementation.
+   The <literal>_id</literal> and content of the resource depend on the server implementation.
+   The server is not required to use the <literal>_id</literal> that the client provides.
+   The server response to the create request indicates the resource location
+   as the value of the <literal>Location</literal> header.
   </para>
 
   <variablelist>
@@ -299,23 +304,9 @@ If-None-Match: *
     You can use the following parameters.
    </para>
 
-   <varlistentry>
-    <term><literal>_prettyPrint=true</literal></term>
-    <listitem>
-     <para>
-      Format the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-pretty-print.xml" />
 
-   <varlistentry>
-    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
-    <listitem>
-     <para>
-      Return only the specified fields in the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-fields.xml" />
   </variablelist>
  </section>
 
@@ -329,7 +320,7 @@ If-None-Match: *
   </para>
 
   <programlisting language="http">
-GET /users/some-id  HTTP/1.1
+GET /users/some-id HTTP/1.1
 Host: example.com
 Accept: application/json
   </programlisting>
@@ -341,23 +332,9 @@ Accept: application/json
     You can use the following parameters.
    </para>
 
-   <varlistentry>
-    <term><literal>_prettyPrint=true</literal></term>
-    <listitem>
-     <para>
-      Format the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-pretty-print.xml" />
 
-   <varlistentry>
-    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
-    <listitem>
-     <para>
-      Return only the specified fields in the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-fields.xml" />
 
    <varlistentry>
     <term><literal>_mimeType=<replaceable>mime-type</replaceable></literal></term>
@@ -378,6 +355,12 @@ Accept: application/json
       matches the <replaceable>mime-type</replaceable> that you specify,
       and the body of the response is the multi-media resource.
      </para>
+
+     <para>
+      The <literal>Accept</literal> header is not used in this case.
+      For example, <literal>Accept: image/png</literal> does not work.
+      Use the <literal>_mimeType</literal> query string parameter instead.
+     </para>
     </listitem>
    </varlistentry>
   </variablelist>
@@ -392,11 +375,12 @@ Accept: application/json
    for the resource with the JSON resource as a payload.
    Use the <literal>If-Match: <replaceable>_rev</replaceable></literal> header
    to check that you are actually updating the version you modified.
+   Use <literal>If-Match: *</literal> if the version does not matter.
    Accept a JSON response.
   </para>
 
   <programlisting language="http">
-PUT /users/some-id  HTTP/1.1
+PUT /users/some-id HTTP/1.1
 Host: example.com
 Accept: application/json
 Content-Length: ...
@@ -412,23 +396,9 @@ If-Match: <replaceable>_rev</replaceable>
     You can use the following parameters.
    </para>
 
-   <varlistentry>
-    <term><literal>_prettyPrint=true</literal></term>
-    <listitem>
-     <para>
-      Format the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-pretty-print.xml" />
 
-   <varlistentry>
-    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
-    <listitem>
-     <para>
-      Return only the specified fields in the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-fields.xml" />
   </variablelist>
  </section>
 
@@ -442,7 +412,7 @@ If-Match: <replaceable>_rev</replaceable>
   </para>
 
   <programlisting language="http">
-DELETE /users/some-id  HTTP/1.1
+DELETE /users/some-id HTTP/1.1
 Host: example.com
 Accept: application/json
   </programlisting>
@@ -454,23 +424,9 @@ Accept: application/json
     You can use the following parameters.
    </para>
 
-   <varlistentry>
-    <term><literal>_prettyPrint=true</literal></term>
-    <listitem>
-     <para>
-      Format the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-pretty-print.xml" />
 
-   <varlistentry>
-    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
-    <listitem>
-     <para>
-      Return only the specified fields in the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-fields.xml" />
   </variablelist>
  </section>
 
@@ -486,7 +442,7 @@ Accept: application/json
   </para>
 
   <programlisting language="http">
-PATCH /users/some-id  HTTP/1.1
+PATCH /users/some-id HTTP/1.1
 Host: example.com
 Accept: application/json
 Content-Length: ...
@@ -517,23 +473,9 @@ If-Match: <replaceable>_rev</replaceable>
     You can use the following parameters.
    </para>
 
-   <varlistentry>
-    <term><literal>_prettyPrint=true</literal></term>
-    <listitem>
-     <para>
-      Format the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-pretty-print.xml" />
 
-   <varlistentry>
-    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
-    <listitem>
-     <para>
-      Return only the specified fields in the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-fields.xml" />
   </variablelist>
  </section>
 
@@ -559,23 +501,9 @@ If-Match: <replaceable>_rev</replaceable>
     Other parameters might depend on the specific action implementation.
    </para>
 
-   <varlistentry>
-    <term><literal>_prettyPrint=true</literal></term>
-    <listitem>
-     <para>
-      Format the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-pretty-print.xml" />
 
-   <varlistentry>
-    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
-    <listitem>
-     <para>
-      Return only the specified fields in the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-fields.xml" />
   </variablelist>
  </section>
 
@@ -586,11 +514,13 @@ If-Match: <replaceable>_rev</replaceable>
    To query a resource collection
    (or resource container if you prefer to think of it that way),
    perform an HTTP GET and accept a JSON response, including at least
-   a <literal>_queryFilter</literal> or <literal>_queryId</literal> parameter.
+   a <literal>_queryExpression</literal>,
+   <literal>_queryFilter</literal>, or <literal>_queryId</literal> parameter.
+   These parameters cannot be used together.
   </para>
 
   <programlisting language="http">
-GET /users?_queryFilter=true  HTTP/1.1
+GET /users?_queryFilter=true HTTP/1.1
 Host: example.com
 Accept: application/json
   </programlisting>
@@ -721,6 +651,20 @@ UTF8STRING     = UTF-8 string possibly containing white-space
       until the server returns a <literal>null</literal> cookie,
       meaning that the final page of results has been returned.
      </para>
+
+     <para>
+      The <literal>_pagedResultsCookie</literal> parameter is supported
+      when used with the <literal>_queryFilter</literal> parameter.
+      The <literal>_pagedResultsCookie</literal> parameter
+      is not guaranteed to work when used with the
+      <literal>_queryExpression</literal> and <literal>_queryId</literal> parameters.
+     </para>
+
+     <para>
+      The <literal>_pagedResultsCookie</literal>
+      and <literal>_pagedResultsOffset</literal> parameters
+      are mutually exclusive, and not to be used together.
+     </para>
     </listitem>
    </varlistentry>
 
@@ -730,10 +674,12 @@ UTF8STRING     = UTF-8 string possibly containing white-space
      <para>
       When <literal>_pageSize</literal> is non-zero,
       use this as an index in the result set indicating the first page to return.
-      When the value of <literal>_pagedResultsOffset</literal> is less than 1,
-      the server returns the next page after the last page returned.
-      When the value is greater than or equal to 1,
-      the server returns the page starting from the specified index.
+     </para>
+
+     <para>
+      The <literal>_pagedResultsCookie</literal>
+      and <literal>_pagedResultsOffset</literal> parameters
+      are mutually exclusive, and not to be used together.
      </para>
     </listitem>
    </varlistentry>
@@ -743,8 +689,9 @@ UTF8STRING     = UTF-8 string possibly containing white-space
     <listitem>
      <para>
       Return query results in pages of this size.
-      After the initial request,
-      use <literal>_pagedResultsCookie</literal> to page through the results.
+      After the initial request, use
+      <literal>_pagedResultsCookie</literal> or <literal>_pageResultsOffset</literal>
+      to page through the results.
      </para>
     </listitem>
    </varlistentry>
@@ -782,20 +729,20 @@ UTF8STRING     = UTF-8 string possibly containing white-space
     </listitem>
    </varlistentry>
 
-   <varlistentry>
-    <term><literal>_prettyPrint=true</literal></term>
-    <listitem>
-     <para>
-      Format the body of the response.
-     </para>
-    </listitem>
-   </varlistentry>
+   <xinclude:include href="varlistentry-pretty-print.xml" />
 
    <varlistentry>
     <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
     <listitem>
      <para>
-      Return only the specified fields in the body of the response.
+      Return only the specified fields in each element
+      of the "results" array in the response.
+     </para>
+
+     <para>
+      The <literal>field</literal> values are JSON pointers.
+      For example if the resource is <literal>{"parent":{"child":"value"}}</literal>,
+      <literal>parent/child</literal> refers to the <literal>"child":"value"</literal>.
      </para>
     </listitem>
    </varlistentry>
@@ -807,7 +754,7 @@ UTF8STRING     = UTF-8 string possibly containing white-space
 
   <para>
    When working with a common REST API over HTTP,
-   you can expect the following HTTP status codes.
+   client applications should expect at least the following HTTP status codes.
    Not all servers necessarily return all status codes identified here.
   </para>
 
@@ -826,6 +773,25 @@ UTF8STRING     = UTF-8 string possibly containing white-space
     <listitem>
      <para>
       The request succeeded and the resource was created.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>204 No Content</term>
+    <listitem>
+     <para>
+      The action request succeeded, and there was no content to return.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>304 Not Modified</term>
+    <listitem>
+     <para>
+      The read request included an <literal>If-None-Match</literal> header,
+      and the value of the header matched the revision value of the resource.
      </para>
     </listitem>
    </varlistentry>
