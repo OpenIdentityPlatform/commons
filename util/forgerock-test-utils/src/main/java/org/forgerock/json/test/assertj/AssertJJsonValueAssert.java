@@ -161,6 +161,17 @@ public class AssertJJsonValueAssert {
         }
 
         /**
+         * Check that the referenced {@link JsonValue} doesn't exist in this object.
+         * @param path The {@link JsonPointer} path.
+         * @return This assert object, for further processing.
+         */
+        public T doesNotContain(String path) {
+            JsonValue child = actual.get(new JsonPointer(path));
+            Assertions.assertThat(child).isNull();
+            return myself;
+        }
+
+        /**
          * Check that the referenced {@link JsonValue} is a boolean.
          * @param path The {@link JsonPointer} path to the expected value.
          * @param condition What condition you expect the value to match.

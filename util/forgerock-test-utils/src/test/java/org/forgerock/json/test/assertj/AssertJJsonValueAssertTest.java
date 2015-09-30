@@ -103,6 +103,21 @@ public class AssertJJsonValueAssertTest {
         asserter.hasObject("emptyObject").isEmpty();
 
         asserter.hasArray("emptyArray").isEmpty();
+
+        asserter.doesNotContain("obj/findme");
+    }
+
+    @Test (expectedExceptions = AssertionError.class)
+    public void testDoesNotContainThrowsException() throws Exception {
+        // Given
+        JsonValue value = json(object(
+                field("null", null)));
+
+        // When
+        AssertJJsonValueAssert.AbstractJsonValueAssert asserter = AssertJJsonValueAssert.assertThat(value);
+
+        // Then
+        asserter.doesNotContain("null");
     }
 
     @Test
