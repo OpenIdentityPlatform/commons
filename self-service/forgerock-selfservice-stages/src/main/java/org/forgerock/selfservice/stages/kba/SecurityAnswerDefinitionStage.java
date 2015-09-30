@@ -29,10 +29,14 @@ import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.stages.crypto.CryptoConstants;
+import org.forgerock.selfservice.stages.crypto.CryptoService;
+import org.forgerock.selfservice.stages.crypto.JsonCryptoException;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
 
@@ -45,6 +49,8 @@ public final class SecurityAnswerDefinitionStage implements ProgressStage<Securi
 
     private final ConnectionFactory connectionFactory;
 
+    private final CryptoService cryptoService;
+
     /**
      * Constructs a new KBA stage.
      *
@@ -54,6 +60,7 @@ public final class SecurityAnswerDefinitionStage implements ProgressStage<Securi
     @Inject
     public SecurityAnswerDefinitionStage(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
+        this.cryptoService = new CryptoService();
     }
 
     @Override
@@ -110,9 +117,32 @@ public final class SecurityAnswerDefinitionStage implements ProgressStage<Securi
             throw new BadRequestException("KBA has not been specified");
         }
 
+        hashAnswers(kba);
         addKbaToContext(context, config, kba);
 
         return StageResponse.newBuilder().build();
+    }
+
+    private void hashAnswers(JsonValue kba) throws InternalServerErrorException {
+        List<Object> questions = kba.asList();
+        for (int kbaArrayIndex = 0; kbaArrayIndex < questions.size(); kbaArrayIndex++) {
+            JsonPointer pointerToAnswer = getPointerToAnswer(kbaArrayIndex);
+            String answerTextValue = kba.get(pointerToAnswer).asString();
+            JsonValue answerHashed = hashAnswer(answerTextValue);
+            kba.put(pointerToAnswer, answerHashed);
+        }
+    }
+
+    private JsonValue hashAnswer(String answerTextValue) throws InternalServerErrorException {
+        try {
+            return cryptoService.hash(answerTextValue, CryptoConstants.ALGORITHM_SHA_256);
+        } catch (JsonCryptoException e) {
+            throw new InternalServerErrorException("Error while hashing the answer", e);
+        }
+    }
+
+    private JsonPointer getPointerToAnswer(int kbaArrayIndex) {
+        return new JsonPointer(kbaArrayIndex + "/answer");
     }
 
     private void addKbaToContext(ProcessContext context, SecurityAnswerDefinitionConfig config, JsonValue kba) {

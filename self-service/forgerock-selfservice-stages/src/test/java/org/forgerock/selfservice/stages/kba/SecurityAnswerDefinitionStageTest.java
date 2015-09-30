@@ -120,10 +120,19 @@ public final class SecurityAnswerDefinitionStageTest {
 
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/customQuestion")
                 .isEqualTo(KBA_QUESTION_3);
-        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer").isEqualTo("a1");
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer/$crypto/value/algorithm")
+                .isEqualTo("SHA-256");
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer/$crypto/value/data").hasSize(64);
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer/$crypto/type")
+                .isEqualTo("salted-hash");
+
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/questionId")
                 .isEqualTo("1");
-        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer").isEqualTo("a2");
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer/$crypto/value/algorithm")
+                .isEqualTo("SHA-256");
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer/$crypto/value/data").hasSize(64);
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer/$crypto/type")
+                .isEqualTo("salted-hash");
 
     }
 
@@ -147,10 +156,11 @@ public final class SecurityAnswerDefinitionStageTest {
 
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/customQuestion")
                 .isEqualTo(KBA_QUESTION_3);
-        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer").isEqualTo("a1");
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer/$crypto/value/data").hasSize(64);
+
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/questionId")
                 .isEqualTo("1");
-        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer").isEqualTo("a2");
+        assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer/$crypto/value/data").hasSize(64);
     }
 
     private SecurityAnswerDefinitionConfig newKbaConfig() {
