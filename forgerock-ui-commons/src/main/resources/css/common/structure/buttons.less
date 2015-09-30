@@ -2,34 +2,12 @@
     .transition(background-color, 0.1s, linear);
 }
 
-.btn-primary.disabled, .btn-primary[disabled] {
-    background-color: @base-theme-color;
-    border-color: darken(@base-theme-color, 5%);
-}
-
-.btn-default:hover,
-.btn-default:focus,
-.btn-default.focus,
-.btn-default:active,
-.btn-default.active {
-    color: darken(@base-theme-color, 5%);
-}
-.btn-default.disabled, .btn-default[disabled]{
-    background-color: #fff;
-    border-color: #ccc;
-    &:hover, &:focus {
-        background-color: #fff;
-        border-color: #ccc;
-    }
-}
-
 .btn-uppercase {
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 .btn-toolbar {
-    border-bottom: 1px solid #ddd;
     padding-bottom: 10px;
     margin-bottom: 20px;
     margin-top: -10px;
@@ -38,32 +16,4 @@
     .no-bottom-border {
         border-bottom: none;
     }
-}
-
-/*
-  Dark secondary button style
-*/
-.fr-btn-secondary {
-    background-color:  #f7f7f7;
-    border-color: #ccc;
-    color: #333;
-
-    .fa {
-        color: #333;
-    }
-
-    &:focus, &.focus,
-    &:active, &.active,
-    &:hover {
-        color: #333;
-        background-color: #e6e6e6;
-        border-color: #adadad;
-    }
-}
-
-
-li.btn-group.active .fr-btn-secondary {
-    color: #333;
-    background-color: #e6e6e6;
-    border-color: #adadad;
 }
