@@ -91,38 +91,38 @@ public interface ResourceResponse extends Response {
      *         not known.
      */
     String getRevision();
-    
+
     /**
-     * Returns the list of fields which should be included in this JSON resource 
-     * after field filtering has occurred. This list will override the list of 
-     * fields that is included in the request. An empty list indicates that the 
-     * original list of fields in the request should be used for filtering the 
+     * Returns the list of fields which should be included in this JSON resource
+     * after field filtering has occurred. This list will override the list of
+     * fields that is included in the request. An empty list indicates that the
+     * original list of fields in the request should be used for filtering the
      * response.
      *
      * @return The list of fields which should be included in this JSON resource
      *         after field filtering has occurred.
      */
-    public List<JsonPointer> getFields();
-    
+    List<JsonPointer> getFields();
+
     /**
      * Returns true if any fields have been added, indicating that the list of
-     * fields in this response should be included in this JSON resource after 
+     * fields in this response should be included in this JSON resource after
      * field filtering has occurred, otherwise returns false indicating that the
      * original list of fields in the request should be used for filtering the
      * response.
-     * 
+     *
      * @return true if any fields have been added, false otherwise.
      */
-    public boolean hasFields();
+    boolean hasFields();
 
     /**
-     * Adds a field to the list of fields which should be included in this JSON 
-     * resource after field filtering has occurred. This list will override the 
+     * Adds a field to the list of fields which should be included in this JSON
+     * resource after field filtering has occurred. This list will override the
      * list of fields that is included in the request.
-     * 
-     * @param field a {@link JsonPointer} representing the field to add.
+     *
+     * @param fields a {@link JsonPointer} representing the field to add.
      */
-    public void addField(JsonPointer... fields);
+    void addField(JsonPointer... fields);
 
     /**
      * Return this response as a result Promise.
