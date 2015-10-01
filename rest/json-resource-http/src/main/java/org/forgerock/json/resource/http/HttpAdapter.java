@@ -137,6 +137,7 @@ final class HttpAdapter implements Handler {
      *            context of each request context, or {@code null} if the
      *            {@link SecurityContextFactory} should be used.
      */
+    @SuppressWarnings("deprecation")
     public HttpAdapter(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
         this.contextFactory = contextFactory != null ? contextFactory : SecurityContextFactory
                 .getHttpServletContextFactory();
