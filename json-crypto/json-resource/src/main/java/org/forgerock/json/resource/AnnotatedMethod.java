@@ -64,6 +64,7 @@ final class AnnotatedMethod {
         return invoke(context, request, null, id);
     }
 
+    @SuppressWarnings("unchecked")
     <T> Promise<T, ResourceException> invoke(Context context, Request request,
             QueryResourceHandler queryHandler, String id) {
         if (method == null) {
