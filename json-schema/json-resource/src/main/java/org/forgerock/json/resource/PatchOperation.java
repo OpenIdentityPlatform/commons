@@ -32,12 +32,10 @@ import static org.forgerock.json.JsonValue.*;
  * allowing for extensibility by supporting user-defined operations. The core
  * operations are defined below and their behavior depends on the type of the
  * field being targeted by the operation:
- * <p>
  * <ul>
  * <li>an object (Java {@code Map}) or primitive (Java {@code String},
  * {@code Boolean}, or {@code Number}): these are considered to be
  * <i>single-valued</i> fields
- * <p>
  * <li>an array (Java {@code List}): these are considered to be
  * <i>multi-valued</i> fields exhibiting either:
  * <ul>
@@ -50,9 +48,7 @@ import static org.forgerock.json.JsonValue.*;
  * implementation defined, although it is usual for it to be defined using a
  * schema.
  * </ul>
- * <p>
  * The four core patch operations are:
- * <p>
  * <ul>
  * <li>{@link #add(String, Object) add} - ensures that the targeted field
  * contains the provided value(s). Missing parent fields will be created as
@@ -73,7 +69,6 @@ import static org.forgerock.json.JsonValue.*;
  * updates to <i>set</i>s are not permitted, although implementations may
  * support the special index "-" which can be used to add a single value to a
  * list or set.
- * <p>
  * <li>{@link #remove(String, Object) remove} - ensures that the targeted field
  * does not contain the provided value(s) if present. If no values are provided
  * with the remove operation then the entire field will be removed if it is
@@ -95,19 +90,16 @@ import static org.forgerock.json.JsonValue.*;
  * permitted as long as the field is a <i>list</i>. If a patch value is provided
  * then it must match the existing value for it to be removed, otherwise the
  * field is left unchanged. Indexed updates to <i>set</i>s are not permitted.
- * <p>
  * <li>{@link #replace(String, Object) replace} - removes any existing value(s)
  * of the targeted field and replaces them with the provided value(s). A replace
  * operation is semantically equivalent to a {@code remove} followed by an
  * {@code add}, except that indexed updates are not permitted regardless of
  * whether or not the field is a list.
- * <p>
  * <li>{@link #increment(String, Number) increment} - increments or decrements
  * the targeted numerical field value(s) by the specified amount. If the amount
  * is negative then the value(s) are decremented. It is an error to attempt to
  * increment a field which does not contain a number or an array of numbers. It
  * is also an error if the patch value is not a single value.
- * <p>
  * </ul>
  * Additional types of patch operation are supported via the
  * {@link #operation(String, String, Object) operation} methods.

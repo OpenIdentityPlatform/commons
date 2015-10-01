@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * </ul>
  * The method may also take the following parameters:
  * <ul>
- *     <li>A {@link org.forgerock.json.resource.Context} to be given the context.</li>
+ *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
  *     <li>A {@link org.forgerock.json.resource.ActionRequest} to be given the request.</li>
  * </ul>
  */
@@ -45,6 +45,7 @@ public @interface Action {
     /**
      * The name of the action being exposed. If not supplied, the name of the method is assumed to be the name
      * of the action.
+     * @return The name of the action being exposed.
      */
     String value() default "";
 }

@@ -109,7 +109,7 @@ public interface Request {
      * Returns the list of fields which should be included with each JSON resource returned by this request. The
      * returned list may be modified if permitted by this query request. An empty list indicates that all fields should
      * be included.
-     * <p/>
+     * <p>
      * <b>NOTE:</b> field filtering alters the structure of a JSON resource and MUST only be performed once while
      * processing a request. It is therefore the responsibility of front-end implementations (e.g. HTTP listeners,
      * Servlets, etc) to perform field filtering. Request handler and resource provider implementations SHOULD NOT
@@ -138,7 +138,7 @@ public interface Request {
     /**
      * Returns the non-{@code null} path of the JSON resource to which this request should be targeted. The resource
      * path is relative and never begins or ends with a forward slash, but may be empty.
-     * <p/>
+     * <p>
      * <b>NOTE</b>: for resource provider implementations the resource path is relative to the current resource being
      * accessed. See the description of {@link org.forgerock.http.routing.UriRouterContext} for more information.
      *
@@ -150,7 +150,7 @@ public interface Request {
     /**
      * Returns the non-{@code null} path of the JSON resource to which this request should be targeted. The resource
      * path is relative and never begins or ends with a forward slash, but may be empty.
-     * <p/>
+     * <p>
      * <b>NOTE</b>: for resource provider implementations the resource path is relative to the current resource being
      * accessed. See the description of {@link org.forgerock.http.routing.UriRouterContext} for more information.
      *
@@ -193,7 +193,7 @@ public interface Request {
     /**
      * Sets the non-{@code null} path of the JSON resource to which this request should be targeted. The resource path
      * is relative and never begins or ends with a forward slash, but may be empty.
-     * <p/>
+     * <p>
      * <b>NOTE</b>: for resource provider implementations the resource path is relative to the current resource being
      * accessed. See the description of {@link org.forgerock.http.routing.UriRouterContext} for more information.
      *
@@ -209,7 +209,7 @@ public interface Request {
     /**
      * Sets the non-{@code null} path of the JSON resource to which this request should be targeted. The resource path
      * is relative and never begins or ends with a forward slash, but may be empty.
-     * <p/>
+     * <p>
      * <b>NOTE</b>: for resource provider implementations the resource path is relative to the current resource being
      * accessed. See the description of {@link org.forgerock.http.routing.UriRouterContext} for more information.
      *

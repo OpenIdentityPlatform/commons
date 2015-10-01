@@ -27,7 +27,7 @@ import org.forgerock.util.query.QueryFilter;
 
 /**
  * A request to search for all JSON resources matching a user specified set of criteria.
- * <p/>
+ * <p>
  * There are four types of query request: <ul> <li>default query: when neither a filter, expression or query ID are
  * specified all resources will be returned <li>query by filter: returns all resources which match the {@link
  * QueryFilters} specified using {@link #setQueryFilter(QueryFilter)} <li>query by ID: returns all resources which match
@@ -36,8 +36,7 @@ import org.forgerock.util.query.QueryFilter;
  * should only be used in very rare cases since it introduces a tight coupling between the application and the
  * underlying JSON resource. In addition, applications should take care to prevent users from directly accessing this
  * form of query for security reasons. </ul>
- * <p/>
- * <p/>
+ * <p>
  * In addition to the above mentioned query types queries may also be paged when a page size is found via {@link
  * #getPageSize()}. Paged requests should be used in most cases when an unknown number of query results will be
  * returned.
@@ -76,21 +75,15 @@ public interface QueryRequest extends Request {
      */
     String FIELD_TOTAL_PAGED_RESULTS_POLICY = "totalPagedResultsPolicy";
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     <R, P> R accept(final RequestVisitor<R, P> v, final P p);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     QueryRequest addField(JsonPointer... fields);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     QueryRequest addField(String... fields);
 
@@ -118,21 +111,15 @@ public interface QueryRequest extends Request {
      */
     QueryRequest addSortKey(String... keys);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     String getAdditionalParameter(String name);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     Map<String, String> getAdditionalParameters();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     List<JsonPointer> getFields();
 
@@ -150,11 +137,11 @@ public interface QueryRequest extends Request {
     /**
      * Returns the opaque cookie which is used by the resource provider to track its position in the set of query
      * results. Paged results will be enabled if and only if the page size is non-zero.
-     * <p/>
+     * <p>
      * The cookie must be {@code null} in the initial query request sent by the client. For subsequent query requests
      * the client must include the cookie returned with the previous query result, until the resource provider returns a
      * {@code null} cookie indicating that the final page of results has been returned.
-     * <p/>
+     * <p>
      * <em>Note:</em> Cookies and offsets are mutually exclusive.
      *
      * @return The opaque cookie which is used by the resource provider to track its position in the set of query
@@ -169,10 +156,10 @@ public interface QueryRequest extends Request {
      * Returns the zero-based index of the first resource which should be included in the query results. An offset of 0
      * (default) will return the first resource in the collection. An offset of {@code 1} will return the second, and so
      * on ...
-     * <p/>
+     * <p>
      * <em>Note:</em> Offsets and cookies are mutually exclusive. When a cookie is supplied only the default {@code 0}
      * offset is supported.
-     * <p/>
+     * <p>
      * Offset must be a zero-based integer denoting the number of records to skip. This is very similar to the
      * <code>LIMIT</code> and <code>SKIP</code> clauses in SQL databases.
      *
@@ -182,16 +169,14 @@ public interface QueryRequest extends Request {
      */
     int getPagedResultsOffset();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     PreferredLocales getPreferredLocales();
 
     /**
      * Returns the native query expression which will be used for processing the query request. An example of a native
      * query expression is a SQL statement.
-     * <p/>
+     * <p>
      * <b>NOTE:</b> the native query expression, query filter, and query ID parameters are mutually exclusive and only
      * one of them may be specified.
      *
@@ -204,7 +189,7 @@ public interface QueryRequest extends Request {
 
     /**
      * Returns the query filter which will be used for selecting which JSON resources will be returned.
-     * <p/>
+     * <p>
      * <b>NOTE:</b> the native query expression, query filter, and query ID parameters are mutually exclusive and only
      * one of them may be specified.
      *
@@ -217,7 +202,7 @@ public interface QueryRequest extends Request {
 
     /**
      * Returns the query identifier for pre-defined queries.
-     * <p/>
+     * <p>
      * <b>NOTE:</b> the native query expression, query filter, and query ID parameters are mutually exclusive and only
      * one of them may be specified.
      *
@@ -228,21 +213,16 @@ public interface QueryRequest extends Request {
      */
     String getQueryId();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     RequestType getRequestType();
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    String getResourcePath();
+
     @Override
     ResourcePath getResourcePathObject();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     Version getResourceVersion();
 
@@ -263,9 +243,6 @@ public interface QueryRequest extends Request {
      */
     CountPolicy getTotalPagedResultsPolicy();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     QueryRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 
@@ -287,11 +264,11 @@ public interface QueryRequest extends Request {
     /**
      * Sets the opaque cookie which is used by the resource provider to track its position in the set of query results.
      * Paged results will be enabled if and only if the page size is non-zero.
-     * <p/>
+     * <p>
      * The cookie must be {@code null} in the initial query request sent by the client. For subsequent query requests
      * the client must include the cookie returned with the previous query result, until the resource provider returns a
      * {@code null} cookie indicating that the final page of results has been returned.
-     * <p/>
+     * <p>
      * When subsequent paged requests are being made no query parameters may be altered; doing so will result in
      * undefined behavior. The only parameter that may be changed during paged requests is the page size.
      *
@@ -311,10 +288,10 @@ public interface QueryRequest extends Request {
      * Sets the zero-based index of the first resource which should be included in the query results. An offset of 0
      * (default) will return the first resource in the collection. An offset of {@code 1} will return the second, and so
      * on ...
-     * <p/>
+     * <p>
      * <em>Note:</em> Offsets and cookies are mutually exclusive. When a cookie is supplied only the default {@code 0}
      * offset is supported.
-     * <p/>
+     * <p>
      * Offset must be a zero-based integer denoting the number of records to skip. This is very similar to the
      * <code>LIMIT</code> and <code>SKIP</code> clauses in SQL databases.
      *
@@ -328,16 +305,13 @@ public interface QueryRequest extends Request {
      */
     QueryRequest setPagedResultsOffset(int offset);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     QueryRequest setPreferredLocales(PreferredLocales preferredLocales);
 
     /**
      * Sets the native query expression which will be used for processing the query request. An example of a native
      * query expression is a SQL statement.
-     * <p/>
+     * <p>
      * <b>NOTE:</b> the native query expression, query filter, and query ID parameters are mutually exclusive and only
      * one of them may be specified.
      *
@@ -354,7 +328,7 @@ public interface QueryRequest extends Request {
 
     /**
      * Sets the query filter which will be used for selecting which JSON resources will be returned.
-     * <p/>
+     * <p>
      * <b>NOTE:</b> the native query expression, query filter, and query ID parameters are mutually exclusive and only
      * one of them may be specified.
      *
@@ -371,7 +345,7 @@ public interface QueryRequest extends Request {
 
     /**
      * Sets the query identifier for pre-defined queries.
-     * <p/>
+     * <p>
      * <b>NOTE:</b> the native query expression, query filter, and query ID parameters are mutually exclusive and only
      * one of them may be specified.
      *
@@ -386,21 +360,12 @@ public interface QueryRequest extends Request {
      */
     QueryRequest setQueryId(String id);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     QueryRequest setResourcePath(ResourcePath path);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     QueryRequest setResourcePath(String path);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     QueryRequest setResourceVersion(Version resourceVersion);
 
@@ -417,9 +382,6 @@ public interface QueryRequest extends Request {
      */
     QueryRequest setTotalPagedResultsPolicy(CountPolicy policy);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     JsonValue toJsonValue();
 }
