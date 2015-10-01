@@ -44,33 +44,23 @@ public interface CreateRequest extends Request {
      */
     String FIELD_NEW_RESOURCE_ID = "newResourceId";
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     <R, P> R accept(final RequestVisitor<R, P> v, final P p);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     CreateRequest addField(JsonPointer... fields);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     CreateRequest addField(String... fields);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     String getAdditionalParameter(String name);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     Map<String, String> getAdditionalParameters();
 
@@ -81,16 +71,14 @@ public interface CreateRequest extends Request {
      */
     JsonValue getContent();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     List<JsonPointer> getFields();
 
     /**
      * Returns the client provided ID of the resource to be created. The new resource ID will be appended to the
      * resource path in order to obtain the full path of the new resource.
-     * <p/>
+     * <p>
      * The new resource ID is optional and should be used in cases where the client wishes to determine the path of the
      * resource to be created. If the new resource ID is not provided then the server will be responsible for generating
      * the ID of the new resource.
@@ -101,21 +89,17 @@ public interface CreateRequest extends Request {
      */
     String getNewResourceId();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     PreferredLocales getPreferredLocales();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     RequestType getRequestType();
 
     /**
      * Returns the path of the JSON resource container beneath which the new resource should be created.
-     * <p/>
+     * <p>
      * The path of the newly created resource will be the concatenation of the resource path and either the client
      * provided resource ID, if provided, or a server generated resource ID.
      *
@@ -125,21 +109,15 @@ public interface CreateRequest extends Request {
     @Override
     String getResourcePath();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ResourcePath getResourcePathObject();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     Version getResourceVersion();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     CreateRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 
@@ -157,7 +135,7 @@ public interface CreateRequest extends Request {
     /**
      * Sets the client provided ID of the resource to be created. The new resource ID will be appended to the resource
      * path in order to obtain the full path of the new resource.
-     * <p/>
+     * <p>
      * The new resource ID is optional and should be used in cases where the client wishes to determine the path of the
      * resource to be created. If the new resource ID is not provided then the server will be responsible for generating
      * the ID of the new resource.
@@ -172,15 +150,13 @@ public interface CreateRequest extends Request {
      */
     CreateRequest setNewResourceId(String id);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     CreateRequest setPreferredLocales(PreferredLocales preferredLocales);
 
     /**
      * Sets the path of the JSON resource container beneath which the new resource should be created.
-     * <p/>
+     * <p>
      * The path of the newly created resource will be the concatenation of the resource path and either the client
      * provided resource ID, if provided, or a server generated resource ID.
      *
@@ -194,21 +170,15 @@ public interface CreateRequest extends Request {
     @Override
     CreateRequest setResourcePath(String path);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     CreateRequest setResourcePath(ResourcePath path);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     CreateRequest setResourceVersion(Version resourceVersion);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     JsonValue toJsonValue();
 }

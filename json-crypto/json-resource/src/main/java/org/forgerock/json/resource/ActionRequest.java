@@ -43,21 +43,15 @@ public interface ActionRequest extends Request {
      */
     String FIELD_CONTENT = "content";
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     <R, P> R accept(final RequestVisitor<R, P> v, final P p);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ActionRequest addField(JsonPointer... fields);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ActionRequest addField(String... fields);
 
@@ -85,15 +79,11 @@ public interface ActionRequest extends Request {
      */
     <T extends Enum<T>> T getActionAsEnum(Class<T> type);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     String getAdditionalParameter(String name);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     Map<String, String> getAdditionalParameters();
 
@@ -104,39 +94,26 @@ public interface ActionRequest extends Request {
      */
     JsonValue getContent();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     List<JsonPointer> getFields();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     PreferredLocales getPreferredLocales();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     RequestType getRequestType();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     String getResourcePath();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ResourcePath getResourcePathObject();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     Version getResourceVersion();
 
@@ -151,9 +128,7 @@ public interface ActionRequest extends Request {
      */
     ActionRequest setAction(String id);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ActionRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 
@@ -168,33 +143,23 @@ public interface ActionRequest extends Request {
      */
     ActionRequest setContent(JsonValue content);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ActionRequest setPreferredLocales(PreferredLocales preferredLocales);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ActionRequest setResourcePath(ResourcePath path);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ActionRequest setResourcePath(String path);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ActionRequest setResourceVersion(Version resourceVersion);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     JsonValue toJsonValue();
 }
