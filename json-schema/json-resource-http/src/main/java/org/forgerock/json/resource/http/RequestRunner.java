@@ -78,7 +78,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private final org.forgerock.http.protocol.Request httpRequest;
     private final Response httpResponse;
     private final Version protocolVersion;
-    private final Request<?> request;
+    private final Request request;
     private final JsonGenerator writer;
 
     RequestRunner(Context context, Request request, org.forgerock.http.protocol.Request httpRequest,
