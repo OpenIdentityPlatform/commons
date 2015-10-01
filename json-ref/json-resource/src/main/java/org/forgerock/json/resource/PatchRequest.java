@@ -45,21 +45,15 @@ public interface PatchRequest extends Request {
      */
     String FIELD_REVISION = "revision";
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     <R, P> R accept(final RequestVisitor<R, P> v, final P p);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     PatchRequest addField(JsonPointer... fields);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     PatchRequest addField(String... fields);
 
@@ -89,21 +83,15 @@ public interface PatchRequest extends Request {
      */
     PatchRequest addPatchOperation(String operation, String field, JsonValue value);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     String getAdditionalParameter(String name);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     Map<String, String> getAdditionalParameters();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     List<JsonPointer> getFields();
 
@@ -114,34 +102,27 @@ public interface PatchRequest extends Request {
      */
     List<PatchOperation> getPatchOperations();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     PreferredLocales getPreferredLocales();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     RequestType getRequestType();
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    String getResourcePath();
+
     @Override
     ResourcePath getResourcePathObject();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     Version getResourceVersion();
 
     /**
      * Returns the expected version information associated with the JSON resource to be patched. Version information can
      * be used in order to implement multi-version concurrency control (MVCC).
-     * <p/>
+     * <p>
      * The returned version information may be {@code null} indicating that the client does not care if the resource has
      * been modified concurrently. If the version information is non-{@code null}, and it does not match the current
      * version of the targeted JSON resource, then the patch request will be rejected by the provider.
@@ -150,40 +131,25 @@ public interface PatchRequest extends Request {
      */
     String getRevision();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     PatchRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     PatchRequest setPreferredLocales(PreferredLocales preferredLocales);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     PatchRequest setResourcePath(ResourcePath path);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     PatchRequest setResourcePath(String path);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     PatchRequest setResourceVersion(Version resourceVersion);
 
     /**
      * Sets the expected version information associated with the JSON resource to be patched. Version information can be
      * used in order to implement multi-version concurrency control (MVCC).
-     * <p/>
+     * <p>
      * The provided version information may be {@code null} indicating that the client does not care if the resource has
      * been modified concurrently. If the version information is non-{@code null}, and it does not match the current
      * version of the targeted JSON resource, then the patch request will be rejected by the provider.
@@ -196,9 +162,6 @@ public interface PatchRequest extends Request {
      */
     PatchRequest setRevision(String version);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     JsonValue toJsonValue();
 }

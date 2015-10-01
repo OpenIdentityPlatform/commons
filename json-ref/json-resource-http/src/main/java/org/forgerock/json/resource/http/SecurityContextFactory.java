@@ -55,6 +55,7 @@ import org.forgerock.services.context.SecurityContext;
  * populate the attributes:
  *
  * <pre>
+ * {@code
  * public Promise<Response, ResponseException> filter(Context context, Request request, Handler next) {
  *     // Authenticate the user.
  *     String authcid = getUserName(request);
@@ -71,6 +72,7 @@ import org.forgerock.services.context.SecurityContext;
  *         attributesContext.getAttributes().put(ATTRIBUTE_AUTHCID, authcid);
  *         attributesContext.getAttributes().put(ATTRIBUTE_AUTHZID, authzid);
  *     }
+ * }
  * }
  * </pre>
  *
