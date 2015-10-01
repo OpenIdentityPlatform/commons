@@ -41,6 +41,7 @@
 
     .bootstrap-dialog-title {
         .wordwrap;
+        color: inherit;
     }
 
     .modal-title {
@@ -50,31 +51,7 @@
     .modal-header {
         margin-bottom: 0;
         padding-bottom: 5px;
-        border-bottom-color: transparent;
-    }
-
-    &.type-primary .modal-header{
-        background-color: @base-theme-color;
-    }
-
-    &.type-danger {
-
-        .modal-header{
-            background-color: white;
-            .bootstrap-dialog-title{
-                color: @failure-color;
-            }
-        }
-
-        .btn-default{
-            color: @failure-color;
-            border-color: @failure-color;
-        }
-    }
-
-
-    &.type-default .bootstrap-dialog-title {
-        font-weight: 600;
-        color: @base-theme-color;
+        // Overriding bootstrap-dialog's background-color.
+        background-color: transparent !important;
     }
 }
