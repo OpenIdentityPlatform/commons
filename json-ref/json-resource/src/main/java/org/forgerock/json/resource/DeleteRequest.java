@@ -16,51 +16,145 @@
 
 package org.forgerock.json.resource;
 
+import java.util.List;
+import java.util.Map;
+
+import org.forgerock.http.routing.Version;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.i18n.PreferredLocales;
+
 /**
  * A request to delete a JSON resource.
  */
-public interface DeleteRequest extends Request<DeleteRequest> {
+public interface DeleteRequest extends Request {
 
     /**
-     * The name of the field which contains the resource version in the JSON
-     * representation.
+     * The name of the field which contains the resource version in the JSON representation.
      */
     String FIELD_REVISION = "revision";
 
     /**
-     * Returns the expected version information associated with the JSON
-     * resource to be deleted. Version information can be used in order to
-     * implement multi-version concurrency control (MVCC).
-     * <p>
-     * The returned version information may be {@code null} indicating that the
-     * client does not care if the resource has been modified concurrently. If
-     * the version information is non-{@code null}, and it does not match the
-     * current version of the targeted JSON resource, then the delete request
-     * will be rejected by the provider.
+     * {@inheritDoc}
+     */
+    @Override
+    <R, P> R accept(final RequestVisitor<R, P> v, final P p);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    DeleteRequest addField(JsonPointer... fields);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    DeleteRequest addField(String... fields);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String getAdditionalParameter(String name);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Map<String, String> getAdditionalParameters();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    List<JsonPointer> getFields();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    PreferredLocales getPreferredLocales();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    RequestType getRequestType();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ResourcePath getResourcePathObject();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Version getResourceVersion();
+
+    /**
+     * Returns the expected version information associated with the JSON resource to be deleted. Version information can
+     * be used in order to implement multi-version concurrency control (MVCC).
+     * <p/>
+     * The returned version information may be {@code null} indicating that the client does not care if the resource has
+     * been modified concurrently. If the version information is non-{@code null}, and it does not match the current
+     * version of the targeted JSON resource, then the delete request will be rejected by the provider.
      *
-     * @return The expected version information associated with the JSON
-     *         resource to be deleted.
+     * @return The expected version information associated with the JSON resource to be deleted.
      */
     String getRevision();
 
     /**
-     * Sets the expected version information associated with the JSON resource
-     * to be deleted. Version information can be used in order to implement
-     * multi-version concurrency control (MVCC).
-     * <p>
-     * The provided version information may be {@code null} indicating that the
-     * client does not care if the resource has been modified concurrently. If
-     * the version information is non-{@code null}, and it does not match the
-     * current version of the targeted JSON resource, then the delete request
-     * will be rejected by the provider.
+     * {@inheritDoc}
+     */
+    @Override
+    DeleteRequest setAdditionalParameter(String name, String value) throws BadRequestException;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    DeleteRequest setPreferredLocales(PreferredLocales preferredLocales);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    DeleteRequest setResourcePath(String path);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    DeleteRequest setResourcePath(ResourcePath path);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    DeleteRequest setResourceVersion(Version resourceVersion);
+
+    /**
+     * Sets the expected version information associated with the JSON resource to be deleted. Version information can be
+     * used in order to implement multi-version concurrency control (MVCC).
+     * <p/>
+     * The provided version information may be {@code null} indicating that the client does not care if the resource has
+     * been modified concurrently. If the version information is non-{@code null}, and it does not match the current
+     * version of the targeted JSON resource, then the delete request will be rejected by the provider.
      *
      * @param version
-     *            The expected version information associated with the JSON
-     *            resource to be deleted.
+     *         The expected version information associated with the JSON resource to be deleted.
      * @return This delete request.
      * @throws UnsupportedOperationException
-     *             If this delete request does not permit changes to the version
-     *             information.
+     *         If this delete request does not permit changes to the version information.
      */
     DeleteRequest setRevision(String version);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    JsonValue toJsonValue();
 }

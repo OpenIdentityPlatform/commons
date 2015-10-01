@@ -16,29 +16,50 @@
 
 package org.forgerock.json.resource;
 
+import java.util.List;
+import java.util.Map;
+
+import org.forgerock.http.routing.Version;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.i18n.PreferredLocales;
 
 /**
  * An implementation specific action, or operation, upon a JSON resource.
  */
-public interface ActionRequest extends Request<ActionRequest> {
+public interface ActionRequest extends Request {
     /**
-     * The name of the field which contains the action ID in the JSON
-     * representation.
+     * The name of the action which is reserved for performing "create" operations.
+     */
+    String ACTION_ID_CREATE = "create";
+
+    /**
+     * The name of the field which contains the action ID in the JSON representation.
      */
     String FIELD_ACTION = "action";
 
     /**
-     * The name of the field which contains the action content in the JSON
-     * representation.
+     * The name of the field which contains the action content in the JSON representation.
      */
     String FIELD_CONTENT = "content";
 
     /**
-     * The name of the action which is reserved for performing "create"
-     * operations.
+     * {@inheritDoc}
      */
-    String ACTION_ID_CREATE = "create";
+    @Override
+    <R, P> R accept(final RequestVisitor<R, P> v, final P p);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest addField(JsonPointer... fields);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest addField(String... fields);
 
     /**
      * Returns the ID of the action to be performed by this action request.
@@ -48,54 +69,132 @@ public interface ActionRequest extends Request<ActionRequest> {
     String getAction();
 
     /**
-     * Returns the ID of the action to be performed by this action request
-     * as a enum constant of the specified enum type.  The action ID string
-     * and enum constants are compared, ignoring case considerations.
+     * Returns the ID of the action to be performed by this action request as a enum constant of the specified enum
+     * type.  The action ID string and enum constants are compared, ignoring case considerations.
      *
      * @param <T>
-     *            the enum type sub-class.
+     *         the enum type sub-class.
      * @param type
-     *            the enum type to match constants with the value.
-     * @return the enum constant represented by the Id of the action to be
-     *         performed by this action request.
+     *         the enum type to match constants with the value.
+     * @return the enum constant represented by the Id of the action to be performed by this action request.
      * @throws IllegalArgumentException
-     *             if {@code type} does not represent an enum type, or
-     *             if the ID does not match any of the enum's constants.
+     *         if {@code type} does not represent an enum type, or if the ID does not match any of the enum's
+     *         constants.
      * @throws NullPointerException
-     *             if {@code type} is {@code null}.
+     *         if {@code type} is {@code null}.
      */
     <T extends Enum<T>> T getActionAsEnum(Class<T> type);
 
     /**
-     * Returns the content of this action request. The structure of the content
-     * is defined by the action.
+     * {@inheritDoc}
+     */
+    @Override
+    String getAdditionalParameter(String name);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Map<String, String> getAdditionalParameters();
+
+    /**
+     * Returns the content of this action request. The structure of the content is defined by the action.
      *
      * @return The content of this action request.
      */
     JsonValue getContent();
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    List<JsonPointer> getFields();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    PreferredLocales getPreferredLocales();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    RequestType getRequestType();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    String getResourcePath();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ResourcePath getResourcePathObject();
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    Version getResourceVersion();
+
+    /**
      * Sets the ID of the action to be performed by this action request.
      *
      * @param id
-     *            The ID of the action to be performed by this action request.
+     *         The ID of the action to be performed by this action request.
      * @return This action request.
      * @throws UnsupportedOperationException
-     *             If this action request does not permit changes to the action
-     *             ID.
+     *         If this action request does not permit changes to the action ID.
      */
     ActionRequest setAction(String id);
 
     /**
-     * Sets the content of this action request. The structure of the content is
-     * defined by the action.
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest setAdditionalParameter(String name, String value) throws BadRequestException;
+
+    /**
+     * Sets the content of this action request. The structure of the content is defined by the action.
      *
      * @param content
-     *            The content of this action request.
+     *         The content of this action request.
      * @return This action request.
      * @throws UnsupportedOperationException
-     *             If this action request does not permit changes to the
-     *             content.
+     *         If this action request does not permit changes to the content.
      */
     ActionRequest setContent(JsonValue content);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest setPreferredLocales(PreferredLocales preferredLocales);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest setResourcePath(ResourcePath path);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest setResourcePath(String path);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    ActionRequest setResourceVersion(Version resourceVersion);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    JsonValue toJsonValue();
 }
