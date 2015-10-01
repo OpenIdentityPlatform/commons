@@ -392,7 +392,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             }
         }, obj.configuration.links);
 
-        if (links && !_.findWhere(links, {name: link.name})) {
+        if (links && !_.find(links, {name: link.name})) {
             if (secondLevelItem) {
                 links.push(link);
             } else {
