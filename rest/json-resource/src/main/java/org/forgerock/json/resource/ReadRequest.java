@@ -28,99 +28,62 @@ import org.forgerock.util.i18n.PreferredLocales;
  * A request to read a single identified JSON resource.
  */
 public interface ReadRequest extends Request {
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     <R, P> R accept(final RequestVisitor<R, P> v, final P p);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ReadRequest addField(JsonPointer... fields);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     ReadRequest addField(String... fields);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     String getAdditionalParameter(String name);
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     Map<String, String> getAdditionalParameters();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     List<JsonPointer> getFields();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     PreferredLocales getPreferredLocales();
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     RequestType getRequestType();
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    String getResourcePath();
+
     @Override
     ResourcePath getResourcePathObject();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     Version getResourceVersion();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     ReadRequest setAdditionalParameter(String name, String value) throws BadRequestException;
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     ReadRequest setPreferredLocales(PreferredLocales preferredLocales);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     ReadRequest setResourcePath(ResourcePath path);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     ReadRequest setResourcePath(String path);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     ReadRequest setResourceVersion(Version resourceVersion);
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     JsonValue toJsonValue();
 }
