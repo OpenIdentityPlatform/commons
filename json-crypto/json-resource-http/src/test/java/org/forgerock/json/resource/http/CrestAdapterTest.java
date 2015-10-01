@@ -95,7 +95,7 @@ public class CrestAdapterTest {
 
     private static final Version V3_0 = version("3.0");
 
-    private static <T extends org.forgerock.json.resource.Request<T>> T withVersion(T request, Version version) {
+    private static <T extends org.forgerock.json.resource.Request> T withVersion(T request, Version version) {
         request.setResourceVersion(version);
         return request;
     }

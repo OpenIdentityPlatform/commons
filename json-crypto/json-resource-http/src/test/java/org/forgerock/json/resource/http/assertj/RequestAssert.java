@@ -28,7 +28,7 @@ import org.forgerock.json.resource.Request;
  * Abstract assertion methods for {@link Request}s.
  */
 @SuppressWarnings("javadoc")
-public abstract class RequestAssert<A extends RequestAssert<A, T>, T extends Request<T>> extends AbstractAssert<A, T> {
+public abstract class RequestAssert<A extends RequestAssert<A, T>, T extends Request> extends AbstractAssert<A, T> {
 
     protected RequestAssert(final T actual, final Class<A> selfType) {
         super(actual, selfType);

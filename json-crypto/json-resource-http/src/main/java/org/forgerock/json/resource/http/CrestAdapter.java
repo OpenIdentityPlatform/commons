@@ -475,7 +475,7 @@ final class CrestAdapter implements RequestHandler {
         request.getHeaders().put(HEADER_IF_NONE_MATCH, ETAG_ANY);
     }
 
-    private void prepareHttpRequest(final org.forgerock.json.resource.Request<?> request, final Request httpRequest) {
+    private void prepareHttpRequest(final org.forgerock.json.resource.Request request, final Request httpRequest) {
         setRequestedResourceVersion(httpRequest, request.getResourceVersion());
 
         httpRequest.setUri(baseUri.resolve(request.getResourcePath()));

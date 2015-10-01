@@ -19,6 +19,7 @@ package org.forgerock.json.resource;
 import static org.forgerock.util.Utils.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -36,7 +37,7 @@ import org.forgerock.util.i18n.PreferredLocales;
  * manipulating requests.
  */
 public final class Requests {
-    private static abstract class AbstractRequestImpl<T extends Request<T>> implements Request<T> {
+    private static abstract class AbstractRequestImpl<T extends Request> implements Request {
         private final List<JsonPointer> fields = new LinkedList<>();
         private ResourcePath resourcePath;
         private final Map<String, String> parameters = new LinkedHashMap<>(2);
@@ -47,7 +48,7 @@ public final class Requests {
             // Default constructor.
         }
 
-        protected AbstractRequestImpl(final Request<T> request) {
+        protected AbstractRequestImpl(final Request request) {
             this.resourcePath = request.getResourcePathObject();
             this.fields.addAll(request.getFields());
             this.parameters.putAll(request.getAdditionalParameters());
@@ -157,9 +158,9 @@ public final class Requests {
         }
 
         @Override
-        public Request setPreferredLocales(PreferredLocales preferredLocales) {
+        public T setPreferredLocales(PreferredLocales preferredLocales) {
             this.preferredLocales = preferredLocales;
-            return this;
+            return getThis();
         }
     }
 
@@ -182,7 +183,7 @@ public final class Requests {
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitActionRequest(p, this);
-        };
+        }
 
         @Override
         public String getAction() {
@@ -255,7 +256,7 @@ public final class Requests {
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitCreateRequest(p, this);
-        };
+        }
 
         @Override
         public JsonValue getContent() {
@@ -314,7 +315,7 @@ public final class Requests {
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitDeleteRequest(p, this);
-        };
+        }
 
         @Override
         public String getRevision() {
@@ -363,7 +364,7 @@ public final class Requests {
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitPatchRequest(p, this);
-        };
+        }
 
         @Override
         public String getRevision() {
@@ -372,9 +373,7 @@ public final class Requests {
 
         @Override
         public PatchRequest addPatchOperation(PatchOperation... operations) {
-            for (PatchOperation operation : operations) {
-                this.operations.add(operation);
-            }
+            Collections.addAll(this.operations, operations);
             return this;
         }
 
@@ -447,7 +446,7 @@ public final class Requests {
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitQueryRequest(p, this);
-        };
+        }
 
         @Override
         public QueryRequest addSortKey(final SortKey... keys) {
@@ -590,7 +589,7 @@ public final class Requests {
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitReadRequest(p, this);
-        };
+        }
 
         @Override
         protected ReadRequest getThis() {
@@ -621,7 +620,7 @@ public final class Requests {
         @Override
         public <R, P> R accept(final RequestVisitor<R, P> v, final P p) {
             return v.visitUpdateRequest(p, this);
-        };
+        }
 
         @Override
         public JsonValue getContent() {
