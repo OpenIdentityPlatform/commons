@@ -1,11 +1,13 @@
 {
   "name" : "userIdValidation",
-  "emailServiceUrl" : "/email",
-  "emailSubject" : "Verify your email address",
-  "emailMessage" : "Is this correct",
-  "emailFrom" : "noreply@example.com",
-  "emailVerificationLink" : "/verifyemail",
-  "emailVerificationLinkToken" : "abc123",
+  "email" : {
+    "serviceUrl": "/email",
+    "subject": "Verify your email address",
+    "message": "Is this correct",
+    "from": "noreply@example.com",
+    "verificationLink": "/verifyemail",
+    "verificationLinkToken": "abc123"
+  },
   "identityServiceUrl" : "/users",
   "identityIdField" : "userId",
   "identityEmailField" : "email",

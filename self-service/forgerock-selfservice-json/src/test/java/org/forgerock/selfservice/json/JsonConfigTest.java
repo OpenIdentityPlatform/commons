@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
  *
  * @since 0.2.0
  */
-public class JsonConfigTest {
+public final class JsonConfigTest {
 
     @Test
     public void testConfigFromJson() throws Exception {

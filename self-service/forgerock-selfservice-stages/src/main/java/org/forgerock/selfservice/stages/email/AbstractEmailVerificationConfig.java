@@ -17,54 +17,80 @@
 package org.forgerock.selfservice.stages.email;
 
 import org.forgerock.selfservice.core.config.StageConfig;
+import org.forgerock.util.Reject;
 
 /**
  * Defines the basic contract for the email verification configuration.
  *
  * @since 0.1.0
  */
-interface AbstractEmailVerificationConfig extends StageConfig {
+abstract class AbstractEmailVerificationConfig implements StageConfig {
+
+    private EmailAccountConfig emailAccountConfig;
+
+    AbstractEmailVerificationConfig(EmailAccountConfig emailConfig) {
+        Reject.ifNull(emailConfig);
+        this.emailAccountConfig = emailConfig;
+    }
 
     /**
      * Gets the URL for the email service.
      *
      * @return the email service URL
      */
-    String getEmailServiceUrl();
+    String getEmailServiceUrl() {
+        return emailAccountConfig.getServiceUrl();
+    }
 
     /**
      * Gets the subject part for the reset email.
      *
      * @return the email subject
      */
-    String getEmailSubject();
+    String getEmailSubject() {
+        return emailAccountConfig.getSubject();
+    }
 
     /**
      * Gets the message for the reset email.
      *
      * @return the email message
      */
-    String getEmailMessage();
+    String getEmailMessage() {
+        return emailAccountConfig.getMessage();
+    }
 
     /**
      * Gets the from part for the reset email.
      *
      * @return the email from field
      */
-    String getEmailFrom();
+    String getEmailFrom() {
+        return emailAccountConfig.getFrom();
+    }
 
     /**
      * Gets the string token representing where the reset URL should be substituted.
      *
      * @return the reset URL string token
      */
-    String getEmailVerificationLinkToken();
+    String getEmailVerificationLinkToken() {
+        return emailAccountConfig.getVerificationLinkToken();
+    }
 
     /**
      * Gets the reset URL to be passed into the email body.
      *
      * @return the reset URL
      */
-    String getEmailVerificationLink();
+    String getEmailVerificationLink() {
+        return emailAccountConfig.getVerificationLink();
+    }
 
+    /**
+     * Gets the name of the stage configuration.
+     *
+     * @return the config name
+     */
+    public abstract String getName();
 }

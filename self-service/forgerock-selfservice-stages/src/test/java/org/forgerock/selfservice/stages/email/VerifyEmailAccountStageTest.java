@@ -51,7 +51,7 @@ public final class VerifyEmailAccountStageTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        config = new VerifyEmailAccountConfig();
+        config = new VerifyEmailAccountConfig(new EmailAccountConfig());
         verifyEmailStage = new VerifyEmailAccountStage(factory);
     }
 

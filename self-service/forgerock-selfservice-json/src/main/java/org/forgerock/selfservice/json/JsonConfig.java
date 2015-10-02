@@ -66,7 +66,6 @@ public final class JsonConfig {
      *         the one built from the provided json
      */
     public static ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) {
-        //return objectMapper.readValue(objectMapper.writeValueAsString(json.getObject()), ProcessInstanceConfig.class);
         return objectMapper.convertValue(json.getObject(), ProcessInstanceConfig.class);
     }
 }

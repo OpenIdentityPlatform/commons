@@ -56,7 +56,7 @@ public final class VerifyUserIdStageTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        config = newVerifyUserIdConfig();
+        config = newVerifyUserIdConfig(new EmailAccountConfig());
         verifyUserIdStage = new VerifyUserIdStage(factory);
     }
 
@@ -92,8 +92,8 @@ public final class VerifyUserIdStageTest {
         verifyUserIdStage.getEmailAddress(context, config, builder);
     }
 
-    private VerifyUserIdConfig newVerifyUserIdConfig() {
-        return new VerifyUserIdConfig()
+    private VerifyUserIdConfig newVerifyUserIdConfig(EmailAccountConfig emailConfig) {
+        return new VerifyUserIdConfig(emailConfig)
             .setQueryFields(new HashSet<>(Arrays.asList("_id", "mail")))
             .setIdentityIdField("_id")
             .setIdentityEmailField("mail")

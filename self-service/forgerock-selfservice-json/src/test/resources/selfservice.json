@@ -2,12 +2,14 @@
   "stageConfigs": [
     {
       "name" : "emailValidation",
-      "emailServiceUrl" : "/email",
-      "emailSubject" : "Verify your email address",
-      "emailMessage" : "Is this correct",
-      "emailFrom" : "noreply@example.com",
-      "emailVerificationLink" : "/verifyemail",
-      "emailVerificationLinkToken" : "abc123"
+      "email" : {
+        "serviceUrl": "/email",
+        "subject": "Verify your email address",
+        "message": "Is this correct",
+        "from": "noreply@example.com",
+        "verificationLink": "/verifyemail",
+        "verificationLinkToken": "abc123"
+      }
     },
     {
       "name" : "userDetails",
@@ -47,12 +49,14 @@
       "identityEmailField" : "mail",
       "identityServiceUrl" : "/users",
 
-      "emailServiceUrl" : "/email",
-      "emailFrom" : "info@admin.org",
-      "emailSubject" : "Reset password email",
-      "emailMessage" : "<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
-      "emailVerificationLinkToken" : "%link%",
-      "emailVerificationLink" : "http://localhost:9999/example/#passwordReset/"
+      "email" : {
+        "serviceUrl": "/email",
+        "from": "info@admin.org",
+        "subject": "Reset password email",
+        "message": "<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+        "verificationLinkToken": "%link%",
+        "verificationLink": "http://localhost:9999/example/#passwordReset/"
+      }
     },
     {
       "name" : "resetStage",

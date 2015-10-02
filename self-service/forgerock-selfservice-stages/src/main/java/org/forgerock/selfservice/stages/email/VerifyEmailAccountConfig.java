@@ -16,131 +16,24 @@
 
 package org.forgerock.selfservice.stages.email;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Configuration for the email account verification stage.
  *
  * @since 0.1.0
  */
-public class VerifyEmailAccountConfig implements AbstractEmailVerificationConfig {
+public final class VerifyEmailAccountConfig extends AbstractEmailVerificationConfig {
 
     /**
      * Name of the stage configuration.
      */
     public static final String NAME = "emailValidation";
 
-    private String emailServiceUrl;
-    private String emailSubject;
-    private String emailMessage;
-    private String emailFrom;
-    private String emailVerificationLink;
-    private String emailVerificationLinkToken;
-
-    @Override
-    public String getEmailServiceUrl() {
-        return emailServiceUrl;
-    }
-
-    /**
-     * Sets the URL for the email service.
-     *
-     * @param emailServiceUrl
-     *         the email service URL
-     *
-     * @return this config instance
-     */
-    public VerifyEmailAccountConfig setEmailServiceUrl(String emailServiceUrl) {
-        this.emailServiceUrl = emailServiceUrl;
-        return this;
-    }
-
-    @Override
-    public String getEmailSubject() {
-        return emailSubject;
-    }
-
-    /**
-     * Sets the subject part for the reset email.
-     *
-     * @param emailSubject
-     *         the email subject
-     *
-     * @return this config instance
-     */
-    public VerifyEmailAccountConfig setEmailSubject(String emailSubject) {
-        this.emailSubject = emailSubject;
-        return this;
-    }
-
-    @Override
-    public String getEmailMessage() {
-        return emailMessage;
-    }
-
-    /**
-     * Sets the message part for the reset email.
-     *
-     * @param emailMessage
-     *         the email message
-     *
-     * @return this config instance
-     */
-    public VerifyEmailAccountConfig setEmailMessage(String emailMessage) {
-        this.emailMessage = emailMessage;
-        return this;
-    }
-
-    @Override
-    public String getEmailFrom() {
-        return emailFrom;
-    }
-
-    /**
-     * Sets the from part for the reset email.
-     *
-     * @param emailFrom
-     *         the email from field
-     *
-     * @return this config instance
-     */
-    public VerifyEmailAccountConfig setEmailFrom(String emailFrom) {
-        this.emailFrom = emailFrom;
-        return this;
-    }
-
-    @Override
-    public String getEmailVerificationLinkToken() {
-        return emailVerificationLinkToken;
-    }
-
-    /**
-     * Sets the string token representing where the reset URL should besubstitutedd.
-     *
-     * @param emailVerificationLinkToken
-     *         the reset URL string token
-     *
-     * @return this config instance
-     */
-    public VerifyEmailAccountConfig setEmailVerificationLinkToken(String emailVerificationLinkToken) {
-        this.emailVerificationLinkToken = emailVerificationLinkToken;
-        return this;
-    }
-
-    @Override
-    public String getEmailVerificationLink() {
-        return emailVerificationLink;
-    }
-
-    /**
-     * Sets the reset URL to be passed into the email body.
-     *
-     * @param emailVerificationLink
-     *         the reset URL
-     *
-     * @return this config instance
-     */
-    public VerifyEmailAccountConfig setEmailVerificationLink(String emailVerificationLink) {
-        this.emailVerificationLink = emailVerificationLink;
-        return this;
+    @JsonCreator
+    VerifyEmailAccountConfig(@JsonProperty("email") EmailAccountConfig emailConfig) {
+        super(emailConfig);
     }
 
     @Override

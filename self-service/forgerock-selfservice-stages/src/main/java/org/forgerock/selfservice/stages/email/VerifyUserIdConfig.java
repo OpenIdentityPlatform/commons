@@ -18,22 +18,40 @@ package org.forgerock.selfservice.stages.email;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Configuration for the user Id verification stage.
  *
  * @since 0.1.0
  */
-public final class VerifyUserIdConfig extends VerifyEmailAccountConfig implements AbstractEmailVerificationConfig {
+public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig {
 
     /**
      * Name of the stage configuration.
      */
     public static final String NAME = "userIdValidation";
 
+    @JsonProperty
     private String identityServiceUrl;
+    @JsonProperty
     private String identityIdField;
+    @JsonProperty
     private String identityEmailField;
+    @JsonProperty
     private Set<String> queryFields;
+
+    /**
+     * Constructs a new configuration.
+     *
+     * @param emailConfig
+     *         the email configuration
+     */
+    @JsonCreator
+    public VerifyUserIdConfig(@JsonProperty("email") EmailAccountConfig emailConfig) {
+        super(emailConfig);
+    }
 
     /**
      * Gets the URL for the identity service.

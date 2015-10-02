@@ -16,7 +16,6 @@
 
 package org.forgerock.selfservice.stages.tokenhandlers;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
@@ -35,51 +34,20 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
      */
     public static final String TYPE = "jwt";
 
-    private final String sharedKey;
-    private final String keyPairAlgorithm;
-
-    private final int keyPairSize;
-    private final JweAlgorithm jweAlgorithm;
-    private final EncryptionMethod encryptionMethod;
-    private final JwsAlgorithm jwsAlgorithm;
-    private final long tokenLifeTimeInSeconds;
-
-    /**
-     * Creates a new JwtTokenHandlerConfig.
-     *
-     * @param sharedKey
-     *         the sharedKey
-     * @param keyPairAlgorithm
-     *         the keyPairAlgorithm
-     * @param keyPairSize
-     *         the keyPairSize
-     * @param jweAlgorithm
-     *         the jweAlgorithm
-     * @param encryptionMethod
-     *         the encryptionMethod
-     * @param jwsAlgorithm
-     *         the jwsAlgorithm
-     * @param tokenLifeTimeInSeconds
-     *         the tokenLifeTimeInSeconds
-     */
-    @JsonCreator
-    public JwtTokenHandlerConfig(
-            @JsonProperty("sharedKey") String sharedKey,
-            @JsonProperty("keyPairAlgorithm") String keyPairAlgorithm,
-            @JsonProperty("keyPairSize") int keyPairSize,
-            @JsonProperty("jweAlgorithm") JweAlgorithm jweAlgorithm,
-            @JsonProperty("encryptionMethod") EncryptionMethod encryptionMethod,
-            @JsonProperty("jwsAlgorithm") JwsAlgorithm jwsAlgorithm,
-            @JsonProperty("tokenExpiry") long tokenLifeTimeInSeconds) {
-        this.sharedKey = sharedKey;
-        this.keyPairAlgorithm = keyPairAlgorithm;
-        this.keyPairSize = keyPairSize;
-        this.jweAlgorithm = jweAlgorithm;
-        this.encryptionMethod = encryptionMethod;
-        this.jwsAlgorithm = jwsAlgorithm;
-        this.tokenLifeTimeInSeconds = tokenLifeTimeInSeconds;
-
-    }
+    @JsonProperty
+    private String sharedKey;
+    @JsonProperty
+    private String keyPairAlgorithm;
+    @JsonProperty
+    private int keyPairSize;
+    @JsonProperty
+    private JweAlgorithm jweAlgorithm;
+    @JsonProperty
+    private EncryptionMethod encryptionMethod;
+    @JsonProperty
+    private JwsAlgorithm jwsAlgorithm;
+    @JsonProperty("tokenExpiry")
+    private long tokenLifeTimeInSeconds;
 
     /**
      * Gets token handler type.
@@ -150,6 +118,70 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
      * @return the token life time in seconds
      */
     public long getTokenLifeTimeInSeconds() {
+
         return tokenLifeTimeInSeconds;
+    }
+
+    /**
+     * Set the shared key.
+     *
+     * @param sharedKey the shared key
+     */
+    public void setSharedKey(String sharedKey) {
+        this.sharedKey = sharedKey;
+    }
+
+    /**
+     * Set the key pair algorithm.
+     *
+     * @param keyPairAlgorithm the key pair algorithm
+     */
+    public void setKeyPairAlgorithm(String keyPairAlgorithm) {
+        this.keyPairAlgorithm = keyPairAlgorithm;
+    }
+
+    /**
+     * Set the key pair size..
+     *
+     * @param keyPairSize the key pair size
+     */
+    public void setKeyPairSize(int keyPairSize) {
+        this.keyPairSize = keyPairSize;
+    }
+
+    /**
+     * Set the Jwe algorithm
+     *
+     * @param jweAlgorithm the JweAlgorithm
+     */
+    public void setJweAlgorithm(JweAlgorithm jweAlgorithm) {
+        this.jweAlgorithm = jweAlgorithm;
+    }
+
+    /**
+     * Set the encryption method.
+     *
+     * @param encryptionMethod the encrpytion method
+     */
+    public void setEncryptionMethod(EncryptionMethod encryptionMethod) {
+        this.encryptionMethod = encryptionMethod;
+    }
+
+    /**
+     * Set the Jws algorithm.
+     *
+     * @param jwsAlgorithm the JwsAlgorithm
+     */
+    public void setJwsAlgorithm(JwsAlgorithm jwsAlgorithm) {
+        this.jwsAlgorithm = jwsAlgorithm;
+    }
+
+    /**
+     * Set the token life (seconds).
+     *
+     * @param tokenLifeTimeInSeconds the token life
+     */
+    public void setTokenLifeTimeInSeconds(long tokenLifeTimeInSeconds) {
+        this.tokenLifeTimeInSeconds = tokenLifeTimeInSeconds;
     }
 }
