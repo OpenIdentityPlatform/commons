@@ -332,9 +332,9 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
         hikariConfig.setAutoCommit(connectionPool.getAutoCommit());
         hikariConfig.setConnectionTimeout(connectionPool.getConnectionTimeout());
         hikariConfig.setIdleTimeout(connectionPool.getIdleTimeout());
-        hikariConfig.setMaximumPoolSize(connectionPool.getMaximumPoolSize());
+        hikariConfig.setMaximumPoolSize(connectionPool.getMaxPoolSize());
         hikariConfig.setMaxLifetime(connectionPool.getMaxLifetime());
-        hikariConfig.setMinimumIdle(connectionPool.getMinimumIdle());
+        hikariConfig.setMinimumIdle(connectionPool.getMinIdle());
         if (!isBlank(connectionPool.getJdbcUrl())) {
             hikariConfig.setJdbcUrl(connectionPool.getJdbcUrl());
         }

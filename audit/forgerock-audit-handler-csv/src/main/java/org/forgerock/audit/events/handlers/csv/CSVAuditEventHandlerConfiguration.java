@@ -31,7 +31,7 @@ import org.forgerock.util.Reject;
  *    "csvConfiguration" : {
  *      "quoteChar" : ";"
  *    },
- *    "csvSecurity" : {
+ *    "security" : {
  *      "enabled" : true,
  *      "filename" : "/var/secure/secure-audit.jks"
  *    }
@@ -41,14 +41,14 @@ import org.forgerock.util.Reject;
 public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonProperty(required=true)
-    @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.logDirectory")
+    @JsonPropertyDescription("audit.handlers.csv.logDirectory")
     private String logDirectory;
 
-    @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.csvConfiguration")
-    private CsvConfiguration csvConfiguration = new CsvConfiguration();
+    @JsonPropertyDescription("audit.handlers.csv.formatting")
+    private CsvFormatting formatting = new CsvFormatting();
 
-    @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.csvSecurity")
-    private CsvSecurity csvSecurity = new CsvSecurity();
+    @JsonPropertyDescription("audit.handlers.csv.security")
+    private CsvSecurity security = new CsvSecurity();
 
     /**
      * Returns the directory where CSV file is located.
@@ -70,52 +70,54 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
     }
 
     /**
-     * Returns the csvConfiguration
+     * Returns the CSV formatting options.
      *
-     * @return the csvConfiguration
+     * @return the CSV formatting options.
      */
-    public CsvConfiguration getCsvConfiguration() {
-        return csvConfiguration;
+    public CsvFormatting getFormatting() {
+        return formatting;
     }
 
     /**
-     * @param csvConfiguration
-     *            the csvConfiguration to set
-     */
-    public void setCsvConfiguration(CsvConfiguration csvConfiguration) {
-        this.csvConfiguration = Reject.checkNotNull(csvConfiguration);
-    }
-
-
-
-    /**
-     * Returns the csvSecurity
+     * Sets the CSV formatting options.
      *
-     * @return the csvSecurity
+     * @param formatting
+     *            the CSV formatting options to set.
      */
-    public CsvSecurity getCsvSecurity() {
-        return csvSecurity;
+    public void setFormatting(CsvFormatting formatting) {
+        this.formatting = Reject.checkNotNull(formatting);
     }
 
     /**
+     * Returns the CSV tamper evident options.
      *
-     * @param csvSecurity the csvSecurity to set
+     * @return the CSV tamper evident options.
      */
-    public void setCsvSecurity(CsvSecurity csvSecurity) {
-        this.csvSecurity = Reject.checkNotNull(csvSecurity);
+    public CsvSecurity getSecurity() {
+        return security;
+    }
+
+    /**
+     * Sets the CSV tamper evident options.
+     *
+     * @param security
+     *            the CSV tamper evident options to set.
+     */
+    public void setSecurity(CsvSecurity security) {
+        this.security = Reject.checkNotNull(security);
     }
 
     /**
      * Contains the csv writer configuration parameters
      */
-    public static class CsvConfiguration {
-        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvConfiguration.quoteChar")
+    public static class CsvFormatting {
+        @JsonPropertyDescription("audit.handlers.csv.formatting.quoteChar")
         private char quoteChar = '"';
 
-        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvConfiguration.delimiterChar")
+        @JsonPropertyDescription("audit.handlers.csv.formatting.delimiterChar")
         private char delimiterChar = ',';
 
-        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvConfiguration.endOfLineSymbols")
+        @JsonPropertyDescription("audit.handlers.csv.formatting.endOfLineSymbols")
         private String endOfLineSymbols = System.getProperty("line.separator");
 
         /**
@@ -172,13 +174,13 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
      */
     public static class CsvSecurity {
 
-        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity.enabled")
+        @JsonPropertyDescription("audit.handlers.csv.security.enabled")
         private boolean enabled = false;
 
-        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity.filename")
+        @JsonPropertyDescription("audit.handlers.csv.security.filename")
         private String filename;
 
-        @JsonPropertyDescription("org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity.password")
+        @JsonPropertyDescription("audit.handlers.csv.security.password")
         private String password;
 
         /**

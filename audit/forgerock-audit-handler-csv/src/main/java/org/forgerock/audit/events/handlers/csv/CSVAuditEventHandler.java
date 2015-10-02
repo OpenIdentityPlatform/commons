@@ -122,19 +122,19 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
             }
             csvPreference = createCsvPreference(config);
-            secure = config.getCsvSecurity().isEnabled();
+            secure = config.getSecurity().isEnabled();
             if (secure) {
-                keystoreFilename = config.getCsvSecurity().getFilename();
-                keystorePassword = config.getCsvSecurity().getPassword();
+                keystoreFilename = config.getSecurity().getFilename();
+                keystorePassword = config.getSecurity().getPassword();
             }
         }
     }
 
     private CsvPreference createCsvPreference(final CSVAuditEventHandlerConfiguration config) {
-        CSVAuditEventHandlerConfiguration.CsvConfiguration csvConfiguration = config.getCsvConfiguration();
-        final CsvPreference.Builder builder = new CsvPreference.Builder(csvConfiguration.getQuoteChar(),
-                                                                        csvConfiguration.getDelimiterChar(),
-                                                                        csvConfiguration.getEndOfLineSymbols());
+        CSVAuditEventHandlerConfiguration.CsvFormatting csvFormatting = config.getFormatting();
+        final CsvPreference.Builder builder = new CsvPreference.Builder(csvFormatting.getQuoteChar(),
+                                                                        csvFormatting.getDelimiterChar(),
+                                                                        csvFormatting.getEndOfLineSymbols());
 
         builder.useQuoteMode(new AlwaysQuoteMode());
         return builder.build();

@@ -17,6 +17,7 @@
 package org.forgerock.audit.events.handlers.csv;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.*;
 import static org.mockito.Mockito.*;
@@ -31,10 +32,13 @@ import java.util.Map;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.forgerock.audit.AuditService;
+import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.BufferedAuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
@@ -57,6 +61,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("javadoc")
 public class CSVAuditEventHandlerTest {
+
+    /**
+     * Integration test.
+     */
+    @Test
+    public void canConfigureSyslogHandlerFromJsonAndRegisterWithAuditService() throws Exception {
+        // given
+        final AuditServiceBuilder auditServiceBuilder = newAuditService();
+        final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler-config.json"));
+
+        // when
+        AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
+
+        // then
+        AuditService auditService = auditServiceBuilder.build();
+        auditService.startup();
+        AuditEventHandler<?> registeredHandler = auditService.getRegisteredHandler("csv");
+        assertThat(registeredHandler).isNotNull();
+    }
+
+    private InputStream getResource(String resourceName) {
+        return getClass().getResourceAsStream(resourceName);
+    }
 
     @Test
     public void testCreatingAuditLogEntryWithBuffering() throws Exception {
@@ -255,7 +282,7 @@ public class CSVAuditEventHandlerTest {
         config.setLogDirectory(tempDirectory.toString());
 
         if (enableSecurity) {
-            config.setCsvSecurity(getCsvSecurityConfig());
+            config.setSecurity(getCsvSecurityConfig());
         }
 
         handler.configure(config);

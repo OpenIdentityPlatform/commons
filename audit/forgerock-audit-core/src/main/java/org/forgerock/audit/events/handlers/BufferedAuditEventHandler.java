@@ -64,7 +64,7 @@ public class BufferedAuditEventHandler<CFG extends EventHandlerConfiguration>
 
     @Override
     public void configure(CFG config) throws ResourceException {
-        EventBufferingConfiguration bufferConf = config.getBufferingConfig();
+        EventBufferingConfiguration bufferConf = config.getBuffering();
         forceFlushBeforeRead = bufferConf.isForceFlushBeforeRead();
         ScheduledExecutorService pool = newScheduledThreadPool(2);
         this.eventBuffer = new Buffer<>(pool, this, bufferConf.getMaxTime(), bufferConf.getMaxSize());

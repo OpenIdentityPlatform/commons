@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
@@ -168,7 +167,7 @@ public class AuditJsonConfig {
             if (conf != null) {
                 Class<CFG> klass = eventHandler.getConfigurationClass();
                 CFG configuration = mapper.readValue(conf.toString(), klass);
-                if (configuration.getBufferingConfig().isEnabled()) {
+                if (configuration.getBuffering().isEnabled()) {
                     eventHandler = new BufferedAuditEventHandler<CFG>(eventHandler);
                 }
                 eventHandler.configure(configuration);

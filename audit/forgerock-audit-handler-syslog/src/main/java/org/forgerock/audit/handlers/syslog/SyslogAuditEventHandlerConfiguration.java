@@ -18,6 +18,7 @@ package org.forgerock.audit.handlers.syslog;
 
 import static java.util.Collections.unmodifiableMap;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -54,20 +55,26 @@ import java.util.Map;
 public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonProperty(required=true)
+    @JsonPropertyDescription("audit.handlers.syslog.transportProtocol")
     private TransportProtocol protocol;
 
     @JsonProperty(required=true)
+    @JsonPropertyDescription("audit.handlers.syslog.host")
     private String host;
 
     @JsonProperty(required=true)
+    @JsonPropertyDescription("audit.handlers.syslog.port")
     private int port;
 
+    @JsonPropertyDescription("audit.handlers.syslog.connectTimeout")
     private int connectTimeout;
 
     @JsonProperty(required=true)
+    @JsonPropertyDescription("audit.handlers.syslog.facility")
     private Facility facility;
 
     @JsonProperty
+    @JsonPropertyDescription("audit.handlers.syslog.severityFieldMappings")
     private List<SeverityFieldMapping> severityFieldMappings = new ArrayList<>();
 
     /**
@@ -198,12 +205,15 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
     public static final class SeverityFieldMapping {
 
         @JsonProperty(required=true)
+        @JsonPropertyDescription("audit.handlers.syslog.severityFieldMapping.topic")
         private String topic;
 
         @JsonProperty(required=true)
+        @JsonPropertyDescription("audit.handlers.syslog.severityFieldMapping.field")
         private String field;
 
         @JsonProperty(required=true)
+        @JsonPropertyDescription("audit.handlers.syslog.severityFieldMapping.valueMappings")
         private Map<String, Severity> valueMappings = new HashMap<>();
 
         /**

@@ -1,0 +1,29 @@
+{
+  "name" : "csv",
+  "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+  "config" : {
+    "logDirectory" : "/path/to/audit/files/",
+    "formatting" : {
+      "quoteChar" : "\"",
+      "delimiterChar" : ",",
+      "endOfLineSymbols" : "\n"
+    },
+    "security" : {
+      "enabled" : "true",
+      "filename" : "/path/to/keystore.jks",
+      "password" : "correcthorsebatterystaple"
+    },
+    "buffering" : {
+      "enabled" : "true",
+      "forceFlushBeforeRead" : "false",
+      "maxSize" : "25",
+      "maxTime" : "30"
+    }
+  },
+  "events": [
+    "access",
+    "activity",
+    "config",
+    "authentication"
+  ]
+}

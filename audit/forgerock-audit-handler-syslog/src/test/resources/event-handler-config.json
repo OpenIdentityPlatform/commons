@@ -15,10 +15,11 @@
         "INFO" : "INFORMATIONAL"
       }
     }],
-    "bufferingConfig" : {
+    "buffering" : {
       "enabled" : "true",
       "forceFlushBeforeRead" : "false",
-      "maxSize" : "25"
+      "maxSize" : "25",
+      "maxTime" : "30"
     }
   },
   "events": [

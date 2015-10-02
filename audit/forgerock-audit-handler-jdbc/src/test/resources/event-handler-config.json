@@ -1,0 +1,45 @@
+{
+  "name" : "jdbc",
+  "class" : "org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandler",
+  "config" : {
+    "databaseName" : "h2",
+    "connectionPool" : {
+      "dataSourceClassName" : null,
+      "jdbcUrl" : "jdbc:h2:mem:audit",
+      "username" : "",
+      "password" : "",
+      "autoCommit" : true,
+      "connectionTimeout" : 30000,
+      "idleTimeout" : 600000,
+      "maxLifetime" : 1800000,
+      "minIdle" : 10,
+      "maxPoolSize" : 10,
+      "poolName" : null
+    },
+    "tableMappings" : [
+      {
+        "event" : "test",
+        "table" : "audittest",
+        "fieldToColumn" : {
+          "_id" : "objectid",
+          "eventName" : "eventname",
+          "timestamp" : "activitydate",
+          "transactionId" : "transactionid",
+          "authentication/id" : "userid",
+          "customObject" : "result",
+          "customArray" : "custom_object",
+          "context" : "custom_array"
+        }
+      }
+    ],
+    "buffering" : {
+      "enabled" : "true",
+      "forceFlushBeforeRead" : "false",
+      "maxSize" : 25,
+      "maxTime" : 30
+    }
+  },
+  "events": [
+    "test"
+  ]
+}

@@ -29,15 +29,15 @@ import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
  */
 public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
-    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool")
+    @JsonPropertyDescription("audit.handlers.jdbc.connectionPool")
     private ConnectionPool connectionPool = new ConnectionPool();
 
     @JsonProperty(required = true)
-    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.tableMappings")
+    @JsonPropertyDescription("audit.handlers.jdbc.tableMappings")
     private List<TableMapping> tableMappings = new LinkedList<>();
 
     @JsonProperty(required = true)
-    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.databaseName")
+    @JsonPropertyDescription("audit.handlers.jdbc.databaseName")
     private String databaseName;
 
     /**
@@ -92,39 +92,39 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
     }
 
     public static class ConnectionPool {
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.dataSourceClassName")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.dataSourceClassName")
         private String dataSourceClassName;
 
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.jdbcUrl")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.jdbcUrl")
         private String jdbcUrl;
 
         @JsonProperty(required = true)
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.username")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.username")
         private String username;
 
         @JsonProperty(required = true)
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.password")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.password")
         private String password;
 
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.autoCommit")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.autoCommit")
         private boolean autoCommit = true;
 
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.connectionTimeout")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.connectionTimeout")
         private int connectionTimeout = 30000;
 
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.idleTimeout")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.idleTimeout")
         private int idleTimeout = 600000;
 
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.maxLifetime")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.maxLifetime")
         private int maxLifetime = 1800000;
 
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.minimumIdle")
-        private int minimumIdle = 10;
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.minIdle")
+        private int minIdle = 10;
 
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.maximumPoolSize")
-        private int maximumPoolSize = 10;
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.maxPoolSize")
+        private int maxPoolSize = 10;
 
-        @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.connectionPool.poolName")
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.poolName")
         private String poolName;
 
 
@@ -212,32 +212,32 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
          * Gets the maximum size of the connection pool.
          * @return The maximum size of the connection pool.
          */
-        public int getMaximumPoolSize() {
-            return maximumPoolSize;
+        public int getMaxPoolSize() {
+            return maxPoolSize;
         }
 
         /**
          * Sets the maximum size of the connection pool.
-         * @param maximumPoolSize The maximum pool size of the connection pool.
+         * @param maxPoolSize The maximum pool size of the connection pool.
          */
-        public void setMaximumPoolSize(int maximumPoolSize) {
-            this.maximumPoolSize = maximumPoolSize;
+        public void setMaxPoolSize(int maxPoolSize) {
+            this.maxPoolSize = maxPoolSize;
         }
 
         /**
          * Gets the minimum number of idle connections in the connection pool.
          * @return The minimum number of idle connections in the connection pool.
          */
-        public int getMinimumIdle() {
-            return minimumIdle;
+        public int getMinIdle() {
+            return minIdle;
         }
 
         /**
          * Sets the minimum number of idle connections in the connection pool.
-         * @param minimumIdle The minimum number of idle connections in the connection pool.
+         * @param minIdle The minimum number of idle connections in the connection pool.
          */
-        public void setMinimumIdle(int minimumIdle) {
-            this.minimumIdle = minimumIdle;
+        public void setMinIdle(int minIdle) {
+            this.minIdle = minIdle;
         }
 
         /**

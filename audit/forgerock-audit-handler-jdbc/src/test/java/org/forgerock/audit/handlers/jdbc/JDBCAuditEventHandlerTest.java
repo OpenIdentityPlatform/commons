@@ -16,6 +16,10 @@
 package org.forgerock.audit.handlers.jdbc;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,9 +32,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.audit.AuditService;
+import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
+import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.ConnectionPool;
+import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonPointer;
@@ -116,10 +124,36 @@ public class JDBCAuditEventHandlerTest {
         connection = null;
     }
 
+    /**
+     * Integration test.
+     */
+    @Test
+    public void canConfigureSyslogHandlerFromJsonAndRegisterWithAuditService() throws Exception {
+        // given
+        final AuditServiceBuilder auditServiceBuilder = newAuditService()
+                .withAdditionalTopicSchemas(
+                        json(object(field("test", getEventsMetaData()))));
+        final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler-config.json"));
+
+        // when
+        AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
+
+        // then
+        AuditService auditService = auditServiceBuilder.build();
+        auditService.startup();
+        AuditEventHandler<?> registeredHandler = auditService.getRegisteredHandler("jdbc");
+        assertThat(registeredHandler).isNotNull();
+    }
+
+    private InputStream getResource(String resourceName) {
+        return getClass().getResourceAsStream(resourceName);
+    }
+
     @Test
     public void testPublish() throws Exception {
         // given
         final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        System.out.println(new ObjectMapper().writeValueAsString(configuration));
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
@@ -414,6 +448,10 @@ public class JDBCAuditEventHandlerTest {
     }
 
     private void addEventsMetaData(JDBCAuditEventHandler handler) throws Exception {
+        handler.setAuditEventsMetaData(getEventsMetaData());
+    }
+
+    private Map<String, JsonValue> getEventsMetaData() throws Exception {
         Map<String, JsonValue> events = new LinkedHashMap<>();
         try (final InputStream configStream = getClass().getResourceAsStream(EVENTS_JSON)) {
             final JsonValue predefinedEventTypes = new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
@@ -421,7 +459,7 @@ public class JDBCAuditEventHandlerTest {
                 events.put(eventTypeName, predefinedEventTypes.get(eventTypeName));
             }
         }
-        handler.setAuditEventsMetaData(events);
+        return events;
     }
 
     static class TestAuditEventBuilder<T extends TestAuditEventBuilder<T>>

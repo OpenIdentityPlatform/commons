@@ -18,6 +18,7 @@ package org.forgerock.audit;
 import static java.util.Collections.emptyList;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 import java.util.List;
 
@@ -36,8 +37,10 @@ import java.util.List;
 public class AuditServiceConfiguration {
 
     @JsonProperty(required = true)
+    @JsonPropertyDescription("audit.service.handlerForQueries")
     private String handlerForQueries;
 
+    @JsonPropertyDescription("audit.service.availableAuditEventHandlers")
     private List<String> availableAuditEventHandlers;
 
     /**

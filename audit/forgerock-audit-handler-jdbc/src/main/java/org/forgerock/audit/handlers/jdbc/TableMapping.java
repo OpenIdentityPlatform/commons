@@ -28,15 +28,15 @@ import java.util.TreeMap;
  */
 public class TableMapping {
     @JsonProperty
-    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.mapping.event")
+    @JsonPropertyDescription("audit.handlers.jdbc.mapping.event")
     private String event;
 
     @JsonProperty
-    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.mapping.table")
+    @JsonPropertyDescription("audit.handlers.jdbc.mapping.table")
     private String table;
 
     @JsonProperty
-    @JsonPropertyDescription("org.forgerock.audit.handlers.jdbc.mapping.fieldToColumn")
+    @JsonPropertyDescription("audit.handlers.jdbc.mapping.fieldToColumn")
     private Map<String, String> fieldToColumn = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     /**

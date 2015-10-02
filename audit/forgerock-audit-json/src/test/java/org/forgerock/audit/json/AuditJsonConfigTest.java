@@ -88,7 +88,7 @@ public class AuditJsonConfigTest {
         assertThat(schema.get("type").asString()).isEqualTo("object");
         assertThat(schema.get("id").asString()).isEqualTo("/");
         assertThat(schema.get("properties").get("message")).isNotNull();
-        assertThat(schema.get("properties").get("bufferingConfig")).isNotNull();
+        assertThat(schema.get("properties").get("buffering")).isNotNull();
     }
 
     private AuditServiceConfiguration loadConfiguration() throws AuditException {

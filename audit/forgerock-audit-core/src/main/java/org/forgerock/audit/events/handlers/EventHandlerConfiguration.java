@@ -25,16 +25,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 public abstract class EventHandlerConfiguration {
 
     /** Event buffering is disabled by default. */
-    @JsonPropertyDescription("The configuration for optional buffering of events.")
-    protected EventBufferingConfiguration bufferingConfig = new EventBufferingConfiguration();
+    @JsonPropertyDescription("audit.handlers.all.buffering")
+    protected EventBufferingConfiguration buffering = new EventBufferingConfiguration();
 
     /**
      * Returns the configuration for events buffering.
      *
      * @return the configuration
      */
-    public EventBufferingConfiguration getBufferingConfig() {
-        return bufferingConfig;
+    public EventBufferingConfiguration getBuffering() {
+        return buffering;
     }
 
     /**
@@ -44,7 +44,7 @@ public abstract class EventHandlerConfiguration {
      *            The configuration
      */
     public void setBufferingConfiguration(EventBufferingConfiguration bufferingConfiguration) {
-        this.bufferingConfig = bufferingConfiguration;
+        this.buffering = bufferingConfiguration;
     }
 
     /**
@@ -52,17 +52,16 @@ public abstract class EventHandlerConfiguration {
      */
     public static class EventBufferingConfiguration {
 
-        @JsonPropertyDescription("Indicates if buffering of events is enabled.")
+        @JsonPropertyDescription("audit.handlers.all.buffering.enabled")
         private boolean enabled;
 
-        @JsonPropertyDescription("Indicates if buffer must be flushed before a read operation is done, " +
-        "in order to ensure the latest events are available.")
+        @JsonPropertyDescription("audit.handlers.all.buffering.forceFlushBeforeRead")
         private boolean forceFlushBeforeRead;
 
-        @JsonPropertyDescription("The maximum time before the buffer is automatically flushed.")
+        @JsonPropertyDescription("audit.handlers.all.buffering.maxTime")
         private long maxTime;
 
-        @JsonPropertyDescription("The maximum size of buffer before the buffer is automatically flushed.")
+        @JsonPropertyDescription("audit.handlers.all.buffering.maxSize")
         private int maxSize = 1;
 
         /**
