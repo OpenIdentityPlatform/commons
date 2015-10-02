@@ -79,19 +79,8 @@ public final class UserDetailsStageTest {
 
         // Then
         assertThat(jsonValue).stringAt("description").isEqualTo("New user details");
-        assertThat(jsonValue).stringAt("properties/userId/description").isEqualTo("New user Id");
         assertThat(jsonValue).stringAt("properties/user/description").isEqualTo("User details");
         assertThat(jsonValue).stringAt("properties/user/type").isEqualTo("object");
-    }
-
-    @Test (expectedExceptions = BadRequestException.class,
-            expectedExceptionsMessageRegExp = "userId has not been specified")
-    public void testAdvanceUserIdNotSpecified() throws Exception {
-        // Given
-        given(context.getInput()).willReturn(newEmptyJsonValue());
-
-        // When
-        userDetailsStage.advance(context, config);
     }
 
     @Test (expectedExceptions = BadRequestException.class,
@@ -115,11 +104,6 @@ public final class UserDetailsStageTest {
         userDetailsStage.advance(context, config);
 
         // Then
-        ArgumentCaptor<String> userIdArgumentCaptor =  ArgumentCaptor.forClass(String.class);
-        verify(context).putState(eq(USER_ID_FIELD), userIdArgumentCaptor.capture());
-        String userIdJson = userIdArgumentCaptor.getValue();
-        Assertions.assertThat(userIdJson).isEqualTo(TEST_EMAIL_ID);
-
         ArgumentCaptor<JsonValue> userArgumentCaptor =  ArgumentCaptor.forClass(JsonValue.class);
         verify(context, times(2))   //1. when the empty empty object is pushed 2. when updated user json is pushed
                 .putState(eq(USER_FIELD), userArgumentCaptor.capture());

@@ -77,17 +77,6 @@ public final class UserRegistrationStageTest {
         userRegistrationStage.gatherInitialRequirements(context, config);
     }
 
-    @Test (expectedExceptions = IllegalArgumentException.class,
-            expectedExceptionsMessageRegExp = "User registration stage expects user id filed in the context")
-    public void testGatherInitialRequirementsNoUserId() throws Exception {
-        // Given
-        given(context.containsState(USER_FIELD)).willReturn(true);
-        given(context.getState(USER_FIELD)).willReturn(newEmptyJsonValue());
-
-        // When
-        userRegistrationStage.gatherInitialRequirements(context, config);
-    }
-
     @Test
     public void testGatherInitialRequirements() throws Exception {
         // Given
@@ -129,7 +118,6 @@ public final class UserRegistrationStageTest {
         assertThat(createRequest.getContent()).stringAt("kba/0/answer").isEqualTo("a1");
         assertThat(createRequest.getContent()).stringAt("kba/1/selectedQuestion").isEqualTo(KBA_QUESTION_2);
         assertThat(createRequest.getContent()).stringAt("kba/1/answer").isEqualTo("a2");
-        assertThat(createRequest.getNewResourceId()).isEqualTo(TEST_EMAIL_ID);
         assertThat(createRequest.getResourcePath()).isEqualTo("users");
     }
 

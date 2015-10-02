@@ -16,7 +16,6 @@
 
 package org.forgerock.selfservice.stages.user;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.stages.CommonStateFields.*;
@@ -63,24 +62,12 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
 
         return RequirementsBuilder
                 .newInstance("New user details")
-                .addRequireProperty(USER_ID_FIELD, "New user Id")
                 .addRequireProperty("user", "object", "User details")
                 .build();
     }
 
     @Override
     public StageResponse advance(ProcessContext context, UserDetailsConfig config) throws ResourceException {
-        String userId = context
-                .getInput()
-                .get(USER_ID_FIELD)
-                .asString();
-
-        if (isEmpty(userId)) {
-            throw new BadRequestException("userId has not been specified");
-        }
-
-        context.putState(USER_ID_FIELD, userId);
-
         JsonValue user = context
                 .getInput()
                 .get("user");

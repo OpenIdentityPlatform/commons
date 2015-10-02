@@ -59,9 +59,6 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
         Reject.ifFalse(context.containsState(USER_FIELD),
                 "User registration stage expects user in the context");
 
-        Reject.ifFalse(context.containsState(USER_ID_FIELD),
-                "User registration stage expects user id filed in the context");
-
         return RequirementsBuilder
                 .newEmptyRequirements();
     }
@@ -70,17 +67,17 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
     public StageResponse advance(ProcessContext context, UserRegistrationConfig config) throws ResourceException {
 
         JsonValue user = context.getState(USER_FIELD);
-        createUser(context.getHttpContext(), context.getState(USER_ID_FIELD).asString(), user, config);
+        createUser(context.getHttpContext(), user, config);
 
         return StageResponse
                 .newBuilder()
                 .build();
     }
 
-    private void createUser(Context httpContext, String userId, JsonValue user,
+    private void createUser(Context httpContext, JsonValue user,
                             UserRegistrationConfig config) throws ResourceException {
         try (Connection connection = connectionFactory.getConnection()) {
-            CreateRequest request = Requests.newCreateRequest(config.getIdentityServiceUrl(), userId, user);
+            CreateRequest request = Requests.newCreateRequest(config.getIdentityServiceUrl(), user);
             connection.create(httpContext, request);
         }
     }
