@@ -33,21 +33,20 @@ import org.forgerock.http.protocol.Form;
  */
 public final class Uris {
 
-    /**
-     * Non-safe characters are escaped as UTF-8 octets using "%" HEXDIG HEXDIG
-     * production.
-     */
+    /** Non-safe characters are escaped as UTF-8 octets using "%" HEXDIG HEXDIG production. */
     private static final char URL_ESCAPE_CHAR = '%';
 
-    /**
-     * Look up table for characters which do not need URL encoding in path elements according to RFC 3986.
-     */
+    /** Look up table for characters which do not need URL encoding in path elements according to RFC 3986. */
     private static final BitSet SAFE_URL_PCHAR_CHARS = new BitSet(128);
 
-    /**
-     * Look up table for characters which do not need URL encoding in query string parameters according to RFC 3986.
-     */
+    /** Look up table for characters which do not need URL encoding in query string parameters according to RFC 3986. */
     private static final BitSet SAFE_URL_QUERY_CHARS = new BitSet(128);
+
+    /** Look up table for characters which do not need URL encoding in fragments according to RFC 3986. */
+    private static final BitSet SAFE_URL_FRAGMENT_CHARS = new BitSet(128);
+
+    /** Look up table for characters which do not need URL encoding in userInfo according to RFC 3986. */
+    private static final BitSet SAFE_URL_USERINFO_CHARS = new BitSet(128);
 
     static {
         /*
@@ -64,12 +63,21 @@ public final class Uris {
         SAFE_URL_PCHAR_CHARS.set('a', 'z' + 1);
         SAFE_URL_PCHAR_CHARS.set('A', 'Z' + 1);
 
-        /*
-         * query       = *( pchar / "/" / "?" )
-         */
+        // query = *( pchar / "/" / "?" ) - also encode ? and & since these are parameter separators
         SAFE_URL_QUERY_CHARS.or(SAFE_URL_PCHAR_CHARS);
         SAFE_URL_QUERY_CHARS.set('/');
         SAFE_URL_QUERY_CHARS.set('?');
+        SAFE_URL_QUERY_CHARS.clear('&');
+        SAFE_URL_QUERY_CHARS.clear('=');
+
+        // fragment = *( pchar / "/" / "?" )
+        SAFE_URL_FRAGMENT_CHARS.or(SAFE_URL_PCHAR_CHARS);
+        SAFE_URL_FRAGMENT_CHARS.set('/');
+        SAFE_URL_FRAGMENT_CHARS.set('?');
+
+        // userInfo = *( unreserved / pct-encoded / sub-delims / ":" )
+        SAFE_URL_USERINFO_CHARS.or(SAFE_URL_PCHAR_CHARS);
+        SAFE_URL_USERINFO_CHARS.clear('@');
     }
 
     /**
@@ -167,12 +175,16 @@ public final class Uris {
             String[] nv = param.split("=", 2);
             if (nv.length == 2) {
                 try {
-                    String name = urlQueryDecode(nv[0]);
-                    String value = urlQueryDecode(nv[1]);
                     if (builder.length() > 0) {
                         builder.append('&');
                     }
-                    builder.append(urlQueryEncode(name)).append('=').append(urlQueryEncode(value));
+
+                    String name = urlDecodeQueryParameterNameOrValue(nv[0]);
+                    String value = urlDecodeQueryParameterNameOrValue(nv[1]);
+
+                    builder.append(urlEncodeQueryParameterNameOrValue(name))
+                           .append('=')
+                           .append(urlEncodeQueryParameterNameOrValue(value));
                 } catch (Exception e) {
                     throw new URISyntaxException(rawQuery, "The URL query string could not be decoded");
                 }
@@ -222,7 +234,7 @@ public final class Uris {
     public static URI withQuery(final URI uri, final Form query) {
         try {
             return create(uri.getScheme(), uri.getRawUserInfo(), uri.getHost(), uri.getPort(),
-                    uri.getRawPath(), query.toString(), uri.getRawFragment());
+                    uri.getRawPath(), query.toQueryString(), uri.getRawFragment());
         } catch (final URISyntaxException e) {
             throw new IllegalStateException(e);
         }
@@ -246,86 +258,129 @@ public final class Uris {
     }
 
     /**
-     * Returns the URL form decoding of the provided string.
+     * Decodes the provided form encoded parameter name or value as per application/x-www-form-urlencoded.
      *
-     * @param value
-     *            the string to be URL form decoded, which may be {@code null}.
-     * @return the URL form decoding of the provided string, or {@code null} if
-     *         {@code string} was {@code null}.
+     * @param nameOrValue
+     *         the form encoded parameter name or value, which may be {@code null}.
+     * @return the decoded form parameter name or value, or {@code null} if {@code nameOrValue} was {@code null}.
      */
-    public static String urlFormDecode(String value) {
+    public static String formDecodeParameterNameOrValue(String nameOrValue) {
         try {
-            return value != null ? URLDecoder.decode(value, "UTF-8") : null;
+            return nameOrValue != null ? URLDecoder.decode(nameOrValue, "UTF-8") : null;
         } catch (UnsupportedEncodingException e) {
-            return value;
+            return nameOrValue;
         }
     }
 
     /**
-     * Returns the URL form encoding of the provided string.
+     * Form encodes the provided parameter name or value as per application/x-www-form-urlencoded.
      *
-     * @param value
-     *            the string to be URL form encoded, which may be {@code null}.
-     * @return the URL form encoding of the provided string, or {@code null} if
-     *         {@code string} was {@code null}.
+     * @param nameOrValue
+     *         the parameter name or value, which may be {@code null}.
+     * @return the form encoded parameter name or value, or {@code null} if {@code nameOrValue} was {@code null}.
      */
-    public static String urlFormEncode(String value) {
+    public static String formEncodeParameterNameOrValue(String nameOrValue) {
         try {
-            return value != null ? URLEncoder.encode(value, "UTF-8") : null;
+            return nameOrValue != null ? URLEncoder.encode(nameOrValue, "UTF-8") : null;
         } catch (UnsupportedEncodingException e) {
-            return value;
+            return nameOrValue;
         }
     }
 
     /**
-     * Returns the URL path decoding of the provided string.
+     * Decodes the provided URL encoded path element as per RFC 3986.
      *
-     * @param value
-     *            the string to be URL path decoded, which may be {@code null}.
-     * @return the URL path decoding of the provided string, or {@code null} if
-     *         {@code string} was {@code null}.
+     * @param pathElement
+     *            the URL encoded path element, which may be {@code null}.
+     * @return the decoded path element, or {@code null} if {@code pathElement} was {@code null}.
      */
-    public static String urlPathDecode(String value) {
-        return urlDecode(value);
+    public static String urlDecodePathElement(String pathElement) {
+        return urlDecode(pathElement);
     }
 
     /**
-     * Returns the URL path encoding of the provided string.
+     * URL encodes the provided path element as per RFC 3986.
      *
-     * @param value
-     *            the string to be URL path encoded, which may be {@code null}.
-     * @return the URL path encoding of the provided string, or {@code null} if
-     *         {@code string} was {@code null}.
+     * @param pathElement
+     *         the path element, which may be {@code null}.
+     * @return the URL encoded path element, or {@code null} if {@code pathElement} was {@code null}.
      */
-    public static String urlPathEncode(String value) {
-        return urlEncode(value, SAFE_URL_PCHAR_CHARS);
+    public static String urlEncodePathElement(String pathElement) {
+        return urlEncode(pathElement, SAFE_URL_PCHAR_CHARS);
     }
 
     /**
-     * Returns the URL query decoding of the provided string.
+     * Decodes the provided URL encoded query parameter name or value as per RFC 3986.
      *
-     * @param value
-     *            the string to be URL query decoded, which may be {@code null}.
-     * @return the URL query decoding of the provided string, or {@code null} if
-     *         {@code string} was {@code null}.
+     * @param nameOrValue
+     *            the URL encoded query parameter name or value, which may be {@code null}.
+     * @return the decoded query parameter name or value, or {@code null} if {@code nameOrValue} was {@code null}.
      */
-    public static String urlQueryDecode(String value) {
-        return urlDecode(value);
+    public static String urlDecodeQueryParameterNameOrValue(String nameOrValue) {
+        return urlDecode(nameOrValue);
     }
 
     /**
-     * Returns the URL query encoding of the provided string.
+     * URL encodes the provided query parameter name or value as per RFC 3986. Note that this method does not
+     * adhere to the "query" production in RFC 3986, because it is intended for encoding query parameter names or
+     * values. Therefore, this method will encode '?' and '=' characters.
      *
-     * @param value
-     *            the string to be URL query encoded, which may be {@code null}.
-     * @return the URL query encoding of the provided string, or {@code null} if
-     *         {@code string} was {@code null}.
+     * @param nameOrValue
+     *         the query parameter name or value, which may be {@code null}.
+     * @return the URL encoded query parameter name or value, or {@code null} if {@code nameOrValue} was {@code null}.
      */
-    public static String urlQueryEncode(String value) {
-        return urlEncode(value, SAFE_URL_QUERY_CHARS);
+    public static String urlEncodeQueryParameterNameOrValue(String nameOrValue) {
+        return urlEncode(nameOrValue, SAFE_URL_QUERY_CHARS);
+    }
+
+    /**
+     * Decodes the provided URL encoded fragment as per RFC 3986.
+     *
+     * @param fragment
+     *            the URL encoded fragment, which may be {@code null}.
+     * @return the decoded fragment, or {@code null} if {@code fragment} was {@code null}.
+     */
+    public static String urlDecodeFragment(String fragment) {
+        return urlDecode(fragment);
+    }
+
+    /**
+     * URL encodes the provided fragment as per RFC 3986.
+     *
+     * @param fragment
+     *         the fragment, which may be {@code null}.
+     * @return the URL encoded fragment, or {@code null} if {@code fragment} was {@code null}.
+     */
+    public static String urlEncodeFragment(String fragment) {
+        return urlEncode(fragment, SAFE_URL_FRAGMENT_CHARS);
+    }
+
+    /**
+     * Decodes the provided URL encoded userInfo as per RFC 3986.
+     *
+     * @param userInfo
+     *            the URL encoded userInfo, which may be {@code null}.
+     * @return the decoded userInfo, or {@code null} if {@code userInfo} was {@code null}.
+     */
+    public static String urlDecodeUserInfo(String userInfo) {
+        return urlDecode(userInfo);
+    }
+
+    /**
+     * URL encodes the provided userInfo as per RFC 3986.
+     *
+     * @param userInfo
+     *         the userInfo, which may be {@code null}.
+     * @return the URL encoded userInfo, or {@code null} if {@code userInfo} was {@code null}.
+     */
+    public static String urlEncodeUserInfo(String userInfo) {
+        return urlEncode(userInfo, SAFE_URL_USERINFO_CHARS);
     }
 
     private static String urlDecode(final String s) {
+        if (s == null) {
+            return null;
+        }
         // First try fast-path decode of simple ASCII.
         final int size = s.length();
         for (int i = 0; i < size; i++) {
@@ -373,6 +428,9 @@ public final class Uris {
     }
 
     private static String urlEncode(final String s, final BitSet safeChars) {
+        if (s == null) {
+            return null;
+        }
         // First try fast-path encode of simple ASCII.
         final int size = s.length();
         for (int i = 0; i < size; i++) {

@@ -27,16 +27,30 @@ import org.testng.annotations.Test;
 public class FormTest {
 
     @Test
-    public void fromString() {
-        Form f = new Form().fromString("x=%3D&y=z");
-        assertThat(f.get("x").get(0)).isEqualTo("=");
+    public void fromFormString() {
+        Form f = new Form().fromFormString("x=%3D+%20&y=z");
+        assertThat(f.get("x").get(0)).isEqualTo("=  ");
         assertThat(f.get("y").get(0)).isEqualTo("z");
     }
 
     @Test
-    public void fromStringAndBack() {
+    public void fromFormStringAndBack() {
         String s1 = "x=%3D&y=%3F";
-        String s2 = new Form().fromString(s1).toString();
+        String s2 = new Form().fromFormString(s1).toFormString();
+        assertThat(s1).isEqualTo(s2);
+    }
+
+    @Test
+    public void fromQueryString() {
+        Form f = new Form().fromQueryString("x=%3D+%20&y=z");
+        assertThat(f.get("x").get(0)).isEqualTo("=+ ");
+        assertThat(f.get("y").get(0)).isEqualTo("z");
+    }
+
+    @Test
+    public void fromQueryStringAndBack() {
+        String s1 = "x=*+%20&y=?";
+        String s2 = new Form().fromQueryString(s1).toQueryString();
         assertThat(s1).isEqualTo(s2);
     }
 

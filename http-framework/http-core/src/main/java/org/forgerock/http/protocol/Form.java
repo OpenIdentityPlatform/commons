@@ -19,8 +19,10 @@
 package org.forgerock.http.protocol;
 
 
-import static org.forgerock.http.util.Uris.urlFormDecode;
-import static org.forgerock.http.util.Uris.urlFormEncode;
+import static org.forgerock.http.util.Uris.formDecodeParameterNameOrValue;
+import static org.forgerock.http.util.Uris.formEncodeParameterNameOrValue;
+import static org.forgerock.http.util.Uris.urlDecodeQueryParameterNameOrValue;
+import static org.forgerock.http.util.Uris.urlEncodeQueryParameterNameOrValue;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -46,37 +48,102 @@ public class Form extends MultiValueMap<String, String> {
     }
 
     /**
-     * Parses a URL-encoded string containing form parameters and stores them in
+     * Parses a form URL-encoded string containing form parameters and stores them in
      * this object. Malformed name-value pairs (missing the "=" delimiter) are
      * simply ignored.
      *
-     * @param s the URL-encoded string to parse.
+     * @param s the form URL-encoded string to parse.
+     * @return this form object.
+     * @deprecated use {@link #fromFormString(String)} instead.
+     */
+    @Deprecated
+    public Form fromString(String s) {
+        return fromFormString(s);
+    }
+
+    /**
+     * Parses a form URL-encoded string containing form parameters and stores them in
+     * this object. Malformed name-value pairs (missing the "=" delimiter) are
+     * simply ignored.
+     *
+     * @param s the form URL-encoded string to parse.
      * @return this form object.
      */
-    public Form fromString(String s) {
+    public Form fromFormString(final String s) {
         for (String param : s.split("&")) {
             String[] nv = param.split("=", 2);
             if (nv.length == 2) {
-                add(urlFormDecode(nv[0]), urlFormDecode(nv[1]));
+                add(formDecodeParameterNameOrValue(nv[0]), formDecodeParameterNameOrValue(nv[1]));
             }
         }
         return this;
     }
 
     /**
-     * Returns this form in a URL-encoded format string.
+     * Parses a URL-encoded query string containing form parameters and stores them in
+     * this object. Malformed name-value pairs (missing the "=" delimiter) are
+     * simply ignored.
      *
-     * @return the URL-encoded form.
+     * @param s the URL-encoded query string to parse.
+     * @return this form object.
      */
+    public Form fromQueryString(final String s) {
+        for (String param : s.split("&")) {
+            String[] nv = param.split("=", 2);
+            if (nv.length == 2) {
+                add(urlDecodeQueryParameterNameOrValue(nv[0]), urlDecodeQueryParameterNameOrValue(nv[1]));
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Returns this form in a form URL-encoded string.
+     *
+     * @return the form URL-encoded form.
+     * @deprecated use {@link #toFormString()} instead.
+     */
+    @Deprecated
     @Override
     public String toString() {
+        return toFormString();
+    }
+
+    /**
+     * Returns this form in a form URL-encoded string.
+     *
+     * @return the form URL-encoded form.
+     */
+    public String toFormString() {
         StringBuilder sb = new StringBuilder();
         for (String name : keySet()) {
             for (String value : get(name)) {
                 if (sb.length() > 0) {
                     sb.append('&');
                 }
-                sb.append(urlFormEncode(name)).append('=').append(urlFormEncode(value));
+                sb.append(formEncodeParameterNameOrValue(name))
+                    .append('=')
+                    .append(formEncodeParameterNameOrValue(value));
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Returns this form in a URL-encoded query string.
+     *
+     * @return the URL-encoded query string.
+     */
+    public String toQueryString() {
+        StringBuilder sb = new StringBuilder();
+        for (String name : keySet()) {
+            for (String value : get(name)) {
+                if (sb.length() > 0) {
+                    sb.append('&');
+                }
+                sb.append(urlEncodeQueryParameterNameOrValue(name))
+                    .append('=')
+                    .append(urlEncodeQueryParameterNameOrValue(value));
             }
         }
         return sb.toString();
@@ -93,7 +160,7 @@ public class Form extends MultiValueMap<String, String> {
     public Form fromRequestQuery(Request request) {
         String query = request.getUri().getRawQuery();
         if (query != null) {
-            fromString(query);
+            fromQueryString(query);
         }
         return this;
     }
@@ -106,7 +173,7 @@ public class Form extends MultiValueMap<String, String> {
      */
     public void toRequestQuery(Request request) {
         try {
-            request.getUri().setRawQuery(toString());
+            request.getUri().setRawQuery(toQueryString());
         } catch (URISyntaxException use) {
             throw new IllegalArgumentException(use);
         }
@@ -124,7 +191,7 @@ public class Form extends MultiValueMap<String, String> {
         if (uriQuery != null && uriQuery.length() > 0) {
             sb.append(uriQuery);
         }
-        String toAppend = toString();
+        String toAppend = toQueryString();
         if (toAppend != null && toAppend.length() > 0) {
             if (sb.length() > 0) {
                 sb.append('&');
@@ -158,7 +225,7 @@ public class Form extends MultiValueMap<String, String> {
                 && request.getEntity() != null
                 && "application/x-www-form-urlencoded".equalsIgnoreCase(request.getHeaders()
                         .getFirst(ContentTypeHeader.class))) {
-            fromString(request.getEntity().getString());
+            fromFormString(request.getEntity().getString());
         }
         return this;
     }
@@ -171,7 +238,7 @@ public class Form extends MultiValueMap<String, String> {
      * @param request the request to add the form entity to.
      */
     public void toRequestEntity(Request request) {
-        String form = toString();
+        String form = toFormString();
         request.setMethod("POST");
         request.getHeaders().put(ContentTypeHeader.NAME, "application/x-www-form-urlencoded");
         request.getHeaders().put(ContentLengthHeader.NAME, form.length());

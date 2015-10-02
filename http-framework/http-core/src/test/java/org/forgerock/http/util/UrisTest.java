@@ -61,8 +61,7 @@ public class UrisTest {
         URI withQuery = Uris.withQuery(uri, form);
         // Form uses LinkedHashMap so parameter order is guaranteed.
         assertThat(withQuery.toString()).isEqualTo(
-                "https://doot.doot.doo.org/all/good/things?goto=http%3A%2F%2Fsome.url"
-                        + "&state=1234567890#breakdance");
+                "https://doot.doot.doo.org/all/good/things?goto=http://some.url&state=1234567890#breakdance");
     }
 
     @Test
@@ -95,44 +94,45 @@ public class UrisTest {
 
     @DataProvider
     private Object[][] urlEncodings() {
-        // decoded, path encoded, query encoded, form encoded
+        //    decoded,       path encoded,  query encoded, form encoded
         return new Object[][] {
-            { "",            "",            "",            "" },                                // empty
-            { " ",           "%20",         "%20",         "+" },                               // whitespace
-            { "azAZ09-._~",  "azAZ09-._~",  "azAZ09-._~",  "azAZ09-._%7E" },                    // unreserved
-            { "!$&'()*+,;=", "!$&'()*+,;=", "!$&'()*+,;=", "%21%24%26%27%28%29*%2B%2C%3B%3D" }, // sub-delims
-            { ":@",          ":@",          ":@",          "%3A%40" },                          // pchar
-            { "/?",          "%2F%3F",      "/?",          "%2F%3F" },                          // query
+            { null,          null,          null,              null },                              // empty
+            { "",            "",            "",                "" },                                // empty
+            { " ",           "%20",         "%20",             "+" },                               // whitespace
+            { "azAZ09-._~",  "azAZ09-._~",  "azAZ09-._~",      "azAZ09-._%7E" },                    // unreserved
+            { "!$&'()*+,;=", "!$&'()*+,;=", "!$%26'()*+,;%3D", "%21%24%26%27%28%29*%2B%2C%3B%3D" }, // sub-delims
+            { ":@",          ":@",          ":@",              "%3A%40" },                          // pchar
+            { "/?",          "%2F%3F",      "/?",              "%2F%3F" },                          // query
         };
     }
 
     @Test(dataProvider = "urlEncodings")
     public void testUrlPathEncode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
-        assertThat(Uris.urlPathEncode(decoded)).isEqualTo(pathEncoded);
+        assertThat(Uris.urlEncodePathElement(decoded)).isEqualTo(pathEncoded);
     }
 
     @Test(dataProvider = "urlEncodings")
     public void testUrlQueryEncode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
-        assertThat(Uris.urlQueryEncode(decoded)).isEqualTo(queryEncoded);
+        assertThat(Uris.urlEncodeQueryParameterNameOrValue(decoded)).isEqualTo(queryEncoded);
     }
 
     @Test(dataProvider = "urlEncodings")
     public void testUrlFormEncode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
-        assertThat(Uris.urlFormEncode(decoded)).isEqualTo(formEncoded);
+        assertThat(Uris.formEncodeParameterNameOrValue(decoded)).isEqualTo(formEncoded);
     }
 
     @Test(dataProvider = "urlEncodings")
     public void testUrlPathDecode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
-        assertThat(Uris.urlPathDecode(pathEncoded)).isEqualTo(decoded);
+        assertThat(Uris.urlDecodePathElement(pathEncoded)).isEqualTo(decoded);
     }
 
     @Test(dataProvider = "urlEncodings")
     public void testUrlQueryDecode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
-        assertThat(Uris.urlQueryDecode(queryEncoded)).isEqualTo(decoded);
+        assertThat(Uris.urlDecodeQueryParameterNameOrValue(queryEncoded)).isEqualTo(decoded);
     }
 
     @Test(dataProvider = "urlEncodings")
     public void testUrlFormDecode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
-        assertThat(Uris.urlFormDecode(formEncoded)).isEqualTo(decoded);
+        assertThat(Uris.formDecodeParameterNameOrValue(formEncoded)).isEqualTo(decoded);
     }
 }

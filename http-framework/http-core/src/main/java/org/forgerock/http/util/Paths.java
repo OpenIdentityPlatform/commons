@@ -38,7 +38,7 @@ public final class Paths {
      *         representation.
      */
     public static String urlDecode(final Object value) {
-        return Uris.urlPathDecode(value.toString());
+        return Uris.urlDecodePathElement(value.toString());
     }
 
     /**
@@ -51,7 +51,7 @@ public final class Paths {
      *         representation.
      */
     public static String urlEncode(final Object value) {
-        return Uris.urlPathEncode(value.toString());
+        return Uris.urlEncodePathElement(value.toString());
     }
 
     /**
