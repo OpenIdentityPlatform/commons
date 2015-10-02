@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @since 0.1.0
  */
-public final class VerifyEmailAccountConfig extends AbstractEmailVerificationConfig {
+public final class VerifyEmailAccountConfig extends AbstractEmailVerificationConfig<VerifyEmailAccountConfig> {
 
     /**
      * Name of the stage configuration.
@@ -32,7 +32,7 @@ public final class VerifyEmailAccountConfig extends AbstractEmailVerificationCon
     public static final String NAME = "emailValidation";
 
     @JsonCreator
-    VerifyEmailAccountConfig(@JsonProperty("email") EmailAccountConfig emailConfig) {
+    public VerifyEmailAccountConfig(@JsonProperty("email") EmailAccountConfig emailConfig) {
         super(emailConfig);
     }
 
@@ -41,4 +41,8 @@ public final class VerifyEmailAccountConfig extends AbstractEmailVerificationCon
         return NAME;
     }
 
+    @Override
+    public VerifyEmailAccountConfig self() {
+        return this;
+    }
 }

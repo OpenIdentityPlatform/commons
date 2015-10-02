@@ -26,20 +26,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @since 0.1.0
  */
-public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig {
+public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig<VerifyUserIdConfig> {
 
     /**
      * Name of the stage configuration.
      */
     public static final String NAME = "userIdValidation";
 
-    @JsonProperty
     private String identityServiceUrl;
-    @JsonProperty
     private String identityIdField;
-    @JsonProperty
     private String identityEmailField;
-    @JsonProperty
     private Set<String> queryFields;
 
     /**
@@ -146,4 +142,8 @@ public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig {
         return NAME;
     }
 
+    @Override
+    public VerifyUserIdConfig self() {
+        return this;
+    }
 }

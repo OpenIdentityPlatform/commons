@@ -17,6 +17,9 @@ package org.forgerock.selfservice.stages.email;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
+import java.util.HashSet;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.forgerock.selfservice.core.config.StageConfig;
@@ -50,5 +53,22 @@ public class VerifyUserIdConfigTest {
         assertThat(verifyUserIdConfig.getEmailVerificationLink()).isEqualTo("/verifyemail");
         assertThat(verifyUserIdConfig.getEmailVerificationLinkToken()).isEqualTo("abc123");
     }
+
+    @Test
+    public void testChainedEmailConfigThroughSetters() {
+        VerifyUserIdConfig verifyUserIdConfig = new VerifyUserIdConfig(new EmailAccountConfig())
+                .setQueryFields(new HashSet<>(Arrays.asList("uid", "mail")))
+                .setIdentityIdField("/uid/0")
+                .setIdentityEmailField("/mail/0")
+                .setIdentityServiceUrl("/users")
+                .setEmailServiceUrl("/email")
+                .setEmailFrom("info@admin.org")
+                .setEmailSubject("Reset password email")
+                .setEmailMessage("<h3>This is your reset email.</h3>"
+                        + "<h4><a href=\"%link%\">Email verification link</a></h4>")
+                .setEmailVerificationLinkToken("%link%")
+                .setEmailVerificationLink("http://somewhere.com");
+    }
 }
+
 

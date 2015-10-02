@@ -24,7 +24,7 @@ import org.forgerock.util.Reject;
  *
  * @since 0.1.0
  */
-abstract class AbstractEmailVerificationConfig implements StageConfig {
+abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificationConfig<C>> implements StageConfig {
 
     private EmailAccountConfig emailAccountConfig;
 
@@ -88,9 +88,94 @@ abstract class AbstractEmailVerificationConfig implements StageConfig {
     }
 
     /**
+     * Sets the URL for the email service.
+     *
+     * @param emailServiceUrl
+     *         the email service URL
+     *
+     * @return this config instance
+     */
+    public C setEmailServiceUrl(String emailServiceUrl) {
+        emailAccountConfig.setServiceUrl(emailServiceUrl);
+        return self();
+    }
+
+    /**
+     * Sets the subject part for the reset email.
+     *
+     * @param emailSubject
+     *         the email subject
+     *
+     * @return this config instance
+     */
+    public C setEmailSubject(String emailSubject) {
+        emailAccountConfig.setSubject(emailSubject);
+        return self();
+    }
+
+    /**
+     * Sets the message part for the reset email.
+     *
+     * @param emailMessage
+     *         the email message
+     *
+     * @return this config instance
+     */
+    public C setEmailMessage(String emailMessage) {
+        emailAccountConfig.setMessage(emailMessage);
+        return self();
+    }
+
+    /**
+     * Sets the from part for the reset email.
+     *
+     * @param emailFrom
+     *         the email from field
+     *
+     * @return this config instance
+     */
+    public C setEmailFrom(String emailFrom) {
+        emailAccountConfig.setFrom(emailFrom);
+        return self();
+    }
+
+    /**
+     * Sets the string token representing where the reset URL should besubstitutedd.
+     *
+     * @param emailVerificationLinkToken
+     *         the reset URL string token
+     *
+     * @return this config instance
+     */
+    public C setEmailVerificationLinkToken(String emailVerificationLinkToken) {
+        emailAccountConfig.setVerificationLinkToken(emailVerificationLinkToken);
+        return self();
+    }
+
+    /**
+     * Sets the reset URL to be passed into the email body.
+     *
+     * @param emailVerificationLink
+     *         the reset URL
+     *
+     * @return this config instance
+     */
+    public C setEmailVerificationLink(String emailVerificationLink) {
+        emailAccountConfig.setVerificationLink(emailVerificationLink);
+        return self();
+    }
+
+    /**
      * Gets the name of the stage configuration.
      *
      * @return the config name
      */
     public abstract String getName();
+
+    /**
+     * Returns this object, as its actual type.
+     *
+     * @return this object
+     */
+    public abstract C self();
 }
