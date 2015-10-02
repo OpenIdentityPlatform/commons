@@ -103,7 +103,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
-            JsonValue clientResponse = initiateProcess(context);
+            JsonValue clientResponse = initiateProcess(new SelfServiceContext(context));
             return newResourceResponse("1", "1.0", clientResponse).asPromise();
         } catch (ResourceException | RuntimeException e) {
             return logAndAdaptException(e).asPromise();
@@ -114,7 +114,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         if (SUBMIT_ACTION.equals(request.getAction())) {
             try {
-                JsonValue clientResponse = progressProcess(context, request.getContent());
+                JsonValue clientResponse = progressProcess(new SelfServiceContext(context), request.getContent());
                 return newActionResponse(clientResponse).asPromise();
             } catch (ResourceException | RuntimeException e) {
                 return logAndAdaptException(e).asPromise();
@@ -142,9 +142,9 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     /*
      * Responsible for retrieving the requirements from the first stage in the flow.
      */
-    private JsonValue initiateProcess(Context httpContext) throws ResourceException {
+    private JsonValue initiateProcess(Context requestContext) throws ResourceException {
         ProcessContextImpl context = ProcessContextImpl
-                .newBuilder(httpContext, INITIAL_STAGE_INDEX)
+                .newBuilder(requestContext, INITIAL_STAGE_INDEX)
                 .build();
 
         ProgressStageWrapper<?> stage = retrieveStage(context);
@@ -165,16 +165,16 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     /*
      * With the process flow already kicked off, progresses to the flow by processing the client input.
      */
-    private JsonValue progressProcess(Context httpContext, JsonValue clientInput) throws ResourceException {
+    private JsonValue progressProcess(Context requestContext, JsonValue clientInput) throws ResourceException {
         JsonValue snapshotTokenValue = clientInput.get(TOKEN_FIELD);
         ProcessContextImpl.Builder contextBuilder;
 
         if (snapshotTokenValue.isNotNull()) {
             JsonValue jsonContext = snapshotAuthor
                     .retrieveSnapshotFrom(snapshotTokenValue.asString());
-            contextBuilder = ProcessContextImpl.newBuilder(httpContext, jsonContext);
+            contextBuilder = ProcessContextImpl.newBuilder(requestContext, jsonContext);
         } else {
-            contextBuilder = ProcessContextImpl.newBuilder(httpContext, INITIAL_STAGE_INDEX);
+            contextBuilder = ProcessContextImpl.newBuilder(requestContext, INITIAL_STAGE_INDEX);
         }
 
         JsonValue input = clientInput.get(INPUT_FIELD);
@@ -218,7 +218,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         int nextIndex = context.getStageIndex() + 1;
 
         ProcessContextImpl nextContext = ProcessContextImpl
-                .newBuilder(context.getHttpContext(), nextIndex)
+                .newBuilder(context.getRequestContext(), nextIndex)
                 .setState(context.getState())
                 .build();
 

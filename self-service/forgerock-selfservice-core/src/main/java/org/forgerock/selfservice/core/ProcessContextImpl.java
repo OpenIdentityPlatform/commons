@@ -38,14 +38,14 @@ final class ProcessContextImpl implements ProcessContext {
     private static final String STAGE_TAG_KEY = "stageTag";
     private static final String PROCESS_STATE_KEY = "processState";
 
-    private final Context httpContext;
+    private final Context requestContext;
     private final int stageIndex;
     private final String stageTag;
     private final JsonValue input;
     private final JsonValue state;
 
     private ProcessContextImpl(Builder builder) {
-        httpContext = builder.httpContext;
+        requestContext = builder.requestContext;
         stageIndex = builder.stageIndex;
         stageTag = builder.stageTag;
         input = builder.input;
@@ -53,8 +53,8 @@ final class ProcessContextImpl implements ProcessContext {
     }
 
     @Override
-    public Context getHttpContext() {
-        return httpContext;
+    public Context getRequestContext() {
+        return requestContext;
     }
 
     @Override
@@ -103,16 +103,16 @@ final class ProcessContextImpl implements ProcessContext {
      */
     static final class Builder {
 
-        private final Context httpContext;
+        private final Context requestContext;
         private final int stageIndex;
         private String stageTag;
         private JsonValue state;
         private JsonValue input;
 
-        private Builder(Context httpContext, int stageIndex) {
-            Reject.ifNull(httpContext);
+        private Builder(Context requestContext, int stageIndex) {
+            Reject.ifNull(requestContext);
             Reject.ifTrue(stageIndex < 0);
-            this.httpContext = httpContext;
+            this.requestContext = requestContext;
             this.stageIndex = stageIndex;
             stageTag = INITIAL_TAG;
             state = emptyJson();
@@ -122,17 +122,17 @@ final class ProcessContextImpl implements ProcessContext {
         private Builder(ProcessContextImpl previous) {
             Reject.ifNull(previous);
             stageIndex = previous.stageIndex;
-            httpContext = previous.httpContext;
+            requestContext = previous.requestContext;
             stageTag = previous.stageTag;
             state = previous.state;
             input = previous.input;
         }
 
-        private Builder(Context httpContext, JsonValue jsonContext) {
-            Reject.ifNull(httpContext, jsonContext);
+        private Builder(Context requestContext, JsonValue jsonContext) {
+            Reject.ifNull(requestContext, jsonContext);
             Reject.ifTrue(jsonContext.get(STAGE_INDEX_KEY).isNull(), "Stage index missing");
 
-            this.httpContext = httpContext;
+            this.requestContext = requestContext;
 
             stageIndex = jsonContext
                     .get(STAGE_INDEX_KEY)
@@ -170,12 +170,12 @@ final class ProcessContextImpl implements ProcessContext {
 
     }
 
-    static Builder newBuilder(Context httpContext, int stageIndex) {
-        return new Builder(httpContext, stageIndex);
+    static Builder newBuilder(Context requestContext, int stageIndex) {
+        return new Builder(requestContext, stageIndex);
     }
 
-    static Builder newBuilder(Context httpContext, JsonValue jsonContext) {
-        return new Builder(httpContext, jsonContext);
+    static Builder newBuilder(Context requestContext, JsonValue jsonContext) {
+        return new Builder(requestContext, jsonContext);
     }
 
     static Builder newBuilder(ProcessContextImpl previous) {

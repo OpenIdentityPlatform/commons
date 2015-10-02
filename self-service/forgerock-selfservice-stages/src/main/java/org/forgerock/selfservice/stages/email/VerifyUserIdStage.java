@@ -19,6 +19,7 @@ package org.forgerock.selfservice.stages.email;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
+import org.forgerock.selfservice.core.SelfServiceContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -78,7 +79,7 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
             throw new BadRequestException("username is missing");
         }
 
-        JsonValue user = findUser(context.getHttpContext(), username, config);
+        JsonValue user = findUser(context.getRequestContext(), username, config);
 
         if (user == null) {
             throw new BadRequestException("Unable to find associated account");
@@ -95,7 +96,7 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
                 .asString();
     }
 
-    private JsonValue findUser(Context httpContext, String identifier,
+    private JsonValue findUser(Context requestContext, String identifier,
                                VerifyUserIdConfig config) throws ResourceException {
 
         List<QueryFilter<JsonPointer>> filterOptions = new ArrayList<>();
@@ -110,15 +111,14 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
         final List<JsonValue> user = new ArrayList<>();
 
         try (Connection connection = connectionFactory.getConnection()) {
-            connection.query(httpContext, request, new QueryResourceHandler() {
-
-                @Override
-                public boolean handleResource(ResourceResponse resourceResponse) {
-                    user.add(resourceResponse.getContent());
-                    return true;
-                }
-
-            });
+            connection.query(requestContext, request,
+                    new QueryResourceHandler() {
+                        @Override
+                        public boolean handleResource(ResourceResponse resourceResponse) {
+                            user.add(resourceResponse.getContent());
+                            return true;
+                        }
+                    });
         }
 
         return user.isEmpty() ? null : user.get(0);

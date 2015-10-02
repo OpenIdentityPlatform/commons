@@ -27,11 +27,11 @@ import org.forgerock.json.JsonValue;
 public interface ProcessContext {
 
     /**
-     * Gets the http context.
+     * Gets the request context.
      *
-     * @return the http context
+     * @return the request context
      */
-    Context getHttpContext();
+    Context getRequestContext();
 
     /**
      * Gets the current stage tag defined by the previously invoked stage.

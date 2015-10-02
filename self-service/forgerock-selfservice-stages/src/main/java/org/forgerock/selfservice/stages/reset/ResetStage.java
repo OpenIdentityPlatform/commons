@@ -20,6 +20,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
 import org.forgerock.json.JsonPointer;
+import org.forgerock.selfservice.core.SelfServiceContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -83,20 +84,20 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
             throw new BadRequestException("password is missing from input");
         }
 
-        patchUser(context.getHttpContext(), userId, password, config);
+        patchUser(context.getRequestContext(), userId, password, config);
 
         return StageResponse
                 .newBuilder()
                 .build();
     }
 
-    private void patchUser(Context httpContext, String userId, String password,
+    private void patchUser(Context requestContext, String userId, String password,
                            ResetStageConfig config) throws ResourceException {
         try (Connection connection = connectionFactory.getConnection()) {
             PatchOperation operation = PatchOperation.replace(
                     new JsonPointer(config.getIdentityPasswordField()), password);
             PatchRequest request = Requests.newPatchRequest(config.getIdentityServiceUrl(), userId, operation);
-            connection.patch(httpContext, request);
+            connection.patch(requestContext, request);
         }
     }
 

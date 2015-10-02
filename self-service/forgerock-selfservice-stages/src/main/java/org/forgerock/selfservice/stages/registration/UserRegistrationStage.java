@@ -27,6 +27,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
+import org.forgerock.selfservice.core.SelfServiceContext;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.services.context.Context;
@@ -67,18 +68,18 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
     public StageResponse advance(ProcessContext context, UserRegistrationConfig config) throws ResourceException {
 
         JsonValue user = context.getState(USER_FIELD);
-        createUser(context.getHttpContext(), user, config);
+        createUser(context.getRequestContext(), user, config);
 
         return StageResponse
                 .newBuilder()
                 .build();
     }
 
-    private void createUser(Context httpContext, JsonValue user,
+    private void createUser(Context requestContext, JsonValue user,
                             UserRegistrationConfig config) throws ResourceException {
         try (Connection connection = connectionFactory.getConnection()) {
             CreateRequest request = Requests.newCreateRequest(config.getIdentityServiceUrl(), user);
-            connection.create(httpContext, request);
+            connection.create(requestContext, request);
         }
     }
 

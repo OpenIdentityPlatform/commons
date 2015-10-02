@@ -23,6 +23,7 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 
+import org.forgerock.selfservice.core.SelfServiceContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -103,7 +104,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
             @Override
             public void snapshotTokenPreview(ProcessContext context,
                                              String snapshotToken) throws ResourceException {
-                sendEmail(context.getHttpContext(), snapshotToken, code, mail, config);
+                sendEmail(context.getRequestContext(), snapshotToken, code, mail, config);
             }
 
         };
@@ -156,7 +157,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
                 .build();
     }
 
-    private void sendEmail(Context httpContext, String snapshotToken, String code,
+    private void sendEmail(Context requestContext, String snapshotToken, String code,
                            String email, C config) throws ResourceException {
 
         String emailUrl = config.getEmailVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
@@ -173,7 +174,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
                                             field("subject", config.getEmailSubject()),
                                             field("message", message))));
 
-            connection.action(httpContext, request);
+            connection.action(requestContext, request);
         }
     }
 
