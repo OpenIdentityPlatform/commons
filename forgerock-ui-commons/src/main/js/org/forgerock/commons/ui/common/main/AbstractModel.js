@@ -32,11 +32,10 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
         },
         get: function(key) {
             //if the key has a leading "/" then trim it off
-            //this assumes the key will never look like "/aProp.aSubProp"
             if (key.indexOf("/") === 0) {
                 key = key.substring(1);
             }
-            
+
             return _.reduce(key.split("/"), function(attr, key) {
                 if (attr instanceof Backbone.Model) {
                     return attr.attributes[key];

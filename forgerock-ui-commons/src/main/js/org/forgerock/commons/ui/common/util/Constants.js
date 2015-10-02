@@ -44,8 +44,6 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.EVENT_SHOW_DIALOG = "dialog.EVENT_SHOW_DIALOG";
     obj.EVENT_CHANGE_VIEW = "view.EVENT_CHANGE_VIEW";
     obj.EVENT_UNAUTHORIZED = "view.EVENT_UNAUTHORIZED";
-    obj.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG = "dialog.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG";
-    obj.EVENT_SHOW_CHANGE_SECURITY_DIALOG = "dialog.EVENT_SHOW_CHANGE_SECURITY_DIALOG";
     obj.EVENT_SHOW_LOGIN_DIALOG = "dialog.EVENT_SHOW_LOGIN_DIALOG";
 
     //login
@@ -68,11 +66,6 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.EVENT_SITE_IDENTIFICATION_CHANGE_REQUEST = "user.profile.EVENT_SITE_IDENTIFICATION_CHANGE_REQUEST";
     obj.EVENT_ENTER_OLD_PASSWORD_REQUEST = "user.profile.EVENT_ENTER_OLD_PASSWORD_REQUEST";
 
-    //registration
-    obj.EVENT_USER_SUCCESSFULLY_REGISTERED = "user.registration.EVENT_USER_SUCCESSFULLY_REGISTERED";
-    obj.EVENT_USER_REGISTRATION_ERROR = "user.registration.EVENT_USER_REGISTRATION_ERROR";
-    obj.EVENT_TERMS_OF_USE_REQUEST = "user.registration.EVENT_TERMS_OF_USE_REQUEST";
-
     //admin
     obj.EVENT_ADMIN_USERS = "admin.usermanagement.EVENT_ADMIN_USERS";
     obj.EVENT_ADMIN_ADD_USER_REQUEST = "admin.usermanagement.EVENT_ADMIN_ADD_USER_REQUEST";
@@ -83,8 +76,6 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.EVENT_NAVIGATION_HOME_REQUEST = "common.navigation.EVENT_NAVIGATION_HOME_REQUEST";
     obj.EVENT_SWITCH_VIEW_REQUEST = "common.navigation.EVENT_SWITCH_VIEW_REQUEST";
     obj.EVENT_HANDLE_DEFAULT_ROUTE = "common.navigation.EVENT_HANDLE_DEFAULT_ROUTE";
-
-    obj.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY = "user.forgottenpassword.FORGOTTEN_PASSWORD_CHANGED_SUCCESSFULLY";
 
     //configuration
     obj.EVENT_CONFIGURATION_CHANGED = "main.Configuration.EVENT_CONFIGURATION_CHANGED";

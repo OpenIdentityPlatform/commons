@@ -78,8 +78,8 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
                 this.displayed = true;
                 this.show(function(){
                     ValidatorsManager.bindValidators(self.$el);
-                    if (Configuration.loggedUser && Configuration.loggedUser.userName) {
-                        self.$el.find("input[name=login]").val(Configuration.loggedUser.userName).trigger("keyup");
+                    if (Configuration.loggedUser && Configuration.loggedUser.get("userName")) {
+                        self.$el.find("input[name=login]").val(Configuration.loggedUser.get("userName")).trigger("keyup");
                         self.$el.find("input[name=password]").focus();
                     } else {
                         self.$el.find("input[name=login]").focus();

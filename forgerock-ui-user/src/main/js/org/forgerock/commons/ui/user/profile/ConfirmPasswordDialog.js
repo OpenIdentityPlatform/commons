@@ -22,19 +22,28 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, $, _*/
+/*global define */
 
 define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
+    "jquery",
     "org/forgerock/commons/ui/common/components/BootstrapDialogView",
-    "org/forgerock/commons/ui/user/profile/UserProfileView",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function(BootstrapDialogView, UserProfileView, UIUtils, ValidatorsManager) {
+], function($, BootstrapDialogView, ValidatorsManager) {
     var ConfirmPasswordDialog = BootstrapDialogView.extend({
         contentTemplate: "templates/user/ConfirmPasswordDialogTemplate.html",
         events: {
             "onValidate": "onValidate",
-            "customValidate": "customValidate"
+            "submit #confirmPasswordForm": "submitForm"
+        },
+        submitForm: function (e) {
+            if (e) {
+                e.preventDefault();
+            }
+
+            if (this.completedCallback) {
+                this.completedCallback(this.$el.find("#currentPassword").val());
+            }
+            this.dialog.close();
         },
         errorsHandlers: {
             "Bad Request": { status: "400" }
@@ -46,26 +55,19 @@ define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
             cssClass: "btn-primary",
             disabled: true,
             action: function(dialog) {
-                UserProfileView.data.currentpassword = dialog.$modal.find("#currentPassword").val();
-                UserProfileView.submit();
-                dialog.close();
+                dialog.options.submitForm();
             }
         }],
-        customValidate: function () {
-            if(ValidatorsManager.formValidated(this.$el.find("#confirmPasswordForm"))) {
-                this.$el.find("#btnUpdate").prop('disabled', false);
-            } else {
-                this.$el.find("#btnUpdate").prop('disabled', true);
-            }
-        },
         onshown: function(dialog){
+            this.dialog = dialog;
             this.element = dialog.$modal;
             this.rebind();
+            dialog.$modal.find(".modal-body :input:first").val("").focus();
             ValidatorsManager.bindValidators(dialog.$modal);
-            this.customValidate();
         },
-        render: function() {
-            this.data.changedProtected = UserProfileView.data.changedProtected;
+        render: function(changedProtected, completedCallback) {
+            this.data.changedProtected = changedProtected;
+            this.completedCallback = completedCallback;
             this.show();
         }
     });

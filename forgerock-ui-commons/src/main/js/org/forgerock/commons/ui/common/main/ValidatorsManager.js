@@ -24,9 +24,6 @@
 
 /*global require, define */
 
-/**
- * @author mbilski
- */
 define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     "jquery",
     "underscore",
@@ -279,11 +276,12 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     };
 
     obj.formValidated = function(el) {
-        return el.find("[data-validation-status=error]").length === 0 && el.find("[data-validation-status=ok]").length !== 0;
+        return el.find("[data-validation-status=error]").length === 0;
     };
 
+    // deprecated
     obj.formNotInvalid = function(el) {
-        return el.find("[data-validation-status=error]").length === 0;
+        return obj.formValidated(el);
     };
 
     obj.validate = function(event) {

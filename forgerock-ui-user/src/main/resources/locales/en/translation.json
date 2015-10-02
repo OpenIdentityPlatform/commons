@@ -33,7 +33,8 @@
                 "siteIdentificationChanged" : "Site identification image has been changed",
                 "userAlreadyExists" : "User already exists",
                 "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error Fetching notifications."
+                "errorFetchingNotifications" : "Error Fetching notifications.",
+                "userProfileIncorrectPassword": "Incorrect current password provided."
             }
         },
         "AppConfiguration" : {
@@ -192,9 +193,10 @@
             "login" : "Login",
             "profile" : "Profile",
             "myProfile" : "My Profile",
+            "basicInfo" : "Basic Info",
             "userProfile" : "User profile",
             "username" : "Username",
-            "emailAddress" : "Email address",
+            "emailAddress" : "Email Address",
             "givenName" : "First Name",
             "sn" : "Last Name",
             "changePassword" : "Change password",

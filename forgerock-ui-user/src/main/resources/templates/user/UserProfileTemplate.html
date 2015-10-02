@@ -1,106 +1,94 @@
 <div class="container">
     <div class="page-header">
-        <div class='btn-toolbar pull-right' style="border-bottom:none">
-            <div class='btn-group'>
-                <button class="btn btn-primary" type="button" id="changeSecurity" name="changeSecurity">{{t "templates.user.UserProfileTemplate.changeSecurityData"}}</button>
-                {{#unless adminUser}}
-                {{#siteIdentification}}<a class="pull-right" href="{{url 'siteIdentification'}}"><button class="btn btn-primary" type="button" name="changeSiteIdentification">{{t "templates.user.UserProfileTemplate.changeSiteIdentification"}}</button></a>{{/siteIdentification}}
-                {{/unless}}
-            </div>
-        </div>
         <h1>{{t "common.user.userProfile"}}</h1>
     </div>
-    <form class="form-horizontal" id="userProfileForm">
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="uid">{{t "common.user.username"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="text" id="uid" name="uid" value="" readonly>
+    <div class="tab-menu">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="active"><a href="#userDetailsTab" role="tab" data-toggle="tab">{{t "common.user.basicInfo"}}</a></li>
+            <li><a href="#userPasswordTab" role="tab" data-toggle="tab">{{t "common.user.password"}}</a></li>
+        </ul>
+    </div>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="userDetailsTab">
+            <div class="panel panel-default">
+                <form class="form-horizontal" id="details">
+                    <div class="panel-body">
+
+                        {{!-- Edit the below template to align with your actual user model. --}}
+                        {{#user}}
+
+                            {{!--
+                                Conditionally render the basicInput form fields by wrapping the partial
+                                call with a block expression referencing the property. This will prevent
+                                the field from being rendered in the form if the property does not exist
+                                in the user object.
+
+                                To always display the form field, simply remove the wrapping block expression.
+                            --}}
+                            {{#userName}}
+                                {{> form/_basicInput property="userName" label="common.user.username" readonly=true}}
+                            {{/userName}}
+
+                            {{#username}}
+                                {{> form/_basicInput property="username" label="common.user.username" readonly=true}}
+                            {{/username}}
+
+                            {{#givenName}}
+                                {{> form/_basicInput property="givenName" label="common.user.givenName"}}
+                            {{/givenName}}
+
+                            {{#sn}}
+                                {{> form/_basicInput property="sn" label="common.user.sn"}}
+                            {{/sn}}
+
+                            {{#mail}}
+                                {{> form/_basicInput type="email" property="mail" label="common.user.emailAddress"}}
+                            {{/mail}}
+
+                            {{#telephoneNumber}}
+                                {{> form/_basicInput type="tel" property="telephoneNumber" label="common.user.phoneNumber"}}
+                            {{/telephoneNumber}}
+
+                            {{#postalAddress}}
+                                {{> form/_basicInput property="postalAddress" label="common.user.address"}}
+                            {{/postalAddress}}
+
+                        {{/user}}
+
+                    </div>
+                    <div class="panel-footer clearfix">
+                        {{> form/_basicSaveReset}}
+                    </div>
+                </form>
             </div>
         </div>
 
-        {{#unless adminUser}}
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="givenName">{{t "common.user.givenName"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="text" id="givenName" name="givenName" value="" autofocus />
-                <div class="validation-message"></div>
-                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+        <div role="tabpanel" class="tab-pane" id="userPasswordTab">
+            <div class="panel panel-default">
+                <form class="form-horizontal" id="password">
+                    <div class="panel-body">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="input-password">{{t "common.user.password"}}</label>
+                            <div class="col-sm-6">
+                                <input class="form-control" type="password" id="input-password" name="password" value="" data-validation-dependents="passwordConfirm" data-validator-event="keyup" placeholder="************" />
+                                <div class="validation-message"></div>
+                                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label" for="input-confirmPassword">{{t 'common.user.confirmPassword'}}</label>
+                            <div class="col-sm-6">
+                                <input class="form-control" type="password" id="input-confirmPassword" value="" data-validator="passwordConfirm" data-validator-event="keyup" placeholder="************" />
+                                <div class="validation-message"></div>
+                                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer clearfix">
+                        {{> form/_basicSaveReset}}
+                    </div>
+                </form>
             </div>
         </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="sn">{{t "common.user.familyName"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="text" id="sn" name="sn" value="" />
-                <div class="validation-message"></div>
-                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="mail">{{t "common.user.emailAddress"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="email" id="mail" name="mail" value="" />
-                <div class="validation-message"></div>
-                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="telephoneNumber">{{t "common.user.phoneNumber"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="tel" id="telephoneNumber" name="telephoneNumber" value="" />
-                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
-            </div>
-        </div>
-
-        {{#if hasAddressDetails}}
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="postalAddress">{{t "common.user.address1"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="text" id="postalAddress" name="postalAddress" value=""  />
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="address2">{{t "common.user.address2"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="text" id="address2" name="address2" value=""  />
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="city">{{t "common.user.city"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="text" id="city" name="city" value=""  />
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="postalCode">{{t "common.user.postalCode"}}</label>
-            <div class="col-sm-6">
-                <input class="form-control" type="text" id="postalCode" name="postalCode" value=""  />
-                <div class="validation-message"></div>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="country">{{t "common.user.country"}}</label>
-            <div class="col-sm-6">
-                <select class="form-control" id="country" name="country"></select>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-sm-3 control-label" for="stateProvince">{{t "common.user.stateProvince"}}</label>
-            <div class="col-sm-6">
-                <select class="form-control" id="stateProvince" name="stateProvince"></select>
-            </div>
-        </div>
-        {{/if}}
-
-        {{/unless}}
-        <div class="form-group">
-            <div class="col-sm-offset-3 col-sm-9">
-                <input class="btn btn-primary" type="submit" name="saveButton" value="{{t "common.form.update"}}" disabled="true" />
-                <input class="btn btn-default" type="button" name="resetButton" value="{{t "common.form.reset"}}" />
-            </div>
-        </div>
-    </form>
-    <div class="user-profile-changes-pending"></div>
+    </div>
 </div>

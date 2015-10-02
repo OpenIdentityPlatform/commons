@@ -55,12 +55,11 @@ define("config/process/CommonConfig", [
             description: "",
             dependencies: [
                 "org/forgerock/commons/ui/common/components/Navigation",
-                "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/components/Footer"
+                "Footer"
             ],
-            processDescription: function(event, navigation, conf,footer) {
-                navigation.init();
-                footer.render();
+            processDescription: function(event, Navigation, Footer) {
+                Navigation.init();
+                Footer.render();
             }
         },
         {

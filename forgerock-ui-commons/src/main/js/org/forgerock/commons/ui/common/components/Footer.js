@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,22 +23,45 @@
  */
 
 /*global define */
-
 define("org/forgerock/commons/ui/common/components/Footer", [
     "org/forgerock/commons/ui/common/main/AbstractView"
 ], function(AbstractView) {
-
-    var Footer = AbstractView.extend({
-        
+    return AbstractView.extend({
         element: "#footer",
         template: "templates/common/FooterTemplate.html",
         noBaseTemplate: true,
-        
+
+        /**
+         * Retrieves the version number of the product
+         * @return {Promise} Promise representing the return version
+         */
+        getVersion: function() {
+            throw new Error("#getVersion not implemented");
+        },
         render: function() {
-            this.parentRender();
+            var self = this;
+
+            this.data = {};
+
+            if(this.showVersion()) {
+                this.getVersion().then(function(version) {
+                    self.data.version = version;
+                }).always(
+                    self.parentRender.bind(self)
+                ).always(function() {
+                    self.$el.addClass("footer-deep");
+                });
+            } else {
+                self.parentRender();
+                self.$el.removeClass("footer-deep");
+            }
+        },
+        /**
+         * Determines if to show the version
+         * @return {boolean} Whether to show the version
+         */
+        showVersion: function() {
+            return false;
         }
-
     });
-
-    return new Footer();
 });

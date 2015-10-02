@@ -30,10 +30,8 @@ define("config/main", [
     "./messages/CommonMessages",
     "./messages/UserMessages",
     "./validators/CommonValidators",
-    "./validators/UserValidators",
     "./AppConfiguration",
     "./process/CommonConfig",
-    "./process/UserConfig",
     "./process/MockConfig",
     "./errorhandlers/CommonErrorHandlers"
 ]);

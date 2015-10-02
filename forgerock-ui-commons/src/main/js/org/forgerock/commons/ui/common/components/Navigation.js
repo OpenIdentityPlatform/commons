@@ -172,15 +172,15 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                             return;
                         }
 
-                        if (Configuration.loggedUser.userName) {
-                            this.data.username = Configuration.loggedUser.userName; //idm
-                        } else if (Configuration.loggedUser.cn) {
-                            this.data.username = Configuration.loggedUser.cn; //am
+                        if (Configuration.loggedUser.has('userName')) {
+                            this.data.username = Configuration.loggedUser.get('userName'); //idm
+                        } else if (Configuration.loggedUser.has('cn')) {
+                            this.data.username = Configuration.loggedUser.get('cn'); //am
                         } else {
-                            this.data.username = Configuration.loggedUser._id; //fallback option
+                            this.data.username = Configuration.loggedUser.id; //fallback option
                         }
 
-                        this.data.admin = _.contains(Configuration.loggedUser.roles, "ui-admin");
+                        this.data.admin = _.contains(Configuration.loggedUser.get('roles'), "ui-admin");
 
                         this.data.userBar = _.map(obj.configuration.userBar, function (link) {
                             if (_.has(link, "i18nKey")) {
@@ -331,7 +331,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     link = obj.configuration.links[linkName];
 
                     linkHasNoRole = !link.role;
-                    userHasNecessaryRole = link.role && Configuration.loggedUser && _.contains(Configuration.loggedUser.roles, link.role);
+                    userHasNecessaryRole = link.role && Configuration.loggedUser && _.contains(Configuration.loggedUser.get('roles'), link.role);
 
                     if (linkHasNoRole || userHasNecessaryRole) {
                         this.addLinksFromConfiguration(linkName);
@@ -392,7 +392,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             }
         }, obj.configuration.links);
 
-        if (links && !_.findWhere(links, {name: link.name})) {
+        if (links && !_.find(links, {name: link.name})) {
             if (secondLevelItem) {
                 links.push(link);
             } else {

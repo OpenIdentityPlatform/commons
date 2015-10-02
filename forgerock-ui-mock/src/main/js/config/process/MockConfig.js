@@ -29,23 +29,13 @@ define("config/process/MockConfig", [
 ], function(Constants) {
     var obj = [
         {
-            startEvent: Constants.EVENT_SHOW_CONFIRM_PASSWORD_DIALOG,
+            startEvent: Constants.EVENT_HANDLE_DEFAULT_ROUTE,
             description: "",
             dependencies: [
-                "org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog"
+                "org/forgerock/commons/ui/common/main/Router"
             ],
-            processDescription: function(event, ConfirmPasswordDialog) {
-                ConfirmPasswordDialog.render(event);
-            }
-        },
-        {
-            startEvent: Constants.EVENT_SHOW_CHANGE_SECURITY_DIALOG,
-            override: true,
-            dependencies: [
-                "org/forgerock/mock/ui/user/profile/ChangeSecurityDataDialog"
-            ],
-            processDescription: function(event, ChangeSecurityDataDialog) {
-                ChangeSecurityDataDialog.render(event);
+            processDescription: function(event, router) {
+                router.routeTo(router.configuration.routes.profile, {trigger: true});
             }
         }
     ];

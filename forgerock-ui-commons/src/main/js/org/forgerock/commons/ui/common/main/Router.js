@@ -154,7 +154,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
     obj.checkRole = function (route) {
         if(route.role) {
             if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
-                return conf.loggedUser.roles.indexOf(role) !== -1;
+                return conf.loggedUser.get('roles').indexOf(role) !== -1;
             })) {
                 eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
                 return false;
@@ -162,7 +162,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
         }
 
         if(route.excludedRole) {
-            if(conf.loggedUser && conf.loggedUser.roles.indexOf(route.excludedRole) !== -1) {
+            if(conf.loggedUser && conf.loggedUser.get('roles').indexOf(route.excludedRole) !== -1) {
                 eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
                 return false;
             }
@@ -214,8 +214,10 @@ define("org/forgerock/commons/ui/common/main/Router", [
     obj.routeTo = function(route, params) {
         var link;
 
-        if(params && params.args) {
+        if (params && params.args) {
             link = obj.getLink(route, params.args);
+        } else if (_.isArray(route.defaults) && route.defaults.length) {
+            link = obj.getLink(route, route.defaults);
         } else {
             link = route.url;
         }

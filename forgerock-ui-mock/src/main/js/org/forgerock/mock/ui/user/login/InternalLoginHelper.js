@@ -22,43 +22,21 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define, window */
+/*global define */
 
 define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
     "jquery",
-    "UserDelegate",
+    "org/forgerock/mock/ui/user/UserModel",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration"
-], function ($, userDelegate, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
+], function ($, UserModel, eventManager, constants, AbstractConfigurationAware, serviceInvoker, conf) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function (params, successCallback, errorCallback) {
-
-        return userDelegate.login(params.userName, params.password,
-            function (user) {
-                conf.globalData.userComponent = user.component;
-                if (successCallback) {
-                    successCallback(user);
-                }
-            },
-            function () {
-                if (errorCallback) {
-                    errorCallback();
-                }
-            },
-            {
-                "forbidden": {
-                    status: "403"
-                },
-                "unauthorized": {
-                    status: "401",
-                    message: "authenticationFailed"
-                }
-            }
-        );
+        return UserModel.getProfile(params.userName, params.password).then(successCallback,errorCallback);
     };
 
     obj.logout = function (successCallback, errorCallback) {
@@ -70,27 +48,12 @@ define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
     };
 
     obj.getLoggedUser = function (successCallback, errorCallback) {
-        return userDelegate.getProfile(
-            function (user) {
-                conf.globalData.userComponent = user.component;
-                if (successCallback) {
-                    successCallback(user);
-                }
-            },
-            function () {
-                if (errorCallback) {
-                    errorCallback();
-                }
-            },
-            {
-                "forbidden": {
-                    status: "403"
-                },
-                "unauthorized": {
-                    status: "401"
-                }
-            }
-        );
+        // the mock project doesn't support sessions, so there is no point in checking
+        if (conf.loggedUser && successCallback) {
+            successCallback(conf.loggedUser);
+        } else if (errorCallback) {
+            errorCallback();
+        }
     };
     return obj;
 });
