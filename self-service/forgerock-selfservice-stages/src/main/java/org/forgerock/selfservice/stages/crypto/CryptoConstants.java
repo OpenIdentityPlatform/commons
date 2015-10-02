@@ -33,7 +33,7 @@ public final class CryptoConstants {
     public static final String ALGORITHM_SHA_256 = "SHA-256";
 
     private CryptoConstants() {
-
+        throw new UnsupportedOperationException();
     }
 
 }

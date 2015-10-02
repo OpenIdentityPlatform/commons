@@ -15,7 +15,7 @@
  */
 
 /**
- * This package contains crypto related implementations in self-service.
- * This will be moved to commons eventually.
+ * This package contains crypto related implementations for self-service.
+ * The files in this package are mostly copied from IDM and shall be replaced by a commons component in the future.
  */
 package org.forgerock.selfservice.stages.crypto;
