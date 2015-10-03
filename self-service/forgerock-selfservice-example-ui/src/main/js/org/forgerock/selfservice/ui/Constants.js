@@ -27,7 +27,6 @@
 define("org/forgerock/selfservice/ui/Constants", [
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (commonConstants) {
-    commonConstants.context = "example/selfservice";
-
+    commonConstants.context = "example";
     return commonConstants;
 });

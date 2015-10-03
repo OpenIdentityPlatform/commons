@@ -27,6 +27,7 @@
 require.config({
     map: {
         "*" : {
+            "Footer": "org/forgerock/selfservice/ui/Footer",
             "ThemeManager": "org/forgerock/selfservice/ui/ThemeManager",
             "LoginView": "org/forgerock/commons/ui/common/LoginView",
             "PasswordResetView": "org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView",
