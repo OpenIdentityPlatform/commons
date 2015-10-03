@@ -26,6 +26,7 @@
 
 // core files needed during startup of the mock app
 define("org/forgerock/mock/ui/main", [
+    "./common/util/Constants",
     "./common/main/MockServer",
     "./user/login/InternalLoginHelper",
     "org/forgerock/commons/ui/common/LoginView"

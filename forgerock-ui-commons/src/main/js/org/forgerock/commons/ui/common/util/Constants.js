@@ -113,5 +113,7 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.HEADER_PARAM_USERNAME = "X-Username";
     obj.HEADER_PARAM_NO_SESSION = "X-NoSession";
 
+    obj.SELF_SERVICE_CONTEXT = "selfservice/";
+
     return obj;
 });

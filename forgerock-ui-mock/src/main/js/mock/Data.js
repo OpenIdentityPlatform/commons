@@ -30,7 +30,7 @@
 
         server.respondWith(
             "GET",
-            "/mock/reset",
+            "/mock/reset/selfservice",
             [
                 200,
                 {
@@ -61,7 +61,7 @@
 
         server.respondWith(
             "POST",
-            "/mock/reset?_action=submitRequirements",
+            "/mock/selfservice/reset?_action=submitRequirements",
             function (request) {
                 var requestContent = JSON.parse(request.requestBody),
                     headers = { "Content-Type": "application/json;charset=UTF-8" };
@@ -185,7 +185,7 @@
 
         server.respondWith(
             "GET",
-            "/mock/registration",
+            "/mock/selfservice/registration",
             [
                 200,
                 {
@@ -216,7 +216,7 @@
 
         server.respondWith(
             "POST",
-            "/mock/registration?_action=submitRequirements",
+            "/mock/selfservice/registration?_action=submitRequirements",
             function (request) {
                 var requestContent = JSON.parse(request.requestBody),
                     headers = { "Content-Type": "application/json;charset=UTF-8" };
@@ -253,7 +253,7 @@
                             JSON.stringify({
                                 "code": 400,
                                 "reason": "Bad Request",
-                                "message": "username is missing"
+                                "message": "mail is missing"
                             })
                         );
                     }
@@ -274,14 +274,9 @@
                                         "type": "object",
                                         "description": "New user details",
                                         "required": [
-                                            "userId",
                                             "user"
                                         ],
                                         "properties": {
-                                            "userId": {
-                                                "description": "New user Id",
-                                                "type": "string"
-                                            },
                                             "user": {
                                                 "description": "User details",
                                                 "type": "object"
@@ -304,7 +299,6 @@
                 break;
                 case "mockToken2":
                     if (_.isObject(requestContent.input) &&
-                        _.isString(requestContent.input.userId) &&
                         _.isObject(requestContent.input.user)) {
                         request.respond(
                             200,
