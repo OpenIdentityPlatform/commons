@@ -63,12 +63,14 @@ public final class Uris {
         SAFE_URL_PCHAR_CHARS.set('a', 'z' + 1);
         SAFE_URL_PCHAR_CHARS.set('A', 'Z' + 1);
 
-        // query = *( pchar / "/" / "?" ) - also encode ? and & since these are parameter separators
+        // query = *( pchar / "/" / "?" ) - also encode ? and & since these are parameter separators,
+        //                                  as well as + which is used for encoding white space (see w3c).
         SAFE_URL_QUERY_CHARS.or(SAFE_URL_PCHAR_CHARS);
         SAFE_URL_QUERY_CHARS.set('/');
         SAFE_URL_QUERY_CHARS.set('?');
         SAFE_URL_QUERY_CHARS.clear('&');
         SAFE_URL_QUERY_CHARS.clear('=');
+        SAFE_URL_QUERY_CHARS.clear('+');
 
         // fragment = *( pchar / "/" / "?" )
         SAFE_URL_FRAGMENT_CHARS.or(SAFE_URL_PCHAR_CHARS);
@@ -295,7 +297,7 @@ public final class Uris {
      * @return the decoded path element, or {@code null} if {@code pathElement} was {@code null}.
      */
     public static String urlDecodePathElement(String pathElement) {
-        return urlDecode(pathElement);
+        return urlDecode(pathElement, false);
     }
 
     /**
@@ -317,7 +319,7 @@ public final class Uris {
      * @return the decoded query parameter name or value, or {@code null} if {@code nameOrValue} was {@code null}.
      */
     public static String urlDecodeQueryParameterNameOrValue(String nameOrValue) {
-        return urlDecode(nameOrValue);
+        return urlDecode(nameOrValue, true);
     }
 
     /**
@@ -341,7 +343,7 @@ public final class Uris {
      * @return the decoded fragment, or {@code null} if {@code fragment} was {@code null}.
      */
     public static String urlDecodeFragment(String fragment) {
-        return urlDecode(fragment);
+        return urlDecode(fragment, false);
     }
 
     /**
@@ -363,7 +365,7 @@ public final class Uris {
      * @return the decoded userInfo, or {@code null} if {@code userInfo} was {@code null}.
      */
     public static String urlDecodeUserInfo(String userInfo) {
-        return urlDecode(userInfo);
+        return urlDecode(userInfo, false);
     }
 
     /**
@@ -377,28 +379,32 @@ public final class Uris {
         return urlEncode(userInfo, SAFE_URL_USERINFO_CHARS);
     }
 
-    private static String urlDecode(final String s) {
+    private static String urlDecode(final String s, final boolean decodePlusToSpace) {
         if (s == null) {
             return null;
         }
         // First try fast-path decode of simple ASCII.
         final int size = s.length();
         for (int i = 0; i < size; i++) {
-            if (isUrlEscapeChar(s.charAt(i))) {
+            final char c = s.charAt(i);
+            if (isUrlEscapeChar(c) || (decodePlusToSpace && c == '+')) {
                 // Slow path.
-                return urlDecode0(s);
+                return urlDecode0(s, decodePlusToSpace);
             }
         }
         return s;
     }
 
-    private static String urlDecode0(String s) {
+    private static String urlDecode0(final String s, final boolean decodePlusToSpace) {
         final StringBuilder builder = new StringBuilder(s.length());
         final int size = s.length();
         final byte[] buffer = new byte[size / 3];
         for (int i = 0; i < size;) {
             final char c = s.charAt(i);
-            if (!isUrlEscapeChar(c)) {
+            if (decodePlusToSpace && c == '+') {
+                builder.append(' ');
+                i++;
+            } else if (!isUrlEscapeChar(c)) {
                 builder.append(c);
                 i++;
             } else {

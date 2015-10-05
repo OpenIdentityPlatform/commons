@@ -96,13 +96,13 @@ public class UrisTest {
     private Object[][] urlEncodings() {
         //    decoded,       path encoded,  query encoded, form encoded
         return new Object[][] {
-            { null,          null,          null,              null },                              // empty
-            { "",            "",            "",                "" },                                // empty
-            { " ",           "%20",         "%20",             "+" },                               // whitespace
-            { "azAZ09-._~",  "azAZ09-._~",  "azAZ09-._~",      "azAZ09-._%7E" },                    // unreserved
-            { "!$&'()*+,;=", "!$&'()*+,;=", "!$%26'()*+,;%3D", "%21%24%26%27%28%29*%2B%2C%3B%3D" }, // sub-delims
-            { ":@",          ":@",          ":@",              "%3A%40" },                          // pchar
-            { "/?",          "%2F%3F",      "/?",              "%2F%3F" },                          // query
+            { null,          null,          null,                null },                              // empty
+            { "",            "",            "",                  "" },                                // empty
+            { " ",           "%20",         "%20",               "+" },                               // whitespace
+            { "azAZ09-._~",  "azAZ09-._~",  "azAZ09-._~",        "azAZ09-._%7E" },                    // unreserved
+            { "!$&'()*+,;=", "!$&'()*+,;=", "!$%26'()*%2B,;%3D", "%21%24%26%27%28%29*%2B%2C%3B%3D" }, // sub-delims
+            { ":@",          ":@",          ":@",                "%3A%40" },                          // pchar
+            { "/?",          "%2F%3F",      "/?",                "%2F%3F" },                          // query
         };
     }
 
@@ -134,5 +134,10 @@ public class UrisTest {
     @Test(dataProvider = "urlEncodings")
     public void testUrlFormDecode(String decoded, String pathEncoded, String queryEncoded, String formEncoded) {
         assertThat(Uris.formDecodeParameterNameOrValue(formEncoded)).isEqualTo(decoded);
+    }
+
+    @Test
+    public void testUrlQueryDecodeConvertsPlusToSpace() {
+        assertThat(Uris.urlDecodeQueryParameterNameOrValue("%20%2B+")).isEqualTo(" + ");
     }
 }

@@ -42,16 +42,16 @@ public class FormTest {
 
     @Test
     public void fromQueryString() {
-        Form f = new Form().fromQueryString("x=%3D+%20&y=z");
-        assertThat(f.get("x").get(0)).isEqualTo("=+ ");
+        Form f = new Form().fromQueryString("x=%3D+%20%2B&y=z");
+        assertThat(f.get("x").get(0)).isEqualTo("=  +");
         assertThat(f.get("y").get(0)).isEqualTo("z");
     }
 
     @Test
     public void fromQueryStringAndBack() {
-        String s1 = "x=*+%20&y=?";
+        String s1 = "x=*+%20%2B&y=?";
         String s2 = new Form().fromQueryString(s1).toQueryString();
-        assertThat(s1).isEqualTo(s2);
+        assertThat(s2).isEqualTo("x=*%20%20%2B&y=?");
     }
 
     @Test
