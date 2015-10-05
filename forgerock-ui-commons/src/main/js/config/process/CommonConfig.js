@@ -34,19 +34,22 @@ define("config/process/CommonConfig", [
             ],
             processDescription: function(event, Router, Configuration, UIUtils, CookieHelper,
                                          SessionManager) {
-                UIUtils.preloadInitialTemplates();
-                UIUtils.preloadInitialPartials();
+                var postSessionCheck = function () {
+                    UIUtils.preloadInitialTemplates();
+                    UIUtils.preloadInitialPartials();
+                    Router.init();
+                };
 
                 SessionManager.getLoggedUser(function(user) {
                     Configuration.setProperty('loggedUser', user);
-                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
-                    Router.init();
+                    // WARNING - do not use the promise returned from sendEvent as an example for using this system
+                    // TODO - replace with simplified event system as per CUI-110
+                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false}).then(postSessionCheck);
                 }, function() {
                     if (!CookieHelper.cookiesEnabled()) {
                         location.href = "#enableCookies/";
                     }
-                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                    Router.init();
+                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true}).then(postSessionCheck);
                 });
             }
         },
