@@ -61,7 +61,8 @@ public class ActivityAuditEventBuilderTest {
                 .eventName("AM-REALM-CREATE")
                 .authentication("someone@forgerock.com")
                 .runAs("admin")
-                .resourceOperation("some/resource", "CREST", "ACTION", "customAction")
+                .objectId("some/resource")
+                .operation("customAction")
                 .before("{ \"name\": \"Old\", \"revision\": 1 }")
                 .after("{ \"name\": \"New\", \"revision\": 2 }")
                 .changedFields("name", "revision")
@@ -85,15 +86,12 @@ public class ActivityAuditEventBuilderTest {
                 .timestamp(1427293286239L)
                 .eventName("AM-REALM-CREATE")
                 .authentication("someone@forgerock.com")
-                .resourceOperationFromRequest(request)
+                .objectIdFromRequest(request)
+                .operationFromRequest(request)
                 .toEvent();
 
-        final JsonValue resourceOperation = event.getValue().get(RESOURCE_OPERATION);
-
-        assertThat(resourceOperation.get(URI).asString().equals("some/resource"));
-        assertThat(resourceOperation.get(PROTOCOL).asString().equals("http"));
-        assertThat(resourceOperation.get(OPERATION).get(METHOD).asString().equals("ACTION"));
-        assertThat(resourceOperation.get(OPERATION).get(DETAIL).asString().equals("customAction"));
+        assertThat(event.getValue().get(OBJECT_ID).asString().equals("some/resource"));
+        assertThat(event.getValue().get(OPERATION).asString().equals("http"));
     }
 
     @Test
@@ -102,7 +100,8 @@ public class ActivityAuditEventBuilderTest {
                 .eventName("AM-REALM-CREATE")
                 .authentication("someone@forgerock.com")
                 .runAs("admin")
-                .resourceOperation("some/resource", "CREST", "ACTION", "customAction")
+                .objectId("some/resource")
+                .operation("customAction")
                 .before("{ \"name\": \"Old\", \"revision\": 1 }")
                 .after("{ \"name\": \"New\", \"revision\": 2 }")
                 .changedFields("name", "revision")
@@ -121,10 +120,8 @@ public class ActivityAuditEventBuilderTest {
         assertThat(value.get(EVENT_NAME).asString()).isEqualTo("AM-REALM-CREATE");
         assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
         assertThat(value.get(RUN_AS).asString()).isEqualTo("admin");
-        assertThat(value.get(RESOURCE_OPERATION).get(URI).asString()).isEqualTo("some/resource");
-        assertThat(value.get(RESOURCE_OPERATION).get(PROTOCOL).asString()).isEqualTo("CREST");
-        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("ACTION");
-        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(DETAIL).asString()).isEqualTo("customAction");
+        assertThat(value.get(OBJECT_ID).asString()).isEqualTo("some/resource");
+        assertThat(value.get(OPERATION).asString()).isEqualTo("customAction");
         assertThat(value.get(BEFORE).asString()).isEqualTo("{ \"name\": \"Old\", \"revision\": 1 }");
         assertThat(value.get(AFTER).asString()).isEqualTo("{ \"name\": \"New\", \"revision\": 2 }");
         assertThat(value.get(CHANGED_FIELDS).asList(String.class)).containsExactly("name", "revision");

@@ -81,7 +81,7 @@ public class AccessAuditEventBuilderTest {
                 .server("sip", 80)
                 .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
                 .authentication("someone@forgerock.com")
-                .resourceOperation("/some/path", "CREST", "action", "reconcile")
+                .request("CREST", "reconcile")
                 .http("GET", "/some/path", "p1=v1&p2=v2", headers)
                 .response(SUCCESS, "200", 12, MILLISECONDS)
                 .openField("value")
@@ -96,7 +96,8 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(HTTP).get(METHOD).asString()).isEqualTo("GET");
         assertThat(value.get(HTTP).get(HEADERS).asMapOfList(String.class)).isEqualTo(headers);
         assertThat(value.get(AUTHORIZATION).get(ID).asString()).isEqualTo("aegloff");
-        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("action");
+        assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");
+        assertThat(value.get(REQUEST).get(OPERATION).asString()).isEqualTo("reconcile");
         assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("SUCCESS");
         assertThat(value.get(RESPONSE).get(STATUS_CODE).asString()).isEqualTo("200");
         assertThat(value.get(RESPONSE).get(ELAPSED_TIME).asLong()).isEqualTo(12);
@@ -228,13 +229,14 @@ public class AccessAuditEventBuilderTest {
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
-                .resourceOperationFromRequest(actionRequest)
+                .requestFromCrestRequest(actionRequest)
                 .toEvent();
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("ACTION");
-        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(DETAIL).asString()).isEqualTo("actionId");
+        assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");
+        assertThat(value.get(REQUEST).get(OPERATION).asString()).isEqualTo("ACTION");
+        assertThat(value.get(REQUEST).get(DETAIL).get("action").asString()).isEqualTo("actionId");
     }
 
     @Test
@@ -247,13 +249,13 @@ public class AccessAuditEventBuilderTest {
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
-                .resourceOperationFromRequest(deleteRequest)
+                .requestFromCrestRequest(deleteRequest)
                 .toEvent();
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).get(METHOD).asString()).isEqualTo("DELETE");
-        assertThat(value.get(RESOURCE_OPERATION).get(OPERATION).isDefined(DETAIL)).isFalse();
+        assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");
+        assertThat(value.get(REQUEST).get(OPERATION).asString()).isEqualTo("DELETE");
     }
 
     @Test

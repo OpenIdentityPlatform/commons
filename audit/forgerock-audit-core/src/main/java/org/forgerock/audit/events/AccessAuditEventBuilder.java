@@ -15,14 +15,13 @@
  */
 package org.forgerock.audit.events;
 
-import static org.forgerock.audit.events.AuditEventBuilderUtil.*;
 import static org.forgerock.json.JsonValue.*;
-
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.Request;
+import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,12 +70,11 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public static final String HOST = "host";
     public static final String IP = "ip";
     public static final String PORT = "port";
-    public static final String RESOURCE_OPERATION = AuditEventBuilderUtil.RESOURCE_OPERATION;
-    public static final String URI = AuditEventBuilderUtil.URI;
-    public static final String PROTOCOL = AuditEventBuilderUtil.PROTOCOL;
-    public static final String OPERATION = AuditEventBuilderUtil.OPERATION;
-    public static final String METHOD = AuditEventBuilderUtil.METHOD;
-    public static final String DETAIL = AuditEventBuilderUtil.DETAIL;
+    public static final String REQUEST = "request";
+    public static final String PROTOCOL = "protocol";
+    public static final String OPERATION = "operation";
+    public static final String METHOD = "method";
+    public static final String DETAIL = "detail";
     public static final String COMPONENT = "component";
     public static final String ID = "id";
     public static final String ROLES = "roles";
@@ -90,6 +88,8 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public static final String ELAPSED_TIME = "elapsedTime";
     public static final String ELAPSED_TIME_UNITS = "elapsedTimeUnits";
     public static final String RESPONSE = "response";
+
+    public static final String CREST_PROTOCOL = "CREST";
 
     private static final String HOST_HEADER = "Host";
     private static final String HTTP_CONTEXT_NAME = "http";
@@ -233,31 +233,35 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets the provided resourceOperation details for the event.
+     * Sets the provided request details for the event.
      *
-     * @param uri the resource identifier.
-     * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
-     *  CRUDPAQ).
-     * @param operationDetail further defines the operation type (e.g. specifies the name of the CRUDPAQ action).
+     * @param protocol the type of request.
+     * @param operation the type of operation (e.g. CREATE, READ, UPDATE, DELETE, PATCH, ACTION, or QUERY).
      * @return this builder
      */
-    public final T resourceOperation(String uri, String protocol, String operationMethod, String operationDetail) {
-        jsonValue.put(RESOURCE_OPERATION, createResourceOperation(uri, protocol, operationMethod, operationDetail));
+    public final T request(String protocol, String operation) {
+        JsonValue object = json(object(
+                field(PROTOCOL, protocol),
+                field(OPERATION, operation)));
+        jsonValue.put(REQUEST, object);
         return self();
     }
 
     /**
-     * Sets the provided resourceOperation details for the event.
+     * Sets the provided request details for the event.
      *
-     * @param uri the resource identifier.
-     * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
-     *  CRUDPAQ).
+     * @param protocol the type of request.
+     * @param operation the type of operation (e.g. CREATE, READ, UPDATE, DELETE, PATCH, ACTION, or QUERY).
+     * @param detail additional details relating to the request (e.g. the ACTION name or summary of the payload).
      * @return this builder
      */
-    public final T resourceOperation(String uri, String protocol, String operationMethod) {
-        jsonValue.put(RESOURCE_OPERATION, createResourceOperation(uri, protocol, operationMethod));
+    public final T request(String protocol, String operation, JsonValue detail) {
+        Reject.ifNull(detail);
+        JsonValue object = json(object(
+                field(PROTOCOL, protocol),
+                field(OPERATION, operation),
+                field(DETAIL, detail.getObject())));
+        jsonValue.put(REQUEST, object);
         return self();
     }
 
@@ -351,17 +355,18 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @param statusCode the status code of the operation.
      * @param elapsedTime the execution time of the action.
      * @param elapsedTimeUnits the unit of measure for the execution time value (either milliseconds or nanoseconds).
-     * @param detail the detail associated to the status.
+     * @param detail additional details relating to the response (e.g. failure description or summary of the payload).
      * @return this builder
      */
     public final T responseWithDetail(ResponseStatus status, String statusCode,
-            long elapsedTime, TimeUnit elapsedTimeUnits, String detail) {
+            long elapsedTime, TimeUnit elapsedTimeUnits, JsonValue detail) {
+        Reject.ifNull(detail);
         JsonValue object = json(object(
                 field(STATUS, status == null ? null : status.toString()),
                 field(STATUS_CODE, statusCode),
                 field(ELAPSED_TIME, elapsedTime),
                 field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.getAbbreviation()),
-                field(DETAIL, detail)));
+                field(DETAIL, detail.getObject())));
         jsonValue.put(RESPONSE, object);
         return self();
     }
@@ -411,15 +416,20 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets resourceOperation method from {@link Request}; iff the provided <code>Request</code>
-     * is an {@link ActionRequest} then resourceOperation action will also be set.
+     * Sets request detail from {@link Request}.
      *
      * @param request The CREST request.
      * @return this builder
      */
-    public final T resourceOperationFromRequest(Request request) {
-        JsonValue object = createResourceOperationFromRequest(request);
-        jsonValue.put(RESOURCE_OPERATION, object);
+    public final T requestFromCrestRequest(Request request) {
+        final String operation = request.getRequestType().name();
+        if (request instanceof ActionRequest) {
+            final String action = ((ActionRequest) request).getAction();
+            final JsonValue detail = json(object(field("action", action)));
+            request(CREST_PROTOCOL, operation, detail);
+        } else {
+            request(CREST_PROTOCOL, operation);
+        }
         return self();
     }
 
@@ -433,7 +443,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @see #clientFromHttpContext(Context)
      * @see #httpFromHttpContext(Context)
      * @see #authenticationFromSecurityContext(Context)
-     * @see #resourceOperationFromRequest(Request)
+     * @see #requestFromCrestRequest(Request)
      *
      * @return this builder
      */
@@ -442,7 +452,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         clientFromHttpContext(context);
         httpFromHttpContext(context);
         authenticationFromSecurityContext(context);
-        resourceOperationFromRequest(request);
+        requestFromCrestRequest(request);
         return self();
     }
 

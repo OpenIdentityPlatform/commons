@@ -15,10 +15,8 @@
  */
 package org.forgerock.audit.events;
 
-import static org.forgerock.audit.events.AuditEventBuilderUtil.*;
 import static org.forgerock.json.JsonValue.*;
 
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Request;
 
@@ -28,12 +26,8 @@ import org.forgerock.json.resource.Request;
 abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 
     public static final String RUN_AS = "runAs";
-    public static final String RESOURCE_OPERATION = AuditEventBuilderUtil.RESOURCE_OPERATION;
-    public static final String URI = AuditEventBuilderUtil.URI;
-    public static final String PROTOCOL = AuditEventBuilderUtil.PROTOCOL;
-    public static final String OPERATION = AuditEventBuilderUtil.OPERATION;
-    public static final String METHOD = AuditEventBuilderUtil.METHOD;
-    public static final String DETAIL = AuditEventBuilderUtil.DETAIL;
+    public static final String OBJECT_ID = "objectId";
+    public static final String OPERATION = "operation";
     public static final String BEFORE = "before";
     public static final String AFTER = "after";
     public static final String REVISION = "revision";
@@ -57,7 +51,8 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     protected void validate() {
         super.validate();
         requireField(RUN_AS);
-        requireField(RESOURCE_OPERATION);
+        requireField(OBJECT_ID);
+        requireField(OPERATION);
     }
 
     /**
@@ -72,31 +67,24 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     }
 
     /**
-     * Sets the provided resourceOperation details for the event.
+     * Sets the provided objectId for the event.
      *
-     * @param uri the resource identifier.
-     * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
-     *  CRUDPAQ).
-     * @param operationDetail further defines the operation type (e.g. specifies the name of the CRUDPAQ action).
+     * @param objectId the resource identifier.
      * @return this builder
      */
-    public final T resourceOperation(String uri, String protocol, String operationMethod, String operationDetail) {
-        jsonValue.put(RESOURCE_OPERATION, createResourceOperation(uri, protocol, operationMethod, operationDetail));
+    public final T objectId(String objectId) {
+        jsonValue.put(OBJECT_ID, objectId);
         return self();
     }
 
     /**
-     * Sets the provided resourceOperation details for the event.
+     * Sets the provided operation for the event.
      *
-     * @param uri the resource identifier.
-     * @param protocol the scheme of the resource identifier uri.
-     * @param operationMethod the type of operation (e.g. when protocol is CREST, operation type will be one of
-     *  CRUDPAQ).
+     * @param operation the type of operation (e.g. CREATE, READ, UPDATE, DELETE, PATCH, QUERY, or the ACTION name).
      * @return this builder
      */
-    public final T resourceOperation(String uri, String protocol, String operationMethod) {
-        jsonValue.put(RESOURCE_OPERATION, createResourceOperation(uri, protocol, operationMethod));
+    public final T operation(String operation) {
+        jsonValue.put(OPERATION, operation);
         return self();
     }
 
@@ -145,15 +133,30 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     }
 
     /**
-     * Sets resourceOperation method from {@link Request}; iff the provided <code>Request</code>
-     * is an {@link ActionRequest} then resourceOperation action will also be set.
+     * Sets objectId method from {@link Request}.
      *
      * @param request The CREST request.
      * @return this builder
      */
-    public final T resourceOperationFromRequest(Request request) {
-        JsonValue object = createResourceOperationFromRequest(request);
-        jsonValue.put(RESOURCE_OPERATION, object);
+    public final T objectIdFromRequest(Request request) {
+        objectId(request.getResourcePath());
+        return self();
+    }
+
+    /**
+     * Sets operation method from {@link Request}.
+     *
+     * @param request The CREST request.
+     * @return this builder
+     */
+    public final T operationFromRequest(Request request) {
+        if (request instanceof ActionRequest) {
+            String action = ((ActionRequest) request).getAction();
+            operation(action);
+        } else {
+            final String method = request.getRequestType().name();
+            operation(method);
+        }
         return self();
     }
 }

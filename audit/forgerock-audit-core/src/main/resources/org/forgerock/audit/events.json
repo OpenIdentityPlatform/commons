@@ -81,29 +81,20 @@
             }
           }
         },
-        "resourceOperation": {
+        "request": {
           "type": "object",
           "properties": {
-            "uri": {
-              "description": "org.forgerock.audit.events.access.resourceOperation.uri",
-              "type": "string"
-            },
             "protocol": {
-              "description": "org.forgerock.audit.events.access.resourceOperation.protocol",
+              "description": "org.forgerock.audit.events.access.request.protocol",
               "type": "string"
             },
             "operation": {
-              "type": "object",
-              "properties": {
-                "method": {
-                  "description": "org.forgerock.audit.events.access.resourceOperation.operation.method",
-                  "type": "string"
-                },
-                "detail": {
-                  "description": "org.forgerock.audit.events.access.resourceOperation.operation.detail",
-                  "type": "string"
-                }
-              }
+              "description": "org.forgerock.audit.events.access.request.operation",
+              "type": "string"
+            },
+            "detail": {
+              "description": "org.forgerock.audit.events.access.request.detail",
+              "type": "object"
             }
           }
         },
@@ -195,31 +186,13 @@
           "description": "org.forgerock.audit.events.activity.runAs",
           "type": "string"
         },
-        "resourceOperation": {
-          "type": "object",
-          "properties": {
-            "uri": {
-              "description": "org.forgerock.audit.events.activity.resourceOperation.uri",
-              "type": "string"
-            },
-            "protocol": {
-              "description": "org.forgerock.audit.events.activity.resourceOperation.protocol",
-              "type": "string"
-            },
-            "operation": {
-              "type": "object",
-              "properties": {
-                "method": {
-                  "description": "org.forgerock.audit.events.activity.resourceOperation.operation.method",
-                  "type": "string"
-                },
-                "detail": {
-                  "description": "org.forgerock.audit.events.activity.resourceOperation.operation.detail",
-                  "type": "string"
-                }
-              }
-            }
-          }
+        "objectId": {
+          "description": "org.forgerock.audit.events.activity.objectId",
+          "type": "string"
+        },
+        "operation": {
+          "description": "org.forgerock.audit.events.activity.operation",
+          "type": "string"
         },
         "before": {
           "description": "org.forgerock.audit.events.activity.before",
@@ -355,31 +328,13 @@
           "description": "org.forgerock.audit.events.config.runAs",
           "type": "string"
         },
-        "resourceOperation": {
-          "type": "object",
-          "properties": {
-            "uri": {
-              "description": "org.forgerock.audit.events.config.resourceOperation.uri",
-              "type": "string"
-            },
-            "protocol": {
-              "description": "org.forgerock.audit.events.config.resourceOperation.protocol",
-              "type": "string"
-            },
-            "operation": {
-              "type": "object",
-              "properties": {
-                "method": {
-                  "description": "org.forgerock.audit.events.config.resourceOperation.operation.method",
-                  "type": "string"
-                },
-                "detail": {
-                  "description": "org.forgerock.audit.events.config.resourceOperation.operation.detail",
-                  "type": "string"
-                }
-              }
-            }
-          }
+        "objectId": {
+          "description": "org.forgerock.audit.events.activity.objectId",
+          "type": "string"
+        },
+        "operation": {
+          "description": "org.forgerock.audit.events.activity.operation",
+          "type": "string"
         },
         "before": {
           "description": "org.forgerock.audit.events.config.before",
