@@ -55,7 +55,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             decodedArgs = decodeArgs(args);
 
 
-        if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, decodedArgs)) {
+        if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, args)) {
             if(obj.currentDialog !== null) {
                 ModuleLoader.load(obj.currentDialog).then(function (dialog) {
                     dialog.close();
@@ -88,7 +88,7 @@ define("org/forgerock/commons/ui/common/main/ViewManager", [
             });
         }
 
-        obj.currentViewArgs = decodedArgs;
+        obj.currentViewArgs = args;
         obj.currentView = viewPath;
     };
 
