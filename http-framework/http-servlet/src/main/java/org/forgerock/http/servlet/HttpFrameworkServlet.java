@@ -73,6 +73,7 @@ import org.forgerock.util.promise.RuntimeExceptionHandler;
  * @see HttpApplication
  */
 public final class HttpFrameworkServlet extends HttpServlet {
+
     private static final long serialVersionUID = 3524182656424860912L;
 
     /**
@@ -209,7 +210,9 @@ public final class HttpFrameworkServlet extends HttpServlet {
         attributesContext.getAttributes().put(HttpServletRequest.class.getName(), req);
         attributesContext.getAttributes().put(HttpServletResponse.class.getName(), resp);
 
-        Context context = createRouterContext(createClientContext(attributesContext, req), req);
+        Context context = attributesContext;
+        context = createClientContext(context, req);
+        context = createRouterContext(context, req);
 
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
@@ -291,6 +294,9 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 .certificates((X509Certificate[]) req.getAttribute(SERVLET_REQUEST_X509_ATTRIBUTE))
                 .userAgent(req.getHeader("User-Agent"))
                 .secure("https".equalsIgnoreCase(req.getScheme()))
+                .localAddress(req.getLocalAddr())
+                .localName(req.getLocalName())
+                .localPort(req.getLocalPort())
                 .build();
     }
 

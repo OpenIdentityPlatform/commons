@@ -42,6 +42,9 @@ import org.forgerock.util.encode.Base64;
  *     <li>User-Agent information</li>
  *     <li>Whether the client is external</li>
  *     <li>Whether the connection to the client is secure</li>
+ *     <li>Local name</li>
+ *     <li>Local port</li>
+ *     <li>Local address</li>
  * </ul>
  */
 public final class ClientContext extends AbstractContext {
@@ -61,8 +64,11 @@ public final class ClientContext extends AbstractContext {
     private static final String BEGIN_CERTIFICATE = "-----BEGIN CERTIFICATE-----";
     private static final String END_CERTIFICATE = "-----END CERTIFICATE-----";
 
+    private static final String ATTR_LOCAL_ADDRESS = "localAddress";
+    private static final String ATTR_LOCAL_NAME  = "localName";
+    private static final String ATTR_LOCAL_PORT = "localPort";
 
-    /** Builder for creating {@code Builder} instances. */
+    /** Builder for creating {@code ClientContext} instances. */
     public final static class Builder {
         private final Context parent;
         private String remoteUser = "";
@@ -72,6 +78,9 @@ public final class ClientContext extends AbstractContext {
         private List<? extends Certificate> certificates = Collections.emptyList();
         private String userAgent = "";
         private boolean isSecure;
+        private String localAddress = "";
+        private String localName = "";
+        private int localPort = -1;
 
         private Builder(Context parent) {
             this.parent = parent;
@@ -170,6 +179,39 @@ public final class ClientContext extends AbstractContext {
         }
 
         /**
+         * Sets the local server's address.
+         *
+         * @param localAddress The local address.
+         * @return The builder instance.
+         */
+        public Builder localAddress(String localAddress) {
+            this.localAddress = localAddress;
+            return this;
+        }
+
+        /**
+         * Sets the local server's name.
+         *
+         * @param localName The local name.
+         * @return The builder instance.
+         */
+        public Builder localName(String localName) {
+            this.localName = localName;
+            return this;
+        }
+
+        /**
+         * Sets the local server's port.
+         *
+         * @param localPort The local port.
+         * @return The builder instance.
+         */
+        public Builder localPort(int localPort) {
+            this.localPort = localPort;
+            return this;
+        }
+
+        /**
          * Creates a {@link ClientContext} instance from the specified properties.
          *
          * @return A {@link ClientContext} instance.
@@ -179,7 +221,7 @@ public final class ClientContext extends AbstractContext {
                 certificates = Collections.<Certificate>emptyList();
             }
             return new ClientContext(parent, remoteUser, remoteAddress, remoteHost, remotePort,
-                certificates, userAgent, true, isSecure);
+                certificates, userAgent, true, isSecure, localAddress, localName, localPort);
         }
 
     }
@@ -205,7 +247,8 @@ public final class ClientContext extends AbstractContext {
      * @return An internal {@link ClientContext} instance.
      */
     public static ClientContext newInternalClientContext(Context parent) {
-        return new ClientContext(parent, "", "", "", -1, Collections.<Certificate>emptyList(), "", false, true);
+        return new ClientContext(parent, "", "", "", -1, Collections.<Certificate>emptyList(), "", false, true, "", "",
+                -1);
     }
 
     private final Collection<? extends Certificate> certificates;
@@ -239,7 +282,10 @@ public final class ClientContext extends AbstractContext {
                           List<? extends Certificate> certificates,
                           String userAgent,
                           boolean isExternal,
-                          boolean isSecure) {
+                          boolean isSecure,
+                          String localAddress,
+                          String localName,
+                          int localPort) {
         super(parent, "client");
         // Maintain the real list of certificates for Java API
         this.certificates = certificates;
@@ -252,6 +298,9 @@ public final class ClientContext extends AbstractContext {
         data.put(ATTR_USER_AGENT, userAgent);
         data.put(ATTR_IS_EXTERNAL, isExternal);
         data.put(ATTR_IS_SECURE, isSecure);
+        data.put(ATTR_LOCAL_ADDRESS, localAddress);
+        data.put(ATTR_LOCAL_NAME, localName);
+        data.put(ATTR_LOCAL_PORT, localPort);
     }
 
     /** Returns Base64-encoded certificates for JSON serialization. */
@@ -350,5 +399,32 @@ public final class ClientContext extends AbstractContext {
      */
     public boolean isSecure() {
         return data.get(ATTR_IS_SECURE).asBoolean();
+    }
+
+    /**
+     * Returns the IP address of the interface that received the request.
+     *
+     * @return the IP address of the server that received the request.
+     */
+    public String getLocalAddress() {
+        return data.get(ATTR_LOCAL_ADDRESS).asString();
+    }
+
+    /**
+     * Returns the host name of the server that received the request.
+     *
+     * @return the host name of the server that received the request.
+     */
+    public String getLocalName() {
+        return data.get(ATTR_LOCAL_NAME).asString();
+    }
+
+    /**
+     * Returns the port of the interface that received the request.
+     *
+     * @return the port of the interface that received the request.
+     */
+    public int getLocalPort() {
+        return data.get(ATTR_LOCAL_PORT).asInteger();
     }
 }
