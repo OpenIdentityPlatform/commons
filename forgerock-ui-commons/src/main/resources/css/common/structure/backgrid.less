@@ -31,26 +31,18 @@
         }
 
         &.filter-header-cell {
-            .form-search {
-                margin: 0 0 10px 0;
-                width: auto;
-                font-size: 14px;
-
-                .search {
-                    display: none;
-                }
-
+            .form-group {
                 input[type=search] {
-                    width: 100%;
-                    height: 100%;
-                    box-sizing: border-box;
                     padding-left: 6px;
                 }
+            }
 
-                .clear {
-                    right: 7px;
-                    font-size: 16px;
-                }
+            .form-control-feedback {
+                /**
+                 * Enable point events as they are disabled in Bootstrap 3.3+
+                 * @see https://github.com/twbs/bootstrap/pull/14104
+                 */
+                pointer-events: auto;
             }
         }
     }
