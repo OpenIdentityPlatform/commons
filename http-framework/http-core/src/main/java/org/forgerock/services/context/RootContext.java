@@ -16,41 +16,25 @@
 
 package org.forgerock.services.context;
 
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.generator.IdGenerator;
 
 /**
  * A {@link Context} which has an a globally unique ID but no parent. All request context
  * chains are terminated by a {@link RootContext} as the top-most context.
- *
- * We're assuming here that we only have requirement for IDs to be globally unique and non-repeating but not "secure"
- * (unguessable).
  */
 public final class RootContext extends AbstractContext {
 
     /**
-     * This ensures a globally unique key (even in a clustered environment).
-     * The UUID is a JVM-wide prefix for the context ID, suffixed with an {@link AtomicLong}.
-     */
-    private static final String BASE = UUID.randomUUID().toString();
-    private static final AtomicLong SEQUENCE = new AtomicLong();
-
-    /**
-     * Returns a new globally unique identifier.
-     */
-    private static String getNextID() {
-        return BASE + SEQUENCE.getAndIncrement();
-    }
-
-    /**
-     * Construct a new {@link RootContext} with a generated (unique) identifier.
+     * Construct a new {@link RootContext} with the default {@code IdGenerator}.
+     *
+     * @see IdGenerator#DEFAULT
      */
     public RootContext() {
-        this(getNextID());
+        this(IdGenerator.DEFAULT.generate());
     }
 
     /**
