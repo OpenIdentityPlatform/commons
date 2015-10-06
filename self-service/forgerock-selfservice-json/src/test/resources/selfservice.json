@@ -6,6 +6,7 @@
         "serviceUrl": "/email",
         "subject": "Verify your email address",
         "message": "Is this correct",
+        "mimeType": "text/plain",
         "from": "noreply@example.com",
         "verificationLink": "/verifyemail",
         "verificationLinkToken": "abc123"
@@ -54,6 +55,7 @@
         "from": "info@admin.org",
         "subject": "Reset password email",
         "message": "<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+        "mimeType": "text/html",
         "verificationLinkToken": "%link%",
         "verificationLink": "http://localhost:9999/example/#passwordReset/"
       }

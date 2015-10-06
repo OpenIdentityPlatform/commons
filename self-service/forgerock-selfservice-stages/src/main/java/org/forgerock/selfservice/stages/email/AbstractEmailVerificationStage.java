@@ -161,7 +161,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
                            String email, C config) throws ResourceException {
 
         String emailUrl = config.getEmailVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
-        String message = config.getEmailMessage().replace(config.getEmailVerificationLinkToken(), emailUrl);
+        String body = config.getEmailMessage().replace(config.getEmailVerificationLinkToken(), emailUrl);
 
         try (Connection connection = connectionFactory.getConnection()) {
             ActionRequest request = Requests
@@ -172,7 +172,8 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
                                             field("to", email),
                                             field("from", config.getEmailFrom()),
                                             field("subject", config.getEmailSubject()),
-                                            field("message", message))));
+                                            field("type", config.getEmailMimeType()),
+                                            field("body", body))));
 
             connection.action(requestContext, request);
         }

@@ -25,8 +25,9 @@ public final class EmailAccountConfig {
 
     private String serviceUrl;
     private String subject;
-    private String message;
     private String from;
+    private String message;
+    private String mimeType;
     private String verificationLink;
     private String verificationLinkToken;
 
@@ -53,7 +54,7 @@ public final class EmailAccountConfig {
     }
 
     /**
-     * Gets the subject part for the reset email.
+     * Gets the subject part for the verification email.
      *
      * @return the email subject
      */
@@ -62,7 +63,7 @@ public final class EmailAccountConfig {
     }
 
     /**
-     * Sets the subject part for the reset email.
+     * Sets the subject part for the verification email.
      *
      * @param subject
      *         the email subject
@@ -75,7 +76,7 @@ public final class EmailAccountConfig {
     }
 
     /**
-     * Gets the message for the reset email.
+     * Gets the message for the verification email.
      *
      * @return the email message
      */
@@ -84,7 +85,7 @@ public final class EmailAccountConfig {
     }
 
     /**
-     * Sets the message part for the reset email.
+     * Sets the message part for the verification email.
      *
      * @param message
      *         the email message
@@ -97,7 +98,27 @@ public final class EmailAccountConfig {
     }
 
     /**
-     * Gets the from part for the reset email.
+     * Gets the mime-type of the email message.
+     *
+     * @return the message mime-type
+     */
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    /**
+     * Sets the message mime-type.
+     *
+     * @param mimeType
+     *         the message mime-type
+     */
+    public EmailAccountConfig setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+        return this;
+    }
+
+    /**
+     * Gets the from part for the verification email.
      *
      * @return the email from field
      */
@@ -106,7 +127,7 @@ public final class EmailAccountConfig {
     }
 
     /**
-     * Sets the from part for the reset email.
+     * Sets the from part for the verification email.
      *
      * @param from
      *         the email from field
@@ -119,19 +140,19 @@ public final class EmailAccountConfig {
     }
 
     /**
-     * Gets the string token representing where the reset URL should be substituted.
+     * Gets the string token representing where the verification URL should be substituted.
      *
-     * @return the reset URL string token
+     * @return the verification URL string token
      */
     public String getVerificationLinkToken() {
         return verificationLinkToken;
     }
 
     /**
-     * Sets the string token representing where the reset URL should be substitutedd.
+     * Sets the string token representing where the verification URL should be substituted.
      *
      * @param verificationLinkToken
-     *         the reset URL string token
+     *         the verification URL string token
      *
      * @return this config instance
      */
@@ -141,19 +162,19 @@ public final class EmailAccountConfig {
     }
 
     /**
-     * Gets the reset URL to be passed into the email body.
+     * Gets the verification URL to be passed into the email body.
      *
-     * @return the reset URL
+     * @return the verification URL
      */
     public String getVerificationLink() {
         return verificationLink;
     }
 
     /**
-     * Sets the reset URL to be passed into the email body.
+     * Sets the verification URL to be passed into the email body.
      *
      * @param verificationLink
-     *         the reset URL
+     *         the verification URL
      *
      * @return this config instance
      */

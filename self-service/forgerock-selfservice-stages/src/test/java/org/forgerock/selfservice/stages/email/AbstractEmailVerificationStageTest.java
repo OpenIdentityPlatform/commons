@@ -128,7 +128,7 @@ public final class AbstractEmailVerificationStageTest {
         assertThat(actionRequest.getContent()).stringAt("/to").isEqualTo(TEST_EMAIL_ID);
         assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(infoEmailId);
         assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(emailSubject);
-        assertThat(actionRequest.getContent()).stringAt("/message").matches(
+        assertThat(actionRequest.getContent()).stringAt("/body").matches(
                 "<h3>This is your reset email\\.</h3><h4>"
                 + "<a href=\"http://localhost:9999/example/#passwordReset/&token=token1&code="
                 + "[\\w\\d]{8}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{12}\">Email verification link</a></h4>"

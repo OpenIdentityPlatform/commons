@@ -43,7 +43,7 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Gets the subject part for the reset email.
+     * Gets the subject part for the verification email.
      *
      * @return the email subject
      */
@@ -52,7 +52,7 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Gets the message for the reset email.
+     * Gets the message for the verification email.
      *
      * @return the email message
      */
@@ -61,7 +61,16 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Gets the from part for the reset email.
+     * Gets the mime-type of the message.
+     *
+     * @return the email mime-type
+     */
+    String getEmailMimeType() {
+        return emailAccountConfig.getMimeType();
+    }
+
+    /**
+     * Gets the from part for the verification email.
      *
      * @return the email from field
      */
@@ -70,18 +79,18 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Gets the string token representing where the reset URL should be substituted.
+     * Gets the string token representing where the verification URL should be substituted.
      *
-     * @return the reset URL string token
+     * @return the verification URL string token
      */
     String getEmailVerificationLinkToken() {
         return emailAccountConfig.getVerificationLinkToken();
     }
 
     /**
-     * Gets the reset URL to be passed into the email body.
+     * Gets the verification URL to be passed into the email body.
      *
-     * @return the reset URL
+     * @return the verification URL
      */
     String getEmailVerificationLink() {
         return emailAccountConfig.getVerificationLink();
@@ -101,7 +110,7 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Sets the subject part for the reset email.
+     * Sets the subject part for the verification email.
      *
      * @param emailSubject
      *         the email subject
@@ -114,7 +123,7 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Sets the message part for the reset email.
+     * Sets the message part for the verification email.
      *
      * @param emailMessage
      *         the email message
@@ -127,7 +136,20 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Sets the from part for the reset email.
+     * Sets the message mime-type for the verification email.
+     *
+     * @param mimeType
+     *         the email message mime-type
+     *
+     * @return this config instance
+     */
+    public C setEmailMimeType(String mimeType) {
+        emailAccountConfig.setMimeType(mimeType);
+        return self();
+    }
+
+    /**
+     * Sets the from part for the verification email.
      *
      * @param emailFrom
      *         the email from field
@@ -140,10 +162,10 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Sets the string token representing where the reset URL should besubstitutedd.
+     * Sets the string token representing where the verification URL should besubstitutedd.
      *
      * @param emailVerificationLinkToken
-     *         the reset URL string token
+     *         the verification URL string token
      *
      * @return this config instance
      */
@@ -153,10 +175,10 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
     }
 
     /**
-     * Sets the reset URL to be passed into the email body.
+     * Sets the verification URL to be passed into the email body.
      *
      * @param emailVerificationLink
-     *         the reset URL
+     *         the verification URL
      *
      * @return this config instance
      */

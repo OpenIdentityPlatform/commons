@@ -105,7 +105,7 @@ final class ExampleEmailService implements SingletonResourceProvider {
             throw new BadRequestException("Field subject is not specified");
         }
 
-        String messageBody = document.get("message").asString();
+        String messageBody = document.get("body").asString();
 
         if (isEmpty(messageBody)) {
             throw new BadRequestException("Field message is not specified");
