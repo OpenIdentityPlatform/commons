@@ -35,7 +35,6 @@ import javax.crypto.spec.SecretKeySpec;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.events.handlers.BufferedAuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.json.AuditJsonConfig;
@@ -87,7 +86,32 @@ public class CSVAuditEventHandlerTest {
 
     @Test
     public void testCreatingAuditLogEntryWithBuffering() throws Exception {
-        // to be updated with CAUD-158
+        //given
+        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CSVAuditEventHandler csvHandler = new CSVAuditEventHandler();
+        csvHandler.configure(getConfigWithBuffering(logDirectory));
+        addEventsMetaData(csvHandler);
+        final Context context = new RootContext();
+        try {
+
+            // when
+            csvHandler.publishEvent(context, "access", buildEvent(1));
+            csvHandler.publishEvent(context, "access", buildEvent(2));
+
+            // then
+            final String expectedContent = "\"_id\",\"timestamp\",\"transactionId\"\n"
+                    + "\"_id1\",\"timestamp\",\"transactionId-X\"\n" + "\"_id2\",\"timestamp\",\"transactionId-X\"";
+            final File file = logDirectory.resolve("access.csv").toFile();
+            int tries = 0;
+            while ((!file.exists() || file.length() < expectedContent.length()) && tries < 10) {
+                Thread.sleep(10);
+                tries++;
+            }
+            assertThat(file).hasContent(expectedContent);
+        } finally {
+            csvHandler.shutdown();
+        }
     }
 
     @Test
@@ -210,7 +234,6 @@ public class CSVAuditEventHandlerTest {
     @SuppressWarnings("unchecked")
     private static <T> ResultHandler<T> mockResultHandler(Class<T> type) {
         return mock(ResultHandler.class);
-
     }
 
     private ResourceResponse createAccessEvent(AuditEventHandler<?> auditEventHandler) throws Exception {
@@ -279,11 +302,9 @@ public class CSVAuditEventHandlerTest {
     }
 
     /** Returns a configuration with buffering enabled. */
-    private CSVAuditEventHandlerConfiguration getConfigWithBuffering(Path tempDir, long maxTimeInMillis, int maxSize) {
+    private CSVAuditEventHandlerConfiguration getConfigWithBuffering(Path tempDir) {
         EventBufferingConfiguration config = new EventBufferingConfiguration();
         config.setEnabled(true);
-        config.setMaxSize(maxSize);
-        config.setMaxTime(maxTimeInMillis);
         CSVAuditEventHandlerConfiguration handlerConfig = new CSVAuditEventHandlerConfiguration();
         handlerConfig.setLogDirectory(tempDir.toString());
         handlerConfig.setBufferingConfiguration(config);

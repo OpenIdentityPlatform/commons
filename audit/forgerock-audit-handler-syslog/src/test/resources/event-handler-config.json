@@ -17,9 +17,8 @@
     }],
     "buffering" : {
       "enabled" : "true",
-      "forceFlushBeforeRead" : "false",
-      "maxSize" : "25",
-      "maxTime" : "30"
+      "autoFlush" : "false",
+      "maxSize" : "25"
     }
   },
   "events": [

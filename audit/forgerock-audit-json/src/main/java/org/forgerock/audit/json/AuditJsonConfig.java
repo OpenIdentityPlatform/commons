@@ -26,7 +26,6 @@ import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.events.handlers.BufferedAuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
@@ -167,9 +166,6 @@ public class AuditJsonConfig {
             if (conf != null) {
                 Class<CFG> klass = eventHandler.getConfigurationClass();
                 CFG configuration = mapper.readValue(conf.toString(), klass);
-                if (configuration.getBuffering().isEnabled()) {
-                    eventHandler = new BufferedAuditEventHandler<CFG>(eventHandler);
-                }
                 eventHandler.configure(configuration);
             }
             // else assume there is no configuration needed

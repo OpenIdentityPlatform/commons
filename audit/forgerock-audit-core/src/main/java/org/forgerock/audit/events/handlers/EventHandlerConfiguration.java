@@ -55,14 +55,11 @@ public abstract class EventHandlerConfiguration {
         @JsonPropertyDescription("audit.handlers.all.buffering.enabled")
         private boolean enabled;
 
-        @JsonPropertyDescription("audit.handlers.all.buffering.forceFlushBeforeRead")
-        private boolean forceFlushBeforeRead;
-
-        @JsonPropertyDescription("audit.handlers.all.buffering.maxTime")
-        private long maxTime;
+        @JsonPropertyDescription("audit.handlers.all.buffering.autoFlush")
+        private boolean autoFlush = true;
 
         @JsonPropertyDescription("audit.handlers.all.buffering.maxSize")
-        private int maxSize = 1;
+        private int maxSize = 5000;
 
         /**
          * Indicates if event buffering is enabled.
@@ -84,57 +81,38 @@ public abstract class EventHandlerConfiguration {
         }
 
         /**
-         * Indicates if a buffer must be flushed before reading the events.
+         * Indicates if events are automatically flushed after being written.
          *
-         * @return {@code true} if buffer must be flushed
+         * @return {@code true} if events must be flushed
          */
-        public boolean isForceFlushBeforeRead() {
-            return forceFlushBeforeRead;
+        public boolean isAutoFlush() {
+            return autoFlush;
         }
 
         /**
-         * Sets the force flush indicator.
+         * Sets the auto flush indicator.
          *
-         * @param forceFlush
-         *            Indicates if a buffer must be flushed before reading the events.
+         * @param auto
+         *            Indicates if events are automatically flushed after being written.
          */
-        public void setForceFlushBeforeRead(boolean forceFlush) {
-            this.forceFlushBeforeRead = forceFlush;
+        public void setAutoFlush(boolean auto) {
+            this.autoFlush = auto;
         }
 
         /**
-         * Returns the maximum time to wait before flushing the buffer.
+         * Returns the maximum size of the queue.
          *
-         * @return maxTime Maximum time in milliseconds.
-         */
-        public long getMaxTime() {
-            return maxTime;
-        }
-
-        /**
-         * Sets the maximum time to wait before flushing the buffer.
-         *
-         * @param maxTime
-         *            Maximum time in milliseconds.
-         */
-        public void setMaxTime(long maxTime) {
-            this.maxTime = maxTime;
-        }
-
-        /**
-         * Returns the maximum size allowed before flushing the buffer.
-         *
-         * @return maxSize Maximum number of events.
+         * @return maxSize Maximum number of events in the queue.
          */
         public int getMaxSize() {
             return maxSize;
         }
 
         /**
-         * Sets the maximum size allowed before flushing the buffer.
+         * Sets the maximum size of the events queue.
          *
          * @param maxSize
-         *            Maximum number of events.
+         *            Maximum number of events in the queue.
          */
         public void setMaxSize(int maxSize) {
             Reject.ifFalse(maxSize >= 1);

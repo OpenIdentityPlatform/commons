@@ -24,6 +24,8 @@ import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -42,7 +44,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.events.handlers.AuditEventTopicState;
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
+import org.forgerock.audit.events.handlers.writers.TextWriter;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -82,6 +86,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private final Map<String, ICsvMapWriter> writers = new HashMap<>();
     private final Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
 
+    private CSVAuditEventHandlerConfiguration config;
     private boolean secure;
     private String keystoreFilename;
     private String keystorePassword;
@@ -121,6 +126,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         synchronized (this) {
             cleanup();
 
+            this.config = config;
             auditLogDirectory = config.getLogDirectory();
             logger.info("Audit logging to: {}", auditLogDirectory);
 
@@ -184,11 +190,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         }
     }
 
-    @Override
-    public synchronized void publishEvents(List<AuditEventTopicState> events) {
-        // will be removed by CAUD-158
-    }
-
     private void checkTopic(String topic) throws ResourceException {
         final JsonValue auditEventProperties = AuditEventHelper.getAuditEventProperties(auditEvents.get(topic));
         if (auditEventProperties == null || auditEventProperties.isNull()) {
@@ -227,9 +228,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                     throws IOException, InternalServerErrorException {
         ICsvMapWriter csvWriter = writers.get(topic);
         writeEntry(topic, csvWriter, event);
-        if (mustFlush) {
+        // TODO: uncomment the following statements once super-csv is released with unwrapped buffer
+        // EventBufferingConfiguration bufferConfig = config.getBuffering();
+        //if (!bufferConfig.isEnabled() || !bufferConfig.isAutoFlush()) {
             csvWriter.flush();
-        }
+        //}
         return csvWriter;
     }
 
@@ -253,13 +256,24 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     private ICsvMapWriter createCsvMapWriter(final File auditTmpFile) throws IOException {
-        CsvMapWriter csvWriter = new CsvMapWriter(new FileWriter(auditTmpFile, true), csvPreference);
-
+        final CsvMapWriter csvWriter = createCsvWriter(auditTmpFile, config.getBuffering());
         if (secure) {
             HmacCalculator hmacCalculator = setupHmacCalculator();
             return new CsvHmacMapWriter(csvWriter, hmacCalculator);
         } else {
             return csvWriter;
+        }
+    }
+
+    private CsvMapWriter createCsvWriter(final File auditTmpFile, EventBufferingConfiguration bufferConfig)
+            throws IOException {
+        if (bufferConfig.isEnabled()) {
+            TextWriter writer = new TextWriter.Stream(new FileOutputStream(auditTmpFile, true));
+            AsynchronousTextWriter asyncWriter = new AsynchronousTextWriter(
+                    "CsvHandler", bufferConfig.getMaxSize(), bufferConfig.isAutoFlush(), writer);
+            return new CsvMapWriter(new SuperCsvTextWriterAdapter(asyncWriter), csvPreference);
+        } else {
+            return new CsvMapWriter(new FileWriter(auditTmpFile, true), csvPreference);
         }
     }
 
