@@ -25,8 +25,7 @@ import static org.forgerock.http.header.HeaderFactory.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -364,7 +363,7 @@ public class Headers implements Map<String, Object> {
      * @return a convenient copy of the headers
      */
     public Map<String, List<String>> copyAsMapOfList() {
-        Map<String, List<String>> result = new HashMap<>(headers.size());
+        Map<String, List<String>> result = new LinkedHashMap<>(headers.size());
         for (Header header : headers.values()) {
             result.put(header.getName(), unmodifiableList(new ArrayList<>(header.getValues())));
         }
