@@ -44,12 +44,12 @@
    For example, if a server has a user collection under <literal>/users</literal>,
    then you can access a user at
    <literal>/users/<replaceable>user-id</replaceable></literal>.
-   The ID is also the value of the "_id" field of the resource.
+   The ID is also the value of the <literal>_id</literal> field of the resource.
   </para>
 
   <para>
    Resources are versioned using revision numbers.
-   A revision is specified in the resource's "_rev" field.
+   A revision is specified in the resource's <literal>_rev</literal> field.
    Revisions make it possible to figure out whether to apply changes
    without resource locking and without distributed transactions.
   </para>
@@ -218,7 +218,7 @@
   <note>
    <para>
     Some parameter values are not safe for URLs,
-    so URL encode parameter values as necessary.
+    so URL-encode parameter values as necessary.
    </para>
   </note>
 
@@ -260,7 +260,7 @@
    with the query string parameter <literal>_action=create</literal>
    and the JSON resource as a payload.
    Accept a JSON response.
-   The server creates the identifier if not specified.
+   The server creates the identifier if not specified:
   </para>
 
   <programlisting language="http">
@@ -277,7 +277,7 @@ Content-Type: application/json
    including the case-sensitive identifier for the resource in the URL path,
    and the JSON resource as a payload.
    Use the <literal>If-None-Match: *</literal> header.
-   Accept a JSON response.
+   Accept a JSON response:
   </para>
 
   <programlisting language="http">
@@ -301,7 +301,7 @@ If-None-Match: *
    <title>Parameters</title>
 
    <para>
-    You can use the following parameters.
+    You can use the following parameters:
    </para>
 
    <xinclude:include href="varlistentry-pretty-print.xml" />
@@ -316,7 +316,7 @@ If-None-Match: *
   <para>
    To retrieve a single resource, perform an HTTP GET on the resource
    by its case-sensitive identifier (<literal>_id</literal>)
-   and accept a JSON response.
+   and accept a JSON response:
   </para>
 
   <programlisting language="http">
@@ -329,7 +329,7 @@ Accept: application/json
    <title>Parameters</title>
 
    <para>
-    You can use the following parameters.
+    You can use the following parameters:
    </para>
 
    <xinclude:include href="varlistentry-pretty-print.xml" />
@@ -376,7 +376,7 @@ Accept: application/json
    Use the <literal>If-Match: <replaceable>_rev</replaceable></literal> header
    to check that you are actually updating the version you modified.
    Use <literal>If-Match: *</literal> if the version does not matter.
-   Accept a JSON response.
+   Accept a JSON response:
   </para>
 
   <programlisting language="http">
@@ -393,7 +393,7 @@ If-Match: <replaceable>_rev</replaceable>
    <title>Parameters</title>
 
    <para>
-    You can use the following parameters.
+    You can use the following parameters:
    </para>
 
    <xinclude:include href="varlistentry-pretty-print.xml" />
@@ -408,7 +408,7 @@ If-Match: <replaceable>_rev</replaceable>
   <para>
    To delete a single resource, perform an HTTP DELETE
    by its case-sensitive identifier (<literal>_id</literal>)
-   and accept a JSON response.
+   and accept a JSON response:
   </para>
 
   <programlisting language="http">
@@ -421,7 +421,7 @@ Accept: application/json
    <title>Parameters</title>
 
    <para>
-    You can use the following parameters.
+    You can use the following parameters:
    </para>
 
    <xinclude:include href="varlistentry-pretty-print.xml" />
@@ -438,7 +438,7 @@ Accept: application/json
    including the patch for the resource as the payload.
    Optionally set the <literal>If-Match</literal> header to the revision
    if the patch should only operate on that version of the resource.
-   Accept a JSON response.
+   Accept a JSON response:
   </para>
 
   <programlisting language="http">
@@ -470,7 +470,7 @@ If-Match: <replaceable>_rev</replaceable>
    <title>Parameters</title>
 
    <para>
-    You can use the following parameters.
+    You can use the following parameters:
    </para>
 
    <xinclude:include href="varlistentry-pretty-print.xml" />
@@ -498,7 +498,7 @@ If-Match: <replaceable>_rev</replaceable>
 
    <para>
     You can use the following parameters.
-    Other parameters might depend on the specific action implementation.
+    Other parameters might depend on the specific action implementation:
    </para>
 
    <xinclude:include href="varlistentry-pretty-print.xml" />
@@ -516,7 +516,7 @@ If-Match: <replaceable>_rev</replaceable>
    perform an HTTP GET and accept a JSON response, including at least
    a <literal>_queryExpression</literal>,
    <literal>_queryFilter</literal>, or <literal>_queryId</literal> parameter.
-   These parameters cannot be used together.
+   These parameters cannot be used together:
   </para>
 
   <programlisting language="http">
@@ -535,7 +535,7 @@ Accept: application/json
    <title>Parameters</title>
 
    <para>
-    You can use the following parameters.
+    You can use the following parameters:
    </para>
 
    <varlistentry>
@@ -549,7 +549,7 @@ Accept: application/json
 
      <para>
       The string representation is summarized as follows.
-      Continue reading for additional explanation.
+      Continue reading for additional explanation:
      </para>
 
      <programlisting language="none">
@@ -588,7 +588,7 @@ UTF8STRING     = UTF-8 string possibly containing white-space
      <para>
       For comparison expressions use
       <replaceable>json-pointer comparator json-value</replaceable>,
-      where the <replaceable>comparator</replaceable> is one of the following.
+      where the <replaceable>comparator</replaceable> is one of the following:
      </para>
 
      <simplelist>
@@ -641,7 +641,7 @@ UTF8STRING     = UTF-8 string possibly containing white-space
       The string is an opaque cookie used by the server
       to keep track of the position in the search results.
       The server returns the cookie in the JSON response
-      as the value of "pagedResultsCookie".
+      as the value of <literal>pagedResultsCookie</literal>.
      </para>
 
      <para>
@@ -755,7 +755,7 @@ UTF8STRING     = UTF-8 string possibly containing white-space
   <para>
    When working with a common REST API over HTTP,
    client applications should expect at least the following HTTP status codes.
-   Not all servers necessarily return all status codes identified here.
+   Not all servers necessarily return all status codes identified here:
   </para>
 
   <variablelist>
