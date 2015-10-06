@@ -331,6 +331,21 @@ public class HeadersTest {
         assertThat(headers.get(CookieHeader.class).getCookies()).hasSize(2);
     }
 
+    @Test
+    public void testCopyAsMapOfList() {
+        // Given
+        Headers headers = new Headers();
+        headers.put("Header", asList("One", "Two", "Three"));
+
+        // When
+        Map<String, List<String>> copyAsMapOfList = headers.copyAsMapOfList();
+        headers.put("Header", asList("One", "Two"));
+
+        // Then
+        assertThat(copyAsMapOfList).containsExactly(entry("Header", Arrays.<String>asList("One", "Two", "Three")));
+    }
+
+
     public List<Object> asList(Object... values) {
         return Arrays.asList(values);
     }

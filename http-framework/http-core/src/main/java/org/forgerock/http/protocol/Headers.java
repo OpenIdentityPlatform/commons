@@ -18,11 +18,15 @@
 
 package org.forgerock.http.protocol;
 
+import static java.util.Collections.unmodifiableList;
+import static java.util.Collections.unmodifiableMap;
 import static org.forgerock.http.header.HeaderFactory.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -351,6 +355,20 @@ public class Headers implements Map<String, Object> {
      */
     public Map<String, Header> asMapOfHeaders() {
         return headers;
+    }
+
+    /**
+     * Returns a convenient copy of the headers as a {@code Map<String, List<String>>}. The returned {@code Map} is a
+     * copy and is disconnected of the {@code Headers} instance.
+     *
+     * @return a convenient copy of the headers
+     */
+    public Map<String, List<String>> copyAsMapOfList() {
+        Map<String, List<String>> result = new HashMap<>(headers.size());
+        for (Header header : headers.values()) {
+            result.put(header.getName(), unmodifiableList(new ArrayList<>(header.getValues())));
+        }
+        return unmodifiableMap(result);
     }
 
 }
