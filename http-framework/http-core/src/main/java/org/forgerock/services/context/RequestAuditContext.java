@@ -17,6 +17,7 @@
 package org.forgerock.services.context;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.time.TimeService;
 
 /**
  * A context for audit information for an incoming request.
@@ -31,8 +32,17 @@ public class RequestAuditContext extends AbstractContext {
      * @param parent The parent context.
      */
     public RequestAuditContext(Context parent) {
+        this(parent, TimeService.SYSTEM);
+    }
+
+    /**
+     * Constructs a new context using the specified parent and the current time as the request received time.
+     * @param parent The parent context.
+     * @param time The instance of {@code TimeService} to use.
+     */
+    public RequestAuditContext(Context parent, TimeService time) {
         super(parent, NAME);
-        data.put(RECEIVED_TIME, System.currentTimeMillis());
+        data.put(RECEIVED_TIME, time.now());
     }
 
     /**
