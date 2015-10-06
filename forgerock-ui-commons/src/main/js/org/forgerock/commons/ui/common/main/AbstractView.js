@@ -1,25 +1,17 @@
 /**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2015 ForgeRock AS.
  */
 
 /*global define*/
@@ -37,11 +29,12 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-], function($, _, Backbone, Configuration, Constants, EventManager, ModuleLoader, Router, ThemeManager, UIUtils, ValidatorsManager, ValidatorsUtils) {
+], function($, _, Backbone, Configuration, Constants, EventManager, ModuleLoader, Router, ThemeManager, UIUtils,
+            ValidatorsManager, ValidatorsUtils) {
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractView
      */
-    var View = Backbone.View.extend({
+    return Backbone.View.extend({
 
         /**
          * This params should be passed when creating new object, for example:
@@ -80,8 +73,14 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             ThemeManager.getTheme().then(function(theme){
                 _this.data.theme = theme;
 
-                if(needsNewBaseTemplate()) {
-                    UIUtils.renderTemplate(_this.data.theme.path + _this.baseTemplate, $("#wrapper"), _.extend({}, Configuration.globalData, _this.data), _.bind(_this.loadTemplate, _this), "replace", needsNewBaseTemplate);
+                if (needsNewBaseTemplate()) {
+                    UIUtils.renderTemplate(
+                        _this.baseTemplate,
+                        $("#wrapper"),
+                        _.extend({}, Configuration.globalData, _this.data),
+                        _.bind(_this.loadTemplate, _this),
+                        "replace",
+                        needsNewBaseTemplate);
                 } else {
                     _this.loadTemplate();
                 }
@@ -104,18 +103,20 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             this.$el.unbind();
             this.delegateEvents();
 
-            if(Configuration.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
+            if (Configuration.baseTemplate !== this.baseTemplate && !this.noBaseTemplate) {
                 Configuration.setProperty("baseTemplate", this.baseTemplate);
                 EventManager.sendEvent(Constants.EVENT_CHANGE_BASE_VIEW);
             }
 
             // Ensure all partials are (pre)loaded before rendering the template
             $.when.apply($, _.map(this.partials, UIUtils.preloadPartial)).then(function () {
-                if(self.callback) {
-                    UIUtils.renderTemplate(self.data.theme.path + self.template, self.$el, _.extend({}, Configuration.globalData, self.data), _.bind(self.callback, self), self.mode, validateCurrent);
-                } else {
-                    UIUtils.renderTemplate(self.data.theme.path + self.template, self.$el, _.extend({}, Configuration.globalData, self.data), null, self.mode, validateCurrent);
-                }
+                UIUtils.renderTemplate(
+                    self.template,
+                    self.$el,
+                    _.extend({}, Configuration.globalData, self.data),
+                    self.callback ? _.bind(self.callback, self) : _.noop(),
+                    self.mode,
+                    validateCurrent);
             });
         },
 
@@ -214,6 +215,4 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             return this.formLock;
         }
     });
-
-    return View;
 });

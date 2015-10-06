@@ -25,10 +25,11 @@
 /*global define */
 
 define("org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView", [
-    "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView"
-], function(AnonymousProcessView) {
+    "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function(AnonymousProcessView, Constants) {
     var PasswordResetView = AnonymousProcessView.extend({
-        endpoint: "reset",
+        endpoint: Constants.SELF_SERVICE_CONTEXT + "reset",
         i18nBase: "common.user.passwordReset"
     });
 
