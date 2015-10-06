@@ -30,7 +30,7 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "moment",
-    "backgrid-filter"
+    "org/forgerock/commons/ui/common/backgrid/extension/ThemeableServerSideFilter"
 ], function ($, _, Backgrid, DateUtil, UIUtils, moment) {
     /**
      * @exports org/forgerock/commons/ui/common/util/BackgridUtils
@@ -427,7 +427,7 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     obj.FilterHeaderCell = Backgrid.HeaderCell.extend({
         className: "filter-header-cell",
         render: function () {
-            var filter = new Backgrid.Extension.ServerSideFilter({
+            var filter = new Backgrid.Extension.ThemeableServerSideFilter({
                 name: this.column.get("name"),
                 placeholder: $.t("common.form.filter"),
                 collection: this.collection
