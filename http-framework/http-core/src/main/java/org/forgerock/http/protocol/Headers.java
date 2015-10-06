@@ -357,8 +357,9 @@ public class Headers implements Map<String, Object> {
     }
 
     /**
-     * Returns a convenient copy of the headers as a {@code Map<String, List<String>>}. The returned {@code Map} is a
-     * copy and is disconnected of the {@code Headers} instance.
+     * Returns a convenient copy of the headers as a {@code Map<String, List<String>>}. The returned {@code Map} is an
+     * copy and is disconnected of the {@code Headers} instance. The {@code Map} itself and the {@code List} are
+     * unmodifiable.
      *
      * @return a convenient copy of the headers
      */
