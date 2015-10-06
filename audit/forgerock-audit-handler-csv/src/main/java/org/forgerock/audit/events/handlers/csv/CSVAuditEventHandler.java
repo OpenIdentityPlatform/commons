@@ -39,6 +39,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.events.handlers.AuditEventTopicState;
@@ -79,6 +80,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private String auditLogDirectory;
     private CsvPreference csvPreference;
     private final Map<String, ICsvMapWriter> writers = new HashMap<>();
+    private final Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
 
     private boolean secure;
     private String keystoreFilename;
@@ -97,6 +99,17 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     @Override
     public void setAuditEventsMetaData(final Map<String, JsonValue> auditEvents) {
         this.auditEvents = auditEvents;
+
+        for (String topic : auditEvents.keySet()) {
+            File auditLogFile = getAuditLogFile(topic);
+            try {
+                Set<String> fieldOrder = getFieldOrder(topic, auditEvents);
+                fieldOrderByTopic.put(topic, fieldOrder);
+                openWriter(topic, auditLogFile);
+            } catch (IOException e) {
+                logger.info("Error when creating audit file: " + auditLogFile, e);
+            }
+        }
     }
 
     /**
@@ -163,7 +176,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
         try {
             checkTopic(topic);
-            publishEventWithRetry(topic, event, getFieldOrder(topic), true);
+            publishEventWithRetry(topic, event, true);
             return newResourceResponse(
                     event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, event).asPromise();
         } catch (ResourceException e) {
@@ -173,44 +186,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
 
     @Override
     public synchronized void publishEvents(List<AuditEventTopicState> events) {
-        Map<String, Set<String>> topicCache = new HashMap<String, Set<String>>();
-        // publish all events
-        int nbPublished = 0;
-        try {
-            for (AuditEventTopicState topicAndEvent : events) {
-                String topic = topicAndEvent.getTopic();
-                Set<String> fieldOrder = topicCache.get(topic);
-                if (fieldOrder == null) {
-                    checkTopic(topic);
-                    fieldOrder = getFieldOrder(topic);
-                    topicCache.put(topic, fieldOrder);
-                }
-                publishEventWithRetry(topic, topicAndEvent.getEvent(), fieldOrder, false);
-                nbPublished++;
-            }
-        } catch (IOException e) {
-            String message = "Could not publish all buffered events. Size of events buffer: " + events.size()
-                    + ", number of events published: " + nbPublished;
-            logger.error(message.toString(), e);
-        }
-        // flushes writers for all topics
-        int nbFlushed = 0;
-        boolean flushError = false;
-        for (String topic : topicCache.keySet()) {
-            try {
-                ICsvMapWriter writer = getWriter(topic, null, false);
-                writer.flush();
-                nbFlushed++;
-            } catch (IOException e) {
-                logger.error("Error while flushing the writer related to the topic " + topic, e);
-                flushError = true;
-            }
-        }
-        if (flushError) {
-            String message = "Could not flush all topics for buffered events.Number of topics: "
-                    + topicCache.size() + ", number topics flushed: " + nbFlushed;
-            logger.error(message);
-        }
+        // will be removed by CAUD-158
     }
 
     private void checkTopic(String topic) throws ResourceException {
@@ -223,68 +199,57 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     /**
      * Publishes the provided event, and returns the writer used.
      */
-    private void publishEventWithRetry(
-            final String topic, final JsonValue event, final Set<String> fieldOrder, boolean mustFlush)
+    private void publishEventWithRetry(final String topic, final JsonValue event, boolean mustFlush)
                     throws ResourceException {
         ICsvMapWriter csvWriter = null;
         try {
-            csvWriter = writeEvent(topic, event, fieldOrder, mustFlush);
+            csvWriter = writeEvent(topic, event, mustFlush);
         } catch (IOException ex) {
             // Re-try once in case the writer stream became closed for some reason
             logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
             synchronized (this) {
                 resetWriter(topic, csvWriter);
+                try {
+                    openWriter(topic, getAuditLogFile(topic));
+                } catch (IOException e) {
+                    throw new BadRequestException(e);
+                }
             }
             try {
-                writeEvent(topic, event, fieldOrder, mustFlush);
-            } catch (IOException ex2) {
-                throw new BadRequestException(ex2);
+                writeEvent(topic, event, mustFlush);
+            } catch (IOException e) {
+                throw new BadRequestException(e);
             }
         }
     }
 
-    private ICsvMapWriter writeEvent(
-            final String topic, final JsonValue event, final Set<String> fieldOrder, boolean mustFlush)
+    private ICsvMapWriter writeEvent(final String topic, final JsonValue event, boolean mustFlush)
                     throws IOException, InternalServerErrorException {
-        File auditFile = getOrCreateAuditFile(topic, fieldOrder);
-        ICsvMapWriter csvWriter = getWriter(topic, auditFile, true);
-        writeEntry(csvWriter, event, fieldOrder);
+        ICsvMapWriter csvWriter = writers.get(topic);
+        writeEntry(topic, csvWriter, event);
         if (mustFlush) {
             csvWriter.flush();
         }
         return csvWriter;
     }
 
-    private Set<String> getFieldOrder(final String topic) throws ResourceException {
+    private Set<String> getFieldOrder(final String topic, final Map<String, JsonValue> auditEvents)
+            throws ResourceException {
         final Set<String> fieldOrder = new LinkedHashSet<>();
-        fieldOrder.addAll(generateJsonPointers(AuditEventHelper.getAuditEventSchema(auditEvents
-                .get(topic))));
+        fieldOrder.addAll(generateJsonPointers(AuditEventHelper.getAuditEventSchema(auditEvents.get(topic))));
         return fieldOrder;
     }
 
-    /** Returns the audit file to use for logging the event. It may imply its creation. */
-    private File getOrCreateAuditFile(final String auditEventType, final Set<String> fieldOrder) throws IOException {
-        File auditFile = getAuditLogFile(auditEventType);
-        // Create header if creating a new file
-        if (!auditFile.exists()) {
-            synchronized (this) {
-                final ICsvMapWriter existingCsvWriter = getWriter(auditEventType, auditFile, false);
-                final File auditTmpFile = new File(auditFile.getParent(), auditEventType + ".tmp");
-                // This is atomic, so only one caller will succeed with created
-                final boolean created = auditTmpFile.createNewFile();
-                if (created) {
-                    final ICsvMapWriter tmpFileWriter = createCsvMapWriter(auditTmpFile);
-                    tmpFileWriter.writeHeader(buildHeaders(fieldOrder));
-                    tmpFileWriter.close();
-                    if (!auditTmpFile.renameTo(auditFile)) {
-                        logger.error("Unable to rename audit temp file");
-                        throw new InternalServerErrorException("Unable to rename audit temp file");
-                    }
-                    resetWriter(auditEventType, existingCsvWriter);
-                }
-            }
+    private void openWriter(final String topic, File auditFile)
+            throws IOException {
+        boolean auditFileIsNew = !auditFile.exists();
+        final ICsvMapWriter writer = createCsvMapWriter(auditFile);
+        if (auditFileIsNew) {
+            // Need to create the header
+            Set<String> fieldOrder = fieldOrderByTopic.get(topic);
+            writer.writeHeader(buildHeaders(fieldOrder));
         }
-        return auditFile;
+        writers.put(topic, writer);
     }
 
     private ICsvMapWriter createCsvMapWriter(final File auditTmpFile) throws IOException {
@@ -367,23 +332,9 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         return new File(auditLogDirectory, type + ".csv");
     }
 
-    private ICsvMapWriter getWriter(final String topic, final File auditFile, final boolean createIfMissing)
+    private void writeEntry(final String topic, final ICsvMapWriter csvWriter, final JsonValue obj)
             throws IOException {
-        synchronized (writers) {
-            ICsvMapWriter existingWriter = writers.get(topic);
-            if (existingWriter == null && createIfMissing) {
-                existingWriter = createCsvMapWriter(auditFile);
-                writers.put(topic, existingWriter);
-            }
-            return existingWriter;
-        }
-    }
-
-    private void writeEntry(
-            final ICsvMapWriter csvWriter,
-            final JsonValue obj,
-            final Collection<String> fieldOrder) throws IOException {
-
+        Set<String> fieldOrder = fieldOrderByTopic.get(topic);
         Map<String, String> cells = new HashMap<>(fieldOrder.size());
         for (String key : fieldOrder) {
             final String value = extractValue(obj, key);
