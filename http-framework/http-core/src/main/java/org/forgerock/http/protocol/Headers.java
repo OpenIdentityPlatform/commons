@@ -335,15 +335,13 @@ public class Headers implements Map<String, Object> {
     @Override
     @SuppressWarnings("unchecked")
     public Collection<Object> values() {
-        final Collection values = headers.values();
-        return values;
+        return (Collection) headers.values();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public Set<Entry<String, Object>> entrySet() {
-        final Set entries = headers.entrySet();
-        return entries;
+        return (Set) headers.entrySet();
     }
 
     /**
