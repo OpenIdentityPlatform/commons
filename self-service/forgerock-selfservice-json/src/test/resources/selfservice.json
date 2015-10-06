@@ -17,24 +17,20 @@
       "identityEmailField" : "mail"
     },
     {
-      "name" : "kbaStage",
+      "name" : "kbaSecurityAnswerDefinitionStage",
       "kbaPropertyName" : "kbaInfo",
-      "questions":[
-        {
-          "id":"1",
-          "question":{
-            "en":"What's your favorite color?",
-            "en_GB":"What's your favorite colour?",
-            "fr":"Quelle est votre couleur préférée?"
-          }
-        },
-        {
-          "id":"2",
-          "question":{
-            "en":"Who was your first employer?"
+      "kbaConfig": {
+        "questions": {
+          "1": {
+            "en": "What's your favorite color?",
+            "en_GB": "What's your favorite colour?",
+            "fr": "Quelle est votre couleur préférée?"
+          },
+          "2": {
+            "en": "Who was your first employer?"
           }
         }
-      ]
+      }
     },
     {
       "name" : "selfRegistration",

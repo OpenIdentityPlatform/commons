@@ -111,6 +111,8 @@ public final class EmailAccountConfig {
      *
      * @param mimeType
      *         the message mime-type
+     *
+     * @return this config instance
      */
     public EmailAccountConfig setMimeType(String mimeType) {
         this.mimeType = mimeType;

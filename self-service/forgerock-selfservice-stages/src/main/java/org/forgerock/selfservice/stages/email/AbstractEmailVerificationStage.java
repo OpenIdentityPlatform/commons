@@ -17,13 +17,10 @@
 package org.forgerock.selfservice.stages.email;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 
-import org.forgerock.selfservice.core.SelfServiceContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;

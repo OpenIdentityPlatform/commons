@@ -150,7 +150,7 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
     }
 
     /**
-     * Set the Jwe algorithm
+     * Set the Jwe algorithm.
      *
      * @param jweAlgorithm the JweAlgorithm
      */

@@ -36,7 +36,7 @@ public final class RequirementsBuilder {
 
     private final static String JSON_SCHEMA = "http://json-schema.org/draft-04/schema#";
 
-    private enum BuilderType { JSON_SCHEMA, OBJECT, ARRAY, ONE_OF }
+    private enum BuilderType { JSON_SCHEMA, OBJECT, ARRAY, ONE_OF, EMPTY_OBJECT }
 
     private final JsonValue jsonValue;
     private final List<String> requiredProperties;
@@ -68,6 +68,8 @@ public final class RequirementsBuilder {
             break;
         case ONE_OF:
             jsonValue.add("type", "object");
+            break;
+        case EMPTY_OBJECT:
             break;
         default:
             throw new IllegalArgumentException("Unknown type " + builderType);
@@ -252,6 +254,15 @@ public final class RequirementsBuilder {
      */
     public static RequirementsBuilder newObject(String description) {
         return new RequirementsBuilder(BuilderType.OBJECT, description);
+    }
+
+    /**
+     * Creates a new builder instance for empty object creation. All properties have to be set explicitly.
+     *
+     * @return a new builder instance
+     */
+    public static RequirementsBuilder newEmptyObject() {
+        return new RequirementsBuilder(BuilderType.EMPTY_OBJECT, null);
     }
 
     /**

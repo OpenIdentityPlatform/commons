@@ -15,7 +15,6 @@
  */
 package org.forgerock.selfservice.stages.kba;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,24 +23,26 @@ import org.forgerock.selfservice.core.config.StageConfig;
 import org.testng.annotations.Test;
 
 /**
- * Unit test for {@link SecurityAnswerDefinitionConfig}.
+ * Unit test for {@link SecurityAnswerVerificationConfig}.
  *
  * @since 0.2.0
  */
-public final class SecurityAnswerDefinitionConfigTest {
+public final class SecurityAnswerVerificationConfigTest {
 
     @Test
     public void testConfigFromJson() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerSubtypes(
-                new NamedType(SecurityAnswerDefinitionConfig.class, SecurityAnswerDefinitionConfig.NAME)
+                new NamedType(SecurityAnswerVerificationConfig.class, SecurityAnswerVerificationConfig.NAME)
         );
-        StageConfig config = mapper.readValue(getClass().getResource("/kbaSecurityAnswerDefinition.json"),
+        StageConfig config = mapper.readValue(getClass().getResource("/kbaSecurityAnswerVerification.json"),
                 StageConfig.class);
 
-        assertThat(config).isInstanceOf(SecurityAnswerDefinitionConfig.class);
-        SecurityAnswerDefinitionConfig kbaConfig = (SecurityAnswerDefinitionConfig) config;
+        assertThat(config).isInstanceOf(SecurityAnswerVerificationConfig.class);
+        SecurityAnswerVerificationConfig kbaConfig = (SecurityAnswerVerificationConfig) config;
         assertThat(kbaConfig.getKbaPropertyName()).isEqualTo("kbaInfo");
+        assertThat(kbaConfig.getIdentityServiceUrl()).isEqualTo("/users");
+        assertThat(kbaConfig.getNumberOfQuestionsUserMustAnswer()).isEqualTo(2);
         assertThat(kbaConfig.getQuestions().get("1").get("en")).isEqualTo("What's your favorite color?");
         assertThat(kbaConfig.getQuestions().get("1").get("en_GB")).isEqualTo("What's your favorite colour?");
         assertThat(kbaConfig.getQuestions().get("1").get("fr")).isEqualTo("Quelle est votre couleur préférée?");

@@ -20,7 +20,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
 import org.forgerock.json.JsonPointer;
-import org.forgerock.selfservice.core.SelfServiceContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;

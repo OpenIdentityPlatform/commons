@@ -22,6 +22,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.*;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -40,6 +43,7 @@ import org.testng.annotations.Test;
  */
 public final class SecurityAnswerDefinitionStageTest {
 
+    private static final String KBA_QUESTION_2 = "Who was your first employer?";
     private static final String KBA_QUESTION_3 = "What is my favorite author?";
 
     private SecurityAnswerDefinitionStage securityAnswerDefinitionStage;
@@ -66,7 +70,7 @@ public final class SecurityAnswerDefinitionStageTest {
             expectedExceptionsMessageRegExp = "KBA questions are not defined")
     public void testGatherInitialRequirementsException() throws Exception {
         // Given
-        config = new SecurityAnswerDefinitionConfig();
+        config = new SecurityAnswerDefinitionConfig(new KbaConfig());
 
         // When
         securityAnswerDefinitionStage.gatherInitialRequirements(context, config);
@@ -164,18 +168,31 @@ public final class SecurityAnswerDefinitionStageTest {
     }
 
     private SecurityAnswerDefinitionConfig newKbaConfig() {
-        return new SecurityAnswerDefinitionConfig()
-                .setKbaPropertyName("kba1")
-                .addQuestion(
-                        new KbaQuestion()
-                                .setId("1")
-                                .put("en", "What's your favorite color?")
-                                .put("en_GB", "What's your favorite colour?")
-                                .put("fr", "Quelle est votre couleur préférée?"))
-                .addQuestion(
-                        new KbaQuestion()
-                                .setId("2")
-                                .put("en", "Who was your first employer?"));
+        KbaConfig kbaConfig = new KbaConfig();
+        Map<String, Map<String, String>> questions = new LinkedHashMap<>();
+        questions.put("1", newKbaQuestion1().get("1"));
+        questions.put("2", newKbaQuestion2().get("2"));
+        kbaConfig.setQuestions(questions);
+        return new SecurityAnswerDefinitionConfig(kbaConfig)
+                .setKbaPropertyName("kba1");
+    }
+
+    private Map<String, Map<String, String>> newKbaQuestion1() {
+        Map<String, Map<String, String>> questions = new HashMap<>();
+        Map<String, String> locales = new HashMap<>();
+        locales.put("en", "What's your favorite color?");
+        locales.put("en_GB", "What's your favorite colour?");
+        locales.put("fr", "Quelle est votre couleur préférée?");
+        questions.put("1", locales);
+        return questions;
+    }
+
+    private Map<String, Map<String, String>> newKbaQuestion2() {
+        Map<String, Map<String, String>> questions = new HashMap<>();
+        Map<String, String> locales = new HashMap<>();
+        locales.put("en", KBA_QUESTION_2);
+        questions.put("2", locales);
+        return questions;
     }
 
     private JsonValue newJsonValueUser() {

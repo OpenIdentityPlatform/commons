@@ -31,6 +31,10 @@ public final class VerifyEmailAccountConfig extends AbstractEmailVerificationCon
      */
     public static final String NAME = "emailValidation";
 
+    /**
+     * Constructs a new VerifyEmailAccountConfig.
+     * @param emailConfig the email configuration.
+     */
     @JsonCreator
     public VerifyEmailAccountConfig(@JsonProperty("email") EmailAccountConfig emailConfig) {
         super(emailConfig);

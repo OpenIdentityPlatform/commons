@@ -17,82 +17,37 @@
 package org.forgerock.selfservice.stages.kba;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
- * Configuration for the KBA stage.
+ * Configuration for the KBA Security Answer Definition Stage.
  *
  * @since 0.2.0
  */
-public final class SecurityAnswerDefinitionConfig implements StageConfig {
+public final class SecurityAnswerDefinitionConfig extends AbstractKbaStageConfig<SecurityAnswerDefinitionConfig> {
 
     /**
      * Name of the stage configuration.
      */
-    public static final String NAME = "kbaStage";
-
-    @JsonProperty
-    private final List<KbaQuestion> questions;
-
-    private String kbaPropertyName;
+    public static final String NAME = "kbaSecurityAnswerDefinitionStage";
 
     /**
      * Creates a new SecurityAnswerDefinitionConfig.
+     *
+     * @param kbaConfig
+     *         the kba configuration
      */
-    public SecurityAnswerDefinitionConfig() {
-        questions = new ArrayList<>();
-    }
-
-    /**
-     * Gets the unmodifiable list view of questions.
-     *
-     * @return list of KbaQuestions
-     */
-    public List<KbaQuestion> questionsAsList() {
-        return Collections.unmodifiableList(questions);
-    }
-
-    /**
-     * Adds the KbaQuestion instance to this config.
-     *
-     * @param question
-     *         the KBA question to be added
-     *
-     * @return this config instance
-     */
-    public SecurityAnswerDefinitionConfig addQuestion(KbaQuestion question) {
-        questions.add(question);
-        return this;
-    }
-
-    /**
-     * Gets the property name in user json instance where kba details will be set.
-     *
-     * @return property name
-     */
-    public String getKbaPropertyName() {
-        return kbaPropertyName;
-    }
-
-    /**
-     * Sets the property name in user json instance where kba details will be set.
-     *
-     * @param kbaPropertyName
-     *         the property name
-     *
-     * @return this config instance
-     */
-    public SecurityAnswerDefinitionConfig setKbaPropertyName(String kbaPropertyName) {
-        this.kbaPropertyName = kbaPropertyName;
-        return this;
+    public SecurityAnswerDefinitionConfig(@JsonProperty("kbaConfig") KbaConfig kbaConfig) {
+        super(kbaConfig);
     }
 
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public SecurityAnswerDefinitionConfig self() {
+        return this;
     }
 
 }

@@ -25,10 +25,23 @@ import org.forgerock.services.context.Context;
  * @since 0.2.0
  */
 public final class SelfServiceContext extends AbstractContext {
+
+    /**
+     * Constructs a new SelfServiceContext.
+     * @param parent The parent context.
+     */
     public SelfServiceContext(Context parent) {
         super(parent, "selfservice");
     }
 
+    /**
+     * Constructs a new SelfServiceContext.
+     * @param savedContext
+     *            The JSON representation from which this context's attributes
+     *            should be parsed.
+     * @param classLoader
+     *            The ClassLoader which can properly resolve the persisted class-name.
+     */
     public SelfServiceContext(JsonValue savedContext, ClassLoader classLoader) {
         super(savedContext, classLoader);
     }

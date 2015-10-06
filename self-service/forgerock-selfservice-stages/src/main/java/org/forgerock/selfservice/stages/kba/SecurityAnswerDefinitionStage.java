@@ -32,10 +32,8 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
-import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.stages.crypto.CryptoConstants;
-import org.forgerock.selfservice.stages.crypto.CryptoService;
 import org.forgerock.selfservice.stages.crypto.JsonCryptoException;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
@@ -45,30 +43,25 @@ import org.forgerock.util.Reject;
  *
  * @since 0.2.0
  */
-public final class SecurityAnswerDefinitionStage implements ProgressStage<SecurityAnswerDefinitionConfig> {
-
-    private final ConnectionFactory connectionFactory;
-
-    private final CryptoService cryptoService;
+public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<SecurityAnswerDefinitionConfig> {
 
     /**
-     * Constructs a new KBA stage.
+     * Constructs a new security answer definition stage.
      *
      * @param connectionFactory
      *         the CREST connection factory
      */
     @Inject
     public SecurityAnswerDefinitionStage(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
-        this.cryptoService = new CryptoService();
+        super(connectionFactory);
     }
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context,
                                                SecurityAnswerDefinitionConfig config) throws ResourceException {
 
-        List<KbaQuestion> questions = config.questionsAsList();
-        Reject.ifTrue(questions.isEmpty(), "KBA questions are not defined");
+        Map<String, Map<String, String>> questions = config.getQuestions();
+        Reject.ifTrue(questions == null || questions.isEmpty(), "KBA questions are not defined");
         List<Map<String, Object>> kbaQuestions = convertToCollections(questions);
 
         return RequirementsBuilder
@@ -79,33 +72,31 @@ public final class SecurityAnswerDefinitionStage implements ProgressStage<Securi
                                         json(object(field("$ref", "#/definitions/systemQuestion"))),
                                         json(object(field("$ref", "#/definitions/userQuestion")))))
                                 .addCustomField("questions", json(kbaQuestions)))
-                .addDefinition("systemQuestion",
+                .addDefinition(REQUIREMENT_PROPERTY_SYSTEM_QUESTION,
                         newObject("System Question")
-                                .addRequireProperty("questionId", "Id of predefined question")
-                                .addRequireProperty("answer", "Answer to the referenced question")
+                                .addRequireProperty(REQUIREMENT_PROPERTY_QUESTION_ID,
+                                        "Id of predefined question")
+                                .addRequireProperty(REQUIREMENT_PROPERTY_ANSWER,
+                                        "Answer to the referenced question")
                                 .addCustomField("additionalProperties", json(false)))
-                .addDefinition("userQuestion",
+                .addDefinition(REQUIREMENT_PROPERTY_USER_QUESTION,
                         newObject("User Question")
-                                .addRequireProperty("customQuestion", "Question defined by the user")
-                                .addRequireProperty("answer", "Answer to the question")
+                                .addRequireProperty(REQUIREMENT_PROPERTY_CUSTOM_QUESTION,
+                                        "Question defined by the user")
+                                .addRequireProperty(REQUIREMENT_PROPERTY_ANSWER, "Answer to the question")
                                 .addCustomField("additionalProperties", json(false)))
                 .build();
     }
 
-    private List<Map<String, Object>> convertToCollections(List<KbaQuestion> questions) {
+    private List<Map<String, Object>> convertToCollections(Map<String, Map<String, String>> questions) {
         List<Map<String, Object>> jsonValueList = new ArrayList<>();
-        for (KbaQuestion kbaQuestion : questions) {
-            Map<String, Object> qMap = convertToCollections(kbaQuestion);
-            jsonValueList.add(qMap);
+        for (Map.Entry<String, Map<String, String>> mapEntry : questions.entrySet()) {
+            Map<String, Object> results = new HashMap<>();
+            results.put(REQUIREMENT_PROPERTY_ID, mapEntry.getKey());
+            results.put(REQUIREMENT_PROPERTY_QUESTION, mapEntry.getValue());
+            jsonValueList.add(results);
         }
         return jsonValueList;
-    }
-
-    private Map<String, Object> convertToCollections(KbaQuestion kbaQuestion) {
-        Map<String, Object> results = new HashMap<>();
-        results.put("id", kbaQuestion.getId());
-        results.put("question", kbaQuestion.questionsAsMap());
-        return results;
     }
 
     @Override
@@ -142,7 +133,7 @@ public final class SecurityAnswerDefinitionStage implements ProgressStage<Securi
     }
 
     private JsonPointer getPointerToAnswer(int kbaArrayIndex) {
-        return new JsonPointer(kbaArrayIndex + "/answer");
+        return new JsonPointer(kbaArrayIndex + "/" + REQUIREMENT_PROPERTY_ANSWER);
     }
 
     private void addKbaToContext(ProcessContext context, SecurityAnswerDefinitionConfig config, JsonValue kba) {

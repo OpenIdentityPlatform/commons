@@ -17,7 +17,6 @@
 package org.forgerock.selfservice.example;
 
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
-import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
@@ -30,10 +29,8 @@ import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
@@ -77,19 +74,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
 
     private void registerCRESTServices() throws ResourceException {
         crestRouter.addRoute(uriTemplate("users"), new MemoryBackend());
-        crestRouter.addRoute(uriTemplate("kba/questions"), newMemoryBackendForKbaQuestions());
         crestRouter.addRoute(uriTemplate("email"), new ExampleEmailService(appConfig.get("mailserver")));
-    }
-
-    private MemoryBackend newMemoryBackendForKbaQuestions() {
-        MemoryBackend memoryBackend = new MemoryBackend();
-        CreateRequest request = Requests.newCreateRequest("/",
-                json(object(field("questions",
-                        array(
-                                "What was your pet's name?",
-                                "Who was your first employer?")))));
-        memoryBackend.createInstance(null, request);
-        return memoryBackend;
     }
 
     private Handler registerResetHandler() throws Exception {

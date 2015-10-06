@@ -36,13 +36,34 @@ public class VerifyUserIdConfigTest {
     public void testConfigFromJson() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerSubtypes(
-                new NamedType(VerifyUserIdConfig.class, VerifyUserIdConfig.NAME),
-                new NamedType(VerifyEmailAccountConfig.class, VerifyEmailAccountConfig.NAME)
+                new NamedType(VerifyUserIdConfig.class, VerifyUserIdConfig.NAME)
         );
         StageConfig config = mapper.readValue(getClass().getResource("/userIdValidation.json"), StageConfig.class);
 
         assertThat(config).isInstanceOf(VerifyUserIdConfig.class);
         VerifyUserIdConfig verifyUserIdConfig = (VerifyUserIdConfig) config;
+
+        assertVerifyUserIdConfigHelper(verifyUserIdConfig);
+    }
+
+    @Test
+    public void testChainedEmailConfigThroughSetters() {
+        VerifyUserIdConfig verifyUserIdConfig = new VerifyUserIdConfig(new EmailAccountConfig())
+                .setQueryFields(new HashSet<>(Arrays.asList("uid", "mail")))
+                .setIdentityIdField("userId")
+                .setIdentityEmailField("email")
+                .setIdentityServiceUrl("/users")
+                .setEmailServiceUrl("/email")
+                .setEmailFrom("noreply@example.com")
+                .setEmailSubject("Verify your email address")
+                .setEmailMessage("Is this correct")
+                .setEmailVerificationLinkToken("abc123")
+                .setEmailVerificationLink("/verifyemail");
+
+        assertVerifyUserIdConfigHelper(verifyUserIdConfig);
+    }
+
+    private void assertVerifyUserIdConfigHelper(VerifyUserIdConfig verifyUserIdConfig) {
         assertThat(verifyUserIdConfig.getIdentityServiceUrl()).isEqualTo("/users");
         assertThat(verifyUserIdConfig.getIdentityIdField()).isEqualTo("userId");
         assertThat(verifyUserIdConfig.getIdentityEmailField()).isEqualTo("email");
@@ -52,22 +73,6 @@ public class VerifyUserIdConfigTest {
         assertThat(verifyUserIdConfig.getEmailFrom()).isEqualTo("noreply@example.com");
         assertThat(verifyUserIdConfig.getEmailVerificationLink()).isEqualTo("/verifyemail");
         assertThat(verifyUserIdConfig.getEmailVerificationLinkToken()).isEqualTo("abc123");
-    }
-
-    @Test
-    public void testChainedEmailConfigThroughSetters() {
-        VerifyUserIdConfig verifyUserIdConfig = new VerifyUserIdConfig(new EmailAccountConfig())
-                .setQueryFields(new HashSet<>(Arrays.asList("uid", "mail")))
-                .setIdentityIdField("/uid/0")
-                .setIdentityEmailField("/mail/0")
-                .setIdentityServiceUrl("/users")
-                .setEmailServiceUrl("/email")
-                .setEmailFrom("info@admin.org")
-                .setEmailSubject("Reset password email")
-                .setEmailMessage("<h3>This is your reset email.</h3>"
-                        + "<h4><a href=\"%link%\">Email verification link</a></h4>")
-                .setEmailVerificationLinkToken("%link%")
-                .setEmailVerificationLink("http://somewhere.com");
     }
 }
 
