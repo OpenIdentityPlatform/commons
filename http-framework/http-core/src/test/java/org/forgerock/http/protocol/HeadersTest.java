@@ -369,8 +369,8 @@ public class HeadersTest {
         // When
         copyAsMapOfList.get("Header").remove(0);
 
-         // Then
-         assertThat(headers.get("Header").getValues()).containsExactly("One", "Two", "Three");
+        // Then
+        assertThat(headers.get("Header").getValues()).containsExactly("One", "Two", "Three");
     }
 
 
