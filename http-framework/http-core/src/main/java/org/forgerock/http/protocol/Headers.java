@@ -363,7 +363,7 @@ public class Headers implements Map<String, Object> {
      *
      * @return a convenient copy of the headers
      */
-    public Map<String, List<String>> copyAsMapOfList() {
+    public Map<String, List<String>> copyAsMultiMapOfStrings() {
         Map<String, List<String>> result = new LinkedHashMap<>(headers.size());
         for (Header header : headers.values()) {
             result.put(header.getName(), unmodifiableList(new ArrayList<>(header.getValues())));

@@ -332,13 +332,13 @@ public class HeadersTest {
     }
 
     @Test
-    public void testCopyAsMapOfList() {
+    public void testCopyAsMultiMapOfStrings() {
         // Given
         Headers headers = new Headers();
         headers.put("Header", asList("One", "Two", "Three"));
 
         // When
-        Map<String, List<String>> copyAsMapOfList = headers.copyAsMapOfList();
+        Map<String, List<String>> copyAsMapOfList = headers.copyAsMultiMapOfStrings();
         headers.put("Header", asList("One", "Two"));
 
         // Then
