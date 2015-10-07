@@ -463,12 +463,6 @@
       <!-- ForgeRock Auth filters dependencies -->
       <dependency>
         <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-auth-filter-common</artifactId>
-        <version>${forgerock-auth-filters.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-jaspi-iwa-module</artifactId>
         <version>${forgerock-auth-filters.version}</version>
       </dependency>
