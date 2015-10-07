@@ -332,7 +332,7 @@ public class HeadersTest {
     }
 
     @Test
-    public void testCopyAsMultiMapOfStrings() {
+    public void testCopyAsMultiMapOfStringsIsDisconnectedFromHeadersWhileUpdatingHeader() {
         // Given
         Headers headers = new Headers();
         headers.put("Header", asList("One", "Two", "Three"));
@@ -343,6 +343,34 @@ public class HeadersTest {
 
         // Then
         assertThat(copyAsMapOfList).containsExactly(entry("Header", Arrays.<String>asList("One", "Two", "Three")));
+    }
+
+    @Test
+    public void testCopyAsMultiMapOfStringsIsDisconnectedFromHeadersWhileAddingHeader() {
+        // Given
+        Headers headers = new Headers();
+        headers.put("Header", asList("One", "Two", "Three"));
+
+        // When
+        Map<String, List<String>> copyAsMapOfList = headers.copyAsMultiMapOfStrings();
+        headers.put("Header2", asList("A", "B"));
+
+        // Then
+        assertThat(copyAsMapOfList).containsExactly(entry("Header", Arrays.<String>asList("One", "Two", "Three")));
+    }
+
+    @Test
+    public void testCopyAsMultiMapOfStringsIsDisconnectedFromHeadersWhileModifyingList() {
+        // Given
+        Headers headers = new Headers();
+        headers.put("Header", asList("One", "Two", "Three"));
+        Map<String, List<String>> copyAsMapOfList = headers.copyAsMultiMapOfStrings();
+
+        // When
+        copyAsMapOfList.get("Header").remove(0);
+
+         // Then
+         assertThat(headers.get("Header").getValues()).containsExactly("One", "Two", "Three");
     }
 
 
