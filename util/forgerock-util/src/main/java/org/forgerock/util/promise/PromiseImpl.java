@@ -471,19 +471,19 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     private void addOrFireListener(final StateListener<V, E> listener) {
         final int stateBefore = state;
         if (stateBefore != PENDING) {
-            fireListener(listener, stateBefore);
+            handleCompletion(listener, stateBefore);
         } else {
             listeners.add(listener);
             final int stateAfter = state;
             if (stateAfter != PENDING && listeners.remove(listener)) {
-                fireListener(listener, stateAfter);
+                handleCompletion(listener, stateAfter);
             }
         }
     }
 
-    private void fireListener(final StateListener<V, E> listener, final int state) {
+    private void handleCompletion(final StateListener<V, E> listener, final int completedState) {
         try {
-            listener.handleStateChange(state, result, exception, runtimeException);
+            listener.handleStateChange(completedState, result, exception, runtimeException);
         } catch (Exception ignored) {
             LOGGER.error("State change listener threw a RuntimeException which cannot be handled!", ignored);
         }
