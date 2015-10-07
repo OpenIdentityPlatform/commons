@@ -13,12 +13,12 @@
           "description": "org.forgerock.audit.events.access.timestamp",
           "type": "string"
         },
-        "transactionId": {
-          "description": "org.forgerock.audit.events.access.transactionId",
-          "type": "string"
-        },
         "eventName": {
           "description": "org.forgerock.audit.events.access.eventName",
+          "type": "string"
+        },
+        "transactionId": {
+          "description": "org.forgerock.audit.events.access.transactionId",
           "type": "string"
         },
         "authentication": {
@@ -28,6 +28,14 @@
               "description": "org.forgerock.audit.events.access.authentication.id",
               "type": "string"
             }
+          }
+        },
+        "trackingIds": {
+          "description": "org.forgerock.audit.events.access.trackingIds",
+          "type": "array",
+          "items": {
+            "id": "0",
+            "type": "string"
           }
         },
         "server": {
@@ -165,12 +173,12 @@
           "description": "org.forgerock.audit.events.activity.timestamp",
           "type": "string"
         },
-        "transactionId": {
-          "description": "org.forgerock.audit.events.activity.transactionId",
-          "type": "string"
-        },
         "eventName": {
           "description": "org.forgerock.audit.events.activity.eventName",
+          "type": "string"
+        },
+        "transactionId": {
+          "description": "org.forgerock.audit.events.activity.transactionId",
           "type": "string"
         },
         "authentication": {
@@ -180,6 +188,14 @@
               "description": "org.forgerock.audit.events.activity.authentication.id",
               "type": "string"
             }
+          }
+        },
+        "trackingIds": {
+          "description": "org.forgerock.audit.events.activity.trackingIds",
+          "type": "array",
+          "items": {
+            "id": "0",
+            "type": "string"
           }
         },
         "runAs": {
@@ -231,12 +247,12 @@
           "description": "org.forgerock.audit.events.authentication.timestamp",
           "type": "string"
         },
-        "transactionId": {
-          "description": "org.forgerock.audit.events.authentication.transactionId",
-          "type": "string"
-        },
         "eventName": {
           "description": "org.forgerock.audit.events.authentication.eventName",
+          "type": "string"
+        },
+        "transactionId": {
+          "description": "org.forgerock.audit.events.authentication.transactionId",
           "type": "string"
         },
         "authentication": {
@@ -246,6 +262,14 @@
               "description": "org.forgerock.audit.events.authentication.authentication.id",
               "type": "string"
             }
+          }
+        },
+        "trackingIds": {
+          "description": "org.forgerock.audit.events.authentication.trackingIds",
+          "type": "array",
+          "items": {
+            "id": "0",
+            "type": "string"
           }
         },
         "result": {
@@ -263,10 +287,6 @@
           "description": "org.forgerock.audit.events.authentication.context",
           "type": "object",
           "properties": {}
-        },
-        "sessionId": {
-          "description": "org.forgerock.audit.events.authentication.sessionId",
-          "type": "string"
         },
         "entries": {
           "description": "org.forgerock.audit.events.authentication.entries",
@@ -307,12 +327,12 @@
           "description": "org.forgerock.audit.events.config.timestamp",
           "type": "string"
         },
-        "transactionId": {
-          "description": "org.forgerock.audit.events.config.transactionId",
-          "type": "string"
-        },
         "eventName": {
           "description": "org.forgerock.audit.events.config.eventName",
+          "type": "string"
+        },
+        "transactionId": {
+          "description": "org.forgerock.audit.events.config.transactionId",
           "type": "string"
         },
         "authentication": {
@@ -322,6 +342,14 @@
               "description": "org.forgerock.audit.events.config.authentication.id",
               "type": "string"
             }
+          }
+        },
+        "trackingIds": {
+          "description": "org.forgerock.audit.events.config.trackingIds",
+          "type": "array",
+          "items": {
+            "id": "0",
+            "type": "string"
           }
         },
         "runAs": {

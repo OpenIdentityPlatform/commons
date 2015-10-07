@@ -24,6 +24,12 @@ import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.Reject;
 
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 /**
  * Root builder for all audit events.
  *
@@ -36,6 +42,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     public static final String TRANSACTION_ID = "transactionId";
     public static final String AUTHENTICATION = "authentication";
     public static final String ID = "id";
+    public static final String TRACKING_IDS = "trackingIds";
 
     /** Represents the event as a JSON value. */
     protected JsonValue jsonValue = json(object());
@@ -45,6 +52,9 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
 
     /** Flag used to ensure super class implementations of setDefaults() get called by subclasses. */
     private boolean superSetDefaultsCalled = false;
+
+    /** Accumulates trackingId entries. */
+    private final Set<String> trackingIdEntries = new LinkedHashSet<>();
 
     /**
      * Creates the builder.
@@ -97,6 +107,9 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     protected void setDefaults() {
         if (!jsonValue.isDefined(TIMESTAMP)) {
             timestamp(System.currentTimeMillis());
+        }
+        if (!trackingIdEntries.isEmpty()) {
+            jsonValue.put(TRACKING_IDS, trackingIdEntries);
         }
         superSetDefaultsCalled = true;
     }
@@ -174,6 +187,32 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
         Reject.ifNull(id);
         JsonValue object = json(object(field(ID, id)));
         jsonValue.put(AUTHENTICATION, object);
+        return self();
+    }
+
+    /**
+     * Adds an entry to trackingIds for the event.
+     *
+     * @param trackingIdValue the unique value associated with the object being tracked.
+     * @return this builder
+     */
+    public final T trackingId(String trackingIdValue) {
+        Reject.ifNull(trackingIdValue, "trackingId value cannot be null");
+        trackingIdEntries.add(trackingIdValue);
+        return self();
+    }
+
+    /**
+     * Adds the specified entries to trackingIds for the event.
+     *
+     * @param trackingIdValues the set of trackingId entries to be recorded (see {@link #trackingId}.
+     * @return this builder
+     */
+    public final T trackingIds(Set<String> trackingIdValues) {
+        // iterate the entries so that each can be validated
+        for (String trackingIdValue : trackingIdValues) {
+            trackingId(trackingIdValue);
+        }
         return self();
     }
 

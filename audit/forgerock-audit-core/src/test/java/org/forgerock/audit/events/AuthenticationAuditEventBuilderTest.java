@@ -60,7 +60,8 @@ public class AuthenticationAuditEventBuilderTest {
                 .timestamp(1427293286239L)
                 .eventName("AM-AUTHENTICATION-SUCCESS")
                 .authentication("someone@forgerock.com")
-                .sessionId("sessionId")
+                .trackingId("12345")
+                .trackingId("67890")
                 .principal(Collections.singletonList("admin"))
                 .context(Collections.<String, Object>singletonMap("contextKey", "contextValue"))
                 .entries(Collections.singletonList(authenticationModule()))
@@ -76,10 +77,11 @@ public class AuthenticationAuditEventBuilderTest {
         AuditEvent event = productAuthenticationEvent()
                 .eventName("AM-AUTHENTICATION-SUCCESS")
                 .authentication("someone@forgerock.com")
-                .sessionId("sessionId")
+                .trackingId("12345")
                 .principal(Collections.singletonList("admin"))
                 .context(Collections.<String, Object>singletonMap("contextKey", "contextValue"))
                 .entries(Collections.singletonList(authenticationModule()))
+                .trackingId("67890")
                 .result(Status.SUCCESSFUL)
                 .openField("value")
                 .transactionId("transactionId")
@@ -103,7 +105,7 @@ public class AuthenticationAuditEventBuilderTest {
         assertThat(value.get(EVENT_NAME).asString()).isEqualTo("AM-AUTHENTICATION-SUCCESS");
         assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
         assertThat(value.get(RESULT).asEnum(Status.class)).isEqualTo(Status.SUCCESSFUL);
-        assertThat(value.get(SESSION_ID).asString()).isEqualTo("sessionId");
+        assertThat(value.get(TRACKING_IDS).asSet()).containsExactly("12345", "67890");
         assertThat(value.get(PRINCIPAL).asList()).containsExactly("admin");
         assertThat(value.get(CONTEXT).getObject()).isNotNull();
         assertThat(value.get(CONTEXT).get("contextKey").asString()).isEqualTo("contextValue");

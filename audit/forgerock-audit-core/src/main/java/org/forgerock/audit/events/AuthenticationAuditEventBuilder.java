@@ -56,11 +56,8 @@ public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventB
     public static final String PRINCIPAL = "principal";
     /** Defines the context key. */
     public static final String CONTEXT = "context";
-    /** Defines the sessionId key. */
-    public static final String SESSION_ID = "sessionId";
     /** Defines the entries key. */
     public static final String ENTRIES = "entries";
-
 
     /**
      * Starts to build an audit authentication event.
@@ -76,17 +73,18 @@ public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventB
 
     /**
      * Sets the authentication audit event overall result.
+     *
      * @param result the authentication overall result.
      * @return an audit authentication event builder
      */
     public T result(Status result) {
-
         jsonValue.put(RESULT, result == null ? null : result.toString());
         return self();
     }
 
     /**
      * Sets the principals of the authentication event.
+     *
      * @param principals the list of principals
      * @return an audit authentication event builder
      */
@@ -96,7 +94,8 @@ public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventB
     }
 
     /**
-     * Sets the context used int he authentication event.
+     * Sets the context used in the authentication event.
+     *
      * @param context the authentication event context
      * @return an audit authentication event builder
      */
@@ -107,21 +106,12 @@ public class AuthenticationAuditEventBuilder<T extends AuthenticationAuditEventB
 
     /**
      * Sets the list of auth modules used in the authentication event and their state.
+     *
      * @param entries the list of authentication modules and their state
      * @return an audit authentication event builder
      */
     public T entries(List<?> entries) {
         jsonValue.put(ENTRIES, entries);
-        return self();
-    }
-
-    /**
-     * Sets the sessionId used in the authentication event.
-     * @param sessionId the authentication event sessionId
-     * @return an audit authentication event builder
-     */
-    public T sessionId(String sessionId) {
-        jsonValue.put(SESSION_ID, sessionId);
         return self();
     }
 

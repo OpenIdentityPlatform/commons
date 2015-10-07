@@ -57,6 +57,8 @@ public class ConfigAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-REALM-CREATE")
+                .trackingId("12345")
+                .trackingId("67890")
                 .authentication("someone@forgerock.com")
                 .runAs("admin")
                 .objectId("some/resource")
@@ -76,10 +78,12 @@ public class ConfigAuditEventBuilderTest {
         AuditEvent event = productConfigEvent()
                 .eventName("AM-REALM-CREATE")
                 .authentication("someone@forgerock.com")
+                .trackingId("12345")
                 .runAs("admin")
                 .objectId("some/resource")
                 .operation("customAction")
                 .before("{ \"name\": \"Old\", \"revision\": 1 }")
+                .trackingId("67890")
                 .after("{ \"name\": \"New\", \"revision\": 2 }")
                 .changedFields("name", "revision")
                 .revision("2")
@@ -96,6 +100,7 @@ public class ConfigAuditEventBuilderTest {
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
         assertThat(value.get(EVENT_NAME).asString()).isEqualTo("AM-REALM-CREATE");
+        assertThat(value.get(TRACKING_IDS).asSet()).containsExactly("12345", "67890");
         assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
         assertThat(value.get(RUN_AS).asString()).isEqualTo("admin");
         assertThat(value.get(OBJECT_ID).asString()).isEqualTo("some/resource");
