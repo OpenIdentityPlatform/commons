@@ -357,11 +357,12 @@ public class Headers implements Map<String, Object> {
     }
 
     /**
-     * Returns a convenient copy of the headers as a {@code Map<String, List<String>>}. The returned {@code Map} is an
-     * copy and is disconnected of the {@code Headers} instance. The {@code Map} itself and the {@code List} are
+     * Returns a copy of these headers as a multi-valued map of strings. Changes to the returned map will not be
+     * reflected in these headers, nor will changes in these headers be reflected in the returned map. The {@code Map}
+     * itself and the {@code List} are
      * unmodifiable.
      *
-     * @return a convenient copy of the headers
+     * @return a copy of these headers as a multi-valued map of strings.
      */
     public Map<String, List<String>> copyAsMultiMapOfStrings() {
         Map<String, List<String>> result = new LinkedHashMap<>(headers.size());
