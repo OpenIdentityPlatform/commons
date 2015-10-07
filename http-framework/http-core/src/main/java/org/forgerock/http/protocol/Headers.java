@@ -18,8 +18,6 @@
 
 package org.forgerock.http.protocol;
 
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
 import static org.forgerock.http.header.HeaderFactory.*;
 
 import java.util.ArrayList;
@@ -358,18 +356,16 @@ public class Headers implements Map<String, Object> {
 
     /**
      * Returns a copy of these headers as a multi-valued map of strings. Changes to the returned map will not be
-     * reflected in these headers, nor will changes in these headers be reflected in the returned map. The {@code Map}
-     * itself and the {@code List} are
-     * unmodifiable.
+     * reflected in these headers, nor will changes in these headers be reflected in the returned map.
      *
      * @return a copy of these headers as a multi-valued map of strings.
      */
     public Map<String, List<String>> copyAsMultiMapOfStrings() {
         Map<String, List<String>> result = new LinkedHashMap<>(headers.size());
         for (Header header : headers.values()) {
-            result.put(header.getName(), unmodifiableList(new ArrayList<>(header.getValues())));
+            result.put(header.getName(), new ArrayList<>(header.getValues()));
         }
-        return unmodifiableMap(result);
+        return result;
     }
 
 }
