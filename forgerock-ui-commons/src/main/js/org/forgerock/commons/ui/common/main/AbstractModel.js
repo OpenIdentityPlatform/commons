@@ -17,19 +17,32 @@
 /*global define */
 
 define("org/forgerock/commons/ui/common/main/AbstractModel", [
+    "jquery",
     "underscore",
     "backbone",
     "org/forgerock/commons/ui/common/util/ObjectUtil",
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function(_, Backbone, ObjectUtil, ServiceInvoker) {
+], function($, _, Backbone, ObjectUtil, ServiceInvoker) {
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractModel
      */
     return Backbone.Model.extend({
         idAttribute: "_id",
+        additionalParameters: {},
+        /**
+         * @returns {string} The multiversion concurrency control revision associated with this object, or "*" if undefined
+         */
         getMVCCRev : function () {
             return this.get("_rev") || "*";
         },
+        /**
+         * Overrides default backbone 'get' method to also accept JSONPointer syntax for property names
+         * @param {string} key Either the simple property name or the JSONPointer to the property into a complex object
+         * @example
+         * this.get("simpleKey")
+         * @example
+         * this.get("/emailAddresses/0/type")
+         */
         get: function(key) {
             //if the key has a leading "/" then trim it off
             if (key.indexOf("/") === 0) {
@@ -44,6 +57,9 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
                 return attr[key];
             }, this.attributes);
         },
+        /**
+         * Overrides default sync to align with ForgeRock REST API
+         */
         sync: function (method, model, options) {
             switch (method) {
                 case "create":
@@ -58,12 +74,12 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
                                     "headers": {
                                         "If-None-Match": "*"
                                     },
-                                    "url": model.url + "/" + model.id
+                                    "url": model.url + "/" + model.id + "?" + $.param(model.additionalParameters)
                                 };
                             } else {
                                 return {
                                     "type": "POST",
-                                    "url": model.url + "?_action=create"
+                                    "url": model.url + "?_action=create&" + $.param(model.additionalParameters)
                                 };
                             }
                         }()),
@@ -72,7 +88,7 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
                 case "read":
                     return ServiceInvoker.restCall(_.extend(
                         {
-                            "url" : model.url + "/" + model.id,
+                            "url" : model.url + "/" + model.id + "?" + $.param(model.additionalParameters),
                             "type": "GET"
                         },
                         options
@@ -89,7 +105,7 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
                         {
                             "type": "PUT",
                             "data": JSON.stringify(model.toJSON()),
-                            "url": model.url + "/" + model.id,
+                            "url": model.url + "/" + model.id + "?" + $.param(model.additionalParameters),
                             "headers": {
                                 "If-Match": model.getMVCCRev()
                             }
@@ -99,7 +115,7 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
                 case "patch":
                     return ServiceInvoker.restCall(_.extend(
                         {
-                            "url" : model.url + "/" + model.id,
+                            "url" : model.url + "/" + model.id + "?" + $.param(model.additionalParameters),
                             "type": "PATCH",
                             "data": JSON.stringify(ObjectUtil.generatePatchSet(model.toJSON(), model.previousAttributes())),
                             "headers": {
@@ -111,7 +127,7 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
                 case "delete":
                     return ServiceInvoker.restCall(_.extend(
                         {
-                            "url" : model.url + "/" + model.id,
+                            "url" : model.url + "/" + model.id + "?" + $.param(model.additionalParameters),
                             "type": "DELETE",
                             "headers": {
                                 "If-Match": model.getMVCCRev()
@@ -120,6 +136,25 @@ define("org/forgerock/commons/ui/common/main/AbstractModel", [
                         options
                     ));
             }
+        },
+        /**
+         * Provide additional url parameters to be included in REST calls
+         * @param {Object} A simple map of string:string pairs to be included in the URL of subsequent REST calls
+         * @example
+         *
+            {
+                "_fields": "_id,sn",
+                "_mimeType": "text/plain",
+                "realm": "myRealm"
+            }
+         */
+        setAdditionalParameters: function (parametersMap) {
+            _.each(_.keys(parametersMap), function (key) {
+                if (!_.isString(parametersMap[key])) {
+                    throw "Cannot set non-string value as additional parameter " + key;
+                }
+            });
+            this.additionalParameters = parametersMap;
         }
     });
 });

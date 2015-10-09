@@ -71,8 +71,8 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
         },
         sync: function (method, collection, options) {
             var params = [],
-                includeList = ["_pageSize", "_pagedResultsOffset", "_sortKeys", "_totalPagedResultsPolicy", "_queryFilter"];
-            
+                includeList = ["_pageSize", "_pagedResultsOffset", "_sortKeys", "_totalPagedResultsPolicy", "_queryFilter", "_fields"];
+
             if (method === "read") {
                 delete options.data.order; // BackbonePaginator seems to insist that this field be included anytime sorting is performed.
 
@@ -91,7 +91,7 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
                         response: response
                     });
                 };
-                
+
                 return ServiceInvoker.restCall(options);
             } else {
                 return BackbonePaginator.prototype.sync.apply(this, arguments);
@@ -152,7 +152,7 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
 
             // totalPagedResults may not be defined in the response, depending on the policy
             this.state.totalRecords = _.isFinite(resp.totalPagedResults) && resp.totalPagedResults > -1 ? resp.totalPagedResults : null;
-            
+
             if (!this.state.totalPages && this.state.totalRecords) {
                 this.state.totalPages = Math.ceil(this.state.totalRecords / this.state.pageSize);
             } else {
