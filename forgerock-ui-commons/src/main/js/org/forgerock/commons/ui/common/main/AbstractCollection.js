@@ -17,13 +17,14 @@
 /*global define, Math */
 
 define("org/forgerock/commons/ui/common/main/AbstractCollection", [
+    "jquery",
     "underscore",
     "backbone",
     "backbone.paginator",
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/components/Messages"
-], function(_, Backbone, BackbonePaginator, AbstractModel, ServiceInvoker, Messages) {
+], function($, _, Backbone, BackbonePaginator, AbstractModel, ServiceInvoker, Messages) {
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractCollection
      *
@@ -70,19 +71,8 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
                     (this.getPagingType() === "offset" && this.state.totalRecords >= ((this.state.currentPage+1) * this.state.pageSize));
         },
         sync: function (method, collection, options) {
-            var params = [],
-                includeList = ["_pageSize", "_pagedResultsOffset", "_sortKeys", "_totalPagedResultsPolicy", "_queryFilter", "_fields"];
-
             if (method === "read") {
                 delete options.data.order; // BackbonePaginator seems to insist that this field be included anytime sorting is performed.
-
-                _.forIn(options.data, function (val, key) {
-                    if (_.include(includeList, key)) {
-                        params.push(key + "=" + val);
-                    }
-                });
-
-                options.data = params.join("&");
                 options.processData = false;
 
                 options.error = function (response) {
@@ -91,6 +81,11 @@ define("org/forgerock/commons/ui/common/main/AbstractCollection", [
                         response: response
                     });
                 };
+
+                if (_.isObject(options.data)) {
+                    // read calls will be GET requests, so any "data" sent will be URL parameters
+                    options.data = $.param(options.data);
+                }
 
                 return ServiceInvoker.restCall(options);
             } else {
