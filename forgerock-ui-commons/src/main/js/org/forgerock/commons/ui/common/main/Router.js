@@ -154,7 +154,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
     obj.checkRole = function (route) {
         if(route.role) {
             if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
-                return conf.loggedUser.get('roles').indexOf(role) !== -1;
+                return conf.loggedUser.uiroles.indexOf(role) !== -1;
             })) {
                 eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
                 return false;
@@ -162,7 +162,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
         }
 
         if(route.excludedRole) {
-            if(conf.loggedUser && conf.loggedUser.get('roles').indexOf(route.excludedRole) !== -1) {
+            if(conf.loggedUser && conf.loggedUser.uiroles.indexOf(route.excludedRole) !== -1) {
                 eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
                 return false;
             }

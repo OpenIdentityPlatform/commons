@@ -76,6 +76,7 @@ define("org/forgerock/mock/ui/user/UserModel", [
         getProfile: function (username, password) {
             this.id = username;
             return this.fetch().then(_.bind(function () {
+                this.uiroles = this.get("roles");
                 if (this.get('password') === password) {
                     this.hideAttribute("password");
                     return this;

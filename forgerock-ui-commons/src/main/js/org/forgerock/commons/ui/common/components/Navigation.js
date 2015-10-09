@@ -180,7 +180,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                             this.data.username = Configuration.loggedUser.id; //fallback option
                         }
 
-                        this.data.admin = _.contains(Configuration.loggedUser.get('roles'), "ui-admin");
+                        this.data.admin = _.contains(Configuration.loggedUser.uiroles, "ui-admin");
 
                         this.data.userBar = _.map(obj.configuration.userBar, function (link) {
                             if (_.has(link, "i18nKey")) {
@@ -331,7 +331,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     link = obj.configuration.links[linkName];
 
                     linkHasNoRole = !link.role;
-                    userHasNecessaryRole = link.role && Configuration.loggedUser && _.contains(Configuration.loggedUser.get('roles'), link.role);
+                    userHasNecessaryRole = link.role && Configuration.loggedUser && _.contains(Configuration.loggedUser.uiroles, link.role);
 
                     if (linkHasNoRole || userHasNecessaryRole) {
                         this.addLinksFromConfiguration(linkName);
