@@ -3,7 +3,7 @@
     {
       "name" : "userIdValidation",
       "queryFields" : [
-        "_id",
+        "userName",
         "mail"
       ],
       "identityIdField" : "_id",
