@@ -84,7 +84,7 @@ public final class HttpClientHandler implements Handler, Closeable {
      *
      * @see Loader#SERVICE_LOADER
      */
-    public static final Option<Loader> OPTION_LOADER = Option.withDefault(Loader.SERVICE_LOADER);
+    public static final Option<Loader> OPTION_LOADER = Option.of(Loader.class, Loader.SERVICE_LOADER);
 
     /**
      * Specifies the maximum number of connections that should be pooled by the
