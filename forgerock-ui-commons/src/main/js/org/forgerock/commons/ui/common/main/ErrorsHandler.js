@@ -28,11 +28,12 @@
  * @author mbilski
  */
 define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
+    "underscore",
     "jquery",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants"
-], function($, AbstractConfigurationAware, eventManager, constants) {
+], function(_, $, AbstractConfigurationAware, eventManager, constants) {
     var obj = new AbstractConfigurationAware();
     
     obj.handleError = function(error, handlers) {
@@ -95,19 +96,44 @@ define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unknown");
         }
     };
-    
+
+    /**
+     * If a generic field for comparison is defined on the handler, that field is then compared to the corresponding field on the error.
+     *
+     * If there is a status defined on the handler, it is compared to the status of the error.
+     *
+     * If either of these comparisons is true than that handler is returned.
+     *
+     * @example
+     *  errorsHandlers: {
+     *      "timeout": {
+     *          "value": 0,
+     *          "field": "readyState"
+     *      }
+     *  }
+     *
+     * @param error
+     * @param handlers
+     * @returns {*}
+     */
     obj.matchError = function(error, handlers) {
         var handler, handlerName;
-                
+
         for(handlerName in handlers) {
             handler = handlers[handlerName];
+
+            if (!_.isUndefined(handler.field)) {
+                if(error[handler.field] === handler[handler.value]) {
+                    return handler;
+                }
+            }
 
             if(handler.status) {
                 if(parseInt(error.status, 0) === parseInt(handler.status, 0)) {
                     return handler;
                 }
             }
-            
+
             //TODO add support for openidm errors
         }
     };
