@@ -39,7 +39,7 @@ public final class RootContext extends AbstractContext {
 
     /**
      * Construct a new {@link RootContext} with the given {@code id} (uniqueness is not verified).
-     * @param id context identifier (uniqueness is not verified, cannot be {code null})
+     * @param id context identifier (uniqueness is not verified, cannot be {@code null})
      */
     public RootContext(String id) {
         // No parent
