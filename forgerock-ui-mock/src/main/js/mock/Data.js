@@ -30,7 +30,7 @@
 
         server.respondWith(
             "GET",
-            "/mock/reset/selfservice",
+            "/mock/selfservice/reset",
             [
                 200,
                 {
@@ -111,7 +111,55 @@
                                     200,
                                     headers,
                                     JSON.stringify({
-                                    "token" : "mockToken2",
+                                        "type": "kbaSecurityAnswerVerificationStage",
+                                        "tag": "initial",
+                                        "requirements": {
+                                            "$schema": "http://json-schema.org/draft-04/schema#",
+                                            "description": "Answer security questions",
+                                            "type": "object",
+                                            "required": [
+                                                "answer1",
+                                                "answer2"
+                                            ],
+                                            "properties": {
+                                                "answer1": {
+                                                    "systemQuestion": {
+                                                        "en": "What's your favorite color?",
+                                                        "en_GB": "What's your favorite colour?",
+                                                        "fr": "Quelle est votre couleur préférée?"
+                                                    },
+                                                    "type": "string"
+                                                },
+                                                "answer2": {
+                                                    "userQuestion": "Who is your favorite author?",
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "token": "mockToken2"
+                                    })
+                                );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "Invalid code"
+                                })
+                            );
+                        }
+                    break;
+                    case "mockToken2":
+                        if (_.isObject(requestContent.input) &&
+                            _.isString(requestContent.input.answer1) &&
+                            _.isString(requestContent.input.answer2)) {
+                                request.respond(
+                                    200,
+                                    headers,
+                                    JSON.stringify({
+                                    "token" : "mockToken3",
                                     "type" : "resetStage",
                                     "tag" : "initial",
                                     "requirements" : {
@@ -137,12 +185,12 @@
                                 JSON.stringify({
                                     "code": 400,
                                     "reason": "Bad Request",
-                                    "message": "Invalid code"
+                                    "message": "answer1 is missing from input"
                                 })
                             );
                         }
                     break;
-                    case "mockToken2":
+                    case "mockToken3":
                         if (_.isObject(requestContent.input) &&
                             _.isString(requestContent.input.password)) {
                             request.respond(

@@ -1,0 +1,19 @@
+<form class="form">
+    <p>{{t 'common.user.kba.answerQuestions'}}</p>
+    {{#requirements}}
+    {{#each properties}}
+    <div class="form-group">
+        {{#if this.systemQuestion}}
+            <label class="sr-only" for="input-{{@key}}">{{mapTranslate this.systemQuestion}}</label>
+            <input type="text" placeholder="{{mapTranslate this.systemQuestion}}" id="input-{{@key}}" name="{{@key}}" class="form-control input-lg" />
+        {{else}}
+            <label class="sr-only" for="input-{{@key}}">{{this.userQuestion}}</label>
+            <input type="text" placeholder="{{this.userQuestion}}" id="input-{{@key}}" name="{{@key}}" class="form-control input-lg" />
+        {{/if}}
+    </div>
+    {{/each}}
+    {{/requirements}}
+
+    <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.form.submit'}}" />
+
+</form>
