@@ -88,7 +88,7 @@
                             org.forgerock.util.time;version=${project.version},
                             org.forgerock.util.query;version=${project.version},
                             org.forgerock.util.encode;version=${project.version},
-                            org.forgerock.util.i18n;version=${project.version}
+                            org.forgerock.util.i18n;version=${project.version},
                             org.forgerock.util.generator;version=${project.version}
 			            </Export-Package>
                     </instructions>
