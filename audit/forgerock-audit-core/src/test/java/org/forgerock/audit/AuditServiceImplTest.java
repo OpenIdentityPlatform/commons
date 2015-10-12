@@ -19,6 +19,7 @@ package org.forgerock.audit;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
+import static org.forgerock.audit.events.EventTopicsMetaDataBuilder.coreTopicSchemas;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Requests.newQueryRequest;
@@ -28,12 +29,16 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
+import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -51,6 +56,7 @@ import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @SuppressWarnings({"javadoc", "rawtypes", "unchecked" })
@@ -58,18 +64,29 @@ public class AuditServiceImplTest {
 
     private static final String QUERY_HANDLER_NAME = "pass-through";
 
+    private EventTopicsMetaData eventTopicsMetaData;
+
+    @BeforeMethod
+    protected void setUp() throws Exception {
+        eventTopicsMetaData = coreTopicSchemas().build();
+    }
+
     @Test
     public void shouldDelegateCreateRequestToRegisteredHandler() throws Exception {
+        final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
+        final PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
+        configuration.setName("mock");
+        configuration.setTopics(Collections.singleton("access"));
         final AuditService auditService = newAuditService()
                 .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
-                .withAuditEventHandler(new PassThroughAuditEventHandler(), "mock", Collections.singleton("access"))
+                .withAuditEventHandler(clazz, configuration)
                 .build();
         auditService.startup();
 
         final CreateRequest createRequest = makeCreateRequest();
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
+        final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
@@ -88,12 +105,12 @@ public class AuditServiceImplTest {
     @Test
     public void shouldIgnoreCreateRequestIfAuditEventTopicNotMappedToHandler() throws Exception {
         //given
-        AuditService auditService = newAuditService().build();
+        final AuditService auditService = newAuditService().build();
         auditService.startup();
-        CreateRequest createRequest = makeCreateRequest("activity");
+        final CreateRequest createRequest = makeCreateRequest("activity");
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
+        final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
@@ -112,12 +129,12 @@ public class AuditServiceImplTest {
     @Test
     public void shouldFailCreateRequestIfAuditEventTopicIsNotKnown() throws ServiceUnavailableException {
         //given
-        AuditService auditService = newAuditService().build();
+        final AuditService auditService = newAuditService().build();
         auditService.startup();
-        CreateRequest createRequest = makeCreateRequest("unknownTopic");
+        final CreateRequest createRequest = makeCreateRequest("unknownTopic");
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
+        final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
@@ -130,14 +147,13 @@ public class AuditServiceImplTest {
     @Test
     public void shouldDelegateReadRequestToConfiguredHandlerForQueries() throws Exception {
         //given
-        final AuditEventHandler<?> queryAuditEventHandler = mock(AuditEventHandler.class, "queryAuditEventHandler");
-        final AuditEventHandler<?> otherAuditEventHandler = mock(AuditEventHandler.class, "otherAuditEventHandler");
-        final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration("query-handler"))
-                .withAuditEventHandler(queryAuditEventHandler, "query-handler", Collections.singleton("access"))
-                .withAuditEventHandler(otherAuditEventHandler, "another-handler", Collections.singleton("access"))
-                .build();
+        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME);
+        final PassThroughAuditEventHandler queryAuditEventHandler = spyPassThroughAuditEventHandler(QUERY_HANDLER_NAME);
+        final PassThroughAuditEventHandler otherAuditEventHandler = spyPassThroughAuditEventHandler("otherHandler");
+        final Set<AuditEventHandler> handlers = asSet(queryAuditEventHandler, otherAuditEventHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
         auditService.startup();
+
         final Promise<ResourceResponse, ResourceException> dummyResponse =
                 newResourceResponse(null, null, json(object())).asPromise();
         reset(otherAuditEventHandler); // So verifyZeroInteractions will work
@@ -146,7 +162,8 @@ public class AuditServiceImplTest {
         final ReadRequest readRequest = Requests.newReadRequest("access", "1234");
 
         //when
-        Promise<ResourceResponse, ResourceException> promise = auditService.handleRead(new RootContext(), readRequest);
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleRead(new RootContext(), readRequest);
 
         //then
         assertThat(promise).isSameAs(dummyResponse);
@@ -177,7 +194,7 @@ public class AuditServiceImplTest {
                 .build();
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
+        final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handlePatch(
                         new RootContext(),
                         Requests.newPatchRequest("_id"));
@@ -195,7 +212,7 @@ public class AuditServiceImplTest {
                 .build();
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
+        final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleUpdate(
                         new RootContext(),
                         Requests.newUpdateRequest("_id", new JsonValue(new HashMap<String, Object>())));
@@ -213,7 +230,7 @@ public class AuditServiceImplTest {
                 .build();
 
         //when
-        Promise<ActionResponse, ResourceException> promise =
+        final Promise<ActionResponse, ResourceException> promise =
                 auditService.handleAction(
                         new RootContext(),
                         Requests.newActionRequest("_id", "unknownAction"));
@@ -226,27 +243,27 @@ public class AuditServiceImplTest {
 
     @Test
     public void shouldDelegateQueryRequestToConfiguredHandlerForQueries() throws Exception {
-        final AuditEventHandler auditEventHandler = mock(AuditEventHandler.class);
-        final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
-                .withAuditEventHandler(auditEventHandler, QUERY_HANDLER_NAME, Collections.singleton("access"))
-                .build();
+        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME);
+        final PassThroughAuditEventHandler eventHandler = spyPassThroughAuditEventHandler(QUERY_HANDLER_NAME);
+        final Set<AuditEventHandler> handlers = asSet(eventHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
         auditService.startup();
-        final Promise<QueryResponse, ResourceException> emptyPromise = newQueryResponse().asPromise();
-        when(auditEventHandler.queryEvents(
+
+        final Promise<QueryResponse, ResourceException> queryResponsePromise = newQueryResponse().asPromise();
+        when(eventHandler.queryEvents(
                 any(Context.class), any(String.class), any(QueryRequest.class), any(QueryResourceHandler.class)))
-            .thenReturn(emptyPromise);
+            .thenReturn(queryResponsePromise);
 
         //when
-        Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(
+        final Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(
                 new RootContext(),
                 newQueryRequest("access"),
                 mock(QueryResourceHandler.class));
 
         //then
-        verify(auditEventHandler).queryEvents(
+        verify(eventHandler).queryEvents(
                 any(Context.class), any(String.class), any(QueryRequest.class), any(QueryResourceHandler.class));
-        assertThat(promise).isSameAs(emptyPromise);
+        assertThat(promise).isSameAs(queryResponsePromise);
     }
 
     @Test
@@ -263,7 +280,7 @@ public class AuditServiceImplTest {
         final CreateRequest createRequest = newCreateRequest("access", content);
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
+        final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
@@ -286,7 +303,7 @@ public class AuditServiceImplTest {
         final CreateRequest createRequest = newCreateRequest("access", content);
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
+        final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
@@ -297,25 +314,35 @@ public class AuditServiceImplTest {
 
     @Test
     public void canQueryForRegisteredHandlerByName() throws Exception {
-        final AuditEventHandler<?> firstHandler = mock(AuditEventHandler.class, "firstHandler");
-        final AuditEventHandler<?> secondHandler = mock(AuditEventHandler.class, "secondHandler");
+        final PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        firstConfiguration.setName("firstHandler");
+        firstConfiguration.setTopics(Collections.singleton("access"));
+        final PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        secondConfiguration.setName("secondHandler");
+        secondConfiguration.setTopics(Collections.singleton("access"));
+        final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final AuditService auditService = newAuditService()
-                .withAuditEventHandler(firstHandler, "firstHandler", Collections.singleton("access"))
-                .withAuditEventHandler(secondHandler, "secondHandler", Collections.singleton("access"))
+                .withAuditEventHandler(clazz, firstConfiguration)
+                .withAuditEventHandler(clazz, secondConfiguration)
                 .build();
         auditService.startup();
 
-        assertThat(auditService.getRegisteredHandler("firstHandler")).isSameAs(firstHandler);
-        assertThat(auditService.getRegisteredHandler("secondHandler")).isSameAs(secondHandler);
+        assertThat(auditService.getRegisteredHandler("firstHandler").getName()).isEqualTo("firstHandler");
+        assertThat(auditService.getRegisteredHandler("secondHandler").getName()).isEqualTo("secondHandler");
     }
 
     @Test
     public void canQueryForTopicHandlingBasedOnRegisteredHandlers() throws Exception {
-        final AuditEventHandler<?> firstHandler = mock(AuditEventHandler.class, "firstHandler");
-        final AuditEventHandler<?> secondHandler = mock(AuditEventHandler.class, "secondHandler");
+        final PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        firstConfiguration.setName("firstHandler");
+        firstConfiguration.setTopics(Collections.singleton("access"));
+        final PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        secondConfiguration.setName("secondHandler");
+        secondConfiguration.setTopics(Collections.singleton("activity"));
+        final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final AuditService auditService = newAuditService()
-                .withAuditEventHandler(firstHandler, "firstHandler", Collections.singleton("access"))
-                .withAuditEventHandler(secondHandler, "secondHandler", Collections.singleton("activity"))
+                .withAuditEventHandler(clazz, firstConfiguration)
+                .withAuditEventHandler(clazz, secondConfiguration)
                 .build();
         auditService.startup();
 
@@ -342,67 +369,65 @@ public class AuditServiceImplTest {
     @Test
     public void shouldStartupAllHandlersWhenStartupIsCalled() throws Exception {
         //given
-        final AuditEventHandler<?> firstHandler = mock(AuditEventHandler.class, "firstHandler");
-        final AuditEventHandler<?> secondHandler = mock(AuditEventHandler.class, "secondHandler");
-        final AuditService auditService = newAuditService()
-                .withAuditEventHandler(firstHandler, "firstHandler", Collections.singleton("access"))
-                .withAuditEventHandler(secondHandler, "secondHandler", Collections.singleton("access"))
-                .build();
+        final AuditServiceConfiguration configuration = new AuditServiceConfiguration();
+        final PassThroughAuditEventHandler eventHandler = spyPassThroughAuditEventHandler("pass");
+        final Set<AuditEventHandler> handlers = asSet(eventHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
 
         //when
         auditService.startup();
 
         //then
-        verify(firstHandler).startup();
-        verify(secondHandler).startup();
+        verify(eventHandler).startup();
     }
 
     @Test
     public void shouldSkipHandlersStartupIfAlreadyRunning() throws Exception {
         //given
-        final AuditEventHandler<?> firstHandler = mock(AuditEventHandler.class, "firstHandler");
-        final AuditEventHandler<?> secondHandler = mock(AuditEventHandler.class, "secondHandler");
-        final AuditService auditService = newAuditService()
-                .withAuditEventHandler(firstHandler, "firstHandler", Collections.singleton("access"))
-                .withAuditEventHandler(secondHandler, "secondHandler", Collections.singleton("access"))
-                .build();
+        final AuditServiceConfiguration configuration = new AuditServiceConfiguration();
+        final PassThroughAuditEventHandler eventHandler = spyPassThroughAuditEventHandler("pass");
+        final Set<AuditEventHandler> handlers = asSet(eventHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
 
         //when
         auditService.startup();
         auditService.startup();
 
         //then
-        verify(firstHandler, times(1)).startup();
-        verify(secondHandler, times(1)).startup();
+        verify(eventHandler, times(1)).startup();
     }
 
     @Test
     public void shouldShutdownAllHandlersWhenShutdownIsCalledWhenRunning() throws Exception {
         //given
-        final AuditEventHandler<?> firstHandler = mock(AuditEventHandler.class, "firstHandler");
-        final AuditEventHandler<?> secondHandler = mock(AuditEventHandler.class, "secondHandler");
-        final AuditService auditService = newAuditService()
-                .withAuditEventHandler(firstHandler, "firstHandler", Collections.singleton("access"))
-                .withAuditEventHandler(secondHandler, "secondHandler", Collections.singleton("access"))
-                .build();
+        final AuditServiceConfiguration configuration = new AuditServiceConfiguration();
+        final PassThroughAuditEventHandler eventHandler = spyPassThroughAuditEventHandler("pass");
+        final Set<AuditEventHandler> handlers = asSet(eventHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
         auditService.startup();
 
         //when
         auditService.shutdown();
 
         //then
-        verify(firstHandler).shutdown();
-        verify(secondHandler).shutdown();
+        verify(eventHandler).shutdown();
     }
 
     @Test
     public void shouldSkipHandlersShutdownIfNotStarted() throws Exception {
         //given
-        final AuditEventHandler<?> firstHandler = mock(AuditEventHandler.class, "firstHandler");
-        final AuditEventHandler<?> secondHandler = mock(AuditEventHandler.class, "secondHandler");
+        final PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        firstConfiguration.setName("firstHandler");
+        firstConfiguration.setTopics(Collections.singleton("access"));
+        final PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        secondConfiguration.setName("secondHandler");
+        secondConfiguration.setTopics(Collections.singleton("access"));
+        final PassThroughAuditEventHandler firstHandler = mock(PassThroughAuditEventHandler.class, "firstHandler");
+        final PassThroughAuditEventHandler secondHandler = mock(PassThroughAuditEventHandler.class, "secondHandler");
+        final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final AuditService auditService = newAuditService()
-                .withAuditEventHandler(firstHandler, "firstHandler", Collections.singleton("access"))
-                .withAuditEventHandler(secondHandler, "secondHandler", Collections.singleton("access"))
+                .withAuditEventHandler(clazz, firstConfiguration)
+                .withAuditEventHandler(clazz, secondConfiguration)
                 .build();
         // note, no call to startup()
 
@@ -422,7 +447,7 @@ public class AuditServiceImplTest {
         auditService.shutdown();
 
         //when
-        Promise<ResourceResponse, ResourceException> promise =
+        final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
@@ -439,7 +464,8 @@ public class AuditServiceImplTest {
         auditService.shutdown();
 
         //when
-        Promise<ResourceResponse, ResourceException> promise = auditService.handleRead(new RootContext(), readRequest);
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleRead(new RootContext(), readRequest);
 
         //then
         assertThat(promise)
@@ -454,7 +480,7 @@ public class AuditServiceImplTest {
         auditService.shutdown();
 
         //when
-        Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(
+        final Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(
                 new RootContext(),
                 newQueryRequest("access"),
                 mock(QueryResourceHandler.class));
@@ -499,7 +525,7 @@ public class AuditServiceImplTest {
     }
 
     private AuditServiceConfiguration getAuditServiceConfiguration(String queryHandlerName) {
-        AuditServiceConfiguration config = new AuditServiceConfiguration();
+        final AuditServiceConfiguration config = new AuditServiceConfiguration();
         config.setHandlerForQueries(queryHandlerName);
         config.setAvailableAuditEventHandlers(
                 singletonList("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler"));
@@ -520,4 +546,15 @@ public class AuditServiceImplTest {
         return newCreateRequest(event, content);
     }
 
+    private PassThroughAuditEventHandler spyPassThroughAuditEventHandler(String name) {
+        PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
+        configuration.setName(name);
+        configuration.setTopics(eventTopicsMetaData.getTopics());
+        return spy(new PassThroughAuditEventHandler(configuration, eventTopicsMetaData));
+    }
+
+    private Set<AuditEventHandler> asSet(AuditEventHandler... entries) {
+        return new HashSet<>(Arrays.asList(entries));
+
+    }
 }

@@ -154,7 +154,7 @@ public interface AuditService extends RequestHandler {
      *         was registered to the service.
      * @throws ServiceUnavailableException if the AuditService has been closed.
      */
-    AuditEventHandler<?> getRegisteredHandler(String handlerName) throws ServiceUnavailableException;
+    AuditEventHandler getRegisteredHandler(String handlerName) throws ServiceUnavailableException;
 
     /**
      * Returns whether or not events of the specified topic will be handled.

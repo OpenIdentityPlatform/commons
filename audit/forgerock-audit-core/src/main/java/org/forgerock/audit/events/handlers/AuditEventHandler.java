@@ -16,9 +16,8 @@
 
 package org.forgerock.audit.events.handlers;
 
-import java.util.Map;
+import java.util.Set;
 
-import org.forgerock.audit.DependencyProvider;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
@@ -30,21 +29,23 @@ import org.forgerock.util.promise.Promise;
 
 /**
  * The interface for an AuditEventHandler.
- *
- * @param <CFG> type of the configuration
+ * <p/>
+ * Implementations may make use of {@link org.forgerock.audit.DependencyProvider} to obtain dependencies from
+ * the product within which the audit service is deployed. Where DependencyProvider is used, the dependencies
+ * that it is expected to provide should be clearly documented.
  */
-public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
+public interface AuditEventHandler {
 
     /**
-     * Configures the Audit Event Handler with the provided configuration.
-     *
-     * @param config the configuration of the Audit Event Handler
-     * @throws ResourceException if configuration fails
-     */
-    void configure(final CFG config) throws ResourceException;
-
-    /**
-     * Instruct this object to that it is safe to initialize file handles and network connections.
+     * Instruct this object that it is safe to initialize file handles and network connections.
+     * <p/>
+     * Reconfiguration of the {@link org.forgerock.audit.AuditService} and its handlers is achieved by replacing
+     * rather than modifying the existing objects. Therefore, it's essential that the replacements do not perform
+     * any I/O that would interfere with the operation of the objects they are replacing until the old objects are
+     * shutdown. For example, when shutting down an old instance of a file-based AuditEventHandler, the old instance
+     * may need to flush buffers, apply file rotation or retention policies, or even add line or block signatures
+     * as part of tamper evident logging. Any of these operations could be broken if two handler instances are
+     * operating on the same set of files simultaneously.
      *
      * @throws ResourceException if starting the AuditEventHandler fails
      */
@@ -58,28 +59,22 @@ public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
     void shutdown() throws ResourceException;
 
     /**
-     * Set the audit events that this EventHandler may have to handle. This method is supposed to be called by the
-     * AuditService when registering this AuditEventHandler.
-     *
-     * @param auditEvents
-     *            List of AuditEvents to handle.
+     * Gets the name of this audit event handler.
+     * @return this handler's name.
      */
-    void setAuditEventsMetaData(Map<String, JsonValue> auditEvents);
+    String getName();
 
     /**
-     * Set the dependency provider to satisfy dependencies of this AuditEventHandler.
-     *
-     * @param dependencyProvider
-     *            Dependency lookup abstraction for obtaining resources or objects from the
-     *            product which integrates this AuditEventHandler.
+     * Gets the names of all audit event topics this handler is registered against.
+     * @return the names of all topics handled by this object.
      */
-    void setDependencyProvider(DependencyProvider dependencyProvider);
+    Set<String> getHandledTopics();
 
     /**
      * Gets the configuration class for the audit event handler.
      * @return the configuration class for the audit event handler
      */
-    Class<CFG> getConfigurationClass();
+    Class<?> getConfigurationClass();
 
     /**
      * Publishes an event to the provided topic.

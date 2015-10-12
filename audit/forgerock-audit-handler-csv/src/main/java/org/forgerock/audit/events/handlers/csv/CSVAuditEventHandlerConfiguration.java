@@ -15,10 +15,12 @@
  */
 package org.forgerock.audit.events.handlers.csv;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.util.Reject;
+import org.forgerock.util.time.Duration;
 
 /**
  * A configuration for CSV audit event handler.
@@ -186,6 +188,9 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
         @JsonPropertyDescription("audit.handlers.csv.security.signatureInterval")
         private String signatureInterval;
 
+        @JsonIgnore
+        private Duration signatureIntervalDuration;
+
         /**
          * Enables tamper evident logging. By default tamper evident logging is disabled.
          * @param enabled True - To enable tamper evident logging.
@@ -243,6 +248,7 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
          */
         public void setSignatureInterval(String signatureInterval) {
             this.signatureInterval = signatureInterval;
+            this.signatureIntervalDuration = Duration.duration(signatureInterval);
         }
 
         /**
@@ -253,5 +259,12 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
             return signatureInterval;
         }
 
+        /**
+         * Get's {@link #getSignatureInterval()} value as a {@link Duration}.
+         * @return The signature internval as a Duration object.
+         */
+        public Duration getSignatureIntervalDuration() {
+            return signatureIntervalDuration;
+        }
     }
 }

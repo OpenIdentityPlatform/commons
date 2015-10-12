@@ -19,10 +19,15 @@ package org.forgerock.audit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.audit.IOUtils.jsonFromFile;
+import static org.forgerock.audit.events.EventTopicsMetaDataBuilder.coreTopicSchemas;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import org.forgerock.audit.AuditServiceBuilder.AuditServiceFactory;
-import org.forgerock.audit.events.handlers.AuditEventHandler;
+import org.forgerock.audit.events.EventTopicsMetaData;
+import org.forgerock.audit.events.handlers.AuditEventHandlerFactory;
+import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
+import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandlerConfiguration;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.mockito.ArgumentCaptor;
@@ -31,21 +36,16 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 @SuppressWarnings({"javadoc", "rawtypes", "unchecked" })
 public class AuditServiceBuilderTest {
 
-    private ArgumentCaptor<Map> topicSchemasCaptor;
-    private ArgumentCaptor<Map> handlersByNameCaptor;
-    private ArgumentCaptor<Map> handlersByTopicCaptor;
+    private ArgumentCaptor<EventTopicsMetaData> topicSchemasCaptor;
 
     @BeforeMethod
     private void setUp() {
-        topicSchemasCaptor = ArgumentCaptor.forClass(Map.class);
-        handlersByNameCaptor = ArgumentCaptor.forClass(Map.class);
-        handlersByTopicCaptor = ArgumentCaptor.forClass(Map.class);
+        topicSchemasCaptor = ArgumentCaptor.forClass(EventTopicsMetaData.class);
     }
 
     @Test
@@ -62,33 +62,28 @@ public class AuditServiceBuilderTest {
     }
 
     @Test
-    public void shouldInjectEventsMetaDataIntoAuditEventHandlers() throws Exception {
-        AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class);
+    public void shouldProvideAuditEventHandlerConstructorParameters() throws Exception {
+        // Given
+        AuditEventHandlerFactory factory = mock(AuditEventHandlerFactory.class);
+        Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
+        PassThroughAuditEventHandlerConfiguration config = new PassThroughAuditEventHandlerConfiguration();
+        config.setName("mock");
+        config.setTopics(Collections.singleton("access"));
+        PassThroughAuditEventHandler handler = mock(PassThroughAuditEventHandler.class);
+        ArgumentCaptor<EventTopicsMetaData> eventTopicsMetaData = ArgumentCaptor.forClass(EventTopicsMetaData.class);
+        given(factory.create(eq("mock"), eq(clazz), eq(config), eventTopicsMetaData.capture())).willReturn(handler);
+        given(handler.getName()).willReturn("mock");
+
+        // When
         newAuditService()
-                .withAuditEventHandler(auditEventHandler, "mock", Collections.singleton("access"))
+                .withAuditEventHandler(clazz, config)
+                .withAuditEventHandlerFactory(factory)
                 .build();
-        final ArgumentCaptor<Map> auditEventMetaDataCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(auditEventHandler).setAuditEventsMetaData(auditEventMetaDataCaptor.capture());
-
-        Map<String, JsonValue> auditEventMetaData = auditEventMetaDataCaptor.getValue();
-        assertThat(auditEventMetaData).containsKey("access");
-        JsonValue accessMetaData = auditEventMetaData.get("access");
+        // Then
+        assertThat(eventTopicsMetaData.getValue().getTopics()).contains("access");
+        JsonValue accessMetaData = eventTopicsMetaData.getValue().getSchema("access");
         assertThat(accessMetaData.isDefined("schema")).isTrue();
-    }
-
-    @Test
-    public void shouldInjectDependencyProviderIntoAuditEventHandlers() throws Exception {
-        DependencyProvider dependencyProvider = mock(DependencyProvider.class);
-        when(dependencyProvider.getDependency(Integer.class)).thenReturn(4);
-        AuditEventHandler<?> auditEventHandler = mock(AuditEventHandler.class);
-
-        newAuditService()
-                .withDependencyProvider(dependencyProvider)
-                .withAuditEventHandler(auditEventHandler, "mock", Collections.singleton("access"))
-                .build();
-
-        verify(auditEventHandler).setDependencyProvider(eq(dependencyProvider));
     }
 
     @Test
@@ -96,8 +91,8 @@ public class AuditServiceBuilderTest {
         // Given
         final JsonValue schemaExtensions = loadJson("validCoreTopicSchemaExtension.json");
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withCoreTopicSchemaExtensions(schemaExtensions);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withCoreTopicSchemaExtensions(schemaExtensions).build());
 
         // When
         auditServiceBuilder.build();
@@ -106,10 +101,9 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        JsonValue accessSchema = (JsonValue) topicSchemasCaptor.getValue().get("access");
+        JsonValue accessSchema = (JsonValue) topicSchemasCaptor.getValue().getSchema("access");
         assertThat(accessSchema.get(pointer("schema/properties")).isDefined("extraField")).isTrue();
     }
 
@@ -118,8 +112,8 @@ public class AuditServiceBuilderTest {
         // Given
         final JsonValue schemaExtensions = loadJson("validAdditionalTopicSchema.json");
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withCoreTopicSchemaExtensions(schemaExtensions);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withCoreTopicSchemaExtensions(schemaExtensions).build());
 
         // When
         auditServiceBuilder.build();
@@ -128,18 +122,17 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        assertThat(topicSchemasCaptor.getValue().containsKey("customTopic")).isFalse();
+        assertThat(topicSchemasCaptor.getValue().getTopics()).doesNotContain("customTopic");
     }
 
     @Test
     public void shouldPreventCoreTopicSchemaExistingFieldsFromBeingAltered() throws Exception {
         final JsonValue schemaExtensions = loadJson("invalidCoreTopicSchemaExtension.json");
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withCoreTopicSchemaExtensions(schemaExtensions);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withCoreTopicSchemaExtensions(schemaExtensions).build());
 
         // When
         auditServiceBuilder.build();
@@ -148,10 +141,9 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        JsonValue accessSchema = (JsonValue) topicSchemasCaptor.getValue().get("access");
+        JsonValue accessSchema = topicSchemasCaptor.getValue().getSchema("access");
         assertThat(accessSchema.get(pointer("schema/properties/server")).isDefined("name")).isFalse();
     }
 
@@ -159,8 +151,7 @@ public class AuditServiceBuilderTest {
     public void shouldHandleNullCoreTopicSchemaExtension() throws Exception {
         // Given
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withCoreTopicSchemaExtensions(null);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory);
 
         // When
         auditServiceBuilder.build();
@@ -169,10 +160,9 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        JsonValue accessSchema = (JsonValue) topicSchemasCaptor.getValue().get("access");
+        JsonValue accessSchema = topicSchemasCaptor.getValue().getSchema("access");
         assertThat(accessSchema.get(pointer("schema/properties")).isDefined("extraField")).isFalse();
     }
 
@@ -182,8 +172,8 @@ public class AuditServiceBuilderTest {
         final JsonValue schemaExtensions = loadJson("invalidCoreTopicSchemaExtension.json");
         schemaExtensions.remove(pointer("schema/properties"));
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withCoreTopicSchemaExtensions(schemaExtensions);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withCoreTopicSchemaExtensions(schemaExtensions).build());
 
         // When
         auditServiceBuilder.build();
@@ -192,10 +182,9 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        JsonValue accessSchema = (JsonValue) topicSchemasCaptor.getValue().get("access");
+        JsonValue accessSchema = topicSchemasCaptor.getValue().getSchema("access");
         assertThat(accessSchema.get(pointer("schema/properties")).isDefined("extraField")).isFalse();
     }
 
@@ -205,8 +194,8 @@ public class AuditServiceBuilderTest {
         final JsonValue schemaExtensions = loadJson("invalidCoreTopicSchemaExtension.json");
         schemaExtensions.remove("schema");
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withCoreTopicSchemaExtensions(schemaExtensions);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withCoreTopicSchemaExtensions(schemaExtensions).build());
 
         // When
         auditServiceBuilder.build();
@@ -215,20 +204,19 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        JsonValue accessSchema = (JsonValue) topicSchemasCaptor.getValue().get("access");
+        JsonValue accessSchema = topicSchemasCaptor.getValue().getSchema("access");
         assertThat(accessSchema.get(pointer("schema/properties")).isDefined("extraField")).isFalse();
     }
 
     @Test
-    public void shouldPermitAdditionalTopicsToDefined() throws Exception {
+    public void shouldPermitAdditionalTopicsToBeDefined() throws Exception {
         // Given
-        final JsonValue schema = loadJson("validAdditionalTopicSchema.json");
+        final JsonValue additionalSchemas = loadJson("validAdditionalTopicSchema.json");
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withAdditionalTopicSchemas(schema);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withAdditionalTopicSchemas(additionalSchemas).build());
 
         // When
         auditServiceBuilder.build();
@@ -237,10 +225,9 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        JsonValue customTopic = (JsonValue) topicSchemasCaptor.getValue().get("customTopic");
+        JsonValue customTopic = topicSchemasCaptor.getValue().getSchema("customTopic");
         assertThat(customTopic.get(pointer("schema/properties")).isDefined("_id")).isTrue();
         assertThat(customTopic.get(pointer("schema/properties")).isDefined("timestamp")).isTrue();
         assertThat(customTopic.get(pointer("schema/properties")).isDefined("transactionId")).isTrue();
@@ -252,8 +239,8 @@ public class AuditServiceBuilderTest {
     public void shouldRejectAdditionalTopicWithSameNameAsCoreTopic() throws Exception {
         final JsonValue schemaExtensions = loadJson("invalidAdditionalTopicSchema.json");
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withAdditionalTopicSchemas(schemaExtensions);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withAdditionalTopicSchemas(schemaExtensions).build());
 
         // When
         auditServiceBuilder.build();
@@ -262,21 +249,20 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        JsonValue accessSchema = (JsonValue) topicSchemasCaptor.getValue().get("access");
+        JsonValue accessSchema = topicSchemasCaptor.getValue().getSchema("access");
         assertThat(accessSchema.get(pointer("schema/properties")).isDefined("customField")).isFalse();
     }
 
     @Test
     public void shouldRejectAdditionalTopicSchemasMissingPropertiesField() throws Exception {
         // Given
-        final JsonValue schema = loadJson("validAdditionalTopicSchema.json");
-        schema.remove(pointer("/customTopic/schema/properties"));
+        final JsonValue additionalSchemas = loadJson("validAdditionalTopicSchema.json");
+        additionalSchemas.remove(pointer("/customTopic/schema/properties"));
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withAdditionalTopicSchemas(schema);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withAdditionalTopicSchemas(additionalSchemas).build());
 
         // When
         auditServiceBuilder.build();
@@ -285,20 +271,19 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        assertThat(topicSchemasCaptor.getValue().containsKey("customTopic")).isFalse();
+        assertThat(topicSchemasCaptor.getValue().getTopics()).doesNotContain("customTopic");
     }
 
     @Test
     public void shouldRejectAdditionalTopicSchemasMissingSchemaField() throws Exception {
         // Given
-        final JsonValue schema = loadJson("validAdditionalTopicSchema.json");
-        schema.remove(pointer("/customTopic/schema"));
+        final JsonValue additionalSchemas = loadJson("validAdditionalTopicSchema.json");
+        additionalSchemas.remove(pointer("/customTopic/schema"));
         final AuditServiceFactory factory = mock(AuditServiceFactory.class);
-        final AuditServiceBuilder auditServiceBuilder =
-                new AuditServiceBuilder(factory).withAdditionalTopicSchemas(schema);
+        final AuditServiceBuilder auditServiceBuilder = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(coreTopicSchemas().withAdditionalTopicSchemas(additionalSchemas).build());
 
         // When
         auditServiceBuilder.build();
@@ -307,10 +292,9 @@ public class AuditServiceBuilderTest {
         verify(factory).newAuditService(
                 any(AuditServiceConfiguration.class),
                 topicSchemasCaptor.capture(),
-                handlersByNameCaptor.capture(),
-                handlersByTopicCaptor.capture());
+                any(Set.class));
 
-        assertThat(topicSchemasCaptor.getValue().containsKey("customTopic")).isFalse();
+        assertThat(topicSchemasCaptor.getValue().getTopics()).doesNotContain("customTopic");
     }
 
     private JsonValue loadJson(String filename) throws IOException {

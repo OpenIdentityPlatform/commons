@@ -19,6 +19,7 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import javax.inject.Inject;
 import javax.sql.DataSource;
 
 import java.io.IOException;
@@ -28,7 +29,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,9 +38,9 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventHelper;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.ConnectionPool;
@@ -59,53 +59,48 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
  * Implements a {@link AuditEventHandler} to write {@link AuditEvent}s to a JDBC repository.
  **/
-public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventHandlerConfiguration> {
+public class JDBCAuditEventHandler extends AuditEventHandlerBase {
 
     private static final Logger logger = LoggerFactory.getLogger(JDBCAuditEventHandler.class);
     public static final String MYSQL = "mysql";
     public static final String H2 = "h2";
     public static final String ORACLE = "oracle";
 
-    private Map<String, JsonValue> auditEventsMetaData;
-    private JDBCAuditEventHandlerConfiguration config;
-    private DataSource dataSource;
-    private DependencyProvider dependencyProvider;
-    private DatabaseStatementProvider databaseStatementProvider;
-    private Boolean sharedDatasource = false;
+    private final JDBCAuditEventHandlerConfiguration configuration;
+    private final DataSource dataSource;
+    private final DatabaseStatementProvider databaseStatementProvider;
+    private final boolean sharedDataSource;
 
     /**
-     * {@inheritDoc}
+     * Create a new JDBCAuditEventHandler instance.
+     *
+     * @param configuration
+     *          Configuration parameters that can be adjusted by system administrators.
+     * @param eventTopicsMetaData
+     *          Meta-data for all audit event topics.
+     * @param dataSource
+     *          Connection pool. If this parameter is null, then a Hikari data source will be created.
      */
-    @Override
-    public void setDependencyProvider(DependencyProvider provider) {
-        this.dependencyProvider = provider;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setAuditEventsMetaData(final Map<String, JsonValue> auditEventsMetaData) {
-        logger.info("Setting audit event metadata: {}", auditEventsMetaData);
-        if (auditEventsMetaData == null) {
-            this.auditEventsMetaData = Collections.emptyMap();
+    @Inject
+    public JDBCAuditEventHandler(
+            final JDBCAuditEventHandlerConfiguration configuration,
+            final EventTopicsMetaData eventTopicsMetaData,
+            final DataSource dataSource) {
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
+        this.configuration = configuration;
+        if (dataSource != null) {
+            sharedDataSource = true;
+            this.dataSource = dataSource;
         } else {
-            this.auditEventsMetaData = auditEventsMetaData;
+            logger.error("No connection pool (DataSource) provided; defaulting to Hikari");
+            sharedDataSource = false;
+            this.dataSource = new HikariDataSource(createHikariConfig(configuration.getConnectionPool()));
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void configure(JDBCAuditEventHandlerConfiguration config) throws ResourceException {
-        logger.info("Configuring handler with config: {}", config.toString());
-        this.config = config;
-        this.dataSource = configureDatasource();
-        this.databaseStatementProvider = getDatabaseStatementProvider(config.getDatabaseName());
+        this.databaseStatementProvider = getDatabaseStatementProvider(configuration.getDatabaseName());
     }
 
     /**
@@ -113,7 +108,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
      */
     @Override
     public void startup() throws ResourceException {
-        // TODO: Move all I/O initialization here to avoid possible interaction with another instance
+        // nothing to do here
     }
 
     /**
@@ -121,10 +116,8 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
      */
     @Override
     public void shutdown() throws ResourceException {
-        this.config = null;
-        if (!sharedDatasource && dataSource instanceof HikariDataSource) {
+        if (!sharedDataSource && dataSource instanceof HikariDataSource) {
             ((HikariDataSource) dataSource).close();
-            dataSource = null;
         }
     }
 
@@ -152,7 +145,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
             final TableMapping mapping = getTableMapping(topic);
             try (PreparedStatement createStatement =
                     databaseStatementProvider.buildCreateStatement(event, mapping, connection,
-                            auditEventsMetaData.get(topic))) {
+                            eventTopicsMetaData.getSchema(topic))) {
                 execute(createStatement);
             }
         } catch (AuditException | SQLException e) {
@@ -187,7 +180,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
             final List<Map<String, Object>> results = new LinkedList<>();
             try (PreparedStatement queryStatement =
                     databaseStatementProvider.buildQueryStatement(
-                            mapping, queryRequest, auditEventsMetaData.get(auditEventTopic), connection)) {
+                            mapping, queryRequest, eventTopicsMetaData.getSchema(auditEventTopic), connection)) {
                 results.addAll(execute(queryStatement));
             }
 
@@ -242,24 +235,8 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
         return newResourceResponse(resourceId, null, result).asPromise();
     }
 
-    private DataSource configureDatasource() throws ResourceException {
-        // attempt to get the datasource from the dependency provider
-        if (this.dependencyProvider != null) {
-            try {
-                final DataSource dataSource = this.dependencyProvider.getDependency(DataSource.class);
-                sharedDatasource = true;
-                return dataSource;
-            } catch (ClassNotFoundException e) {
-                logger.error("Unable to get the connection pool from the dependency provider");
-            }
-        }
-
-        // create the datasource from the json config
-        return new HikariDataSource(createHikariConfig(config.getConnectionPool()));
-    }
-
     private TableMapping getTableMapping(final String auditEventTopic) throws AuditException {
-        for (TableMapping tableMapping : config.getTableMappings()) {
+        for (TableMapping tableMapping : configuration.getTableMappings()) {
             if (tableMapping.getEvent().equalsIgnoreCase(auditEventTopic)) {
                 return tableMapping;
             }
@@ -287,7 +264,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase<JDBCAuditEventH
                 if (value != null) {
                     final JsonPointer field = new JsonPointer(entry.getKey());
                     final String fieldType =
-                            AuditEventHelper.getPropertyType(auditEventsMetaData.get(auditEventTopic), field);
+                            AuditEventHelper.getPropertyType(eventTopicsMetaData.getSchema(auditEventTopic), field);
                     if (AuditEventHelper.ARRAY_TYPE.equalsIgnoreCase(fieldType)
                             || AuditEventHelper.OBJECT_TYPE.equalsIgnoreCase(fieldType)) {
                         // parse stringified json

@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -35,6 +36,7 @@ import javax.crypto.spec.SecretKeySpec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
@@ -64,7 +66,7 @@ public class CSVAuditEventHandlerTest {
      * Integration test.
      */
     @Test
-    public void canConfigureSyslogHandlerFromJsonAndRegisterWithAuditService() throws Exception {
+    public void canConfigureCsvHandlerFromJsonAndRegisterWithAuditService() throws Exception {
         // given
         final AuditServiceBuilder auditServiceBuilder = newAuditService();
         final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler-config.json"));
@@ -75,7 +77,7 @@ public class CSVAuditEventHandlerTest {
         // then
         AuditService auditService = auditServiceBuilder.build();
         auditService.startup();
-        AuditEventHandler<?> registeredHandler = auditService.getRegisteredHandler("csv");
+        AuditEventHandler registeredHandler = auditService.getRegisteredHandler("csv");
         assertThat(registeredHandler).isNotNull();
     }
 
@@ -88,9 +90,9 @@ public class CSVAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = new CSVAuditEventHandler();
-        csvHandler.configure(getConfigWithBuffering(logDirectory));
-        addEventsMetaData(csvHandler);
+        final CSVAuditEventHandler csvHandler = new CSVAuditEventHandler(
+                getConfigWithBuffering(logDirectory), getEventTopicsMetaData());
+        csvHandler.startup();
         final Context context = new RootContext();
         try {
 
@@ -235,7 +237,7 @@ public class CSVAuditEventHandlerTest {
         return mock(ResultHandler.class);
     }
 
-    private ResourceResponse createAccessEvent(AuditEventHandler<?> auditEventHandler) throws Exception {
+    private ResourceResponse createAccessEvent(AuditEventHandler auditEventHandler) throws Exception {
         final CreateRequest createRequest = makeCreateRequest();
         final Context context = new RootContext();
 
@@ -273,17 +275,17 @@ public class CSVAuditEventHandlerTest {
 
     private CSVAuditEventHandler createAndConfigureHandler(Path tempDirectory, boolean enableSecurity)
             throws Exception {
-        CSVAuditEventHandler handler = spy(new CSVAuditEventHandler());
+        EventTopicsMetaData eventTopicsMetaData = getEventTopicsMetaData();
         CSVAuditEventHandlerConfiguration config = new CSVAuditEventHandlerConfiguration();
+        config.setName("csv");
+        config.setTopics(eventTopicsMetaData.getTopics());
         config.setLogDirectory(tempDirectory.toString());
-
         if (enableSecurity) {
             config.setSecurity(getCsvSecurityConfig());
         }
-
-        handler.configure(config);
-        addEventsMetaData(handler);
-        return handler;
+        CSVAuditEventHandler handler = new CSVAuditEventHandler(config, eventTopicsMetaData);
+        handler.startup();
+        return spy(handler);
     }
 
     private CsvSecurity getCsvSecurityConfig() throws Exception {
@@ -293,7 +295,7 @@ public class CSVAuditEventHandlerTest {
         csvSecurity.setFilename(keystorePath);
         csvSecurity.setPassword("forgerock");
 
-        // Force the initial key so we'll have reproductible builds.
+        // Force the initial key so we'll have reproducible builds.
         SecretKey secretKey = new SecretKeySpec(Base64.decode("zmq4EoprX52XLGyLkMENcin0gv0jwYyrySi3YOqfhFY="), "RAW");
         CsvSecureUtils.writeToKeyStore(secretKey, csvSecurity.getFilename(), "InitialKey", csvSecurity.getPassword());
 
@@ -305,12 +307,14 @@ public class CSVAuditEventHandlerTest {
         EventBufferingConfiguration config = new EventBufferingConfiguration();
         config.setEnabled(true);
         CSVAuditEventHandlerConfiguration handlerConfig = new CSVAuditEventHandlerConfiguration();
+        handlerConfig.setName("csv");
+        handlerConfig.setTopics(Collections.singleton("access"));
         handlerConfig.setLogDirectory(tempDir.toString());
         handlerConfig.setBufferingConfiguration(config);
         return handlerConfig;
     }
 
-    private void addEventsMetaData(CSVAuditEventHandler handler) throws Exception {
+    private EventTopicsMetaData getEventTopicsMetaData() throws Exception {
         Map<String, JsonValue> events = new LinkedHashMap<>();
         try (final InputStream configStream = getClass().getResourceAsStream("/events.json")) {
             final JsonValue predefinedEventTypes = new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
@@ -318,7 +322,7 @@ public class CSVAuditEventHandlerTest {
                 events.put(eventTypeName, predefinedEventTypes.get(eventTypeName));
             }
         }
-        handler.setAuditEventsMetaData(events);
+        return new EventTopicsMetaData(events);
     }
 
 }

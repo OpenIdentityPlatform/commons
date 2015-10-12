@@ -16,9 +16,11 @@
 package org.forgerock.audit.json;
 
 import java.io.InputStream;
+import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
+import static org.forgerock.audit.events.EventTopicsMetaDataBuilder.coreTopicSchemas;
 import static org.forgerock.audit.json.AuditJsonConfig.parseAuditServiceConfiguration;
 
 import org.forgerock.audit.AuditException;
@@ -26,6 +28,7 @@ import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.PassThroughAuditEventHandler;
+import org.forgerock.audit.PassThroughAuditEventHandlerConfiguration;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.DataProvider;
@@ -55,7 +58,7 @@ public class AuditJsonConfigTest {
 
         AuditService auditService = auditServiceBuilder.build();
         auditService.startup();
-        AuditEventHandler<?> registeredHandler = auditService.getRegisteredHandler("passthrough");
+        AuditEventHandler registeredHandler = auditService.getRegisteredHandler("passthrough");
         assertThat(registeredHandler).isNotNull();
     }
 
@@ -79,7 +82,11 @@ public class AuditJsonConfigTest {
     @Test
     public void testGetAuditEventHandlerConfigurationSchema() throws Exception {
         //given
-        final AuditEventHandler<?> auditEventHandler = new PassThroughAuditEventHandler();
+        PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
+        configuration.setName("pass");
+        configuration.setTopics(Collections.singleton("access"));
+        final AuditEventHandler auditEventHandler = new PassThroughAuditEventHandler(
+                configuration, coreTopicSchemas().build());
 
         //when
         final JsonValue schema = AuditJsonConfig.getAuditEventHandlerConfigurationSchema(auditEventHandler);

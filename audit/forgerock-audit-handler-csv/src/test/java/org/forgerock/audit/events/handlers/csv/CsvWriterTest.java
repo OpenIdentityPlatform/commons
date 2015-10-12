@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,6 @@ public class CsvWriterTest {
 
     @Test
     public void shouldCreateBufferedSecureCsvFile() throws Exception {
-        final Duration signatureInterval = duration("3 seconds");
         final CsvPreference csvPreference = CsvPreference.EXCEL_PREFERENCE;
         String[] header;
 
@@ -51,9 +51,12 @@ public class CsvWriterTest {
         EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
         bufferConfig.setEnabled(true);
         bufferConfig.setMaxSize(3);
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig,
-                CsvSecureMapWriterTest.KEYSTORE_FILENAME, CsvSecureMapWriterTest.KEYSTORE_PASSWORD,
-                signatureInterval)) {
+        CsvSecurity csvSecurity = new CsvSecurity();
+        csvSecurity.setFilename(CsvSecureMapWriterTest.KEYSTORE_FILENAME);
+        csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+        csvSecurity.setEnabled(true);
+        csvSecurity.setSignatureInterval("3 seconds");
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, csvSecurity)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "pim");
             values.put(header[1], "pam");
@@ -74,7 +77,6 @@ public class CsvWriterTest {
         // This is more an integration test rather than a unit test.
         // As we're running a little bit out of time, this is the best that can be done.
 
-        final Duration signatureInterval = duration("3 seconds");
         final CsvPreference csvPreference = CsvPreference.EXCEL_PREFERENCE;
         String[] header;
 
@@ -84,9 +86,12 @@ public class CsvWriterTest {
         header = new String[] { "child1", "child2", "child3" };
         EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
         bufferConfig.setEnabled(false);
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, 
-                CsvSecureMapWriterTest.KEYSTORE_FILENAME, CsvSecureMapWriterTest.KEYSTORE_PASSWORD,
-                signatureInterval)) {
+        CsvSecurity csvSecurity = new CsvSecurity();
+        csvSecurity.setFilename(CsvSecureMapWriterTest.KEYSTORE_FILENAME);
+        csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+        csvSecurity.setEnabled(true);
+        csvSecurity.setSignatureInterval("3 seconds");
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, csvSecurity)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "pim");
             values.put(header[1], "pam");
@@ -95,9 +100,7 @@ public class CsvWriterTest {
             writer.writeRow(values);
         }
 
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig,
-                CsvSecureMapWriterTest.KEYSTORE_FILENAME, CsvSecureMapWriterTest.KEYSTORE_PASSWORD,
-                signatureInterval)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, csvSecurity)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "riri");
             values.put(header[1], "fifi");
@@ -114,9 +117,7 @@ public class CsvWriterTest {
 
         // Expecting to fail
         header = new String[] { "child1", "child2", "child3", "enfant4" };
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig,
-                CsvSecureMapWriterTest.KEYSTORE_FILENAME, CsvSecureMapWriterTest.KEYSTORE_PASSWORD,
-                signatureInterval)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, bufferConfig, csvSecurity)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "Joe");
             values.put(header[1], "William");

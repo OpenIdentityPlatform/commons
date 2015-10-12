@@ -26,6 +26,7 @@ import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.extractValue;
 
 import org.forgerock.audit.AuditService;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.providers.LocalHostNameProvider;
 import org.forgerock.audit.providers.ProductInfoProvider;
 import org.forgerock.audit.events.AuditEvent;
@@ -68,12 +69,12 @@ public class SyslogFormatter {
     /**
      * Construct a new SyslogFormatter.
      *
-     * @param auditEventsMetaData Schemas and additional meta-data for known audit event topics.
+     * @param eventTopicsMetaData Schemas and additional meta-data for known audit event topics.
      * @param config Configuration options.
      * @param localHostNameProvider Strategy for obtaining hostname of current server.
      * @param productInfoProvider Strategy for obtaining name of the hosting application.
      */
-    public SyslogFormatter(Map<String, JsonValue> auditEventsMetaData, SyslogAuditEventHandlerConfiguration config,
+    public SyslogFormatter(EventTopicsMetaData eventTopicsMetaData, SyslogAuditEventHandlerConfiguration config,
             LocalHostNameProvider localHostNameProvider, ProductInfoProvider productInfoProvider) {
 
         Reject.ifNull(localHostNameProvider, "LocalHostNameProvider must not be null");
@@ -83,9 +84,9 @@ public class SyslogFormatter {
         this.appName = getProductName(productInfoProvider);
         this.facility = config.getFacility();
         this.severityFieldMappings =
-                createSeverityFieldMappings(config.getSeverityFieldMappings(), auditEventsMetaData);
+                createSeverityFieldMappings(config.getSeverityFieldMappings(), eventTopicsMetaData);
         this.structuredDataFormatters = Collections.unmodifiableMap(
-                createStructuredDataFormatters(appName, auditEventsMetaData));
+                createStructuredDataFormatters(appName, eventTopicsMetaData));
     }
 
     /**
@@ -133,7 +134,7 @@ public class SyslogFormatter {
     }
 
     private Map<String, SeverityFieldMapping> createSeverityFieldMappings(
-            List<SeverityFieldMapping> mappings, Map<String, JsonValue> auditEventsMetaData) {
+            List<SeverityFieldMapping> mappings, EventTopicsMetaData eventTopicsMetaData) {
 
         Map<String, SeverityFieldMapping> results = new HashMap<>(mappings.size());
         for (SeverityFieldMapping mapping : mappings) {
@@ -143,12 +144,12 @@ public class SyslogFormatter {
                 continue;
             }
 
-            if (!auditEventsMetaData.containsKey(mapping.getTopic())) {
+            if (!eventTopicsMetaData.containsTopic(mapping.getTopic())) {
                 logger.warn("Syslog severity field mapping defined for unknown topic {}", mapping.getTopic());
                 continue;
             }
 
-            JsonValue auditEventMetaData = auditEventsMetaData.get(mapping.getTopic());
+            JsonValue auditEventMetaData = eventTopicsMetaData.getSchema(mapping.getTopic());
             JsonValue auditEventSchema;
             try {
                 auditEventSchema = getAuditEventSchema(auditEventMetaData);
@@ -174,11 +175,12 @@ public class SyslogFormatter {
 
     private Map<String, StructuredDataFormatter> createStructuredDataFormatters(
             String productName,
-            Map<String, JsonValue> auditEventsMetaData) {
+            EventTopicsMetaData eventTopicsMetaData) {
 
         final Map<String, StructuredDataFormatter> results = new HashMap<>();
-        for (Map.Entry<String, JsonValue> entry : auditEventsMetaData.entrySet()) {
-            results.put(entry.getKey(), new StructuredDataFormatter(productName, entry.getKey(), entry.getValue()));
+        for (String topic : eventTopicsMetaData.getTopics()) {
+            JsonValue schema = eventTopicsMetaData.getSchema(topic);
+            results.put(topic, new StructuredDataFormatter(productName, topic, schema));
         }
         return results;
     }

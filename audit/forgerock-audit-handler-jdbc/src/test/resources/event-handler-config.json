@@ -1,7 +1,8 @@
 {
-  "name" : "jdbc",
   "class" : "org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandler",
   "config" : {
+    "name" : "jdbc",
+    "topics": [ "test" ],
     "databaseName" : "h2",
     "connectionPool" : {
       "dataSourceClassName" : null,
@@ -37,8 +38,5 @@
       "autoFlush" : "true",
       "maxSize" : 25
     }
-  },
-  "events": [
-    "test"
-  ]
+  }
 }

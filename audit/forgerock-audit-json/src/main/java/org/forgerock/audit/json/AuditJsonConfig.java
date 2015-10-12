@@ -17,10 +17,8 @@ package org.forgerock.audit.json;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditServiceBuilder;
@@ -28,7 +26,6 @@ import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ResourceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -128,93 +125,49 @@ public class AuditJsonConfig {
     }
 
     /**
-     * Creates an audit event handler from the provided name and JSON configuration.
-     * <p>
-     * The JSON configuration is expected to contains a "class" property which provides
-     * the class name for the handler to instantiate. It is assumed that the configuration
-     * class of the handler is given by adding the "Configuration" suffix to the class name
-     * of the handler.
-     * For example, hander class is CSVAuditEventHandler and handler configuration class is
-     * CSVAuditEventHandlerConfiguration.
+     * Configures and registers the audit event handler corresponding to the provided JSON configuration
+     * to the provided audit service.
      *
-     * @param <CFG>
-     *          The type of the configuration bean for the event handler.
-     * @param handlerName
-     *          The name of the handler to create.
      * @param jsonConfig
      *          The configuration of the audit event handler as JSON.
-     * @param classLoader
-     *          The class loader to use to load the handler and its configuration class.
-     * @return the fully configured audit event handler
+     * @param auditServiceBuilder
+     *          The builder for the service the event handler will be registered to.
      * @throws AuditException
      *             If any error occurs during configuration or registration of the handler.
      */
-    @SuppressWarnings("unchecked") // Class.forName calls
-    public static <CFG extends EventHandlerConfiguration> AuditEventHandler<CFG> buildAuditEventHandler(
-            String handlerName, JsonValue jsonConfig, ClassLoader classLoader) throws AuditException {
-        // TODO: class name should not be provided in customer configuration
-        // but through a commons module/service context
-        String className = jsonConfig.get(CLASS_FIELD).asString();
-        if (className == null) {
-            throw new AuditException(String.format("No class is defined for the audit handler %s. "
-                    + "You must define a 'class' property in the configuration.", handlerName));
-        }
-        AuditEventHandler<CFG> eventHandler;
-        try {
-            eventHandler = (AuditEventHandler<CFG>) Class.forName(className, true, classLoader).newInstance();
-            JsonValue conf = jsonConfig.get(CONFIG_FIELD);
-            if (conf != null) {
-                Class<CFG> klass = eventHandler.getConfigurationClass();
-                CFG configuration = mapper.readValue(conf.toString(), klass);
-                eventHandler.configure(configuration);
-            }
-            // else assume there is no configuration needed
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-            throw new AuditException(String.format("An error occured while trying to instantiate class "
-                    + "for the handler '%s' or its configuration", handlerName), e);
-        } catch (ResourceException e) {
-            throw new AuditException(String.format("An error occured while trying to configure " + "the handler '%s'",
-                    handlerName), e);
-        } catch (IOException e) {
-            throw new AuditException(String.format("An error occured while trying to generate "
-                    + "the configuration class for the handler '%s'", handlerName), e);
-        }
-        return eventHandler;
+    public static void registerHandlerToService(JsonValue jsonConfig, AuditServiceBuilder auditServiceBuilder)
+            throws AuditException {
+        registerHandlerToService(jsonConfig, auditServiceBuilder, auditServiceBuilder.getClass().getClassLoader());
     }
 
     /**
-     * Returns the set of events topics to use for the event handler corresponding to provided
-     * name and JSON configuration.
-     * <p>
-     * The JSON configuration is expected to contains an "events" field containing an array of
-     * values corresponding to the event topics, e.g.
+     * Configures and registers the audit event handler corresponding to the provided JSON configuration
+     * to the provided audit service, using a specific class loader.
      *
-     * <pre>
-     *  "events" : [ "access", "activity" ]
-     * </pre>
-     *
-     * However, it is not an error if "events" field is missing or empty.
-     *
-     * @param name
-     *            The name of the event handler
      * @param jsonConfig
-     *            The JSON configuration of the event handler.
-     * @return the set of event topics the handler must process, which can be empty but
-     *         never {@code null}
+     *          The configuration of the audit event handler as JSON.
+     * @param auditServiceBuilder
+     *          The builder for the service the event handler will be registered to.
+     * @param classLoader
+     *          The class loader to use to load the handler and its configuration class.
+     * @throws AuditException
+     *             If any error occurs during configuration or registration of the handler.
      */
-    public static Set<String> getEvents(String name, JsonValue jsonConfig) {
-        Set<String> events = jsonConfig.get(EVENTS_FIELD).asSet(String.class);
-        if (events == null) {
-            events = Collections.emptySet();
-        }
-        return events;
+    public static void registerHandlerToService(JsonValue jsonConfig,
+            AuditServiceBuilder auditServiceBuilder, ClassLoader classLoader) throws AuditException {
+        String name = getHandlerName(jsonConfig);
+        Class<? extends AuditEventHandler> handlerClass = getAuditEventHandlerClass(name, jsonConfig, classLoader);
+        Class<? extends EventHandlerConfiguration> configClass =
+                getAuditEventHandlerConfigurationClass(name, handlerClass, classLoader);
+        EventHandlerConfiguration configuration = parseAuditEventHandlerConfiguration(name, configClass, jsonConfig);
+        auditServiceBuilder.withAuditEventHandler(handlerClass, configuration);
     }
 
     /**
      * Returns the name of the event handler corresponding to provided JSON configuration.
      * <p>
      * The JSON configuration is expected to contains a "name" field identifying the
-     * event hander, e.g.
+     * event handler, e.g.
      * <pre>
      *  "name" : "passthrough"
      * </pre>
@@ -225,8 +178,8 @@ public class AuditJsonConfig {
      * @throws AuditException
      *          If an error occurs.
      */
-    public static String getHandlerName(JsonValue jsonConfig) throws AuditException {
-        String name = jsonConfig.get(NAME_FIELD).asString();
+    private static String getHandlerName(JsonValue jsonConfig) throws AuditException {
+        String name = jsonConfig.get(CONFIG_FIELD).get(NAME_FIELD).asString();
         if (name == null) {
             throw new AuditException(String.format("No name is defined for the provided audit handler. "
                     + "You must define a 'name' property in the configuration."));
@@ -235,44 +188,78 @@ public class AuditJsonConfig {
     }
 
     /**
-     * Configures and registers the audit event handler corresponding to the provided JSON configuration
-     * to the provided audit service.
+     * Creates an audit event handler factory from the provided JSON configuration.
+     * <p>
+     * The JSON configuration is expected to contains a "class" property which provides
+     * the class name for the handler factory to instantiate.
      *
-     * @param <CFG>
-     *          The type of the configuration bean for the event handler.
      * @param jsonConfig
      *          The configuration of the audit event handler as JSON.
-     * @param auditServiceBuilder
-     *          The builder for the service the event handler will be registered to.
+     * @param classLoader
+     *          The class loader to use to load the handler and its configuration class.
+     * @return the fully configured audit event handler
      * @throws AuditException
      *             If any error occurs during configuration or registration of the handler.
      */
-    public static <CFG> void registerHandlerToService(JsonValue jsonConfig, AuditServiceBuilder auditServiceBuilder)
+    @SuppressWarnings("unchecked") // Class.forName calls
+    private static Class<? extends AuditEventHandler> getAuditEventHandlerClass(
+            String handlerName, JsonValue jsonConfig, ClassLoader classLoader) throws AuditException {
+        // TODO: class name should not be provided in customer configuration
+        // but through a commons module/service context
+        String className = jsonConfig.get(CLASS_FIELD).asString();
+        if (className == null) {
+            String errorMessage = String.format("No class is defined for the audit handler %s. "
+                    + "You must define a 'class' property in the configuration.", handlerName);
+            throw new AuditException(errorMessage);
+        }
+        try {
+            return (Class<? extends AuditEventHandler>) Class.forName(className, true, classLoader);
+        } catch (ClassNotFoundException e) {
+            String errorMessage = String.format("Invalid class is defined for the audit handler %s.", handlerName);
+            throw new AuditException(errorMessage, e);
+        }
+    }
+
+    @SuppressWarnings("unchecked") // Class.forName calls
+    private static Class<? extends EventHandlerConfiguration> getAuditEventHandlerConfigurationClass(
+            String handlerName, Class<? extends AuditEventHandler> handlerClass, ClassLoader classLoader)
             throws AuditException {
-        registerHandlerToService(jsonConfig, auditServiceBuilder, auditServiceBuilder.getClass().getClassLoader());
+        String className = handlerClass.getName() + "Configuration";
+        try {
+            return (Class<? extends EventHandlerConfiguration>) Class.forName(className, true, classLoader);
+        } catch (ClassNotFoundException e) {
+            String errorMessage = String.format("Unable to locate configuration class %s for the audit handler %s.",
+                    className, handlerName);
+            throw new AuditException(errorMessage, e);
+        }
     }
 
     /**
-     * Configures and registers the audit event handler corresponding to the provided JSON configuration
-     * to the provided audit service, using a specific class loader.
+     * Returns the audit event handler configuration from the provided JSON string.
      *
-     * @param <CFG>
+     * @param <C>
      *          The type of the configuration bean for the event handler.
+     * @param handlerName
+     *          The name of the handler to create.
      * @param jsonConfig
      *          The configuration of the audit event handler as JSON.
-     * @param auditServiceBuilder
-     *          The builder for the service the event handler will be registered to.
-     * @param classLoader
-     *          The class loader to use to load the handler and its configuration class.
+     * @return the fully configured audit event handler
      * @throws AuditException
-     *             If any error occurs during configuration or registration of the handler.
+     *             If any error occurs while instantiating the configuration from JSON.
      */
-    public static <CFG extends EventHandlerConfiguration> void registerHandlerToService(JsonValue jsonConfig,
-            AuditServiceBuilder auditServiceBuilder, ClassLoader classLoader) throws AuditException {
-        String name = getHandlerName(jsonConfig);
-        AuditEventHandler<CFG> handler = buildAuditEventHandler(name, jsonConfig, classLoader);
-        Set<String> events = getEvents(name, jsonConfig);
-        auditServiceBuilder.withAuditEventHandler(handler, name, events);
+    private static <C extends EventHandlerConfiguration> C parseAuditEventHandlerConfiguration(
+            String handlerName, Class<C> clazz, JsonValue jsonConfig) throws AuditException {
+        try {
+            C configuration = null;
+            JsonValue conf = jsonConfig.get(CONFIG_FIELD);
+            if (conf != null) {
+                configuration = mapper.readValue(conf.toString(), clazz);
+            }
+            return configuration;
+        } catch (IOException e) {
+            throw new AuditException(String.format("An error occurred while trying to generate "
+                    + "the configuration class for the handler '%s'", handlerName), e);
+        }
     }
 
     /**
@@ -281,7 +268,7 @@ public class AuditJsonConfig {
      * @return The config schema as json schema.
      * @throws AuditException If any error occurs parsing the config class for schema.
      */
-    public static JsonValue getAuditEventHandlerConfigurationSchema(final AuditEventHandler<?> auditEventHandler)
+    public static JsonValue getAuditEventHandlerConfigurationSchema(final AuditEventHandler auditEventHandler)
             throws AuditException {
         try {
             SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();

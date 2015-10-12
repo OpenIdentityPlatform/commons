@@ -21,7 +21,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
 import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import org.forgerock.audit.DependencyProvider;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.providers.LocalHostNameProvider;
 import org.forgerock.audit.providers.ProductInfoProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
@@ -40,85 +40,78 @@ import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Collections;
-import java.util.Map;
 
 /**
  * The handler publishes audit events formatted using {@link SyslogFormatter} to a syslog daemon using
- * the configured {@link SyslogPublisher}. The publisher is initialized by {@link #configure} and flushed after each
- * write.
+ * the configured {@link SyslogPublisher}. The publisher is flushed after each write.
  */
-public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEventHandlerConfiguration> {
+public class SyslogAuditEventHandler extends AuditEventHandlerBase {
 
     private static final Logger logger = LoggerFactory.getLogger(SyslogAuditEventHandler.class);
 
-    private volatile DependencyProvider dependencyProvider;
-    private volatile SyslogAuditEventHandlerConfiguration config;
-    private volatile Map<String, JsonValue> auditEventsMetaData;
-    private volatile SyslogPublisher publisher;
-    private volatile SyslogFormatter formatter;
+    private final SyslogPublisher publisher;
+    private final SyslogFormatter formatter;
 
-    @Override
-    public synchronized void setAuditEventsMetaData(Map<String, JsonValue> auditEventsMetaData) {
-        this.auditEventsMetaData = auditEventsMetaData;
-        updateFormatter();
-    }
+    /**
+     * Create a new SyslogAuditEventHandler instance.
+     *
+     * @param configuration
+     *          Configuration parameters that can be adjusted by system administrators.
+     * @param eventTopicsMetaData
+     *          Meta-data for all audit event topics.
+     * @param productInfoProvider
+     *          Provides info such as product name.
+     * @param localHostNameProvider
+     *          Provides local host name.
+     */
+    @Inject
+    public SyslogAuditEventHandler(
+            final SyslogAuditEventHandlerConfiguration configuration,
+            final EventTopicsMetaData eventTopicsMetaData,
+            final ProductInfoProvider productInfoProvider,
+            final LocalHostNameProvider localHostNameProvider) {
 
-    @Override
-    public void configure(SyslogAuditEventHandlerConfiguration config) throws ResourceException {
-        Reject.ifNull(config.getProtocol(),
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
+        Reject.ifNull(configuration.getProtocol(),
                 "Syslog transport 'protocol' of TCP or UDP is required");
-        Reject.ifNull(config.getHost(),
+        Reject.ifNull(configuration.getHost(),
                 "Syslog destination server 'host' is required");
-        Reject.ifTrue(config.getPort() < 0 || config.getPort() > 65535,
+        Reject.ifTrue(configuration.getPort() < 0 || configuration.getPort() > 65535,
                 "Syslog destination server 'port' between 0 and 65535 is required");
-        Reject.ifNull(config.getFacility(),
+        Reject.ifNull(configuration.getFacility(),
                 "Syslog 'facility' is required");
-        Reject.ifTrue(config.getProtocol() == TransportProtocol.TCP && config.getConnectTimeout() == 0,
+        Reject.ifTrue(configuration.getProtocol() == TransportProtocol.TCP && configuration.getConnectTimeout() == 0,
                 "Syslog 'connectTimeout' is required for TCP connections");
 
-        synchronized (this) {
-            InetSocketAddress socketAddress = new InetSocketAddress(config.getHost(), config.getPort());
-            this.publisher = config.getProtocol().getPublisher(socketAddress, config);
-            this.config = config;
-            updateFormatter();
-        }
+        InetSocketAddress socketAddress = new InetSocketAddress(configuration.getHost(), configuration.getPort());
+        this.publisher = configuration.getProtocol().getPublisher(socketAddress, configuration);
+        this.formatter = new SyslogFormatter(
+                eventTopicsMetaData,
+                configuration,
+                getLocalHostNameProvider(localHostNameProvider),
+                getProductNameProvider(productInfoProvider));
+
         logger.debug("Successfully configured Syslog audit event handler.");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setDependencyProvider(DependencyProvider dependencyProvider) {
-        Reject.ifNull(dependencyProvider, "DependencyProvider must not be null");
-        this.dependencyProvider = dependencyProvider;
-        updateFormatter();
-    }
-
-    private void updateFormatter() {
-        if (dependencyProvider != null && auditEventsMetaData != null && config != null) {
-            formatter = new SyslogFormatter(
-                    auditEventsMetaData, config, getLocalHostNameProvider(), getProductNameProvider());
-        }
-    }
-
-    private ProductInfoProvider getProductNameProvider() {
-        try {
-            return dependencyProvider.getDependency(ProductInfoProvider.class);
-        } catch (ClassNotFoundException e) {
+    private ProductInfoProvider getProductNameProvider(ProductInfoProvider productInfoProvider) {
+        if (productInfoProvider != null) {
+            return productInfoProvider;
+        } else {
             logger.debug("No {} provided; using default.", ProductInfoProvider.class.getSimpleName());
             return new DefaultProductInfoProvider();
         }
     }
 
-    private LocalHostNameProvider getLocalHostNameProvider() {
-        try {
-            return dependencyProvider.getDependency(LocalHostNameProvider.class);
-        } catch (ClassNotFoundException e) {
+    private LocalHostNameProvider getLocalHostNameProvider(LocalHostNameProvider localHostNameProvider) {
+        if (localHostNameProvider != null) {
+            return localHostNameProvider;
+        } else {
             logger.debug("No {} provided; using default.", LocalHostNameProvider.class.getSimpleName());
             return new DefaultLocalHostNameProvider();
         }
@@ -191,8 +184,6 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
 
     /**
      * Default implementation of ProductNameProvider.
-     * <p/>
-     * Products can provide an alternative via {@link DependencyProvider}.
      */
     private static class DefaultProductInfoProvider implements ProductInfoProvider {
 
@@ -204,8 +195,6 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase<SyslogAuditEv
 
     /**
      * Default implementation of LocalHostNameProvider.
-     * <p/>
-     * Products can provide an alternative via {@link DependencyProvider}.
      */
     private static class DefaultLocalHostNameProvider implements LocalHostNameProvider {
 

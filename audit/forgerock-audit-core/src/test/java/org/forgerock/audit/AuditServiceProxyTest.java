@@ -19,7 +19,6 @@ package org.forgerock.audit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.AuditServiceImplTest.makeCreateRequest;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.fail;
 
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.ResourceException;

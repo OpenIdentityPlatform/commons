@@ -19,14 +19,64 @@ import org.forgerock.util.Reject;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 /**
  * Base class for audit event handler configuration.
  */
 public abstract class EventHandlerConfiguration {
 
+    /** Name of this audit event handler. */
+    @JsonPropertyDescription("audit.handlers.all.name")
+    private String name;
+
+    /** The set of topics that this audit event handler accepts. */
+    @JsonPropertyDescription("audit.handlers.all.topics")
+    private Set<String> topics;
+
     /** Event buffering is disabled by default. */
     @JsonPropertyDescription("audit.handlers.all.buffering")
     protected EventBufferingConfiguration buffering = new EventBufferingConfiguration();
+
+    /**
+     * Returns the name of this handler.
+     *
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Sets the name of this handler.
+     *
+     * @param name
+     *          The name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Returns the names of the topics accepted by this handler.
+     *
+     * @return the set of topic names
+     */
+    public Set<String> getTopics() {
+        return topics;
+    }
+
+    /**
+     * Sets the topics accepted by this handler.
+     *
+     * @param topics
+     *          The names of all accepted topics
+     */
+    public void setTopics(Set<String> topics) {
+        this.topics = topics;
+    }
 
     /**
      * Returns the configuration for events buffering.

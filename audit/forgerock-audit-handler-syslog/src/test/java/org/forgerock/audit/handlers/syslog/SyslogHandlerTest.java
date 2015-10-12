@@ -45,7 +45,7 @@ public class SyslogHandlerTest {
         // then
         AuditService auditService = auditServiceBuilder.build();
         auditService.startup();
-        AuditEventHandler<?> registeredHandler = auditService.getRegisteredHandler("syslog");
+        AuditEventHandler registeredHandler = auditService.getRegisteredHandler("syslog");
         assertThat(registeredHandler).isNotNull();
     }
 

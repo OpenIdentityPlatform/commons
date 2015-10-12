@@ -15,42 +15,31 @@
  */
 package org.forgerock.audit.events.handlers;
 
-import java.util.Set;
-
+import org.forgerock.audit.AuditException;
 import org.forgerock.audit.events.EventTopicsMetaData;
 
 /**
- * Abstract AuditEventHandler class.
+ * Factory interface for creating instances of {@link AuditEventHandler}.
  */
-public abstract class AuditEventHandlerBase implements AuditEventHandler {
-
-    private final String name;
-    protected final EventTopicsMetaData eventTopicsMetaData;
+public interface AuditEventHandlerFactory {
 
     /**
      * Create a new AuditEventHandler instance.
      *
      * @param name
-     *          The name of this AuditEventHandler.
+     *          The name of the AuditEventHandler object.
+     * @param clazz
+     *          The type of AuditEventHandler to create.
+     * @param configuration
+     *          Configuration parameters that can be adjusted by system administrators.
      * @param eventTopicsMetaData
      *          Provides meta-data describing the audit event topics this AuditEventHandler may have to handle.
+     * @throws AuditException
+     *          If the required handler could not be constructed for any reason.
      */
-    protected AuditEventHandlerBase(
-            final String name,
-            final EventTopicsMetaData eventTopicsMetaData,
-            final Set<String> acceptedTopics) {
-        this.name = name;
-        this.eventTopicsMetaData = eventTopicsMetaData.filter(acceptedTopics);
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public Set<String> getHandledTopics() {
-        return eventTopicsMetaData.getTopics();
-    }
-
+    <T extends AuditEventHandler> T create(
+            String name,
+            Class<T> clazz,
+            EventHandlerConfiguration configuration,
+            EventTopicsMetaData eventTopicsMetaData) throws AuditException;
 }

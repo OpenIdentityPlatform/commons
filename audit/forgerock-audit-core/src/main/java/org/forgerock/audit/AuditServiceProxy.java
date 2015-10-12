@@ -175,7 +175,7 @@ public class AuditServiceProxy implements AuditService {
     }
 
     @Override
-    public AuditEventHandler<?> getRegisteredHandler(String handlerName) throws ServiceUnavailableException {
+    public AuditEventHandler getRegisteredHandler(String handlerName) throws ServiceUnavailableException {
         obtainReadLock();
         try {
             return delegate.getRegisteredHandler(handlerName);

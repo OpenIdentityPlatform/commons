@@ -25,6 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.providers.LocalHostNameProvider;
 import org.forgerock.audit.providers.ProductInfoProvider;
 import org.forgerock.audit.events.AuditEvent;
@@ -390,7 +391,7 @@ public class SyslogFormatterTest {
     private SyslogFormatter newSyslogFormatter(String productName, Facility facility, String localHostName,
             List<SeverityFieldMapping> severityFieldMappings) throws Exception {
 
-        Map<String, JsonValue> auditEventDefinitions = loadAuditEventDefinitions();
+        EventTopicsMetaData eventTopicsMetaData = loadEventTopicsMetaData();
 
         SyslogAuditEventHandlerConfiguration config = new SyslogAuditEventHandlerConfiguration();
         config.setFacility(facility);
@@ -402,7 +403,7 @@ public class SyslogFormatterTest {
         ProductInfoProvider productInfoProvider = mock(ProductInfoProvider.class);
         given(productInfoProvider.getProductName()).willReturn(productName);
 
-        return new SyslogFormatter(auditEventDefinitions, config, localHostNameProvider, productInfoProvider);
+        return new SyslogFormatter(eventTopicsMetaData, config, localHostNameProvider, productInfoProvider);
     }
 
     private SyslogMessage readSyslogMessage(String message) {
@@ -509,7 +510,7 @@ public class SyslogFormatterTest {
         String msg;
     }
 
-    private Map<String, JsonValue> loadAuditEventDefinitions() throws Exception {
+    private EventTopicsMetaData loadEventTopicsMetaData() throws Exception {
         Map<String, JsonValue> events = new LinkedHashMap<>();
         try (final InputStream configStream = getClass().getResourceAsStream("/events.json")) {
             final JsonValue predefinedEventTypes = new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
@@ -517,7 +518,7 @@ public class SyslogFormatterTest {
                 events.put(eventTypeName, predefinedEventTypes.get(eventTypeName));
             }
         }
-        return events;
+        return new EventTopicsMetaData(events);
     }
 
     private static TestTopicBuilder firstTestTopic() {

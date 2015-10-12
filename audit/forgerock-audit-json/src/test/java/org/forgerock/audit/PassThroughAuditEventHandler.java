@@ -18,6 +18,7 @@ package org.forgerock.audit;
 
 import static org.forgerock.json.resource.Responses.*;
 
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.services.context.Context;
@@ -36,17 +37,18 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles AuditEvents by just calling the result Handler.
  */
-public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThroughAuditEventHandlerConfiguration> {
+public class PassThroughAuditEventHandler extends AuditEventHandlerBase {
 
     private static final Logger logger = LoggerFactory.getLogger(PassThroughAuditEventHandlerConfiguration.class);
 
     /** A message logged when a new entry is added. */
     private String message;
 
-    /** {@inheritDoc} */
-    @Override
-    public void configure(PassThroughAuditEventHandlerConfiguration config) throws ResourceException {
-        this.message = config.getMessage();
+    public PassThroughAuditEventHandler(
+            final PassThroughAuditEventHandlerConfiguration configuration,
+            final EventTopicsMetaData eventTopicsMetaData) {
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
+        this.message = configuration.getMessage();
     }
 
     /** {@inheritDoc} */

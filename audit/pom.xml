@@ -55,6 +55,7 @@
         <jodaTime.version>2.1</jodaTime.version>
         <supercsv.version>2.3.1</supercsv.version>
         <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
+        <javax.inject.version>1</javax.inject.version>
     </properties>
 
     <modules>
@@ -75,6 +76,11 @@
                 <version>${commons.forgerock-bom.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>javax.inject</groupId>
+                <artifactId>javax.inject</artifactId>
+                <version>${javax.inject.version}</version>
             </dependency>
 
             <!-- Third party dependencies -->

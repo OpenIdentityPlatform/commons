@@ -15,8 +15,6 @@
  */
 package org.forgerock.audit;
 
-import static java.util.Collections.unmodifiableSet;
-import static java.util.Collections.unmodifiableMap;
 import static org.forgerock.audit.events.AuditEventBuilder.TIMESTAMP;
 import static org.forgerock.audit.events.AuditEventBuilder.TRANSACTION_ID;
 import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
@@ -26,9 +24,11 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
@@ -89,19 +89,19 @@ final class AuditServiceImpl implements AuditService {
     /**
      * Map of all configured AuditEventHandlers indexed by their instance name.
      */
-    private final Map<String, AuditEventHandler<?>> auditEventHandlersByName;
+    private final Map<String, AuditEventHandler> auditEventHandlersByName;
     /**
      * Lists of AuditEventHandlers that should receive events for each topic.
      */
-    private final Map<String, Set<AuditEventHandler<?>>> auditEventHandlersByTopic;
+    private final Map<String, Set<AuditEventHandler>> auditEventHandlersByTopic;
     /**
      * All the audit event types configured.
      */
-    private final Map<String, JsonValue> auditEventTopicSchemas;
+    private final EventTopicsMetaData eventTopicsMetaData;
     /**
      * The AuditEventHandler to use for queries.
      */
-    private final AuditEventHandler<?> queryHandler;
+    private final AuditEventHandler queryHandler;
     /**
      * Indicates the current lifecycle state of this AuditService.
      */
@@ -112,30 +112,22 @@ final class AuditServiceImpl implements AuditService {
      *
      * @param configuration
      *          User-facing configuration.
-     * @param auditEventTopicSchemas
+     * @param eventTopicsMetaData
      *          Meta-data describing the types of events this AuditService can receive.
      *          Passing the map to this constructor effectively transfers ownership to this object and neither
      *          it nor its contents should not be updated further by code outside of this class thereafter.
-     * @param auditEventHandlersByName
-     *          Map of all configured AuditEventHandlers indexed by their instance name.
-     *          Passing the map to this constructor effectively transfers ownership to this object and neither
-     *          it nor its contents should not be updated further by code outside of this class thereafter.
-     * @param auditEventHandlersByTopic
-     *          Lists of AuditEventHandlers that should receive events for each topic.
-     *          Passing the list to this constructor effectively transfers ownership to this object and neither
-     *          it nor its contents should not be updated further by code outside of this class thereafter.
+     * @param auditEventHandlers
+     *          List of all configured AuditEventHandlers.
      */
     public AuditServiceImpl(
             final AuditServiceConfiguration configuration,
-            final Map<String, JsonValue> auditEventTopicSchemas,
-            final Map<String, AuditEventHandler<?>> auditEventHandlersByName,
-            final Map<String, Set<AuditEventHandler<?>>> auditEventHandlersByTopic) {
-
-        this.auditEventHandlersByTopic = unmodifiableMapSet(auditEventHandlersByTopic);
-        this.auditEventHandlersByName = unmodifiableMap(auditEventHandlersByName);
+            final EventTopicsMetaData eventTopicsMetaData,
+            final Set<AuditEventHandler> auditEventHandlers) {
 
         this.config = new AuditServiceConfiguration(configuration);
-        this.auditEventTopicSchemas = unmodifiableMap(auditEventTopicSchemas);
+        this.eventTopicsMetaData = eventTopicsMetaData;
+        this.auditEventHandlersByName = getAuditEventHandlersByName(auditEventHandlers);
+        this.auditEventHandlersByTopic = getAuditEventHandlersByTopic(auditEventHandlers, eventTopicsMetaData);
 
         String queryHandlerName = configuration.getHandlerForQueries();
         if (queryHandlerName != null && this.auditEventHandlersByName.containsKey(queryHandlerName)) {
@@ -145,12 +137,29 @@ final class AuditServiceImpl implements AuditService {
         }
     }
 
-    private <K, V> Map<K, Set<V>> unmodifiableMapSet(Map<K, Set<V>> map) {
-        Map<K, Set<V>> copy = new HashMap<>(map.size());
-        for (Map.Entry<K, Set<V>> entry : map.entrySet()) {
-            copy.put(entry.getKey(), unmodifiableSet(entry.getValue()));
+    private Map<String, AuditEventHandler> getAuditEventHandlersByName(Set<AuditEventHandler> handlers) {
+        Map<String, AuditEventHandler> handlersByName = new HashMap<>(handlers.size());
+        for (AuditEventHandler handler : handlers) {
+            handlersByName.put(handler.getName(), handler);
         }
-        return unmodifiableMap(copy);
+        return handlersByName;
+    }
+
+    private Map<String, Set<AuditEventHandler>> getAuditEventHandlersByTopic(
+            final Set<AuditEventHandler> handlers,
+            final EventTopicsMetaData eventTopicsMetaData) {
+
+        Map<String, Set<AuditEventHandler>> handlersByTopic = new HashMap<>();
+        for (String topic : eventTopicsMetaData.getTopics()) {
+            // Use a LinkedHashSet so that iteration order follows order in which handlers were defined
+            handlersByTopic.put(topic, new LinkedHashSet<AuditEventHandler>());
+        }
+        for (AuditEventHandler handler : handlers) {
+            for (String topic : handler.getHandledTopics()) {
+                handlersByTopic.get(topic).add(handler);
+            }
+        }
+        return handlersByTopic;
     }
 
     @Override
@@ -183,7 +192,7 @@ final class AuditServiceImpl implements AuditService {
             rejectIfMissingTransactionIdOrTimestamp(request);
             final String auditEventId = establishAuditEventId(request);
 
-            Collection<AuditEventHandler<?>> auditEventHandlersForEvent = getAuditEventHandlersForEvent(topic);
+            Collection<AuditEventHandler> auditEventHandlersForEvent = getAuditEventHandlersForEvent(topic);
             if (auditEventHandlersForEvent.isEmpty()) {
                 // if the event is known but not registered with a handler, it's ok to ignore it
                 logger.debug("No handler found for the event of topic {}", topic);
@@ -192,7 +201,7 @@ final class AuditServiceImpl implements AuditService {
                 // Otherwise, let the event handlers set the response
                 logger.debug("Cascading the event of topic {} to the handlers : {}", topic, auditEventHandlersForEvent);
                 Promise<ResourceResponse, ResourceException> promise = null;
-                for (AuditEventHandler<?> auditEventHandler : auditEventHandlersForEvent) {
+                for (AuditEventHandler auditEventHandler : auditEventHandlersForEvent) {
                     promise = auditEventHandler.publishEvent(context, topic, request.getContent());
                 }
                 // TODO CAUD-24 last one wins!
@@ -225,7 +234,7 @@ final class AuditServiceImpl implements AuditService {
         if (topic == null) {
             throw new BadRequestException("Audit service called without specifying event topic in the identifier");
         }
-        if (!auditEventTopicSchemas.containsKey(topic)) {
+        if (!eventTopicsMetaData.containsTopic(topic)) {
             throw new NotSupportedException("Audit service called with unknown event topic " + topic);
         }
         return topic;
@@ -267,7 +276,7 @@ final class AuditServiceImpl implements AuditService {
         return new BadRequestException(error).asPromise();
     }
 
-    private Collection<AuditEventHandler<?>> getAuditEventHandlersForEvent(final String auditEvent) {
+    private Collection<AuditEventHandler> getAuditEventHandlersForEvent(final String auditEvent) {
         if (auditEventHandlersByTopic.containsKey(auditEvent)) {
             return auditEventHandlersByTopic.get(auditEvent);
         } else {
@@ -282,7 +291,7 @@ final class AuditServiceImpl implements AuditService {
     }
 
     @Override
-    public AuditEventHandler<?> getRegisteredHandler(String handlerName) throws ServiceUnavailableException {
+    public AuditEventHandler getRegisteredHandler(String handlerName) throws ServiceUnavailableException {
         checkLifecycleStateIsRunning();
         return auditEventHandlersByName.get(handlerName);
     }
@@ -296,16 +305,16 @@ final class AuditServiceImpl implements AuditService {
     @Override
     public Set<String> getKnownTopics() throws ServiceUnavailableException {
         checkLifecycleStateIsRunning();
-        return auditEventTopicSchemas.keySet();
+        return eventTopicsMetaData.getTopics();
     }
 
     @Override
     public void startup() throws ServiceUnavailableException {
         switch (lifecycleState) {
             case STARTING:
-                for (Map.Entry<String, AuditEventHandler<?>> entry : auditEventHandlersByName.entrySet()) {
+                for (Map.Entry<String, AuditEventHandler> entry : auditEventHandlersByName.entrySet()) {
                     String handlerName = entry.getKey();
-                    AuditEventHandler<?> handler = entry.getValue();
+                    AuditEventHandler handler = entry.getValue();
                     try {
                         handler.startup();
                     } catch (ResourceException e) {
@@ -338,9 +347,9 @@ final class AuditServiceImpl implements AuditService {
                 lifecycleState = LifecycleState.SHUTDOWN;
                 break;
             case RUNNING:
-                for (Map.Entry<String, AuditEventHandler<?>> entry : auditEventHandlersByName.entrySet()) {
+                for (Map.Entry<String, AuditEventHandler> entry : auditEventHandlersByName.entrySet()) {
                     String handlerName = entry.getKey();
-                    AuditEventHandler<?> handler = entry.getValue();
+                    AuditEventHandler handler = entry.getValue();
                     try {
                         handler.shutdown();
                     } catch (ResourceException e) {
@@ -374,7 +383,7 @@ final class AuditServiceImpl implements AuditService {
     /**
      * Substitute {@link AuditEventHandler} to use when no query handler is available.
      */
-    private class NullQueryHandler implements AuditEventHandler<EventHandlerConfiguration> {
+    private class NullQueryHandler implements AuditEventHandler {
 
         private final String errorMessage;
 
@@ -388,11 +397,6 @@ final class AuditServiceImpl implements AuditService {
         }
 
         @Override
-        public void configure(EventHandlerConfiguration config) throws ResourceException {
-            throw new UnsupportedOperationException("Unsupported.");
-        }
-
-        @Override
         public void startup() throws ResourceException {
             throw new UnsupportedOperationException("Unsupported.");
         }
@@ -403,12 +407,12 @@ final class AuditServiceImpl implements AuditService {
         }
 
         @Override
-        public void setAuditEventsMetaData(Map<String, JsonValue> auditEvents) {
+        public String getName() {
             throw new UnsupportedOperationException("Unsupported.");
         }
 
         @Override
-        public void setDependencyProvider(DependencyProvider dependencyProvider) {
+        public Set<String> getHandledTopics() {
             throw new UnsupportedOperationException("Unsupported.");
         }
 

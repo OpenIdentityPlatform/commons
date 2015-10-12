@@ -19,6 +19,7 @@ package org.forgerock.audit.events.handlers;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.*;
 
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.QueryRequest;
@@ -29,13 +30,20 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
+import java.util.Collections;
+
 /**
  * An event handler that does nothing.
  * <p>
  * The purpose of this handler is mainly to be able to assess performance of the Audit Service alone, without
  * the cost implied by the actual handlers.
  */
-public class NullAuditEventHandler extends AuditEventHandlerBase<EventHandlerConfiguration> {
+public class NullAuditEventHandler extends AuditEventHandlerBase {
+
+    public NullAuditEventHandler() {
+        super("NullAuditEventHandler",
+                new EventTopicsMetaData(Collections.<String, JsonValue>emptyMap()), Collections.<String>emptySet());
+    }
 
     @Override
     public void startup() throws ResourceException {
@@ -44,11 +52,6 @@ public class NullAuditEventHandler extends AuditEventHandlerBase<EventHandlerCon
 
     @Override
     public void shutdown() throws ResourceException {
-        // nothing to do
-    }
-
-    @Override
-    public void configure(final EventHandlerConfiguration config) throws ResourceException {
         // nothing to do
     }
 

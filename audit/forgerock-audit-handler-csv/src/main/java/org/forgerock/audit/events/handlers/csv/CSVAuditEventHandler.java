@@ -35,9 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.audit.events.AuditEventHelper;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
@@ -51,6 +50,7 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.time.Duration;
@@ -64,17 +64,18 @@ import org.supercsv.prefs.CsvPreference;
 import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.util.CsvContext;
 
+import javax.inject.Inject;
+
 /**
  * Handles AuditEvents by writing them to a CSV file.
  */
-public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHandlerConfiguration> {
+public class CSVAuditEventHandler extends AuditEventHandlerBase {
 
     private static final Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
-    private static final ObjectMapper mapper;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
-    private Map<String, JsonValue> auditEvents;
-    private String auditLogDirectory;
-    private CsvPreference csvPreference;
+    private final CSVAuditEventHandlerConfiguration configuration;
+    private final CsvPreference csvPreference;
     private final Map<String, CsvWriter> writers = new HashMap<>();
     private final Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
     /** Caches a JSON pointer for each field. */
@@ -82,30 +83,66 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     /** Caches the dot notation for each field. */
     private final Map<String, String> fieldDotNotationByField = new HashMap<>();
 
-    private CSVAuditEventHandlerConfiguration config;
-    private boolean secure;
-    private String keystoreFilename;
-    private String keystorePassword;
-    private Duration signatureInterval;
+    /**
+     * Create a new CSVAuditEventHandler instance.
+     *
+     * @param configuration
+     *          Configuration parameters that can be adjusted by system administrators.
+     * @param eventTopicsMetaData
+     *          Meta-data for all audit event topics.
+     */
+    @Inject
+    public CSVAuditEventHandler(
+            final CSVAuditEventHandlerConfiguration configuration,
+            final EventTopicsMetaData eventTopicsMetaData) {
 
-    static {
-        JsonFactory jsonFactory = new JsonFactory();
-        mapper = new ObjectMapper(jsonFactory);
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
+        this.configuration = configuration;
+        this.csvPreference = createCsvPreference(this.configuration);
+        if (configuration.getSecurity().isEnabled()) {
+            Duration duration = configuration.getSecurity().getSignatureIntervalDuration();
+            Reject.ifTrue(duration.isZero() || duration.isUnlimited(),
+                    "The signature interval can't be zero or unlimited");
+        }
+        for (String topic : this.eventTopicsMetaData.getTopics()) {
+            try {
+                Set<String> fieldOrder = getFieldOrder(topic, this.eventTopicsMetaData);
+                cacheFieldsInformation(fieldOrder);
+                fieldOrderByTopic.put(topic, fieldOrder);
+            } catch (ResourceException e) {
+                logger.error(topic + " topic schema meta-data misconfigured.");
+            }
+        }
+    }
+
+    private CsvPreference createCsvPreference(final CSVAuditEventHandlerConfiguration config) {
+        return new CsvPreference.Builder(
+                config.getFormatting().getQuoteChar(),
+                config.getFormatting().getDelimiterChar(),
+                config.getFormatting().getEndOfLineSymbols())
+                .useQuoteMode(new AlwaysQuoteMode())
+                .build();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void setAuditEventsMetaData(final Map<String, JsonValue> auditEvents) {
-        this.auditEvents = auditEvents;
-
-        for (String topic : auditEvents.keySet()) {
+    public void startup() throws ResourceException {
+        logger.info("Audit logging to: {}", configuration.getLogDirectory());
+        File file = new File(configuration.getLogDirectory());
+        if (!file.isDirectory()) {
+            if (file.exists()) {
+                logger.warn("Specified path is file but should be a directory: " + configuration.getLogDirectory());
+            } else {
+                if (!file.mkdirs()) {
+                    logger.warn("Unable to create audit directory in the path: " + configuration.getLogDirectory());
+                }
+            }
+        }
+        for (String topic : eventTopicsMetaData.getTopics()) {
             File auditLogFile = getAuditLogFile(topic);
             try {
-                Set<String> fieldOrder = getFieldOrder(topic, auditEvents);
-                cacheFieldsInformation(fieldOrder);
-                fieldOrderByTopic.put(topic, fieldOrder);
                 openWriter(topic, auditLogFile);
             } catch (IOException e) {
                 logger.error("Error when creating audit file: " + auditLogFile, e);
@@ -121,65 +158,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 fieldDotNotationByField.put(field, jsonPointerToDotNotation(field));
             }
         }
-    }
-
-    /**
-     * Configure the CSVAuditEventHandler.
-     * {@inheritDoc}
-     */
-    @Override
-    public void configure(final CSVAuditEventHandlerConfiguration config) throws ResourceException {
-        synchronized (this) {
-            cleanup();
-
-            this.config = config;
-            auditLogDirectory = config.getLogDirectory();
-            logger.info("Audit logging to: {}", auditLogDirectory);
-
-            File file = new File(auditLogDirectory);
-            if (!file.isDirectory()) {
-                if (file.exists()) {
-                    logger.warn("Specified path is file but should be a directory: " + auditLogDirectory);
-                } else {
-                    if (!file.mkdirs()) {
-                        logger.warn("Unable to create audit directory in the path: " + auditLogDirectory);
-                    }
-                }
-            }
-            csvPreference = createCsvPreference(config);
-            final CSVAuditEventHandlerConfiguration.CsvSecurity security = config.getSecurity();
-            secure = security.isEnabled();
-            if (secure) {
-                keystoreFilename = security.getFilename();
-                keystorePassword = security.getPassword();
-                Duration duration = Duration.duration(security.getSignatureInterval());
-                if (duration.isZero() || duration.isUnlimited()) {
-                    throw ResourceException.getException(ResourceException.NOT_SUPPORTED,
-                                                         "The signature interval can't be zero nor unlimited.");
-                }
-                signatureInterval = duration;
-
-            }
-        }
-    }
-
-    private CsvPreference createCsvPreference(final CSVAuditEventHandlerConfiguration config) {
-        CSVAuditEventHandlerConfiguration.CsvFormatting csvFormatting = config.getFormatting();
-        final CsvPreference.Builder builder = new CsvPreference.Builder(csvFormatting.getQuoteChar(),
-                                                                        csvFormatting.getDelimiterChar(),
-                                                                        csvFormatting.getEndOfLineSymbols());
-
-        builder.useQuoteMode(new AlwaysQuoteMode());
-        return builder.build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void startup() throws ResourceException {
-        // TODO: Move all I/O initialization here to avoid possible interaction with another instance
-        // that references the same set of files.
     }
 
     /** {@inheritDoc} */
@@ -205,7 +183,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     private void checkTopic(String topic) throws ResourceException {
-        final JsonValue auditEventProperties = AuditEventHelper.getAuditEventProperties(auditEvents.get(topic));
+        final JsonValue auditEventProperties = getAuditEventProperties(eventTopicsMetaData.getSchema(topic));
         if (auditEventProperties == null || auditEventProperties.isNull()) {
             throw new InternalServerErrorException("No audit event properties defined for audit event: " + topic);
         }
@@ -242,40 +220,35 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                     throws IOException, InternalServerErrorException {
         writeEntry(topic, csvWriter, event);
         // TODO: uncomment the following statements once super-csv is released with unwrapped buffer
-        // EventBufferingConfiguration bufferConfig = config.getBuffering();
+        // EventBufferingConfiguration bufferConfig = configuration.getBuffering();
         //if (!bufferConfig.isEnabled() || !bufferConfig.isAutoFlush()) {
             csvWriter.flush();
         //}
         return csvWriter;
     }
 
-    private Set<String> getFieldOrder(final String topic, final Map<String, JsonValue> auditEvents)
+    private Set<String> getFieldOrder(final String topic, final EventTopicsMetaData eventTopicsMetaData)
             throws ResourceException {
         final Set<String> fieldOrder = new LinkedHashSet<>();
-        fieldOrder.addAll(generateJsonPointers(AuditEventHelper.getAuditEventSchema(auditEvents.get(topic))));
+        fieldOrder.addAll(generateJsonPointers(getAuditEventSchema(eventTopicsMetaData.getSchema(topic))));
         return fieldOrder;
     }
 
-    private void openWriter(final String topic, File auditFile)
-            throws IOException {
+    private void openWriter(final String topic, File auditFile) throws IOException {
         final CsvWriter writer = createCsvMapWriter(auditFile, topic);
         writers.put(topic, writer);
     }
 
     private synchronized CsvWriter createCsvMapWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
-        if (secure) {
-            return new CsvWriter(auditFile, headers, csvPreference, config.getBuffering(), keystoreFilename,
-                    keystorePassword, signatureInterval);
-        } else {
-            return new CsvWriter(auditFile, headers, csvPreference, config.getBuffering(), null, null, null);
-        }
+        return new CsvWriter(
+                auditFile, headers, csvPreference, configuration.getBuffering(), configuration.getSecurity());
     }
 
     private ICsvMapReader createCsvMapReader(final File auditFile) throws IOException {
         CsvMapReader csvReader = new CsvMapReader(new FileReader(auditFile), csvPreference);
 
-        if (secure) {
+        if (configuration.getSecurity().isEnabled()) {
             return new CsvSecureMapReader(csvReader);
         } else {
             return csvReader;
@@ -332,11 +305,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     private File getAuditLogFile(final String type) {
-        return new File(auditLogDirectory, type + ".csv");
+        return new File(configuration.getLogDirectory(), type + ".csv");
     }
 
-    private void writeEntry(final String topic, final CsvWriter csvWriter, final JsonValue obj)
-            throws IOException {
+    private void writeEntry(final String topic, final CsvWriter csvWriter, final JsonValue obj) throws IOException {
         Set<String> fieldOrder = fieldOrderByTopic.get(topic);
         Map<String, String> cells = new HashMap<>(fieldOrder.size());
         for (String key : fieldOrder) {
@@ -411,7 +383,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private CellProcessor[] createCellProcessors(final String auditEntryType, final String[] headers)
             throws ResourceException {
         final List<CellProcessor> cellProcessors = new ArrayList<>();
-        final JsonValue auditEvent = auditEvents.get(auditEntryType);
+        final JsonValue auditEvent = eventTopicsMetaData.getSchema(auditEntryType);
 
         for (String header: headers) {
             final String propertyType = getPropertyType(auditEvent, new JsonPointer(header));
@@ -456,7 +428,6 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     }
 
     private void cleanup() throws ResourceException {
-        auditLogDirectory = null;
         try {
             for (CsvWriter csvWriter : writers.values()) {
                 if (csvWriter != null) {

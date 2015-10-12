@@ -16,24 +16,19 @@
 
 package org.forgerock.audit;
 
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.audit.events.EventTopicsMetaDataBuilder.coreTopicSchemas;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.json.JsonValue;
+import org.forgerock.audit.events.handlers.AuditEventHandlerFactory;
+import org.forgerock.audit.events.handlers.DependencyProviderAuditEventHandlerFactory;
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.util.Reject;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -45,16 +40,14 @@ import java.util.Set;
 public final class AuditServiceBuilder {
 
     private static final Logger logger = LoggerFactory.getLogger(AuditServiceBuilder.class);
-    private static final String SCHEMA = "schema";
-    private static final String PROPERTIES = "properties";
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final AuditServiceFactory auditServiceFactory;
     private AuditServiceConfiguration auditServiceConfiguration = new AuditServiceConfiguration();
-    private JsonValue coreTopicSchemaExtensions = json(object());
-    private JsonValue additionalTopicSchemas = json(object());
-    private DependencyProvider dependencyProvider = new DependencyProviderBase();
+    private AuditEventHandlerFactory auditEventHandlerFactory =
+            new DependencyProviderAuditEventHandlerFactory(new DependencyProviderBase());
     private Map<String, HandlerRegistration> handlerRegistrations = new LinkedHashMap<>();
+    private Set<AuditEventHandler> prebuiltHandlers = new LinkedHashSet<>();
+    private EventTopicsMetaData eventTopicsMetaData = coreTopicSchemas().build();
 
     @VisibleForTesting
     AuditServiceBuilder(AuditServiceFactory auditServiceFactory) {
@@ -85,77 +78,9 @@ public final class AuditServiceBuilder {
         return this;
     }
 
-    /**
-     * Specifies additional fields that should be added to the schemas for core event topics.
-     * <p/>
-     * The extension must not redefine a property already defined in the core event topics.
-     * <p>
-     * Example of a valid extension:
-     * <pre>
-     *  {
-     *    "access": {
-     *      "schema": {
-     *        "$schema": "http://json-schema.org/draft-04/schema#",
-     *        "id": "/",
-     *        "type": "object",
-     *        "properties": {
-     *          "extraField": {
-     *            "type": "string"
-     *          }
-     *        }
-     *      }
-     *    }
-     *  }
-     * </pre>
-     *
-     * @param coreTopicSchemaExtensions
-     *          the extension of the core event topics.
-     * @return this builder for method-chaining.
-     */
-    public AuditServiceBuilder withCoreTopicSchemaExtensions(JsonValue coreTopicSchemaExtensions) {
-        this.coreTopicSchemaExtensions = coreTopicSchemaExtensions == null ? json(object()) : coreTopicSchemaExtensions;
-        return this;
-    }
-
-    /**
-     * Specifies schemas for additional topics.
-     * <p/>
-     * Custom schema must always include _id, timestamp, transactionId and eventName fields.
-     * <p/>
-     * Example of a valid schema:
-     * <pre>
-     * "customTopic": {
-     *   "schema": {
-     *     "$schema": "http://json-schema.org/draft-04/schema#",
-     *     "id": "/",
-     *     "type": "object",
-     *     "properties": {
-     *       "_id": {
-     *         "type": "string"
-     *       },
-     *       "timestamp": {
-     *         "type": "string"
-     *       },
-     *       "transactionId": {
-     *         "type": "string"
-     *       },
-     *       "eventName": {
-     *         "type": "string"
-     *       },
-     *       "customField": {
-     *         "type": "string"
-     *       }
-     *     }
-     *   }
-     * }
-     * </pre>
-     *
-     * @param additionalTopicSchemas
-     *          the schemas of the additional event topics.
-     * @return this builder for method-chaining.
-     */
-    public AuditServiceBuilder withAdditionalTopicSchemas(JsonValue additionalTopicSchemas) {
-        this.additionalTopicSchemas = additionalTopicSchemas == null ? json(object()) : additionalTopicSchemas;;
+    public AuditServiceBuilder withEventTopicsMetaData(EventTopicsMetaData eventTopicsMetaData) {
+        Reject.ifNull(eventTopicsMetaData, "Audit service event topic meta-data cannot be null");
+        this.eventTopicsMetaData = eventTopicsMetaData;
         return this;
     }
 
@@ -170,7 +95,20 @@ public final class AuditServiceBuilder {
      */
     public AuditServiceBuilder withDependencyProvider(DependencyProvider dependencyProvider) {
         Reject.ifNull(dependencyProvider, "Audit event handler DependencyProvider cannot be null");
-        this.dependencyProvider = dependencyProvider;
+        this.auditEventHandlerFactory = new DependencyProviderAuditEventHandlerFactory(dependencyProvider);
+        return this;
+    }
+
+    /**
+     * Register factory for creating instances of {@link AuditEventHandler}.
+     *
+     * @param auditEventHandlerFactory
+     *            the AuditEventHandlerFactory to register.
+     * @return this builder for method-chaining.
+     */
+    public AuditServiceBuilder withAuditEventHandlerFactory(AuditEventHandlerFactory auditEventHandlerFactory) {
+        Reject.ifNull(auditEventHandlerFactory, "AuditEventHandlerFactory cannot be null");
+        this.auditEventHandlerFactory = auditEventHandlerFactory;
         return this;
     }
 
@@ -178,27 +116,51 @@ public final class AuditServiceBuilder {
      * Register an AuditEventHandler. After that registration, that AuditEventHandler can be referred with the given
      * name. This AuditEventHandler will only be notified about the events specified in the parameter events.
      *
-     * @param handler
-     *            the AuditEventHandler to register.
-     * @param name
-     *            the name of the handler we want to register.
-     * @param topics
-     *            the event topics to which the handler should subscribe.
+     * @param clazz
+     *            the AuditEventHandler type to register.
+     * @param configuration
+     *            the handler configuration.
      * @throws AuditException
      *             if already asked to register a handler with the same name.
      * @return this builder for method-chaining.
      */
-    public AuditServiceBuilder withAuditEventHandler(AuditEventHandler<?> handler, String name, Set<String> topics)
-            throws AuditException {
+    public AuditServiceBuilder withAuditEventHandler(
+            Class<? extends AuditEventHandler> clazz, EventHandlerConfiguration configuration) throws AuditException {
 
-        Reject.ifNull(handler, "Audit event handler cannot be null");
-        Reject.ifNull(name, "Audit event handler name cannot be null");
+        Reject.ifNull(clazz, "Audit event handler clazz cannot be null");
+        Reject.ifNull(configuration, "Audit event handler configuration cannot be null");
+        Reject.ifNull(configuration.getName(), "Audit event handler name cannot be null");
 
+        rejectIfHandlerNameAlreadyTaken(configuration.getName());
+        handlerRegistrations.put(configuration.getName(), new HandlerRegistration<>(clazz, configuration));
+        return this;
+    }
+
+    /**
+     * Register an AuditEventHandler.
+     *
+     * @param auditEventHandler
+     *            the AuditEventHandler to register.
+     * @throws AuditException
+     *             if already asked to register a handler with the same name.
+     * @return this builder for method-chaining.
+     */
+    public AuditServiceBuilder withAuditEventHandler(AuditEventHandler auditEventHandler) throws AuditException {
+        Reject.ifNull(auditEventHandler, "Audit event handler cannot be null");
+        rejectIfHandlerNameAlreadyTaken(auditEventHandler.getName());
+        prebuiltHandlers.add(auditEventHandler);
+        return this;
+    }
+
+    private void rejectIfHandlerNameAlreadyTaken(String name) throws AuditException {
         if (handlerRegistrations.containsKey(name)) {
             throw new AuditException("There is already a handler registered for " + name);
         }
-        handlerRegistrations.put(name, new HandlerRegistration(handler, name, topics));
-        return this;
+        for (AuditEventHandler handler : prebuiltHandlers) {
+            if (handler.getName() != null && handler.getName().equals(name)) {
+                throw new AuditException("There is already a handler registered for " + name);
+            }
+        }
     }
 
     /**
@@ -228,117 +190,29 @@ public final class AuditServiceBuilder {
      * @return a new AuditService instance.
      */
     public AuditService build() {
-        Map<String, JsonValue> auditEventTopicSchemas = getAuditEventTopicSchemas();
-        return auditServiceFactory.newAuditService(
-                auditServiceConfiguration,
-                auditEventTopicSchemas,
-                getAuditEventHandlersByName(),
-                getAuditEventHandlersByTopic(auditEventTopicSchemas));
+        Set<AuditEventHandler> handlers = buildAuditEventHandlers(eventTopicsMetaData);
+        return auditServiceFactory.newAuditService(auditServiceConfiguration, eventTopicsMetaData, handlers);
     }
 
-    private Map<String, JsonValue> getAuditEventTopicSchemas() {
-        Map<String, JsonValue> auditEventTopicSchemas = readCoreEventTopicSchemas();
-        extendCoreEventTopicsSchemas(auditEventTopicSchemas);
-        addCustomEventTopicSchemas(auditEventTopicSchemas);
-        return auditEventTopicSchemas;
-    }
 
-    private Map<String, JsonValue> readCoreEventTopicSchemas() {
-        Map<String, JsonValue> auditEvents = new HashMap<>();
-        try (final InputStream configStream = getResourceAsStream("/org/forgerock/audit/events.json")) {
-            final JsonValue predefinedEventTypes = new JsonValue(MAPPER.readValue(configStream, Map.class));
-            for (String eventTypeName : predefinedEventTypes.keys()) {
-                auditEvents.put(eventTypeName, predefinedEventTypes.get(eventTypeName));
-            }
-            return auditEvents;
-        } catch (IOException ioe) {
-            logger.error("Error while parsing core event topic schema definitions", ioe);
-            throw new RuntimeException(ioe);
-        }
-    }
-
-    private InputStream getResourceAsStream(String resourcePath) {
-        return new BufferedInputStream(getClass().getResourceAsStream(resourcePath));
-    }
-
-    private void extendCoreEventTopicsSchemas(Map<String, JsonValue> auditEventTopicSchemas) {
-        for (String topic : coreTopicSchemaExtensions.keys()) {
-            if (auditEventTopicSchemas.containsKey(topic)) {
-                JsonValue coreEventType = auditEventTopicSchemas.get(topic);
-                JsonValue coreProperties = coreEventType.get(SCHEMA).get(PROPERTIES);
-                JsonValue extendedProperties = coreTopicSchemaExtensions.get(topic).get(SCHEMA).get(PROPERTIES);
-
-                for (String property : extendedProperties.keys()) {
-                    if (coreProperties.isDefined(property)) {
-                        logger.warn("Cannot override {} property of {} topic", property, topic);
-                    } else {
-                        coreProperties.add(property, extendedProperties.get(property));
-                    }
-                }
-            }
-        }
-    }
-
-    private void addCustomEventTopicSchemas(Map<String, JsonValue> auditEventTopicSchemas) {
-        for (String topic : additionalTopicSchemas.keys()) {
-            if (!auditEventTopicSchemas.containsKey(topic)) {
-                JsonValue additionalTopicSchema = additionalTopicSchemas.get(topic);
-                if (!additionalTopicSchema.get(SCHEMA).isDefined(PROPERTIES)) {
-                    logger.warn("{} topic schema definition is invalid", topic);
-                } else {
-                    auditEventTopicSchemas.put(topic, additionalTopicSchema);
-                }
-            } else {
-                logger.warn("Cannot override pre-defined event topic {}", topic);
-            }
-        }
-    }
-
-    /**
-     * Generate lists of AuditEventHandlers that should receive events for each topic.
-     * <p/>
-     * NB. As a side-effect of calling this method, handlers get topic schemas and dependency provider.
-     */
-    private Map<String, Set<AuditEventHandler<?>>> getAuditEventHandlersByTopic(
-            Map<String, JsonValue> auditEventTopicSchemas) {
-
-        Map<String, Set<AuditEventHandler<?>>> handlersByTopic = new HashMap<>();
-
-        for (String topic : auditEventTopicSchemas.keySet()) {
-            // Use a LinkedHashSet so that iteration order follows order in which handlers were defined
-            handlersByTopic.put(topic, new LinkedHashSet<AuditEventHandler<?>>());
-        }
-
+    private Set<AuditEventHandler> buildAuditEventHandlers(final EventTopicsMetaData eventTopicsMetaData) {
+        Set<AuditEventHandler> handlers = new LinkedHashSet<>(prebuiltHandlers);
         for (HandlerRegistration handlerRegistration : handlerRegistrations.values()) {
-            final AuditEventHandler<?> handler = handlerRegistration.handler;
-
-            logger.info("Registering {} handler '{}' for {} topics", handlerRegistration.handler.getClass().getName(),
-                    handlerRegistration.name, handlerRegistration.topics.toString());
-
-            Map<String, JsonValue> filteredAuditEventTopicSchemas = new HashMap<>();
-            for (String topic : handlerRegistration.topics) {
-                if (!auditEventTopicSchemas.containsKey(topic)) {
-                    logger.error("unknown audit event topic : {}", topic);
-                    continue;
-                }
-                filteredAuditEventTopicSchemas.put(topic, auditEventTopicSchemas.get(topic));
-                handlersByTopic.get(topic).add(handler);
+            logger.info("Registering handler '{}' for {} topics",
+                    handlerRegistration.configuration.getName(),
+                    handlerRegistration.configuration.getTopics().toString());
+            try {
+                handlers.add(auditEventHandlerFactory.create(
+                        handlerRegistration.configuration.getName(),
+                        handlerRegistration.clazz,
+                        handlerRegistration.configuration,
+                        eventTopicsMetaData));
+            } catch (AuditException e) {
+                logger.error(e.getMessage(), e);
             }
-            handler.setAuditEventsMetaData(filteredAuditEventTopicSchemas);
-            handler.setDependencyProvider(dependencyProvider);
         }
-
-        logger.info("Registered {}", handlersByTopic.toString());
-
-        return handlersByTopic;
-    }
-
-    private Map<String, AuditEventHandler<?>> getAuditEventHandlersByName() {
-        Map<String, AuditEventHandler<?>> handlersByName = new HashMap<>();
-        for (HandlerRegistration handlerRegistration : handlerRegistrations.values()) {
-            handlersByName.put(handlerRegistration.name, handlerRegistration.handler);
-        }
-        return handlersByName;
+        logger.info("Registered {}", handlers.toString());
+        return handlers;
     }
 
     /**
@@ -349,18 +223,14 @@ public final class AuditServiceBuilder {
      * is available for validation of the mapping from topics to handlers without constraining
      * the order in which the builder's methods should be called.
      */
-    private static class HandlerRegistration {
+    private static class HandlerRegistration<C extends EventHandlerConfiguration> {
 
-        private final AuditEventHandler<?> handler;
-        private final String name;
-        private final Set<String> topics;
+        final Class<? extends AuditEventHandler> clazz;
+        final C configuration;
 
-        private HandlerRegistration(AuditEventHandler<?> handler, String name, Set<String> topics) {
-            this.handler = handler;
-            this.name = name;
-            this.topics = topics == null
-                    ? Collections.<String>emptySet()
-                    : Collections.unmodifiableSet(new HashSet<>(topics));
+        private HandlerRegistration(Class<? extends AuditEventHandler> clazz, C configuration) {
+            this.clazz = clazz;
+            this.configuration = configuration;
         }
     }
 
@@ -372,12 +242,9 @@ public final class AuditServiceBuilder {
 
         AuditService newAuditService(
                 final AuditServiceConfiguration configuration,
-                final Map<String, JsonValue> auditEventTopicSchemas,
-                final Map<String, AuditEventHandler<?>> auditEventHandlersByName,
-                final Map<String, Set<AuditEventHandler<?>>> auditEventHandlersByTopic) {
-
-            return new AuditServiceImpl(
-                    configuration, auditEventTopicSchemas, auditEventHandlersByName, auditEventHandlersByTopic);
+                final EventTopicsMetaData eventTopicsMetaData,
+                final Set<AuditEventHandler> auditEventHandlers) {
+            return new AuditServiceImpl(configuration, eventTopicsMetaData, auditEventHandlers);
         }
     }
 }
