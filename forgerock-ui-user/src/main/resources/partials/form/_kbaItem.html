@@ -4,7 +4,7 @@
             <div class="panel-body kbaSet">
 
                 <div class="form-group">
-                    <select name="kba[{{index}}].questionId" class="form-control input-lg kbaQuestions" required data-validator="required">
+                    <select name="kba[{{index}}].questionId" class="form-control input-lg kbaQuestions" data-validator="required">
                         <option value="">{{t 'common.user.kba.selectQuestion'}}...</option>
                     {{#each requirements.properties.kba.questions}}
                         <option value="{{id}}">{{mapTranslate question}}</option>
@@ -15,12 +15,12 @@
 
                 <div class="form-group custom-question hidden">
                     <label class="sr-only" for="input-customQuestion_{{index}}">{{t 'common.user.kba.customQuestion'}}</label>
-                    <input type="text" placeholder="{{t 'common.user.kba.customQuestion'}}" id="input-customQuestion_{{index}}" name="kba[{{index}}].customQuestion" class="form-control input-lg" required data-validator="required" data-validator-event="keyup" />
+                    <input type="text" placeholder="{{t 'common.user.kba.customQuestion'}}" id="input-customQuestion_{{index}}" name="kba[{{index}}].customQuestion" class="form-control input-lg" data-validator="required" data-validator-event="keyup" />
                 </div>
 
                 <div class="form-group">
                     <label class="sr-only" for="input-answer_{{index}}">{{t 'common.user.kba.answer'}}</label>
-                    <input type="text" placeholder="{{t 'common.user.kba.answer'}}" id="input-answer_{{index}}" name="kba[{{index}}].answer" class="form-control input-lg" required data-validator="required" data-validator-event="keyup" />
+                    <input type="text" placeholder="{{t 'common.user.kba.answer'}}" id="input-answer_{{index}}" name="kba[{{index}}].answer" class="form-control input-lg" data-validator="required" data-validator-event="keyup" />
                 </div>
 
             </div>

@@ -55,7 +55,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
         baseTemplate: "templates/user/AnonymousProcessBaseTemplate.html",
         template: "templates/user/AnonymousProcessWrapper.html",
         events: {
-            "click input[type=submit]": "formSubmit",
+            "submit form": "formSubmit",
             "click #restart": "restartProcess",
             "onValidate": "onValidate"
         },
