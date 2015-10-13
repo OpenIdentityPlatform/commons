@@ -21,7 +21,7 @@
         <artifactId>forgerock-rest</artifactId>
         <version>3.0.0-SNAPSHOT</version>
     </parent>
-    <artifactId>json-schema</artifactId>
+    <artifactId>json-schema-core</artifactId>
     <packaging>bundle</packaging>
     <name>JSON Schema Draft-04 validator</name>
     <description>Simple tool to validate objects with draft-fge-json-schema-validation-00.</description>

@@ -65,7 +65,7 @@
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
     </properties>
     <modules>
-        <module>json-schema</module>
+        <module>json-schema-core</module>
         <module>json-schema-cli</module>
     </modules>
     <dependencies>

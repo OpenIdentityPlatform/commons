@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-schema</artifactId>
+            <artifactId>json-schema-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
