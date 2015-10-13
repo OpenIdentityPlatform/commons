@@ -67,4 +67,9 @@ public final class VerifyEmailAccountStage extends AbstractEmailVerificationStag
         return email;
     }
 
+    @Override
+    public Class<VerifyEmailAccountConfig> getConfigClass() {
+        return VerifyEmailAccountConfig.class;
+    }
+
 }

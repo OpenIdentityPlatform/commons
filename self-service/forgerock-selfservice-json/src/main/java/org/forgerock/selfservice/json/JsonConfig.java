@@ -36,9 +36,9 @@ import org.forgerock.selfservice.stages.user.UserDetailsConfig;
  */
 public final class JsonConfig {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     static {
-        objectMapper
+        OBJECT_MAPPER
                 .registerModule(
                         new SimpleModule("SelfServiceModule", Version.unknownVersion())
                                 .addDeserializer(StorageType.class, new StorageTypeDeserializer()))
@@ -68,6 +68,6 @@ public final class JsonConfig {
      *         the one built from the provided json
      */
     public static ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) {
-        return objectMapper.convertValue(json.getObject(), ProcessInstanceConfig.class);
+        return OBJECT_MAPPER.convertValue(json.getObject(), ProcessInstanceConfig.class);
     }
 }

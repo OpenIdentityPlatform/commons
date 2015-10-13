@@ -82,4 +82,9 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
         }
     }
 
+    @Override
+    public Class<UserRegistrationConfig> getConfigClass() {
+        return UserRegistrationConfig.class;
+    }
+
 }

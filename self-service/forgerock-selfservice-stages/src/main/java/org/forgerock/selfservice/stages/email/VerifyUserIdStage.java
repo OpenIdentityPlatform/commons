@@ -123,4 +123,9 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
         return user.isEmpty() ? null : user.get(0);
     }
 
+    @Override
+    public Class<VerifyUserIdConfig> getConfigClass() {
+        return VerifyUserIdConfig.class;
+    }
+
 }

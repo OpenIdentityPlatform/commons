@@ -100,4 +100,9 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
         }
     }
 
+    @Override
+    public Class<ResetStageConfig> getConfigClass() {
+        return ResetStageConfig.class;
+    }
+
 }

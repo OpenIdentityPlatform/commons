@@ -230,4 +230,9 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
         return context.getState(KEY_STATE_ANSWER_VS_QUESTION).asMap(String.class);
     }
 
+    @Override
+    public Class<SecurityAnswerVerificationConfig> getConfigClass() {
+        return SecurityAnswerVerificationConfig.class;
+    }
+
 }

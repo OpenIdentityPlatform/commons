@@ -107,4 +107,9 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
         }
     }
 
+    @Override
+    public Class<UserDetailsConfig> getConfigClass() {
+        return UserDetailsConfig.class;
+    }
+
 }

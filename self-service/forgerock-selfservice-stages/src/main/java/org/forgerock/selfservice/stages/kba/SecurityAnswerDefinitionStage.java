@@ -151,4 +151,9 @@ public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<Securi
         return user;
     }
 
+    @Override
+    public Class<SecurityAnswerDefinitionConfig> getConfigClass() {
+        return SecurityAnswerDefinitionConfig.class;
+    }
+
 }
