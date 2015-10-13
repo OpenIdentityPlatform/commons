@@ -77,6 +77,10 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private CsvPreference csvPreference;
     private final Map<String, CsvWriter> writers = new HashMap<>();
     private final Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
+    /** Caches a JSON pointer for each field. */
+    private final Map<String, JsonPointer> jsonPointerByField = new HashMap<>();
+    /** Caches the dot notation for each field. */
+    private final Map<String, String> fieldDotNotationByField = new HashMap<>();
 
     private CSVAuditEventHandlerConfiguration config;
     private boolean secure;
@@ -100,10 +104,21 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
             File auditLogFile = getAuditLogFile(topic);
             try {
                 Set<String> fieldOrder = getFieldOrder(topic, auditEvents);
+                cacheFieldsInformation(fieldOrder);
                 fieldOrderByTopic.put(topic, fieldOrder);
                 openWriter(topic, auditLogFile);
             } catch (IOException e) {
                 logger.error("Error when creating audit file: " + auditLogFile, e);
+            }
+        }
+    }
+
+    /** Pre-compute field related information to be used for each event publishing. */
+    private void cacheFieldsInformation(Set<String> fieldOrder) {
+        for (String field : fieldOrder) {
+            if (!jsonPointerByField.containsKey(field)) {
+                jsonPointerByField.put(field, new JsonPointer(field));
+                fieldDotNotationByField.put(field, jsonPointerToDotNotation(field));
             }
         }
     }
@@ -325,12 +340,22 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
         Set<String> fieldOrder = fieldOrderByTopic.get(topic);
         Map<String, String> cells = new HashMap<>(fieldOrder.size());
         for (String key : fieldOrder) {
-            final String value = extractValue(obj, key);
-            if (value != null && !value.isEmpty()) {
-                cells.put(jsonPointerToDotNotation(key), value);
+            final String value = extractFieldValue(obj, key);
+            if (!value.isEmpty()) {
+                cells.put(fieldDotNotationByField.get(key), value);
             }
         }
         csvWriter.writeRow(cells);
+    }
+
+    private String extractFieldValue(final JsonValue json, final String fieldName) {
+        JsonValue value = json.get(jsonPointerByField.get(fieldName));
+        if (value == null) {
+            return "";
+        } else if (value.isString()) {
+            return value.asString();
+        }
+        return value.toString();
     }
 
     private void resetWriter(final String auditEventType, final CsvWriter writerToReset) {
