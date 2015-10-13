@@ -28,7 +28,7 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-crypto</artifactId>
+            <artifactId>json-crypto-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

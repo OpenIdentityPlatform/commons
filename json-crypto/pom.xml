@@ -65,7 +65,7 @@
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
     </properties>
     <modules>
-        <module>json-crypto</module>
+        <module>json-crypto-core</module>
         <module>json-crypto-cli</module>
     </modules>
     <dependencies>
