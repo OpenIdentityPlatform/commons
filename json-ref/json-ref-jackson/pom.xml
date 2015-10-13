@@ -32,7 +32,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-ref</artifactId>
+            <artifactId>json-ref-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

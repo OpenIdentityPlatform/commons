@@ -65,7 +65,7 @@
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
     </properties>
     <modules>
-        <module>json-ref</module>
+        <module>json-ref-core</module>
         <module>json-ref-jackson</module>
     </modules>
     <dependencies>
