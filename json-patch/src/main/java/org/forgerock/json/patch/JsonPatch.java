@@ -16,17 +16,15 @@
 
 package org.forgerock.json.patch;
 
-// Java SE
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-// JSON Fluent
-import org.forgerock.json.fluent.JsonException;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 
 /**
  * Processes partial modifications to JSON values. Implements
@@ -42,18 +40,18 @@ public final class JsonPatch {
     /**
      * Path to the "op" attribute of a patch entry. Required.
      */
-    private static final JsonPointer OP_PTR = new JsonPointer("/op");
+    public static final JsonPointer OP_PTR = new JsonPointer("/op");
 
     /**
      * Path to the "path" attribute of a patch entry. Required.
      */
-    private static final JsonPointer PATH_PTR = new JsonPointer("/path");
+    public static final JsonPointer PATH_PTR = new JsonPointer("/path");
 
     /**
      * Path to the "from" attribute of a patch entry. Required only for "move" and "copy"
      * operations. Ignored for all others.
      */
-    private static final JsonPointer FROM_PTR = new JsonPointer("/from");
+    public static final JsonPointer FROM_PTR = new JsonPointer("/from");
 
     /**
      * Path to the "value" attribute of a patch entry. Required for "add", "replace" and

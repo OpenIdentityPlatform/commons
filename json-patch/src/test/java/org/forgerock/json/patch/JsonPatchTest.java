@@ -16,16 +16,12 @@
 
 package org.forgerock.json.patch;
 
-// FEST-Assert
-import static org.fest.assertions.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.*;
 
-// TestNG
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.testng.annotations.Test;
-
-// JSON Fluent
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
-import static org.forgerock.json.fluent.JsonValue.*;
 
 public class JsonPatchTest {
 

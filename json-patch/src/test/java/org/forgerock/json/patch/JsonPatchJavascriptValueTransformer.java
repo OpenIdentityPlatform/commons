@@ -16,9 +16,9 @@
 
 package org.forgerock.json.patch;
 
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
-import org.forgerock.json.fluent.JsonValueException;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 
@@ -46,7 +46,7 @@ public class JsonPatchJavascriptValueTransformer implements JsonPatchValueTransf
      *               for use by custom transforms.
      * @param op the patch operation.
      * @return
-     * @throws org.forgerock.json.fluent.JsonValueException
+     * @throws org.forgerock.json.JsonValueException
      */
     public Object getTransformedValue(JsonValue target, JsonValue op) throws JsonValueException {
         if (op.get(JsonPatch.VALUE_PTR) != null) {
