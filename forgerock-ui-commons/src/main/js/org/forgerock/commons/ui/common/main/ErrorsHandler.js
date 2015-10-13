@@ -123,7 +123,7 @@ define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
             handler = handlers[handlerName];
 
             if (!_.isUndefined(handler.field)) {
-                if(error[handler.field] === handler[handler.value]) {
+                if(error[handler.field] === handler.value) {
                     return handler;
                 }
             }
