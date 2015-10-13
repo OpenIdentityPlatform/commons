@@ -51,6 +51,10 @@
             <artifactId>forgerock-util</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-client-apache-sync</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>

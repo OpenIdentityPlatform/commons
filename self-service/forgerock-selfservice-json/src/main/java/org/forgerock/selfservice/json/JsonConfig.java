@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
+import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
@@ -44,6 +45,7 @@ public final class JsonConfig {
                                 .addDeserializer(StorageType.class, new StorageTypeDeserializer()))
                 .registerSubtypes(
                         // stage config object mapping
+                        new NamedType(CaptchaStageConfig.class, CaptchaStageConfig.NAME),
                         new NamedType(ResetStageConfig.class, ResetStageConfig.NAME),
                         new NamedType(UserRegistrationConfig.class, UserRegistrationConfig.NAME),
                         new NamedType(VerifyUserIdConfig.class, VerifyUserIdConfig.NAME),

@@ -22,9 +22,11 @@ import static org.forgerock.json.resource.Router.uriTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
+import org.forgerock.http.Client;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
@@ -50,11 +52,13 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     private ConnectionFactory crestConnectionFactory;
     private Router crestRouter;
     private JsonValue appConfig;
+    private Client httpClient;
 
     @Override
     public Handler start() throws HttpApplicationException {
         try {
             appConfig = JsonReader.jsonFileToJsonValue("/config.json");
+            httpClient = new Client(new HttpClientHandler());
 
             crestRouter = new Router();
             crestConnectionFactory = newInternalConnectionFactory(crestRouter);
@@ -83,7 +87,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new ExampleProgressStageFactory(crestConnectionFactory),
+                new ExampleProgressStageFactory(crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
@@ -95,7 +99,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
 
         RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new ExampleProgressStageFactory(crestConnectionFactory),
+                new ExampleProgressStageFactory(crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));

@@ -24,7 +24,7 @@ import org.forgerock.selfservice.stages.crypto.CryptoService;
  *
  * @since 0.2.0
  */
-abstract class AbstractKbaStage<C extends AbstractKbaStageConfig> implements ProgressStage<C> {
+abstract class AbstractKbaStage<C extends AbstractKbaStageConfig<?>> implements ProgressStage<C> {
 
     protected static final String REQUIREMENT_PROPERTY_ANSWER = "answer";
     protected static final String REQUIREMENT_PROPERTY_ID = "id";

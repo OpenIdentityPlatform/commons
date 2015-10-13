@@ -95,6 +95,12 @@
                 <version>${commons.forgerock-http-framework.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.forgerock.http</groupId>
+                <artifactId>chf-client-apache-sync</artifactId>
+                <version>${commons.forgerock-http-framework.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>${javax.inject.version}</version>

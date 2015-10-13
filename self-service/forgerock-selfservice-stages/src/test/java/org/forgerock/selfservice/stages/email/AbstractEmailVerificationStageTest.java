@@ -50,11 +50,11 @@ public final class AbstractEmailVerificationStageTest {
 
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
 
-    private AbstractEmailVerificationStage<AbstractEmailVerificationConfig>  verificationStage;
+    private AbstractEmailVerificationStage<AbstractEmailVerificationConfig<?>>  verificationStage;
     @Mock
     private ProcessContext context;
     @Mock
-    private AbstractEmailVerificationConfig config;
+    private AbstractEmailVerificationConfig<?> config;
     @Mock
     private ConnectionFactory factory;
     @Mock
@@ -173,10 +173,10 @@ public final class AbstractEmailVerificationStageTest {
         assertThat(stageResponse.getCallback()).isNull();
     }
 
-    private AbstractEmailVerificationStage<AbstractEmailVerificationConfig> newSpyInstanceVerificationStage() {
+    private AbstractEmailVerificationStage<AbstractEmailVerificationConfig<?>> newSpyInstanceVerificationStage() {
         //The object being created and the constructor argument connectionFactory are mock objects.
         return spy(
-            new AbstractEmailVerificationStage<AbstractEmailVerificationConfig>(factory) {
+            new AbstractEmailVerificationStage<AbstractEmailVerificationConfig<?>>(factory) {
 
                 @Override
                 protected String getEmailAddress(ProcessContext context,
@@ -192,7 +192,7 @@ public final class AbstractEmailVerificationStageTest {
                 }
 
                 @Override
-                public Class<AbstractEmailVerificationConfig> getConfigClass() {
+                public Class<AbstractEmailVerificationConfig<?>> getConfigClass() {
                     return null;
                 }
             }

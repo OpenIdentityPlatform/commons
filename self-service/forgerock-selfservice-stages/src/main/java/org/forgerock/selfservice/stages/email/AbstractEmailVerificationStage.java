@@ -47,7 +47,8 @@ import java.util.UUID;
  *
  * @since 0.1.0
  */
-abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificationConfig> implements ProgressStage<C> {
+abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificationConfig<?>>
+        implements ProgressStage<C> {
 
     private static final String VALIDATE_CODE_TAG = "validateCode";
 

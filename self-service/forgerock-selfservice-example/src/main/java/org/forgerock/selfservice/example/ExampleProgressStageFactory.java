@@ -16,11 +16,14 @@
 
 package org.forgerock.selfservice.example;
 
+import org.forgerock.http.Client;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageFactory;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.exceptions.StageConfigException;
+import org.forgerock.selfservice.stages.captcha.CaptchaStage;
+import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
 import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
@@ -51,8 +54,9 @@ final class ExampleProgressStageFactory implements ProgressStageFactory {
     /**
      * Creates a new basic progress stage factory.
      */
-    ExampleProgressStageFactory(ConnectionFactory connectionFactory) {
+    ExampleProgressStageFactory(ConnectionFactory connectionFactory, Client client) {
         progressStages = new HashMap<>();
+        safePut(CaptchaStageConfig.class, new CaptchaStage(client));
         safePut(VerifyEmailAccountConfig.class, new VerifyEmailAccountStage(connectionFactory));
         safePut(VerifyUserIdConfig.class, new VerifyUserIdStage(connectionFactory));
         safePut(ResetStageConfig.class, new ResetStage(connectionFactory));
