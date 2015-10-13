@@ -15,7 +15,6 @@
  */
 package org.forgerock.audit.events.handlers;
 
-import java.util.List;
 import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
@@ -48,25 +47,6 @@ public abstract class AuditEventHandlerBase<CFG extends EventHandlerConfiguratio
     @Override
     public void setDependencyProvider(DependencyProvider dependencyProvider) {
         // do nothing by default
-    }
-
-    /**
-     * {@inheritDoc}
-     * <p>
-     * This default implementation publishes each event in order.
-     * Implementing classes should override this method to optimize the publication.
-     */
-    @Override
-    public synchronized void publishEvents(List<AuditEventTopicState> events) {
-        try {
-            for (AuditEventTopicState event : events) {
-                publishEvent(event.getContext(), event.getTopic(), event.getEvent());
-            }
-        } catch (Exception e) {
-            logger.error(
-                    String.format("Could not process buffered events. Size of events: %d, first event: %s",
-                            events.size(), events.get(0)), e);
-        }
     }
 
 }

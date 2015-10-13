@@ -425,11 +425,6 @@ final class AuditServiceImpl implements AuditService {
         }
 
         @Override
-        public void publishEvents(List<AuditEventTopicState> events) {
-            throw new UnsupportedOperationException("Unsupported.");
-        }
-
-        @Override
         public Promise<ResourceResponse, ResourceException> readEvent(
                 Context context, String topic, String resourceId) {
             return adapt(new AuditException(errorMessage)).asPromise();

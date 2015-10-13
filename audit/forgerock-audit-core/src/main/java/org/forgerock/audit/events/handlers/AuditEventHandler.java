@@ -16,7 +16,6 @@
 
 package org.forgerock.audit.events.handlers;
 
-import java.util.List;
 import java.util.Map;
 
 import org.forgerock.audit.DependencyProvider;
@@ -94,14 +93,6 @@ public interface AuditEventHandler<CFG extends EventHandlerConfiguration> {
      * @return a promise with either a response or an exception
      */
     Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event);
-
-    /**
-     * Publishes a list of events.
-     *
-     * @param events
-     *          The list of (topic, event) pairs to publish.
-     */
-    void publishEvents(List<AuditEventTopicState> events);
 
     /**
      * Reads an event with the provided resource id from the provided topic.

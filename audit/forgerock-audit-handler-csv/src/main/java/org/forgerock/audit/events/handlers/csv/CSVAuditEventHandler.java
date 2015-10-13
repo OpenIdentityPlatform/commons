@@ -23,12 +23,9 @@ import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,9 +39,6 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
-import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
-import org.forgerock.audit.events.handlers.writers.TextWriter;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -57,7 +51,6 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.time.Duration;
@@ -188,7 +181,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
         try {
             checkTopic(topic);
-            publishEventWithRetry(topic, event, true);
+            publishEventWithRetry(topic, event);
             return newResourceResponse(
                     event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, event).asPromise();
         } catch (ResourceException e) {
@@ -206,11 +199,11 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     /**
      * Publishes the provided event, and returns the writer used.
      */
-    private void publishEventWithRetry(final String topic, final JsonValue event, boolean mustFlush)
+    private void publishEventWithRetry(final String topic, final JsonValue event)
                     throws ResourceException {
         CsvWriter csvWriter = writers.get(topic);
         try {
-            writeEvent(topic, csvWriter, event, mustFlush);
+            writeEvent(topic, csvWriter, event);
         } catch (IOException ex) {
             // Re-try once in case the writer stream became closed for some reason
             logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
@@ -223,14 +216,14 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
                 }
             }
             try {
-                writeEvent(topic, csvWriter, event, mustFlush);
+                writeEvent(topic, csvWriter, event);
             } catch (IOException e) {
                 throw new BadRequestException(e);
             }
         }
     }
 
-    private CsvWriter writeEvent(final String topic, CsvWriter csvWriter, final JsonValue event, boolean mustFlush)
+    private CsvWriter writeEvent(final String topic, CsvWriter csvWriter, final JsonValue event)
                     throws IOException, InternalServerErrorException {
         writeEntry(topic, csvWriter, event);
         // TODO: uncomment the following statements once super-csv is released with unwrapped buffer
@@ -257,7 +250,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase<CSVAuditEventHan
     private synchronized CsvWriter createCsvMapWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
         if (secure) {
-            return new CsvWriter(auditFile, headers, csvPreference, config.getBuffering(), keystoreFilename, 
+            return new CsvWriter(auditFile, headers, csvPreference, config.getBuffering(), keystoreFilename,
                     keystorePassword, signatureInterval);
         } else {
             return new CsvWriter(auditFile, headers, csvPreference, config.getBuffering(), null, null, null);
