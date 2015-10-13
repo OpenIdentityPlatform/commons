@@ -114,6 +114,10 @@
     <!-- Shared components versions -->
     <forgerock-guava.version>18.0.1</forgerock-guava.version>
     <forgerock-util.version>2.0.0-SNAPSHOT</forgerock-util.version>
+    <json-crypto.version>3.0.0-SNAPSHOT</json-crypto.version>
+    <json-patch.version>3.0.0-SNAPSHOT</json-patch.version>
+    <json-ref.version>3.0.0-SNAPSHOT</json-ref.version>
+    <json-schema.version>3.0.0-SNAPSHOT</json-schema.version>
     <forgerock-http-framework.version>0.0.1-SNAPSHOT</forgerock-http-framework.version>
     <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
     <forgerock-auth-filters.version>2.0.0-SNAPSHOT</forgerock-auth-filters.version>
@@ -378,41 +382,53 @@
         <version>${forgerock-http-framework.version}</version>
       </dependency>
 
+      <!-- ForgeRock json-* dependencies -->
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>json-crypto-core</artifactId>
+        <version>${json-crypto.version}</version>
+      </dependency>
 
-      <!-- ForgeRock REST dependencies -->
       <dependency>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>json-crypto-cli</artifactId>
-        <version>${forgerock-rest.version}</version>
+        <version>${json-crypto.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>json-patch</artifactId>
-        <version>${forgerock-rest.version}</version>
+        <version>${json-patch.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>json-ref-core</artifactId>
+        <version>${json-ref.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>json-ref-jackson</artifactId>
-        <version>${forgerock-rest.version}</version>
+        <version>${json-ref.version}</version>
       </dependency>
 
       <dependency>
         <groupId>org.forgerock.commons</groupId>
-        <artifactId>json-ref</artifactId>
-        <version>${forgerock-rest.version}</version>
+        <artifactId>json-schema-core</artifactId>
+        <version>${json-schema.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>json-schema-cli</artifactId>
+        <version>${json-schema.version}</version>
+      </dependency>
+
+      <!-- ForgeRock REST dependencies -->
       <dependency>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>json-resource-descriptor</artifactId>
-        <version>${forgerock-rest.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>json-crypto</artifactId>
         <version>${forgerock-rest.version}</version>
       </dependency>
 
@@ -438,18 +454,6 @@
       <dependency>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>json-resource-examples</artifactId>
-        <version>${forgerock-rest.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>json-schema</artifactId>
-        <version>${forgerock-rest.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>json-schema-cli</artifactId>
         <version>${forgerock-rest.version}</version>
       </dependency>
 
