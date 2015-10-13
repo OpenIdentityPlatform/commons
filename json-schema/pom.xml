@@ -65,17 +65,8 @@
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
     </properties>
     <modules>
-        <module>forgerock-rest-docbook</module>
-        <module>json-ref</module>
-        <module>json-ref-jackson</module>
         <module>json-schema</module>
         <module>json-schema-cli</module>
-        <module>json-crypto</module>
-        <module>json-crypto-cli</module>
-        <module>json-resource</module>
-        <module>json-resource-examples</module>
-        <module>json-resource-http</module>
-        <module>json-web-token</module>
     </modules>
     <dependencies>
         <dependency>
