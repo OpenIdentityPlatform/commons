@@ -28,14 +28,8 @@
     xsi:schemaLocation="http://maven.apache.org/DECORATION/1.0.1 http://maven.apache.org/xsd/decoration-1.0.1.xsd">
     <body>
         <menu name="ForgeRock REST libraries">
-            <item name="JSON Reference" href="../json-ref/index.html" />
-            <item name="JSON Reference Jackson" href="../json-ref-jackson/index.html" />
-            <item name="JSON Schema" href="../json-schema/index.html" />
-            <item name="JSON Schema CLI" href="../json-schema-cli/index.html" />
-            <item name="JSON Crypto" href="../json-crypto/index.html" />
-            <item name="JSON Crypto CLI" href="../json-crypto-cli/index.html" />
             <item name="JSON Resource" href="../json-resource/index.html" />
-            <item name="JSON Resource Servlet" href="../json-resource-servlet/index.html" />
+            <item name="JSON Resource HTTP" href="../json-resource-http/index.html" />
         </menu>
         <menu name="Documentation">
             <item name="Introduction" href="index.html" />

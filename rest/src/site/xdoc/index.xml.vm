@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2012 ForgeRock AS
+  !      Copyright 2012-2015 ForgeRock AS.
   !    
 -->
 <document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -37,34 +37,10 @@
       </p>
       <ul>
         <li>
-          <a href="json-fluent/index.html">json-fluent</a> : JSON fluent.
-        </li>
-        <li>
-          <a href="json-patch/index.html">json-patch</a> : JSON patch.
-        </li>
-        <li>
-          <a href="json-ref/index.html">json-ref</a> : JSON reference.
-        </li>
-        <li>
-          <a href="json-ref-jackson/index.html">json-ref-jackson</a> : JSON reference Jackson integration.
-        </li>
-        <li>
-          <a href="json-schema/index.html">json-schema</a> : JSON schema.
-        </li>
-        <li>
-          <a href="json-schema-cli/index.html">json-schema-cli</a> : JSON schema CLI.
-        </li>
-        <li>
-          <a href="json-crypto/index.html">json-crypto</a> : JSON cryptographic.
-        </li>
-        <li>
-          <a href="json-crypto-cli/index.html">json-crypto-cli</a> : JSON cryptographic CLI.
-        </li>
-        <li>
           <a href="json-resource/index.html">json-resource</a> : JSON based REST framework.
         </li>
         <li>
-          <a href="json-resource-servlet/index.html">json-resource-servlet</a> : JSON resource Servlet integration.
+          <a href="json-resource-http/index.html">json-resource-http</a> : JSON resource HTTP integration.
         </li>
       </ul>
     </section>
