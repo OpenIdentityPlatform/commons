@@ -650,8 +650,8 @@ public final class MemoryBackend implements CollectionResourceProvider {
             }
 
             if (pagedResultsRequested) {
-                final String nextCookie = resultIndex < resources.size() ?
-                        new Cookie(lastResultIndex, sortKeys).toBase64()
+                final String nextCookie = resultIndex < resources.size()
+                        ? new Cookie(lastResultIndex, sortKeys).toBase64()
                         : null;
 
                 switch (request.getTotalPagedResultsPolicy()) {

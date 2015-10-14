@@ -25,7 +25,8 @@ import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
 /**
  * AssertJ asserter for ResourceExceptions.
  */
-public class AssertJResourceExceptionAssert extends AbstractThrowableAssert<AssertJResourceExceptionAssert, ResourceException> {
+public class AssertJResourceExceptionAssert extends
+        AbstractThrowableAssert<AssertJResourceExceptionAssert, ResourceException> {
 
     /**
      * Creates a new {@link AssertJResourceExceptionAssert}.

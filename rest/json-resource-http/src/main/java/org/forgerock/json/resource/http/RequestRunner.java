@@ -181,7 +181,8 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                         try {
                             // treat as update to existing resource (if supported)
                             // if create failed because object already exists
-                            if (resourceException instanceof PreconditionFailedException && isUpsertSupported(request)) {
+                            if (resourceException instanceof PreconditionFailedException
+                                    && isUpsertSupported(request)) {
                                 return visitUpdateRequest(p,
                                         newUpdateRequest(
                                                 request.getResourcePathObject().child(request.getNewResourceId()),
@@ -463,36 +464,34 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private void writeResourceJsonContent(final ResourceResponse resource) throws IOException {
         if (getRequestedProtocolVersion(httpRequest).getMajor() >= PROTOCOL_VERSION_2.getMajor()) {
             writer.writeStartObject();
-            {
-                final JsonValue content = resource.getContent();
+            final JsonValue content = resource.getContent();
 
-                if (resource.getId() != null) {
-                    writer.writeObjectField(FIELD_CONTENT_ID, resource.getId());
-                } else {
-                    // Defensively extract an object instead of a string in case application code has stored a UUID
-                    // object, or some other non-JSON primitive. Also assume that a null ID means no ID.
-                    final Object id = content.get(FIELD_CONTENT_ID).getObject();
-                    if (id != null) {
-                        writer.writeObjectField(FIELD_CONTENT_ID, id.toString());
-                    }
+            if (resource.getId() != null) {
+                writer.writeObjectField(FIELD_CONTENT_ID, resource.getId());
+            } else {
+                // Defensively extract an object instead of a string in case application code has stored a UUID
+                // object, or some other non-JSON primitive. Also assume that a null ID means no ID.
+                final Object id = content.get(FIELD_CONTENT_ID).getObject();
+                if (id != null) {
+                    writer.writeObjectField(FIELD_CONTENT_ID, id.toString());
                 }
+            }
 
-                if (resource.getRevision() != null) {
-                    writer.writeObjectField(FIELD_CONTENT_REVISION, resource.getRevision());
-                } else {
-                    // Defensively extract an object instead of a string in case application code has stored a Number
-                    // object, or some other non-JSON primitive. Also assume that a null revision means no revision.
-                    final Object rev = content.get(FIELD_CONTENT_REVISION).getObject();
-                    if (rev != null) {
-                        writer.writeObjectField(FIELD_CONTENT_REVISION, rev.toString());
-                    }
+            if (resource.getRevision() != null) {
+                writer.writeObjectField(FIELD_CONTENT_REVISION, resource.getRevision());
+            } else {
+                // Defensively extract an object instead of a string in case application code has stored a Number
+                // object, or some other non-JSON primitive. Also assume that a null revision means no revision.
+                final Object rev = content.get(FIELD_CONTENT_REVISION).getObject();
+                if (rev != null) {
+                    writer.writeObjectField(FIELD_CONTENT_REVISION, rev.toString());
                 }
+            }
 
-                for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
-                    final String key = property.getKey();
-                    if (!FIELD_CONTENT_ID.equals(key) && !FIELD_CONTENT_REVISION.equals(key)) {
-                        writer.writeObjectField(key, property.getValue());
-                    }
+            for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
+                final String key = property.getKey();
+                if (!FIELD_CONTENT_ID.equals(key) && !FIELD_CONTENT_REVISION.equals(key)) {
+                    writer.writeObjectField(key, property.getValue());
                 }
             }
             writer.writeEndObject();

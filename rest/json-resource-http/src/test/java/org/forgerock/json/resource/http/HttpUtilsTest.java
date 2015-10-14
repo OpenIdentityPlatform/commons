@@ -18,7 +18,6 @@ package org.forgerock.json.resource.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
-import static org.forgerock.json.resource.http.HttpUtils.determineRequestType;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 
 import java.io.ByteArrayOutputStream;
@@ -26,7 +25,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.List;
 
 import org.forgerock.http.header.AcceptApiVersionHeader;
@@ -487,7 +485,6 @@ public class HttpUtilsTest {
         }
         return request;
     }
-
 
     private Request newRequest() {
         Request request = new Request();

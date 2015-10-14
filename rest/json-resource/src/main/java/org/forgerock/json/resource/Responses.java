@@ -227,10 +227,10 @@ public final class Responses {
         public List<JsonPointer> getFields() {
             return Collections.unmodifiableList(fields);
         }
-        
+
         @Override
         public boolean hasFields() {
-        	return !fields.isEmpty();
+            return !fields.isEmpty();
         }
 
         @Override

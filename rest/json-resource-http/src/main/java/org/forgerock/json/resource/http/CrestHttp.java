@@ -115,8 +115,18 @@ public final class CrestHttp {
         return new CrestAdapter(handler, uri);
     }
 
-    // Convenience method. Note that ConnectionFactory is going to be removed
-    // soon, so you may not need this.
+    /**
+     * Creates a new {@link ConnectionFactory} that map back and forth JSON resource objects to CHF objects.
+     * <p/>
+     * Convenience method. Note that ConnectionFactory is going to be removed soon, so you may not need this.
+     *
+     * @param handler
+     *         HTTP {@link Handler} responsible for emitting the HTTP request build from JSON resource {@link
+     *         org.forgerock.json.resource.Request}s.
+     * @param uri
+     *         base URI used to build the target URI for built HTTP message
+     * @return a JSON resource {@link RequestHandler}
+     */
     public static ConnectionFactory newConnectionFactory(Handler handler, final URI uri) {
         return Resources.newInternalConnectionFactory(newRequestHandler(handler, uri));
     }

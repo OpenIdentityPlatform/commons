@@ -128,8 +128,8 @@ public final class Resources {
             final Collection<JsonPointer> fields) {
         final JsonValue unfiltered = resource.getContent();
         final Collection<JsonPointer> filterFields = resource.hasFields()
-        		? resource.getFields()
-        	    : fields;
+                ? resource.getFields()
+                : fields;
         final JsonValue filtered = filterResource(unfiltered, filterFields);
         if (filtered == unfiltered) {
             return resource; // Unchanged.

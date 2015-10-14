@@ -45,7 +45,6 @@ public @interface Action {
     /**
      * The name of the action being exposed. If not supplied, the name of the method is assumed to be the name
      * of the action.
-     * @return The name of the action being exposed.
      */
     String value() default "";
 }

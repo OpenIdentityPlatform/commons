@@ -754,16 +754,15 @@ public class CrestAdapterTest {
                 });
 
         try {
-            handler.handleQuery(newContext(),
-                                newQueryRequest("users").setQueryId("all"),
-                                new QueryResourceHandler() {
-                                    @Override
-                                    public boolean handleResource(final ResourceResponse resource) {
-                                        assertThat(resource).isEqualTo(bjensen);
-                                        return true;
-                                    }
-                                })
-                   .getOrThrow();
+            handler.handleQuery(newContext(), newQueryRequest("users").setQueryId("all"),
+                    new QueryResourceHandler() {
+                        @Override
+                        public boolean handleResource(final ResourceResponse resource) {
+                            assertThat(resource).isEqualTo(bjensen);
+                            return true;
+                        }
+                    })
+                    .getOrThrow();
             failBecauseExceptionWasNotThrown(ResourceException.class);
         } catch (ResourceException e) {
             assertThat(e).isEqualTo(exception);

@@ -472,15 +472,15 @@ public final class ResourcePath implements Comparable<ResourcePath>, Iterable<St
      */
     public ResourcePath parent() {
         switch (size()) {
-            case 0:
-                return null;
-            case 1:
-                return EMPTY;
-            default:
-                final String newPath = path.substring(0, path.lastIndexOf('/') /* safe */);
-                final String newNormalizedPath =
-                        normalizedPath.substring(0, normalizedPath.lastIndexOf('/') /* safe */);
-                return new ResourcePath(newPath, newNormalizedPath, size - 1);
+        case 0:
+            return null;
+        case 1:
+            return EMPTY;
+        default:
+            final String newPath = path.substring(0, path.lastIndexOf('/') /* safe */);
+            final String newNormalizedPath =
+                    normalizedPath.substring(0, normalizedPath.lastIndexOf('/') /* safe */);
+            return new ResourcePath(newPath, newNormalizedPath, size - 1);
         }
     }
 

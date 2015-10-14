@@ -157,22 +157,22 @@ final class HttpAdapter implements Handler {
         try {
             RequestType requestType = determineRequestType(request);
             switch (requestType) {
-                case CREATE:
-                    return doCreate(context, request);
-                case READ:
-                    return doRead(context, request);
-                case UPDATE:
-                    return doUpdate(context, request);
-                case DELETE:
-                    return doDelete(context, request);
-                case PATCH:
-                    return doPatch(context, request);
-                case ACTION:
-                    return doAction(context, request);
-                case QUERY:
-                    return doQuery(context, request);
-                default:
-                    throw new NotSupportedException("Operation " + requestType + " not supported");
+            case CREATE:
+                return doCreate(context, request);
+            case READ:
+                return doRead(context, request);
+            case UPDATE:
+                return doUpdate(context, request);
+            case DELETE:
+                return doDelete(context, request);
+            case PATCH:
+                return doPatch(context, request);
+            case ACTION:
+                return doAction(context, request);
+            case QUERY:
+                return doQuery(context, request);
+            default:
+                throw new NotSupportedException("Operation " + requestType + " not supported");
             }
         } catch (ResourceException e) {
             return fail(request, e);

@@ -144,11 +144,9 @@ public final class HttpUtils {
     /** The policy used for counting total paged results. */
     public static final String PARAM_TOTAL_PAGED_RESULTS_POLICY = param(QueryRequest.FIELD_TOTAL_PAGED_RESULTS_POLICY);
 
-    /** The name of the protocol in use. */
-    public static final String PROTOCOL_NAME = "crest";
-    /** Protocol Version 1 */
+    /** Protocol Version 1. */
     public static final Version PROTOCOL_VERSION_1 = version(1);
-    /** Protocol Version 2 - supports upsert on PUT */
+    /** Protocol Version 2 - supports upsert on PUT. */
     public static final Version PROTOCOL_VERSION_2 = version(2);
     /** The default version of the named protocol. */
     public static final Version DEFAULT_PROTOCOL_VERSION = PROTOCOL_VERSION_2;

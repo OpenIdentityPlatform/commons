@@ -387,7 +387,8 @@ final class CrestAdapter implements RequestHandler {
                       .then(buildCrestResponse(asList(Status.OK)), NO_OP_ON_EXCEPTION);
     }
 
-    private static Function<Response, ResourceResponse, ResourceException> buildCrestResponse(final List<Status> accepted) {
+    private static Function<Response, ResourceResponse, ResourceException> buildCrestResponse(
+            final List<Status> accepted) {
         return new Function<Response, ResourceResponse, ResourceException>() {
             @Override
             public ResourceResponse apply(Response response) throws ResourceException {
