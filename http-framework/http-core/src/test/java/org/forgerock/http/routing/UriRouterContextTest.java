@@ -18,6 +18,8 @@ package org.forgerock.http.routing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 
 import org.forgerock.services.context.Context;
@@ -55,4 +57,39 @@ public class UriRouterContextTest {
     private UriRouterContext newContext(Context parentContext, String matchedUri) {
         return new UriRouterContext(parentContext, matchedUri, "REMAINING", Collections.<String, String>emptyMap());
     }
+
+    @Test
+    public void shouldLookupOnParentContextForOriginalUri() throws Exception {
+        final URI originalUri = new URI("http://www.example.com");
+        UriRouterContext parent = new UriRouterContext(new RootContext(), null, null,
+                Collections.<String, String>emptyMap(), originalUri);
+        UriRouterContext context = new UriRouterContext(parent, null, null, Collections.<String, String>emptyMap());
+
+        assertThat(context.getOriginalUri()).isEqualTo(originalUri);
+    }
+
+    @Test
+    public void shouldReturnTheFirstNotNullOriginalUri() throws Exception {
+        final URI originalUri1 = null;
+        final URI originalUri2 = new URI("http://www.forgerock.org");
+        UriRouterContext context1 = new UriRouterContext(new RootContext(), null, null,
+                Collections.<String, String>emptyMap(), originalUri1);
+        UriRouterContext context2 = new UriRouterContext(context1, null, null,
+                Collections.<String, String>emptyMap(), originalUri2);
+
+        assertThat(context1.getOriginalUri()).isNull();
+        assertThat(context2.getOriginalUri()).isEqualTo(originalUri2);
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    @SuppressWarnings("ResultOfObjectAllocationIgnored")
+    public void shouldFailWhenTryingToDefineMoreThanOneOriginalUri() throws URISyntaxException {
+        final URI originalUri = new URI("http://www.example.com");
+        UriRouterContext parent = new UriRouterContext(new RootContext(), null, null,
+                Collections.<String, String>emptyMap(), originalUri);
+
+        new UriRouterContext(parent, null, null, Collections.<String, String>emptyMap(),
+                new URI("http://www.forgerock.org"));
+    }
+
 }

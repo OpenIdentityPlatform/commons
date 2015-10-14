@@ -16,14 +16,18 @@
 
 package org.forgerock.http.routing;
 
-import static org.forgerock.util.Reject.*;
+import static java.lang.String.format;
+import static org.forgerock.util.Reject.checkNotNull;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.AbstractContext;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.Reject;
 
 /**
  * A {@link Context} which is created when a request has been routed. The
@@ -44,10 +48,17 @@ public final class UriRouterContext extends AbstractContext {
     private static final String ATTR_MATCHED_URI = "matchedUri";
     private static final String ATTR_REMAINIG_URI = "remainingUri";
     private static final String ATTR_URI_TEMPLATE_VARIABLES = "uriTemplateVariables";
+    private static final String ATTR_ORIGINAL_URI = "originalUri";
 
     private final Map<String, String> uriTemplateVariables;
 
     /**
+     * The original message's URI, as received by the web container. This value is set by the receiving servlet and
+     * is immutable.
+     */
+    private URI originalUri;
+
+        /**
      * Creates a new routing context having the provided parent, URI template
      * variables, and an ID automatically generated using
      * {@code UUID.randomUUID()}.
@@ -64,11 +75,43 @@ public final class UriRouterContext extends AbstractContext {
      */
     public UriRouterContext(final Context parent, final String matchedUri, final String remainingUri,
             final Map<String, String> uriTemplateVariables) {
+        this(parent, matchedUri, remainingUri, uriTemplateVariables, null);
+    }
+
+    /**
+     * Creates a new routing context having the provided parent, URI template
+     * variables, and an ID automatically generated using
+     * {@code UUID.randomUUID()}.
+     *
+     * @param parent
+     *            The parent server context.
+     * @param matchedUri
+     *            The matched URI
+     * @param remainingUri
+     *            The remaining URI to be matched.
+     * @param uriTemplateVariables
+     *            A {@code Map} containing the parsed URI template variables,
+     *            keyed on the URI template variable name.
+     * @param originalUri
+     *            The original URI
+     */
+    public UriRouterContext(final Context parent, final String matchedUri, final String remainingUri,
+            final Map<String, String> uriTemplateVariables, URI originalUri) {
         super(checkNotNull(parent, "Cannot instantiate UriRouterContext with null parent Context"), "router");
         data.put(ATTR_MATCHED_URI, matchedUri);
         data.put(ATTR_REMAINIG_URI, remainingUri);
         this.uriTemplateVariables = Collections.unmodifiableMap(uriTemplateVariables);
         data.put(ATTR_URI_TEMPLATE_VARIABLES, this.uriTemplateVariables);
+
+        if (originalUri != null) {
+            if (parent.containsContext(UriRouterContext.class)) {
+                UriRouterContext parentUriRouterContext = parent.asContext(UriRouterContext.class);
+                Reject.ifTrue(parentUriRouterContext.getOriginalUri() != null, "Cannot set the originalUri more than "
+                        + "once in the chain.");
+            }
+            this.originalUri = originalUri;
+            data.put(ATTR_ORIGINAL_URI, originalUri.toASCIIString());
+        }
     }
 
     /**
@@ -84,6 +127,13 @@ public final class UriRouterContext extends AbstractContext {
         super(savedContext, classLoader);
         this.uriTemplateVariables =
                 Collections.unmodifiableMap(data.get(ATTR_URI_TEMPLATE_VARIABLES).required().asMap(String.class));
+
+        final String savedUri = data.get(ATTR_ORIGINAL_URI).asString();
+        try {
+            this.originalUri = new URI(savedUri);
+        } catch (URISyntaxException ex) {
+            throw new IllegalArgumentException(format("The URI %s is not valid", savedUri));
+        }
     }
 
     /**
@@ -146,5 +196,22 @@ public final class UriRouterContext extends AbstractContext {
      */
     public Map<String, String> getUriTemplateVariables() {
         return uriTemplateVariables;
+    }
+
+    /**
+     * Get the original URI.
+     *
+     * @return The original URI
+     */
+    public URI getOriginalUri() {
+        final Context parent = getParent();
+
+        if (this.originalUri != null) {
+            return this.originalUri;
+        } else if (parent.containsContext(UriRouterContext.class)) {
+            return parent.asContext(UriRouterContext.class).getOriginalUri();
+        } else {
+            return null;
+        }
     }
 }

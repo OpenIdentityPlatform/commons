@@ -23,6 +23,7 @@ import static org.forgerock.util.Utils.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -184,8 +185,10 @@ public final class HttpFrameworkServlet extends HttpServlet {
         final SessionContext sessionContext = new SessionContext(new RootContext(), session);
 
         final Request request;
+        final UriRouterContext uriRouterContext;
         try {
             request = createRequest(req);
+            uriRouterContext = createRouterContext(sessionContext, req);
         } catch (URISyntaxException e) {
             Response response = new Response(Status.BAD_REQUEST);
             response.setEntity(e.getMessage());
@@ -193,7 +196,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
             return;
         }
 
-        final AttributesContext attributesContext = new AttributesContext(new RequestAuditContext(sessionContext));
+        final AttributesContext attributesContext = new AttributesContext(new RequestAuditContext(uriRouterContext));
 
         /* TODO
          * add comment on why this was added as probably shouldn't stick around as
@@ -210,9 +213,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         attributesContext.getAttributes().put(HttpServletRequest.class.getName(), req);
         attributesContext.getAttributes().put(HttpServletResponse.class.getName(), resp);
 
-        Context context = attributesContext;
-        context = createClientContext(context, req);
-        context = createRouterContext(context, req);
+        Context context = createClientContext(attributesContext, req);
 
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
@@ -300,10 +301,12 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 .build();
     }
 
-    private UriRouterContext createRouterContext(Context parent, HttpServletRequest req) {
+    private UriRouterContext createRouterContext(Context parent, HttpServletRequest req) throws URISyntaxException {
         String matchedUri = routingBase.extractMatchedUri(req);
-        String remaining = req.getRequestURI().substring(req.getRequestURI().indexOf(matchedUri) + matchedUri.length());
-        return new UriRouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap());
+        final String requestURI = req.getRequestURI();
+        String remaining = requestURI.substring(requestURI.indexOf(matchedUri) + matchedUri.length());
+        return new UriRouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap(),
+                new URI(requestURI));
     }
 
     private void writeResponse(Request request, Response response, HttpServletResponse servletResponse,
