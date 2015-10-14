@@ -165,6 +165,23 @@
                             <overWriteIfNewer>true</overWriteIfNewer>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>unpack-codemirror</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/www/libs</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.forgerock.commons.ui.libs</groupId>
+                                    <artifactId>CodeMirror</artifactId>
+                                    <type>zip</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
@@ -313,6 +330,14 @@
             <type>zip</type>
             <classifier>www</classifier>
         </dependency>
+
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>CodeMirror</artifactId>
+            <version>4.10</version>
+            <type>zip</type>
+        </dependency>
+
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>sinon</artifactId>

@@ -27,10 +27,16 @@
 define("org/forgerock/mock/ui/examples/ExamplesView", [
     "jquery",
     "underscore",
+    "libs/codemirror-4.10/lib/codemirror",
+    "libs/codemirror-4.10/mode/xml/xml",
+    "libs/codemirror-4.10/mode/javascript/javascript",
     "bootstrap",
     "selectize",
     "org/forgerock/commons/ui/common/main/AbstractView"
 ], function($, _,
+            CodeMirror,
+            xmlmode,
+            jsmode,
             bootstrap,
             selectize,
             AbstractView) {
@@ -45,6 +51,38 @@ define("org/forgerock/mock/ui/examples/ExamplesView", [
         },
         render: function(args, callback) {
             this.parentRender(_.bind(function() {
+                /*
+                Code Snippets
+                */
+                this.$el.find('.example').each(function(i, elem) {
+
+                    var snippet = $('.snippet')[i].innerHTML,
+                        myCodeMirror = new CodeMirror(elem, {
+                            value: snippet,
+                            mode: 'xml',
+                            lineNumbers: false,
+                            readOnly: true,
+                            lineWrapping: false
+                    });
+                });
+
+                this.$el.find('.code').each(function() {
+
+                    var $this = $(this),
+                        $code = $this.html(),
+                        myCodeMirrorJS;
+
+                    $this.empty();
+
+                    myCodeMirrorJS = new CodeMirror(this, {
+                        value: $code,
+                        mode: 'javascript',
+                        lineNumbers: true,
+                        readOnly: true,
+                        lineWrapping: true
+                    });
+                });
+
                 /*
                  Selectize
                  */
