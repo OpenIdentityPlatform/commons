@@ -23,6 +23,8 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 
+import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -39,9 +41,11 @@ import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.i18n.PreferredLocales;
 
 import javax.inject.Inject;
-import org.forgerock.services.context.Context;
+import java.util.UUID;
 
 /**
  * Having retrieved the email address from the context or in response to the initial requirements, verifies the
@@ -108,7 +112,7 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
             @Override
             public void snapshotTokenPreview(ProcessContext context, String snapshotToken)
                     throws ResourceException {
-                sendEmail(context.getRequestContext(), snapshotToken, code, mail, config);
+                sendEmail(context, snapshotToken, code, mail, config);
             }
 
         };
@@ -162,11 +166,36 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
                 .build();
     }
 
-    private void sendEmail(Context requestContext, String snapshotToken, String code,
+    private void sendEmail(ProcessContext processContext, String snapshotToken, String code,
                            String email, VerifyEmailAccountConfig config) throws ResourceException {
 
         String emailUrl = config.getVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
-        String body = config.getMessage().replace(config.getVerificationLinkToken(), emailUrl);
+        Map<Locale, String> messageMap = config.getMessageMap();
+        Map<Locale, String> subjectMap = config.getSubjectMap();
+
+        PreferredLocales preferredLocales = processContext.getPreferredLocales();
+        if (preferredLocales == null) {
+            throw ResourceException.newResourceException(ResourceException.BAD_REQUEST,
+                    "No locales available in the context");
+        }
+
+        String subjectText = null;
+        String bodyText = null;
+        try {
+            subjectText = preferredLocales.getTranslationFromLocaleMap(subjectMap);
+        } catch (IllegalArgumentException iae) {
+            throw ResourceException.newResourceException(ResourceException.BAD_REQUEST,
+                    "No translations available for email subject");
+        }
+
+        try {
+            bodyText = preferredLocales.getTranslationFromLocaleMap(messageMap);
+        } catch (IllegalArgumentException iae) {
+            throw ResourceException.newResourceException(ResourceException.BAD_REQUEST,
+                    "No translations available for email body");
+        }
+
+        bodyText = bodyText.replace(config.getVerificationLinkToken(), emailUrl);
 
         try (Connection connection = connectionFactory.getConnection()) {
             ActionRequest request = Requests
@@ -176,11 +205,11 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
                                     object(
                                             field("to", email),
                                             field("from", config.getFrom()),
-                                            field("subject", config.getSubject()),
+                                            field("subject", subjectText),
                                             field("type", config.getMimeType()),
-                                            field("body", body))));
+                                            field("body", bodyText))));
 
-            connection.action(requestContext, request);
+            connection.action(processContext.getRequestContext(), request);
         }
     }
 

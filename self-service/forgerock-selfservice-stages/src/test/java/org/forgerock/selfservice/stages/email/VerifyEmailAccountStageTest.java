@@ -22,6 +22,10 @@ import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.*;
+import static org.forgerock.json.JsonValue.*;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
 import org.assertj.core.api.Assertions;
@@ -31,15 +35,23 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Unit test for {@link VerifyEmailAccountStage}.
@@ -125,20 +137,34 @@ public final class VerifyEmailAccountStageTest {
         // Given
         given(context.getStageTag()).willReturn(INITIAL_TAG);
 
+        List<Locale> locales = new ArrayList<>();
+        locales.add(Locale.ENGLISH);
+        PreferredLocales preferredLocales = new PreferredLocales(locales);
+
+        given(context.getPreferredLocales()).willReturn(preferredLocales);
+
         given(context.containsState(EMAIL_FIELD)).willReturn(true);
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
 
         given(factory.getConnection()).willReturn(connection);
 
-        config.setMessage("<h3>This is your reset email.</h3>"
-                + "<h4><a href=\"%link%\">Email verification link</a></h4>");
         config.setVerificationLinkToken("%link%");
         config.setVerificationLink("http://localhost:9999/example/#passwordReset/");
         config.setEmailServiceUrl("/email");
         final String infoEmailId = "info@admin.org";
         config.setFrom(infoEmailId);
         final String emailSubject = "Reset password email";
-        config.setSubject(emailSubject);
+
+        Map<Locale, String> subjectMap = new HashMap<>();
+        Map<Locale, String> messageMap = new HashMap<>();
+
+        subjectMap.put(Locale.ENGLISH, "Reset password email");
+        subjectMap.put(Locale.GERMAN, "Deutsch Thema");
+        messageMap.put(Locale.ENGLISH, "<h3>This is your reset email.</h3>"
+                            + "<h4><a href=\"%link%\">Email verification link</a></h4>");
+
+        config.setSubjectMap(subjectMap);
+        config.setMessageMap(messageMap);
 
         // When
         StageResponse stageResponse = verifyEmailStage.advance(context, config);
@@ -153,7 +179,7 @@ public final class VerifyEmailAccountStageTest {
         assertThat(actionRequest.getAction()).isSameAs("send");
         assertThat(actionRequest.getContent()).stringAt("/to").isEqualTo(TEST_EMAIL_ID);
         assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(infoEmailId);
-        assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(emailSubject);
+        assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(subjectMap.get(Locale.ENGLISH));
         assertThat(actionRequest.getContent()).stringAt("/body").matches(
                 "<h3>This is your reset email\\.</h3><h4>"
                 + "<a href=\"http://localhost:9999/example/#passwordReset/&token=token1&code="

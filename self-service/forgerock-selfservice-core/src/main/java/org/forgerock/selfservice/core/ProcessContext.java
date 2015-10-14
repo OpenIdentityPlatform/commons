@@ -18,6 +18,7 @@ package org.forgerock.selfservice.core;
 
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.i18n.PreferredLocales;
 
 /**
  * Process context represents the current state of the workflow.
@@ -76,5 +77,12 @@ public interface ProcessContext {
      *         the value to be added
      */
     void putState(String jsonPointer, Object value);
+
+    /**
+     * Retrieve the preferred locales from the original request
+     *
+     * @return the preferred locales
+     */
+    PreferredLocales getPreferredLocales();
 
 }

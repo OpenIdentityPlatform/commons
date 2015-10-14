@@ -19,6 +19,9 @@ package org.forgerock.selfservice.stages.email;
 import org.forgerock.selfservice.core.ProgressStageBinder;
 import org.forgerock.selfservice.core.config.StageConfig;
 
+import java.util.Locale;
+import java.util.Map;
+
 /**
  * Configuration for the email account verification stage.
  *
@@ -32,9 +35,9 @@ public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAc
     public static final String NAME = "emailValidation";
 
     private String emailServiceUrl;
-    private String subject;
+    private Map<Locale, String> subjectMap;
     private String from;
-    private String message;
+    private Map<Locale, String> messageMap;
     private String mimeType;
     private String verificationLink;
     private String verificationLinkToken;
@@ -62,46 +65,46 @@ public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAc
     }
 
     /**
-     * Gets the subject part for the verification email.
+     * Gets the subject map for the verification email.
      *
-     * @return the email subject
+     * @return the email subject map (locale to string)
      */
-    public String getSubject() {
-        return subject;
+    public Map<Locale, String> getSubjectMap() {
+        return subjectMap;
     }
 
     /**
-     * Sets the subject part for the verification email.
+     * Sets the subject map for the verification email.
      *
-     * @param subject
-     *         the email subject
+     * @param subjectMap
+     *         the email subject map (locale to string)
      *
      * @return this config instance
      */
-    public VerifyEmailAccountConfig setSubject(String subject) {
-        this.subject = subject;
+    public VerifyEmailAccountConfig setSubjectMap(Map<Locale, String> subjectMap) {
+        this.subjectMap = subjectMap;
         return this;
     }
 
     /**
-     * Gets the message for the verification email.
+     * Gets the message map for the verification email.
      *
-     * @return the email message
+     * @return the email message map (locale to string)
      */
-    public String getMessage() {
-        return message;
+    public Map<Locale, String> getMessageMap() {
+        return messageMap;
     }
 
     /**
-     * Sets the message part for the verification email.
+     * Sets the message map for the verification email.
      *
-     * @param message
-     *         the email message
+     * @param messageMap
+     *         the email message map (locale to string)
      *
      * @return this config instance
      */
-    public VerifyEmailAccountConfig setMessage(String message) {
-        this.message = message;
+    public VerifyEmailAccountConfig setMessageMap(Map<Locale, String> messageMap) {
+        this.messageMap = messageMap;
         return this;
     }
 

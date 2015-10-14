@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.testng.annotations.Test;
 
+import java.util.Locale;
+
 /**
  * Unit test for {@link VerifyEmailAccountConfig}.
  *
@@ -41,11 +43,13 @@ public final class VerifyEmailAccountConfigTest {
         VerifyEmailAccountConfig verifyEmailAccountConfig = (VerifyEmailAccountConfig) config;
 
         assertThat(verifyEmailAccountConfig.getEmailServiceUrl()).isEqualTo("/email");
-        assertThat(verifyEmailAccountConfig.getSubject()).isEqualTo("Verify your email address");
-        assertThat(verifyEmailAccountConfig.getMessage()).isEqualTo("Is this correct");
         assertThat(verifyEmailAccountConfig.getFrom()).isEqualTo("noreply@example.com");
         assertThat(verifyEmailAccountConfig.getVerificationLink()).isEqualTo("/verifyemail");
         assertThat(verifyEmailAccountConfig.getVerificationLinkToken()).isEqualTo("abc123");
+        assertThat(verifyEmailAccountConfig.getMessageMap()).containsKey(new Locale("en", "GB"));
+        assertThat(verifyEmailAccountConfig.getMessageMap()).containsKey(new Locale("fr", "FR"));
+        assertThat(verifyEmailAccountConfig.getSubjectMap()).containsKey(new Locale("en", "GB"));
+        assertThat(verifyEmailAccountConfig.getSubjectMap()).containsKey(new Locale("fr", "FR"));
     }
 
 }

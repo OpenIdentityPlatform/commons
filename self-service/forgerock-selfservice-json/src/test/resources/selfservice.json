@@ -3,8 +3,14 @@
     {
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
-      "subject": "Verify your email address",
-      "message": "Is this correct",
+      "subjectMap": {
+        "en_GB": "Register!",
+        "fr_FR": "Registre!!"
+      },
+      "messageMap": {
+        "en_GB": "Click this link to register: %link%",
+        "fr_FR": "Clicker le linke a registre: %link%"
+      },
       "mimeType": "text/plain",
       "from": "noreply@example.com",
       "verificationLink": "/verifyemail",

@@ -14,8 +14,14 @@
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
       "from": "info@admin.org",
-      "subject": "Register new account",
-      "message": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+      "subjectMap": {
+        "en_GB": "Reset!",
+        "fr_FR": "Le Reset!!"
+      },
+      "messageMap": {
+        "en_GB": "<h3>Click to reset your password</h3><h4><a href=\"%link%\">Password reset link</a></h4>",
+        "fr_FR": "<h3>Clicker a resetter votre passwerd</h3><h4><a href=\"%link%\">Passwerd resetter linkette</a></h4>"
+      },
       "verificationLinkToken": "%link%",
       "verificationLink": "http://localhost:9999/example/#passwordReset/"
     },
