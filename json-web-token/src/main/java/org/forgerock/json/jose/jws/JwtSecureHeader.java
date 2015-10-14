@@ -41,7 +41,6 @@ import org.forgerock.util.encode.Base64;
 /**
  * A base implementation for the common security header parameters shared by the JWS and JWE headers.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public abstract class JwtSecureHeader extends JwtHeader {
@@ -109,7 +108,7 @@ public abstract class JwtSecureHeader extends JwtHeader {
      * @return The JSON Web Key.
      */
     public JWK getJsonWebKey() {
-        return (JWK)get(JWK.value()).getObject();
+        return (JWK) get(JWK.value()).getObject();
     }
 
     /**

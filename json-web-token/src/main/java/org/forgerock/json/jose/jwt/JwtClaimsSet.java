@@ -40,7 +40,6 @@ import org.forgerock.json.jose.utils.StringOrURI;
  * <p>
  * Provides methods to set claims for all the reserved claim names as well as custom claims.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class JwtClaimsSet extends JWObject implements Payload {

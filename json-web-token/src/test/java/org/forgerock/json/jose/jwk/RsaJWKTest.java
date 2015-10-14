@@ -32,76 +32,75 @@ import java.util.HashMap;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
-@SuppressWarnings("javadoc")
 public class RsaJWKTest {
 
     //RSA parameter values
-    private final String N = "MTQ0MDg1NDkwODc1OTU1MjYzNTg1MDcyOTU0MjQ2Mjg0NDExMzI3NjQxNzA2MjQ5OTQwMDU1MTMwMjgwNDA5N" +
-            "zc2NzMzODIyMDU0ODIwNzUxMzc3OTIzNDE4NDQ5MjcxOTEyNTQxNjE1ODYxOTg0MTIwMzM4Mjg5NzMzMjk1MjQ5NTYwODY4MDYyMzY" +
-            "4OTM0NDczOTg0NDc0MjA4NzI1OTMzODU1ODE5MzMwMDIxNzM1Nzg5MTk5ODY2MjE4NDc4NzcwOTgzOTU1NzgxNTE0NDc5MjkwNTc3M" +
-            "jAzMDA0NjU1NjAyNTgxODcxOTcwNTU4NjU3NTg3MTgzOTM0ODM3NDk4NzE3OTc1NTg5NzQ1NzkzNDg1MzY0NzUwMzAxMTE4MTMzNjA" +
-            "2NTY1Mjc1MDgzMjI2NDQx";
-    private final String E = "NjU1Mzc";
-    private final String D = "NDEwMDA1MDg0MDUxMDk5MzM0ODE4MTk4MTk3MDA5MTYzOTgxNjk3MjM4MjI4NzY0Njg3NDQxOTIyMDU5MTk3M" +
-            "zg4Njk3ODQyMDU4NzM4MTQ2NzYzOTQ5MTkzNjg2MDgxNDM0NDU1MTMxMzMxOTQxMDE5NjA1NTMwNDk5NzUxNzU5OTMxMTI3MjI1MDk" +
-            "3MDA3NjQ1MzUwOTQwNTQ4MDA4OTg3NzMyNzQ0MjI2NzM5MTA0NTIzNTc1MjExMDE2NzYxNTA5MjU3NTI2MDE1NjM0MTc1NzcyNTg2N" +
-            "jA1OTk4MjUwNDYzMDE0NzUyNzY5MzYzNzI5ODExOTI4MzUzMzI3MTczMjg1NjAyNjQxMzQ5NTE4ODM4NDc2NzI3ODI0NzM1NTM0OTk" +
-            "1MTM2ODY2OTkzNzUxNDE";
-    private final String P = "MTI5NjY4NjkwMzMxODI0NTQ0NDU2MjE2NTc4NzQyNTA2Mzk3NDQ2NDMxMzQxMzcxNDgyMjAyNTY4OTk1MDA0M" +
-            "zY3MjcyNTI2NDcyODA3NDcyNjM3NTc0NzU4MTUxMDg3NTU5MDU4NjkwODIwNTE3MTYzMjIwODA3OTk0OTc5Njc0OTYzNzg1MzIzMTY" +
-            "4Nzc1MjAwMzU0MDY4NTk";
-    private final String Q = "MTExMTE4MTgxNjU3NjA1OTA1ODYwMzA1MTczOTY5OTQxODEzMTA2Nzg2OTg2MDE1MDM3NjExODA1MjQ5ODIwM" +
-            "jQ0ODI2MjkyOTEzMjY2NjAzODAzMTgzMDk5NzkwMzM0Njg5NjMyNTA4NzIzNTE4ODQwMDgwNjg4NjUxOTQwOTYyNzIyMTkzOTc3NTY" +
-            "xMTMzODE4Nzk0NDg2OTk";
-    private final String DP = "MTIyODE0OTY4ODcyMDQ3MDEwODE4Nzg1MjkyMTU5OTAzNTU5OTUzODAyMTY3NTIyOTU2NzIzMDczNDU4MTUx" +
-            "OTc2NTg4OTEyMTUyNjI0OTAyNzExOTM2NDMyMjg1NzY5MjMwNDExMDY3MjY0MzIzMzg3ODk2OTkyNzYyNDQ1MjM0OTY2OTIwMTU3NT" +
-            "Q1NDM4MTk1Mzk0NjMzNTU";
-    private final String DQ = "NjEzNjAyNTQ0MjQwNDY4Mzk2OTQ4OTY2ODgwNjg5MTA2MDM0MTk5NzA3MTkxOTUwMjI4Mjk0MTI4ODExMzU3" +
-            "NjU0NDk0OTQ3OTczMDcxNDU0NTQyODA3MzI3Mzc0MTg3NDY5MzM4MDA2MTE5MzEzNzk1NjQ1MjI2NzEzNzI1NTk2MzY3ODgzNzk4MT" +
-            "UwMjcxMjgyMjAyNzk5";
-    private final String QI = "NjI2ODI2NzE4MTA4NDYzNjAxMjU5MTc2ODcwMDQ5OTYwNDI3MTAyMjA4MzU3MTE5MTE1NTU4MjA1ODE2Njkz" +
-            "OTA2NzUwMTA2NjM4MjE2MDc2NjgyNTYxODQyNjY3OTcyMDQ3MzEwMzgxNDc0ODg2MjA2NDE2NjQ2MDU1MzA4Nzg2NTQ2MTAwMjA5OD" +
-            "ExNzQ4OTIyMDM5MzkxMw";
+    private static final String N = "MTQ0MDg1NDkwODc1OTU1MjYzNTg1MDcyOTU0MjQ2Mjg0NDExMzI3NjQxNzA2MjQ5OTQwMDU1MTMwMjgw"
+            + "NDA5Nzc2NzMzODIyMDU0ODIwNzUxMzc3OTIzNDE4NDQ5MjcxOTEyNTQxNjE1ODYxOTg0MTIwMzM4Mjg5NzMzMjk1MjQ5NTYwODY4MD"
+            + "YyMzY4OTM0NDczOTg0NDc0MjA4NzI1OTMzODU1ODE5MzMwMDIxNzM1Nzg5MTk5ODY2MjE4NDc4NzcwOTgzOTU1NzgxNTE0NDc5Mjkw"
+            + "NTc3MjAzMDA0NjU1NjAyNTgxODcxOTcwNTU4NjU3NTg3MTgzOTM0ODM3NDk4NzE3OTc1NTg5NzQ1NzkzNDg1MzY0NzUwMzAxMTE4MT"
+            + "MzNjA2NTY1Mjc1MDgzMjI2NDQx";
+    private static final String E = "NjU1Mzc";
+    private static final String D = "NDEwMDA1MDg0MDUxMDk5MzM0ODE4MTk4MTk3MDA5MTYzOTgxNjk3MjM4MjI4NzY0Njg3NDQxOTIyMDU5"
+            + "MTk3Mzg4Njk3ODQyMDU4NzM4MTQ2NzYzOTQ5MTkzNjg2MDgxNDM0NDU1MTMxMzMxOTQxMDE5NjA1NTMwNDk5NzUxNzU5OTMxMTI3Mj"
+            + "I1MDk3MDA3NjQ1MzUwOTQwNTQ4MDA4OTg3NzMyNzQ0MjI2NzM5MTA0NTIzNTc1MjExMDE2NzYxNTA5MjU3NTI2MDE1NjM0MTc1Nzcy"
+            + "NTg2NjA1OTk4MjUwNDYzMDE0NzUyNzY5MzYzNzI5ODExOTI4MzUzMzI3MTczMjg1NjAyNjQxMzQ5NTE4ODM4NDc2NzI3ODI0NzM1NT"
+            + "M0OTk1MTM2ODY2OTkzNzUxNDE";
+    private static final String P = "MTI5NjY4NjkwMzMxODI0NTQ0NDU2MjE2NTc4NzQyNTA2Mzk3NDQ2NDMxMzQxMzcxNDgyMjAyNTY4OTk1"
+            + "MDA0MzY3MjcyNTI2NDcyODA3NDcyNjM3NTc0NzU4MTUxMDg3NTU5MDU4NjkwODIwNTE3MTYzMjIwODA3OTk0OTc5Njc0OTYzNzg1Mz"
+            + "IzMTY4Nzc1MjAwMzU0MDY4NTk";
+    private static final String Q = "MTExMTE4MTgxNjU3NjA1OTA1ODYwMzA1MTczOTY5OTQxODEzMTA2Nzg2OTg2MDE1MDM3NjExODA1MjQ5"
+            + "ODIwMjQ0ODI2MjkyOTEzMjY2NjAzODAzMTgzMDk5NzkwMzM0Njg5NjMyNTA4NzIzNTE4ODQwMDgwNjg4NjUxOTQwOTYyNzIyMTkzOT"
+            + "c3NTYxMTMzODE4Nzk0NDg2OTk";
+    private static final String DP = "MTIyODE0OTY4ODcyMDQ3MDEwODE4Nzg1MjkyMTU5OTAzNTU5OTUzODAyMTY3NTIyOTU2NzIzMDczNDU"
+            + "4MTUxOTc2NTg4OTEyMTUyNjI0OTAyNzExOTM2NDMyMjg1NzY5MjMwNDExMDY3MjY0MzIzMzg3ODk2OTkyNzYyNDQ1MjM0OTY2OTIwM"
+            + "TU3NTQ1NDM4MTk1Mzk0NjMzNTU";
+    private static final String DQ = "NjEzNjAyNTQ0MjQwNDY4Mzk2OTQ4OTY2ODgwNjg5MTA2MDM0MTk5NzA3MTkxOTUwMjI4Mjk0MTI4ODE"
+            + "xMzU3NjU0NDk0OTQ3OTczMDcxNDU0NTQyODA3MzI3Mzc0MTg3NDY5MzM4MDA2MTE5MzEzNzk1NjQ1MjI2NzEzNzI1NTk2MzY3ODgzN"
+            + "zk4MTUwMjcxMjgyMjAyNzk5";
+    private static final String QI = "NjI2ODI2NzE4MTA4NDYzNjAxMjU5MTc2ODcwMDQ5OTYwNDI3MTAyMjA4MzU3MTE5MTE1NTU4MjA1ODE"
+            + "2NjkzOTA2NzUwMTA2NjM4MjE2MDc2NjgyNTYxODQyNjY3OTcyMDQ3MzEwMzgxNDc0ODg2MjA2NDE2NjQ2MDU1MzA4Nzg2NTQ2MTAwM"
+            + "jA5ODExNzQ4OTIyMDM5MzkxMw";
 
-    private final String N_SP = "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4" +
-            "cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMst" +
-            "n64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2Q" +
-            "vzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbIS" +
-            "D08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw" +
-            "0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw";
-    private final String E_SP = "AQAB";
-    private final String D_SP = "X4cTteJY_gn4FYPsXB8rdXix5vwsg1FLN5E3EaG6RJoVH-HLLKD9" +
-            "M7dx5oo7GURknchnrRweUkC7hT5fJLM0WbFAKNLWY2vv7B6NqXSzUvxT0_YSfqij" +
-            "wp3RTzlBaCxWp4doFk5N2o8Gy_nHNKroADIkJ46pRUohsXywbReAdYaMwFs9tv8d" +
-            "_cPVY3i07a3t8MN6TNwm0dSawm9v47UiCl3Sk5ZiG7xojPLu4sbg1U2jx4IBTNBz" +
-            "nbJSzFHK66jT8bgkuqsk0GjskDJk19Z4qwjwbsnn4j2WBii3RL-Us2lGVkY8fkFz" +
-            "me1z0HbIkfz0Y6mqnOYtqc0X4jfcKoAC8Q";
-    private final String P_SP = "83i-7IvMGXoMXCskv73TKr8637FiO7Z27zv8oj6pbWUQyLPQBQxtPV" +
-            "nwD20R-60eTDmD2ujnMt5PoqMrm8RfmNhVWDtjjMmCMjOpSXicFHj7XOuVIYQyqV" +
-            "WlWEh6dN36GVZYk93N8Bc9vY41xy8B9RzzOGVQzXvNEvn7O0nVbfs";
-    private final String Q_SP = "3dfOR9cuYq-0S-mkFLzgItgMEfFzB2q3hWehMuG0oCuqnb3vobLyum" +
-            "qjVZQO1dIrdwgTnCdpYzBcOfW5r370AFXjiWft_NGEiovonizhKpo9VVS78TzFgx" +
-            "kIdrecRezsZ-1kYd_s1qDbxtkDEgfAITAG9LUnADun4vIcb6yelxk";
-    private final String DQ_SP = "s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUU" +
-            "vMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9" +
-            "GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk";
-    private final String DP_SP = "s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUU" +
-            "vMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9" +
-            "GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk";
-    private final String QI_SP = "GyM_p6JrXySiz1toFgKbWV-JdI3jQ4ypu9rbMWx3rQJBfmt0FoYzg" +
-            "UIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rx" +
-            "yR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU";
+    private static final String N_SP = "0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4"
+            + "cbbfAAtVT86zwu1RK7aPFFxuhDR1L6tSoc_BJECPebWKRXjBZCiFV4n3oknjhMst"
+            + "n64tZ_2W-5JsGY4Hc5n9yBXArwl93lqt7_RN5w6Cf0h4QyQ5v-65YGjQR0_FDW2Q"
+            + "vzqY368QQMicAtaSqzs8KJZgnYb9c7d0zgdAZHzu6qMQvRL5hajrn1n91CbOpbIS"
+            + "D08qNLyrdkt-bFTWhAI4vMQFh6WeZu0fM4lFd2NcRwr3XPksINHaQ-G_xBniIqbw"
+            + "0Ls1jF44-csFCur-kEgU8awapJzKnqDKgw";
+    private static final String E_SP = "AQAB";
+    private static final String D_SP = "X4cTteJY_gn4FYPsXB8rdXix5vwsg1FLN5E3EaG6RJoVH-HLLKD9"
+            + "M7dx5oo7GURknchnrRweUkC7hT5fJLM0WbFAKNLWY2vv7B6NqXSzUvxT0_YSfqij"
+            + "wp3RTzlBaCxWp4doFk5N2o8Gy_nHNKroADIkJ46pRUohsXywbReAdYaMwFs9tv8d"
+            + "_cPVY3i07a3t8MN6TNwm0dSawm9v47UiCl3Sk5ZiG7xojPLu4sbg1U2jx4IBTNBz"
+            + "nbJSzFHK66jT8bgkuqsk0GjskDJk19Z4qwjwbsnn4j2WBii3RL-Us2lGVkY8fkFz"
+            + "me1z0HbIkfz0Y6mqnOYtqc0X4jfcKoAC8Q";
+    private static final String P_SP = "83i-7IvMGXoMXCskv73TKr8637FiO7Z27zv8oj6pbWUQyLPQBQxtPV"
+            + "nwD20R-60eTDmD2ujnMt5PoqMrm8RfmNhVWDtjjMmCMjOpSXicFHj7XOuVIYQyqV"
+            + "WlWEh6dN36GVZYk93N8Bc9vY41xy8B9RzzOGVQzXvNEvn7O0nVbfs";
+    private static final String Q_SP = "3dfOR9cuYq-0S-mkFLzgItgMEfFzB2q3hWehMuG0oCuqnb3vobLyum"
+            + "qjVZQO1dIrdwgTnCdpYzBcOfW5r370AFXjiWft_NGEiovonizhKpo9VVS78TzFgx"
+            + "kIdrecRezsZ-1kYd_s1qDbxtkDEgfAITAG9LUnADun4vIcb6yelxk";
+    private static final String DQ_SP = "s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUU"
+            + "vMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9"
+            + "GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk";
+    private static final String DP_SP = "s9lAH9fggBsoFR8Oac2R_E2gw282rT2kGOAhvIllETE1efrA6huUU"
+            + "vMfBcMpn8lqeW6vzznYY5SSQF7pMdC_agI3nG8Ibp1BUb0JUiraRNqUfLhcQb_d9"
+            + "GF4Dh7e74WbRsobRonujTYN1xCaP6TO61jvWrX-L18txXw494Q_cgk";
+    private static final String QI_SP = "GyM_p6JrXySiz1toFgKbWV-JdI3jQ4ypu9rbMWx3rQJBfmt0FoYzg"
+            + "UIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rx"
+            + "yR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU";
 
-    private final String ALG = "RS256";
-    private final String KID = "2011-04-29";
-    private final String KTY = "RSA";
+    private static final String ALG = "RS256";
+    private static final String KID = "2011-04-29";
+    private static final String KTY = "RSA";
 
     //json objects
     private String json = null;
     private JsonValue jsonValue = null;
 
     @BeforeClass
-    public void setup(){
+    public void setup() {
         /*{
          "kty":"RSA",
           "n":"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4
@@ -169,7 +168,7 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testCreateJWKFromAString(){
+    public void testCreateJWKFromAString() {
         //Given
 
         //When
@@ -187,7 +186,7 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testCreateJWKFromAJsonValue(){
+    public void testCreateJWKFromAJsonValue() {
         //Given
 
         //When
@@ -205,7 +204,7 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testCreatePrivateKey(){
+    public void testCreatePrivateKey() {
         //Given
         RsaJWK jwk = RsaJWK.parse(json);
 
@@ -217,7 +216,7 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testCreatePublicKey(){
+    public void testCreatePublicKey() {
         //Given
         RsaJWK jwk = RsaJWK.parse(json);
 
@@ -229,7 +228,7 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testCreatePairKey(){
+    public void testCreatePairKey() {
         //Given
         RsaJWK jwk = RsaJWK.parse(json);
 
@@ -242,14 +241,14 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testCreateJWKUsingPublicKey(){
+    public void testCreateJWKUsingPublicKey() {
         //Given
         KeyPair keypair = null;
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
             generator.initialize(1024);
             keypair = generator.genKeyPair();
-        } catch (Exception e){
+        } catch (Exception e) {
             assertFalse(false, e.getLocalizedMessage());
         }
 
@@ -265,21 +264,20 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testCreateJWKUsingPublicKeyandPrivateKey(){
+    public void testCreateJWKUsingPublicKeyandPrivateKey() {
         //Given
         KeyPair keypair = null;
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
             generator.initialize(1024);
             keypair = generator.genKeyPair();
-        } catch (Exception e){
+        } catch (Exception e) {
             assertFalse(false, e.getLocalizedMessage());
         }
 
         //When
-        RsaJWK jwk = new
-                RsaJWK((RSAPublicKey)keypair.getPublic(),(RSAPrivateKey)keypair.getPrivate(), null, ALG, KID,
-                null, null, null);
+        RsaJWK jwk = new RsaJWK((RSAPublicKey) keypair.getPublic(), (RSAPrivateKey) keypair.getPrivate(), null, ALG,
+                KID, null, null, null);
 
         //Then
         BigInteger modulus = toPosBigInt(jwk.getModulus());
@@ -288,25 +286,24 @@ public class RsaJWKTest {
 
         assertEquals(modulus, ((RSAPublicKey) keypair.getPublic()).getModulus());
         assertEquals(pubExponent, ((RSAPublicKey) keypair.getPublic()).getPublicExponent());
-        assertEquals(privExponent ,((RSAPrivateKey) keypair.getPrivate()).getPrivateExponent());
+        assertEquals(privExponent, ((RSAPrivateKey) keypair.getPrivate()).getPrivateExponent());
     }
 
     @Test
-    public void testCreateJWKUsingPublicKeyandPrivateCert(){
+    public void testCreateJWKUsingPublicKeyandPrivateCert() {
         //Given
         KeyPair keypair = null;
         try {
             KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
             generator.initialize(1024);
             keypair = generator.genKeyPair();
-        } catch (Exception e){
+        } catch (Exception e) {
             assertFalse(false, e.getLocalizedMessage());
         }
 
         //When
-        RsaJWK jwk = new
-                RsaJWK((RSAPublicKey)keypair.getPublic(),(RSAPrivateCrtKey)keypair.getPrivate(), null, ALG, KID,
-                null, null, null);
+        RsaJWK jwk = new RsaJWK((RSAPublicKey) keypair.getPublic(), (RSAPrivateCrtKey) keypair.getPrivate(), null, ALG,
+                KID, null, null, null);
 
         //Then
         BigInteger modulus = toPosBigInt(jwk.getModulus());
@@ -348,7 +345,7 @@ public class RsaJWKTest {
         return sb.toString();
     }
 
-    private void testPrivateKey(RSAPrivateKey privKey){
+    private void testPrivateKey(RSAPrivateKey privKey) {
 
         BigInteger modulus = toPosBigInt(N);
         BigInteger privateExponent = toPosBigInt(D);
@@ -358,7 +355,7 @@ public class RsaJWKTest {
 
     }
 
-    private void testPublicKey(RSAPublicKey pubKey){
+    private void testPublicKey(RSAPublicKey pubKey) {
         BigInteger modulus = toPosBigInt(N);
         BigInteger publicExponent = toPosBigInt(E);
 
@@ -367,7 +364,7 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testSecurityProviderWithCreatePrivateKey(){
+    public void testSecurityProviderWithCreatePrivateKey() {
         //Given
         RsaJWK jwk = RsaJWK.parse(createJsonForSecurityProviderTest());
 
@@ -379,7 +376,7 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testSecurityProviderWithCreatePublicKey(){
+    public void testSecurityProviderWithCreatePublicKey() {
         //Given
         RsaJWK jwk = RsaJWK.parse(createJsonForSecurityProviderTest());
 
@@ -391,7 +388,7 @@ public class RsaJWKTest {
     }
 
     @Test
-    public void testSecurityProviderWithCreatePairKey(){
+    public void testSecurityProviderWithCreatePairKey() {
         //Given
         RsaJWK jwk = RsaJWK.parse(createJsonForSecurityProviderTest());
 
@@ -403,7 +400,7 @@ public class RsaJWKTest {
         testSecurityProviderPublicKey((RSAPublicKey) keypair.getPublic());
     }
 
-    private void testSecurityProviderPrivateKey(RSAPrivateKey privKey){
+    private void testSecurityProviderPrivateKey(RSAPrivateKey privKey) {
 
         BigInteger modulus = toPosBigInt(N_SP);
         BigInteger privateExponent = toPosBigInt(D_SP);
@@ -413,7 +410,7 @@ public class RsaJWKTest {
 
     }
 
-    private void testSecurityProviderPublicKey(RSAPublicKey pubKey){
+    private void testSecurityProviderPublicKey(RSAPublicKey pubKey) {
         BigInteger modulus = toPosBigInt(N_SP);
         BigInteger publicExponent = toPosBigInt(E_SP);
 

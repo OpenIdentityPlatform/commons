@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.compression;
@@ -20,7 +20,6 @@ package org.forgerock.json.jose.jwe.handlers.compression;
  * A NOP implementation of the Compression Handler, which will be used when no compression is to be
  * applied.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class NOPCompressionHandler implements CompressionHandler {

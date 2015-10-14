@@ -24,28 +24,26 @@ import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@SuppressWarnings("javadoc")
 public class JWKSetTest {
 
-    //ECJWK parameters
-    private final String KTY2 = "EC";
-    private final String CRV = "NIST P-256";
-    private final String X = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4";
-    private final String Y = "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM";
-    private final String D = "870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE";
-    private final String USE = "enc";
-    private final String KID2 = "1";
+    private static final String KTY2 = "EC";
+    private static final String CRV = "NIST P-256";
+    private static final String X = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4";
+    private static final String Y = "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM";
+    private static final String D = "870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE";
+    private static final String USE = "enc";
+    private static final String KID2 = "1";
 
-    //OCT parameters
-    private final String KTY1 = "OCT";
-    private final String K = "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow";
-    private final String KID1 = "HMAC key used in JWS A.1 example";
+    private static final String KTY1 = "OCT";
+    private static final String K = "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr"
+            + "1Z9CAow";
+    private static final String KID1 = "HMAC key used in JWS A.1 example";
 
     private String json = null;
     private JsonValue jsonValue = null;
 
     @BeforeClass
-    public void setup(){
+    public void setup() {
         //create string json object
         StringBuilder sb = new StringBuilder();
         /*
@@ -62,7 +60,7 @@ public class JWKSetTest {
                 .append("\"kty\"").append(":").append("\"" + KTY1 + "\"").append(",")
                 .append("\"k\"").append(":").append("\"" + K + "\"").append(",")
                 .append("\"kid\"").append(":").append("\"" + KID1 + "\"")
-        .append("}");
+                .append("}");
         sb.append(",");
         sb.append("{")
                 .append("\"kty\"").append(":").append("\"" + KTY2 + "\"").append(",")
@@ -72,7 +70,7 @@ public class JWKSetTest {
                 .append("\"d\"").append(":").append("\"" + D + "\"").append(",")
                 .append("\"use\"").append(":").append("\"" + USE + "\"").append(",")
                 .append("\"kid\"").append(":").append("\"" + KID2 + "\"")
-        .append("}");
+                .append("}");
         sb.append("]");
         sb.append("}");
 
@@ -98,22 +96,20 @@ public class JWKSetTest {
 
         jsonValue = new JsonValue(new HashMap<>());
         jsonValue.put("keys", listOfKeys);
-
-
     }
 
     @Test
-    public void testCreateJWKFromAString(){
+    public void testCreateJWKFromAString() {
         JWKSet jwkSet = JWKSet.parse(json);
 
         List<JWK> jwks = jwkSet.getJWKsAsList();
 
-        OctJWK jwk = (OctJWK)jwks.get(0);
+        OctJWK jwk = (OctJWK) jwks.get(0);
         assert jwk.getKey().equalsIgnoreCase(K);
         assert jwk.get("kty").asString().equalsIgnoreCase(KTY1);
         assert jwk.get("kid").asString().equalsIgnoreCase(KID1);
 
-        EcJWK jwk2 = (EcJWK)jwks.get(1);
+        EcJWK jwk2 = (EcJWK) jwks.get(1);
         assert jwk2.getCurve().equals(CRV);
         assert jwk2.getX().equals(X);
         assert jwk2.getY().equals(Y);
@@ -121,18 +117,18 @@ public class JWKSetTest {
     }
 
     @Test
-    public void testCreateJWKFromAJsonValue(){
+    public void testCreateJWKFromAJsonValue() {
 
         JWKSet jwkSet = JWKSet.parse(jsonValue);
 
         List<JWK> jwks = jwkSet.getJWKsAsList();
 
-        OctJWK jwk = (OctJWK)jwks.get(0);
+        OctJWK jwk = (OctJWK) jwks.get(0);
         assert jwk.getKey().equalsIgnoreCase(K);
         assert jwk.get("kty").asString().equalsIgnoreCase(KTY1);
         assert jwk.get("kid").asString().equalsIgnoreCase(KID1);
 
-        EcJWK jwk2 = (EcJWK)jwks.get(1);
+        EcJWK jwk2 = (EcJWK) jwks.get(1);
         assert jwk2.getCurve().equals(CRV);
         assert jwk2.getX().equals(X);
         assert jwk2.getY().equals(Y);

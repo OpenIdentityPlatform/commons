@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
@@ -19,7 +19,6 @@ package org.forgerock.json.jose.jwe;
 /**
  * This class represents the result from the encryption process of the JWT plaintext.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class JweEncryption {

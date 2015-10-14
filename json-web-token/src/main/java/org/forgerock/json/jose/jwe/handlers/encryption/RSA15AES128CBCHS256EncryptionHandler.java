@@ -25,8 +25,13 @@ import org.forgerock.json.jose.jws.SigningManager;
  *
  * @since 2.0.0
  */
-public class RSA15AES128CBCHS256EncryptionHandler extends AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler {
+public class RSA15AES128CBCHS256EncryptionHandler extends AbstractRSAESPkcs1V15AesCbcHmacEncryptionHandler {
 
+    /**
+     * Constructs a new RSA15AES128CBCHS256EncryptionHandler.
+     *
+     * @param signingManager A {@code SigningManager} instance.
+     */
     public RSA15AES128CBCHS256EncryptionHandler(final SigningManager signingManager) {
         super(signingManager, EncryptionMethod.A128CBC_HS256);
     }

@@ -71,7 +71,7 @@ public class EncryptedJwtTest {
         // Simulate a padding oracle attack against the last byte of the cipher text. This may generate different
         // error conditions depending on MAC vs padding errors. It should not be possible to distinguish these
         // cases, otherwise the attacker can easily break the encryption.
-        int ivEnd = initialisationVector.length-1;
+        int ivEnd = initialisationVector.length - 1;
         byte pad = 0x01;
         final Set<String> errorMessages = new HashSet<>();
         final Set<String> stackTraces = new HashSet<>();
@@ -101,8 +101,8 @@ public class EncryptedJwtTest {
     @DataProvider
     public Object[][] encryptionMethods() {
         return new Object[][] {
-                { EncryptionMethod.A128CBC_HS256, JweAlgorithm.RSAES_PKCS1_V1_5 },
-                { EncryptionMethod.A256CBC_HS512, JweAlgorithm.RSAES_PKCS1_V1_5 }
+            { EncryptionMethod.A128CBC_HS256, JweAlgorithm.RSAES_PKCS1_V1_5 },
+            { EncryptionMethod.A256CBC_HS512, JweAlgorithm.RSAES_PKCS1_V1_5 }
         };
     }
 

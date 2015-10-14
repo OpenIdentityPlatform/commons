@@ -563,10 +563,10 @@ public class JwtImplementationSpecTest {
     public void shouldDecryptJDK6Or7JweWithJDK8() {
 
         //Given
-        String originalJwe = "eyAidHlwIjogIkpXVCIsICJhbGciOiAiUlNBRVNfUEtDUzFfVjFfNSIsICJlbmMiOiAiQTEyOENCQ19IUzI" +
-                "1NiIgfQ.XftfhI758nV17DtXxgq6ykQEIsVBkVsEDCebrRjTPpYYobXSuJKXSAMirT3Kv-gELpsw-r4mT5eLt2wOwKEdcw.0" +
-                "Z4Ze0easjxgcK9WmExjwg.ooyGybIEKD6SFbC65gVui9YGq94_19VXVnlBGMlZ3-Uq5Gye2Ud_fO9i5RvwJGbR.trMZifMFl" +
-                "RVoA5SPmFoifQ";
+        String originalJwe = "eyAidHlwIjogIkpXVCIsICJhbGciOiAiUlNBRVNfUEtDUzFfVjFfNSIsICJlbmMiOiAiQTEyOENCQ19IUzI"
+                + "1NiIgfQ.XftfhI758nV17DtXxgq6ykQEIsVBkVsEDCebrRjTPpYYobXSuJKXSAMirT3Kv-gELpsw-r4mT5eLt2wOwKEdcw.0"
+                + "Z4Ze0easjxgcK9WmExjwg.ooyGybIEKD6SFbC65gVui9YGq94_19VXVnlBGMlZ3-Uq5Gye2Ud_fO9i5RvwJGbR.trMZifMFl"
+                + "RVoA5SPmFoifQ";
         EncryptedJwt encryptedJwt = reconstruction.reconstructJwt(originalJwe, EncryptedJwt.class);
 
         //When
@@ -598,10 +598,10 @@ public class JwtImplementationSpecTest {
         //Given
         // JSON headers and claims are stripped of spaces around keys/values before encrypting,
         // i.e. {"typ":"JWT"} vs { "typ" : "JWT" } etc.
-        String noSpaceJwe = "eyJ0eXAiOiJKV1QiLCJoZWFkZXIta2V5IjoiaGVhZGVyLXZhbHVlIiwiZW5jIjoiQTEyOENCQ19IUzI" +
-                "1NiIsImFsZyI6IlJTQUVTX1BLQ1MxX1YxXzUifQ.LwGSGsJ1LOEKgv1jA3GE90081GfJrM21DCDdL4b_8S22hjvzgFY" +
-                "yDKV6rchkkTiZHJiSyjMdtgQbyCvzJNx-GA.yGUN6WZWEwfyzhKdH5ifHw.AAfJrA4u_83EEhuNfmWmc1yjyev1rvpS" +
-                "1B7o7uvAfxg.c2zquNkMFg4QG5WyyXtqnA";
+        String noSpaceJwe = "eyJ0eXAiOiJKV1QiLCJoZWFkZXIta2V5IjoiaGVhZGVyLXZhbHVlIiwiZW5jIjoiQTEyOENCQ19IUzI"
+                + "1NiIsImFsZyI6IlJTQUVTX1BLQ1MxX1YxXzUifQ.LwGSGsJ1LOEKgv1jA3GE90081GfJrM21DCDdL4b_8S22hjvzgFY"
+                + "yDKV6rchkkTiZHJiSyjMdtgQbyCvzJNx-GA.yGUN6WZWEwfyzhKdH5ifHw.AAfJrA4u_83EEhuNfmWmc1yjyev1rvpS"
+                + "1B7o7uvAfxg.c2zquNkMFg4QG5WyyXtqnA";
         EncryptedJwt encryptedJwt = reconstruction.reconstructJwt(noSpaceJwe, EncryptedJwt.class);
 
         //When

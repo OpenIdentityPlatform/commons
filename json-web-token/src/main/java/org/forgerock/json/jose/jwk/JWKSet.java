@@ -101,7 +101,7 @@ public class JWKSet extends JWObject {
      * @return a json value of the son string
      * @throws JsonException if unable to parse
      */
-    protected static JsonValue toJsonValue(String json) throws JsonException {
+    protected static JsonValue toJsonValue(String json) {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return new JsonValue(mapper.readValue(json, Map.class));

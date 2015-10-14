@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -23,7 +23,6 @@ import org.forgerock.json.jose.jws.JwsHeader;
  * <p>
  * See {@link JwsHeader} for information on the JwsHeader object that this builder creates.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class JwsHeaderBuilder extends JwtSecureHeaderBuilder<SignedJwtBuilderImpl, JwsHeaderBuilder> {

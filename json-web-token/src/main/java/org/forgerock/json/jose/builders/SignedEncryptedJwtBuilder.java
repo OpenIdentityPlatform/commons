@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -28,7 +28,6 @@ import org.forgerock.json.jose.jwt.JwtType;
  * An implementation of a JwtBuilder that can build a JWT and encrypt it and nest it within another signed JWT,
  * resulting in an SignedEncryptedJwt object.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class SignedEncryptedJwtBuilder implements SignedJwtBuilder {

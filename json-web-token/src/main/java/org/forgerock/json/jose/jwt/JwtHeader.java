@@ -30,7 +30,6 @@ import java.util.Map;
  * @see org.forgerock.json.jose.jws.JwsHeader
  * @see org.forgerock.json.jose.jwe.JweHeader
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public abstract class JwtHeader extends JWObject {

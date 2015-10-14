@@ -44,7 +44,7 @@ import java.util.Arrays;
  *
  * @see <a href="https://tools.ietf.org/html/rfc7518#section-4.2">RFC 7518 Section 4.2</a>
  */
-abstract class AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler extends AbstractEncryptionHandler {
+abstract class AbstractRSAESPkcs1V15AesCbcHmacEncryptionHandler extends AbstractEncryptionHandler {
 
     private static final JweAlgorithm ALGORITHM = JweAlgorithm.RSAES_PKCS1_V1_5;
     private static final String INITIALISATION_VECTOR_ALGORITHM = "SHA1PRNG";
@@ -58,8 +58,8 @@ abstract class AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler extends A
      *
      * @param signingManager An instance of the SigningManager to use to create the authenticate tag.
      */
-    protected AbstractRSAES_PKCS1_V1_5_AES_CBC_HMAC_EncryptionHandler(SigningManager signingManager,
-                                                                      EncryptionMethod encryptionMethod) {
+    protected AbstractRSAESPkcs1V15AesCbcHmacEncryptionHandler(SigningManager signingManager,
+            EncryptionMethod encryptionMethod) {
         this.signingManager = checkNotNull(signingManager, "SigningManager must not be null");
         this.encryptionMethod = checkNotNull(encryptionMethod, "EncryptionMethod must not be null");
 

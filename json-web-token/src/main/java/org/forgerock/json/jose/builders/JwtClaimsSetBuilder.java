@@ -31,7 +31,6 @@ import org.forgerock.json.jose.jwt.JwtType;
  * See {@link org.forgerock.json.jose.jwt.JwtClaimsSet} for information on the JwtClaimsSet object that this builder
  * creates.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class JwtClaimsSetBuilder {

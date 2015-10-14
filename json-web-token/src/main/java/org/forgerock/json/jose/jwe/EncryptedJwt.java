@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
@@ -35,7 +35,6 @@ import org.forgerock.util.encode.Base64url;
  * @see <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-11">
  *     JSON Web Encryption Specification</a>
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class EncryptedJwt implements Jwt, Payload {

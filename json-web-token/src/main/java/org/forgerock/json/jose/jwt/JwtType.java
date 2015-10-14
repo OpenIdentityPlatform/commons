@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -24,7 +24,6 @@ package org.forgerock.json.jose.jwt;
  * encrypted JWTs the JWT type MUST be "JWS" and "JWE" respectively and the "typ" property in the JWT header MUST be
  * set.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public enum JwtType {

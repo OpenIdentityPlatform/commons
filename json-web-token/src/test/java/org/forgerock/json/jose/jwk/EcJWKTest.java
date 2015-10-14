@@ -22,24 +22,21 @@ import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@SuppressWarnings("javadoc")
 public class EcJWKTest {
 
-    //ECJWK parameters
-    private final String KTY = "EC";
-    private final String CRV = "NIST P-256";
-    private final String X = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4";
-    private final String Y = "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM";
-    private final String D = "870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE";
-    private final String USE = "enc";
-    private final String KID = "1";
+    private static final String KTY = "EC";
+    private static final String CRV = "NIST P-256";
+    private static final String X = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4";
+    private static final String Y = "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM";
+    private static final String D = "870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE";
+    private static final String USE = "enc";
+    private static final String KID = "1";
 
-    //json objects
     private String json = null;
     private JsonValue jsonValue = null;
 
     @BeforeClass
-    public void setup(){
+    public void setup() {
         /*
         {"kty":"EC",
         "crv":"P-256",
@@ -59,7 +56,7 @@ public class EcJWKTest {
                 .append("\"d\"").append(":").append("\"" + D + "\"").append(",")
                 .append("\"use\"").append(":").append("\"" + USE + "\"").append(",")
                 .append("\"kid\"").append(":").append("\"" + KID + "\"")
-          .append("}");
+                .append("}");
         json = sb.toString();
 
         //create json value object
@@ -75,7 +72,7 @@ public class EcJWKTest {
     }
 
     @Test
-    public void testCreateJWKFromAString(){
+    public void testCreateJWKFromAString() {
 
         //Given
 
@@ -91,7 +88,7 @@ public class EcJWKTest {
     }
 
     @Test
-    public void testCreateJWKFromAJsonValue(){
+    public void testCreateJWKFromAJsonValue() {
         //Given
 
         //When
@@ -103,85 +100,4 @@ public class EcJWKTest {
         assert jwk.getY().equals(Y);
         assert jwk.getD().equals(D);
     }
-    /*
-    @Test
-    public void testCreatePrivateKey(){
-        //Given
-        EcJWK jwk = EcJWK.parse(jsonValue);
-
-        //When
-        ECPrivateKey privKey = jwk.toECPrivateKey();
-
-        //Then
-        validatePrivateKey(privKey);
-    }
-
-    @Test
-    public void testCreatePublicKey(){
-        //Given
-        EcJWK jwk = EcJWK.parse(jsonValue);
-
-        //When
-        ECPublicKey publicKey = jwk.toECPublicKey();
-
-        //Then
-        validatePublicKey(publicKey);
-
-    }
-
-    @Test
-    public void testCreatePairKey(){
-        //Given
-        EcJWK jwk = EcJWK.parse(json);
-
-        //When
-        KeyPair keypair = jwk.toKeyPair();
-
-        //Then
-        validatePrivateKey((ECPrivateKey)keypair.getPrivate());
-        validatePublicKey((ECPublicKey)keypair.getPublic());
-
-    }
-
-    private void validatePrivateKey(ECPrivateKey privateKey){
-        ECParameterSpec spec = null;
-        ECPrivateKey expectedPriv = null;
-
-        BigInteger d = new BigInteger(Base64url.decode(D));
-
-        try{
-            spec = NamedCurve.getECParameterSpec(CRV);
-            ECPrivateKeySpec privspec = new ECPrivateKeySpec(d, spec);
-            expectedPriv = (ECPrivateKey) ECKeyFactory.INSTANCE.generatePrivate(privspec);
-        } catch (Exception e){
-            throw new JsonException("Unable to create public EC key.", e);
-        }
-
-        assert privateKey.getParams().equals(spec);
-        assert privateKey.getS().equals(d);
-        assert privateKey.equals(expectedPriv);
-    }
-
-    private void validatePublicKey(ECPublicKey publicKey){
-        ECParameterSpec spec = null;
-        ECPublicKey expectedPub = null;
-        try{
-            spec = NamedCurve.getECParameterSpec(CRV);
-            ECPoint point = new ECPoint(new BigInteger(Base64url.decode(X)),
-                    new BigInteger(Base64url.decode(Y)));
-            ECPublicKeySpec pubspec = new ECPublicKeySpec(point, spec);
-            expectedPub = (ECPublicKey) ECKeyFactory.INSTANCE.generatePublic(pubspec);
-        } catch (Exception e){
-            throw new JsonException("Unable to create public EC key.", e);
-        }
-
-        BigInteger x = new BigInteger(Base64url.decode(X));
-        BigInteger y = new BigInteger(Base64url.decode(Y));
-
-        assert publicKey.getParams().equals(spec);
-        assert publicKey.getW().getAffineX().equals(x);
-        assert publicKey.getW().getAffineY().equals(y);
-        assert publicKey.equals(expectedPub);
-    }
-    */
 }

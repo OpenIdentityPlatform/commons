@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
@@ -29,7 +29,6 @@ package org.forgerock.json.jose.jwe;
  * This list add upon the list in {@link org.forgerock.json.jose.jws.JwsHeaderKey}.
  * Any other header parameter name is deemed as a "custom" header parameter.
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public enum JweHeaderKey {

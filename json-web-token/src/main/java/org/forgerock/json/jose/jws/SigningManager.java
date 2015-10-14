@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -29,7 +29,6 @@ import java.security.Key;
  * <p>
  * For details of all supported signing algorithms see {@link JwsAlgorithm}
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class SigningManager {
@@ -49,7 +48,7 @@ public class SigningManager {
 
     /**
      * Constructs a new HmacSigningHandler.
-     * 
+     *
      * @param sharedSecret
      *            The shared secret to use to sign the data.
      * @return a new HmacSigningHandler.

@@ -30,7 +30,6 @@ import org.forgerock.json.jose.jwt.JwtHeader;
  * @param <T> the type of JwtBuilder that parents this JwtHeaderBuilder.
  * @param <B> the type of this JwtHeaderBuilder
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public abstract class JwtHeaderBuilder<T extends JwtBuilder, B extends JwtHeaderBuilder<T, B>> {

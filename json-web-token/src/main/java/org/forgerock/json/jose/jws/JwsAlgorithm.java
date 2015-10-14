@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2014 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -35,7 +35,7 @@ public enum JwsAlgorithm implements Algorithm {
     HS384("HmacSHA384", "SHA-384", JwsAlgorithmType.HMAC),
     /** HMAC using SHA-512 hash algorithm. */
     HS512("HmacSHA512", "SHA-512", JwsAlgorithmType.HMAC),
-    /** RSA using SHA-256 hash algorithm **/
+    /** RSA using SHA-256 hash algorithm. **/
     RS256("SHA256withRSA", "SHA-256", JwsAlgorithmType.RSA);
 
     private final String algorithm;
@@ -67,7 +67,7 @@ public enum JwsAlgorithm implements Algorithm {
     /**
      * Returns the Java-friendly name of the message digest algorithm
      * implementation.
-     * 
+     *
      * @return the Java-friendly name of the message digest algorithm
      *         implementation.
      * @see <a

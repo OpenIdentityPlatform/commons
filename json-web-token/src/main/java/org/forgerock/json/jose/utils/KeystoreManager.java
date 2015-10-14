@@ -124,6 +124,7 @@ public class KeystoreManager {
      * Gets the Private Key from the KeyStore with the given alias.
      *
      * @param keyAlias The Private Key Alias.
+     * @param privateKeyPassword The private key password
      * @return The Private Key.
      */
     public PrivateKey getPrivateKey(String keyAlias, String privateKeyPassword) {

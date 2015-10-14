@@ -28,6 +28,9 @@ public final class JweDecryptionException extends JweException {
     /** Serializable class version number. */
     private static final long serialVersionUID = 2L;
 
+    /**
+     * Constructs a new JweDecryptionException.
+     */
     public JweDecryptionException() {
         super("Decryption failed");
     }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
@@ -28,7 +28,6 @@ import org.forgerock.json.jose.jws.SigningManager;
  * For details of all supported algorithms see {@link JweAlgorithm} and for all supported encryption methods see
  * {@link EncryptionMethod}
  *
- * @author Phill Cunnington
  * @since 2.0.0
  */
 public class EncryptionManager {

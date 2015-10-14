@@ -22,19 +22,18 @@ import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@SuppressWarnings("javadoc")
 public class OctJWKTest {
 
-    //Oct Parameters
-    private final String KTY = "OCT";
-    private final String K = "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr1Z9CAow";
-    private final String KID = "HMAC key used in JWS A.1 example";
+    private static final String KTY = "OCT";
+    private static final String K = "AyM1SysPpbyDfgZld3umj1qzKObwVMkoqQ-EstJQLr_T-1qS0gZH75aKtMN3Yj0iPS4hcgUuTwjAzZr"
+            + "1Z9CAow";
+    private static final String KID = "HMAC key used in JWS A.1 example";
 
     private String json = null;
     private JsonValue jsonValue = null;
 
     @BeforeClass
-    public void setup(){
+    public void setup() {
         //create string json object
         StringBuilder sb = new StringBuilder();
         /*
@@ -45,10 +44,10 @@ public class OctJWKTest {
              }
          */
         sb.append("{")
-            .append("\"kty\"").append(":").append("\"" + KTY + "\"").append(",")
-            .append("\"k\"").append(":").append("\"" + K + "\"").append(",")
-            .append("\"kid\"").append(":").append("\"" + KID + "\"")
-        .append("}");
+                .append("\"kty\"").append(":").append("\"" + KTY + "\"").append(",")
+                .append("\"k\"").append(":").append("\"" + K + "\"").append(",")
+                .append("\"kid\"").append(":").append("\"" + KID + "\"")
+                .append("}");
 
         json = sb.toString();
 
@@ -61,7 +60,7 @@ public class OctJWKTest {
     }
 
     @Test
-    public void testCreateJWKFromAString(){
+    public void testCreateJWKFromAString() {
         OctJWK jwk = OctJWK.parse(json);
 
         assert jwk.getKey().equalsIgnoreCase(K);
@@ -70,7 +69,7 @@ public class OctJWKTest {
     }
 
     @Test
-    public void testCreateJWKFromAJsonValue(){
+    public void testCreateJWKFromAJsonValue() {
 
         OctJWK jwk = OctJWK.parse(jsonValue);
 
