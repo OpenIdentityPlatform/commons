@@ -32,7 +32,7 @@ public class AuditEvent {
      */
     AuditEvent(JsonValue value) {
         Reject.ifNull(value);
-        this.value = value.copy();
+        this.value = value;
     }
 
     /**
