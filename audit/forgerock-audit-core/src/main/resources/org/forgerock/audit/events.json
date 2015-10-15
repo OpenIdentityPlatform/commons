@@ -117,15 +117,28 @@
               "description": "org.forgerock.audit.events.access.http.path",
               "type": "string"
             },
-            "queryString": {
-              "description": "org.forgerock.audit.events.access.http.queryString",
-              "type": "string"
+            "queryParameters": {
+              "description": "org.forgerock.audit.events.access.http.queryParameters",
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
             },
             "headers": {
               "description": "org.forgerock.audit.events.access.http.headers",
               "type": "array",
               "items": {
                 "id": "0",
+                "type": "string"
+              }
+            },
+            "cookies": {
+              "description": "org.forgerock.audit.events.access.http.cookies",
+              "type": "object",
+              "additionalProperties": {
                 "type": "string"
               }
             }

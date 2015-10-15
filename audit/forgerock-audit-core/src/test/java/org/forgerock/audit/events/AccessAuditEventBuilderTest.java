@@ -15,15 +15,15 @@
  */
 package org.forgerock.audit.events;
 
-import static java.util.Arrays.*;
-import static org.assertj.core.api.Assertions.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
 import static org.forgerock.audit.events.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
 import static org.forgerock.audit.events.AuditEventBuilder.ID;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,12 +35,12 @@ import java.util.concurrent.TimeUnit;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.services.context.SecurityContext;
 import org.forgerock.json.resource.http.HttpContext;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.services.context.SecurityContext;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -70,8 +70,15 @@ public class AccessAuditEventBuilderTest {
     @Test
     public void ensureEventIsCorrectlyBuilt() {
         Map<String, List<String>> headers = new HashMap<>();
-        headers.put("Content-Length", asList("200"));
-        headers.put("Content-Type", asList("application/json"));
+        headers.put("Content-Length", singletonList("200"));
+        headers.put("Content-Type", singletonList("application/json"));
+        headers.put("Cookie", singletonList("iPlanetDirectoryPro=sensitive; sessionId=sensitive"));
+
+        Map<String, List<String>> queryParameters = new HashMap<>();
+        queryParameters.put("parameter1", asList("value1", "value2"));
+        queryParameters.put("parameter2", asList("value1", "value2"));
+
+        List<String> expectedCookieNames = asList("iPlanetDirectoryPro", "sessionId");
 
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
@@ -84,7 +91,7 @@ public class AccessAuditEventBuilderTest {
                 .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
                 .authentication("someone@forgerock.com")
                 .request("CREST", "reconcile")
-                .http("GET", "/some/path", "p1=v1&p2=v2", headers)
+                .http("GET", "/some/path", queryParameters, headers)
                 .response(SUCCESS, "200", 12, TimeUnit.MILLISECONDS)
                 .openField("value")
                 .toEvent();
@@ -98,6 +105,9 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(SERVER).get(PORT).asLong()).isEqualTo(80);
         assertThat(value.get(HTTP).get(METHOD).asString()).isEqualTo("GET");
         assertThat(value.get(HTTP).get(HEADERS).asMapOfList(String.class)).isEqualTo(headers);
+        assertThat(value.get(HTTP).get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(queryParameters);
+        assertThat(value.get(HTTP).get(COOKIES).asMap(String.class))
+                .containsOnlyKeys(expectedCookieNames.toArray(new String[0]));
         assertThat(value.get(AUTHORIZATION).get(ID).asString()).isEqualTo("aegloff");
         assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");
         assertThat(value.get(REQUEST).get(OPERATION).asString()).isEqualTo("reconcile");
@@ -161,14 +171,14 @@ public class AccessAuditEventBuilderTest {
 
     @Test
     public void eventWithNoHeader() {
-        Map<String, List<String>> headers = Collections.<String, List<String>>emptyMap();
+        Map<String, List<String>> headers = Collections.emptyMap();
 
         AuditEvent event = productAccessEvent()
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .authentication("someone@forgerock.com")
                 .timestamp(1427293286239L)
-                .http("GET", "/some/path", "p1=v1&p2=v2", headers)
+                .http("GET", "/some/path", Collections.<String, List<String>>emptyMap(), headers)
                 .toEvent();
 
         JsonValue value = event.getValue();
@@ -201,10 +211,14 @@ public class AccessAuditEventBuilderTest {
         // Given
         HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"), null);
 
-        Map<String, Object> expectedHeaders = new LinkedHashMap<String, Object>();
-        expectedHeaders.put("h1", Arrays.asList("h1_v1", "h1_v2"));
-        expectedHeaders.put("h2", Arrays.asList("h2_v1", "h2_v2"));
-        expectedHeaders.put("Host", Arrays.asList("product.example.com:8080"));
+        Map<String, Object> expectedHeaders = new LinkedHashMap<>();
+        expectedHeaders.put("h1", asList("h1_v1", "h1_v2"));
+        expectedHeaders.put("h2", asList("h2_v1", "h2_v2"));
+        expectedHeaders.put("Host", singletonList("product.example.com:8080"));
+
+        Map<String, Object> expectedParameters = new LinkedHashMap<>();
+        expectedParameters.put("p1", asList("p1_v1", "p1_v2"));
+        expectedParameters.put("p2", asList("p2_v1", "p2_v2"));
 
         // When
         AuditEvent event = productAccessEvent()
@@ -218,7 +232,7 @@ public class AccessAuditEventBuilderTest {
         JsonValue value = event.getValue();
         assertThat(value.get(HTTP).get(METHOD).asString()).isEqualTo("GET");
         assertThat(value.get(HTTP).get(PATH).asString()).isEqualTo("http://product.example.com:8080/path");
-        assertThat(value.get(HTTP).get(QUERY_STRING).asString()).isEqualTo("p1=p1_v1&p1=p1_v2&p2=p2_v1&p2=p2_v2");
+        assertThat(value.get(HTTP).get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(expectedParameters);
         assertThat(value.get(HTTP).get(HEADERS).asMap()).isEqualTo(expectedHeaders);
     }
 
@@ -286,7 +300,7 @@ public class AccessAuditEventBuilderTest {
         List<String> roles = new LinkedList<>();
         roles.add("role1");
         roles.add("role2");
-        Map<String, Object> authorizationId = new HashMap<String, Object>();
+        Map<String, Object> authorizationId = new HashMap<>();
         authorizationId.put(COMPONENT, COMPONENT);
         authorizationId.put(ID, ID);
         authorizationId.put(ROLES, roles);
