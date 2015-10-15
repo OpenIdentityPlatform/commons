@@ -118,6 +118,7 @@
     <json-patch.version>3.0.0-SNAPSHOT</json-patch.version>
     <json-ref.version>3.0.0-SNAPSHOT</json-ref.version>
     <json-schema.version>3.0.0-SNAPSHOT</json-schema.version>
+    <json-web-token.version>3.0.0-SNAPSHOT</json-web-token.version>
     <forgerock-http-framework.version>0.0.1-SNAPSHOT</forgerock-http-framework.version>
     <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
     <forgerock-auth-filters.version>2.0.0-SNAPSHOT</forgerock-auth-filters.version>
@@ -460,7 +461,7 @@
       <dependency>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>json-web-token</artifactId>
-        <version>${forgerock-rest.version}</version>
+        <version>${json-web-token.version}</version>
       </dependency>
 
 
