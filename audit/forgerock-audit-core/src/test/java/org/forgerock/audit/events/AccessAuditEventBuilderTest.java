@@ -15,6 +15,7 @@
  */
 package org.forgerock.audit.events;
 
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,14 +31,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.http.HttpContext;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("javadoc")
 public class AccessAuditEventBuilderTest {
@@ -65,10 +67,14 @@ public class AccessAuditEventBuilderTest {
 
     @Test
     public void ensureEventIsCorrectlyBuilt() {
-        Map<String, List<String>> headers = new HashMap<>();
-        headers.put("Content-Length", singletonList("200"));
-        headers.put("Content-Type", singletonList("application/json"));
-        headers.put("Cookie", singletonList("iPlanetDirectoryPro=sensitive; sessionId=sensitive"));
+        Map<String, List<String>> requestHeaders = new HashMap<>();
+        requestHeaders.put("Content-Length", singletonList("200"));
+        requestHeaders.put("Content-Type", singletonList("application/json"));
+        requestHeaders.put("Cookie", singletonList("iPlanetDirectoryPro=sensitive; sessionId=sensitive"));
+
+        Map<String, List<String>> responseHeaders = new HashMap<>();
+        responseHeaders.put("Cache-Control", singletonList("max-age=3600"));
+        responseHeaders.put("Set-Cookie", singletonList("UserID=JohnDoe; Max-Age=3600; Version=1"));
 
         Map<String, List<String>> queryParameters = new HashMap<>();
         queryParameters.put("parameter1", asList("value1", "value2"));
@@ -86,7 +92,8 @@ public class AccessAuditEventBuilderTest {
                 .server("sip", 80)
                 .userId("someone@forgerock.com")
                 .request("CREST", "reconcile")
-                .http("GET", "/some/path", queryParameters, headers)
+                .httpRequest(false, "GET", "/some/path", queryParameters, requestHeaders)
+                .httpResponse(responseHeaders)
                 .response(SUCCESSFUL, "200", 12, TimeUnit.MILLISECONDS)
                 .openField("value")
                 .toEvent();
@@ -98,11 +105,12 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(TRACKING_IDS).asSet()).containsExactly("12345", "67890");
         assertThat(value.get(SERVER).get(IP).asString()).isEqualTo("sip");
         assertThat(value.get(SERVER).get(PORT).asLong()).isEqualTo(80);
-        assertThat(value.get(HTTP).get(METHOD).asString()).isEqualTo("GET");
-        assertThat(value.get(HTTP).get(HEADERS).asMapOfList(String.class)).isEqualTo(headers);
-        assertThat(value.get(HTTP).get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(queryParameters);
-        assertThat(value.get(HTTP).get(COOKIES).asMap(String.class))
+        assertThat(value.get(HTTP).get(REQUEST).get(METHOD).asString()).isEqualTo("GET");
+        assertThat(value.get(HTTP).get(REQUEST).get(HEADERS).asMapOfList(String.class)).isEqualTo(requestHeaders);
+        assertThat(value.get(HTTP).get(REQUEST).get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(queryParameters);
+        assertThat(value.get(HTTP).get(REQUEST).get(COOKIES).asMap(String.class))
                 .containsOnlyKeys(expectedCookieNames.toArray(new String[0]));
+        assertThat(value.get(HTTP).get(RESPONSE).get(HEADERS).asMapOfList(String.class)).isEqualTo(responseHeaders);
         assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");
         assertThat(value.get(REQUEST).get(OPERATION).asString()).isEqualTo("reconcile");
         assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("SUCCESSFUL");
@@ -172,19 +180,20 @@ public class AccessAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .userId("someone@forgerock.com")
                 .timestamp(1427293286239L)
-                .http("GET", "/some/path", Collections.<String, List<String>>emptyMap(), headers)
+                .httpRequest(false, "GET", "/some/path", Collections.<String, List<String>>emptyMap(), headers)
                 .toEvent();
 
         JsonValue value = event.getValue();
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
-        assertThat(value.get(HTTP).get(HEADERS).asMapOfList(String.class)).isEqualTo(headers);
+        assertThat(value.get(HTTP).get(REQUEST).get(HEADERS).asMapOfList(String.class)).isEqualTo(headers);
     }
 
     @Test
     public void canPopulateClientFromHttpContext() throws Exception {
         // Given
-        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"), null);
+        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"),
+                Thread.currentThread().getContextClassLoader());
 
         // When
         AuditEvent event = productAccessEvent()
@@ -203,7 +212,8 @@ public class AccessAuditEventBuilderTest {
     @Test
     public void canPopulateHttpFromHttpContext() throws Exception {
         // Given
-        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"), null);
+        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"),
+                Thread.currentThread().getContextClassLoader());
 
         Map<String, Object> expectedHeaders = new LinkedHashMap<>();
         expectedHeaders.put("h1", asList("h1_v1", "h1_v2"));
@@ -224,10 +234,11 @@ public class AccessAuditEventBuilderTest {
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(HTTP).get(METHOD).asString()).isEqualTo("GET");
-        assertThat(value.get(HTTP).get(PATH).asString()).isEqualTo("http://product.example.com:8080/path");
-        assertThat(value.get(HTTP).get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(expectedParameters);
-        assertThat(value.get(HTTP).get(HEADERS).asMap()).isEqualTo(expectedHeaders);
+        final JsonValue httpRequest = value.get(HTTP).get(REQUEST);
+        assertThat(httpRequest.get(METHOD).asString()).isEqualTo("GET");
+        assertThat(httpRequest.get(PATH).asString()).isEqualTo("http://product.example.com:8080/path");
+        assertThat(httpRequest.get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(expectedParameters);
+        assertThat(httpRequest.get(HEADERS).asMap()).isEqualTo(expectedHeaders);
     }
 
     @Test
@@ -272,7 +283,8 @@ public class AccessAuditEventBuilderTest {
     @Test
     public void canPopulateServerFromHttpContext() throws Exception {
         // Given
-        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"), null);
+        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"),
+                Thread.currentThread().getContextClassLoader());
 
         // When
         AuditEvent event = productAccessEvent()

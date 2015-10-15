@@ -83,39 +83,65 @@
         "http": {
           "type": "object",
           "properties": {
-            "method": {
-              "description": "org.forgerock.audit.events.access.http.method",
-              "type": "string"
-            },
-            "path": {
-              "description": "org.forgerock.audit.events.access.http.path",
-              "type": "string"
-            },
-            "queryParameters": {
-              "description": "org.forgerock.audit.events.access.http.queryParameters",
+            "request": {
+              "description": "org.forgerock.audit.events.access.http.request",
               "type": "object",
-              "additionalProperties": {
-                "type": "array",
-                "items": {
+              "properties": {
+                "secure": {
+                  "description": "org.forgerock.audit.events.access.http.secure",
+                  "type": "boolean"
+                },
+                "method": {
+                  "description": "org.forgerock.audit.events.access.http.method",
                   "type": "string"
+                },
+                "path": {
+                  "description": "org.forgerock.audit.events.access.http.path",
+                  "type": "string"
+                },
+                "queryParameters": {
+                  "description": "org.forgerock.audit.events.access.http.queryParameters",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "headers": {
+                  "description": "org.forgerock.audit.events.access.http.headers",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "cookies": {
+                  "description": "org.forgerock.audit.events.access.http.cookies",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
                 }
               }
             },
-            "headers": {
-              "description": "org.forgerock.audit.events.access.http.headers",
+            "response": {
+              "description": "org.forgerock.audit.events.access.http.response",
               "type": "object",
-              "additionalProperties": {
-                "type": "array",
-                "items": {
-                  "type": "string"
+              "properties": {
+                "headers": {
+                  "description": "org.forgerock.audit.events.access.http.request.headers",
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
                 }
-              }
-            },
-            "cookies": {
-              "description": "org.forgerock.audit.events.access.http.cookies",
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
               }
             }
           }

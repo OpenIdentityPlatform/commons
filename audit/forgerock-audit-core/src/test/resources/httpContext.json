@@ -13,5 +13,25 @@
   },
   "remoteAddress": "168.0.0.10",
   "name" : "http",
-  "parent": null
+  "parent": {
+    "class": "org.forgerock.services.context.ClientContext",
+    "name": "client",
+    "remoteUser": "",
+    "remoteAddress": "",
+    "remoteHost": "",
+    "remotePort": -1,
+    "certificates": "",
+    "userAgent": "",
+    "isExternal": false,
+    "isSecure": true,
+    "localAddress": "",
+    "localName": "",
+    "localPort": -1,
+    "parent": {
+      "class": "org.forgerock.services.context.RootContext",
+      "id": "6a958c81-2ec4-4b8d-8a11-73519d30b6d7-0",
+      "name": "root",
+      "parent": null
+    }
+  }
 }

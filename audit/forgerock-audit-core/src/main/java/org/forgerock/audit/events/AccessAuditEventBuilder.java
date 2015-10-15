@@ -16,13 +16,17 @@
 package org.forgerock.audit.events;
 
 import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.fieldIfNotNull;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,6 +40,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +84,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public static final String REQUEST = "request";
     public static final String PROTOCOL = "protocol";
     public static final String OPERATION = "operation";
+    public static final String SECURE = "secure";
     public static final String METHOD = "method";
     public static final String DETAIL = "detail";
     public static final String PATH = "path";
@@ -97,6 +103,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     private static final String HOST_HEADER = "Host";
     private static final String COOKIE_HEADER = "Cookie";
     private static final String HTTP_CONTEXT_NAME = "http";
+    private static final String CLIENT_CONTEXT_NAME = "client";
     private static final String HTTP_CONTEXT_REMOTE_ADDRESS = "remoteAddress";
 
     private static final Logger logger = LoggerFactory.getLogger(AccessAuditEventBuilder.class);
@@ -269,15 +276,16 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets the provided HTTP fields for the event.
+     * Sets the provided HTTP request fields for the event.
      *
+     * @param secure Was the request secure ?
      * @param method the HTTP method.
      * @param path the path of HTTP request.
      * @param queryParameters the query parameters of HTTP request.
      * @param headers the list of headers of HTTP request. The headers are optional.
      * @return this builder
      */
-    public final T http(String method, String path,  Map<String, List<String>> queryParameters,
+    public final T httpRequest(boolean secure, String method, String path, Map<String, List<String>> queryParameters,
             Map<String, List<String>> headers) {
         final List<String> cookiesHeader = headers.remove(COOKIE_HEADER);
         final List<Cookie> listOfCookies = new LinkedList<>();
@@ -289,13 +297,14 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         for (final Cookie cookie : listOfCookies) {
             cookies.put(cookie.getName(), cookie.toString());
         }
-        http(method, path, queryParameters, headers, cookies);
+        httpRequest(secure, method, path, queryParameters, headers, cookies);
         return self();
     }
 
     /**
-     * Sets the provided HTTP fields for the event.
+     * Sets the provided HTTP request fields for the event.
      *
+     * @param secure Was the request secure ?
      * @param method the HTTP method.
      * @param path the path of HTTP request.
      * @param queryParameters the query parameters of HTTP request.
@@ -303,16 +312,59 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @param cookies the list of cookies of HTTP request. The cookies are optional.
      * @return this builder
      */
-    public final T http(String method, String path,  Map<String, List<String>> queryParameters,
+    public final T httpRequest(boolean secure, String method, String path,  Map<String, List<String>> queryParameters,
             Map<String, List<String>> headers, Map<String, String> cookies) {
         JsonValue object = json(object(
+                field(SECURE, secure),
                 field(METHOD, method),
                 field(PATH, path),
                 field(QUERY_PARAMETERS, queryParameters),
                 field(HEADERS, headers),
                 field(COOKIES, cookies)));
-        jsonValue.put(HTTP, object);
+        getOrCreateHttp().put(REQUEST, object.getObject());
+
         return self();
+    }
+
+    /**
+     * Sets the provided HTTP fields for the event.
+     *
+     * @param headers the list of headers of HTTP response. The headers are optional.
+     * @return this builder
+     */
+    public final T httpResponse(Map<String, List<String>> headers) {
+        JsonValue object = json(object(
+                field(HEADERS, headers)));
+        getOrCreateHttp().put(RESPONSE, object);
+
+        return self();
+    }
+
+    @VisibleForTesting
+    JsonValue getOrCreateHttp() {
+        if (jsonValue.get(HTTP).isNull()) {
+            jsonValue.put(HTTP, object());
+        }
+        return jsonValue.get(HTTP);
+    }
+
+    @VisibleForTesting
+    JsonValue getOrCreateHttpResponse() {
+        if (getOrCreateHttp().get(RESPONSE).isNull()) {
+            getOrCreateHttp().put(RESPONSE, object());
+        }
+        return getOrCreateHttp().get(RESPONSE);
+    }
+
+    @VisibleForTesting
+    JsonValue getOrCreateHttpResponseCookies() {
+        final JsonValue httpResponse = getOrCreateHttpResponse();
+        JsonValue cookies = httpResponse.get(COOKIES);
+        if (cookies.isNull()) {
+            httpResponse.put(COOKIES, new ArrayList());
+        }
+        cookies = httpResponse.get(COOKIES);
+        return cookies;
     }
 
     /**
@@ -392,7 +444,9 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public final T httpFromHttpContext(Context context) {
         if (context.containsContext(HTTP_CONTEXT_NAME)) {
             final JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
-            http(httpContext.get("method").asString(),
+            final JsonValue clientContext = context.getContext(CLIENT_CONTEXT_NAME).toJsonValue();
+            httpRequest(clientContext.get("isSecure").asBoolean(),
+                    httpContext.get("method").asString(),
                     httpContext.get("path").asString(),
                     httpContext.get("parameters").asMapOfList(String.class),
                     httpContext.get("headers").asMapOfList(String.class));
