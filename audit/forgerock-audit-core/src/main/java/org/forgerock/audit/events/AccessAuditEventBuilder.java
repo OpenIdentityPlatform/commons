@@ -15,15 +15,10 @@
  */
 package org.forgerock.audit.events;
 
-import static org.forgerock.json.JsonValue.*;
-
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.Request;
-import org.forgerock.util.Reject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -32,6 +27,15 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.Request;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.Reject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Builder for audit access events.
@@ -335,7 +339,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @param status the status of the operation.
      * @param statusCode the status code of the operation.
      * @param elapsedTime the execution time of the action.
-     * @param elapsedTimeUnits the unit of measure for the execution time value (either milliseconds or nanoseconds).
+     * @param elapsedTimeUnits the unit of measure for the execution time value.
      * @return this builder
      */
     public final T response(ResponseStatus status, String statusCode, long elapsedTime, TimeUnit elapsedTimeUnits) {
@@ -343,7 +347,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
                 field(STATUS, status == null ? null : status.toString()),
                 field(STATUS_CODE, statusCode),
                 field(ELAPSED_TIME, elapsedTime),
-                field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.getAbbreviation())));
+                field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.name())));
         jsonValue.put(RESPONSE, object);
         return self();
     }
@@ -354,7 +358,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @param status the status of the operation.
      * @param statusCode the status code of the operation.
      * @param elapsedTime the execution time of the action.
-     * @param elapsedTimeUnits the unit of measure for the execution time value (either milliseconds or nanoseconds).
+     * @param elapsedTimeUnits the unit of measure for the execution time value.
      * @param detail additional details relating to the response (e.g. failure description or summary of the payload).
      * @return this builder
      */
@@ -365,7 +369,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
                 field(STATUS, status == null ? null : status.toString()),
                 field(STATUS_CODE, statusCode),
                 field(ELAPSED_TIME, elapsedTime),
-                field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.getAbbreviation()),
+                field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.name()),
                 field(DETAIL, detail.getObject())));
         jsonValue.put(RESPONSE, object);
         return self();
@@ -489,30 +493,5 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         SUCCESS,
         /** The access request was not successfully completed. */
         FAILURE
-    }
-
-    /**
-     * Defines a fixed set of options for <code>/response/elapsedTimeUnit</code> values.
-     */
-    public enum TimeUnit {
-
-        /**
-         * Thousandths of a second.
-         */
-        MILLISECONDS("ms"),
-        /**
-         * Billionths of a second.
-         */
-        NANOSECONDS("ns");
-
-        private final String abbreviation;
-
-        TimeUnit(String abbreviation) {
-            this.abbreviation = abbreviation;
-        }
-
-        public String getAbbreviation() {
-            return abbreviation;
-        }
     }
 }

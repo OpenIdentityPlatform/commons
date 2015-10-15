@@ -18,7 +18,6 @@ package org.forgerock.audit.events;
 import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
 import static org.forgerock.audit.events.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
 import static org.forgerock.audit.events.AuditEventBuilder.ID;
 
@@ -31,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -85,7 +85,7 @@ public class AccessAuditEventBuilderTest {
                 .authentication("someone@forgerock.com")
                 .request("CREST", "reconcile")
                 .http("GET", "/some/path", "p1=v1&p2=v2", headers)
-                .response(SUCCESS, "200", 12, MILLISECONDS)
+                .response(SUCCESS, "200", 12, TimeUnit.MILLISECONDS)
                 .openField("value")
                 .toEvent();
 
@@ -104,7 +104,7 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("SUCCESS");
         assertThat(value.get(RESPONSE).get(STATUS_CODE).asString()).isEqualTo("200");
         assertThat(value.get(RESPONSE).get(ELAPSED_TIME).asLong()).isEqualTo(12);
-        assertThat(value.get(RESPONSE).get(ELAPSED_TIME_UNITS).asString()).isEqualTo("ms");
+        assertThat(value.get(RESPONSE).get(ELAPSED_TIME_UNITS).asString()).isEqualTo(TimeUnit.MILLISECONDS.name());
         assertThat(value.get("open").getObject()).isEqualTo("value");
     }
 
