@@ -118,70 +118,97 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
      * @return the token life time in seconds
      */
     public long getTokenLifeTimeInSeconds() {
-
         return tokenLifeTimeInSeconds;
     }
 
     /**
      * Set the shared key.
      *
-     * @param sharedKey the shared key
+     * @param sharedKey
+     *         the shared key
+     *
+     * @return this config instance
      */
-    public void setSharedKey(String sharedKey) {
+    public JwtTokenHandlerConfig setSharedKey(String sharedKey) {
         this.sharedKey = sharedKey;
+        return this;
     }
 
     /**
      * Set the key pair algorithm.
      *
-     * @param keyPairAlgorithm the key pair algorithm
+     * @param keyPairAlgorithm
+     *         the key pair algorithm
+     *
+     * @return this config instance
      */
-    public void setKeyPairAlgorithm(String keyPairAlgorithm) {
+    public JwtTokenHandlerConfig setKeyPairAlgorithm(String keyPairAlgorithm) {
         this.keyPairAlgorithm = keyPairAlgorithm;
+        return this;
     }
 
     /**
      * Set the key pair size..
      *
-     * @param keyPairSize the key pair size
+     * @param keyPairSize
+     *         the key pair size
+     *
+     * @return this config instance
      */
-    public void setKeyPairSize(int keyPairSize) {
+    public JwtTokenHandlerConfig setKeyPairSize(int keyPairSize) {
         this.keyPairSize = keyPairSize;
+        return this;
     }
 
     /**
      * Set the Jwe algorithm.
      *
-     * @param jweAlgorithm the JweAlgorithm
+     * @param jweAlgorithm
+     *         the JweAlgorithm
+     *
+     * @return this config instance
      */
-    public void setJweAlgorithm(JweAlgorithm jweAlgorithm) {
+    public JwtTokenHandlerConfig setJweAlgorithm(JweAlgorithm jweAlgorithm) {
         this.jweAlgorithm = jweAlgorithm;
+        return this;
     }
 
     /**
      * Set the encryption method.
      *
-     * @param encryptionMethod the encrpytion method
+     * @param encryptionMethod
+     *         the encrpytion method
+     *
+     * @return this config instance
      */
-    public void setEncryptionMethod(EncryptionMethod encryptionMethod) {
+    public JwtTokenHandlerConfig setEncryptionMethod(EncryptionMethod encryptionMethod) {
         this.encryptionMethod = encryptionMethod;
+        return this;
     }
 
     /**
      * Set the Jws algorithm.
      *
-     * @param jwsAlgorithm the JwsAlgorithm
+     * @param jwsAlgorithm
+     *         the JwsAlgorithm
+     *
+     * @return this config instance
      */
-    public void setJwsAlgorithm(JwsAlgorithm jwsAlgorithm) {
+    public JwtTokenHandlerConfig setJwsAlgorithm(JwsAlgorithm jwsAlgorithm) {
         this.jwsAlgorithm = jwsAlgorithm;
+        return this;
     }
 
     /**
      * Set the token life (seconds).
      *
-     * @param tokenLifeTimeInSeconds the token life
+     * @param tokenLifeTimeInSeconds
+     *         the token life
+     *
+     * @return this config instance
      */
-    public void setTokenLifeTimeInSeconds(long tokenLifeTimeInSeconds) {
+    public JwtTokenHandlerConfig setTokenLifeTimeInSeconds(long tokenLifeTimeInSeconds) {
         this.tokenLifeTimeInSeconds = tokenLifeTimeInSeconds;
+        return this;
     }
 }

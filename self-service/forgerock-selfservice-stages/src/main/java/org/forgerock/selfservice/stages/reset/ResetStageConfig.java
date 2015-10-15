@@ -16,6 +16,7 @@
 
 package org.forgerock.selfservice.stages.reset;
 
+import org.forgerock.selfservice.core.ProgressStageBinder;
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
@@ -23,7 +24,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
  *
  * @since 0.1.0
  */
-public final class ResetStageConfig implements StageConfig {
+public final class ResetStageConfig implements StageConfig<ResetConfigVisitor> {
 
     /**
      * Name of the stage configuration.
@@ -80,6 +81,11 @@ public final class ResetStageConfig implements StageConfig {
     @Override
     public String getName() {
         return NAME;
+    }
+
+    @Override
+    public ProgressStageBinder<?> accept(ResetConfigVisitor visitor) {
+        return visitor.build(this);
     }
 
 }

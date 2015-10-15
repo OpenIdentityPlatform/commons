@@ -18,20 +18,20 @@ package org.forgerock.selfservice.stages.user;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.selfservice.stages.CommonStateFields.*;
+import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 
-import java.util.Map;
-import javax.inject.Inject;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
+
+import java.util.Map;
 
 /**
  * Stage is responsible for request a new user json representation.
@@ -42,22 +42,9 @@ import org.forgerock.util.Reject;
  */
 public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> {
 
-    private final ConnectionFactory connectionFactory;
-
-    /**
-     * Constructs a new user user details stage.
-     *
-     * @param connectionFactory
-     *         the CREST connection factory
-     */
-    @Inject
-    public UserDetailsStage(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
-    }
-
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context,
-                                               UserDetailsConfig config) throws ResourceException {
+            UserDetailsConfig config) throws ResourceException {
         Reject.ifFalse(context.containsState(EMAIL_FIELD), "User registration stage expects mail in the context");
 
         return RequirementsBuilder
@@ -105,11 +92,6 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
             Object value = entry.getValue();
             userState.add(key, value);
         }
-    }
-
-    @Override
-    public Class<UserDetailsConfig> getConfigClass() {
-        return UserDetailsConfig.class;
     }
 
 }

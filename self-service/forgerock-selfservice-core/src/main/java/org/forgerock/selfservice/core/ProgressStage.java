@@ -35,7 +35,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
  *
  * @since 0.1.0
  */
-public interface ProgressStage<C extends StageConfig> {
+public interface ProgressStage<C extends StageConfig<?>> {
 
     /**
      * Response for defining any initial requirements the stage may have.
@@ -68,12 +68,5 @@ public interface ProgressStage<C extends StageConfig> {
      *         if some expected state or input is invalid
      */
     StageResponse advance(ProcessContext context, C config) throws ResourceException;
-
-    /**
-     * Retrieves the class for the corresponding stage config.
-     *
-     * @return stage config class
-     */
-    Class<C> getConfigClass();
 
 }

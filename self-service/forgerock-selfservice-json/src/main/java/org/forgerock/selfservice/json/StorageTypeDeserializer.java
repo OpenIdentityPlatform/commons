@@ -15,25 +15,31 @@
  */
 package org.forgerock.selfservice.json;
 
-import java.io.IOException;
-
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import org.forgerock.selfservice.core.StorageType;
 
+import java.io.IOException;
+
 /**
  * Jackson Deserializer for {@link StorageType}.
+ *
+ * @since 0.2.0
  */
-class StorageTypeDeserializer  extends JsonDeserializer<StorageType> {
+class StorageTypeDeserializer extends JsonDeserializer<StorageType> {
+
     @Override
     public StorageType deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
             throws IOException {
         StorageType type = StorageType.valueOf(jsonParser.getValueAsString().toUpperCase());
+
         if (type != null) {
             return type;
         }
+
         throw new JsonMappingException("Invalid value for type 'StorageType'");
     }
+
 }

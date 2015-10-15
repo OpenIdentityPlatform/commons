@@ -14,37 +14,36 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
+package org.forgerock.selfservice.stages.email;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.config.StageConfigVisitor;
 
 /**
- * Represents the configuration for a given progress stage.
+ * Visitor that builds email flow stages using visited email configs.
  *
- * @param <V>
- *         type that describes the stage config visitor
- *
- * @since 0.1.0
+ * @since 0.3.0
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-public interface StageConfig<V extends StageConfigVisitor> {
+public interface EmailConfigVisitor extends StageConfigVisitor {
 
     /**
-     * Gets the name of the stage configuration.
+     * Builds a verify email account stage bound to the verify email account config.
      *
-     * @return the config name
+     * @param config
+     *         verify email account config
+     *
+     * @return verify email account stage binding
      */
-    String getName();
+    ProgressStageBinder<?> build(VerifyEmailAccountConfig config);
 
     /**
-     * Accepts the passed visitor.
+     * Builds a verify user Id stage bound to the verify user Id config.
      *
-     * @param visitor
-     *         stage config visitor
+     * @param config
+     *         verify user Id stage config
      *
-     * @return a new progress stage binder
+     * @return verify user Id stage binding
      */
-    ProgressStageBinder<?> accept(V visitor);
+    ProgressStageBinder<?> build(VerifyUserIdConfig config);
 
 }

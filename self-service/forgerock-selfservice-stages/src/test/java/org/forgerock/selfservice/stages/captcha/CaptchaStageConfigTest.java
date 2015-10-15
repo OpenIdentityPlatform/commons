@@ -38,7 +38,7 @@ public final class CaptchaStageConfigTest {
         );
 
         // When
-        StageConfig config = mapper.readValue(getClass().getResource("/captcha.json"), StageConfig.class);
+        StageConfig<?> config = mapper.readValue(getClass().getResource("/captcha.json"), StageConfig.class);
 
         // Then
         assertThat(config).isInstanceOf(CaptchaStageConfig.class);

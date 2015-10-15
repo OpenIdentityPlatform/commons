@@ -27,11 +27,14 @@ import java.util.List;
 /**
  * Represents the configuration for an instance of the anonymous process service.
  *
+ * @param <V>
+ *         type that describes the stage config visitor
+ *
  * @since 0.1.0
  */
-public final class ProcessInstanceConfig {
+public final class ProcessInstanceConfig<V extends StageConfigVisitor> {
 
-    private List<StageConfig> stageConfigs;
+    private List<StageConfig<? super V>> stageConfigs;
     @JsonProperty("snapshotToken")
     private SnapshotTokenConfig snapshotTokenConfig;
     @JsonProperty("storage")
@@ -46,7 +49,7 @@ public final class ProcessInstanceConfig {
      *
      * @return this config
      */
-    public ProcessInstanceConfig setStageConfigs(List<? extends StageConfig> stageConfigs) {
+    public ProcessInstanceConfig<V> setStageConfigs(List<StageConfig<? super V>> stageConfigs) {
         Reject.ifNull(stageConfigs);
         this.stageConfigs = new ArrayList<>(stageConfigs);
         return this;
@@ -57,7 +60,7 @@ public final class ProcessInstanceConfig {
      *
      * @return the list of stage configs
      */
-    public List<StageConfig> getStageConfigs() {
+    public List<StageConfig<? super V>> getStageConfigs() {
         return stageConfigs;
     }
 
@@ -69,7 +72,7 @@ public final class ProcessInstanceConfig {
      *
      * @return this config
      */
-    public ProcessInstanceConfig setSnapshotTokenConfig(SnapshotTokenConfig snapshotTokenConfig) {
+    public ProcessInstanceConfig<V> setSnapshotTokenConfig(SnapshotTokenConfig snapshotTokenConfig) {
         Reject.ifNull(snapshotTokenConfig);
         this.snapshotTokenConfig = snapshotTokenConfig;
         return this;
@@ -92,7 +95,7 @@ public final class ProcessInstanceConfig {
      *
      * @return this config
      */
-    public ProcessInstanceConfig setStorageType(StorageType storageType) {
+    public ProcessInstanceConfig<V> setStorageType(StorageType storageType) {
         Reject.ifNull(storageType);
         this.storageType = storageType;
         return this;

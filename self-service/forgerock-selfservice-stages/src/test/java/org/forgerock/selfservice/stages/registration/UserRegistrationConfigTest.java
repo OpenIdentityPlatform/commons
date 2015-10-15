@@ -35,7 +35,7 @@ public class UserRegistrationConfigTest {
         mapper.registerSubtypes(
                 new NamedType(UserRegistrationConfig.class, UserRegistrationConfig.NAME)
         );
-        StageConfig config = mapper.readValue(getClass().getResource("/userRegistration.json"), StageConfig.class);
+        StageConfig<?> config = mapper.readValue(getClass().getResource("/userRegistration.json"), StageConfig.class);
 
         assertThat(config).isInstanceOf(UserRegistrationConfig.class);
         UserRegistrationConfig userRegistrationConfig = (UserRegistrationConfig) config;

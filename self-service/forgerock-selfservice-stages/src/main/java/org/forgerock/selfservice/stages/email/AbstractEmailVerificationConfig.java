@@ -24,9 +24,10 @@ import org.forgerock.util.Reject;
  *
  * @since 0.1.0
  */
-abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificationConfig<C>> implements StageConfig {
+abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificationConfig<C>>
+        implements StageConfig<EmailConfigVisitor> {
 
-    private EmailAccountConfig emailAccountConfig;
+    private final EmailAccountConfig emailAccountConfig;
 
     AbstractEmailVerificationConfig(EmailAccountConfig emailConfig) {
         Reject.ifNull(emailConfig);
@@ -186,13 +187,6 @@ abstract class AbstractEmailVerificationConfig<C extends AbstractEmailVerificati
         emailAccountConfig.setVerificationLink(emailVerificationLink);
         return self();
     }
-
-    /**
-     * Gets the name of the stage configuration.
-     *
-     * @return the config name
-     */
-    public abstract String getName();
 
     /**
      * Returns this object, as its actual type.

@@ -35,7 +35,7 @@ public class ResetConfigTest {
         mapper.registerSubtypes(
                 new NamedType(ResetStageConfig.class, ResetStageConfig.NAME)
         );
-        StageConfig config = mapper.readValue(getClass().getResource("/resetPassword.json"), StageConfig.class);
+        StageConfig<?> config = mapper.readValue(getClass().getResource("/resetPassword.json"), StageConfig.class);
 
         assertThat(config).isInstanceOf(ResetStageConfig.class);
         ResetStageConfig resetStageConfig = (ResetStageConfig) config;

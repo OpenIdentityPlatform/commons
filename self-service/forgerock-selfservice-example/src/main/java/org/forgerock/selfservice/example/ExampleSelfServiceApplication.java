@@ -21,7 +21,6 @@ import static org.forgerock.json.resource.Resources.newInternalConnectionFactory
 import static org.forgerock.json.resource.Router.uriTemplate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Map;
 import org.forgerock.http.Client;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
@@ -41,6 +40,8 @@ import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.json.JsonConfig;
 import org.forgerock.util.Factory;
+
+import java.util.Map;
 
 /**
  * Basic http application which initialises the user self service service.
@@ -84,10 +85,10 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     private Handler registerResetHandler() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/reset.json"), Map.class));
-        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
+        ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
 
-        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new ExampleProgressStageFactory(crestConnectionFactory, httpClient),
+        RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,
+                new ExampleStageConfigVisitor(crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
@@ -96,10 +97,10 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     private Handler registerRegistrationHandler() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/registration.json"), Map.class));
-        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
+        ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
 
-        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new ExampleProgressStageFactory(crestConnectionFactory, httpClient),
+        RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,
+                new ExampleStageConfigVisitor(crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));

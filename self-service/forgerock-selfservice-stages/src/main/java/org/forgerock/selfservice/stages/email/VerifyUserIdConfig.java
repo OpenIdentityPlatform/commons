@@ -16,10 +16,11 @@
 
 package org.forgerock.selfservice.stages.email;
 
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.forgerock.selfservice.core.ProgressStageBinder;
+
+import java.util.Set;
 
 /**
  * Configuration for the user Id verification stage.
@@ -143,7 +144,13 @@ public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig<Ve
     }
 
     @Override
+    public ProgressStageBinder<?> accept(EmailConfigVisitor visitor) {
+        return visitor.build(this);
+    }
+
+    @Override
     public VerifyUserIdConfig self() {
         return this;
     }
+
 }

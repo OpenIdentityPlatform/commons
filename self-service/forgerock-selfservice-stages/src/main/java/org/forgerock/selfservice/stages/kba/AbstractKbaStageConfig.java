@@ -15,16 +15,17 @@
  */
 package org.forgerock.selfservice.stages.kba;
 
-import java.util.Map;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.util.Reject;
+
+import java.util.Map;
 
 /**
  * Defines the common configurations for the KBA stages.
  *
  * @since 0.2.0
  */
-abstract class AbstractKbaStageConfig<C extends AbstractKbaStageConfig<C>> implements StageConfig {
+abstract class AbstractKbaStageConfig<C extends AbstractKbaStageConfig<C>> implements StageConfig<KbaConfigVisitor> {
 
     private KbaConfig config;
 

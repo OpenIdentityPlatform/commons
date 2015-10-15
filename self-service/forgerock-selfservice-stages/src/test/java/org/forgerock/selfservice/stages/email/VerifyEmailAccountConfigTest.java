@@ -35,7 +35,7 @@ public class VerifyEmailAccountConfigTest {
         mapper.registerSubtypes(
                 new NamedType(VerifyEmailAccountConfig.class, VerifyEmailAccountConfig.NAME)
         );
-        StageConfig config = mapper.readValue(getClass().getResource("/emailValidation.json"), StageConfig.class);
+        StageConfig<?> config = mapper.readValue(getClass().getResource("/emailValidation.json"), StageConfig.class);
 
         assertThat(config).isInstanceOf(VerifyEmailAccountConfig.class);
         VerifyEmailAccountConfig verifyEmailAccountConfig = (VerifyEmailAccountConfig) config;

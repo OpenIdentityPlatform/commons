@@ -35,7 +35,7 @@ public final class SecurityAnswerVerificationConfigTest {
         mapper.registerSubtypes(
                 new NamedType(SecurityAnswerVerificationConfig.class, SecurityAnswerVerificationConfig.NAME)
         );
-        StageConfig config = mapper.readValue(getClass().getResource("/kbaSecurityAnswerVerification.json"),
+        StageConfig<?> config = mapper.readValue(getClass().getResource("/kbaSecurityAnswerVerification.json"),
                 StageConfig.class);
 
         assertThat(config).isInstanceOf(SecurityAnswerVerificationConfig.class);

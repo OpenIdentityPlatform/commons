@@ -19,7 +19,6 @@ package org.forgerock.selfservice.stages.email;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -32,7 +31,9 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.query.QueryFilter;
 
 import javax.inject.Inject;
@@ -54,7 +55,7 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
      *         the CREST connection factory
      */
     @Inject
-    public VerifyUserIdStage(ConnectionFactory connectionFactory) {
+    public VerifyUserIdStage(@SelfService ConnectionFactory connectionFactory) {
         super(connectionFactory);
     }
 
@@ -68,7 +69,7 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
 
     @Override
     protected String getEmailAddress(ProcessContext context, VerifyUserIdConfig config,
-                                     StageResponse.Builder builder) throws ResourceException {
+            StageResponse.Builder builder) throws ResourceException {
         String username = context
                 .getInput()
                 .get("username")
@@ -96,7 +97,7 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
     }
 
     private JsonValue findUser(Context requestContext, String identifier,
-                               VerifyUserIdConfig config) throws ResourceException {
+            VerifyUserIdConfig config) throws ResourceException {
 
         List<QueryFilter<JsonPointer>> filterOptions = new ArrayList<>();
         for (String queryField : config.getQueryFields()) {
@@ -121,11 +122,6 @@ public final class VerifyUserIdStage extends AbstractEmailVerificationStage<Veri
         }
 
         return user.isEmpty() ? null : user.get(0);
-    }
-
-    @Override
-    public Class<VerifyUserIdConfig> getConfigClass() {
-        return VerifyUserIdConfig.class;
     }
 
 }

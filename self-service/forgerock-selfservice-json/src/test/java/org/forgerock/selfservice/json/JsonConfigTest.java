@@ -36,7 +36,7 @@ public final class JsonConfigTest {
     public void testConfigFromJson() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/selfservice.json"), Map.class));
-        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
+        ProcessInstanceConfig<?> config = JsonConfig.buildProcessInstanceConfig(json);
         assertThat(config.getStorageType()).isEqualTo(StorageType.STATELESS);
         assertThat(config.getSnapshotTokenConfig().getType()).isEqualTo("jwt");
     }

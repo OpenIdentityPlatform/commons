@@ -14,37 +14,26 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
+package org.forgerock.selfservice.stages.user;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.config.StageConfigVisitor;
 
 /**
- * Represents the configuration for a given progress stage.
+ * Visitor that builds a user details stages using visited user details config.
  *
- * @param <V>
- *         type that describes the stage config visitor
- *
- * @since 0.1.0
+ * @since 0.3.0
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-public interface StageConfig<V extends StageConfigVisitor> {
+public interface UserDetailsConfigVisitor extends StageConfigVisitor {
 
     /**
-     * Gets the name of the stage configuration.
+     * Builds a user details stage bound to the user deatils config.
      *
-     * @return the config name
+     * @param config
+     *         user details config
+     *
+     * @return user details stage binding
      */
-    String getName();
-
-    /**
-     * Accepts the passed visitor.
-     *
-     * @param visitor
-     *         stage config visitor
-     *
-     * @return a new progress stage binder
-     */
-    ProgressStageBinder<?> accept(V visitor);
+    ProgressStageBinder<?> build(UserDetailsConfig config);
 
 }

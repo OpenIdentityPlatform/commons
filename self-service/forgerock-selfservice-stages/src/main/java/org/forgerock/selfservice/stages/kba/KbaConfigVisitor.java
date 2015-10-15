@@ -14,37 +14,36 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
+package org.forgerock.selfservice.stages.kba;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.config.StageConfigVisitor;
 
 /**
- * Represents the configuration for a given progress stage.
+ * Visitor that builds KBA flow stages using visited KBA configs.
  *
- * @param <V>
- *         type that describes the stage config visitor
- *
- * @since 0.1.0
+ * @since 0.3.0
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-public interface StageConfig<V extends StageConfigVisitor> {
+public interface KbaConfigVisitor extends StageConfigVisitor {
 
     /**
-     * Gets the name of the stage configuration.
+     * Builds a security answer definition stage bound to the security answer definition config.
      *
-     * @return the config name
+     * @param config
+     *         security answer definition config
+     *
+     * @return security answer definition stage binding
      */
-    String getName();
+    ProgressStageBinder<?> build(SecurityAnswerDefinitionConfig config);
 
     /**
-     * Accepts the passed visitor.
+     * Builds a security answer verification stage bound to the security answer verification config.
      *
-     * @param visitor
-     *         stage config visitor
+     * @param config
+     *         security answer verification config
      *
-     * @return a new progress stage binder
+     * @return security answer verifications stage binding
      */
-    ProgressStageBinder<?> accept(V visitor);
+    ProgressStageBinder<?> build(SecurityAnswerVerificationConfig config);
 
 }

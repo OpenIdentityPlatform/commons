@@ -18,6 +18,7 @@ package org.forgerock.selfservice.stages.email;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.forgerock.selfservice.core.ProgressStageBinder;
 
 /**
  * Configuration for the email account verification stage.
@@ -33,7 +34,9 @@ public final class VerifyEmailAccountConfig extends AbstractEmailVerificationCon
 
     /**
      * Constructs a new VerifyEmailAccountConfig.
-     * @param emailConfig the email configuration.
+     *
+     * @param emailConfig
+     *         the email configuration.
      */
     @JsonCreator
     public VerifyEmailAccountConfig(@JsonProperty("email") EmailAccountConfig emailConfig) {
@@ -46,7 +49,13 @@ public final class VerifyEmailAccountConfig extends AbstractEmailVerificationCon
     }
 
     @Override
+    public ProgressStageBinder<?> accept(EmailConfigVisitor visitor) {
+        return visitor.build(this);
+    }
+
+    @Override
     public VerifyEmailAccountConfig self() {
         return this;
     }
+
 }

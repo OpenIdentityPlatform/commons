@@ -14,27 +14,21 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core;
+package org.forgerock.selfservice.stages;
 
-import org.forgerock.selfservice.core.config.StageConfig;
+import org.forgerock.selfservice.stages.captcha.CaptchaConfigVisitor;
+import org.forgerock.selfservice.stages.email.EmailConfigVisitor;
+import org.forgerock.selfservice.stages.kba.KbaConfigVisitor;
+import org.forgerock.selfservice.stages.registration.UserRegistrationConfigVisitor;
+import org.forgerock.selfservice.stages.reset.ResetConfigVisitor;
+import org.forgerock.selfservice.stages.user.UserDetailsConfigVisitor;
 
 /**
- * Factory responsible for providing progress stage instances based on the requested configuration.
+ * Represents all stage config visitors defined within commons.
  *
- * @since 0.1.0
+ * @since 0.3.0
  */
-public interface ProgressStageFactory {
-
-    /**
-     * Given a stage configuration, retrieves an actual stage cable of handling the config.
-     *
-     * @param config
-     *         the stage configuration
-     * @param <C>
-     *         the stage configuration type
-     *
-     * @return the progress stage cable of handling the config
-     */
-    <C extends StageConfig> ProgressStage<C> get(C config);
+public interface CommonConfigVisitor extends CaptchaConfigVisitor, EmailConfigVisitor, KbaConfigVisitor,
+        UserRegistrationConfigVisitor, ResetConfigVisitor, UserDetailsConfigVisitor {
 
 }

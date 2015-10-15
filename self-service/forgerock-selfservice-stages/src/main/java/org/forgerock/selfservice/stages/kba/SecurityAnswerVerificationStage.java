@@ -19,12 +19,6 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newEmptyObject;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -37,9 +31,17 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.crypto.JsonCryptoException;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Stage is responsible for verifying the answers provided by the user for the KBA questions.
@@ -59,7 +61,7 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
      *         the CREST connection factory
      */
     @Inject
-    public SecurityAnswerVerificationStage(ConnectionFactory connectionFactory) {
+    public SecurityAnswerVerificationStage(@SelfService ConnectionFactory connectionFactory) {
         super(connectionFactory);
     }
 
@@ -102,7 +104,7 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
     }
 
     private void generateRequirement(SecurityAnswerVerificationConfig config, JsonValue selectedAnswers,
-                                     Map<String, String> answerKeyVsQuestionKey, RequirementsBuilder builder) {
+            Map<String, String> answerKeyVsQuestionKey, RequirementsBuilder builder) {
         int index = 1;
         for (JsonValue answer : selectedAnswers) {
             String answerKey = REQUIREMENT_PROPERTY_ANSWER + index++;
@@ -158,15 +160,15 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
     }
 
     private JsonValue getKbaAnswersSetDuringRegistration(ProcessContext context,
-                                                            SecurityAnswerVerificationConfig config,
-                                                            String userId) throws ResourceException {
+            SecurityAnswerVerificationConfig config,
+            String userId) throws ResourceException {
         JsonValue userJsonValue = readUser(context, config, userId);
         return getKbaAnswersSetDuringRegistration(config, userJsonValue);
     }
 
     private JsonValue readUser(ProcessContext context,
-                               SecurityAnswerVerificationConfig config,
-                               String userId) throws ResourceException {
+            SecurityAnswerVerificationConfig config,
+            String userId) throws ResourceException {
         ReadRequest request = Requests.newReadRequest(config.getIdentityServiceUrl() + "/" + userId);
         try (Connection connection = connectionFactory.getConnection()) {
             ResourceResponse readResponse = connection.read(context.getRequestContext(), request);
@@ -175,12 +177,11 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
     }
 
     private JsonValue getKbaAnswersSetDuringRegistration(SecurityAnswerVerificationConfig config,
-                                                            JsonValue userJsonValue) {
+            JsonValue userJsonValue) {
         return userJsonValue.get(new JsonPointer(
                 (config.getKbaPropertyName() != null)
                         ? config.getKbaPropertyName() : DEFAULT_VALUE_KBA_PROPERTY_NAME));
     }
-
 
 
     private void matchAnswer(String answerKey, String questionId, JsonValue answersInput, JsonValue kbaAnswersSetByUser)
@@ -228,11 +229,6 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
         Reject.ifNull(context.getState(KEY_STATE_ANSWER_VS_QUESTION),
                 "Unable to track the questions asked to the user");
         return context.getState(KEY_STATE_ANSWER_VS_QUESTION).asMap(String.class);
-    }
-
-    @Override
-    public Class<SecurityAnswerVerificationConfig> getConfigClass() {
-        return SecurityAnswerVerificationConfig.class;
     }
 
 }

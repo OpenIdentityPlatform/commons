@@ -15,9 +15,13 @@
  */
 package org.forgerock.selfservice.stages.user;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
-import static org.forgerock.selfservice.stages.CommonStateFields.*;
+import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -26,7 +30,6 @@ import static org.mockito.Mockito.verify;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.mockito.ArgumentCaptor;
@@ -52,8 +55,6 @@ public final class UserDetailsStageTest {
 
     private UserDetailsConfig config;
     @Mock
-    private ConnectionFactory factory;
-    @Mock
     private Connection connection;
 
     @Mock
@@ -64,7 +65,7 @@ public final class UserDetailsStageTest {
         MockitoAnnotations.initMocks(this);
 
         config = newUserDetailsConfig();
-        userDetailsStage = new UserDetailsStage(factory);
+        userDetailsStage = new UserDetailsStage();
     }
 
     @Test
@@ -82,7 +83,7 @@ public final class UserDetailsStageTest {
         assertThat(jsonValue).stringAt("properties/user/type").isEqualTo("object");
     }
 
-    @Test (expectedExceptions = BadRequestException.class,
+    @Test(expectedExceptions = BadRequestException.class,
             expectedExceptionsMessageRegExp = "user has not been specified")
     public void testAdvanceUserNotSpecified() throws Exception {
         // Given
@@ -97,13 +98,12 @@ public final class UserDetailsStageTest {
         // Given
         given(context.getInput()).willReturn(newJsonValueInputsUser());
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueEmailId());
-        given(factory.getConnection()).willReturn(connection);
 
         // When
         userDetailsStage.advance(context, config);
 
         // Then
-        ArgumentCaptor<JsonValue> userArgumentCaptor =  ArgumentCaptor.forClass(JsonValue.class);
+        ArgumentCaptor<JsonValue> userArgumentCaptor = ArgumentCaptor.forClass(JsonValue.class);
         verify(context, times(2))   //1. when the empty empty object is pushed 2. when updated user json is pushed
                 .putState(eq(USER_FIELD), userArgumentCaptor.capture());
         JsonValue userJson = userArgumentCaptor.getValue();
@@ -119,13 +119,12 @@ public final class UserDetailsStageTest {
         given(context.getInput()).willReturn(newJsonValueInputsUser());
         given(context.getState(USER_FIELD)).willReturn(newJsonValueKba());
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueEmailId());
-        given(factory.getConnection()).willReturn(connection);
 
         // When
         userDetailsStage.advance(context, config);
 
         // Then
-        ArgumentCaptor<JsonValue> createRequestArgumentCaptor =  ArgumentCaptor.forClass(JsonValue.class);
+        ArgumentCaptor<JsonValue> createRequestArgumentCaptor = ArgumentCaptor.forClass(JsonValue.class);
         verify(context, times(1)).putState(eq(USER_FIELD), createRequestArgumentCaptor.capture());
         JsonValue userJson = createRequestArgumentCaptor.getValue();
 

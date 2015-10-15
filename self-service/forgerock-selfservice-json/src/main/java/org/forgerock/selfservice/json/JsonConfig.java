@@ -16,12 +16,14 @@
 package org.forgerock.selfservice.json;
 
 import com.fasterxml.jackson.core.Version;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
+import org.forgerock.selfservice.core.config.StageConfigVisitor;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
@@ -34,10 +36,13 @@ import org.forgerock.selfservice.stages.user.UserDetailsConfig;
 
 /**
  * Static utility methods for deserializing config objects from JSON.
+ *
+ * @since 0.2.0
  */
 public final class JsonConfig {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     static {
         OBJECT_MAPPER
                 .registerModule(
@@ -64,12 +69,17 @@ public final class JsonConfig {
 
     /**
      * Builds ProcessInstanceConfig instance from a JsonValue instance.
+     *
      * @param json
      *         the value to be converted
+     * @param <V>
+     *         the stage config visitor type
+     *
      * @return ProcessInstanceConfig
-     *         the one built from the provided json
+     * the one built from the provided json
      */
-    public static ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) {
-        return OBJECT_MAPPER.convertValue(json.getObject(), ProcessInstanceConfig.class);
+    public static <V extends StageConfigVisitor> ProcessInstanceConfig<V> buildProcessInstanceConfig(JsonValue json) {
+        return OBJECT_MAPPER.convertValue(json.getObject(), new TypeReference<ProcessInstanceConfig<V>>() { });
     }
+
 }

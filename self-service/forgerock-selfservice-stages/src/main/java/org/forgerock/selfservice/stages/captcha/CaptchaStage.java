@@ -18,9 +18,6 @@ package org.forgerock.selfservice.stages.captcha;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newEmptyObject;
 
-import java.io.IOException;
-import java.net.URI;
-import javax.inject.Inject;
 import org.forgerock.http.Client;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -30,10 +27,15 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
+
+import javax.inject.Inject;
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * Stage is responsible for captcha based security.
@@ -47,10 +49,11 @@ public final class CaptchaStage implements ProgressStage<CaptchaStageConfig> {
     /**
      * Constructs a new captcha stage.
      *
-     * @param httpClient the http client
+     * @param httpClient
+     *         the http client
      */
     @Inject
-    public CaptchaStage(Client httpClient) {
+    public CaptchaStage(@SelfService Client httpClient) {
         this.httpClient = httpClient;
     }
 
@@ -116,11 +119,6 @@ public final class CaptchaStage implements ProgressStage<CaptchaStageConfig> {
                             }
                         })
                 .getOrThrowUninterruptibly();
-    }
-
-    @Override
-    public Class<CaptchaStageConfig> getConfigClass() {
-        return CaptchaStageConfig.class;
     }
 
 }

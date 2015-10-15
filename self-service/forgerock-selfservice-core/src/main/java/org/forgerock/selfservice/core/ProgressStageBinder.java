@@ -22,17 +22,21 @@ import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.util.Reject;
 
 /**
- * Wraps the progress stage up with the current configuration which removes
- * the need to pass both the stage and the configuration around.
+ * Binds together the progress stage with its config. Acts to enforce the generic binding between the two
+ * but also assists in the passing of the config to keep the progress stages from maintaining thread state,
+ * therefore promoting thread safety.
+ *
+ * @param <C>
+ *         type that describes the stage config
  *
  * @since 0.1.0
  */
-final class ProgressStageWrapper<C extends StageConfig> {
+public final class ProgressStageBinder<C extends StageConfig<?>> {
 
     private final ProgressStage<C> delegatedStage;
     private final C stageConfig;
 
-    ProgressStageWrapper(ProgressStage<C> delegatedStage, C stageConfig) {
+    private ProgressStageBinder(ProgressStage<C> delegatedStage, C stageConfig) {
         Reject.ifNull(delegatedStage, stageConfig);
         this.delegatedStage = delegatedStage;
         this.stageConfig = stageConfig;
@@ -48,6 +52,22 @@ final class ProgressStageWrapper<C extends StageConfig> {
 
     String getName() {
         return stageConfig.getName();
+    }
+
+    /**
+     * Create a new binder instance.
+     *
+     * @param stage
+     *         the progress stage
+     * @param config
+     *         the stage config
+     * @param <C>
+     *         the stage config type shared by the progress stage
+     *
+     * @return a new binder instance
+     */
+    public static <C extends StageConfig<?>> ProgressStageBinder<C> bind(ProgressStage<C> stage, C config) {
+        return new ProgressStageBinder<>(stage, config);
     }
 
 }

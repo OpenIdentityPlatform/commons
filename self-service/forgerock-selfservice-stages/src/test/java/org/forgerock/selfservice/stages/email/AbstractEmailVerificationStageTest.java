@@ -190,11 +190,6 @@ public final class AbstractEmailVerificationStageTest {
                     ProcessContext context, AbstractEmailVerificationConfig config) throws ResourceException {
                     return null;
                 }
-
-                @Override
-                public Class<AbstractEmailVerificationConfig<?>> getConfigClass() {
-                    return null;
-                }
             }
         );
     }

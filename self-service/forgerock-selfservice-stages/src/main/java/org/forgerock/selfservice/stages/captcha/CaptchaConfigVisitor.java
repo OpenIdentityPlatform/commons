@@ -14,37 +14,26 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
+package org.forgerock.selfservice.stages.captcha;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.config.StageConfigVisitor;
 
 /**
- * Represents the configuration for a given progress stage.
+ * Visitor that builds a captcha stage using the visited captcha config.
  *
- * @param <V>
- *         type that describes the stage config visitor
- *
- * @since 0.1.0
+ * @since 0.3.0
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-public interface StageConfig<V extends StageConfigVisitor> {
+public interface CaptchaConfigVisitor extends StageConfigVisitor {
 
     /**
-     * Gets the name of the stage configuration.
+     * Builds a captcha stage bound to the captcha stage config.
      *
-     * @return the config name
+     * @param config
+     *         captcha stage config
+     *
+     * @return captcha stage binding
      */
-    String getName();
-
-    /**
-     * Accepts the passed visitor.
-     *
-     * @param visitor
-     *         stage config visitor
-     *
-     * @return a new progress stage binder
-     */
-    ProgressStageBinder<?> accept(V visitor);
+    ProgressStageBinder<?> build(CaptchaStageConfig config);
 
 }

@@ -17,11 +17,12 @@
 package org.forgerock.selfservice.stages.email;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -36,6 +37,7 @@ import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.services.context.Context;
 
 import javax.inject.Inject;
 import java.util.UUID;
@@ -78,7 +80,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
     }
 
     private StageResponse sendEmail(final ProcessContext context,
-                                    final C config) throws ResourceException {
+            final C config) throws ResourceException {
 
         StageResponse.Builder builder = StageResponse.newBuilder();
         final String mail = getEmailAddress(context, config, builder);
@@ -101,7 +103,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
 
             @Override
             public void snapshotTokenPreview(ProcessContext context,
-                                             String snapshotToken) throws ResourceException {
+                    String snapshotToken) throws ResourceException {
                 sendEmail(context.getRequestContext(), snapshotToken, code, mail, config);
             }
 
@@ -130,7 +132,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
      *         if some expected state or input is invalid
      */
     protected abstract String getEmailAddress(ProcessContext context, C config,
-                                              StageResponse.Builder builder) throws ResourceException;
+            StageResponse.Builder builder) throws ResourceException;
 
     private StageResponse validateCode(ProcessContext context) throws ResourceException {
         String originalCode = context
@@ -156,7 +158,7 @@ abstract class AbstractEmailVerificationStage<C extends AbstractEmailVerificatio
     }
 
     private void sendEmail(Context requestContext, String snapshotToken, String code,
-                           String email, C config) throws ResourceException {
+            String email, C config) throws ResourceException {
 
         String emailUrl = config.getEmailVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
         String body = config.getEmailMessage().replace(config.getEmailVerificationLinkToken(), emailUrl);

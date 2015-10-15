@@ -20,7 +20,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 
 import org.forgerock.json.JsonPointer;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
@@ -32,7 +31,9 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 
 import javax.inject.Inject;
@@ -53,13 +54,13 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
      *         the CREST connection factory
      */
     @Inject
-    public ResetStage(ConnectionFactory connectionFactory) {
+    public ResetStage(@SelfService ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context,
-                                               ResetStageConfig config) throws ResourceException {
+            ResetStageConfig config) throws ResourceException {
         Reject.ifFalse(context.containsState(USER_ID_FIELD), "Reset stage expects userId in the context");
 
         return RequirementsBuilder
@@ -91,18 +92,13 @@ public final class ResetStage implements ProgressStage<ResetStageConfig> {
     }
 
     private void patchUser(Context requestContext, String userId, String password,
-                           ResetStageConfig config) throws ResourceException {
+            ResetStageConfig config) throws ResourceException {
         try (Connection connection = connectionFactory.getConnection()) {
             PatchOperation operation = PatchOperation.replace(
                     new JsonPointer(config.getIdentityPasswordField()), password);
             PatchRequest request = Requests.newPatchRequest(config.getIdentityServiceUrl(), userId, operation);
             connection.patch(requestContext, request);
         }
-    }
-
-    @Override
-    public Class<ResetStageConfig> getConfigClass() {
-        return ResetStageConfig.class;
     }
 
 }

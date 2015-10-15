@@ -16,9 +16,8 @@
 
 package org.forgerock.selfservice.stages.registration;
 
-import static org.forgerock.selfservice.stages.CommonStateFields.*;
+import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 
-import javax.inject.Inject;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -28,9 +27,12 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
+
+import javax.inject.Inject;
 
 /**
  * Stage is responsible for registering the user supplied data using the underlying service.
@@ -49,13 +51,13 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
      *         the CREST connection factory
      */
     @Inject
-    public UserRegistrationStage(ConnectionFactory connectionFactory) {
+    public UserRegistrationStage(@SelfService ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context,
-                                               UserRegistrationConfig config) throws ResourceException {
+            UserRegistrationConfig config) throws ResourceException {
         Reject.ifFalse(context.containsState(USER_FIELD),
                 "User registration stage expects user in the context");
 
@@ -75,16 +77,11 @@ public final class UserRegistrationStage implements ProgressStage<UserRegistrati
     }
 
     private void createUser(Context requestContext, JsonValue user,
-                            UserRegistrationConfig config) throws ResourceException {
+            UserRegistrationConfig config) throws ResourceException {
         try (Connection connection = connectionFactory.getConnection()) {
             CreateRequest request = Requests.newCreateRequest(config.getIdentityServiceUrl(), user);
             connection.create(requestContext, request);
         }
-    }
-
-    @Override
-    public Class<UserRegistrationConfig> getConfigClass() {
-        return UserRegistrationConfig.class;
     }
 
 }

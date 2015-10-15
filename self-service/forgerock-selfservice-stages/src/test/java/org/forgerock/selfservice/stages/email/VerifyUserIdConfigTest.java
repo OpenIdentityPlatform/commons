@@ -38,7 +38,7 @@ public class VerifyUserIdConfigTest {
         mapper.registerSubtypes(
                 new NamedType(VerifyUserIdConfig.class, VerifyUserIdConfig.NAME)
         );
-        StageConfig config = mapper.readValue(getClass().getResource("/userIdValidation.json"), StageConfig.class);
+        StageConfig<?> config = mapper.readValue(getClass().getResource("/userIdValidation.json"), StageConfig.class);
 
         assertThat(config).isInstanceOf(VerifyUserIdConfig.class);
         VerifyUserIdConfig verifyUserIdConfig = (VerifyUserIdConfig) config;

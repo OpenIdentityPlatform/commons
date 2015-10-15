@@ -16,15 +16,14 @@
 
 package org.forgerock.selfservice.stages.kba;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
-import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.*;
+import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newArray;
+import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newObject;
+import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.oneOf;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Inject;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -33,10 +32,17 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.crypto.CryptoConstants;
 import org.forgerock.selfservice.stages.crypto.JsonCryptoException;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
+
+import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Stage is responsible for supplying the KBA questions to the user and capturing the answers provided by the user.
@@ -52,13 +58,13 @@ public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<Securi
      *         the CREST connection factory
      */
     @Inject
-    public SecurityAnswerDefinitionStage(ConnectionFactory connectionFactory) {
+    public SecurityAnswerDefinitionStage(@SelfService ConnectionFactory connectionFactory) {
         super(connectionFactory);
     }
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context,
-                                               SecurityAnswerDefinitionConfig config) throws ResourceException {
+            SecurityAnswerDefinitionConfig config) throws ResourceException {
 
         Map<String, Map<String, String>> questions = config.getQuestions();
         Reject.ifTrue(questions == null || questions.isEmpty(), "KBA questions are not defined");
@@ -149,11 +155,6 @@ public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<Securi
             context.putState(USER_FIELD, user);
         }
         return user;
-    }
-
-    @Override
-    public Class<SecurityAnswerDefinitionConfig> getConfigClass() {
-        return SecurityAnswerDefinitionConfig.class;
     }
 
 }

@@ -22,7 +22,6 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -35,9 +34,11 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.core.config.StageConfig;
+import org.forgerock.selfservice.core.config.StageConfigVisitor;
 import org.forgerock.selfservice.core.exceptions.StageConfigException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
@@ -50,9 +51,13 @@ import java.util.List;
  * Anonymous process service progresses a chain of {@link ProgressStage}
  * configurations, handling any required client interactions.
  *
+ * @param <V>
+ *         type that describes the stage config visitor
+ *
  * @since 0.1.0
  */
-public final class AnonymousProcessService extends AbstractRequestHandler {
+
+public final class AnonymousProcessService<V extends StageConfigVisitor> extends AbstractRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AnonymousProcessService.class);
 
@@ -69,9 +74,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
     private static final int INITIAL_STAGE_INDEX = 0;
 
-    private final ProgressStageFactory progressStageFactory;
-    private final List<StageConfig> stageConfigs;
-    private final SnapshotTokenHandler snapshotTokenHandler;
+    private final V stageConfigVisitor;
+    private final List<StageConfig<? super V>> stageConfigs;
     private final SnapshotAuthor snapshotAuthor;
 
     /**
@@ -79,24 +83,24 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
      *
      * @param config
      *         service configuration
-     * @param progressStageFactory
-     *         workflow stage factory
+     * @param stageConfigVisitor
+     *         stage configuration visitor
      * @param tokenHandlerFactory
      *         snapshot token handler factory
      * @param processStore
      *         store for locally persisted state
      */
     @Inject
-    public AnonymousProcessService(ProcessInstanceConfig config, ProgressStageFactory progressStageFactory,
-                                   SnapshotTokenHandlerFactory tokenHandlerFactory, ProcessStore processStore) {
-        Reject.ifNull(config, progressStageFactory, tokenHandlerFactory, processStore);
+    public AnonymousProcessService(ProcessInstanceConfig<V> config, V stageConfigVisitor,
+            SnapshotTokenHandlerFactory tokenHandlerFactory, ProcessStore processStore) {
+        Reject.ifNull(config, stageConfigVisitor, tokenHandlerFactory, processStore);
         Reject.ifNull(config.getStageConfigs(), config.getSnapshotTokenConfig(), config.getStorageType());
         Reject.ifTrue(config.getStageConfigs().isEmpty());
 
-        this.progressStageFactory = progressStageFactory;
-
+        this.stageConfigVisitor = stageConfigVisitor;
         stageConfigs = config.getStageConfigs();
-        snapshotTokenHandler = tokenHandlerFactory.get(config.getSnapshotTokenConfig());
+
+        SnapshotTokenHandler snapshotTokenHandler = tokenHandlerFactory.get(config.getSnapshotTokenConfig());
         snapshotAuthor = config.getStorageType().newSnapshotAuthor(snapshotTokenHandler, processStore);
     }
 
@@ -147,7 +151,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 .newBuilder(requestContext, INITIAL_STAGE_INDEX)
                 .build();
 
-        ProgressStageWrapper<?> stage = retrieveStage(context);
+        ProgressStageBinder<?> stage = retrieveStage(context);
         JsonValue requirements = stage.gatherInitialRequirements(context);
 
         if (logger.isDebugEnabled()) {
@@ -187,7 +191,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 .setInput(input)
                 .build();
 
-        ProgressStageWrapper<?> stage = retrieveStage(context);
+        ProgressStageBinder<?> stage = retrieveStage(context);
 
         if (logger.isDebugEnabled()) {
             logger.debug("Advancing stage " + stage.getName());
@@ -196,7 +200,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         return enactContext(context, stage);
     }
 
-    private JsonValue enactContext(ProcessContextImpl context, ProgressStageWrapper<?> stage) throws ResourceException {
+    private JsonValue enactContext(ProcessContextImpl context, ProgressStageBinder<?> stage) throws ResourceException {
         StageResponse response = stage.advance(context);
 
         if (response.hasRequirements()) {
@@ -208,7 +212,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     }
 
     private JsonValue handleProgression(ProcessContextImpl context,
-                                        ProgressStageWrapper<?> stage) throws ResourceException {
+            ProgressStageBinder<?> stage) throws ResourceException {
         if (context.getStageIndex() + 1 == stageConfigs.size()) {
             // Flow complete, render completion response.
             return renderCompletion(stage);
@@ -222,7 +226,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 .setState(context.getState())
                 .build();
 
-        ProgressStageWrapper<?> nextStage = retrieveStage(nextContext);
+        ProgressStageBinder<?> nextStage = retrieveStage(nextContext);
         JsonValue requirements = nextStage.gatherInitialRequirements(nextContext);
 
         if (logger.isDebugEnabled()) {
@@ -243,8 +247,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         return enactContext(nextContext, nextStage);
     }
 
-    private JsonValue renderRequirementsWithSnapshot(ProcessContextImpl context, ProgressStageWrapper<?> stage,
-                                                     StageResponse response) throws ResourceException {
+    private JsonValue renderRequirementsWithSnapshot(ProcessContextImpl context, ProgressStageBinder<?> stage,
+            StageResponse response) throws ResourceException {
         ProcessContextImpl updatedContext = ProcessContextImpl
                 .newBuilder(context)
                 .setStageTag(response.getStageTag())
@@ -260,7 +264,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                 .add(TOKEN_FIELD, snapshotToken);
     }
 
-    private JsonValue renderRequirements(ProgressStageWrapper<?> stage, StageResponse response) {
+    private JsonValue renderRequirements(ProgressStageBinder<?> stage, StageResponse response) {
         return json(
                 object(
                         field(TYPE_FIELD, stage.getName()),
@@ -268,7 +272,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                         field(REQUIREMENTS_FIELD, response.getRequirements().asMap())));
     }
 
-    private JsonValue renderCompletion(ProgressStageWrapper<?> stage) {
+    private JsonValue renderCompletion(ProgressStageBinder<?> stage) {
         return json(
                 object(
                         field(TYPE_FIELD, stage.getName()),
@@ -278,22 +282,13 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
                                         field(SUCCESS_FIELD, true)))));
     }
 
-    private ProgressStageWrapper<?> retrieveStage(ProcessContextImpl context) {
+    private ProgressStageBinder<?> retrieveStage(ProcessContextImpl context) {
         if (context.getStageIndex() >= stageConfigs.size()) {
             throw new StageConfigException("Invalid stage index " + context.getStageIndex());
         }
 
-        return getStageWrappedWithConfig(stageConfigs.get(context.getStageIndex()));
-    }
-
-    private <C extends StageConfig> ProgressStageWrapper<C> getStageWrappedWithConfig(C config) {
-        ProgressStage<C> stage = progressStageFactory.get(config);
-
-        if (stage == null) {
-            throw new StageConfigException("Unknown progress stage " + config.getName());
-        }
-
-        return new ProgressStageWrapper<>(stage, config);
+        StageConfig<? super V> config = stageConfigs.get(context.getStageIndex());
+        return config.accept(stageConfigVisitor);
     }
 
 }

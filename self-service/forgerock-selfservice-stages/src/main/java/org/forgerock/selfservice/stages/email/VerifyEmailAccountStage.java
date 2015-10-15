@@ -24,7 +24,10 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+
+import javax.inject.Inject;
 
 /**
  * Having retrieved the email address in response to the initial requirements, verifies the
@@ -40,7 +43,8 @@ public final class VerifyEmailAccountStage extends AbstractEmailVerificationStag
      * @param connectionFactory
      *         the CREST connection factory
      */
-    public VerifyEmailAccountStage(ConnectionFactory connectionFactory) {
+    @Inject
+    public VerifyEmailAccountStage(@SelfService ConnectionFactory connectionFactory) {
         super(connectionFactory);
     }
 
@@ -54,7 +58,7 @@ public final class VerifyEmailAccountStage extends AbstractEmailVerificationStag
 
     @Override
     protected String getEmailAddress(ProcessContext context, VerifyEmailAccountConfig config,
-                                     StageResponse.Builder builder) throws ResourceException {
+            StageResponse.Builder builder) throws ResourceException {
         String email = context
                 .getInput()
                 .get("mail")
@@ -65,11 +69,6 @@ public final class VerifyEmailAccountStage extends AbstractEmailVerificationStag
         }
 
         return email;
-    }
-
-    @Override
-    public Class<VerifyEmailAccountConfig> getConfigClass() {
-        return VerifyEmailAccountConfig.class;
     }
 
 }
