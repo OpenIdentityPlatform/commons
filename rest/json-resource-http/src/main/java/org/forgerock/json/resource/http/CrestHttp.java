@@ -117,7 +117,7 @@ public final class CrestHttp {
 
     /**
      * Creates a new {@link ConnectionFactory} that map back and forth JSON resource objects to CHF objects.
-     * <p/>
+     * <p>
      * Convenience method. Note that ConnectionFactory is going to be removed soon, so you may not need this.
      *
      * @param handler
