@@ -26,13 +26,10 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.events.handlers.AuditEventTopicState;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -52,6 +49,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.generator.IdGenerator;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -213,9 +211,10 @@ final class AuditServiceImpl implements AuditService {
     }
 
     private String establishAuditEventId(CreateRequest request) {
-        String auditEventId = (request.getNewResourceId() == null || request.getNewResourceId().isEmpty())
-                ? UUID.randomUUID().toString()
-                : request.getNewResourceId();
+        String newResourceId = request.getNewResourceId();
+        String auditEventId = newResourceId == null || newResourceId.isEmpty()
+                ? IdGenerator.DEFAULT.generate()
+                : newResourceId;
         request.getContent().put(ResourceResponse.FIELD_CONTENT_ID, auditEventId);
         logger.debug("Audit create id {}", auditEventId);
         return auditEventId;

@@ -16,8 +16,8 @@
 package org.forgerock.audit.events;
 
 import org.forgerock.util.Reject;
+import org.forgerock.util.generator.IdGenerator;
 
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -55,7 +55,7 @@ public final class TransactionId {
      * Construct a <code>TransactionId</code> with a random value.
      */
     public TransactionId() {
-        this(UUID.randomUUID().toString());
+        this(IdGenerator.DEFAULT.generate());
     }
 
     /**
