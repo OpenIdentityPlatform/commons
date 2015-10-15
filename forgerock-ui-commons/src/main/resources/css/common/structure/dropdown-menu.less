@@ -1,25 +1,7 @@
-.dropdown-menu>.active>a,
-.dropdown-menu>.active>a:hover,
-.dropdown-menu>.active>a:focus,
-.dropdown-menu>li>a:hover,
-.dropdown-menu>li>a:focus{
-    background-color: @base-theme-color;
-}
-
-
 /* Medium devices (desktops, 768px and up)*/
 @media (min-width: @screen-sm) {
 
     nav:not(.navbar-inverse){
-
-        .dropdown-menu > li > span:hover,
-        .dropdown-menu > li > span:focus,
-        .dropdown-submenu:hover > span,
-        .dropdown-submenu:focus > span {
-            color: #fff;
-            background-color: @base-theme-color;
-        }
-
 
         .dropdown-menu>li>span {
             display: block;
@@ -27,7 +9,6 @@
             clear: both;
             font-weight: normal;
             line-height: 1.42857143;
-            color: #333;
             white-space: nowrap;
             cursor:pointer;
         }
@@ -35,7 +16,5 @@
         .dropdown-menu .fa {
             margin-right:5px;
         }
-
     }
-
 }
