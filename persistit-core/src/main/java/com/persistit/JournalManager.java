@@ -1,12 +1,12 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -70,12 +70,14 @@ import com.persistit.util.Util;
 /**
  * Manages the disk-based I/O journal. The journal contains both committed
  * transactions and images of updated pages.
- * 
+ *
  * @author peter
- * 
+ *
  */
 class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
+    /** Copy with no delay as soon as the number of journal files reach this threshold. */
+    final static int PAGE_COPIER_URGENT = 5;
     final static int URGENT = 10;
     final static int ALMOST_URGENT = 8;
     final static int HALF_URGENT = 5;
@@ -244,7 +246,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * "/xxx/yyy/zzz.000000000000", "/xxx/yyy/zzz.000000000001", and so on. (The
      * suffix contains twelve digits.)
      * </p>
-     * 
+     *
      * @param rman
      * @param path
      * @param maximumSize
@@ -306,7 +308,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     /**
      * Copy dynamic variables into a {@link Management.JournalInfo} structure.
-     * 
+     *
      * @param info
      */
     public synchronized void populateJournalInfo(final Management.JournalInfo info) {
@@ -560,7 +562,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * JOURNAL_COPIER thread should perform I/O. This number is computed on a
      * scale of 0 to 10; larger values are intended make the thread work harder.
      * A value of 10 suggests the copier should run flat-out.
-     * 
+     *
      * @return the JOURNAL_COPIER urgency on a scale of 0 to 10
      */
     @Override
@@ -577,7 +579,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * behind. The amount of delay depends on the value returned by
      * {@link #urgency()}. When that value is {@value #URGENT} then the delay is
      * {@value #URGENT_COMMIT_DELAY_MILLIS} milliseconds.
-     * 
+     *
      * @throws PersistitInterruptedException
      */
     public void throttle() throws PersistitInterruptedException {
@@ -840,7 +842,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     /**
      * Method used by diagnostic tools to attempt to read a page from journal
-     * 
+     *
      * @param address
      *            journal address
      * @param _bb
@@ -897,7 +899,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * beginning of the journal file. Note that this method does not call
      * {@link #prepareWriteBuffer(int)} - the write buffer needs to be ready to
      * receive the JH record.
-     * 
+     *
      * @throws PersistitException
      */
     synchronized void writeJournalHeader() throws PersistitException {
@@ -920,7 +922,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * of each complete journal file. Note that this method does not call
      * {@link #prepareWriteBuffer(int)} - the write buffer needs to be ready to
      * receive the JE record.
-     * 
+     *
      * @throws PersistitException
      */
     synchronized void writeJournalEnd() throws PersistitException {
@@ -1135,7 +1137,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     /**
      * package-private for unit tests only.
-     * 
+     *
      * @param volume
      * @param handle
      * @throws PersistitException
@@ -1184,7 +1186,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * process find efficiently all the updates of a transaction that needs to
      * be rolled back.
      * </p>
-     * 
+     *
      * @param buffer
      *            The buffer containing the update records
      * @param startTimestamp
@@ -1195,7 +1197,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * @param backchainAddress
      *            Journal address of previous TX record written by this
      *            transaction, or 0 if there is to previous record
-     * 
+     *
      * @return
      * @throws PersistitException
      */
@@ -1353,7 +1355,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     /**
      * Flushes the write buffer
-     * 
+     *
      * @throws PersistitException
      */
     synchronized long flush() throws PersistitException {
@@ -1455,7 +1457,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * _writeBufferAddress, and in case a new journal file is prepared (a
      * "roll-over" event), it also modifies _currentAddress to reflect the
      * current address in the new file.
-     * 
+     *
      * @param size
      *            Size of record to be written
      * @return <code>true</code> if and only if a new journal file was started
@@ -1557,7 +1559,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * journal header. This timestamp is used to discriminate between pages in a
      * "branch" history and the live history. See comments in
      * {@link RecoveryManager#scanLoadPageMap(long, long, int)} for details.
-     * 
+     *
      * @return either the current timestamp or the timestamp of the last valid
      *         checkpoint, depending on whether this journal file starts a new
      *         epoch.
@@ -1612,7 +1614,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * Return the <code>FileChannel</code> for the journal file containing the
      * supplied <code>address</code>. If necessary, create a new
      * {@link MediatedFileChannel}.
-     * 
+     *
      * @param address
      *            the journal address of a record in the journal for which the
      *            corresponding channel will be returned
@@ -1643,7 +1645,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * deleted. Pages modified after the last valid checkpoint cannot be copied.
      * <p>
      * Does nothing of the <code>appendOnly</code> is set.
-     * 
+     *
      * @throws PersistitException
      */
     @Override
@@ -1664,7 +1666,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     /**
      * Remove transactions and PageNode entries when possible due to completion
      * of a new checkpoint.
-     * 
+     *
      * @param checkpoint
      */
     private void checkpointWritten(final Checkpoint checkpoint) {
@@ -1789,7 +1791,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * General method used to wait for durability. This method is used by all
      * three commit modes: SOFT, HARD and GROUP. The two parameters represent
      * time intervals in milliseconds.
-     * 
+     *
      * @param flushedTimestamp
      *            a timestamp taken after the transaction buffer belonging to
      *            the current transaction has been flushed.
@@ -1861,14 +1863,14 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
      * It links to previously created PageNode objects which refer to earlier
      * versions of the same page. These earlier instances are truncated whenever
      * a later version of the same page has been checkpointed.
-     * 
+     *
      * PageNode instances are designed to serve as both Key and Value fields of
      * the _pageNodeMap. The general rubric when adding a page to the journal is
      * to construct a PageNode representing the page image, and then use it to
      * perform a lookup in the _pageNodeMap. If there is no matching PageNode
      * already in the map then simply add the new one. If there is a matching
      * PageNode, link it to the new one then replace the entry in the map.
-     * 
+     *
      * This class implement Comparable on the page address. This is used in
      * forming a sorted set of PageNodes so that we can copy pages in roughly
      * sequential order to each Volume file.
@@ -2204,34 +2206,16 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
         /**
          * Return a nice interval, in milliseconds, to wait between copierCycle
-         * invocations. The interval decreases as interval goes up, and becomes
-         * zero when the urgency is greater than or equal to 8. The interval is
-         * also zero if there has be no recent I/O activity invoked by other
-         * activities.
+         * invocations. When number of journal reach the PAGE_COPIER_URGENT threshold,
+         * the page copier run flat-out.
          */
         @Override
         public long pollInterval() {
-            final IOMeter iom = _persistit.getIOMeter();
             final long pollInterval = super.getPollInterval();
-            final int urgency = urgency();
-
-            if (_lastCyclePagesWritten == 0) {
+            if (_lastCyclePagesWritten == 0 || getJournalFileCount() < PAGE_COPIER_URGENT) {
                 return pollInterval;
             }
-
-            if (urgency >= ALMOST_URGENT) {
-                return 0;
-            }
-
-            int divisor = 1;
-
-            if (iom.recentCharge() < iom.getQuiescentIOthreshold() * KILO) {
-                divisor = HALF_URGENT;
-            } else if (urgency > HALF_URGENT) {
-                divisor = urgency - HALF_URGENT;
-            }
-
-            return super.getPollInterval() / divisor;
+            return 0;
         }
     }
 
@@ -2259,7 +2243,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
         /**
          * General method used to wait for durability. {@See
          * JournalManager#waitForDurability(long, long, long)}.
-         * 
+         *
          * @throws PersistitInterruptedException
          */
         private void waitForDurability(final long flushedTimestamp, final long leadTime, final long stallTime)
@@ -2709,7 +2693,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     /**
      * Remove obsolete PageNodes from the page list.
-     * 
+     *
      * @return Count of removed PageNode instances.
      */
     int cleanupPageList() {
@@ -2898,7 +2882,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     /**
      * For use only by unit tests that test page maps, etc.
-     * 
+     *
      * @param handleToVolumeMap
      */
     synchronized void unitTestInjectVolumes(final Map<Integer, Volume> handleToVolumeMap) {
@@ -2907,7 +2891,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
 
     /**
      * For use only by unit tests that test page maps, etc.
-     * 
+     *
      * @param handleToVolumeMap
      */
     void unitTestInjectPageMap(final Map<PageNode, PageNode> pageMap) {
