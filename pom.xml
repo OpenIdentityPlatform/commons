@@ -426,6 +426,12 @@
         <version>${json-schema.version}</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>json-web-token</artifactId>
+        <version>${json-web-token.version}</version>
+      </dependency>
+
       <!-- ForgeRock REST dependencies -->
       <dependency>
         <groupId>org.forgerock.commons</groupId>
@@ -456,12 +462,6 @@
         <groupId>org.forgerock.commons</groupId>
         <artifactId>json-resource-examples</artifactId>
         <version>${forgerock-rest.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>json-web-token</artifactId>
-        <version>${json-web-token.version}</version>
       </dependency>
 
 
