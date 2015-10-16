@@ -392,5 +392,36 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
         }
     };
 
+    /**
+     * Removes a link from the navigation bar. Can either be a top- or a second-level item.
+     * Does nothing if this link does not exist.
+     * Will require the nav bar to be reloaded.
+     * @param {Object} link Link to remove.
+     * @param {string} link.key - Link key.
+     * @param {string} link.name - Link name.
+     * @param {string} role Role to remove for ("admin" or "user").
+     * @param {string} [secondLevelItem] If this parameter is absent, the link will be removed from the top-level,
+     *                                  in order for the link to be removed from the second-level, this parameter should
+     *                                  point to an existing top-level item (one of the keys of the "urls" object).
+     */
+    obj.removeLink = function (link, role, secondLevelItem) {
+        var pathToTheLink = [role, "urls"],
+            links;
+
+        if (secondLevelItem) {
+            pathToTheLink = pathToTheLink.concat([secondLevelItem, "urls"]);
+        }
+
+        links = _.reduce(pathToTheLink, function (prevVal, nextVal) {
+            if (prevVal) {
+                return prevVal[nextVal];
+            }
+        }, obj.configuration.links);
+
+        if (links && _.find(links, {name: link.name})) {
+            delete links[link.key];
+        }
+    };
+
     return obj;
 });
