@@ -523,8 +523,15 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             notifyAll(); // Wake up any blocked threads.
         }
         StateListener<V, E> listener;
-        while ((listener = listeners.poll()) != null) {
-            listener.handleStateChange(newState, result, exception, runtimeException);
+        try {
+            while ((listener = listeners.poll()) != null) {
+                listener.handleStateChange(newState, result, exception, runtimeException);
+            }
+        } catch (RuntimeException e) {
+            synchronized (this) {
+                state = PENDING;
+            }
+            handleRuntimeException(e);
         }
         return true;
     }

@@ -128,6 +128,56 @@ public class PromiseImplTest {
     }
 
     @Test
+     public void promiseThrowingRuntimeExceptionShouldPropagateThroughAChainedThenOnResult() {
+
+        //Given
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+        final RuntimeException runtimeException = new RuntimeException();
+
+        PromiseImpl<Void, NeverThrowsException> rootPromise = new PromiseImpl<>();
+        Promise<Void, NeverThrowsException> leafPromise = rootPromise
+                .thenOnResult(new ResultHandler<Void>() {
+                    @Override
+                    public void handleResult(Void result) {
+                        throw runtimeException;
+                    }
+                });
+
+        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+
+        //When
+        rootPromise.handleResult(null);
+
+        //Then
+        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
+    }
+
+    @Test
+    public void promiseThrowingRuntimeExceptionShouldPropagateThroughAChainedThenOnException() {
+
+        //Given
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+        final RuntimeException runtimeException = new RuntimeException();
+
+        PromiseImpl<Void, Exception> rootPromise = new PromiseImpl<>();
+        Promise<Void, Exception> leafPromise = rootPromise
+                .thenOnException(new ExceptionHandler<Exception>() {
+                    @Override
+                    public void handleException(Exception exception) {
+                        throw runtimeException;
+                    }
+                });
+
+        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+
+        //When
+        rootPromise.handleException(new Exception());
+
+        //Then
+        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
+    }
+
+    @Test
     public void promiseBrokenWithRuntimeExceptionShouldThrowOnGet() {
 
         //Given
