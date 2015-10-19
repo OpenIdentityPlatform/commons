@@ -129,10 +129,12 @@
             },
             "headers": {
               "description": "org.forgerock.audit.events.access.http.headers",
-              "type": "array",
-              "items": {
-                "id": "0",
-                "type": "string"
+              "type": "object",
+              "additionalProperties": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
               }
             },
             "cookies": {
