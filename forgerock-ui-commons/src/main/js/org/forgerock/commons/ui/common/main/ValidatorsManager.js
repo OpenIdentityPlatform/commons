@@ -22,6 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+ /*jslint regexp:false */
+
 /*global require, define */
 
 define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
@@ -32,6 +34,21 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     "org/forgerock/commons/ui/common/util/ValidatorsUtils"
 ], function($, _, AbstractConfigurationAware, ModuleLoader, ValidatorsUtils) {
     var obj = new AbstractConfigurationAware();
+    function jsonEditorNodeCallbackHandler(node) {
+        if (!node.getAttribute || !node.getAttribute("name")) {
+            return false;
+        }
+
+        return {
+            "name": node.getAttribute('name')
+                        .match(/(\[.*?\])/g)
+                        .map(function (field) {
+                            return field.replace(/\[|\]/g, '');
+                        })
+                        .join("."),
+            "value": node.value
+        };
+    }
 
     obj.bindValidators = function(el, baseEntity, callback) {
         var event, input, policyDelegate,
@@ -100,7 +117,8 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
 
                 policyDelegate.readEntity(baseEntity).then(_.bind(function (policy) {
                     _.each(policy.properties, _.bind(function (property, i) {
-                        var input,event,idx;
+                        var input,event,idx,
+                            jsonEditorForm = el.hasClass("jsonEditor");
 
                         if (property.name.match(/\[\*\]$/)) { // property is an array
                             // if the name is property[*], then this selector will match all inputs named beginning like "property[", including
@@ -108,7 +126,11 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                             input = el.find("[name^='" + property.name.replace(/\*\]$/, '') + "']");
                         }
                         else {
-                            input = el.find("[name='" + property.name + "']");
+                            if (jsonEditorForm) {
+                                input = el.find("[name='root[" + property.name + "]']");
+                            } else {
+                                input = el.find("[name='" + property.name + "']");
+                            }
                         }
 
                         input.attr("data-validation-status", "error");
@@ -230,7 +252,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                                         policyDelegate.validateProperty(
                                             baseEntity,
                                             {
-                                                "fullObject": form2js(this.input.closest("form")[0], '.', false),
+                                                "fullObject": form2js(this.input.closest("form")[0], '.', true, jsonEditorForm ? jsonEditorNodeCallbackHandler : undefined),
                                                 "value": this.input.val(),
                                                 "property": this.property.name
                                             },
