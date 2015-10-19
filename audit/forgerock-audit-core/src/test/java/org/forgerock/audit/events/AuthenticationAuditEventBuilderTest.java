@@ -59,7 +59,7 @@ public class AuthenticationAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-AUTHENTICATION-SUCCESS")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .trackingId("12345")
                 .trackingId("67890")
                 .principal(Collections.singletonList("admin"))
@@ -76,7 +76,7 @@ public class AuthenticationAuditEventBuilderTest {
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event = productAuthenticationEvent()
                 .eventName("AM-AUTHENTICATION-SUCCESS")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .trackingId("12345")
                 .principal(Collections.singletonList("admin"))
                 .context(Collections.<String, Object>singletonMap("contextKey", "contextValue"))
@@ -103,7 +103,7 @@ public class AuthenticationAuditEventBuilderTest {
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
         assertThat(value.get(EVENT_NAME).asString()).isEqualTo("AM-AUTHENTICATION-SUCCESS");
-        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
+        assertThat(value.get(USER_ID).asString()).isEqualTo("someone@forgerock.com");
         assertThat(value.get(RESULT).asEnum(Status.class)).isEqualTo(Status.SUCCESSFUL);
         assertThat(value.get(TRACKING_IDS).asSet()).containsExactly("12345", "67890");
         assertThat(value.get(PRINCIPAL).asList()).containsExactly("admin");

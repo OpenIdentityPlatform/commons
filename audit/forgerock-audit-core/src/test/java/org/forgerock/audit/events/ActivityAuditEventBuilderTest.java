@@ -61,7 +61,7 @@ public class ActivityAuditEventBuilderTest {
                 .eventName("AM-REALM-CREATE")
                 .trackingId("12345")
                 .trackingId("67890")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .runAs("admin")
                 .objectId("some/resource")
                 .operation("customAction")
@@ -87,7 +87,7 @@ public class ActivityAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-REALM-CREATE")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .objectIdFromRequest(request)
                 .operationFromRequest(request)
                 .toEvent();
@@ -100,7 +100,7 @@ public class ActivityAuditEventBuilderTest {
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event = productActivityEvent()
                 .eventName("AM-REALM-CREATE")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .trackingId("12345")
                 .runAs("admin")
                 .objectId("some/resource")
@@ -123,7 +123,7 @@ public class ActivityAuditEventBuilderTest {
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
         assertThat(value.get(EVENT_NAME).asString()).isEqualTo("AM-REALM-CREATE");
         assertThat(value.get(TRACKING_IDS).asSet()).containsExactly("12345", "67890");
-        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
+        assertThat(value.get(USER_ID).asString()).isEqualTo("someone@forgerock.com");
         assertThat(value.get(RUN_AS).asString()).isEqualTo("admin");
         assertThat(value.get(OBJECT_ID).asString()).isEqualTo("some/resource");
         assertThat(value.get(OPERATION).asString()).isEqualTo("customAction");

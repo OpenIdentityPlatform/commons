@@ -77,11 +77,10 @@ public class JDBCAuditEventHandlerTest {
     public static final String AUDIT_SQL_SCRIPT = "/audit.sql";
     public static final String TEST_AUDIT_EVENT_TOPIC = "test";
     public static final String AUDIT_TEST_TABLE_NAME = "audittest";
-    public static final String AUTHENTICATION_ID_POINTER = "authentication/id";
     public static final String ID_TABLE_COLUMN = "objectid";
     public static final String EVENTNAME_TABLE_COLUMN = "eventname";
     public static final String TIMESTAMP_TABLE_COLUMN = "activitydate";
-    public static final String AUTHENTICATION_ID_TABLE_COLUMN = "userid";
+    public static final String USER_ID_TABLE_COLUMN = "userid";
     public static final String TRANSACTIONID_TABLE_COLUMN = "transactionid";
 
     public static final String SHUTDOWN = "SHUTDOWN";
@@ -90,12 +89,11 @@ public class JDBCAuditEventHandlerTest {
     public static final String TRANSACTION_ID_FIELD = "transactionId";
     public static final String ID_FIELD = "_id";
     public static final String TIMESTAMP_FIELD = "timestamp";
-    public static final String AUTHENTICATION_FIELD = "authentication";
-    public static final String AUTHENTICATION_ID_FIELD = "id";
+    public static final String USER_ID_FIELD = "userId";
 
     public static final String ID_VALUE = "UUID";
     public static final String EVENT_NAME_VALUE = "eventName";
-    public static final String AUTHENTICATION_ID_VALUE = "test@forgerock.com";
+    public static final String USER_ID_VALUE = "test@forgerock.com";
     public static final String TRANSACTION_ID_VALUE = "transactionId";
     public static final String CUSTOM_OBJECT_FIELD = "customObject";
     public static final String CUSTOM_OBJECT_KEY_FIELD = "key";
@@ -228,8 +226,7 @@ public class JDBCAuditEventHandlerTest {
                 .containsEntry(EVENT_NAME_FIELD, EVENT_NAME_VALUE)
                 .containsKeys(TIMESTAMP_FIELD)
                 .containsEntry(TRANSACTION_ID_FIELD, TRANSACTION_ID_VALUE)
-                .containsEntry(AUTHENTICATION_FIELD,
-                        Collections.singletonMap(AUTHENTICATION_ID_FIELD, AUTHENTICATION_ID_VALUE))
+                .containsEntry(USER_ID_FIELD, USER_ID_VALUE)
                 .containsEntry(CUSTOM_OBJECT_FIELD,
                         Collections.singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
                 .containsEntry(CUSTOM_ARRAY_FIELD, Collections.singletonList(CUSTOM_ARRAY_VALUE));
@@ -325,8 +322,7 @@ public class JDBCAuditEventHandlerTest {
                 .containsEntry(EVENT_NAME_FIELD, EVENT_NAME_VALUE)
                 .containsKeys(TIMESTAMP_FIELD)
                 .containsEntry(TRANSACTION_ID_FIELD, TRANSACTION_ID_VALUE)
-                .containsEntry(AUTHENTICATION_FIELD,
-                        Collections.singletonMap(AUTHENTICATION_ID_FIELD, AUTHENTICATION_ID_VALUE))
+                .containsEntry(USER_ID_FIELD, USER_ID_VALUE)
                 .containsEntry(CUSTOM_OBJECT_FIELD,
                         Collections.singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
                 .containsEntry(CUSTOM_ARRAY_FIELD, Collections.singletonList(CUSTOM_ARRAY_VALUE));
@@ -421,7 +417,7 @@ public class JDBCAuditEventHandlerTest {
         fieldToColumn.put(ID_FIELD, ID_TABLE_COLUMN);
         fieldToColumn.put(EVENT_NAME_FIELD, EVENTNAME_TABLE_COLUMN);
         fieldToColumn.put(TIMESTAMP_FIELD, TIMESTAMP_TABLE_COLUMN);
-        fieldToColumn.put(AUTHENTICATION_ID_POINTER, AUTHENTICATION_ID_TABLE_COLUMN);
+        fieldToColumn.put(USER_ID_FIELD, USER_ID_TABLE_COLUMN);
         fieldToColumn.put(TRANSACTION_ID_FIELD, TRANSACTIONID_TABLE_COLUMN);
         fieldToColumn.put(CUSTOM_OBJECT_FIELD, CUSTOM_OBJECT_COLUMN);
         fieldToColumn.put(CUSTOM_ARRAY_FIELD, CUSTOM_ARRAY_COLUMN);
@@ -443,7 +439,7 @@ public class JDBCAuditEventHandlerTest {
     private JsonValue makeEvent() {
       final AuditEvent testAuditEvent = TestAuditEventBuilder.testAuditEventBuilder()
               .eventName(EVENT_NAME_VALUE)
-              .authentication(AUTHENTICATION_ID_VALUE)
+              .userId(USER_ID_VALUE)
               .timestamp(System.currentTimeMillis())
               .transactionId(TRANSACTION_ID_VALUE)
               .customObject(Collections.<String, Object>singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))

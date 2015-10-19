@@ -20,14 +20,12 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
 import static org.forgerock.audit.events.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
-import static org.forgerock.audit.events.AuditEventBuilder.ID;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -39,8 +37,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.http.HttpContext;
-import org.forgerock.services.context.RootContext;
-import org.forgerock.services.context.SecurityContext;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -88,8 +84,7 @@ public class AccessAuditEventBuilderTest {
                 .trackingId("67890")
                 .client("cip", 1203)
                 .server("sip", 80)
-                .authorizationId("managed/user", "aegloff", "openidm-admin", "openidm-authorized")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .request("CREST", "reconcile")
                 .http("GET", "/some/path", queryParameters, headers)
                 .response(SUCCESS, "200", 12, TimeUnit.MILLISECONDS)
@@ -108,7 +103,6 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(HTTP).get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(queryParameters);
         assertThat(value.get(HTTP).get(COOKIES).asMap(String.class))
                 .containsOnlyKeys(expectedCookieNames.toArray(new String[0]));
-        assertThat(value.get(AUTHORIZATION).get(ID).asString()).isEqualTo("aegloff");
         assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");
         assertThat(value.get(REQUEST).get(OPERATION).asString()).isEqualTo("reconcile");
         assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("SUCCESS");
@@ -126,14 +120,14 @@ public class AccessAuditEventBuilderTest {
                 .client("cip", 1203)
                 .openField("value")
                 .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .timestamp(1427293286239L)
                 .toEvent();
         assertEvent(event1);
 
         AuditEvent event2 = productAccessEvent()
                 .client("cip", 1203)
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .openField("value")
                 .server("ip", 80)
                 .eventName("IDM-sync-10")
@@ -147,7 +141,7 @@ public class AccessAuditEventBuilderTest {
                 .transactionId("transactionId")
                 .client("cip", 1203)
                 .server("ip", 80)
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("IDM-sync-10")
@@ -155,7 +149,7 @@ public class AccessAuditEventBuilderTest {
         assertEvent(event3);
 
         AuditEvent event4 = productAccessEvent()
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .transactionId("transactionId")
                 .client("cip", 1203)
                 .openField("value")
@@ -176,7 +170,7 @@ public class AccessAuditEventBuilderTest {
         AuditEvent event = productAccessEvent()
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .timestamp(1427293286239L)
                 .http("GET", "/some/path", Collections.<String, List<String>>emptyMap(), headers)
                 .toEvent();
@@ -196,7 +190,7 @@ public class AccessAuditEventBuilderTest {
         AuditEvent event = productAccessEvent()
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .clientFromHttpContext(httpContext)
                 .toEvent();
 
@@ -224,7 +218,7 @@ public class AccessAuditEventBuilderTest {
         AuditEvent event = productAccessEvent()
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .httpFromHttpContext(httpContext)
                 .toEvent();
 
@@ -245,7 +239,7 @@ public class AccessAuditEventBuilderTest {
         AuditEvent event = productAccessEvent()
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .requestFromCrestRequest(actionRequest)
                 .toEvent();
 
@@ -265,7 +259,7 @@ public class AccessAuditEventBuilderTest {
         AuditEvent event = productAccessEvent()
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .requestFromCrestRequest(deleteRequest)
                 .toEvent();
 
@@ -284,7 +278,7 @@ public class AccessAuditEventBuilderTest {
         AuditEvent event = productAccessEvent()
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .serverFromHttpContext(httpContext)
                 .toEvent();
 
@@ -292,34 +286,6 @@ public class AccessAuditEventBuilderTest {
         JsonValue value = event.getValue();
         assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(8080);
         assertThat(value.get(SERVER).get(HOST).asString()).isEqualTo("product.example.com");
-    }
-
-    @Test
-    public void canPopulateAuthorizationIdFromSecurityContext() throws Exception {
-        // Given
-        List<String> roles = new LinkedList<>();
-        roles.add("role1");
-        roles.add("role2");
-        Map<String, Object> authorizationId = new HashMap<>();
-        authorizationId.put(COMPONENT, COMPONENT);
-        authorizationId.put(ID, ID);
-        authorizationId.put(ROLES, roles);
-        SecurityContext securityContext = new SecurityContext(new RootContext(), "authenticationId", authorizationId);
-
-        // When
-        AuditEvent event = productAccessEvent()
-                .eventName("IDM-sync-10")
-                .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
-                .authorizationIdFromSecurityContext(securityContext)
-                .toEvent();
-
-        // Then
-        JsonValue value = event.getValue();
-        assertThat(value.get(AUTHORIZATION).get(COMPONENT).asString()).isEqualTo(COMPONENT);
-        assertThat(value.get(AUTHORIZATION).get(ID).asString()).isEqualTo(ID);
-        assertThat(value.get(AUTHORIZATION).get(ROLES).asList()).contains("role1");
-        assertThat(value.get(AUTHORIZATION).get(ROLES).asList()).contains("role2");
     }
 
     private void assertEvent(AuditEvent event) {
@@ -331,7 +297,7 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(CLIENT).get(PORT).asLong()).isEqualTo(1203);
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
-        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
+        assertThat(value.get(USER_ID).asString()).isEqualTo("someone@forgerock.com");
     }
 
     private JsonValue jsonFromFile(String resourceFilePath) throws IOException {

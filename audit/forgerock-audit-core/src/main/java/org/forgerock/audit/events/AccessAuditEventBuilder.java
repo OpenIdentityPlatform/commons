@@ -15,7 +15,6 @@
  */
 package org.forgerock.audit.events;
 
-import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -24,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -83,10 +81,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public static final String OPERATION = "operation";
     public static final String METHOD = "method";
     public static final String DETAIL = "detail";
-    public static final String COMPONENT = "component";
-    public static final String ID = "id";
-    public static final String ROLES = "roles";
-    public static final String AUTHORIZATION = "authorization";
     public static final String PATH = "path";
     public static final String QUERY_PARAMETERS = "queryParameters";
     public static final String HEADERS = "headers";
@@ -103,7 +97,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     private static final String HOST_HEADER = "Host";
     private static final String COOKIE_HEADER = "Cookie";
     private static final String HTTP_CONTEXT_NAME = "http";
-    private static final String SECURITY_CONTEXT_NAME = "security";
     private static final String HTTP_CONTEXT_REMOTE_ADDRESS = "remoteAddress";
 
     private static final Logger logger = LoggerFactory.getLogger(AccessAuditEventBuilder.class);
@@ -169,7 +162,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets the server fields for the event, iff the provided
+     * Sets the server fields for the event, if the provided
      * <code>Context</code> contains a <code>HttpContext</code>..
      *
      * @param context the CREST context
@@ -276,51 +269,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets the provided authorizationId fields for the event.
-     *
-     * @param component the component part of the authorization id.
-     * @param id the id part of the authorization id.
-     * @param roles the list of roles. Roles are optional.
-     * @return this builder
-     */
-    public final T authorizationId(String component, String id, String...roles) {
-        JsonValue object = json(object(
-                field(COMPONENT, component),
-                field(ID, id)));
-        if (roles != null && roles.length > 0) {
-            Object roleList = json(array(Arrays.copyOf(roles, roles.length, Object[].class)));
-            object.put(ROLES, roleList);
-        }
-        jsonValue.put(AUTHORIZATION, object);
-        return self();
-    }
-
-    /**
-     * Sets the provided authorizationId fields for the event, iff the provided
-     * <code>Context</code> contains a <code>SecurityContext</code>..
-     *
-     * @param context the CREST context
-     * @return this builder
-     */
-    public final T authorizationIdFromSecurityContext(Context context) {
-        if (context.containsContext(SECURITY_CONTEXT_NAME)) {
-            JsonValue securityContext = context.getContext(SECURITY_CONTEXT_NAME).toJsonValue();
-            authorizationId(
-                    securityContext.get(AUTHORIZATION).get(COMPONENT).asString(),
-                    securityContext.get(AUTHORIZATION).get(ID).asString(),
-                    getRoles(securityContext));
-        }
-        return self();
-    }
-
-    private String[] getRoles(JsonValue securityContext) {
-        if (securityContext.get(AUTHORIZATION).isDefined(ROLES)) {
-            return securityContext.get(AUTHORIZATION).get(ROLES).asList().toArray(new String[0]);
-        }
-        return null;
-    }
-
-    /**
      * Sets the provided HTTP fields for the event.
      *
      * @param method the HTTP method.
@@ -410,7 +358,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets client ip, port and host from <code>HttpContext</code>, iff the provided
+     * Sets client ip, port and host from <code>HttpContext</code>, if the provided
      * <code>Context</code> contains a <code>HttpContext</code>.
      *
      * @param context The CREST context.
@@ -435,7 +383,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets HTTP method, path, queryString and headers from <code>HttpContext</code>, iff the provided
+     * Sets HTTP method, path, queryString and headers from <code>HttpContext</code>, if the provided
      * <code>Context</code> contains a <code>HttpContext</code>.
      *
      * @param context The CREST context.
@@ -479,7 +427,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @see #transactionIdFromRootContext(Context)
      * @see #clientFromHttpContext(Context)
      * @see #httpFromHttpContext(Context)
-     * @see #authenticationFromSecurityContext(Context)
+     * @see #userIdFromSecurityContext(Context)
      * @see #requestFromCrestRequest(Request)
      *
      * @return this builder
@@ -488,7 +436,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         transactionIdFromRootContext(context);
         clientFromHttpContext(context);
         httpFromHttpContext(context);
-        authenticationFromSecurityContext(context);
         requestFromCrestRequest(request);
         return self();
     }

@@ -23,10 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.services.context.RootContext;
-import org.forgerock.services.context.SecurityContext;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -59,7 +57,6 @@ public class AuditEventBuilderTest {
         AuditEvent event = productEvent()
                 .eventName("AM-CREST-SUCCESS")
                 .transactionId("transactionId")
-                .authentication("someone@forgerock.com")
                 .toEvent();
         JsonValue value = event.getValue();
         assertThat(value.get(TIMESTAMP).asString()).isNotNull().isNotEmpty();
@@ -70,7 +67,6 @@ public class AuditEventBuilderTest {
         productEvent()
                 .eventName("AM-CREST-SUCCESS")
                 .timestamp(System.currentTimeMillis())
-                .authentication("someone@forgerock.com")
                 .toEvent();
     }
 
@@ -79,7 +75,6 @@ public class AuditEventBuilderTest {
         productEvent()
                 .transactionId("transactionId")
                 .timestamp(System.currentTimeMillis())
-                .authentication("someone@forgerock.com")
                 .toEvent();
     }
 
@@ -88,7 +83,6 @@ public class AuditEventBuilderTest {
         productEvent()
                 .eventName("AM-CREST-SUCCESS")
                 .transactionId("transactionId")
-                .timestamp(System.currentTimeMillis())
                 .toEvent();
     }
 
@@ -102,7 +96,8 @@ public class AuditEventBuilderTest {
                 .eventName("AM-CREST-SUCCESS")
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
+                .trackingId("12345")
                 .openField("value")
                 .toEvent();
 
@@ -112,11 +107,12 @@ public class AuditEventBuilderTest {
     @Test
     public void ensureBuilderMethodsCanBeCalledInAnyOrder() {
         AuditEvent event = productEvent()
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .openField("value")
                 .transactionId("transactionId")
                 .eventName("AM-CREST-SUCCESS")
                 .timestamp(1427293286239L)
+                .trackingId("12345")
                 .toEvent();
         assertEvent(event);
     }
@@ -130,7 +126,6 @@ public class AuditEventBuilderTest {
         AuditEvent event = productEvent()
                 .eventName("AM-CREST-SUCCESS")
                 .transactionIdFromRootContext(context)
-                .authentication("someone@forgerock.com")
                 .toEvent();
 
         // Then
@@ -138,30 +133,12 @@ public class AuditEventBuilderTest {
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo(context.getId());
     }
 
-    @Test
-    public void canPopulateAuthenticationIdFromSecurityContext() {
-        // Given
-        RootContext rootContext = new RootContext();
-        String authenticationId = "username";
-        Context context = new SecurityContext(rootContext, authenticationId, null);
-
-        // When
-        AuditEvent event = productEvent()
-                .eventName("AM-CREST-SUCCESS")
-                .transactionId("transactionId")
-                .authenticationFromSecurityContext(context)
-                .toEvent();
-
-        // Then
-        JsonValue value = event.getValue();
-        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo(authenticationId);
-    }
-
     private void assertEvent(AuditEvent event) {
         JsonValue value = event.getValue();
         assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo("transactionId");
         assertThat(value.get(TIMESTAMP).asString()).isEqualTo("2015-03-25T14:21:26.239Z");
-        assertThat(value.get(AUTHENTICATION).get(ID).asString()).isEqualTo("someone@forgerock.com");
+        assertThat(value.get(USER_ID).asString()).isEqualTo("someone@forgerock.com");
+        assertThat(value.get(TRACKING_IDS).asSet()).containsExactly("12345");
         assertThat(value.get("open").getObject()).isEqualTo("value");
     }
 

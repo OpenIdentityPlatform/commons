@@ -54,7 +54,7 @@ public class SyslogFormatterTest {
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .eventName("AM-ACCESS-ATTEMPT")
-                .authentication("someone@forgerock.com")
+                .userId("someone@forgerock.com")
                 .field1("foo", "bar")
                 .field4("123456789")
                 .toEvent();

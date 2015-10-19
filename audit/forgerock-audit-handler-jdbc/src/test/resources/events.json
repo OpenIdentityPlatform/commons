@@ -17,13 +17,8 @@
         "eventName" : {
           "type": "string"
         },
-        "authentication": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            }
-          }
+        "userId": {
+          "type": "string"
         },
         "customObject": {
           "type": "object"

@@ -21,14 +21,10 @@ import org.forgerock.audit.util.DateUtil;
 import org.forgerock.json.JsonValue;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
-import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.Reject;
 
 import java.util.LinkedHashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 
 /**
  * Root builder for all audit events.
@@ -40,8 +36,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     public static final String EVENT_NAME = "eventName";
     public static final String TIMESTAMP = "timestamp";
     public static final String TRANSACTION_ID = "transactionId";
-    public static final String AUTHENTICATION = "authentication";
-    public static final String ID = "id";
+    public static final String USER_ID = "userId";
     public static final String TRACKING_IDS = "trackingIds";
 
     /** Represents the event as a JSON value. */
@@ -178,15 +173,14 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     }
 
     /**
-     * Sets the provided authentication id for the event.
+     * Sets the provided userId for the event.
      *
-     * @param id the authentication id.
+     * @param id the user id.
      * @return this builder
      */
-    public final T authentication(String id) {
+    public final T userId(String id) {
         Reject.ifNull(id);
-        JsonValue object = json(object(field(ID, id)));
-        jsonValue.put(AUTHENTICATION, object);
+        jsonValue.put(USER_ID, id);
         return self();
     }
 
@@ -217,7 +211,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     }
 
     /**
-     * Sets transactionId from ID of {@link RootContext}, iff the provided
+     * Sets transactionId from ID of {@link RootContext}, if the provided
      * <code>Context</code> contains a <code>RootContext</code>.
      *
      * @param context The CREST context.
@@ -230,20 +224,4 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
         }
         return self();
     }
-
-    /**
-     * Sets authentication from {@link SecurityContext}, iff the provided
-     * <code>Context</code> contains a <code>SecurityContext</code>.
-     *
-     * @param context The CREST context.
-     * @return this builder
-     */
-    public final T authenticationFromSecurityContext(Context context) {
-        if (context.containsContext(SecurityContext.class)) {
-            SecurityContext securityContext = context.asContext(SecurityContext.class);
-            authentication(securityContext.getAuthenticationId());
-        }
-        return self();
-    }
-
 }
