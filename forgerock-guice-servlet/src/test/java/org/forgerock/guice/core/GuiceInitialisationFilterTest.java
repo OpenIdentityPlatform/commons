@@ -16,11 +16,15 @@
 
 package org.forgerock.guice.core;
 
+import com.google.inject.Stage;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 public class GuiceInitialisationFilterTest {
@@ -37,12 +41,30 @@ public class GuiceInitialisationFilterTest {
 
         //Given
         ServletContextEvent servletContextEvent = mock(ServletContextEvent.class);
+        ServletContext servletContext = mock(ServletContext.class);
+        given(servletContextEvent.getServletContext()).willReturn(servletContext);
 
         //When
         initialisationFilter.contextInitialized(servletContextEvent);
 
         //Then
-        //Just getting here is a pass
+        assertThat(InjectorConfiguration.getStage()).isEqualTo(Stage.PRODUCTION);
+    }
+
+    @Test
+    public void shouldInitializeContextWithStage() {
+
+        //Given
+        ServletContextEvent servletContextEvent = mock(ServletContextEvent.class);
+        ServletContext servletContext = mock(ServletContext.class);
+        given(servletContextEvent.getServletContext()).willReturn(servletContext);
+        given(servletContext.getInitParameter(Stage.class.getCanonicalName())).willReturn("DEVELOPMENT");
+
+        //When
+        initialisationFilter.contextInitialized(servletContextEvent);
+
+        //Then
+        assertThat(InjectorConfiguration.getStage()).isEqualTo(Stage.DEVELOPMENT);
     }
 
     @Test

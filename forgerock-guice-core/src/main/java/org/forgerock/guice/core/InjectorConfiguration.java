@@ -18,6 +18,8 @@ package org.forgerock.guice.core;
 
 import java.lang.annotation.Annotation;
 
+import com.google.inject.Stage;
+
 /**
  * <p>A thread-safe singleton holding the configuration information on how the Guice framework finds Guice Modules to
  * configure the Guice Injector instance.</p>
@@ -42,13 +44,14 @@ public enum InjectorConfiguration {
 
     private volatile Class<? extends Annotation> moduleAnnotation = GuiceModule.class;
     private volatile GuiceModuleLoader guiceModuleLoader = new GuiceModuleServiceLoader(new ServiceLoaderWrapper());
+    private volatile Stage stage = Stage.PRODUCTION;
 
     /**
      * Gets the module annotation that all modules MUST be annotated with.
      *
      * @return The module annotation.
      */
-    static synchronized Class<? extends Annotation> getModuleAnnotation() {
+    static Class<? extends Annotation> getModuleAnnotation() {
         return INSTANCE.moduleAnnotation;
     }
 
@@ -57,7 +60,7 @@ public enum InjectorConfiguration {
      *
      * @param moduleAnnotation The module annotation.
      */
-    public static synchronized void setModuleAnnotation(Class<? extends Annotation> moduleAnnotation) {
+    public static void setModuleAnnotation(Class<? extends Annotation> moduleAnnotation) {
         INSTANCE.moduleAnnotation = moduleAnnotation;
     }
 
@@ -66,7 +69,7 @@ public enum InjectorConfiguration {
      *
      * @return The GuiceModuleLoader implementation.
      */
-    static synchronized GuiceModuleLoader getGuiceModuleLoader() {
+    static GuiceModuleLoader getGuiceModuleLoader() {
         return INSTANCE.guiceModuleLoader;
     }
 
@@ -75,7 +78,26 @@ public enum InjectorConfiguration {
      *
      * @param guiceModuleLoader The GuiceModuleLoader implementation.
      */
-    public static synchronized void setGuiceModuleLoader(GuiceModuleLoader guiceModuleLoader) {
+    public static void setGuiceModuleLoader(GuiceModuleLoader guiceModuleLoader) {
         INSTANCE.guiceModuleLoader = guiceModuleLoader;
+    }
+
+    /**
+     * Gets the {@link Stage} that the injector should run in.
+     *
+     * @return The injector stage.
+     */
+    static Stage getStage() {
+        return INSTANCE.stage;
+    }
+
+    /**
+     * Sets the {@link Stage} that the injector should run in. See {@link Stage} for available stages
+     * and their differences.
+     *
+     * @param stage The injector stage.
+     */
+    public static void setStage(Stage stage) {
+        INSTANCE.stage = stage;
     }
 }

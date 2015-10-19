@@ -16,8 +16,11 @@
 
 package org.forgerock.guice.core;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+
+import com.google.inject.Stage;
 
 /**
  * Servlet Context Listener to start the Guice initialisation eagerly when the Container starts up, instead of
@@ -34,6 +37,11 @@ public final class GuiceInitialisationFilter implements ServletContextListener {
      * @param servletContextEvent {@inheritDoc}
      */
     public void contextInitialized(ServletContextEvent servletContextEvent) {
+        ServletContext servletContext = servletContextEvent.getServletContext();
+        String stageName = servletContext.getInitParameter(Stage.class.getCanonicalName());
+        if (stageName != null) {
+            InjectorConfiguration.setStage(Stage.valueOf(stageName));
+        }
         InjectorHolder.getInjector();
     }
 

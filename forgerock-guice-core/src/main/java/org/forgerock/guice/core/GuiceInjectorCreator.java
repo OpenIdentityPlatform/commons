@@ -38,6 +38,6 @@ class GuiceInjectorCreator {
      * @return A non-null configured Guice Injector instance.
      */
     Injector createInjector(Iterable<? extends Module> modules) {
-        return Guice.createInjector(modules);
+        return Guice.createInjector(InjectorConfiguration.getStage(), modules);
     }
 }

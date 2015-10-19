@@ -22,6 +22,7 @@ import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import com.google.inject.Module;
+import com.google.inject.Stage;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -68,6 +69,18 @@ public class InjectorConfigurationTest {
     }
 
     @Test
+    public void shouldGetDefaultInjectorStage() {
+
+        //Given
+
+        //When
+        Stage stage = InjectorConfiguration.getStage();
+
+        //Then
+        assertThat(stage).isEqualTo(Stage.PRODUCTION);
+    }
+
+    @Test
     public void shouldSetModuleAnnotation() {
 
         //Given
@@ -92,6 +105,19 @@ public class InjectorConfigurationTest {
         //Then
         GuiceModuleLoader moduleLoader = InjectorConfiguration.getGuiceModuleLoader();
         assertThat(moduleLoader).isEqualTo(testModuleLoader);
+    }
+
+    @Test
+    public void shouldSetInjectorStage() {
+
+        //Given
+        Stage stage = Stage.DEVELOPMENT;
+
+        //When
+        InjectorConfiguration.setStage(stage);
+
+        //Then
+        assertThat(InjectorConfiguration.getStage()).isEqualTo(stage);
     }
 
     private static final class TestGuiceModuleLoader implements GuiceModuleLoader {
