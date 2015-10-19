@@ -30,7 +30,6 @@
                 "profileUpdateSuccessful" : "Profile has been updated",
                 "userNameUpdated" : "Username has been modified succesfully.",
                 "afterRegistration" : "User has been registered successfully",
-                "siteIdentificationChanged" : "Site identification image has been changed",
                 "userAlreadyExists" : "User already exists",
                 "errorDeletingNotification" : "Error deleting notification.",
                 "errorFetchingNotifications" : "Error Fetching notifications.",
@@ -54,9 +53,7 @@
                 "noAccountQuestion" : "Don't have an account?",
                 "registerAccount" : "Register your account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
-                "resetPassword" : "Reset your Password",
-                "siteIdentificationHeader": "Site Identification",
-                "siteIdentificationExplanation": "Please enter your login name.<br />Your site image and pass phrase will be displayed here."
+                "resetPassword" : "Reset your Password"
             },
             "404" : {
                 "pageNotFound" : "Page not found",
@@ -76,9 +73,6 @@
                 "explanation1" : "Changing the following attributes requires re-authentication: ",
                 "explanation2" : "Please confirm your current password to continue."
             },
-            "ChangeSiteIdentificationDialogTemplate" : {
-                "siteImageAndPhaseExplanation" : "The Site Image and Phrase selected will be shown to you upon login to confirm that you are logging in to the genuine site"
-            },
             "ForgottenPasswordTemplate" : {
                 "forgottenPasswordQuestion" : "Forgotten password?",
                 "enterLogin" : "Please enter your login in the field below to continue."
@@ -86,10 +80,6 @@
             "TermsOfUseTemplate" : {
                 "termsOfUse" : "Terms of Use",
                 "termsOfUseContent" : "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p>"
-            },
-            "UserProfileTemplate" : {
-                "changeSecurityData" : "Change Security Data",
-                "changeSiteIdentification" : "Change Site Identification"
             },
             "UserRegistrationTemplate" : {
                 "registerYourAccount" : "Register your account",

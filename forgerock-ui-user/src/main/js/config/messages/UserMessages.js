@@ -72,10 +72,6 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.afterRegistration",
                 type: "info"
             },
-            "siteIdentificationChanged": {
-                msg: "config.messages.UserMessages.siteIdentificationChanged",
-                type: "info"
-            },
             "userAlreadyExists": {
                 msg: "config.messages.UserMessages.userAlreadyExists",
                 type: "error"
