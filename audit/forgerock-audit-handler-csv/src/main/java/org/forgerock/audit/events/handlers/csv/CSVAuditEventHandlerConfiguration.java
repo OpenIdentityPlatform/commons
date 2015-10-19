@@ -142,7 +142,7 @@ public class CSVAuditEventHandlerConfiguration extends EventHandlerConfiguration
          * Gets the character to use to delimit the csv entries.
          * @return The character used to delimit the entries.
          */
-        public int getDelimiterChar() {
+        public char getDelimiterChar() {
             return delimiterChar;
         }
 
