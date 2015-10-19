@@ -27,6 +27,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
@@ -46,8 +47,10 @@ import org.testng.annotations.Test;
 public final class UserDetailsStageTest {
 
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
+    private static final String TEST_EMAIL_ID_2 = "test2@forgerock.com";
     private static final String KBA_QUESTION_2 = "Who was your first employer?";
     private static final String KBA_QUESTION_3 = "What is my favorite author?";
+    private static final String IDENTITY_EMAIL_FIELD = "mail";
 
     private UserDetailsStage userDetailsStage;
     @Mock
@@ -87,17 +90,32 @@ public final class UserDetailsStageTest {
             expectedExceptionsMessageRegExp = "user has not been specified")
     public void testAdvanceUserNotSpecified() throws Exception {
         // Given
-        given(context.getInput()).willReturn(newJsonValueUserId());
+        given(context.getInput()).willReturn(newEmptyJsonValue());
+
+        // When
+        userDetailsStage.advance(context, config);
+    }
+
+    @Test(expectedExceptions = BadRequestException.class,
+            expectedExceptionsMessageRegExp = "Email address mismatch")
+    public void testAdvanceEmailIdMismatch() throws Exception {
+        // Given
+        given(context.containsState(EMAIL_FIELD)).willReturn(true);
+        given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueEmailId());
+
+        given(context.getInput()).willReturn(newJsonValueInputsUserWithEmailId2());
 
         // When
         userDetailsStage.advance(context, config);
     }
 
     @Test
-    public void testAdvance() throws Exception {
+    public void testAdvanceEmailVerified() throws Exception {
         // Given
-        given(context.getInput()).willReturn(newJsonValueInputsUser());
+        given(context.containsState(EMAIL_FIELD)).willReturn(true);
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueEmailId());
+
+        given(context.getInput()).willReturn(newJsonValueInputsUserWithoutEmail());
 
         // When
         userDetailsStage.advance(context, config);
@@ -111,14 +129,14 @@ public final class UserDetailsStageTest {
         assertThat(userJson).stringAt("givenName").isEqualTo("testUser");
         assertThat(userJson).stringAt("sn").isEqualTo("testUserSecondName");
         assertThat(userJson).stringAt("password").isEqualTo("passwordTobeEncrypted");
+        assertThat(userJson).stringAt(IDENTITY_EMAIL_FIELD).isEqualTo(TEST_EMAIL_ID);
     }
 
     @Test
     public void testAdvanceAfterKbaStage() throws Exception {
         // Given
-        given(context.getInput()).willReturn(newJsonValueInputsUser());
+        given(context.getInput()).willReturn(newJsonValueInputsUserWithEmail());
         given(context.getState(USER_FIELD)).willReturn(newJsonValueKba());
-        given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueEmailId());
 
         // When
         userDetailsStage.advance(context, config);
@@ -131,6 +149,7 @@ public final class UserDetailsStageTest {
         assertThat(userJson).stringAt("givenName").isEqualTo("testUser");
         assertThat(userJson).stringAt("sn").isEqualTo("testUserSecondName");
         assertThat(userJson).stringAt("password").isEqualTo("passwordTobeEncrypted");
+        assertThat(userJson).stringAt(IDENTITY_EMAIL_FIELD).isEqualTo(TEST_EMAIL_ID);
 
         assertThat(userJson).stringAt("kba/0/customQuestion").isEqualTo(KBA_QUESTION_3);
         assertThat(userJson).stringAt("kba/0/answer").isEqualTo("a1");
@@ -140,7 +159,7 @@ public final class UserDetailsStageTest {
 
     private UserDetailsConfig newUserDetailsConfig() {
         return new UserDetailsConfig()
-                .setIdentityEmailField("mail");
+                .setIdentityEmailField(IDENTITY_EMAIL_FIELD);
     }
 
     private JsonValue newJsonValueEmailId() {
@@ -149,10 +168,6 @@ public final class UserDetailsStageTest {
 
     private JsonValue newEmptyJsonValue() {
         return json(object());
-    }
-
-    private JsonValue newJsonValueUserId() {
-        return json(object(field("userId", TEST_EMAIL_ID)));
     }
 
     private JsonValue newJsonValueKba() {
@@ -167,13 +182,23 @@ public final class UserDetailsStageTest {
                                         field("answer", "a2"))))));
     }
 
-    private JsonValue newJsonValueInputsUser() {
+    private JsonValue newJsonValueInputsUserWithEmail() {
+        return newJsonValueInputsUserWithoutEmail()
+                .put(new JsonPointer("user/" + IDENTITY_EMAIL_FIELD), TEST_EMAIL_ID);
+    }
+
+    private JsonValue newJsonValueInputsUserWithEmailId2() {
+        return newJsonValueInputsUserWithoutEmail()
+                .put(new JsonPointer("user/" + IDENTITY_EMAIL_FIELD), TEST_EMAIL_ID_2);
+    }
+
+    private JsonValue newJsonValueInputsUserWithoutEmail() {
         return json(
                 object(
-                        field("userId", TEST_EMAIL_ID),
                         field("user", object(
                                 field("givenName", "testUser"),
                                 field("sn", "testUserSecondName"),
                                 field("password", "passwordTobeEncrypted")))));
     }
+
 }

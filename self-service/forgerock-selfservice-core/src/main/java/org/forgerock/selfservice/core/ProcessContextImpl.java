@@ -69,7 +69,7 @@ final class ProcessContextImpl implements ProcessContext {
 
     @Override
     public boolean containsState(String jsonPointer) {
-        return state.get(new JsonPointer(jsonPointer)).isNotNull();
+        return state.get(new JsonPointer(jsonPointer)) != null;
     }
 
     @Override

@@ -29,7 +29,6 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
-import org.forgerock.util.Reject;
 
 import java.util.Map;
 
@@ -45,8 +44,6 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context,
             UserDetailsConfig config) throws ResourceException {
-        Reject.ifFalse(context.containsState(EMAIL_FIELD), "User registration stage expects mail in the context");
-
         return RequirementsBuilder
                 .newInstance("New user details")
                 .addRequireProperty("user", "object", "User details")
@@ -63,11 +60,7 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
             throw new BadRequestException("user has not been specified");
         }
 
-        String email = context
-                .getState(EMAIL_FIELD)
-                .asString();
-
-        user.put(new JsonPointer(config.getIdentityEmailField()), email);
+        processEmailFromPreviousStage(context, config, user);
 
         JsonValue userState = ensureUserInContext(context);
         Map<String, Object> properties = user.asMap();
@@ -75,6 +68,19 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
         context.putState(USER_FIELD, userState);
 
         return StageResponse.newBuilder().build();
+    }
+
+    private void processEmailFromPreviousStage(ProcessContext context, UserDetailsConfig config, JsonValue user)
+            throws BadRequestException {
+        if (context.containsState(EMAIL_FIELD)) {
+            JsonValue emailFieldContext = context.getState(EMAIL_FIELD);
+            JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
+            if (emailFieldUser != null && emailFieldUser.isNotNull()
+                    && !emailFieldUser.asString().equalsIgnoreCase(emailFieldContext.asString())) {
+                throw new BadRequestException("Email address mismatch");
+            }
+            user.put(new JsonPointer(config.getIdentityEmailField()), emailFieldContext.asString());
+        }
     }
 
     private JsonValue ensureUserInContext(ProcessContext context) {
