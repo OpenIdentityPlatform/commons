@@ -387,7 +387,7 @@ define("config/process/CommonConfig", [
 
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
 
-                    if (! Configuration.backgroundLogin) {
+                    if (!Configuration.backgroundLogin) {
                         if (Configuration.globalData.auth.urlParams && Configuration.globalData.auth.urlParams.goto) {
                             window.location.href = Configuration.globalData.auth.urlParams.goto;
                             return false;
@@ -410,6 +410,11 @@ define("config/process/CommonConfig", [
                         });
                     } else if (typeof $.prototype.modal === "function") {
                         $(".modal.in").modal("hide");
+                        // There are some cases, when user is presented with login modal panel,
+                        // rather than a normal login view. backgroundLogin property is used to
+                        // indicate such cases. It should be deleted afterwards for correct
+                        // display of the login view later
+                        delete Configuration.backgroundLogin;
                     }
 
                     promise.resolve(user);
