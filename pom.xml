@@ -117,9 +117,6 @@
     <forgerock-http-framework.version>0.0.1-SNAPSHOT</forgerock-http-framework.version>
     <forgerock-rest.version>3.0.0-SNAPSHOT</forgerock-rest.version>
     <forgerock-auth-filters.version>2.0.0-SNAPSHOT</forgerock-auth-filters.version>
-    <forgerock-audit.version>0.6.0-SNAPSHOT</forgerock-audit.version>
-    <forgerock-selfservice.version>0.2.0-SNAPSHOT</forgerock-selfservice.version>
-    <opendj.ldap-sdk.version>3.0.0-SNAPSHOT</opendj.ldap-sdk.version>
   </properties>
 
   <prerequisites>
@@ -513,56 +510,6 @@
         <version>${forgerock-auth-filters.version}</version>
       </dependency>
 
-      <!-- ForgeRock Audit dependencies -->
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-audit-core</artifactId>
-        <version>${forgerock-audit.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-audit-handler-csv</artifactId>
-        <version>${forgerock-audit.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-audit-json</artifactId>
-        <version>${forgerock-audit.version}</version>
-      </dependency>
-
-      <!-- ForgeRock User Self-Service dependencies -->
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-selfservice-core</artifactId>
-        <version>${forgerock-selfservice.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-selfservice-stages</artifactId>
-        <version>${forgerock-selfservice.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-selfservice-json</artifactId>
-        <version>${forgerock-selfservice.version}</version>
-      </dependency>
-
-      <!-- OpenDJ Ldap SDK dependencies -->
-      <dependency>
-        <groupId>org.forgerock.opendj</groupId>
-        <artifactId>opendj-core</artifactId>
-        <version>${opendj.ldap-sdk.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.forgerock.opendj</groupId>
-        <artifactId>opendj-grizzly</artifactId>
-        <version>${opendj.ldap-sdk.version}</version>
-      </dependency>
     </dependencies>
   </dependencyManagement>
 </project>
