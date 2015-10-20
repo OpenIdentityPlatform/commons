@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ! The contents of this file are subject to the terms of the Common Development and
-  ! Distribution License (the License). You may not use this file except in compliance with the
-  ! License.
-  !
-  ! You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
-  ! specific language governing permission and limitations under the License.
-  !
-  ! When distributing Covered Software, include this CDDL Header Notice in each file and include
-  ! the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
-  ! Header, with the fields enclosed by brackets [] replaced by your own identifying
-  ! information: "Portions copyright [year] [name of copyright owner]".
-  !
-  !  Copyright 2015 ForgeRock AS.
+   The contents of this file are subject to the terms of the Common Development and
+   Distribution License (the License). You may not use this file except in compliance with the
+   License.
+
+   You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+   specific language governing permission and limitations under the License.
+
+   When distributing Covered Software, include this CDDL Header Notice in each file and include
+   the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+   Header, with the fields enclosed by brackets [] replaced by your own identifying
+   information: "Portions copyright [year] [name of copyright owner]".
+
+    Copyright 2015 ForgeRock AS.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -28,7 +28,6 @@
     which are known to be compatible with each other.</description>
   <url>http://www.forgerock.com</url>
 
-
   <licenses>
     <license>
       <name>CDDL-1.0</name>
@@ -38,19 +37,16 @@
     </license>
   </licenses>
 
-
   <issueManagement>
     <system>jira</system>
     <url>https://bugster.forgerock.org</url>
   </issueManagement>
-
 
   <scm>
     <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-bom.git</connection>
     <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-bom.git</developerConnection>
     <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-bom/browse</url>
   </scm>
-
 
   <distributionManagement>
     <snapshotRepository>
@@ -93,7 +89,6 @@
     </repository>
   </repositories>
 
-
   <properties>
     <maven.min.version>3.0.1</maven.min.version>
 
@@ -127,11 +122,9 @@
     <opendj.ldap-sdk.version>3.0.0-SNAPSHOT</opendj.ldap-sdk.version>
   </properties>
 
-
   <prerequisites>
     <maven>${maven.min.version}</maven>
   </prerequisites>
-
 
   <dependencyManagement>
     <dependencies>
@@ -520,7 +513,6 @@
         <version>${forgerock-auth-filters.version}</version>
       </dependency>
 
-
       <!-- ForgeRock Audit dependencies -->
       <dependency>
         <groupId>org.forgerock.commons</groupId>
@@ -571,7 +563,6 @@
         <artifactId>opendj-grizzly</artifactId>
         <version>${opendj.ldap-sdk.version}</version>
       </dependency>
-
     </dependencies>
   </dependencyManagement>
 </project>
