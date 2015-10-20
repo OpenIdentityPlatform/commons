@@ -83,7 +83,6 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             name - Name of the navigation element
             icon - Icon to display with the navigation name
             url - Link location
-            inactive - Boolean that controls whether or not the navigation item is currently in use
             dropdown - Boolean that controls if a drop down element is used or a standard navigation element
 
             Example:
@@ -99,26 +98,22 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                             {
                                 "url": "#connectors/",
                                 "name": "config.AppConfiguration.Navigation.links.connectors",
-                                "icon": "fa fa-cubes",
-                                "inactive": false
+                                "icon": "fa fa-cubes"
                             },
                             {
                                 "url": "#managed/",
                                 "name": "config.AppConfiguration.Navigation.links.managedObjects",
-                                "icon": "fa fa-th",
-                                "inactive": false
+                                "icon": "fa fa-th"
                             },
                             {
                                 "url": "#mapping/",
                                 "name": "config.AppConfiguration.Navigation.links.mapping",
-                                "icon": "fa fa-arrows-h",
-                                "inactive": false
+                                "icon": "fa fa-arrows-h"
                             },
                             {
                                 "url": "#settings/",
                                 "name": "config.AppConfiguration.Navigation.links.systemPref",
-                                "icon": "fa fa-cog",
-                                "inactive": false
+                                "icon": "fa fa-cog"
                             }
                         ]
                     },
@@ -141,11 +136,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             data: {},
 
             events: {
-                "click a.inactive": "disableLink",
-                "click .event-link:not(.inactive)": "fireEvent"
-            },
-            disableLink: function(e){
-                e.preventDefault();
+                "click .event-link": "fireEvent"
             },
 
             fireEvent: function(e){

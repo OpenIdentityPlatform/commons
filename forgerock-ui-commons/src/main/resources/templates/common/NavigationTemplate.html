@@ -15,8 +15,9 @@
         <div id="mainNavBar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav {{#if admin}}navbar-admin{{/if}}">
                 {{#each topNav}}
-                <li class="{{#if active}}active{{/if}}{{#if dropdown}} dropdown{{/if}}" >
-
+                <li class=" {{#if active}}active{{/if}}
+                            {{#if dropdown}} dropdown{{/if}}
+                            {{#if cssClass}} {{cssClass}}{{/if}}" >
                     <a  title="{{title}}"
                         href="{{#if hashurl}}{{hashurl}}{{else}}#{{/if}}"
                         class="{{#if event}}event-link{{/if}} {{#if urls}}dropdown-toggle{{/if}}"
@@ -40,7 +41,7 @@
                             {{#if header}}
                                 <li class="dropdown-header ">{{headerTitle}}</li>
                             {{else}}
-                                <li {{#if cssClass}}class="{{cssClass}}{{#if active}} active{{/if}}" {{else}} {{#if active}} class="active" {{/if}} {{/if}}>
+                                <li class="{{#if cssClass}}{{cssClass}}{{/if}} {{#if active}}active{{/if}}">
                                 <a  title="{{title}}"
                                     href="{{#if hashurl}}{{hashurl}}{{else}}#{{/if}}"
                                     class="{{#if event}}event-link{{/if}} {{#if urls}}dropdown-toggle{{/if}}"
@@ -104,7 +105,7 @@
                             </a>
                         </li>
                         {{else}}
-                        <li class="dropdown-nolink-item">
+                        <li class="dropdown-header">
                             <span id="user_name">{{username}}</span>
                         </li>
                         {{/if}}
