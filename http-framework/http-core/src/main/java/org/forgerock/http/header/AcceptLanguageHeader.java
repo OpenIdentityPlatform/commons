@@ -17,13 +17,18 @@
 package org.forgerock.http.header;
 
 import static java.util.Collections.*;
+import static org.forgerock.http.header.HeaderUtil.*;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import org.forgerock.http.protocol.Header;
+import org.forgerock.util.Pair;
 import org.forgerock.util.i18n.PreferredLocales;
 
 /**
@@ -37,6 +42,13 @@ public final class AcceptLanguageHeader extends Header {
      * The name of the header.
      */
     public static final String NAME = "Accept-Language";
+    private static final Comparator<Pair<Locale, BigDecimal>> LOCALES_QUALITY_COMPARATOR =
+            new Comparator<Pair<Locale, BigDecimal>>() {
+                @Override
+                public int compare(Pair<Locale, BigDecimal> o1, Pair<Locale, BigDecimal> o2) {
+                    return o2.getSecond().compareTo(o1.getSecond());
+                }
+            };
 
     /**
      * Creates an accept language header representation for a {@code PreferredLocales} instance.
@@ -67,6 +79,40 @@ public final class AcceptLanguageHeader extends Header {
             locales.add(Locale.forLanguageTag(languageTag));
         }
         return valueOf(new PreferredLocales(locales));
+    }
+
+    /**
+     * Create a header from a list of header values.
+     * @param headerValues The Accept-Language header values.
+     * @return The header.
+     */
+    public static AcceptLanguageHeader valueOf(Set<String> headerValues) {
+        if (headerValues == null || headerValues.isEmpty()) {
+            return null;
+        }
+
+        List<Pair<Locale, BigDecimal>> localeWeightings = new ArrayList<>();
+        for (String language : split(join(headerValues, ','), ',')) {
+            List<String> values = split(language, ';');
+            BigDecimal quality = BigDecimal.ONE;
+            if (values.size() == 2) {
+                String[] parameter = parseParameter(values.get(1).trim());
+                if (!"q".equals(parameter[0])) {
+                    throw new IllegalArgumentException("Unrecognised parameter: " + parameter[0]);
+                }
+                quality = new BigDecimal(parameter[1].trim());
+            } else if (values.size() != 1) {
+                throw new IllegalArgumentException("Unrecognised parameter(s): " + language);
+            }
+            localeWeightings.add(Pair.of(Locale.forLanguageTag(values.get(0).trim()), quality));
+        }
+
+        sort(localeWeightings, LOCALES_QUALITY_COMPARATOR);
+        List<Locale> locales = new ArrayList<>(localeWeightings.size());
+        for (Pair<Locale, BigDecimal> locale : localeWeightings) {
+            locales.add(locale.getFirst());
+        }
+        return new AcceptLanguageHeader(new PreferredLocales(locales));
     }
 
     private final PreferredLocales locales;
@@ -122,12 +168,12 @@ public final class AcceptLanguageHeader extends Header {
 
         @Override
         public AcceptLanguageHeader parse(String value) {
-            return valueOf(value);
+            return valueOf(singleton(value));
         }
 
         @Override
         public AcceptLanguageHeader parse(List<String> values) {
-            return valueOf(values.toArray(new String[values.size()]));
+            return valueOf(new LinkedHashSet<>(values));
         }
     }
 }

@@ -20,7 +20,11 @@ import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 
 import org.forgerock.util.i18n.PreferredLocales;
 import org.testng.annotations.Test;
@@ -41,6 +45,29 @@ public class AcceptLanguageHeaderTest {
 
         // Then
         assertThat(languageHeader).isEqualTo("en;q=1,fr-FR;q=0.9,fr;q=0.8");
+    }
+
+    @Test
+    public void testEmptyAcceptLanguageHeadersReturnsNull() {
+        assertThat(AcceptLanguageHeader.valueOf(Collections.<String>emptySet())).isNull();
+        assertThat(AcceptLanguageHeader.valueOf((Set<String>) null)).isNull();
+    }
+
+    @Test
+    public void testValueOfAcceptLanguageHeaders() {
+        // Given
+        Set<String> headerValues = new HashSet<>(Arrays.asList("en,fr;q=1.0,de-DE;q=0.7", "pl;q=0.8"));
+
+        // When
+        AcceptLanguageHeader header = AcceptLanguageHeader.valueOf(headerValues);
+
+        // Then
+        assertThat(header.getLocales().getLocales()).containsExactly(
+                Locale.forLanguageTag("en"),
+                Locale.forLanguageTag("fr"),
+                Locale.forLanguageTag("pl"),
+                Locale.forLanguageTag("de-DE")
+        );
     }
 
     @Test
