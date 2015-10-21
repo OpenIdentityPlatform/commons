@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>json-crypto</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0</version>
     </parent>
     <artifactId>json-crypto-core</artifactId>
     <name>JSON Crypto core library</name>
