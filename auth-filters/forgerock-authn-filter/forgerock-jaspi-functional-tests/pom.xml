@@ -34,7 +34,7 @@
         <context.uri>jaspi</context.uri>
         <servlet.ajp.port>18009</servlet.ajp.port>
 
-        <forgerock.guice.version>1.1.0-SNAPSHOT</forgerock.guice.version>
+        <forgerock.guice.version>1.1.0</forgerock.guice.version>
     </properties>
 
     <build>
