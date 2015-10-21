@@ -25,7 +25,7 @@ Copyright 2014-2015 ForgeRock AS.
 
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-guice</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ForgeRock Guice Library</name>
@@ -59,7 +59,7 @@ Copyright 2014-2015 ForgeRock AS.
         <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-guice.git</connection>
         <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-guice.git</developerConnection>
         <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-guice/browse</url>
-      <tag>1.1.0</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <ciManagement>
