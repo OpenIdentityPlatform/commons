@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright 2011-2015 ForgeRock AS. 
+  Copyright 2011-2015 ForgeRock AS.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -28,6 +28,11 @@
     <packaging>bundle</packaging>
     <name>JSON Patch library</name>
     <description>ForgeRock JSON Patch project</description>
+    <scm>
+        <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/json-patch.git</connection>
+        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/json-patch.git</developerConnection>
+        <url>http://stash.forgerock.org/projects/COMMONS/repos/json-patch/browse</url>
+    </scm>
     <dependencies>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
