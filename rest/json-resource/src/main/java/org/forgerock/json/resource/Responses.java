@@ -324,7 +324,9 @@ public final class Responses {
         }
 
         @Override
-        public CountPolicy getTotalPagedResultsPolicy() { return totalPagedResultsPolicy; }
+        public CountPolicy getTotalPagedResultsPolicy() {
+            return totalPagedResultsPolicy;
+        }
 
         @Override
         public String getPagedResultsCookie() {

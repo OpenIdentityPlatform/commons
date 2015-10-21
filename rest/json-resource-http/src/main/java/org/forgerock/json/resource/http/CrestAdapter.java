@@ -138,13 +138,13 @@ final class CrestAdapter implements RequestHandler {
 
     private static final Status NOT_MODIFIED = Status.valueOf(304, "Not Modified");
     private static final Function<NeverThrowsException, ResourceResponse, ResourceException> NO_OP_ON_EXCEPTION =
-            new Function<NeverThrowsException, ResourceResponse, ResourceException>() {
-                @Override
-                public ResourceResponse apply(NeverThrowsException value) throws ResourceException {
-                    // Should not happen
-                    return null;
-                }
-            };
+        new Function<NeverThrowsException, ResourceResponse, ResourceException>() {
+            @Override
+            public ResourceResponse apply(NeverThrowsException value) throws ResourceException {
+                // Should not happen
+                return null;
+            }
+        };
 
     private final Handler handler;
     private final URI baseUri;

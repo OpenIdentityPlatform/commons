@@ -164,188 +164,188 @@ public final class MemoryBackend implements CollectionResourceProvider {
     private static final QueryFilterVisitor<FilterResult, ResourceResponse, JsonPointer> RESOURCE_FILTER =
             new QueryFilterVisitor<FilterResult, ResourceResponse, JsonPointer>() {
 
-                @Override
-                public FilterResult visitAndFilter(final ResourceResponse p,
-                        final List<org.forgerock.util.query.QueryFilter<JsonPointer>> subFilters) {
-                    FilterResult result = FilterResult.TRUE;
-                    for (final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter : subFilters) {
-                        final FilterResult r = subFilter.accept(this, p);
-                        if (r.ordinal() < result.ordinal()) {
-                            result = r;
-                        }
-                        if (result == FilterResult.FALSE) {
-                            break;
-                        }
+            @Override
+            public FilterResult visitAndFilter(final ResourceResponse p,
+                    final List<org.forgerock.util.query.QueryFilter<JsonPointer>> subFilters) {
+                FilterResult result = FilterResult.TRUE;
+                for (final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter : subFilters) {
+                    final FilterResult r = subFilter.accept(this, p);
+                    if (r.ordinal() < result.ordinal()) {
+                        result = r;
                     }
-                    return result;
+                    if (result == FilterResult.FALSE) {
+                        break;
+                    }
                 }
+                return result;
+            }
 
-                @Override
-                public FilterResult visitBooleanLiteralFilter(final ResourceResponse p, final boolean value) {
-                    return FilterResult.valueOf(value);
-                }
+            @Override
+            public FilterResult visitBooleanLiteralFilter(final ResourceResponse p, final boolean value) {
+                return FilterResult.valueOf(value);
+            }
 
-                @Override
-                public FilterResult visitContainsFilter(final ResourceResponse p, final JsonPointer field,
-                        final Object valueAssertion) {
-                    for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value)) {
-                            if (valueAssertion instanceof String) {
-                                final String s1 =
-                                        ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
-                                final String s2 = ((String) value).toLowerCase(Locale.ENGLISH);
-                                if (s2.contains(s1)) {
-                                    return FilterResult.TRUE;
-                                }
-                            } else {
-                                // Use equality matching for numbers and booleans.
-                                if (compareValues(valueAssertion, value) == 0) {
-                                    return FilterResult.TRUE;
-                                }
+            @Override
+            public FilterResult visitContainsFilter(final ResourceResponse p, final JsonPointer field,
+                    final Object valueAssertion) {
+                for (final Object value : getValues(p, field)) {
+                    if (isCompatible(valueAssertion, value)) {
+                        if (valueAssertion instanceof String) {
+                            final String s1 =
+                                    ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
+                            final String s2 = ((String) value).toLowerCase(Locale.ENGLISH);
+                            if (s2.contains(s1)) {
+                                return FilterResult.TRUE;
+                            }
+                        } else {
+                            // Use equality matching for numbers and booleans.
+                            if (compareValues(valueAssertion, value) == 0) {
+                                return FilterResult.TRUE;
                             }
                         }
                     }
-                    return FilterResult.FALSE;
                 }
+                return FilterResult.FALSE;
+            }
 
-                @Override
-                public FilterResult visitEqualsFilter(final ResourceResponse p, final JsonPointer field,
-                        final Object valueAssertion) {
-                    for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value)
-                                && compareValues(valueAssertion, value) == 0) {
-                            return FilterResult.TRUE;
-                        }
-                    }
-                    return FilterResult.FALSE;
-                }
-
-                @Override
-                public FilterResult visitExtendedMatchFilter(final ResourceResponse p,
-                        final JsonPointer field, final String matchingRuleId,
-                        final Object valueAssertion) {
-                    // This backend does not support any extended filters.
-                    return FilterResult.UNDEFINED;
-                }
-
-                @Override
-                public FilterResult visitGreaterThanFilter(final ResourceResponse p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value)
-                                && compareValues(valueAssertion, value) < 0) {
-                            return FilterResult.TRUE;
-                        }
-                    }
-                    return FilterResult.FALSE;
-                }
-
-                @Override
-                public FilterResult visitGreaterThanOrEqualToFilter(final ResourceResponse p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value)
-                                && compareValues(valueAssertion, value) <= 0) {
-                            return FilterResult.TRUE;
-                        }
-                    }
-                    return FilterResult.FALSE;
-                }
-
-                @Override
-                public FilterResult visitLessThanFilter(final ResourceResponse p, final JsonPointer field,
-                        final Object valueAssertion) {
-                    for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value)
-                                && compareValues(valueAssertion, value) > 0) {
-                            return FilterResult.TRUE;
-                        }
-                    }
-                    return FilterResult.FALSE;
-                }
-
-                @Override
-                public FilterResult visitLessThanOrEqualToFilter(final ResourceResponse p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value)
-                                && compareValues(valueAssertion, value) >= 0) {
-                            return FilterResult.TRUE;
-                        }
-                    }
-                    return FilterResult.FALSE;
-                }
-
-                @Override
-                public FilterResult visitNotFilter(final ResourceResponse p,
-                        final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter) {
-                    switch (subFilter.accept(this, p)) {
-                    case FALSE:
+            @Override
+            public FilterResult visitEqualsFilter(final ResourceResponse p, final JsonPointer field,
+                    final Object valueAssertion) {
+                for (final Object value : getValues(p, field)) {
+                    if (isCompatible(valueAssertion, value)
+                            && compareValues(valueAssertion, value) == 0) {
                         return FilterResult.TRUE;
-                    case UNDEFINED:
-                        return FilterResult.UNDEFINED;
-                    default: // TRUE
-                        return FilterResult.FALSE;
                     }
                 }
+                return FilterResult.FALSE;
+            }
 
-                @Override
-                public FilterResult visitOrFilter(final ResourceResponse p,
-                        final List<org.forgerock.util.query.QueryFilter<JsonPointer>> subFilters) {
-                    FilterResult result = FilterResult.FALSE;
-                    for (final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter : subFilters) {
-                        final FilterResult r = subFilter.accept(this, p);
-                        if (r.ordinal() > result.ordinal()) {
-                            result = r;
-                        }
-                        if (result == FilterResult.TRUE) {
-                            break;
-                        }
+            @Override
+            public FilterResult visitExtendedMatchFilter(final ResourceResponse p,
+                    final JsonPointer field, final String matchingRuleId,
+                    final Object valueAssertion) {
+                // This backend does not support any extended filters.
+                return FilterResult.UNDEFINED;
+            }
+
+            @Override
+            public FilterResult visitGreaterThanFilter(final ResourceResponse p,
+                    final JsonPointer field, final Object valueAssertion) {
+                for (final Object value : getValues(p, field)) {
+                    if (isCompatible(valueAssertion, value)
+                            && compareValues(valueAssertion, value) < 0) {
+                        return FilterResult.TRUE;
                     }
-                    return result;
                 }
+                return FilterResult.FALSE;
+            }
 
-                @Override
-                public FilterResult visitPresentFilter(final ResourceResponse p, final JsonPointer field) {
-                    final JsonValue value = p.getContent().get(field);
-                    return FilterResult.valueOf(value != null);
+            @Override
+            public FilterResult visitGreaterThanOrEqualToFilter(final ResourceResponse p,
+                    final JsonPointer field, final Object valueAssertion) {
+                for (final Object value : getValues(p, field)) {
+                    if (isCompatible(valueAssertion, value)
+                            && compareValues(valueAssertion, value) <= 0) {
+                        return FilterResult.TRUE;
+                    }
                 }
+                return FilterResult.FALSE;
+            }
 
-                @Override
-                public FilterResult visitStartsWithFilter(final ResourceResponse p,
-                        final JsonPointer field, final Object valueAssertion) {
-                    for (final Object value : getValues(p, field)) {
-                        if (isCompatible(valueAssertion, value)) {
-                            if (valueAssertion instanceof String) {
-                                final String s1 =
-                                        ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
-                                final String s2 = ((String) value).toLowerCase(Locale.ENGLISH);
-                                if (s2.startsWith(s1)) {
-                                    return FilterResult.TRUE;
-                                }
-                            } else {
-                                // Use equality matching for numbers and booleans.
-                                if (compareValues(valueAssertion, value) == 0) {
-                                    return FilterResult.TRUE;
-                                }
+            @Override
+            public FilterResult visitLessThanFilter(final ResourceResponse p, final JsonPointer field,
+                    final Object valueAssertion) {
+                for (final Object value : getValues(p, field)) {
+                    if (isCompatible(valueAssertion, value)
+                            && compareValues(valueAssertion, value) > 0) {
+                        return FilterResult.TRUE;
+                    }
+                }
+                return FilterResult.FALSE;
+            }
+
+            @Override
+            public FilterResult visitLessThanOrEqualToFilter(final ResourceResponse p,
+                    final JsonPointer field, final Object valueAssertion) {
+                for (final Object value : getValues(p, field)) {
+                    if (isCompatible(valueAssertion, value)
+                            && compareValues(valueAssertion, value) >= 0) {
+                        return FilterResult.TRUE;
+                    }
+                }
+                return FilterResult.FALSE;
+            }
+
+            @Override
+            public FilterResult visitNotFilter(final ResourceResponse p,
+                    final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter) {
+                switch (subFilter.accept(this, p)) {
+                case FALSE:
+                    return FilterResult.TRUE;
+                case UNDEFINED:
+                    return FilterResult.UNDEFINED;
+                default: // TRUE
+                    return FilterResult.FALSE;
+                }
+            }
+
+            @Override
+            public FilterResult visitOrFilter(final ResourceResponse p,
+                    final List<org.forgerock.util.query.QueryFilter<JsonPointer>> subFilters) {
+                FilterResult result = FilterResult.FALSE;
+                for (final org.forgerock.util.query.QueryFilter<JsonPointer> subFilter : subFilters) {
+                    final FilterResult r = subFilter.accept(this, p);
+                    if (r.ordinal() > result.ordinal()) {
+                        result = r;
+                    }
+                    if (result == FilterResult.TRUE) {
+                        break;
+                    }
+                }
+                return result;
+            }
+
+            @Override
+            public FilterResult visitPresentFilter(final ResourceResponse p, final JsonPointer field) {
+                final JsonValue value = p.getContent().get(field);
+                return FilterResult.valueOf(value != null);
+            }
+
+            @Override
+            public FilterResult visitStartsWithFilter(final ResourceResponse p,
+                    final JsonPointer field, final Object valueAssertion) {
+                for (final Object value : getValues(p, field)) {
+                    if (isCompatible(valueAssertion, value)) {
+                        if (valueAssertion instanceof String) {
+                            final String s1 =
+                                    ((String) valueAssertion).toLowerCase(Locale.ENGLISH);
+                            final String s2 = ((String) value).toLowerCase(Locale.ENGLISH);
+                            if (s2.startsWith(s1)) {
+                                return FilterResult.TRUE;
+                            }
+                        } else {
+                            // Use equality matching for numbers and booleans.
+                            if (compareValues(valueAssertion, value) == 0) {
+                                return FilterResult.TRUE;
                             }
                         }
                     }
-                    return FilterResult.FALSE;
                 }
+                return FilterResult.FALSE;
+            }
 
-                private List<Object> getValues(final ResourceResponse resource, final JsonPointer field) {
-                    final JsonValue value = resource.getContent().get(field);
-                    if (value == null) {
-                        return Collections.emptyList();
-                    } else if (value.isList()) {
-                        return value.asList();
-                    } else {
-                        return Collections.singletonList(value.getObject());
-                    }
+            private List<Object> getValues(final ResourceResponse resource, final JsonPointer field) {
+                final JsonValue value = resource.getContent().get(field);
+                if (value == null) {
+                    return Collections.emptyList();
+                } else if (value.isList()) {
+                    return value.asList();
+                } else {
+                    return Collections.singletonList(value.getObject());
                 }
+            }
 
-            };
+        };
 
     private static final Comparator<Object> VALUE_COMPARATOR = new Comparator<Object>() {
         @Override
