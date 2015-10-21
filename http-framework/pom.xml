@@ -15,9 +15,7 @@
   Copyright 2010–2011 ApexIdentity Inc.
   Portions Copyright 2011-2015 ForgeRock AS.
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.forgerock</groupId>
@@ -26,7 +24,7 @@
   </parent>
   <groupId>org.forgerock.http</groupId>
   <artifactId>forgerock-http-framework</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>pom</packaging>
   <name>Commons HTTP Framework</name>
   <description>
@@ -111,6 +109,7 @@
     <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-http-framework.git</connection>
     <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-http-framework.git</developerConnection>
     <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-http-framework/browse</url>
+    <tag>1.0.0</tag>
   </scm>
   <distributionManagement>
     <site>
