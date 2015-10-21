@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.forgerock.http</groupId>
     <artifactId>forgerock-http-framework</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>chf-client-apache-sync</artifactId>
   <packaging>bundle</packaging>
