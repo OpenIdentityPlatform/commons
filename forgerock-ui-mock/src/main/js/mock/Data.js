@@ -38,18 +38,18 @@
                 },
                 JSON.stringify(
                     {
-                        "type" : "emailValidation",
+                        "type" : "userQuery",
                         "tag" : "initial",
                         "requirements" : {
                             "$schema": "http://json-schema.org/draft-04/schema#",
-                            "description": "Reset your password",
+                            "description": "Find your account",
                             "type" : "object",
                             "required" : [
-                                "mail"
+                                "queryFilter"
                             ],
                             "properties" : {
-                                "mail" : {
-                                    "description" : "Enter your email address",
+                                "queryFilter" : {
+                                    "description" : "filter string to find account",
                                     "type" : "string"
                                 }
                             }
@@ -67,7 +67,7 @@
                     headers = { "Content-Type": "application/json;charset=UTF-8" };
                 switch (requestContent.token) {
                     case undefined:
-                        if (_.isObject(requestContent.input) && _.isString(requestContent.input.mail)) {
+                        if (_.isObject(requestContent.input) && _.isString(requestContent.input.queryFilter)) {
                             request.respond(
                                 200,
                                 headers,
@@ -98,7 +98,7 @@
                                 JSON.stringify({
                                     "code": 400,
                                     "reason": "Bad Request",
-                                    "message": "username is missing"
+                                    "message": "queryFilter is missing"
                                 })
                             );
                         }
@@ -352,7 +352,7 @@
                             200,
                             headers,
                             JSON.stringify({
-                              "type": "kbaStage",
+                              "type": "kbaSecurityAnswerDefinitionStage",
                               "tag": "initial",
                               "requirements": {
                                 "$schema": "http://json-schema.org/draft-04/schema#",

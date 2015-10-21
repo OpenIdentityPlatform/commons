@@ -62,12 +62,6 @@
             "DefaultBaseTemplate" : {
                 "orPhone" : ", or phone"
             },
-            "ChangeSecurityDataDialogTemplate" : {
-                "securityDataChange" : "Security data change",
-                "enterNewPasswordToChange" : "Please enter new password in the fields below to change your password.",
-                "selectQuestionAndAnserIfYouWant" : "Please select question and enter your answer if you want to set up a one.",
-                "securityQuestionAndAnserExplanation" : "The Security Question selected and corresponding Answer provided by you will be used to help identify you in the event that you forget your password."
-            },
             "ConfirmPasswordDialogTemplate" : {
                 "title" : "Current Password",
                 "explanation1" : "Changing the following attributes requires re-authentication: ",
@@ -76,16 +70,6 @@
             "ForgottenPasswordTemplate" : {
                 "forgottenPasswordQuestion" : "Forgotten password?",
                 "enterLogin" : "Please enter your login in the field below to continue."
-            },
-            "TermsOfUseTemplate" : {
-                "termsOfUse" : "Terms of Use",
-                "termsOfUseContent" : "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris idvulputate urna. Quisque tristique dictum sodales. Nullam tempus eleifend erat,vel facilisis nibh euismod non. Phasellus vitae elit velit, in sollicitudindiam. Maecenas ornare nunc non ipsum ornare vehicula id sed dolor. Duispellentesque congue sapien, dictum adipiscing est posuere sit amet. Suspendissein lectus lorem. Suspendisse vitae metus sapien, sit amet luctus libero.Integer nec nunc sed massa pellentesque pulvinar. Integer vulputate nunc atnunc lacinia eu luctus neque elementum. Aenean ultricies arcu sed enimultricies blandit placerat ut massa. Donec at dolor sit amet magna vulputateelementum sit amet in sapien. Donec sit amet erat neque.</p>"
-            },
-            "UserRegistrationTemplate" : {
-                "registerYourAccount" : "Register your account",
-                "logIn" : "Log in",
-                "haveAccoutQuestion" : "Already have an account?",
-                "agreeToTerms" : "I agree to the "
             },
             "ChangesPendingTemplate": {
                 "undo": "Undo Changes",
@@ -169,6 +153,13 @@
             }
         },
         "user" : {
+            "userQuery" : {
+                "mainEnterPrompt": "Enter your ",
+                "optionalEnterPrompt": "or your ",
+                "orAllEnterPrompt" : "or all of the following information",
+                "title" : "Enter details to find your account",
+                "any" : "Any of these:"
+            },
             "passwordReset" : {
                 "title": "Reset Your Password",
                 "completed": "Your password has been successfully reset.",
@@ -195,7 +186,7 @@
             "userIdValidation" : "Enter the username or email address associated with your account. We will send you an email with a link that will allow you to reset your password.",
             "emailValidation" : "Enter your email address to proceed. We will send you an email with a link that will allow you to continue registering.",
             "send": "Send",
-            "validateCode" : "An email has been sent to the address you entered. Click the link in that email to proceed.",
+            "validateCode" : "An email has been sent to your address. Click the link in that email to proceed.",
             "user" : "User",
             "login" : "Login",
             "profile" : "Profile",

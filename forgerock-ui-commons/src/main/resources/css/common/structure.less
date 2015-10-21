@@ -106,10 +106,12 @@
 
 @import "structure/codemirror.less";
 
+
 /*
-    IDM Styles - please remove from commons
+    Self-Service (Registration and Password Reset)
 */
-@import "structure/idm-only.less";
+
+@import "structure/selfservice.less";
 
 /*
   Items for review (not used in projects yet)
@@ -119,31 +121,6 @@
 @version: '';
 .nocache-background-image(@url) {
     background-image: url("@{url}?v=@{version}");
-}
-
-/*
-Registration
-*/
-#passPhrasePictures img {
-    cursor: pointer;
-}
-
-#userRegistration {
-    .remember-forgot .checkbox{
-        padding-top: 0;
-        padding-bottom: 15px;
-        padding-left: 20px;
-    }
-
-    .form-horizontal .form-group {
-        margin-left: 0;
-        margin-right: 0;
-    }
-
-    .toggle-login-register {
-        margin-top: 20px;
-        text-align: center;
-    }
 }
 
 /*
@@ -203,8 +180,4 @@ Login
             margin-top: 0;
         }
     }
-}
-
-#processContent {
-    padding-bottom: 20px;
 }

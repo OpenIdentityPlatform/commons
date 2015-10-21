@@ -167,7 +167,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                 this.$el.find("#processContent").html(content);
                 ValidatorsManager.bindValidators(this.$el);
                 ValidatorsManager.validateAllFields(this.$el);
-                this.$el.find(":input:first").focus();
+                this.$el.find(":input:visible:first").focus();
             }, this));
 
         }
