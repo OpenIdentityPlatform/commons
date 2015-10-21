@@ -18,7 +18,7 @@ package org.forgerock.audit.events;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESSFUL;
 import static org.forgerock.audit.events.AccessAuditEventBuilderTest.OpenProductAccessAuditEventBuilder.*;
 
 import java.io.IOException;
@@ -87,7 +87,7 @@ public class AccessAuditEventBuilderTest {
                 .userId("someone@forgerock.com")
                 .request("CREST", "reconcile")
                 .http("GET", "/some/path", queryParameters, headers)
-                .response(SUCCESS, "200", 12, TimeUnit.MILLISECONDS)
+                .response(SUCCESSFUL, "200", 12, TimeUnit.MILLISECONDS)
                 .openField("value")
                 .toEvent();
 
@@ -105,7 +105,7 @@ public class AccessAuditEventBuilderTest {
                 .containsOnlyKeys(expectedCookieNames.toArray(new String[0]));
         assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");
         assertThat(value.get(REQUEST).get(OPERATION).asString()).isEqualTo("reconcile");
-        assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("SUCCESS");
+        assertThat(value.get(RESPONSE).get(STATUS).asString()).isEqualTo("SUCCESSFUL");
         assertThat(value.get(RESPONSE).get(STATUS_CODE).asString()).isEqualTo("200");
         assertThat(value.get(RESPONSE).get(ELAPSED_TIME).asLong()).isEqualTo(12);
         assertThat(value.get(RESPONSE).get(ELAPSED_TIME_UNITS).asString()).isEqualTo(TimeUnit.MILLISECONDS.name());

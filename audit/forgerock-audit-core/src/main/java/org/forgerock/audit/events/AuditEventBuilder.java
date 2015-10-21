@@ -138,7 +138,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * Sets the provided name for the event.
      *
      * An event's name will usually be of the form {product}-{component}-{operation}. For example,
-     * AM-SESSION-CREATED, AM-CREST-SUCCESS, etc.
+     * AM-SESSION-CREATED, AM-CREST-SUCCESSFUL, etc.
      *
      * @param name the event's name.
      * @return this builder

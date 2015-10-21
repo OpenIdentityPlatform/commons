@@ -453,8 +453,8 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      */
     public enum ResponseStatus {
         /** The access request was successfully completed. */
-        SUCCESS,
+        SUCCESSFUL,
         /** The access request was not successfully completed. */
-        FAILURE
+        FAILED
     }
 }

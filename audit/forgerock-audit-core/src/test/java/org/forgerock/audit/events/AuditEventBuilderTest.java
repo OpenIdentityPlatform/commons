@@ -55,7 +55,7 @@ public class AuditEventBuilderTest {
     @Test
     public void ensureAuditEventContainsTimestampEvenIfNotAdded() throws Exception {
         AuditEvent event = productEvent()
-                .eventName("AM-CREST-SUCCESS")
+                .eventName("AM-CREST-SUCCESSFUL")
                 .transactionId("transactionId")
                 .toEvent();
         JsonValue value = event.getValue();
@@ -65,7 +65,7 @@ public class AuditEventBuilderTest {
     @Test(expectedExceptions = { IllegalStateException.class })
     public void ensureAuditEventContainsTransactionId() throws Exception {
         productEvent()
-                .eventName("AM-CREST-SUCCESS")
+                .eventName("AM-CREST-SUCCESSFUL")
                 .timestamp(System.currentTimeMillis())
                 .toEvent();
     }
@@ -81,7 +81,7 @@ public class AuditEventBuilderTest {
     @Test
     public void auditEventAuthenticationDetailsAreOptional() throws Exception {
         productEvent()
-                .eventName("AM-CREST-SUCCESS")
+                .eventName("AM-CREST-SUCCESSFUL")
                 .transactionId("transactionId")
                 .toEvent();
     }
@@ -93,7 +93,7 @@ public class AuditEventBuilderTest {
         headers.put("Content-Type", asList("application/json"));
 
         AuditEvent event = productEvent()
-                .eventName("AM-CREST-SUCCESS")
+                .eventName("AM-CREST-SUCCESSFUL")
                 .transactionId("transactionId")
                 .timestamp(1427293286239L)
                 .userId("someone@forgerock.com")
@@ -110,7 +110,7 @@ public class AuditEventBuilderTest {
                 .userId("someone@forgerock.com")
                 .openField("value")
                 .transactionId("transactionId")
-                .eventName("AM-CREST-SUCCESS")
+                .eventName("AM-CREST-SUCCESSFUL")
                 .timestamp(1427293286239L)
                 .trackingId("12345")
                 .toEvent();
@@ -124,7 +124,7 @@ public class AuditEventBuilderTest {
 
         // When
         AuditEvent event = productEvent()
-                .eventName("AM-CREST-SUCCESS")
+                .eventName("AM-CREST-SUCCESSFUL")
                 .transactionIdFromRootContext(context)
                 .toEvent();
 
