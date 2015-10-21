@@ -25,8 +25,6 @@ import org.forgerock.selfservice.stages.captcha.CaptchaStage;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
-import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
-import org.forgerock.selfservice.stages.email.VerifyUserIdStage;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionStage;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
@@ -39,6 +37,8 @@ import org.forgerock.selfservice.stages.user.UserDetailsConfig;
 import org.forgerock.selfservice.stages.user.UserDetailsStage;
 
 import javax.inject.Inject;
+import org.forgerock.selfservice.stages.user.UserQueryConfig;
+import org.forgerock.selfservice.stages.user.UserQueryStage;
 
 /**
  * Example stage config visitor.
@@ -87,8 +87,8 @@ final class ExampleStageConfigVisitor implements CommonConfigVisitor {
     }
 
     @Override
-    public ProgressStageBinder<?> build(VerifyUserIdConfig config) {
-        return ProgressStageBinder.bind(new VerifyUserIdStage(connectionFactory), config);
+    public ProgressStageBinder<?> build(UserQueryConfig config) {
+        return ProgressStageBinder.bind(new UserQueryStage(connectionFactory), config);
     }
 
     @Override

@@ -24,7 +24,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
  *
  * @since 0.2.0
  */
-public final class UserDetailsConfig implements StageConfig<UserDetailsConfigVisitor> {
+public final class UserDetailsConfig implements StageConfig<UserConfigVisitor> {
 
     /**
      * Name of the stage configuration.
@@ -61,7 +61,7 @@ public final class UserDetailsConfig implements StageConfig<UserDetailsConfigVis
     }
 
     @Override
-    public ProgressStageBinder<?> accept(UserDetailsConfigVisitor visitor) {
+    public ProgressStageBinder<?> accept(UserConfigVisitor visitor) {
         return visitor.build(this);
     }
 

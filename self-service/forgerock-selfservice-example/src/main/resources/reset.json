@@ -1,23 +1,23 @@
 {
   "stageConfigs": [
     {
-      "name" : "userIdValidation",
-      "queryFields" : [
+      "name" : "userQuery",
+      "validQueryFields" : [
         "userName",
         "mail"
       ],
       "identityIdField" : "_id",
       "identityEmailField" : "mail",
-      "identityServiceUrl" : "/users",
-
-      "email" : {
-        "serviceUrl": "/email",
-        "from": "info@admin.org",
-        "subject": "Reset password email",
-        "message": "<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
-        "verificationLinkToken": "%link%",
-        "verificationLink": "http://localhost:9999/example/#passwordReset/"
-      }
+      "identityServiceUrl" : "/users"
+    },
+    {
+      "name" : "emailValidation",
+      "emailServiceUrl": "/email",
+      "from": "info@admin.org",
+      "subject": "Register new account",
+      "message": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+      "verificationLinkToken": "%link%",
+      "verificationLink": "http://localhost:9999/example/#passwordReset/"
     },
     {
       "name" : "captcha",

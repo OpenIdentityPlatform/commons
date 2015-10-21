@@ -17,18 +17,19 @@
 package org.forgerock.selfservice.stages;
 
 import org.forgerock.selfservice.stages.captcha.CaptchaConfigVisitor;
-import org.forgerock.selfservice.stages.email.EmailConfigVisitor;
+import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfigVisitor;
 import org.forgerock.selfservice.stages.kba.KbaConfigVisitor;
 import org.forgerock.selfservice.stages.registration.UserRegistrationConfigVisitor;
 import org.forgerock.selfservice.stages.reset.ResetConfigVisitor;
-import org.forgerock.selfservice.stages.user.UserDetailsConfigVisitor;
+import org.forgerock.selfservice.stages.user.UserConfigVisitor;
 
 /**
  * Represents all stage config visitors defined within commons.
  *
  * @since 0.3.0
  */
-public interface CommonConfigVisitor extends CaptchaConfigVisitor, EmailConfigVisitor, KbaConfigVisitor,
-        UserRegistrationConfigVisitor, ResetConfigVisitor, UserDetailsConfigVisitor {
+public interface CommonConfigVisitor extends CaptchaConfigVisitor, KbaConfigVisitor, ResetConfigVisitor,
+        UserRegistrationConfigVisitor, UserConfigVisitor,
+        VerifyEmailAccountConfigVisitor {
 
 }

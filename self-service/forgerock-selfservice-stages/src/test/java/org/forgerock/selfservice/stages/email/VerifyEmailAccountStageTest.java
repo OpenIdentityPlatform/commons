@@ -16,15 +16,26 @@
 package org.forgerock.selfservice.stages.email;
 
 import static org.forgerock.json.JsonValue.*;
-import static org.mockito.BDDMockito.*;
-import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
+import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
+import org.forgerock.services.context.Context;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.annotations.BeforeMethod;
@@ -44,6 +55,8 @@ public final class VerifyEmailAccountStageTest {
     private ProcessContext context;
     @Mock
     private ConnectionFactory factory;
+    @Mock
+    private Connection connection;
 
     private VerifyEmailAccountConfig config;
 
@@ -51,12 +64,12 @@ public final class VerifyEmailAccountStageTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        config = new VerifyEmailAccountConfig(new EmailAccountConfig());
+        config = new VerifyEmailAccountConfig();
         verifyEmailStage = new VerifyEmailAccountStage(factory);
     }
 
     @Test
-    public void testGatherInitialRequirements() throws Exception {
+    public void testGatherInitialRequirementsEmptyContext() throws Exception {
         // When
         JsonValue jsonValue = verifyEmailStage.gatherInitialRequirements(context, config);
 
@@ -65,27 +78,125 @@ public final class VerifyEmailAccountStageTest {
         assertThat(jsonValue).stringAt("properties/mail/description").isEqualTo("Email address");
     }
 
-    @Test (expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp = "mail is missing")
-    public void testGetEmailAddressWithoutSufficientInput() throws Exception {
+    @Test
+    public void testGatherInitialRequirementsWithEmailInContext() throws Exception {
+        // When
+        given(context.containsState(EMAIL_FIELD)).willReturn(true);
+        given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
+
+        JsonValue jsonValue = verifyEmailStage.gatherInitialRequirements(context, config);
+
+        // Then
+        assertThat(jsonValue).isEmpty();
+    }
+
+    @Test (expectedExceptions = InternalServerErrorException.class,
+            expectedExceptionsMessageRegExp = "mail should not be empty")
+    public void testAdvanceInitialStageWithoutEmailAddress() throws Exception {
         // Given
         given(context.getInput()).willReturn(newEmptyJsonValue());
-        StageResponse.Builder builder = StageResponse.newBuilder();
+        given(context.getStageTag()).willReturn(INITIAL_TAG);
 
         // When
-        verifyEmailStage.getEmailAddress(context, config, builder);
+        verifyEmailStage.advance(context, config);
     }
 
     @Test
-    public void testGetEmailAddress() throws Exception {
+    public void testAdvanceInitialStage() throws Exception {
         // Given
-        given(context.getInput()).willReturn(newJsonValueWithEmail());
-        StageResponse.Builder builder = StageResponse.newBuilder();
+        given(context.containsState(EMAIL_FIELD)).willReturn(true);
+        given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
+
+        given(context.getStageTag()).willReturn(INITIAL_TAG);
 
         // When
-        String emailAddress = verifyEmailStage.getEmailAddress(context, config, builder);
+        StageResponse stageResponse = verifyEmailStage.advance(context, config);
 
         // Then
-        assertThat(emailAddress).isSameAs(TEST_EMAIL_ID);
+        Assertions.assertThat(stageResponse.getStageTag()).isSameAs("validateCode");
+        assertThat(stageResponse.getRequirements()).stringAt("/description").isEqualTo("Verify emailed code");
+        assertThat(stageResponse.getRequirements()).stringAt("properties/code/description")
+                .isEqualTo("Enter code emailed");
+        Assertions.assertThat(stageResponse.getCallback()).isNotNull().isInstanceOf(SnapshotTokenCallback.class);
+    }
+
+    @Test
+    public void testAdvanceCallbackSendMail() throws Exception {
+        // Given
+        given(context.getStageTag()).willReturn(INITIAL_TAG);
+
+        given(context.containsState(EMAIL_FIELD)).willReturn(true);
+        given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
+
+        given(factory.getConnection()).willReturn(connection);
+
+        config.setMessage("<h3>This is your reset email.</h3>"
+                + "<h4><a href=\"%link%\">Email verification link</a></h4>");
+        config.setVerificationLinkToken("%link%");
+        config.setVerificationLink("http://localhost:9999/example/#passwordReset/");
+        config.setEmailServiceUrl("/email");
+        final String infoEmailId = "info@admin.org";
+        config.setFrom(infoEmailId);
+        final String emailSubject = "Reset password email";
+        config.setSubject(emailSubject);
+
+        // When
+        StageResponse stageResponse = verifyEmailStage.advance(context, config);
+        SnapshotTokenCallback callback = stageResponse.getCallback();
+        callback.snapshotTokenPreview(context, "token1");
+
+        // Then
+        ArgumentCaptor<ActionRequest> actionRequestArgumentCaptor =  ArgumentCaptor.forClass(ActionRequest.class);
+        verify(connection).action(any(Context.class), actionRequestArgumentCaptor.capture());
+        ActionRequest actionRequest = actionRequestArgumentCaptor.getValue();
+
+        assertThat(actionRequest.getAction()).isSameAs("send");
+        assertThat(actionRequest.getContent()).stringAt("/to").isEqualTo(TEST_EMAIL_ID);
+        assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(infoEmailId);
+        assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(emailSubject);
+        assertThat(actionRequest.getContent()).stringAt("/body").matches(
+                "<h3>This is your reset email\\.</h3><h4>"
+                + "<a href=\"http://localhost:9999/example/#passwordReset/&token=token1&code="
+                + "[\\w\\d]{8}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{12}\">Email verification link</a></h4>"
+        );
+    }
+
+    @Test (expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp = "Input code is missing")
+    public void testAdvanceValidateCodeStageWhenInputCodeIsMissing() throws Exception {
+        // Given
+        given(context.getStageTag()).willReturn("validateCode");
+        given(context.getState("code")).willReturn(json("code1"));
+        given(context.getInput()).willReturn(json(object(field("code", null))));
+
+        // When
+        verifyEmailStage.advance(context, config);
+    }
+
+    @Test (expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp = "Invalid code")
+    public void testAdvanceValidateCodeStageWhenCodeIsInvalid() throws Exception {
+        // Given
+        given(context.getStageTag()).willReturn("validateCode");
+        given(context.getState("code")).willReturn(json("code1"));
+        given(context.getInput()).willReturn(json(object(field("code", "code2"))));
+
+        // When
+        verifyEmailStage.advance(context, config);
+    }
+
+    @Test
+    public void testAdvanceValidateCodeStage() throws Exception {
+        // Given
+        given(context.getStageTag()).willReturn("validateCode");
+        given(context.getState("code")).willReturn(json("code1"));
+        given(context.getInput()).willReturn(json(object(field("code", "code1"))));
+
+        // When
+        StageResponse stageResponse = verifyEmailStage.advance(context, config);
+
+        // Then
+        assertThat(stageResponse.getStageTag()).isSameAs(INITIAL_TAG);
+        assertThat(stageResponse.getRequirements()).isEmpty();
+        assertThat(stageResponse.getCallback()).isNull();
     }
 
     private JsonValue newEmptyJsonValue() {
@@ -93,6 +204,6 @@ public final class VerifyEmailAccountStageTest {
     }
 
     private JsonValue newJsonValueWithEmail() {
-        return json(object(field("mail", TEST_EMAIL_ID)));
+        return json(TEST_EMAIL_ID);
     }
 }

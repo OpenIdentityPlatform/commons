@@ -16,31 +16,181 @@
 
 package org.forgerock.selfservice.stages.email;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
  * Configuration for the email account verification stage.
  *
  * @since 0.1.0
  */
-public final class VerifyEmailAccountConfig extends AbstractEmailVerificationConfig<VerifyEmailAccountConfig> {
+public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAccountConfigVisitor> {
 
     /**
      * Name of the stage configuration.
      */
     public static final String NAME = "emailValidation";
 
+    private String emailServiceUrl;
+    private String subject;
+    private String from;
+    private String message;
+    private String mimeType;
+    private String verificationLink;
+    private String verificationLinkToken;
+
     /**
-     * Constructs a new VerifyEmailAccountConfig.
+     * Gets the URL for the email service.
      *
-     * @param emailConfig
-     *         the email configuration.
+     * @return the email service URL
      */
-    @JsonCreator
-    public VerifyEmailAccountConfig(@JsonProperty("email") EmailAccountConfig emailConfig) {
-        super(emailConfig);
+    public String getEmailServiceUrl() {
+        return emailServiceUrl;
+    }
+
+    /**
+     * Sets the URL for the email service.
+     *
+     * @param emailServiceUrl
+     *         the email service URL
+     *
+     * @return this config instance
+     */
+    public VerifyEmailAccountConfig setEmailServiceUrl(String emailServiceUrl) {
+        this.emailServiceUrl = emailServiceUrl;
+        return this;
+    }
+
+    /**
+     * Gets the subject part for the verification email.
+     *
+     * @return the email subject
+     */
+    public String getSubject() {
+        return subject;
+    }
+
+    /**
+     * Sets the subject part for the verification email.
+     *
+     * @param subject
+     *         the email subject
+     *
+     * @return this config instance
+     */
+    public VerifyEmailAccountConfig setSubject(String subject) {
+        this.subject = subject;
+        return this;
+    }
+
+    /**
+     * Gets the message for the verification email.
+     *
+     * @return the email message
+     */
+    public String getMessage() {
+        return message;
+    }
+
+    /**
+     * Sets the message part for the verification email.
+     *
+     * @param message
+     *         the email message
+     *
+     * @return this config instance
+     */
+    public VerifyEmailAccountConfig setMessage(String message) {
+        this.message = message;
+        return this;
+    }
+
+    /**
+     * Gets the mime-type of the email message.
+     *
+     * @return the message mime-type
+     */
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    /**
+     * Sets the message mime-type.
+     *
+     * @param mimeType
+     *         the message mime-type
+     *
+     * @return this config instance
+     */
+    public VerifyEmailAccountConfig setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+        return this;
+    }
+
+    /**
+     * Gets the from part for the verification email.
+     *
+     * @return the email from field
+     */
+    public String getFrom() {
+        return from;
+    }
+
+    /**
+     * Sets the from part for the verification email.
+     *
+     * @param from
+     *         the email from field
+     *
+     * @return this config instance
+     */
+    public VerifyEmailAccountConfig setFrom(String from) {
+        this.from = from;
+        return this;
+    }
+
+    /**
+     * Gets the string token representing where the verification URL should be substituted.
+     *
+     * @return the verification URL string token
+     */
+    public String getVerificationLinkToken() {
+        return verificationLinkToken;
+    }
+
+    /**
+     * Sets the string token representing where the verification URL should be substituted.
+     *
+     * @param verificationLinkToken
+     *         the verification URL string token
+     *
+     * @return this config instance
+     */
+    public VerifyEmailAccountConfig setVerificationLinkToken(String verificationLinkToken) {
+        this.verificationLinkToken = verificationLinkToken;
+        return this;
+    }
+
+    /**
+     * Gets the verification URL to be passed into the email body.
+     *
+     * @return the verification URL
+     */
+    public String getVerificationLink() {
+        return verificationLink;
+    }
+
+    /**
+     * Sets the verification URL to be passed into the email body.
+     *
+     * @param verificationLink
+     *         the verification URL
+     *
+     * @return this config instance
+     */
+    public VerifyEmailAccountConfig setVerificationLink(String verificationLink) {
+        this.verificationLink = verificationLink;
+        return this;
     }
 
     @Override
@@ -49,13 +199,8 @@ public final class VerifyEmailAccountConfig extends AbstractEmailVerificationCon
     }
 
     @Override
-    public ProgressStageBinder<?> accept(EmailConfigVisitor visitor) {
+    public ProgressStageBinder<?> accept(VerifyEmailAccountConfigVisitor visitor) {
         return visitor.build(this);
-    }
-
-    @Override
-    public VerifyEmailAccountConfig self() {
-        return this;
     }
 
 }

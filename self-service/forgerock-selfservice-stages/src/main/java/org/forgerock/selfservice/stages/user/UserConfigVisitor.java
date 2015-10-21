@@ -14,36 +14,36 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.stages.email;
+package org.forgerock.selfservice.stages.user;
 
 import org.forgerock.selfservice.core.ProgressStageBinder;
 import org.forgerock.selfservice.core.config.StageConfigVisitor;
 
 /**
- * Visitor that builds email flow stages using visited email configs.
+ * Visitor that builds a user details stages using visited user details config.
  *
  * @since 0.3.0
  */
-public interface EmailConfigVisitor extends StageConfigVisitor {
+public interface UserConfigVisitor extends StageConfigVisitor {
 
     /**
-     * Builds a verify email account stage bound to the verify email account config.
+     * Builds a user details stage bound to the user deatils config.
      *
      * @param config
-     *         verify email account config
+     *         user details config
      *
-     * @return verify email account stage binding
+     * @return user details stage binding
      */
-    ProgressStageBinder<?> build(VerifyEmailAccountConfig config);
+    ProgressStageBinder<?> build(UserDetailsConfig config);
 
     /**
-     * Builds a verify user Id stage bound to the verify user Id config.
+     * Builds a user query stage bound to the user query config.
      *
      * @param config
-     *         verify user Id stage config
+     *         user query config
      *
-     * @return verify user Id stage binding
+     * @return user query stage binding
      */
-    ProgressStageBinder<?> build(VerifyUserIdConfig config);
+    ProgressStageBinder<?> build(UserQueryConfig config);
 
 }

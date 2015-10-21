@@ -15,6 +15,7 @@
  */
 package org.forgerock.selfservice.stages.user;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -142,6 +143,12 @@ public final class UserDetailsStageTest {
         userDetailsStage.advance(context, config);
 
         // Then
+        ArgumentCaptor<JsonValue> emailIdArgumentCaptor = ArgumentCaptor.forClass(JsonValue.class);
+        verify(context, times(1)).putState(eq(EMAIL_FIELD), emailIdArgumentCaptor.capture());
+        Object emailId = emailIdArgumentCaptor.getValue();
+        assertThat(emailId).isEqualTo(TEST_EMAIL_ID);
+
+
         ArgumentCaptor<JsonValue> createRequestArgumentCaptor = ArgumentCaptor.forClass(JsonValue.class);
         verify(context, times(1)).putState(eq(USER_FIELD), createRequestArgumentCaptor.capture());
         JsonValue userJson = createRequestArgumentCaptor.getValue();

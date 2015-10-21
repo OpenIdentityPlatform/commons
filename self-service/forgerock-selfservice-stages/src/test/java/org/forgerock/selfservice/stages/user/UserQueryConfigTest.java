@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.selfservice.stages.email;
+package org.forgerock.selfservice.stages.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,29 +23,28 @@ import org.forgerock.selfservice.core.config.StageConfig;
 import org.testng.annotations.Test;
 
 /**
- * Unit test for {@link VerifyEmailAccountConfig}.
+ * Unit test for {@link UserQueryConfig}.
  *
- * @since 0.2.0
+ * @since 0.5.0
  */
-public final class VerifyEmailAccountConfigTest {
+public final class UserQueryConfigTest {
 
     @Test
     public void testConfigFromJson() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerSubtypes(
-                new NamedType(VerifyEmailAccountConfig.class, VerifyEmailAccountConfig.NAME)
+                new NamedType(UserQueryConfig.class, UserQueryConfig.NAME)
         );
-        StageConfig<?> config = mapper.readValue(getClass().getResource("/emailValidation.json"), StageConfig.class);
+        StageConfig<?> config = mapper.readValue(getClass().getResource("/userQuery.json"), StageConfig.class);
 
-        assertThat(config).isInstanceOf(VerifyEmailAccountConfig.class);
-        VerifyEmailAccountConfig verifyEmailAccountConfig = (VerifyEmailAccountConfig) config;
+        assertThat(config).isInstanceOf(UserQueryConfig.class);
+        UserQueryConfig queryConfig = (UserQueryConfig) config;
 
-        assertThat(verifyEmailAccountConfig.getEmailServiceUrl()).isEqualTo("/email");
-        assertThat(verifyEmailAccountConfig.getSubject()).isEqualTo("Verify your email address");
-        assertThat(verifyEmailAccountConfig.getMessage()).isEqualTo("Is this correct");
-        assertThat(verifyEmailAccountConfig.getFrom()).isEqualTo("noreply@example.com");
-        assertThat(verifyEmailAccountConfig.getVerificationLink()).isEqualTo("/verifyemail");
-        assertThat(verifyEmailAccountConfig.getVerificationLinkToken()).isEqualTo("abc123");
+        assertThat(queryConfig.getIdentityServiceUrl()).isEqualTo("/users");
+        assertThat(queryConfig.getIdentityIdField()).isEqualTo("userId");
+        assertThat(queryConfig.getIdentityEmailField()).isEqualTo("email");
+        assertThat(queryConfig.getValidQueryFields()).contains("email");
+        assertThat(queryConfig.getValidQueryFields()).contains("username");
     }
 
 }

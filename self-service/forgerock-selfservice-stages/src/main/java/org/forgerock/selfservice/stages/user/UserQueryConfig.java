@@ -13,41 +13,49 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
-package org.forgerock.selfservice.stages.email;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.forgerock.selfservice.core.ProgressStageBinder;
+package org.forgerock.selfservice.stages.user;
 
 import java.util.Set;
+import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
- * Configuration for the user Id verification stage.
+ * Configuration for the user query stage.
  *
- * @since 0.1.0
+ * @since 0.5.0
  */
-public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig<VerifyUserIdConfig> {
+public final class UserQueryConfig implements StageConfig<UserConfigVisitor> {
 
     /**
      * Name of the stage configuration.
      */
-    public static final String NAME = "userIdValidation";
+    public static final String NAME = "userQuery";
 
+    private Set<String> validQueryFields;
     private String identityServiceUrl;
     private String identityIdField;
     private String identityEmailField;
-    private Set<String> queryFields;
 
     /**
-     * Constructs a new configuration.
+     * Gets the set of query fields to be used when looking up the user.
      *
-     * @param emailConfig
-     *         the email configuration
+     * @return query fields
      */
-    @JsonCreator
-    public VerifyUserIdConfig(@JsonProperty("email") EmailAccountConfig emailConfig) {
-        super(emailConfig);
+    public Set<String> getValidQueryFields() {
+        return validQueryFields;
+    }
+
+    /**
+     * Sets the set of query fields to be used when looking up the user.
+     *
+     * @param validQueryFields
+     *         query fields
+     *
+     * @return this config instance
+     */
+    public UserQueryConfig setValidQueryFields(Set<String> validQueryFields) {
+        this.validQueryFields = validQueryFields;
+        return this;
     }
 
     /**
@@ -67,7 +75,7 @@ public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig<Ve
      *
      * @return this config instance
      */
-    public VerifyUserIdConfig setIdentityServiceUrl(String identityServiceUrl) {
+    public UserQueryConfig setIdentityServiceUrl(String identityServiceUrl) {
         this.identityServiceUrl = identityServiceUrl;
         return this;
     }
@@ -89,7 +97,7 @@ public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig<Ve
      *
      * @return this config instance
      */
-    public VerifyUserIdConfig setIdentityIdField(String identityIdField) {
+    public UserQueryConfig setIdentityIdField(String identityIdField) {
         this.identityIdField = identityIdField;
         return this;
     }
@@ -111,30 +119,8 @@ public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig<Ve
      *
      * @return this config instance
      */
-    public VerifyUserIdConfig setIdentityEmailField(String identityEmailField) {
+    public UserQueryConfig setIdentityEmailField(String identityEmailField) {
         this.identityEmailField = identityEmailField;
-        return this;
-    }
-
-    /**
-     * Gets the set of query fields to be used when looking up the user.
-     *
-     * @return query fields
-     */
-    public Set<String> getQueryFields() {
-        return queryFields;
-    }
-
-    /**
-     * Sets the set of query fields to be used when looking up the user.
-     *
-     * @param queryFields
-     *         query fields
-     *
-     * @return this config instance
-     */
-    public VerifyUserIdConfig setQueryFields(Set<String> queryFields) {
-        this.queryFields = queryFields;
         return this;
     }
 
@@ -144,13 +130,9 @@ public final class VerifyUserIdConfig extends AbstractEmailVerificationConfig<Ve
     }
 
     @Override
-    public ProgressStageBinder<?> accept(EmailConfigVisitor visitor) {
+    public ProgressStageBinder<?> accept(UserConfigVisitor visitor) {
         return visitor.build(this);
     }
 
-    @Override
-    public VerifyUserIdConfig self() {
-        return this;
-    }
-
 }
+

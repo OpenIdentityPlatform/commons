@@ -2,14 +2,12 @@
   "stageConfigs": [
     {
       "name" : "emailValidation",
-      "email" : {
-        "serviceUrl": "/email",
-        "from": "info@admin.org",
-        "subject": "Register new account",
-        "message": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
-        "verificationLinkToken": "%link%",
-        "verificationLink": "http://localhost:9999/example/#register/"
-      }
+      "emailServiceUrl": "/email",
+      "from": "info@admin.org",
+      "subject": "Register new account",
+      "message": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+      "verificationLinkToken": "%link%",
+      "verificationLink": "http://localhost:9999/example/#register/"
     },
     {
       "name" : "userDetails",

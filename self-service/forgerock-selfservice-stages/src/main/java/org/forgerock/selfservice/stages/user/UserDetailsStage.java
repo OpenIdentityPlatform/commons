@@ -60,7 +60,7 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
             throw new BadRequestException("user has not been specified");
         }
 
-        processEmailFromPreviousStage(context, config, user);
+        processEmail(context, config, user);
 
         JsonValue userState = ensureUserInContext(context);
         Map<String, Object> properties = user.asMap();
@@ -70,7 +70,7 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
         return StageResponse.newBuilder().build();
     }
 
-    private void processEmailFromPreviousStage(ProcessContext context, UserDetailsConfig config, JsonValue user)
+    private void processEmail(ProcessContext context, UserDetailsConfig config, JsonValue user)
             throws BadRequestException {
         if (context.containsState(EMAIL_FIELD)) {
             JsonValue emailFieldContext = context.getState(EMAIL_FIELD);
@@ -80,6 +80,11 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
                 throw new BadRequestException("Email address mismatch");
             }
             user.put(new JsonPointer(config.getIdentityEmailField()), emailFieldContext.asString());
+        } else {
+            JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
+            if (emailFieldUser != null && emailFieldUser.isNotNull()) {
+                context.putState(EMAIL_FIELD, emailFieldUser.asString());
+            }
         }
     }
 

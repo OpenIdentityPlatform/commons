@@ -26,13 +26,13 @@ import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.core.config.StageConfigVisitor;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
-import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
 import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
 import org.forgerock.selfservice.stages.user.UserDetailsConfig;
+import org.forgerock.selfservice.stages.user.UserQueryConfig;
 
 /**
  * Static utility methods for deserializing config objects from JSON.
@@ -53,7 +53,7 @@ public final class JsonConfig {
                         new NamedType(CaptchaStageConfig.class, CaptchaStageConfig.NAME),
                         new NamedType(ResetStageConfig.class, ResetStageConfig.NAME),
                         new NamedType(UserRegistrationConfig.class, UserRegistrationConfig.NAME),
-                        new NamedType(VerifyUserIdConfig.class, VerifyUserIdConfig.NAME),
+                        new NamedType(UserQueryConfig.class, UserQueryConfig.NAME),
                         new NamedType(VerifyEmailAccountConfig.class, VerifyEmailAccountConfig.NAME),
                         new NamedType(UserDetailsConfig.class, UserDetailsConfig.NAME),
                         new NamedType(SecurityAnswerDefinitionConfig.class, SecurityAnswerDefinitionConfig.NAME),

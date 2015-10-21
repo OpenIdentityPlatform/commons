@@ -15,6 +15,6 @@
  */
 
 /**
- * This package contains a common user details stage implementation.
+ * This package contains a common user related stage implementation.
  */
 package org.forgerock.selfservice.stages.user;

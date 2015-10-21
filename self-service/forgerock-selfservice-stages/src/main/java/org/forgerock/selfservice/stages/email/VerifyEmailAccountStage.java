@@ -17,25 +17,43 @@
 package org.forgerock.selfservice.stages.email;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
+import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 
+import java.util.UUID;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
+import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
+import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
+import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 
 import javax.inject.Inject;
+import org.forgerock.services.context.Context;
 
 /**
- * Having retrieved the email address in response to the initial requirements, verifies the
+ * Having retrieved the email address from the context or in response to the initial requirements, verifies the
  * validity of the email address with the user who submitted the requirements via an email flow.
  *
  * @since 0.1.0
  */
-public final class VerifyEmailAccountStage extends AbstractEmailVerificationStage<VerifyEmailAccountConfig> {
+public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailAccountConfig> {
+
+    private static final String VALIDATE_CODE_TAG = "validateCode";
+
+    private final ConnectionFactory connectionFactory;
 
     /**
      * Constructs a new stage.
@@ -45,11 +63,16 @@ public final class VerifyEmailAccountStage extends AbstractEmailVerificationStag
      */
     @Inject
     public VerifyEmailAccountStage(@SelfService ConnectionFactory connectionFactory) {
-        super(connectionFactory);
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context, VerifyEmailAccountConfig config) {
+        if (context.containsState(EMAIL_FIELD)) {
+            return RequirementsBuilder
+                    .newEmptyRequirements();
+        }
+
         return RequirementsBuilder
                 .newInstance("Verify your email address")
                 .addRequireProperty("mail", "Email address")
@@ -57,18 +80,108 @@ public final class VerifyEmailAccountStage extends AbstractEmailVerificationStag
     }
 
     @Override
-    protected String getEmailAddress(ProcessContext context, VerifyEmailAccountConfig config,
-            StageResponse.Builder builder) throws ResourceException {
-        String email = context
-                .getInput()
-                .get("mail")
-                .asString();
-
-        if (isEmpty(email)) {
-            throw new BadRequestException("mail is missing");
+    public StageResponse advance(ProcessContext context, VerifyEmailAccountConfig config) throws ResourceException {
+        switch (context.getStageTag()) {
+        case INITIAL_TAG:
+            return sendEmail(context, config);
+        case VALIDATE_CODE_TAG:
+            return validateCode(context);
         }
 
-        return email;
+        throw new IllegalStageTagException(context.getStageTag());
+    }
+
+    private StageResponse sendEmail(ProcessContext context, final VerifyEmailAccountConfig config)
+            throws ResourceException {
+        final String mail = getEmailAsString(context);
+
+        final String code = UUID.randomUUID().toString();
+        context.putState("code", code);
+
+        JsonValue requirements = RequirementsBuilder
+                .newInstance("Verify emailed code")
+                .addRequireProperty("code", "Enter code emailed")
+                .build();
+
+        SnapshotTokenCallback callback = new SnapshotTokenCallback() {
+
+            @Override
+            public void snapshotTokenPreview(ProcessContext context, String snapshotToken)
+                    throws ResourceException {
+                sendEmail(context.getRequestContext(), snapshotToken, code, mail, config);
+            }
+
+        };
+
+        return StageResponse.newBuilder()
+                .setStageTag(VALIDATE_CODE_TAG)
+                .setRequirements(requirements)
+                .setCallback(callback)
+                .build();
+    }
+
+    private String getEmailAsString(ProcessContext context) throws InternalServerErrorException {
+        if (!context.containsState(EMAIL_FIELD)) {
+            JsonValue email = context.getInput().get("mail");
+            String mail = getEmailAsString(email);
+            context.putState(EMAIL_FIELD, mail);
+            return mail;
+        }
+
+        JsonValue email = context.getState(EMAIL_FIELD);
+        return getEmailAsString(email);
+    }
+
+    private String  getEmailAsString(JsonValue email) throws InternalServerErrorException {
+        if (email == null || isEmpty(email.asString())) {
+            throw new InternalServerErrorException("mail should not be empty");
+        }
+        return email.asString();
+    }
+
+    private StageResponse validateCode(ProcessContext context) throws ResourceException {
+        String originalCode = context
+                .getState("code")
+                .asString();
+
+        String submittedCode = context
+                .getInput()
+                .get("code")
+                .asString();
+
+        if (isEmpty(submittedCode)) {
+            throw new BadRequestException("Input code is missing");
+        }
+
+        if (!originalCode.equals(submittedCode)) {
+            throw new BadRequestException("Invalid code");
+        }
+
+        return StageResponse
+                .newBuilder()
+                .build();
+    }
+
+    private void sendEmail(Context requestContext, String snapshotToken, String code,
+                           String email, VerifyEmailAccountConfig config) throws ResourceException {
+
+        String emailUrl = config.getVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
+        String body = config.getMessage().replace(config.getVerificationLinkToken(), emailUrl);
+
+        try (Connection connection = connectionFactory.getConnection()) {
+            ActionRequest request = Requests
+                    .newActionRequest(config.getEmailServiceUrl(), "send")
+                    .setContent(
+                            json(
+                                    object(
+                                            field("to", email),
+                                            field("from", config.getFrom()),
+                                            field("subject", config.getSubject()),
+                                            field("type", config.getMimeType()),
+                                            field("body", body))));
+
+            connection.action(requestContext, request);
+        }
     }
 
 }
