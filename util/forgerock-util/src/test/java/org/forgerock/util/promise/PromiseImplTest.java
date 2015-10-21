@@ -127,8 +127,34 @@ public class PromiseImplTest {
         verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
     }
 
+
     @Test
-     public void promiseThrowingRuntimeExceptionShouldPropagateThroughAChainedThenOnResult() {
+    public void promiseThrowingRuntimeExceptionShouldPropagateThroughAChainedThenAlways() {
+
+        //Given
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+        final RuntimeException runtimeException = new RuntimeException();
+
+        PromiseImpl<Void, NeverThrowsException> rootPromise = new PromiseImpl<>();
+        Promise<Void, NeverThrowsException> leafPromise = rootPromise
+                .thenAlways(new Runnable() {
+                    @Override
+                    public void run() {
+                        throw runtimeException;
+                    }
+                });
+
+        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+
+        //When
+        rootPromise.handleResult(null);
+
+        //Then
+        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
+    }
+
+    @Test
+    public void promiseThrowingRuntimeExceptionShouldPropagateThroughAChainedThenOnResult() {
 
         //Given
         RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
