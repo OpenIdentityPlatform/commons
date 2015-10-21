@@ -43,12 +43,12 @@ public final class AcceptLanguageHeader extends Header {
      */
     public static final String NAME = "Accept-Language";
     private static final Comparator<Pair<Locale, BigDecimal>> LOCALES_QUALITY_COMPARATOR =
-            new Comparator<Pair<Locale, BigDecimal>>() {
-                @Override
-                public int compare(Pair<Locale, BigDecimal> o1, Pair<Locale, BigDecimal> o2) {
-                    return o2.getSecond().compareTo(o1.getSecond());
-                }
-            };
+        new Comparator<Pair<Locale, BigDecimal>>() {
+            @Override
+            public int compare(Pair<Locale, BigDecimal> o1, Pair<Locale, BigDecimal> o2) {
+                return o2.getSecond().compareTo(o1.getSecond());
+            }
+        };
 
     /**
      * Creates an accept language header representation for a {@code PreferredLocales} instance.
