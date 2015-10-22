@@ -54,103 +54,30 @@
     </licenses>
 
     <properties>
-        <commons.forgerock-rest.version>3.0.0</commons.forgerock-rest.version>
-        <commons.forgerock-util.version>2.0.0</commons.forgerock-util.version>
-        <commons.json-web-token.version>3.0.0</commons.json-web-token.version>
-        <commons.forgerock-http-framework.version>1.0.0</commons.forgerock-http-framework.version>
-        <javax.inject.version>1</javax.inject.version>
+        <commons.forgerock-bom.version>1.0.0</commons.forgerock-bom.version>
+        <javax.inject.version>1_2</javax.inject.version>
         <commons-lang3.version>3.4</commons-lang3.version>
         <jackson-mapper-asl.version>1.9.2</jackson-mapper-asl.version>
-        <assertj.version>2.1.0</assertj.version>
-        <mockito.version>1.9.5</mockito.version>
-        <testng.version>6.8.21</testng.version>
-        <slf4j.version>1.7.5</slf4j.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
+                <artifactId>forgerock-bom</artifactId>
+                <version>${commons.forgerock-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-resource-http</artifactId>
-                <version>${commons.forgerock-rest.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>json-web-token</artifactId>
-                <version>${commons.json-web-token.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-util</artifactId>
-                <version>${commons.forgerock-util.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.http</groupId>
-                <artifactId>chf-http-servlet</artifactId>
-                <version>${commons.forgerock-http-framework.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.http</groupId>
-                <artifactId>chf-client-apache-sync</artifactId>
-                <version>${commons.forgerock-http-framework.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>javax.inject</groupId>
-                <artifactId>javax.inject</artifactId>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
                 <version>${javax.inject.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.codehaus.jackson</groupId>
-                <artifactId>jackson-mapper-asl</artifactId>
-                <version>${jackson-mapper-asl.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <!-- Test dependency -->
-
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.assertj</groupId>
-                <artifactId>assertj-core</artifactId>
-                <version>${assertj.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.mockito</groupId>
-                <artifactId>mockito-all</artifactId>
-                <version>${mockito.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-test-utils</artifactId>
-                <version>${commons.forgerock-util.version}</version>
-                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
