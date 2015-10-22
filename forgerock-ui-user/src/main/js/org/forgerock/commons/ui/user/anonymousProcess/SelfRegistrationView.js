@@ -35,11 +35,11 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
 ], function($, _, form2js, Handlebars, AnonymousProcessView, Constants, ValidatorsManager) {
     var SelfRegistrationView = AnonymousProcessView.extend({
         partials: [
-            "partials/form/_kbaItem.html"
+            "partials/process/_kbaItem.html"
         ],
         events: _.extend({
             "click #kbaStage #provideAnother": "addKBAQuestion",
-            "change #kbaStage .kbaQuestions": "toggleCustomQuestion"
+            "change #kbaStage .kba-questions": "toggleCustomQuestion"
         }, AnonymousProcessView.prototype.events),
         endpoint: Constants.SELF_SERVICE_CONTEXT + "registration",
         i18nBase: "common.user.selfRegistration",
@@ -47,9 +47,10 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
             e.preventDefault();
             var nextIndex = this.$el.find("#kbaItems li").length,
                 newQuestion = $("<li>").html(
-                Handlebars.compile("{{> form/_kbaItem}}")(
-                    _.extend({index: nextIndex}, this.stateData)
-                )
+                Handlebars.compile("{{> process/_kbaItem}}")({
+                    index: nextIndex,
+                    questions: this.stateData.requirements.properties.kba.questions
+                })
             );
             this.$el.find("#kbaItems").append(newQuestion);
             ValidatorsManager.bindValidators(this.$el);

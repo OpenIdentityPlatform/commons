@@ -84,12 +84,19 @@ define("org/forgerock/mock/ui/common/main/LocalStorage",[
 
                         _.each(pathParts, function (part, index) {
                             if (index !== (pathParts.length-1)) {
+                                if (node[part] === undefined) {
+                                    node[part] = {};
+                                }
                                 node = node[part];
                             } else if (index === (pathParts.length-1)) {
                                 if (patchEntry.operation === "add" || patchEntry.operation === "replace") {
                                     node[part] = patchEntry.value;
                                 } else if (patchEntry.operation === "remove") {
-                                    delete node[part];
+                                    if (_.isArray(node)) {
+                                        node.splice(part, 1);
+                                    } else {
+                                        delete node[part];
+                                    }
                                 }
                             }
                         });

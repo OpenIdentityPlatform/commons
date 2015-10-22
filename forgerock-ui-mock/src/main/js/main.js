@@ -31,7 +31,6 @@ require.config({
             "ThemeManager": "org/forgerock/mock/ui/common/util/ThemeManager",
             "LoginView": "org/forgerock/commons/ui/common/LoginView",
             "PasswordResetView": "org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView",
-            "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
             "RegisterView": "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
             // TODO: Remove this when there are no longer any references to the "underscore" dependency
@@ -174,7 +173,17 @@ require([
         telephoneNumber: '12345',
         givenName: 'Jack',
         sn: 'White',
-        mail: 'white@test.com'
+        mail: 'white@test.com',
+        kbaInfo:[
+            {
+                "customQuestion":"What is my favorite open source identity company?",
+                "answer": {"$crypto":{"value":{"algorithm":"SHA-256","data":"LbOwzJnSKtSn2waBA/6Zv8AFaTwe74vHh9dyPaBOVnZFTCU/MsNWTfmbRcx2PM4d"},"type":"salted-hash"}}
+            },
+            {
+                "questionId":"1",
+                "answer": {"$crypto":{"value":{"algorithm":"SHA-256","data":"ht5QecQ11l4mnCBxa8TKRU7KZhhMrD6SSTxv1XJkbEUlRjGhw5Ss5WMC4diBgNme"},"type":"salted-hash"}}
+            }
+        ]
     });
 
     EventManager.sendEvent(Constants.EVENT_DEPENDENCIES_LOADED);

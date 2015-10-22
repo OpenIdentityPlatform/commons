@@ -25,7 +25,7 @@
 /*global define */
 
 
-define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessDelegate", [
+define("org/forgerock/commons/ui/user/delegates/AnonymousProcessDelegate", [
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",

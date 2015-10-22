@@ -38,13 +38,8 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/commons/ui/common/SiteConfigurator",
                 configuration: {
-                    "passwordResetLink": "",
-                    "selfRegistration": true,
-                    "passwordReset": true,
-                    "roles": {
-                        "ui-user": "User"
-                    },
-                    "lang": "en"
+                    "delegate" : "org/forgerock/mock/ui/common/delegates/SiteConfigurationDelegate",
+                    "remoteConfig" : true
                 }
             },
 

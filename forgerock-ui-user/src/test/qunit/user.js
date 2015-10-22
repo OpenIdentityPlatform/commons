@@ -61,8 +61,8 @@ define([
 
                         // docment.activeElement - a hack around testing for .is(":focus") bug in phantomjs: https://github.com/guard/guard-jasmine/issues/48
                         QUnit.equal($("input[name=givenName]", userProfileView.$el)[0], document.activeElement, "First name field has focus on page load");
-                        QUnit.equal($('input[type="submit"]', userProfileView.$el).length, 2, "Update button appears to be defined for each tab");
-                        QUnit.equal($('input[type="reset"]', userProfileView.$el).length, 2, "Reset button appears to be defined");
+                        QUnit.equal($('input[type="submit"]', userProfileView.$el).length, 3, "Update button appears to be defined for each tab");
+                        QUnit.equal($('input[type="reset"]', userProfileView.$el).length, 3, "Reset button appears to be defined");
 
                         _.each(_.keys(testVals), function (prop) {
                             QUnit.ok($('input[name="'+prop+'"]', userProfileView.$el).length, prop + " input appears to be defined");

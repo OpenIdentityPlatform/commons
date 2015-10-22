@@ -77,21 +77,31 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
         submit: function(formId, formData) {
             Configuration.loggedUser.save(formData, {patch: true}).then(
-                _.bind(function() {
-                    this.changesPendingWidgets[formId].saveChanges();
-                    this.data.user = Configuration.loggedUser.toJSON();
-                    this.reloadFormData(document.getElementById(formId));
-                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
+                _.bind(function () {
+                    this.submitSuccess(formId);
                 }, this),
-                _.bind(function(e) {
-                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
-                }, this)
+                _.bind(this.submitFailure, this)
             );
+        },
+
+        submitSuccess: function(formId) {
+            this.changesPendingWidgets[formId].saveChanges();
+            this.data.user = Configuration.loggedUser.toJSON();
+            this.reloadFormData(document.getElementById(formId));
+            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
+        },
+
+        submitFailure: function() {
+            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
         },
 
         checkChanges: function(e) {
             var form = $(e.target).closest("form");
-            this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: form2js(form[0], ".", false) });
+            this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: this.getFormContent(form[0]) });
+        },
+
+        getFormContent: function (form) {
+            return form2js(form, ".", false);
         },
 
         formSubmit: function(event) {
@@ -101,13 +111,13 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
             var changedProtected = [],
                 form = $(event.target).closest("form"),
-                formData = form2js(form[0], ".", false);
+                formData = this.getFormContent(form[0]);
 
             if (ValidatorsManager.formValidated(form)) {
 
                 changedProtected = _.chain(Configuration.loggedUser.getProtectedAttributes())
                     .filter(function(attr) {
-                        return _.has(formData, attr) && Configuration.loggedUser.get(attr) !== formData[attr];
+                        return _.has(formData, attr) && !_.isEqual(Configuration.loggedUser.get(attr),formData[attr]);
                     }, this)
                     .map(function (attr) {
                         return this.$el.find("label[for=input-"+attr+"]").text();
@@ -148,7 +158,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
                     this.changesPendingWidgets[$(form).attr('id')] = ChangesPending.watchChanges({
                         element: $(".changes-pending", form),
-                        watchedObj: { subform: form2js(form, ".", false) },
+                        watchedObj: { subform: this.getFormContent(form) },
                         watchedProperties: ["subform"],
                         alertClass: "alert-warning alert-sm"
                     });
@@ -163,8 +173,8 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
 
         reloadFormData: function (form) {
-            $("input[type=password]", form).val("");
             js2form(form, this.data.user);
+            $("input[type=password]", form).val("").attr("placeholder",$.t("common.form.passwordPlaceholder"));
         },
         resetForm: function (e) {
             e.preventDefault();

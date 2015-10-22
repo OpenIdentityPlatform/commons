@@ -29,7 +29,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
     "underscore",
     "form2js",
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessDelegate",
+    "org/forgerock/commons/ui/user/delegates/AnonymousProcessDelegate",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Router",

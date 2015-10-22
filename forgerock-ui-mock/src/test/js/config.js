@@ -25,17 +25,20 @@
 /*global $, require, QUnit */
 
 require.config({
+    map: {
+        "*" : {
+            // TODO: Remove this when there are no longer any references to the "underscore" dependency
+            "underscore": "lodash"
+        }
+    },
     baseUrl: '../www',
     paths: {
         jquery: "libs/jquery-2.1.1-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        underscore: "libs/lodash-2.4.1-min",
+        lodash: "libs/lodash-3.10.1-min",
         sinon: "libs/sinon-1.15.4"
     },
     shim: {
-        underscore: {
-            exports: "_"
-        },
         sinon: {
             exports: "sinon"
         },

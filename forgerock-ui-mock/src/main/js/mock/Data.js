@@ -25,8 +25,57 @@
 /*global define, _ */
 
  define("mock/Data", [
- ], function () {
+     "lodash",
+     "org/forgerock/commons/ui/common/main/Configuration",
+     "org/forgerock/mock/ui/common/main/LocalStorage"
+ ], function (_, Configuration, LocalStorage) {
     return function (server) {
+
+    var kbaQuestions = [
+        {
+            "id": "1",
+            "question": {
+                "en_GB": "What's your favorite colour?",
+                "fr": "Quelle est votre couleur préférée?",
+                "en": "What's your favorite color?"
+            }
+        },
+        {
+            "id": "2",
+            "question": {
+                "en": "Who was your first employer?"
+            }
+        }
+    ];
+
+        server.respondWith(
+            "GET",
+            "/mock/selfservice/kbaQuestions",
+            [
+                200,
+                {
+                    "Content-Type": "application/json;charset=UTF-8"
+                },
+                JSON.stringify({
+                    "questions" : kbaQuestions
+                })
+            ]
+        );
+
+        server.respondWith(
+            "PATCH",
+            "/mock/selfservice/user",
+            function (request) {
+                var requestContent = JSON.parse(request.requestBody),
+                    headers = { "Content-Type": "application/json;charset=UTF-8" };
+
+                request.respond(
+                    200,
+                    headers,
+                    JSON.stringify(LocalStorage.patch("mock/repo/internal/user/" + Configuration.loggedUser.id, requestContent))
+                );
+            }
+        );
 
         server.respondWith(
             "GET",
@@ -123,11 +172,7 @@
                                             ],
                                             "properties": {
                                                 "answer1": {
-                                                    "systemQuestion": {
-                                                        "en": "What's your favorite color?",
-                                                        "en_GB": "What's your favorite colour?",
-                                                        "fr": "Quelle est votre couleur préférée?"
-                                                    },
+                                                    "systemQuestion": kbaQuestions[0].question,
                                                     "type": "string"
                                                 },
                                                 "answer2": {
@@ -375,22 +420,7 @@
                                         }
                                       ]
                                     },
-                                    "questions": [
-                                      {
-                                        "id": "1",
-                                        "question": {
-                                          "en_GB": "What's your favorite colour?",
-                                          "fr": "Quelle est votre couleur préférée?",
-                                          "en": "What's your favorite color?"
-                                        }
-                                      },
-                                      {
-                                        "id": "2",
-                                        "question": {
-                                          "en": "Who was your first employer?"
-                                        }
-                                      }
-                                    ]
+                                    "questions": kbaQuestions
                                   }
                                 },
                                 "definitions": {
