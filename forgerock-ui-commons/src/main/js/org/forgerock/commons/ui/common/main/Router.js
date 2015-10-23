@@ -151,6 +151,29 @@ define("org/forgerock/commons/ui/common/main/Router", [
         }
     };
 
+    /**
+     * Given a route and a set of current parameters, will return a new parameter
+     * list with whichever missing default values were available.
+     */
+    obj.applyDefaultParameters = function (route, originalParameters) {
+        var populatedParameters = _.clone(originalParameters),
+            maxArgLength,i;
+
+        if (_.isObject(route.defaults)) {
+            if (_.isArray(originalParameters) && originalParameters.length) {
+                maxArgLength = (originalParameters.length >= route.defaults.length) ? originalParameters.length : route.defaults.length;
+                for (i=0;i<maxArgLength;i++) {
+                    if (!_.isString(originalParameters[i]) && !_.isUndefined(route.defaults[i])) {
+                        populatedParameters[i] = _.clone(route.defaults[i]);
+                    }
+                }
+            } else {
+                populatedParameters = _.clone(route.defaults);
+            }
+        }
+        return populatedParameters;
+    };
+
     obj.checkRole = function (route) {
         if(route.role) {
             if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
@@ -187,7 +210,7 @@ define("org/forgerock/commons/ui/common/main/Router", [
                 // we don't actually use any of the backbone-provided arguments to this function,
                 // as they are decoded and that results in the loss of important context.
                 // instead we parse the parameters out of the hash ourselves:
-                args = obj.extractParameters(route, obj.getURIFragment());
+                args = obj.applyDefaultParameters(route, obj.extractParameters(route, obj.getURIFragment()));
 
                 if (!obj.checkRole(route)) {
                     return;
@@ -235,21 +258,10 @@ define("org/forgerock/commons/ui/common/main/Router", [
         obj.router.navigate(link, params);
     };
 
-    obj.getLink = function(route, args) {
-        var i,maxArgLength, pattern;
-
-        if (typeof route.defaults === "object") {
-            if (args) {
-                maxArgLength = (args.length >= route.defaults.length) ? args.length : route.defaults.length;
-                for (i=0;i<maxArgLength;i++) {
-                    if (typeof args[i] !== "string" && route.defaults[i] !== undefined) {
-                        args[i] = route.defaults[i];
-                    }
-                }
-            } else {
-                args = route.defaults;
-            }
-        }
+    obj.getLink = function(route, rawParameters) {
+        var pattern,
+            args = obj.applyDefaultParameters(route, rawParameters),
+            i;
 
         if (!_.isRegExp(route.url)) {
             pattern = route.url.replace(/:[A-Za-z@.]+/, "?");

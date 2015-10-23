@@ -91,7 +91,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                 this.submitDelegate(params, function () {
                     EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
                         route: Router.currentRoute,
-                        args: ["/continue"]
+                        args: ["/continue", ""]
                     });
                 });
                 return;
@@ -112,7 +112,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
         },
 
         submitDelegate: function (params, onSubmit) {
-            this.delegate.submit(_.omit(params, "token")).then(onSubmit());
+            this.delegate.submit(_.omit(params, "token")).always(onSubmit);
         },
 
         setTranslationBase: function () {
