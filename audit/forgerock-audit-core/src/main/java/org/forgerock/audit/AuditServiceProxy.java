@@ -224,12 +224,22 @@ public class AuditServiceProxy implements AuditService {
         }
     }
 
+    @Override
+    public boolean isRunning() {
+        obtainReadLock();
+        try {
+            return delegate.isRunning();
+        } finally {
+            releaseReadLock();
+        }
+    }
+
     /**
      * Obtain the read lock or block until it becomes available.
      *
      * @throws IllegalStateException If the current thread already holds the write lock.
      */
-    protected void obtainReadLock() {
+    protected final void obtainReadLock() {
         delegateLock.readLock().lock();
         if (delegateLock.isWriteLockedByCurrentThread()) {
             throw new IllegalStateException(
@@ -240,21 +250,21 @@ public class AuditServiceProxy implements AuditService {
     /**
      * Release the read lock.
      */
-    protected void releaseReadLock() {
+    protected final void releaseReadLock() {
         delegateLock.readLock().unlock();
     }
 
     /**
      * Obtain the write lock or block until it becomes available.
      */
-    protected void obtainWriteLock() {
+    protected final void obtainWriteLock() {
         delegateLock.writeLock().lock();
     }
 
     /**
      * Release the write lock.
      */
-    protected void releaseWriteLock() {
+    protected final void releaseWriteLock() {
         delegateLock.writeLock().unlock();
     }
 }

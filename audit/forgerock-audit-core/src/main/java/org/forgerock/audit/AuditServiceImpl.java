@@ -366,6 +366,11 @@ final class AuditServiceImpl implements AuditService {
         }
     }
 
+    @Override
+    public boolean isRunning() {
+        return lifecycleState == LifecycleState.RUNNING;
+    }
+
     private void checkLifecycleStateIsRunning() throws ServiceUnavailableException {
         if (lifecycleState != LifecycleState.RUNNING) {
             throw new ServiceUnavailableException("AuditService not running");

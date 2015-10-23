@@ -188,4 +188,14 @@ public interface AuditService extends RequestHandler {
      * that will resolve to, {@link ServiceUnavailableException}.
      */
     void shutdown();
+
+    /**
+     * Returns <tt>true</tt> if this object is running.
+     * <p/>
+     * This object will be in a 'running' state if {@link #startup()} completed successfully and {@link #shutdown()}
+     * has not yet been called.
+     *
+     * @return true if this object is running; false otherwise.
+     */
+    boolean isRunning();
 }

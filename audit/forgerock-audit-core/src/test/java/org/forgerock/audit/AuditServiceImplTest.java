@@ -367,6 +367,27 @@ public class AuditServiceImplTest {
     }
 
     @Test
+    public void shouldNotBeRunningIfStartupNotYetCalled() throws Exception {
+        final AuditService auditService = newAuditService().build();
+        assertThat(auditService.isRunning()).isFalse();
+    }
+
+    @Test
+    public void shouldBeRunningIfStartupCalledButShutdownNotYetCalled() throws Exception {
+        final AuditService auditService = newAuditService().build();
+        auditService.startup();
+        assertThat(auditService.isRunning()).isTrue();
+    }
+
+    @Test
+    public void shouldBeNotRunningIfShutdownCalled() throws Exception {
+        final AuditService auditService = newAuditService().build();
+        auditService.startup();
+        auditService.shutdown();
+        assertThat(auditService.isRunning()).isFalse();
+    }
+
+    @Test
     public void shouldStartupAllHandlersWhenStartupIsCalled() throws Exception {
         //given
         final AuditServiceConfiguration configuration = new AuditServiceConfiguration();
