@@ -123,15 +123,9 @@ public class PatchOperationTest {
         PatchOperation.operation(PatchOperation.OPERATION_INCREMENT, "/users/0", "fourty-two");
     }
 
-    @Test
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testPatchWithUnknownOperation() throws Exception {
-        final Connection connection = getConnectionWithAliceAndBob();
-        connection.patch(ctx(),
-                Requests.newPatchRequest("users/0", PatchOperation.operation("Unknown", "users/0", "Dummy")));
-        final ResourceResponse resource = connection.read(ctx(), newReadRequest("users/0"));
-        assertThat(resource.getId()).isEqualTo("0");
-        assertThat(resource.getRevision()).isEqualTo("1");
-        assertThat(resource.getContent().getObject()).isEqualTo(userAliceWithIdAndRev(0, 1).getObject());
+        PatchOperation.operation("Unknown", "users/0", "Dummy");
     }
 
     /** Test to ensure CREST-320 non regression */

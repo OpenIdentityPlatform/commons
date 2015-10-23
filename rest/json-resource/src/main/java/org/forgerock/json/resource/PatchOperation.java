@@ -28,8 +28,7 @@ import static org.forgerock.json.JsonValue.*;
 
 /**
  * An individual patch operation which is to be performed against a field within
- * a resource. This class defines four core types of operation as well as
- * allowing for extensibility by supporting user-defined operations. The core
+ * a resource. This class defines four core types of operation. The core
  * operations are defined below and their behavior depends on the type of the
  * field being targeted by the operation:
  * <ul>
@@ -101,8 +100,6 @@ import static org.forgerock.json.JsonValue.*;
  * increment a field which does not contain a number or an array of numbers. It
  * is also an error if the patch value is not a single value.
  * </ul>
- * Additional types of patch operation are supported via the
- * {@link #operation(String, String, Object) operation} methods.
  * <p>
  * <b>NOTE:</b> this class does not define how field values will be matched, nor
  * does it define whether a resource supports indexed based modifications, nor
@@ -548,6 +545,7 @@ public final class PatchOperation {
         checkNotNull(value, "Cannot instantiate PatchOperation with null 'value' value");
 
         this.operation = operation;
+        checkOperationType();
         this.field = field;
         this.value = value;
         this.from = from;
@@ -574,6 +572,12 @@ public final class PatchOperation {
             if (value.isNotNull()) {
                 throw new IllegalArgumentException("'" + operation + "' does not accept value field");
             }
+        }
+    }
+
+    private void checkOperationType() {
+        if (!isAdd() && !isRemove() && !isIncrement() && !isReplace() && !isTransform() && !isMove() && !isCopy()) {
+            throw new IllegalArgumentException("Invalid patch operation type " + operation);
         }
     }
 
