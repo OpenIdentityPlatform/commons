@@ -22,6 +22,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.audit.events.EventTopicsMetaData;
+import org.forgerock.audit.providers.DefaultLocalHostNameProvider;
 import org.forgerock.audit.providers.LocalHostNameProvider;
 import org.forgerock.audit.providers.ProductInfoProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
@@ -41,9 +42,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 import java.util.Collections;
 
 /**
@@ -190,22 +189,6 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase {
         @Override
         public String getProductName() {
             return null;
-        }
-    }
-
-    /**
-     * Default implementation of LocalHostNameProvider.
-     */
-    private static class DefaultLocalHostNameProvider implements LocalHostNameProvider {
-
-        @Override
-        public String getLocalHostName() {
-            try {
-                return InetAddress.getLocalHost().getHostName();
-            } catch (UnknownHostException uhe) {
-                logger.error("Cannot resolve localhost name", uhe);
-                return null;
-            }
         }
     }
 }
