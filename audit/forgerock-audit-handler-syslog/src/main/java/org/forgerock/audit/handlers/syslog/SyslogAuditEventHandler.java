@@ -21,6 +21,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
 import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.providers.DefaultLocalHostNameProvider;
 import org.forgerock.audit.providers.LocalHostNameProvider;
@@ -72,8 +73,8 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase {
     public SyslogAuditEventHandler(
             final SyslogAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData,
-            final ProductInfoProvider productInfoProvider,
-            final LocalHostNameProvider localHostNameProvider) {
+            @Audit final ProductInfoProvider productInfoProvider,
+            @Audit final LocalHostNameProvider localHostNameProvider) {
 
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
         Reject.ifNull(configuration.getProtocol(),

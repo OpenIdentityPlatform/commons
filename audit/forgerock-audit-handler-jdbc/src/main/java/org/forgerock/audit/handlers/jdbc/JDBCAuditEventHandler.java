@@ -37,6 +37,7 @@ import java.util.Map;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
+import org.forgerock.audit.Audit;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventHelper;
@@ -89,7 +90,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
     public JDBCAuditEventHandler(
             final JDBCAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData,
-            final DataSource dataSource) {
+            @Audit final DataSource dataSource) {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
         this.configuration = configuration;
         if (dataSource != null) {
