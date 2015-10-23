@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Copyright 2015 ForgeRock AS
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +68,7 @@ import com.persistit.util.Util;
  * <code>Buffer</code> provides the low-level methods that organize keys and
  * values into byte arrays to be stored in database files.
  * </p>
- * 
+ *
  * @version 1.0
  */
 
@@ -169,7 +170,7 @@ public class Buffer extends SharedResource {
      * bytes) so that every key block is int-aligned. The TAIL value is the
      * offset within this buffer of the tail block. It is always a multiple of
      * 4, making the tail block int-aligned too.
-     * 
+     *
      * Offsets to fields in header:
      */
     final static int TYPE_OFFSET = 0;
@@ -238,7 +239,7 @@ public class Buffer extends SharedResource {
     private final static int GARBAGE_BLOCK_EXPECTED_COUNT = 24;
 
     /**
-     * 
+     *
      */
     final static int LONGREC_TYPE = 255;
     final static int LONGREC_PREFIX_SIZE_OFFSET = 2;
@@ -385,7 +386,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Construct a new buffer.
-     * 
+     *
      * @param size
      *            The buffer size, in bytes.
      */
@@ -447,9 +448,9 @@ public class Buffer extends SharedResource {
     }
 
     /**
-     * 
+     *
      * Extract fields from the buffer.
-     * 
+     *
      * @throws PersistitIOException
      * @throws InvalidPageAddressException
      * @throws InvalidPageStructureException
@@ -509,23 +510,16 @@ public class Buffer extends SharedResource {
         Debug.$assert0.t(isOwnedAsWriterByMe());
         final long checkpointTimestamp = _persistit.getTimestampAllocator().getProposedCheckpointTimestamp();
         if (isDirty() && !isTemporary() && getTimestamp() < checkpointTimestamp && timestamp > checkpointTimestamp) {
-            writePage(false);
+            writePage();
             _pool.bumpForcedCheckpointWrites();
         }
     }
 
     void writePage() throws PersistitException {
-        writePage(_persistit.getJournalManager().isWritePagePruningEnabled());
-    }
-
-    void writePage(final boolean prune) throws PersistitException {
         assert isOwnedAsWriterByMe();
         _persistit.checkFatal();
         final Volume volume = getVolume();
         if (volume != null) {
-            if (prune) {
-                pruneMvvValues(null, false, null);
-            }
             clearSlack();
             save();
             _vol.getStorage().writePage(this);
@@ -604,7 +598,7 @@ public class Buffer extends SharedResource {
     /**
      * Clears all tailblock bytes that are no longer in use. This makes sure we
      * don't retain data that has been deleted or moved in this page.
-     * 
+     *
      * @throws InvalidPageStructureException
      */
     void clearSlack() throws InvalidPageStructureException {
@@ -696,7 +690,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Gets the page type
-     * 
+     *
      * @return the type as an integer
      */
     public int getPageType() {
@@ -724,7 +718,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Gets the index of this Buffer within the buffer pool
-     * 
+     *
      * @return The index
      */
     public int getIndex() {
@@ -733,7 +727,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Get the page address of the right sibling page
-     * 
+     *
      * @return the sibling's address
      */
     public long getRightSibling() {
@@ -747,7 +741,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Set the right sibling's page address
-     * 
+     *
      * @param pageAddress
      *            the sibling's address
      */
@@ -813,7 +807,7 @@ public class Buffer extends SharedResource {
      * predecessor key block <br>
      * offset is the offset of the keyblock at or after the supplied key.
      * <p>
-     * 
+     *
      * @param key
      *            The key to seek
      * @return An encoded result (see above). Returns 0 if the supplied key
@@ -1109,7 +1103,7 @@ public class Buffer extends SharedResource {
     /**
      * Given a foundAt position, return a long value that encodes the offset and
      * size of the associated value field
-     * 
+     *
      * @param foundAt
      * @return (offset << 32) | size;
      */
@@ -1217,7 +1211,7 @@ public class Buffer extends SharedResource {
     /**
      * Internal implementation of getKey using a previously computed result from
      * the findKey() method.
-     * 
+     *
      * @param key
      * @param mode
      * @param foundAt
@@ -1238,7 +1232,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Helper method to compute the actual bytes in the previous key.
-     * 
+     *
      * @param key
      * @param foundAt
      * @return foundAt value
@@ -1311,7 +1305,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Helper method to compute the actual bytes in the successor key.
-     * 
+     *
      * @param key
      * @param foundAt
      * @return foundAt value
@@ -1346,7 +1340,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Helper method for IntegrityCheck to find next long record key block
-     * 
+     *
      * @param value
      * @param foundAt
      * @return foundAt value
@@ -1397,7 +1391,7 @@ public class Buffer extends SharedResource {
      * Insert or replace a value for a key. If there already is a value with the
      * same key, then replace it. Otherwise insert a new key and value into the
      * buffer.
-     * 
+     *
      * @param key
      *            The key on under which the value will be stored
      * @param value
@@ -1413,7 +1407,7 @@ public class Buffer extends SharedResource {
      * Insert or replace a value for a key. If there already is a value with the
      * same key, then replace it. Otherwise insert a new key and value into the
      * buffer.
-     * 
+     *
      * @param key
      *            The key under which the value will be stored
      * @param value
@@ -1567,7 +1561,7 @@ public class Buffer extends SharedResource {
     /**
      * This method is for debugging only. It should be asserted after a key has
      * been inserted or removed.
-     * 
+     *
      * @param p
      * @return when key is adjacent
      */
@@ -1691,7 +1685,7 @@ public class Buffer extends SharedResource {
      * Removes the keys and associated values from the key blocks indicated by
      * the two argument. The removal range starts at foundAt1 inclusive and ends
      * at foundAt2 exclusive.
-     * 
+     *
      * @param foundAt1
      *            Encoded location of the first key block to remove
      * @param foundAt2
@@ -1859,7 +1853,7 @@ public class Buffer extends SharedResource {
      * to free delta bytes of space before the specified tail block. This is
      * sometimes done in the removeKey() method to allow the key that follows
      * the one being removed to have its ebc value increased.
-     * 
+     *
      * @param tail
      *            Offset of tail block to be expanded downward
      * @param delta
@@ -1894,7 +1888,7 @@ public class Buffer extends SharedResource {
     /**
      * Copies keys and values to a newly allocated buffer in order to make room
      * for an insertion, and then performs the insertion.
-     * 
+     *
      * @param rightSibling
      *            The buffer containing the new right sibling page
      * @param key
@@ -2396,7 +2390,7 @@ public class Buffer extends SharedResource {
      * <code>RebalanceException</code>. Calling code should catch and handle
      * this exception by, for example, splitting one of the pages.
      * </p>
-     * 
+     *
      * @param buffer
      *            The buffer containing the right edge key
      * @param foundAt1
@@ -2495,9 +2489,9 @@ public class Buffer extends SharedResource {
         if (okayToRejoin) {
             /*
              * REJOIN CASE
-             * 
+             *
              * -----------
-             * 
+             *
              * This is the case where according to the JoinPolicy, the records
              * from the right page can be merged into the left page. The caller
              * will then deallocate the right page.
@@ -2549,9 +2543,9 @@ public class Buffer extends SharedResource {
         else {
             /*
              * REBALANCE CASE
-             * 
+             *
              * --------------
-             * 
+             *
              * The remaining records still require two pages. Some key must be
              * chosen to serve as the edge between the pages. Use the JoinPolicy
              * to find the optimal location.
@@ -2660,7 +2654,7 @@ public class Buffer extends SharedResource {
     /**
      * Compute total size used by key blocks and tail blocks within a page. Does
      * not include the size of the page header.
-     * 
+     *
      * @return computed size
      */
     int inUseSize() {
@@ -2685,13 +2679,13 @@ public class Buffer extends SharedResource {
      * <p>
      * DOES NOT MODIFY BUFFER
      * </p>
-     * 
+     *
      * @param from
      *            offset of first key block being deleted
      * @param to
      *            offset of the next key block not being deleted
      * @return long encoding the size being deleted and the minimum ebc
-     * 
+     *
      */
     long joinMeasure(final int from, final int to) {
         int minimumEbc = Integer.MAX_VALUE;
@@ -2718,7 +2712,7 @@ public class Buffer extends SharedResource {
      * <p>
      * MODIFIES THIS BUFFER
      * </p>
-     * 
+     *
      * @param from
      *            offset of first key block being deleted
      * @param to
@@ -2759,7 +2753,7 @@ public class Buffer extends SharedResource {
      * <p>
      * DOES NOT MODIFY EITHER BUFFER
      * </p>
-     * 
+     *
      * @param buffer
      *            The buffer containing the right sibling page
      * @param virtualSize
@@ -2956,7 +2950,7 @@ public class Buffer extends SharedResource {
 
     /**
      * Move records from buffer2 to this buffer. The
-     * 
+     *
      * @param buffer
      * @param p1
      * @param p2
@@ -3030,7 +3024,7 @@ public class Buffer extends SharedResource {
      * it returns -1. The caller can call repack() and then call allocTail
      * again. The caller is responsible for repacking because it may need to
      * perform various other actions if tail blocks move.
-     * 
+     *
      * @param size
      *            Size of the required tail block
      * @return Offset to the allocated tail block, or -1 if there is not
@@ -3166,7 +3160,7 @@ public class Buffer extends SharedResource {
     /**
      * Determines whether it is possible to allocate a new tailblock with a
      * specified size.
-     * 
+     *
      * @param needed
      *            The size required by the proposed new tailblock.
      * @return boolean <i>true</i> if it will fit, else <i>false</i>.
@@ -3178,7 +3172,7 @@ public class Buffer extends SharedResource {
     /**
      * Determines whether supplied index points to the right of the last key in
      * the page.
-     * 
+     *
      * @param foundAt
      *            The keyblock index
      */
@@ -3190,7 +3184,7 @@ public class Buffer extends SharedResource {
     /**
      * Determines whether supplied index points to the left of the first key in
      * the page.
-     * 
+     *
      * @param foundAt
      */
     boolean isBeforeLeftEdge(final int foundAt) {
@@ -3593,7 +3587,7 @@ public class Buffer extends SharedResource {
      * {@link #writePageOnCheckpoint(long)}; in other words, the results of
      * pruning the page can be saved with the preceding checkpoint even though a
      * new checkpoint has been proposed.
-     * 
+     *
      * @param tree
      * @param spareKey
      * @return <code>true</code> if this method changed the contents of the
@@ -4220,7 +4214,7 @@ public class Buffer extends SharedResource {
      * Dump a copy of this <code>Buffer</code> to the supplied ByteBuffer. The
      * format is identical to the journal: an optional IV record to identify the
      * volume followed by a PA record.
-     * 
+     *
      * @param bb
      *            ByteBuffer to write to
      * @param secure
@@ -4335,7 +4329,7 @@ public class Buffer extends SharedResource {
     /**
      * Overwrite the value payload bytes in the supplied buffer image to appear
      * as strings of 'x's.
-     * 
+     *
      * @param bytes
      *            buffer image
      */

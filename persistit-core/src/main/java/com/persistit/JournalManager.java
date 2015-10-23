@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Copyright 2015 ForgeRock AS
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,6 +195,8 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     private final TransactionPlayer _player = new TransactionPlayer(new JournalTransactionPlayerSupport());
 
     private final TransactionPlayerListener _listener = new ProactiveRollbackListener();
+
+    private final PruneTransactionPlayer _pruneCommited = new PruneTransactionPlayer();
 
     private final AtomicBoolean _writePagePruning = new AtomicBoolean(true);
 
@@ -1727,6 +1730,8 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
         long earliestCommitted = Long.MAX_VALUE;
         long earliestAborted = Long.MAX_VALUE;
         final List<TransactionMapItem> toPrune = new ArrayList<TransactionMapItem>();
+        final List<TransactionMapItem> toPruneCommited = new ArrayList<>();
+
         /*
          * Remove any committed transactions that committed before the
          * checkpoint. No need to keep a record of such a transaction since its
@@ -1739,6 +1744,7 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
                 if (item.isCommitted()) {
                     if (item.getCommitTimestamp() < timestamp) {
                         iterator.remove();
+                        toPruneCommited.add(item);
                     } else if (item.getStartTimestamp() < earliestCommitted) {
                         earliestCommitted = item.getStartTimestamp();
                     }
@@ -1765,6 +1771,17 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
             _earliestCommittedTimestamp = earliestCommitted;
             _earliestAbortedTimestamp = earliestAborted;
         }
+        Collections.sort(toPruneCommited, TransactionMapItem.TRANSACTION_MAP_ITEM_COMPARATOR);
+        for (final TransactionMapItem item : toPruneCommited) {
+            try {
+                synchronized (_player) {
+                  _player.applyTransaction(item, _pruneCommited);
+                }
+            } catch (final PersistitException e) {
+                _persistit.getLogBase().pruneException.log(e, item);
+            }
+        }
+
         /*
          * Sort the toPrune list - since all members are aborted, the comparison
          * will be by startTimeStamp which is a good approximation of journal
@@ -2777,6 +2794,70 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
         public Persistit getPersistit() {
             return _persistit;
         }
+    }
+
+    class PruneTransactionPlayer implements TransactionPlayerListener
+    {
+
+      @Override
+      public void startRecovery(long address, long timestamp) throws PersistitException
+      {
+      }
+
+      @Override
+      public void startTransaction(long address, long timestamp, long commitTimestamp) throws PersistitException
+      {
+      }
+
+      @Override
+      public void store(long address, long timestamp, Exchange exchange) throws PersistitException
+      {
+      }
+
+      @Override
+      public void removeKeyRange(long address, long startTimestamp, Exchange exchange, Key from, Key to)
+          throws PersistitException
+      {
+        try {
+          exchange.prune(from, to);
+      } catch (final RebalanceException e) {
+          // ignore
+      }
+      }
+
+      @Override
+      public void removeTree(long address, long timestamp, Exchange exchange) throws PersistitException
+      {
+      }
+
+      @Override
+      public void delta(long address, long timestamp, Tree tree, int index, int accumulatorType, long value)
+          throws PersistitException
+      {
+      }
+
+      @Override
+      public void endTransaction(long address, long timestamp) throws PersistitException
+      {
+      }
+
+      @Override
+      public void endRecovery(long address, long timestamp) throws PersistitException
+      {
+      }
+
+      @Override
+      public boolean requiresLongRecordConversion()
+      {
+        return false;
+      }
+
+      @Override
+      public boolean createTree(long timestamp) throws PersistitException
+      {
+        return false;
+      }
+
     }
 
     class ProactiveRollbackListener implements TransactionPlayerListener {

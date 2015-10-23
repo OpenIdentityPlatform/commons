@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ * Copyright 2015 ForgeRock AS
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +21,8 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -37,19 +38,19 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
         void performAction(Persistit persistit, List<CleanupAction> consequentActions) throws PersistitException;
     }
 
-    final static long DEFAULT_CLEANUP_INTERVAL_MS = 1000;
+    final static long DEFAULT_CLEANUP_INTERVAL_MS = 1_000;
 
-    final static int DEFAULT_QUEUE_SIZE = 50000;
+    final static int DEFAULT_QUEUE_SIZE = 100_000;
 
-    private final static int WORKLIST_LENGTH = 500;
+    private final static int WORKLIST_LENGTH = 2_000;
 
-    private final static long MINIMUM_MAINTENANCE_INTERVAL_NS = 1000000000L;
+    private final static long MINIMUM_MAINTENANCE_INTERVAL_NS = 1_000_000_000L;
 
-    private final static long MINIMUM_PRUNE_OBSOLETE_TRANSACTIONS_INTERVAL_NS = 5000000000L;
+    private final static long MINIMUM_PRUNE_OBSOLETE_TRANSACTIONS_INTERVAL_NS = 2_000_000_000L;
 
-    private final static long DEFAULT_MINIMUM_PRUNING_DELAY_NS = 1000;
+    private final static long DEFAULT_MINIMUM_PRUNING_DELAY_NS = 1_000;
 
-    private final Queue<CleanupAction> _cleanupActionQueue = new ArrayBlockingQueue<CleanupAction>(DEFAULT_QUEUE_SIZE);
+    private final BlockingQueue<CleanupAction> _cleanupActionQueue = new ArrayBlockingQueue<>(DEFAULT_QUEUE_SIZE);
 
     private final AtomicBoolean _closed = new AtomicBoolean();
 
@@ -141,11 +142,10 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
 
     @Override
     public long pollInterval() {
-        if (_cleanupActionQueue.size() < DEFAULT_QUEUE_SIZE / 2) {
+        if (_cleanupActionQueue.size() < DEFAULT_QUEUE_SIZE / 4) {
             return super.getPollInterval();
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     @Override
@@ -163,17 +163,8 @@ class CleanupManager extends IOTaskRunnable implements CleanupManagerMXBean {
             _lastPruneObsoleteTransactions = now;
         }
 
-        final List<CleanupAction> workList = new ArrayList<CleanupAction>(WORKLIST_LENGTH);
-        synchronized (this) {
-            while (workList.size() < WORKLIST_LENGTH) {
-                final CleanupAction action;
-                action = _cleanupActionQueue.poll();
-                if (action == null) {
-                    break;
-                }
-                workList.add(action);
-            }
-        }
+        final List<CleanupAction> workList = new ArrayList<>(WORKLIST_LENGTH);
+        _cleanupActionQueue.drainTo(workList, WORKLIST_LENGTH);
         Collections.sort(workList);
 
         for (final CleanupAction action : workList) {

@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Copyright 2015 ForgeRock AS
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -132,7 +133,7 @@ import static com.persistit.util.ThreadSequencer.sequence;
  * <code>Exchange</code> once it is no longer needed, thereby placing it in the
  * pool for subsequent reuse.
  * </p>
- * 
+ *
  * @version 1.0
  */
 public class Exchange implements ReadOnlyExchange {
@@ -326,7 +327,7 @@ public class Exchange implements ReadOnlyExchange {
    * throws a {@link com.persistit.exception.TreeNotFoundException}.
    * </p>
    * <p>
-   * The <code>volumeName</tt< you supply must match exactly one open 
+   * The <code>volumeName</tt< you supply must match exactly one open
    * <code>Volume</code>. The name matches if either (a) the
    * <code>Volume</code> has an optional alias that is equal to the supplied
    * name, or (b) if the supplied name matches a substring of the
@@ -334,18 +335,18 @@ public class Exchange implements ReadOnlyExchange {
    * you supply, this method throws a
    * {@link com.persistit.exception.VolumeNotFoundException}.
    * </p>
-   * 
+   *
    * @param volumeName
    *            The volume name that either matches the alias or a partially
    *            matches the pathname of exactly one open <code>Volume</code>.
-   * 
+   *
    * @param treeName
    *            The tree name
-   * 
+   *
    * @param create
    *            <code>true</code> to create a new Tree if one by the specified
    *            name does not already exist.
-   * 
+   *
    * @throws PersistitException
    */
   public Exchange(final Persistit persistit, final String volumeName, final String treeName, final boolean create)
@@ -362,7 +363,7 @@ public class Exchange implements ReadOnlyExchange {
    * specified name does not exist, this constructor throws a
    * {@link com.persistit.exception.TreeNotFoundException}.
    * </p>
-   * 
+   *
    * @param volume
    *            The Volume
    * @param treeName
@@ -388,7 +389,7 @@ public class Exchange implements ReadOnlyExchange {
    * are copied to new the <code>Key</code> and new <code>Value</code>
    * associated with this <code>Exchange</code> so that operations on the two
    * <code>Exchange</code>s initially behave identically.
-   * 
+   *
    * @param exchange
    *            The <code>Exchange</code> to copy from.
    */
@@ -400,7 +401,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Construct a new <code>Exchange</code> to access the specified
    * {@link Tree}.
-   * 
+   *
    * @param tree
    *            The <code>Tree</code> to access.
    * @throws BufferSizeUnavailableException
@@ -671,7 +672,7 @@ public class Exchange implements ReadOnlyExchange {
      * that modifying the <code>Key</code> affects the results of subsequent
      * traversal operations.
      * </ul>
-     * 
+     *
      * @param ex
      *            a {@link ReadOnlyExchange} from which the current
      *            <code>Key</code> and <code>Value</code> may be read
@@ -684,7 +685,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Delegate to {@link Key#reset} on the associated <code>Key</code> object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange reset() {
@@ -694,7 +695,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Delegate to {@link Key#clear} on the associated <code>Key</code> object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange clear() {
@@ -705,7 +706,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#setDepth} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange setDepth(final int depth) {
@@ -716,7 +717,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#cut(int)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange cut(final int level) {
@@ -726,7 +727,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Delegate to {@link Key#cut()} on the associated <code>Key</code> object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange cut() {
@@ -737,7 +738,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(boolean)} on the associated
    * <code>Key</code> object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final boolean item) {
@@ -748,7 +749,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(byte)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final byte item) {
@@ -759,7 +760,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(short)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final short item) {
@@ -770,7 +771,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(char)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final char item) {
@@ -781,7 +782,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(int)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final int item) {
@@ -792,7 +793,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(long)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final long item) {
@@ -803,7 +804,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(float)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final float item) {
@@ -814,7 +815,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(double)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final double item) {
@@ -825,7 +826,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#append(Object)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange append(final Object item) {
@@ -836,7 +837,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(boolean)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final boolean item) {
@@ -847,7 +848,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(byte)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final byte item) {
@@ -858,7 +859,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(short)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final short item) {
@@ -869,7 +870,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(char)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final char item) {
@@ -880,7 +881,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(int)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final int item) {
@@ -891,7 +892,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(long)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final long item) {
@@ -902,7 +903,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(float)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final float item) {
@@ -913,7 +914,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(double)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final double item) {
@@ -924,7 +925,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Delegate to {@link Key#to(Object)} on the associated <code>Key</code>
    * object.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining.
    */
   public Exchange to(final Object item) {
@@ -934,7 +935,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Return the {@link Key} associated with this <code>Exchange</code>.
-   * 
+   *
    * @return This <code>Key</code>.
    */
   @Override
@@ -945,7 +946,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Return the {@link Value} associated with this <code>Exchange</code>.
-   * 
+   *
    * @return The <code>Value</code>.
    */
   @Override
@@ -961,7 +962,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Return the {@link Volume} containing the data accessed by this
    * <code>Exchange</code>.
-   * 
+   *
    * @return The <code>Volume</code>.
    */
   @Override
@@ -972,7 +973,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Return the {@link Tree} on which this <code>Exchange</code> operates.
-   * 
+   *
    * @return The <code>Tree</code>
    */
   @Override
@@ -983,7 +984,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Return the Persistit instance from which this Exchange was created.
-   * 
+   *
    * @return The <code>Persistit</code> instance.
    */
   @Override
@@ -998,7 +999,7 @@ public class Exchange implements ReadOnlyExchange {
    * committed by all Threads, including the current one. A structural change
    * is one in which at least one key is inserted or deleted. Replacement of
    * an existing value is not counted.
-   * 
+   *
    * @return The change count
    */
   @Override
@@ -1010,7 +1011,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * An additional <code>Key</code> maintained for the convenience of
    * {@link Transaction}, {@link PersistitMap} and {@link JournalManager}.
-   * 
+   *
    * @return spareKey1
    */
   Key getAuxiliaryKey1() {
@@ -1020,7 +1021,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * An additional <code>Key</code> maintained for the convenience of
    * {@link Transaction}, {@link PersistitMap} and {@link JournalManager}.
-   * 
+   *
    * @return spareKey3
    */
   Key getAuxiliaryKey3() {
@@ -1030,7 +1031,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * An additional <code>Key</code> maintained for the convenience of
    * {@link Transaction}, {@link PersistitMap} and {@link JournalManager}.
-   * 
+   *
    * @return spareKey4
    */
   Key getAuxiliaryKey4() {
@@ -1040,7 +1041,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * An additional <code>Key</code> maintained for the convenience of
    * {@link Transaction}, {@link PersistitMap} and {@link JournalManager}.
-   * 
+   *
    * @return spareKey2
    */
   Key getAuxiliaryKey2() {
@@ -1050,7 +1051,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * An additional <code>Value</code> maintained for the convenience of
    * {@link Transaction}.
-   * 
+   *
    * @return spareValue
    */
   Value getAuxiliaryValue() {
@@ -1060,7 +1061,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Internal value that, if <code>true</code>, indicates the last store
    * operation caused a page split. Reset on every call to a store method.
-   * 
+   *
    * @return storeCausedSplit
    */
   boolean getStoreCausedSplit() {
@@ -1070,7 +1071,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Internal value that is a counter of the total loops of the inner loop of
    * {@link #traverse(com.persistit.Key.Direction, boolean, int, int, int)}.
-   * 
+   *
    * @return {@link #_keysVisitedDuringTraverse}
    */
   int getKeysVisitedDuringTraverse() {
@@ -1080,7 +1081,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Return a displayable String containing the volume name, tree name and
    * current key state for this <code>Exchange</code>.
-   * 
+   *
    * @return The displayable String
    */
   @Override
@@ -1098,7 +1099,7 @@ public class Exchange implements ReadOnlyExchange {
    * (_levelCache[0]) and establishes a claim on a Buffer at that level to
    * which the foundAt value refers. The caller of this method MUST release
    * that Buffer when finished with it.
-   * 
+   *
    * @return Encoded key location within the data page. The page itself is
    *         made valid in the level cache.
    */
@@ -1129,7 +1130,7 @@ public class Exchange implements ReadOnlyExchange {
    * establish a claim on the Buffer before calling this method. This method
    * determines whether information cached in the LevelCache is still valid;
    * if so the previous result is still valid.
-   * 
+   *
    * @param buffer
    * @param key
    * @param lc
@@ -1165,7 +1166,7 @@ public class Exchange implements ReadOnlyExchange {
    * (_levelCache[0]) and establishes a claim on a Buffer at that level to
    * which the foundAt value refers. The caller of this method MUST release
    * that Buffer when finished with it.
-   * 
+   *
    * @return Encoded key location within the level. The page itself is valid
    *         within the level cache.
    */
@@ -1254,7 +1255,7 @@ public class Exchange implements ReadOnlyExchange {
    * specified <code>currentLevel</code> and establishes a claim on a Buffer
    * at that level. The caller of this method MUST release that Buffer when
    * finished with it.
-   * 
+   *
    * @param key
    *            Key to search for
    * @param edge
@@ -1338,7 +1339,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Inserts or replaces a data value in the database.
-   * 
+   *
    * @param key
    *            The key to store.
    * @param value
@@ -1369,11 +1370,11 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Inserts or replaces a data value in the database starting at a specified
    * level and working up toward the root of the tree.
-   * 
+   *
    * <p>
    * <b>Note: Fetch and MVCC are exclusive options.</b>
    * </p>
-   * 
+   *
    * @param key
    *            The key to store.
    * @param value
@@ -1848,7 +1849,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Inserts a data or pointer value into a level of the tree.
-   * 
+   *
    * @param buffer
    *            The buffer containing the insert location. The buffer must
    *            have a writer claim on it, and must be reserved.
@@ -1982,10 +1983,10 @@ public class Exchange implements ReadOnlyExchange {
    * otherwise find the next smaller key and return it.</dd>
    * </dl>
    * </p>
-   * 
+   *
    * @param direction
    *            One of Key.GT, Key.GTEQ, Key.EQ, Key.LT or Key.LTEQ.
-   * 
+   *
    * @param deep
    *            Determines whether the result should represent the next (or
    *            previous) physical key in the <code>Tree</code> or should be
@@ -2039,23 +2040,23 @@ public class Exchange implements ReadOnlyExchange {
    * otherwise find the next smaller key and return it.</dd>
    * </dl>
    * </p>
-   * 
+   *
    * @param direction
    *            One of Key.GT, Key.GTEQ, Key.EQ, Key.LT or Key.LTEQ.
-   * 
+   *
    * @param deep
    *            Determines whether the result should represent the next (or
    *            previous) physical key in the <code>Tree</code> or should be
    *            restricted to just the logical siblings of the current key.
    *            (See <a href="Key.html#_keyChildren">Logical Key Children and
    *            Siblings</a>).
-   * 
+   *
    * @param minimumBytes
    *            The minimum number of bytes to fetch. See {@link #fetch(int)}.
-   * 
+   *
    * @return <code>true</code> if there is a key to traverse to, else
    *         <code>false</code>.
-   * 
+   *
    * @throws PersistitException
    */
   public boolean traverse(final Direction direction, final boolean deep, final int minimumBytes)
@@ -2066,7 +2067,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * See {@link #traverse(com.persistit.Key.Direction, boolean, int)} for full
    * description
-   * 
+   *
    * @param minKeyDepth
    *            Minimum valid key depth. If a key is found with a depth less
    *            than this value, <i>regardless of MVCC visibility</i>,
@@ -2414,26 +2415,26 @@ public class Exchange implements ReadOnlyExchange {
    * otherwise find the next smaller key and return it.</dd>
    * </dl>
    * </p>
-   * 
+   *
    * @param direction
    *            One of Key.GT, Key.GTEQ, Key.EQ, Key.LT or Key.LTEQ.
-   * 
+   *
    * @param deep
    *            Determines whether the result should represent the next (or
    *            previous) physical key in the <code>Tree</code> or should be
    *            restricted to just the logical siblings of the current key.
    *            (See <a href="Key.html#_keyChildren">Logical Key Children and
    *            Siblings</a>).
-   * 
+   *
    * @param minimumBytes
    *            The minimum number of bytes to fetch. See {@link #fetch(int)}.
-   * 
+   *
    * @param visitor
    *            The application-supplied <code>TraverseVisitor</code>.
-   * 
+   *
    * @return <code>true</code> if additional keys remaining in the traversal
    *         set, or <code>false</code> to indicate that keys are exhausted.
-   * 
+   *
    * @throws PersistitException
    */
 
@@ -2469,21 +2470,21 @@ public class Exchange implements ReadOnlyExchange {
    * otherwise find the next smaller key and return it.</dd>
    * </dl>
    * </p>
-   * 
+   *
    * @param direction
    *            One of Key.GT, Key.GTEQ, Key.EQ, Key.LT or Key.LTEQ.
-   * 
+   *
    * @param keyFilter
    *            A KeyFilter that constrains the keys returned by this
    *            operation.
-   * 
+   *
    * @param minBytes
    *            The minimum number of bytes to fetch. See {@link #fetch(int)}.
    *            If minBytes is less than or equal to 0 then this method does
    *            not update the Key and Value fields of the Exchange.
-   * 
+   *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * 
+   *
    * @throws PersistitException
    */
   public boolean traverse(final Direction direction, final KeyFilter keyFilter, final int minBytes)
@@ -2535,7 +2536,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Traverses to the next logical sibling key value. Equivalent to
    * <code>traverse(Key.GT, false)</code>.
-   * 
+   *
    * @return <code>true</code> if there is a key to traverse to, else null.
    * @throws PersistitException
    */
@@ -2546,7 +2547,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Traverses to the previous logical sibling key value. Equivalent to
    * <code>traverse(Key.LT, false)</code>.
-   * 
+   *
    * @return <code>true</code> if there is a key to traverse to, else null.
    * @throws PersistitException
    */
@@ -2557,14 +2558,14 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Traverses to the next key with control over depth. Equivalent to
    * <code>traverse(Key.GT, deep)</code>.
-   * 
+   *
    * @param deep
    *            Determines whether the result should represent the next (or
    *            previous) physical key in the <code>Tree</code> or should be
    *            restricted to just the logical siblings of the current key.
    *            (See <a href="Key.html#_keyChildren">Logical Key Children and
    *            Siblings</a>).
-   * 
+   *
    * @return <code>true</code> if there is a key to traverse to, else null.
    * @throws PersistitException
    */
@@ -2575,16 +2576,16 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Traverses to the previous key with control over depth. Equivalent to
    * <code>traverse(Key.LT, deep)</code>.
-   * 
+   *
    * @param deep
    *            Determines whether the result should represent the next (or
    *            previous) physical key in the <code>Tree</code> or should be
    *            restricted to just the logical siblings of the current key.
    *            (See <a href="Key.html#_keyChildren">Logical Key Children and
    *            Siblings</a>).
-   * 
+   *
    * @return <code>true</code> if there is a key to traverse to, else null.
-   * 
+   *
    * @throws PersistitException
    */
   public boolean previous(final boolean deep) throws PersistitException {
@@ -2595,7 +2596,7 @@ public class Exchange implements ReadOnlyExchange {
    * Traverses to the next key value within the subset of all keys defined by
    * the supplied KeyFilter. Whether logical children of the current key value
    * are included in the result is determined by the <code>KeyFilter</code>.
-   * 
+   *
    * @return <code>true</code> if there is a key to traverse to, else null.
    * @throws PersistitException
    */
@@ -2608,7 +2609,7 @@ public class Exchange implements ReadOnlyExchange {
    * by the supplied KeyFilter. Whether logical children of the current key
    * value are included in the result is determined by the
    * <code>KeyFilter</code>.
-   * 
+   *
    * @return <code>true</code> if there is a key to traverse to, else null.
    * @throws PersistitException
    */
@@ -2621,9 +2622,9 @@ public class Exchange implements ReadOnlyExchange {
    * without changing the state of <code>Key</code> or <code>Value</code>.
    * This method is equivalent to {@link #next()} except that no state is
    * changed.
-   * 
+   *
    * @return <code>true</code> if the key has a successor
-   * 
+   *
    * @throws PersistitException
    */
   public boolean hasNext() throws PersistitException {
@@ -2634,9 +2635,9 @@ public class Exchange implements ReadOnlyExchange {
    * Determines whether the current key has a successor within the subset of
    * all keys defined by a <code>KeyFilter</code>. This method does not change
    * the state of <code>Key</code> or <code>Value</code>.
-   * 
+   *
    * @return <code>true</code> if the key has a successor
-   * 
+   *
    * @throws PersistitException
    */
   public boolean hasNext(final KeyFilter filter) throws PersistitException {
@@ -2653,16 +2654,16 @@ public class Exchange implements ReadOnlyExchange {
    * without changing the state of <code>Key</code> or <code>Value</code>.
    * This method is equivalent to {@link #next(boolean)} except that no state
    * is changed.
-   * 
+   *
    * @param deep
    *            Determines whether the predecessor may be of any logical depth
    *            (<code>true</code>, or must be a restricted logical siblings (
    *            <code>false</code>) of the current key. (See <a
    *            href="Key.html#_keyChildren">Logical Key Children and
    *            Siblings</a>).
-   * 
+   *
    * @return <code>true</code> if the key has a successor
-   * 
+   *
    * @throws PersistitException
    */
   public boolean hasNext(final boolean deep) throws PersistitException {
@@ -2674,7 +2675,7 @@ public class Exchange implements ReadOnlyExchange {
    * without changing the state of <code>Key</code> or <code>Value</code>.
    * This method is equivalent to {@link #previous()} except that no state is
    * changed.
-   * 
+   *
    * @return <code>true</code> if the key has a predecessor
    * @throws PersistitException
    */
@@ -2687,16 +2688,16 @@ public class Exchange implements ReadOnlyExchange {
    * without changing the state of <code>Key</code> or <code>Value</code>.
    * This method is equivalent to {@link #previous(boolean)} except that no
    * state is changed.
-   * 
+   *
    * @param deep
    *            Determines whether the predecessor may be of any logical depth
    *            (<code>true</code>, or must be a restricted logical siblings (
    *            <code>false</code>) of the current key. (See <a
    *            href="Key.html#_keyChildren">Logical Key Children and
    *            Siblings</a>).
-   * 
+   *
    * @return <code>true</code> if the key has a predecessor
-   * 
+   *
    * @throws PersistitException
    */
   public boolean hasPrevious(final boolean deep) throws PersistitException {
@@ -2707,9 +2708,9 @@ public class Exchange implements ReadOnlyExchange {
    * Determines whether the current key has a predecessor within the subset of
    * all keys defined by a <code>KeyFilter</code>. This method does not change
    * the state of <code>Key</code> or <code>Value</code>.
-   * 
+   *
    * @return <code>true</code> if the key has a successor
-   * 
+   *
    * @throws PersistitException
    */
   public boolean hasPrevious(final KeyFilter filter) throws PersistitException {
@@ -2726,9 +2727,9 @@ public class Exchange implements ReadOnlyExchange {
    * whether a {@link #fetch} operation would return a defined value - without
    * actually changing the state of either the <code>Key</code> or the
    * <code>Value</code>.
-   * 
+   *
    * @return <code>true</code> if the key has an associated value
-   * 
+   *
    * @throws PersistitException
    */
   public boolean isValueDefined() throws PersistitException {
@@ -2739,7 +2740,7 @@ public class Exchange implements ReadOnlyExchange {
    * Insert the current <code>Key</code> and <code>Value</code> pair into this
    * <code>Exchange</code>'s <code>Tree</code>. If there already is a value
    * associated with the current key, then replace it.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining
    * @throws PersistitException
    */
@@ -2751,7 +2752,7 @@ public class Exchange implements ReadOnlyExchange {
    * Invoke {@link #lock(Key, long)} with the current key and a default
    * timeout value of
    * {@value com.persistit.SharedResource#DEFAULT_MAX_WAIT_TIME} milliseconds.
-   * 
+   *
    * @throws PersistitException
    */
   public void lock() throws PersistitException {
@@ -2762,7 +2763,7 @@ public class Exchange implements ReadOnlyExchange {
    * Invoke {@link #lock(Key, long)} with the supplied key and a default
    * timeout value of
    * {@value com.persistit.SharedResource#DEFAULT_MAX_WAIT_TIME} milliseconds.
-   * 
+   *
    * @param key
    *            The key to lock
    * @throws PersistitException
@@ -2829,7 +2830,7 @@ public class Exchange implements ReadOnlyExchange {
    * transaction; the potential deadlock is detected immediately and this
    * method immediately throws a <code>RollbackException</code>.
    * </p>
-   * 
+   *
    * @param lockKey
    *            the source Key
    * @param timeout
@@ -2869,7 +2870,7 @@ public class Exchange implements ReadOnlyExchange {
    * updates the value. Effectively this swaps the content of
    * <code>Value</code> with the database record associated with the current
    * <code>key</code>. It is equivalent to the code: <blockquote>
-   * 
+   *
    * <pre>
    *  Value tempValue = new Value();
    *  <i>exchange</i>.fetch(tempValue);
@@ -2877,10 +2878,10 @@ public class Exchange implements ReadOnlyExchange {
    *  tempValue.copyTo(exchange.getValue());
    *  return <i>exchange</i>;
    * </pre>
-   * 
+   *
    * </blockquote> except that this operation is performed atomically, without
    * need for external synchronization.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining
    * @throws PersistitException
    */
@@ -2906,7 +2907,7 @@ public class Exchange implements ReadOnlyExchange {
    * then {@link Value#isDefined} is false. Otherwise the value may be
    * retrieved using {@link Value#get} and other methods of <code>Value</code>
    * .
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining
    * @throws PersistitException
    */
@@ -2932,11 +2933,11 @@ public class Exchange implements ReadOnlyExchange {
    * database. This might allow an application to determine whether to
    * retrieve the rest of the value.
    * </p>
-   * 
+   *
    * @param minimumBytes
    *            specifies a length at which Persistit will truncate the
    *            returned value.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining
    * @throws PersistitException
    */
@@ -2951,11 +2952,11 @@ public class Exchange implements ReadOnlyExchange {
    * the fetched state. If there is no value associated with the key then
    * {@link Value#isDefined} is false. Otherwise the value may be retrieved
    * using {@link Value#get} and other methods of <code>Value</code>.
-   * 
+   *
    * @param value
    *            the <code>Value</code> into which the database value should be
    *            fetched.
-   * 
+   *
    * @return This <code>Exchange</code> to permit method call chaining
    * @throws PersistitException
    */
@@ -2968,14 +2969,14 @@ public class Exchange implements ReadOnlyExchange {
    * assumed, but not required, to be an MVV. The correct version is
    * determined by the current transactions start timestamp. If no transaction
    * is active, the highest committed version is returned.
-   * 
+   *
    * <p>
    * <b>Note</b>: This method only determines the visible version and copies
    * it into <code>value</code>, or clears it if there isn't one. It may still
    * be a LONG_RECORD or AntiValue
    * </p>
    * .
-   * 
+   *
    * @param value
    *            The <code>Value</code> into which the value should be fetched.
    * @param minimumBytes
@@ -3034,15 +3035,15 @@ public class Exchange implements ReadOnlyExchange {
    * database. This might allow an application to determine whether to
    * retrieve the rest of the value using the {@link #fetch()} operation.
    * </p>
-   * 
+   *
    * @param value
    *            the <code>Value</code> into which the database value should be
    *            fetched.
    * @param minimumBytes
    *            specifies a length at which Persistit will truncate the
    *            returned value.
-   * 
-   * 
+   *
+   *
    * @return This <code>Exchange</code> to permit method call chaining
    * @throws PersistitException
    */
@@ -3061,7 +3062,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Helper for fully pulling a value out of a Buffer. That is, if the value
    * is a LONG_RECORD it will also be fetched.
-   * 
+   *
    * @param buffer
    *            Buffer to read from.
    * @param value
@@ -3084,7 +3085,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Helper for finalizing the value to return from a, potentially, MVV
    * contained in the given Value.
-   * 
+   *
    * @param value
    *            Value to finalize.
    * @param minimumBytes
@@ -3112,11 +3113,6 @@ public class Exchange implements ReadOnlyExchange {
        */
       fetchFixupForLongRecords(value, Integer.MAX_VALUE);
       if (MVV.isArrayMVV(value.getEncodedBytes(), 0, value.getEncodedSize())) {
-        if (bufferForPruning != null) {
-          final int treeHandle = _tree.getHandle();
-          assert treeHandle != 0 : "MVV found in a temporary tree " + _tree;
-          bufferForPruning.enqueuePruningAction(treeHandle);
-        }
         visible = mvccFetch(value, minimumBytes);
         fetchFixupForLongRecords(value, minimumBytes);
       }
@@ -3134,7 +3130,7 @@ public class Exchange implements ReadOnlyExchange {
    * Looks the current key, {@link #_key}, up in the tree and fetches the
    * value from the page. The value is left as found. Specifically, that means
    * it can be a <b>user value, LONG_RECORD, or MVV</b>.
-   * 
+   *
    * @param value
    *            The value as found on the page.
    * @param minimumBytes
@@ -3185,7 +3181,7 @@ public class Exchange implements ReadOnlyExchange {
    * current <code>Key</code>. A logical child is a key that can be formed by
    * appending a value to the parent. (See <a
    * href="Key.html#_keyChildren">Logical Key Children and Siblings</a>).
-   * 
+   *
    * @return <code>true</code> if the current <code>Key</code> has logical
    *         children
    * @throws PersistitException
@@ -3205,7 +3201,7 @@ public class Exchange implements ReadOnlyExchange {
    * fetches the former value then deletes it. If there was no value formerly
    * associated with the key then <code>Value</code> becomes undefined - that
    * is, the value of {@link Value#isDefined} becomes <code>false</code>.
-   * 
+   *
    * @return <code>true</code> if there was a key/value pair to remove
    * @throws PersistitException
    */
@@ -3225,7 +3221,7 @@ public class Exchange implements ReadOnlyExchange {
    * based on. Subsequent to successful completion of this method, the
    * <code>Exchange</code> will no longer be usable. Attempts to perform
    * operations on it will result in an <code>IllegalStateException</code>.
-   * 
+   *
    * @throws PersistitException
    */
   public void removeTree() throws PersistitException {
@@ -3246,7 +3242,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Remove a single key/value pair from the this <code>Exchange</code>'s
    * <code>Tree</code>.
-   * 
+   *
    * @return <code>true</code> if there was a key/value pair to remove
    * @throws PersistitException
    */
@@ -3256,7 +3252,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Remove all keys in this <code>Exchange</code>'s <code>Tree</code>.
-   * 
+   *
    * @return <code>true</code> if there were key/value pairs removed
    * @throws PersistitException
    */
@@ -3282,7 +3278,7 @@ public class Exchange implements ReadOnlyExchange {
    * <dd>Remove the record associated with the current key AND its logical
    * children.</dd>
    * </dl>
-   * 
+   *
    * @param direction
    *            One of Key.EQ, Key.GT, Key.GTEQ
    * @return <code>true</code> if one or more records were actually removed,
@@ -3329,21 +3325,21 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Removes all records with keys falling between <code>key1</code> and
    * <code>key2</code>, left-inclusive.
-   * 
+   *
    * @param key1
    *            Start of the deletion range. No record with a key smaller than
    *            key1 will be removed. key1 may be empty, in which case all
    *            records having keys less than key2 will be removed.
-   * 
+   *
    * @param key2
    *            End of the deletion range. No record with a key greater than
    *            or equal to key2 will be removed. key2 may be empty, in which
    *            case all records having keys equal to or greater than key1
    *            will be removed.
-   * 
+   *
    * @return <code>true</code> if one or more records were actually removed,
    *         else <i>false</i>.
-   * 
+   *
    * @throws PersistitException
    *             if there are any internal errors
    * @throws IllegalArgumentException
@@ -3375,7 +3371,7 @@ public class Exchange implements ReadOnlyExchange {
    * Removes all records with keys falling between <code>key1</code> and
    * </code>key2</code>, left-inclusive. Validity checks and Key value
    * adjustments have been done by caller - this method does the work.
-   * 
+   *
    * @param key1
    *            Key that is less than or equal to the leftmost to be removed
    * @param key2
@@ -3462,7 +3458,7 @@ public class Exchange implements ReadOnlyExchange {
    * Removes all records with keys falling between <code>key1</code> and
    * </code>key2</code>, lefty-inclusive. Validity checks and Key value
    * adjustments have been done by caller - this method does the work.
-   * 
+   *
    * @param key1
    *            Key that is less than or equal to the leftmost to be removed
    * @param key2
@@ -3887,7 +3883,7 @@ public class Exchange implements ReadOnlyExchange {
    * method inserts an empty record with key being deleted, allowing the
    * {@link Buffer#split(Buffer, Key, ValueHelper, int, Key, Sequence, SplitPolicy)}
    * method to be used.
-   * 
+   *
    * @param lc
    *            LevelCache set up by raw_removeKeyRangeInternal
    * @throws PersistitException
@@ -4119,7 +4115,7 @@ public class Exchange implements ReadOnlyExchange {
    * Assert that the current thread matches the "owner" of the Exchange. The
    * owner is set when the Exchange is created or first used. To enable
    * pooling, the {@link #removeState(boolean)} method clears it.
-   * 
+   *
    * @param set
    *            Whether to set or clear the thread field for subsequent
    *            checks.
@@ -4131,7 +4127,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Ensure the this Exchange is compatible with the current Thread; if a
    * Thread was previously assigned then this thread must be the same one.
-   * 
+   *
    * @param set
    *            whether to assign the current thread
    * @return true if and only if there was no assigned Thread or the assigned
@@ -4159,7 +4155,7 @@ public class Exchange implements ReadOnlyExchange {
    * transaction context of the current thread, and by default, all
    * <code>Exchange</code>s created by a thread share the same transaction
    * context.
-   * 
+   *
    * @return The <code>Transaction</code> context for this thread.
    */
   @Override
@@ -4179,7 +4175,7 @@ public class Exchange implements ReadOnlyExchange {
    * Allows for all MVV contents to be returned through the Value object
    * during fetch. This can then be displayed conveniently through
    * {@link Value#toString()} or as an array from {@link Value#get()}.
-   * 
+   *
    * @param doIgnore
    *            If <code>true</code> return MVVs as described otherwise return
    *            the appropriate single version.
@@ -4195,7 +4191,7 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Package-private method indicates whether this <code>Exchange</code>
    * refers to the directory tree.
-   * 
+   *
    * @return <code>true</code> if this is a directory exchange, else
    *         <code>false</code>.
    */
@@ -4294,7 +4290,7 @@ public class Exchange implements ReadOnlyExchange {
 
   /**
    * Store an Object with this Exchange for the convenience of an application.
-   * 
+   *
    * @param appCache
    *            the object to be cached for application convenience.
    */
@@ -4340,7 +4336,7 @@ public class Exchange implements ReadOnlyExchange {
    * The supplied value must be greater than or equal to zero. Zero means do
    * not wait.
    * </p>
-   * 
+   *
    * @param timeout
    *            Standard timeout setting, in milliseconds, for operations that
    *            wait.
@@ -4355,7 +4351,7 @@ public class Exchange implements ReadOnlyExchange {
    * key, then copies and returns the page at the specified tree level in a
    * new Buffer. The resulting Buffer object is not part of the BufferPool and
    * can simply be discarded when the caller is finished with it.
-   * 
+   *
    * @param level
    *            The tree level, starting at zero for the data page.
    * @return copy of page on the key's index tree at that level.
@@ -4399,7 +4395,7 @@ public class Exchange implements ReadOnlyExchange {
    * Intended to be a test method. Fetches the current _key and determines if
    * stored value is a LONG_RECORD. No other state, including the fetched
    * value, can be gotten from this method.
-   * 
+   *
    * @return <code>true</code> if the value is a LONG_RECORD
    * @throws PersistitException
    *             Any error during fetch
@@ -4421,7 +4417,7 @@ public class Exchange implements ReadOnlyExchange {
    * Intended to be a test method. Fetches the current _key and determines if
    * stored value is a long MVV. No other state, including the fetched value,
    * can be gotten from this method.
-   * 
+   *
    * @return <code>true</code> if the value is a long MVV
    * @throws PersistitException
    *             Any error during fetch
@@ -4453,14 +4449,14 @@ public class Exchange implements ReadOnlyExchange {
   /**
    * Modifies the maximum size to which the value backing buffer can grow and trims
    * the current backing buffer to be no larger than the new maximum.
-   * 
+   *
    * @param size
    *            The maximum size
-   * 
+   *
    * @throws IllegalArgumentException
    *             If the backing buffer is already larger than
    *             <code>size</code>, this method
-   * 
+   *
    */
   public void setMaximumValueSize(int size) {
     _value.setMaximumSize(size);
