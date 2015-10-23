@@ -32,8 +32,7 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/util/CookieHelper",
                 "org/forgerock/commons/ui/common/main/SessionManager"
             ],
-            processDescription: function(event, Router, Configuration, UIUtils, CookieHelper,
-                                         SessionManager) {
+            processDescription: function(event, Router, Configuration, UIUtils, CookieHelper, SessionManager) {
                 var postSessionCheck = function () {
                     UIUtils.preloadInitialTemplates();
                     UIUtils.preloadInitialPartials();
@@ -58,9 +57,12 @@ define("config/process/CommonConfig", [
             description: "",
             dependencies: [
                 "org/forgerock/commons/ui/common/components/Navigation",
+                "org/forgerock/commons/ui/common/components/LoginHeader",
                 "Footer"
+
             ],
-            processDescription: function(event, Navigation, Footer) {
+            processDescription: function(event, Navigation, LoginHeader, Footer) {
+                LoginHeader.render();
                 Navigation.init();
                 Footer.render();
             }
