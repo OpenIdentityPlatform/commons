@@ -38,9 +38,9 @@ import java.util.Collections;
  * The purpose of this handler is mainly to be able to assess performance of the Audit Service alone, without
  * the cost implied by the actual handlers.
  */
-public class NullAuditEventHandler extends AuditEventHandlerBase {
+public class NoOpAuditEventHandler extends AuditEventHandlerBase {
 
-    public NullAuditEventHandler() {
+    public NoOpAuditEventHandler() {
         super("NullAuditEventHandler",
                 new EventTopicsMetaData(Collections.<String, JsonValue>emptyMap()), Collections.<String>emptySet());
     }
