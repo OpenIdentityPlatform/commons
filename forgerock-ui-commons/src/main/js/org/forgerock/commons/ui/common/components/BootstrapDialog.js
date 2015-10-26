@@ -20,6 +20,10 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialog", [
     "jquery",
     "bootstrap-dialog"
 ], function (_, $, BootstrapDialog) {
+    function forceFocus (dialog) {
+        dialog.$modalContent.find("[autofocus]").focus();
+    }
+
     /**
      * @exports org/forgerock/commons/ui/common/components/BootstrapDialog
      */
@@ -47,6 +51,12 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialog", [
             // The title then inherits from this.
             type = type.replace("type", "text");
             dialog.getModalHeader().addClass(type);
+
+            /**
+             * Workaround for autofocus having no effect in Bootstrap modals
+             * @see http://getbootstrap.com/javascript/#modals
+             */
+            dialog.onShown(forceFocus);
 
             return dialog;
         };
