@@ -23,6 +23,10 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialogView", [
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/util/UIUtils"
 ], function($, _, AbstractView, ModuleLoader, UIUtils) {
+    /**
+     * @exports org/forgerock/commons/ui/common/components/BootstrapDialogView
+     * @deprecated
+     */
     var BootstrapDialogView = AbstractView.extend({
         contentTemplate: "templates/common/DefaultBaseTemplate.html",
         data: { },
