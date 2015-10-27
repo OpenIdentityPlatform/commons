@@ -16,29 +16,43 @@
 
 package org.forgerock.audit;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.audit.events.EventTopicsMetaDataBuilder.coreTopicSchemas;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandlerConfiguration;
+import org.forgerock.audit.filter.FilterPolicy;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -49,13 +63,12 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
-
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -63,6 +76,8 @@ import org.testng.annotations.Test;
 public class AuditServiceImplTest {
 
     private static final String QUERY_HANDLER_NAME = "pass-through";
+    public static final String FILTERED_FIELD = "filteredField";
+    public static final String FILTERED_VALUE = "filteredValue";
 
     private EventTopicsMetaData eventTopicsMetaData;
 
@@ -73,12 +88,13 @@ public class AuditServiceImplTest {
 
     @Test
     public void shouldDelegateCreateRequestToRegisteredHandler() throws Exception {
+        final String topic = "access";
         final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
         configuration.setName("mock");
-        configuration.setTopics(Collections.singleton("access"));
+        configuration.setTopics(Collections.singleton(topic));
         final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic))
                 .withAuditEventHandler(clazz, configuration)
                 .build();
         auditService.startup();
@@ -105,16 +121,17 @@ public class AuditServiceImplTest {
     @Test
     public void shouldIgnoreCreateRequestIfAuditEventTopicNotMappedToHandler() throws Exception {
         //given
+        final String topic = "activity";
         final AuditService auditService = newAuditService().build();
         auditService.startup();
-        final CreateRequest createRequest = makeCreateRequest("activity");
+        final CreateRequest createRequest = makeCreateRequest(topic);
 
         //when
         final Promise<ResourceResponse, ResourceException> promise =
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
-        assertThat(auditService.isAuditing("activity")).isFalse();
+        assertThat(auditService.isAuditing(topic)).isFalse();
         assertThat(promise)
                 .succeeded()
                 .withObject()
@@ -123,15 +140,16 @@ public class AuditServiceImplTest {
         // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
-        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+        assertThat(resource.getContent().asMap()).isEqualTo(Collections.emptyMap());
     }
 
     @Test
     public void shouldFailCreateRequestIfAuditEventTopicIsNotKnown() throws ServiceUnavailableException {
         //given
+        final String topic = "unknownTopic";
         final AuditService auditService = newAuditService().build();
         auditService.startup();
-        final CreateRequest createRequest = makeCreateRequest("unknownTopic");
+        final CreateRequest createRequest = makeCreateRequest(topic);
 
         //when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -147,7 +165,8 @@ public class AuditServiceImplTest {
     @Test
     public void shouldDelegateReadRequestToConfiguredHandlerForQueries() throws Exception {
         //given
-        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME);
+        final String topic = "access";
+        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic);
         final PassThroughAuditEventHandler queryAuditEventHandler = spyPassThroughAuditEventHandler(QUERY_HANDLER_NAME);
         final PassThroughAuditEventHandler otherAuditEventHandler = spyPassThroughAuditEventHandler("otherHandler");
         final Set<AuditEventHandler> handlers = asSet(queryAuditEventHandler, otherAuditEventHandler);
@@ -157,9 +176,9 @@ public class AuditServiceImplTest {
         final Promise<ResourceResponse, ResourceException> dummyResponse =
                 newResourceResponse(null, null, json(object())).asPromise();
         reset(otherAuditEventHandler); // So verifyZeroInteractions will work
-        given(queryAuditEventHandler.readEvent(any(Context.class), eq("access"), eq("1234"))).willReturn(dummyResponse);
+        given(queryAuditEventHandler.readEvent(any(Context.class), eq(topic), eq("1234"))).willReturn(dummyResponse);
 
-        final ReadRequest readRequest = Requests.newReadRequest("access", "1234");
+        final ReadRequest readRequest = Requests.newReadRequest(topic, "1234");
 
         //when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -173,7 +192,7 @@ public class AuditServiceImplTest {
     @Test
     public void shouldNotSupportDeleteOfAuditEvents() throws ResourceException {
         final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, null))
                 .build();
         //when
         Promise<ResourceResponse, ResourceException> promise =
@@ -190,7 +209,7 @@ public class AuditServiceImplTest {
     @Test
     public void shouldNotSupportPatchOfAuditEvents() throws ResourceException {
         final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, null))
                 .build();
 
         //when
@@ -208,7 +227,7 @@ public class AuditServiceImplTest {
     @Test
     public void shouldNotSupportUpdateOfAuditEvents() throws ResourceException {
         final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, null))
                 .build();
 
         //when
@@ -226,7 +245,7 @@ public class AuditServiceImplTest {
     @Test
     public void shouldNotSupportActions() throws ResourceException {
         final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, null))
                 .build();
 
         //when
@@ -243,7 +262,8 @@ public class AuditServiceImplTest {
 
     @Test
     public void shouldDelegateQueryRequestToConfiguredHandlerForQueries() throws Exception {
-        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME);
+        final String topic = "access";
+        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic);
         final PassThroughAuditEventHandler eventHandler = spyPassThroughAuditEventHandler(QUERY_HANDLER_NAME);
         final Set<AuditEventHandler> handlers = asSet(eventHandler);
         final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
@@ -257,7 +277,7 @@ public class AuditServiceImplTest {
         //when
         final Promise<QueryResponse, ResourceException> promise = auditService.handleQuery(
                 new RootContext(),
-                newQueryRequest("access"),
+                newQueryRequest(topic),
                 mock(QueryResourceHandler.class));
 
         //then
@@ -268,8 +288,9 @@ public class AuditServiceImplTest {
 
     @Test
     public void shouldFailCreateRequestIfAuditEventIsMissingTransactionId() throws ResourceException {
+        final String topic = "access";
         final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic))
                 .build();
         auditService.startup();
 
@@ -277,7 +298,7 @@ public class AuditServiceImplTest {
         final JsonValue content = json(object(field("_id", "_id"),
                 field("timestamp", "timestamp")));
 
-        final CreateRequest createRequest = newCreateRequest("access", content);
+        final CreateRequest createRequest = newCreateRequest(topic, content);
 
         //when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -291,8 +312,9 @@ public class AuditServiceImplTest {
 
     @Test
     public void shouldFailCreateRequestIfAuditEventIsMissingTimestamp() throws ResourceException {
+        final String topic = "access";
         final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic))
                 .build();
         auditService.startup();
 
@@ -300,7 +322,7 @@ public class AuditServiceImplTest {
         final JsonValue content = json(object(field("_id", "_id"),
                 field("transactionId", "transactionId")));
 
-        final CreateRequest createRequest = newCreateRequest("access", content);
+        final CreateRequest createRequest = newCreateRequest(topic, content);
 
         //when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -547,13 +569,14 @@ public class AuditServiceImplTest {
 
     @Test
     public void shouldNotDelegateCreateRequestToADisabledHandler() throws Exception {
+        final String topic = "access";
         final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
         configuration.setName("mock");
-        configuration.setTopics(Collections.singleton("access"));
+        configuration.setTopics(Collections.singleton(topic));
         configuration.setEnabled(false);
         final AuditService auditService = newAuditService()
-                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic))
                 .withAuditEventHandler(clazz, configuration)
                 .build();
         auditService.startup();
@@ -565,7 +588,7 @@ public class AuditServiceImplTest {
                 auditService.handleCreate(new RootContext(), createRequest);
 
         //then
-        assertThat(auditService.isAuditing("access")).isFalse();
+        assertThat(auditService.isAuditing(topic)).isFalse();
         assertThat(promise)
                 .succeeded()
                 .withObject()
@@ -574,14 +597,56 @@ public class AuditServiceImplTest {
         // TODO should use AssertJResourceResponseAssert
         final ResourceResponse resource = promise.get();
         assertThat(resource).isNotNull();
-        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+        assertThat(resource.getContent().asMap()).isEqualTo(Collections.emptyMap());
     }
 
-    private AuditServiceConfiguration getAuditServiceConfiguration(String queryHandlerName) {
+    @Test
+    public void shouldDelegateFilteredCreateRequestToRegisteredHandler() throws Exception {
+        final String topic = "access";
+        final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
+        final PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
+        configuration.setName("mock");
+        configuration.setTopics(Collections.singleton(topic));
+        final AuditService auditService = newAuditService()
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic))
+                .withAuditEventHandler(clazz, configuration)
+                .build();
+        auditService.startup();
+
+        final CreateRequest createRequest = makeCreateRequest();
+        final JsonValue expectedResponseContent = makeCreateContent();
+        expectedResponseContent.remove(FILTERED_FIELD);
+        expectedResponseContent.remove(FILTERED_VALUE);
+
+        //when
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleCreate(new RootContext(), createRequest);
+
+        //then
+        assertThat(auditService.isAuditing(topic)).isTrue();
+        assertThat(promise)
+                .succeeded()
+                .withObject()
+                .isInstanceOf(ResourceResponse.class);
+
+        // TODO should use AssertJResourceResponseAssert
+        final ResourceResponse resource = promise.get();
+        expectedResponseContent.put("_id", resource.getId());
+        assertThat(resource).isNotNull();
+        assertThat(resource.getContent().asMap()).isEqualTo(expectedResponseContent.asMap());
+    }
+
+    private AuditServiceConfiguration getAuditServiceConfiguration(String queryHandlerName, String topic) {
         final AuditServiceConfiguration config = new AuditServiceConfiguration();
         config.setHandlerForQueries(queryHandlerName);
         config.setAvailableAuditEventHandlers(
                 singletonList("org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler"));
+        if (topic != null) {
+            final Map<String, FilterPolicy> filterPolicies = new LinkedHashMap<>();
+            filterPolicies.put("value", createValueFilter(topic));
+            filterPolicies.put("field", createFieldFilter(topic));
+            config.setFilterPolicies(filterPolicies);
+        }
         return config;
     }
 
@@ -590,13 +655,33 @@ public class AuditServiceImplTest {
     }
 
     public static CreateRequest makeCreateRequest(String event) {
-        final JsonValue content = json(
+        return newCreateRequest(event, makeCreateContent());
+    }
+
+    public static JsonValue makeCreateContent() {
+        return json(
                 object(
                         field("_id", "_id"),
                         field("timestamp", "timestamp"),
-                        field("transactionId", "transactionId"))
+                        field("transactionId", "transactionId"),
+                        field(FILTERED_FIELD, "value"),
+                        field(FILTERED_VALUE, "value")
+                )
         );
-        return newCreateRequest(event, content);
+    }
+
+    private static FilterPolicy createFieldFilter(final String event) {
+        final FilterPolicy filterPolicy = new FilterPolicy();
+        filterPolicy.setIncludeIf(Collections.EMPTY_LIST);
+        filterPolicy.setExcludeIf(asList("/" + event + "/" + FILTERED_FIELD));
+        return filterPolicy;
+    }
+
+    private static FilterPolicy createValueFilter(final String event) {
+        final FilterPolicy filterPolicy = new FilterPolicy();
+        filterPolicy.setIncludeIf(Collections.EMPTY_LIST);
+        filterPolicy.setExcludeIf(asList("/" + event + "/" + FILTERED_VALUE));
+        return filterPolicy;
     }
 
     private PassThroughAuditEventHandler spyPassThroughAuditEventHandler(String name) {

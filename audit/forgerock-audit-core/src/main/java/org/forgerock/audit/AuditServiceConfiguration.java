@@ -17,10 +17,13 @@ package org.forgerock.audit;
 
 import static java.util.Collections.emptyList;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-
-import java.util.List;
+import org.forgerock.audit.filter.FilterPolicy;
 
 /**
  * Configuration of the audit service.
@@ -29,8 +32,24 @@ import java.util.List;
  * <pre>
  *   {
  *     "handlerForQueries" : "csv",
- *     "availableAuditEventHandlers" : ["org.forgerock.audit.events.handler.MyHandler",
- *                                      "org.forgerock.audit.events.handler.AnotherHandler"]
+ *     "availableAuditEventHandlers" : [
+ *          "org.forgerock.audit.events.handler.MyHandler",
+ *          "org.forgerock.audit.events.handler.AnotherHandler"
+ *     ],
+ *     "filterPolicies" : {
+ *         "field" : {
+ *             "excludeIf" : [],
+ *             "includeIf" : [
+ *                  "/access/filter/field"
+ *             ]
+ *         },
+ *         "value" : {
+ *             "excludeIf" : [],
+ *             "includeIf" : [
+ *                  "/access/filter/value"
+ *             ]
+ *         }
+ *     }
  *   }
  * </pre>
  */
@@ -42,6 +61,9 @@ public class AuditServiceConfiguration {
 
     @JsonPropertyDescription("audit.service.availableAuditEventHandlers")
     private List<String> availableAuditEventHandlers;
+
+    @JsonPropertyDescription("audit.service.filter.policies")
+    private Map<String, FilterPolicy> filterPolicies = new LinkedHashMap<>();
 
     /**
      * Empty constructor.
@@ -99,5 +121,13 @@ public class AuditServiceConfiguration {
      */
     public void setAvailableAuditEventHandlers(List<String> availableAuditEventHandlers) {
         this.availableAuditEventHandlers = availableAuditEventHandlers;
+    }
+
+    public Map<String, FilterPolicy> getFilterPolicies() {
+        return filterPolicies;
+    }
+
+    public void setFilterPolicies(Map<String, FilterPolicy> filterPolicies) {
+        this.filterPolicies.putAll(filterPolicies);
     }
 }

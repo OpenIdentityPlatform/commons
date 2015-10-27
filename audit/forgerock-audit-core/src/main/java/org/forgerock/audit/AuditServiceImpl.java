@@ -19,6 +19,8 @@ import static org.forgerock.audit.events.AuditEventBuilder.TIMESTAMP;
 import static org.forgerock.audit.events.AuditEventBuilder.TRANSACTION_ID;
 import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
 import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.util.Collection;
@@ -31,6 +33,8 @@ import java.util.Set;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+import org.forgerock.audit.filter.Filter;
+import org.forgerock.audit.filter.FilterChainBuilder;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -106,6 +110,10 @@ final class AuditServiceImpl implements AuditService {
      * Indicates the current lifecycle state of this AuditService.
      */
     private volatile LifecycleState lifecycleState = LifecycleState.STARTING;
+    /**
+     * The filters to apply to the audit event.
+     */
+    private final Filter filters;
 
     /**
      * Constructs a new instance.
@@ -135,6 +143,11 @@ final class AuditServiceImpl implements AuditService {
         } else {
             queryHandler = new NullQueryHandler(config.getHandlerForQueries());
         }
+
+        this.filters = new FilterChainBuilder()
+                .withAuditTopics(eventTopicsMetaData.getTopics())
+                .withPolicies(configuration.getFilterPolicies())
+                .build();
     }
 
     private Map<String, AuditEventHandler> getAuditEventHandlersByName(Set<AuditEventHandler> handlers) {
@@ -188,18 +201,19 @@ final class AuditServiceImpl implements AuditService {
             checkLifecycleStateIsRunning();
             if (context.containsContext(AuditingContext.class)) {
                 // Don't audit the audit log
-                return newResourceResponse(null, null, request.getContent().copy()).asPromise();
+                return newResourceResponse(null, null, null).asPromise();
             }
 
             final String topic = establishAuditEventTopic(request.getResourcePathObject());
             rejectIfMissingTransactionIdOrTimestamp(request);
             final String auditEventId = establishAuditEventId(request);
+            filters.doFilter(topic, request.getContent());
 
             Collection<AuditEventHandler> auditEventHandlersForEvent = getAuditEventHandlersForEvent(topic);
             if (auditEventHandlersForEvent.isEmpty()) {
                 // if the event is known but not registered with a handler, it's ok to ignore it
                 logger.debug("No handler found for the event of topic {}", topic);
-                return newResourceResponse(auditEventId, null, request.getContent().copy()).asPromise();
+                return newResourceResponse(auditEventId, null, json(object())).asPromise();
             } else {
                 // Otherwise, let the event handlers set the response
                 logger.debug("Cascading the event of topic {} to the handlers : {}", topic, auditEventHandlersForEvent);
