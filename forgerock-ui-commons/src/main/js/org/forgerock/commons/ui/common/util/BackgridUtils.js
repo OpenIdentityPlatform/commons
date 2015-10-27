@@ -80,6 +80,7 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
                     $("td, th", "table").each(function () {
                         var cell = $(this);
                         cell.width(cell.width());
+                        cell.css("maxWidth", "none");
                     });
 
                     if (!event.target.nodeName.match(/^(input|select)$/i)) {
@@ -89,6 +90,8 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
                 },
 
                 onDrag: function ($item, position, _super, event) {
+                    $item.closest("table").find(".placeholder");
+
                     if (position.top - offset >= topBounds && position.top - offset <= bottomBounds) {
                         $item.css("top", position.top - offset);
                     }
