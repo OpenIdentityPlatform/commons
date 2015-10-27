@@ -1,48 +1,59 @@
 {
   "eventHandlers" : [
     {
-      "name" : "csv",
       "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
       "config" : {
+        "name" : "csv",
+        "topics": [ "access", "activity", "config", "authentication" ],
         "logDirectory" : "/tmp/audit",
-        "bufferingConfig" : {
+        "formatting" : {
+          "quoteChar" : "\"",
+          "delimiterChar" : ",",
+          "endOfLineSymbols" : "\n"
+        },
+        "security" : {
+          "enabled" : "false",
+          "filename" : "/path/to/keystore.jks",
+          "password" : "correcthorsebatterystaple",
+          "signatureInterval" : "3 seconds"
+        },
+        "buffering" : {
           "enabled" : "true",
-          "forceFlushBeforeRead" : "false",
+          "autoFlush" : "true",
           "maxSize" : "25"
         }
-      },
-      "events": [
-        "access",
-        "activity",
-        "config",
-        "authentication"
-      ]
+      }
     },
     {
-      "name" : "syslog",
       "class" : "org.forgerock.audit.handlers.syslog.SyslogAuditEventHandler",
       "config" : {
+        "name" : "syslog",
+        "topics": [ "access", "activity", "config", "authentication" ],
         "protocol" : "UDP",
         "host" : "localhost",
         "port" : 514,
         "facility" : "LOCAL0",
-        "bufferingConfig" : {
+        "severityFieldMappings": [{
+          "topic" : "system-status",
+          "field"  : "level",
+          "valueMappings" : {
+            "SEVERE" : "EMERGENCY",
+            "WARNING" : "WARNING",
+            "INFO" : "INFORMATIONAL"
+          }
+        }],
+        "buffering" : {
           "enabled" : "true",
-          "forceFlushBeforeRead" : "false",
+          "autoFlush" : "false",
           "maxSize" : "25"
         }
-      },
-      "events": [
-        "access",
-        "activity",
-        "config",
-        "authentication"
-      ]
+      }
     },
     {
-      "name" : "jdbc",
       "class" : "org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandler",
       "config" : {
+        "name" : "jdbc",
+        "topics": [ "access", "activity", "config", "authentication" ],
         "databaseName" : "mysql",
         "connectionPool" : {
           "jdbcUrl" : "jdbc:mysql://localhost:3306/audit?allowMultiQueries=true&characterEncoding=utf8",
@@ -136,8 +147,7 @@
             }
           }
         ]
-      },
-      "events" : [ "access", "activity", "config", "authentication" ]
+      }
     }
   ]
 }

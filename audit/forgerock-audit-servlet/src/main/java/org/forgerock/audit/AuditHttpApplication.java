@@ -33,6 +33,7 @@ import org.forgerock.http.routing.Router;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.util.Factory;
 import org.slf4j.Logger;
@@ -66,11 +67,17 @@ public final class AuditHttpApplication implements HttpApplication {
                 }
             }
         } catch (AuditException | IOException e) {
-            logger.error("Unable to start audit service", e);
+            logger.error("Failed to read audit event handler configurations", e);
             throw new HttpApplicationException(e);
         }
 
         final AuditService auditService = auditServiceBuilder.build();
+        try {
+            auditService.startup();
+        } catch (ServiceUnavailableException e) {
+            logger.error("Unable to start audit service", e);
+            throw new HttpApplicationException(e);
+        }
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, AUDIT_ROOT_PATH),
                 CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(auditService)));
         return router;
