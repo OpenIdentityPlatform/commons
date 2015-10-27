@@ -21,13 +21,16 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
 import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import java.net.InetSocketAddress;
+import java.util.Collections;
+import javax.inject.Inject;
+
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
+import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.providers.DefaultLocalHostNameProvider;
 import org.forgerock.audit.providers.LocalHostNameProvider;
 import org.forgerock.audit.providers.ProductInfoProvider;
-import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -37,14 +40,11 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import java.net.InetSocketAddress;
-import java.util.Collections;
 
 /**
  * The handler publishes audit events formatted using {@link SyslogFormatter} to a syslog daemon using
@@ -76,7 +76,7 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase {
             @Audit final ProductInfoProvider productInfoProvider,
             @Audit final LocalHostNameProvider localHostNameProvider) {
 
-        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         Reject.ifNull(configuration.getProtocol(),
                 "Syslog transport 'protocol' of TCP or UDP is required");
         Reject.ifNull(configuration.getHost(),

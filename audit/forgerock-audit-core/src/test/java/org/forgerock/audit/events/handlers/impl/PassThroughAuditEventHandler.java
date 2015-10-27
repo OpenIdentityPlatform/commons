@@ -43,7 +43,7 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase {
     public PassThroughAuditEventHandler(
             final PassThroughAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData) {
-        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.message = configuration.getMessage();
     }
 

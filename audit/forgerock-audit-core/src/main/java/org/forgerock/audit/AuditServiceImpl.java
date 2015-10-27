@@ -155,6 +155,9 @@ final class AuditServiceImpl implements AuditService {
             handlersByTopic.put(topic, new LinkedHashSet<AuditEventHandler>());
         }
         for (AuditEventHandler handler : handlers) {
+            if (!handler.isEnabled()) {
+                continue;
+            }
             for (String topic : handler.getHandledTopics()) {
                 handlersByTopic.get(topic).add(handler);
             }
@@ -442,6 +445,11 @@ final class AuditServiceImpl implements AuditService {
         public Promise<QueryResponse, ResourceException> queryEvents(
                 Context context, String topic, QueryRequest query, QueryResourceHandler handler) {
             return adapt(new AuditException(errorMessage)).asPromise();
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return true;
         }
     }
 }

@@ -16,8 +16,12 @@
 
 package org.forgerock.audit.events.handlers;
 
-import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.json.resource.Responses.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+
+import java.util.Collections;
 
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.json.JsonValue;
@@ -30,8 +34,6 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
-import java.util.Collections;
-
 /**
  * An event handler that does nothing.
  * <p>
@@ -42,7 +44,7 @@ public class NoOpAuditEventHandler extends AuditEventHandlerBase {
 
     public NoOpAuditEventHandler() {
         super("NullAuditEventHandler",
-                new EventTopicsMetaData(Collections.<String, JsonValue>emptyMap()), Collections.<String>emptySet());
+                new EventTopicsMetaData(Collections.<String, JsonValue>emptyMap()), Collections.<String>emptySet(), true);
     }
 
     @Override

@@ -26,6 +26,7 @@ public abstract class AuditEventHandlerBase implements AuditEventHandler {
 
     private final String name;
     protected final EventTopicsMetaData eventTopicsMetaData;
+    private final boolean enabled;
 
     /**
      * Create a new AuditEventHandler instance.
@@ -34,13 +35,20 @@ public abstract class AuditEventHandlerBase implements AuditEventHandler {
      *          The name of this AuditEventHandler.
      * @param eventTopicsMetaData
      *          Provides meta-data describing the audit event topics this AuditEventHandler may have to handle.
+     * @param acceptedTopics
+     *          Audit event topics the AuditEventHandler will handle.
+     * @param enabled
+     *          Whether or not the audit event handler is enabled.
+     *
      */
     protected AuditEventHandlerBase(
             final String name,
             final EventTopicsMetaData eventTopicsMetaData,
-            final Set<String> acceptedTopics) {
+            final Set<String> acceptedTopics,
+            final boolean enabled) {
         this.name = name;
         this.eventTopicsMetaData = eventTopicsMetaData.filter(acceptedTopics);
+        this.enabled = enabled;
     }
 
     @Override
@@ -51,6 +59,11 @@ public abstract class AuditEventHandlerBase implements AuditEventHandler {
     @Override
     public Set<String> getHandledTopics() {
         return eventTopicsMetaData.getTopics();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled;
     }
 
 }

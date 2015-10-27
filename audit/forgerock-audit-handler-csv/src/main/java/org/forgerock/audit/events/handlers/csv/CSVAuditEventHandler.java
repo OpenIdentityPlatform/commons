@@ -41,11 +41,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -57,6 +57,7 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
@@ -70,8 +71,6 @@ import org.supercsv.io.ICsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.util.CsvContext;
-
-import javax.inject.Inject;
 
 /**
  * Handles AuditEvents by writing them to a CSV file.
@@ -103,7 +102,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
             final CSVAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData) {
 
-        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics());
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = configuration;
         this.csvPreference = createCsvPreference(this.configuration);
         if (configuration.getSecurity().isEnabled()) {

@@ -545,6 +545,38 @@ public class AuditServiceImplTest {
         auditService.getKnownTopics();
     }
 
+    @Test
+    public void shouldNotDelegateCreateRequestToADisabledHandler() throws Exception {
+        final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
+        final PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
+        configuration.setName("mock");
+        configuration.setTopics(Collections.singleton("access"));
+        configuration.setEnabled(false);
+        final AuditService auditService = newAuditService()
+                .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME))
+                .withAuditEventHandler(clazz, configuration)
+                .build();
+        auditService.startup();
+
+        final CreateRequest createRequest = makeCreateRequest();
+
+        //when
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleCreate(new RootContext(), createRequest);
+
+        //then
+        assertThat(auditService.isAuditing("access")).isFalse();
+        assertThat(promise)
+                .succeeded()
+                .withObject()
+                .isInstanceOf(ResourceResponse.class);
+
+        // TODO should use AssertJResourceResponseAssert
+        final ResourceResponse resource = promise.get();
+        assertThat(resource).isNotNull();
+        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
+    }
+
     private AuditServiceConfiguration getAuditServiceConfiguration(String queryHandlerName) {
         final AuditServiceConfiguration config = new AuditServiceConfiguration();
         config.setHandlerForQueries(queryHandlerName);

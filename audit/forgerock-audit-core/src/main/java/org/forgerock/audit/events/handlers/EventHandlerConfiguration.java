@@ -15,18 +15,19 @@
  */
 package org.forgerock.audit.events.handlers;
 
-import org.forgerock.util.Reject;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import org.forgerock.util.Reject;
 
 /**
  * Base class for audit event handler configuration.
  */
 public abstract class EventHandlerConfiguration {
+
+    /** Whether or not this handler is enabled. */
+    @JsonPropertyDescription("audit.handlers.all.enabled")
+    private boolean enabled = true;
 
     /** Name of this audit event handler. */
     @JsonPropertyDescription("audit.handlers.all.name")
@@ -39,6 +40,26 @@ public abstract class EventHandlerConfiguration {
     /** Event buffering is disabled by default. */
     @JsonPropertyDescription("audit.handlers.all.buffering")
     protected EventBufferingConfiguration buffering = new EventBufferingConfiguration();
+
+    /**
+     * Checks if the audit event handler is enabled.
+     * @return
+     *      True - If the audit event handler is enabled.
+     *      False - If the audit event handler is disabled.
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Sets the enabled flag for an audit event handler.
+     * @param enabled
+     *      True - Enable the audit event handler.
+     *      False - Disable the audit event handler.
+     */
+    public void setEnabled(final boolean enabled) {
+        this.enabled = enabled;
+    }
 
     /**
      * Returns the name of this handler.

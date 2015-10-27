@@ -117,4 +117,10 @@ public interface AuditEventHandler {
      */
     Promise<QueryResponse, ResourceException> queryEvents(Context context, String topic, QueryRequest query,
             QueryResourceHandler handler);
+
+    /**
+     * Checks if the audit event handler is enabled.
+     * @return whether or not the audit event handler is enabled
+     */
+    boolean isEnabled();
 }
