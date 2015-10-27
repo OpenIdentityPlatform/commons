@@ -17,18 +17,19 @@ package org.forgerock.audit.events.handlers.csv;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.forgerock.util.time.Duration.duration;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
-import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapReader;
@@ -129,5 +130,23 @@ public class CsvWriterTest {
         } catch (IOException e) {
             // This is ok, we expect to have this exception.
         }
+    }
+
+    @Test
+    public void shouldAddHeadersToEmptyCsvFile() throws Exception {
+        final File csvFile = org.assertj.core.util.Files.newTemporaryFile();
+        final String[] headers = new String[] { "child1", "child2", "child3" };
+        final CsvPreference csvPreference = CsvPreference.EXCEL_PREFERENCE;
+        final EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
+        bufferConfig.setEnabled(false);
+        CsvSecurity csvSecurity = new CsvSecurity();
+        csvSecurity.setEnabled(false);
+
+        final CsvWriter csvWriter = new CsvWriter(csvFile, headers, csvPreference, bufferConfig, csvSecurity);
+        csvWriter.close();
+
+        final List<String> contents = Files.readAllLines(csvFile.toPath(), Charset.defaultCharset());
+        assertThat(contents.size()).isEqualTo(1);
+        assertThat(contents.get(0)).isEqualTo("child1,child2,child3");
     }
 }

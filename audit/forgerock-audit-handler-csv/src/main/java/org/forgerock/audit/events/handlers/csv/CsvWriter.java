@@ -53,9 +53,9 @@ public class CsvWriter implements AutoCloseable {
 
     CsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, EventBufferingConfiguration bufferConfig,
               CsvSecurity securityConfiguration) throws IOException {
-        final boolean fileAlreadyExisted = csvFile.exists();
+        boolean fileAlreadyInitialized = csvFile.exists();
         CsvSecureVerifier verifier = null;
-        if (fileAlreadyExisted) {
+        if (fileAlreadyInitialized) {
             // Run the CsvVerifier to check that the file was not tampered,
             // and get the headers and lastSignature for free
             try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
@@ -74,24 +74,28 @@ public class CsvWriter implements AutoCloseable {
                     actualHeaders = reader.getHeader(true);
                 }
                 // Assert that the 2 headers equals.
-                if (actualHeaders == null || actualHeaders.length != headers.length) {
-                    throw new IOException("Resuming an existing CSV file but the headers do not match.");
-                }
-                for (int idx = 0; idx < actualHeaders.length; idx++) {
-                    if (!actualHeaders[idx].equals(headers[idx])) {
+                if (actualHeaders == null) {
+                    fileAlreadyInitialized = false;
+                } else {
+                    if (actualHeaders.length != headers.length) {
                         throw new IOException("Resuming an existing CSV file but the headers do not match.");
+                    }
+                    for (int idx = 0; idx < actualHeaders.length; idx++) {
+                        if (!actualHeaders[idx].equals(headers[idx])) {
+                            throw new IOException("Resuming an existing CSV file but the headers do not match.");
+                        }
                     }
                 }
             }
         }
         this.headers = checkNotNull(headers, "The headers can't be null.");
 
-        csvWriter = new CsvMapWriter(constructWriter(csvFile, fileAlreadyExisted, bufferConfig), csvPreference);
+        csvWriter = new CsvMapWriter(constructWriter(csvFile, fileAlreadyInitialized, bufferConfig), csvPreference);
         if (securityConfiguration.isEnabled()) {
             csvWriter = new CsvSecureMapWriter(csvWriter, securityConfiguration.getFilename(),
                     securityConfiguration.getPassword(), securityConfiguration.getSignatureIntervalDuration(),
-                    fileAlreadyExisted);
-            if (fileAlreadyExisted) {
+                    fileAlreadyInitialized);
+            if (fileAlreadyInitialized) {
                 CsvSecureMapWriter csvSecureWriter = (CsvSecureMapWriter) csvWriter;
                 csvSecureWriter.setHeader(headers);
                 csvSecureWriter.setLastHMAC(verifier.getLastHMAC());
@@ -99,7 +103,7 @@ public class CsvWriter implements AutoCloseable {
             }
         }
 
-        if (!fileAlreadyExisted) {
+        if (!fileAlreadyInitialized) {
             csvWriter.writeHeader(headers);
         }
     }
