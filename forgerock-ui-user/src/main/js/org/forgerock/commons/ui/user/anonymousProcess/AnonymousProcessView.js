@@ -170,7 +170,9 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
             e.preventDefault();
             delete this.delegate;
             delete this.stateData;
-            EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, { route: Router.currentRoute });
+            EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                route: _.extend({}, Router.currentRoute, { forceUpdate: true }) 
+            });
         },
 
         renderProcessState: function (response) {
