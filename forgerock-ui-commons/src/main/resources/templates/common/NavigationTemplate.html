@@ -8,7 +8,15 @@
                 <span class="icon-bar"></span>
             </button>
             {{/if}}
-            <a href="#" class="navbar-brand" title="{{theme.settings.logo.title}}"><img  style="{{#if theme.settings.logo.width}}width:{{theme.settings.logo.width}};{{/if}}{{#if theme.settings.logo.height}} height:{{theme.settings.logo.height}};{{/if}}"  src="{{theme.settings.logo.src}}" alt="{{theme.settings.logo.alt}}" /> </a>
+            <ul class="nav navbar-nav {{#if admin}}navbar-admin{{/if}}">
+                <li id="navbarBrand">
+                    <a href="#" title="{{theme.settings.logo.title}}">
+                        <img style="{{#if theme.settings.logo.width}}width:{{theme.settings.logo.width}};{{/if}}{{#if theme.settings.logo.height}} height:{{theme.settings.logo.height}};{{/if}}"
+                             src="{{theme.settings.logo.src}}"
+                             alt="{{theme.settings.logo.alt}}" />
+                    </a>
+                </li>
+            </ul>
         </div>
 
         {{#if username}}
