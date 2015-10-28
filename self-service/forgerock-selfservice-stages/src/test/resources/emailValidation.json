@@ -7,7 +7,7 @@
   },
   "messageMap": {
     "en_GB": "Click this link to register: %link%",
-    "fr_FR": "Clicker le linke a registre: %link%"
+    "fr_FR": "Cliquez sur ce lien pour vous inscrire: %link%"
   },
   "mimeType": "text/plain",
   "from": "noreply@example.com",

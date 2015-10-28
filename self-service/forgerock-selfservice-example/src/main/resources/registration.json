@@ -5,12 +5,12 @@
       "emailServiceUrl": "/email",
       "from": "info@admin.org",
       "subjectMap": {
-        "en_GB": "Register!",
-        "fr_FR": "Registre!!"
+        "en_GB": "Register new account",
+        "fr_FR": "Créer un nouveau compte"
       },
       "messageMap": {
         "en_GB": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
-        "fr_FR": "<h3>Cette est votre email d'registre.</h3><h4><a href=\"%link%\">Linke de verification</a></h4>"
+        "fr_FR": "<h3>Ceci est votre mail d'inscription.</h3><h4><a href=\"%link%\">Lien de vérification Email</a></h4>"
       },
       "verificationLinkToken": "%link%",
       "verificationLink": "http://localhost:9999/example/#register/"
