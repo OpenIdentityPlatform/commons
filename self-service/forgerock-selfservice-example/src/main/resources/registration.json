@@ -13,7 +13,8 @@
         "fr": "<h3>Ceci est votre mail d'inscription.</h3><h4><a href=\"%link%\">Lien de vérification Email</a></h4>"
       },
       "verificationLinkToken": "%link%",
-      "verificationLink": "http://localhost:9999/example/#register/"
+      "verificationLink": "http://localhost:9999/example/#register/",
+      "identityEmailField" : "mail"
     },
     {
       "name" : "userDetails",

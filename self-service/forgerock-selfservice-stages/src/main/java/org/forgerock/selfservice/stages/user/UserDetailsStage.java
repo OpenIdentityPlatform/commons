@@ -75,14 +75,14 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
         if (context.containsState(EMAIL_FIELD)) {
             JsonValue emailFieldContext = context.getState(EMAIL_FIELD);
             JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
-            if (emailFieldUser != null && emailFieldUser.isNotNull()
-                    && !emailFieldUser.asString().equalsIgnoreCase(emailFieldContext.asString())) {
+            if (emailFieldUser == null) {
+                user.put(new JsonPointer(config.getIdentityEmailField()), emailFieldContext.asString());
+            } else if (!emailFieldUser.asString().equalsIgnoreCase(emailFieldContext.asString())) {
                 throw new BadRequestException("Email address mismatch");
             }
-            user.put(new JsonPointer(config.getIdentityEmailField()), emailFieldContext.asString());
         } else {
             JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
-            if (emailFieldUser != null && emailFieldUser.isNotNull()) {
+            if (emailFieldUser != null) {
                 context.putState(EMAIL_FIELD, emailFieldUser.asString());
             }
         }

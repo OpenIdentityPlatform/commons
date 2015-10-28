@@ -35,7 +35,8 @@ abstract class AbstractKbaStageConfig<C extends AbstractKbaStageConfig<C>> imple
     }
 
     /**
-     * Gets the kba questions.
+     * Gets the kba questions in the following format.
+     * <pre>Map&lt;id,Map&lt;locale,question&gt;&gt;</pre>
      *
      * @return property name
      */

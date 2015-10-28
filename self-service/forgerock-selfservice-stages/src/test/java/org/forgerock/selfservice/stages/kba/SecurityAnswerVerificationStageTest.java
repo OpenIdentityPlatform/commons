@@ -44,7 +44,7 @@ import org.testng.annotations.Test;
 public final class SecurityAnswerVerificationStageTest {
 
 
-    private static final String KBA_QUESTION_1 = "What is my favorite author?";
+    private static final String KBA_QUESTION_1 = "Who is your favorite author?";
     private static final String KBA_QUESTION_2 = "Who was your first employer?";
 
     private SecurityAnswerVerificationStage securityAnswerVerificationStage;
@@ -87,7 +87,7 @@ public final class SecurityAnswerVerificationStageTest {
     }
 
     @Test (expectedExceptions = IllegalArgumentException.class,
-            expectedExceptionsMessageRegExp = "KBA Answers are not set for the user with Id: testUserId")
+            expectedExceptionsMessageRegExp = "KBA questions should be configured")
     public void testGatherInitialRequirementsExceptionKbaQuestionsNotSet() throws Exception {
         // Given
         config = new SecurityAnswerVerificationConfig(new KbaConfig())
@@ -117,6 +117,28 @@ public final class SecurityAnswerVerificationStageTest {
         securityAnswerVerificationStage.gatherInitialRequirements(context, config);
     }
 
+    @Test (expectedExceptions = IllegalStateException.class,
+            expectedExceptionsMessageRegExp = "Insufficient number of questions. Minimum number of questions "
+                    + "user must answer: 1, Questions available: 0")
+    public void testGatherInitialRequirementsExceptionInsufficientNumberOfQuestions() throws Exception {
+        // Given
+        config.setNumberOfQuestionsUserMustAnswer(1);
+        given(context.containsState(USER_ID_FIELD)).willReturn(true);
+        given(context.getState(USER_ID_FIELD)).willReturn(new JsonValue("testUserId"));
+
+        given(factory.getConnection()).willReturn(connection);
+        given(queryResponse.getContent()).willReturn(newEmptyJsonValue());
+        given(connection.read(any(Context.class), any(ReadRequest.class))).willReturn(queryResponse);
+
+        // When
+        JsonValue jsonValue = securityAnswerVerificationStage.gatherInitialRequirements(context, config);
+
+        // Then
+        assertThat(jsonValue).stringAt("description").isEqualTo("Answer security questions");
+        assertThat(jsonValue).stringAt("properties/answer1/userQuestion").isEqualTo(KBA_QUESTION_1);
+        assertThat(jsonValue).stringAt("properties/answer1/type").isEqualTo("string");
+    }
+
     @Test
     public void testGatherInitialRequirementsOneCustomAnswer() throws Exception {
         // Given
@@ -133,7 +155,7 @@ public final class SecurityAnswerVerificationStageTest {
 
         // Then
         assertThat(jsonValue).stringAt("description").isEqualTo("Answer security questions");
-        assertThat(jsonValue).stringAt("properties/answer1/userQuestion").isEqualTo("What is my favorite author?");
+        assertThat(jsonValue).stringAt("properties/answer1/userQuestion").isEqualTo(KBA_QUESTION_1);
         assertThat(jsonValue).stringAt("properties/answer1/type").isEqualTo("string");
     }
 
@@ -309,7 +331,7 @@ public final class SecurityAnswerVerificationStageTest {
     private Map<String, Map<String, String>> newKbaQuestion3() {
         Map<String, Map<String, String>> questions = new HashMap<>();
         Map<String, String> locales = new HashMap<>();
-        locales.put("en", "Who was your first employer?");
+        locales.put("en", "What is your pet’s name");
         questions.put("3", locales);
         return questions;
     }
@@ -338,4 +360,9 @@ public final class SecurityAnswerVerificationStageTest {
                                 field("data", data))),
                         field("type", "salted-hash"))));
     }
+
+    private JsonValue newEmptyJsonValue() {
+        return json(object());
+    }
+
 }

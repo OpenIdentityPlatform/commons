@@ -22,17 +22,18 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
@@ -45,6 +46,8 @@ import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.i18n.PreferredLocales;
 
 import javax.inject.Inject;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.Reject;
 
 /**
  * Having retrieved the email address from the context or in response to the initial requirements, verifies the
@@ -53,6 +56,8 @@ import javax.inject.Inject;
  * @since 0.1.0
  */
 public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailAccountConfig> {
+
+    static final String REQUIREMENT_KEY_EMAIL = "mail";
 
     private static final String VALIDATE_CODE_TAG = "validateCode";
 
@@ -71,6 +76,15 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
 
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context, VerifyEmailAccountConfig config) {
+        Reject.ifNull(config.getEmailServiceUrl(), "Email service url should be configured");
+        Reject.ifNull(config.getFrom(), "From Email should be configured");
+        Reject.ifNull(config.getMessageTranslations(), "Email message should be configured");
+        Reject.ifNull(config.getSubjectTranslations(), "Email subject should be configured");
+        Reject.ifNull(config.getMimeType(), "Mime type should be configured");
+        Reject.ifNull(config.getVerificationLink(), "Verification link should be configured");
+        Reject.ifNull(config.getVerificationLinkToken(), "Verification link token should be configured");
+        Reject.ifNull(config.getIdentityEmailField(), "Identity email field should be configured");
+
         if (context.containsState(EMAIL_FIELD)) {
             return RequirementsBuilder
                     .newEmptyRequirements();
@@ -78,7 +92,7 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
 
         return RequirementsBuilder
                 .newInstance("Verify your email address")
-                .addRequireProperty("mail", "Email address")
+                .addRequireProperty(REQUIREMENT_KEY_EMAIL, "Email address")
                 .build();
     }
 
@@ -96,7 +110,7 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
 
     private StageResponse sendEmail(ProcessContext context, final VerifyEmailAccountConfig config)
             throws ResourceException {
-        final String mail = getEmailAsString(context);
+        final String mail = getEmailAsString(context, config);
 
         final String code = UUID.randomUUID().toString();
         context.putState("code", code);
@@ -123,11 +137,15 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
                 .build();
     }
 
-    private String getEmailAsString(ProcessContext context) throws InternalServerErrorException {
+    private String getEmailAsString(ProcessContext context, VerifyEmailAccountConfig config)
+            throws BadRequestException {
         if (!context.containsState(EMAIL_FIELD)) {
-            JsonValue email = context.getInput().get("mail");
+            JsonValue email = context.getInput().get(REQUIREMENT_KEY_EMAIL);
             String mail = getEmailAsString(email);
             context.putState(EMAIL_FIELD, mail);
+
+            updateUserIfAvailable(context, config, mail);
+
             return mail;
         }
 
@@ -135,9 +153,22 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
         return getEmailAsString(email);
     }
 
-    private String  getEmailAsString(JsonValue email) throws InternalServerErrorException {
+    private void updateUserIfAvailable(ProcessContext context, VerifyEmailAccountConfig config, String mail)
+            throws BadRequestException {
+        if (context.containsState(USER_FIELD)) {
+            JsonValue user = context.getState(USER_FIELD);
+            JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
+            if (emailFieldUser == null) {
+                user.put(new JsonPointer(config.getIdentityEmailField()), mail);
+            } else if (!emailFieldUser.asString().equalsIgnoreCase(mail)) {
+                throw new BadRequestException("Email address mismatch");
+            }
+        }
+    }
+
+    private String getEmailAsString(JsonValue email) throws BadRequestException {
         if (email == null || isEmpty(email.asString())) {
-            throw new InternalServerErrorException("mail should not be empty");
+            throw new BadRequestException("mail should not be empty");
         }
         return email.asString();
     }

@@ -20,8 +20,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -31,7 +33,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
@@ -57,6 +58,7 @@ import java.util.Map;
 public final class VerifyEmailAccountStageTest {
 
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
+    private static final  String INFO_MAIL_ID = "info@admin.org";
 
     private VerifyEmailAccountStage verifyEmailStage;
     @Mock
@@ -72,12 +74,12 @@ public final class VerifyEmailAccountStageTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        config = new VerifyEmailAccountConfig();
+        config = newVerifyEmailAccountConfig();
         verifyEmailStage = new VerifyEmailAccountStage(factory);
     }
 
     @Test
-    public void testGatherInitialRequirementsEmptyContext() throws Exception {
+    public void testGatherInitialRequirementsNoEmailInContext() throws Exception {
         // When
         JsonValue jsonValue = verifyEmailStage.gatherInitialRequirements(context, config);
 
@@ -98,7 +100,7 @@ public final class VerifyEmailAccountStageTest {
         assertThat(jsonValue).isEmpty();
     }
 
-    @Test (expectedExceptions = InternalServerErrorException.class,
+    @Test (expectedExceptions = BadRequestException.class,
             expectedExceptionsMessageRegExp = "mail should not be empty")
     public void testAdvanceInitialStageWithoutEmailAddress() throws Exception {
         // Given
@@ -129,6 +131,30 @@ public final class VerifyEmailAccountStageTest {
     }
 
     @Test
+    public void testAdvanceEmailProcessing() throws Exception {
+        // Given
+        given(context.containsState(EMAIL_FIELD)).willReturn(false);
+        given(context.getInput()).willReturn(newJsonValueInputEmail());
+
+        given(context.containsState(USER_FIELD)).willReturn(true);
+        JsonValue user = newJsonValueUser();
+        given(context.getState(USER_FIELD)).willReturn(user);
+
+        given(context.getStageTag()).willReturn(INITIAL_TAG);
+
+        // When
+        verifyEmailStage.advance(context, config);
+
+        // Then
+        ArgumentCaptor<String> putStateArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(context).putState(eq(EMAIL_FIELD), putStateArgumentCaptor.capture());
+        assertThat(putStateArgumentCaptor.getValue()).isEqualTo(TEST_EMAIL_ID);
+
+        assertThat(user).stringAt(config.getIdentityEmailField()).isEqualTo(TEST_EMAIL_ID);
+    }
+
+
+    @Test
     public void testAdvanceCallbackSendMail() throws Exception {
         // Given
         given(context.getStageTag()).willReturn(INITIAL_TAG);
@@ -150,13 +176,8 @@ public final class VerifyEmailAccountStageTest {
         final String infoEmailId = "info@admin.org";
         config.setFrom(infoEmailId);
 
-        Map<Locale, String> subjectMap = new HashMap<>();
-        Map<Locale, String> messageMap = new HashMap<>();
-
-        subjectMap.put(Locale.ENGLISH, "Reset password email");
-        subjectMap.put(Locale.GERMAN, "Deutsch Thema");
-        messageMap.put(Locale.ENGLISH, "<h3>This is your reset email.</h3>"
-                            + "<h4><a href=\"%link%\">Email verification link</a></h4>");
+        Map<Locale, String> subjectMap = newSubjectMap();
+        Map<Locale, String> messageMap = newMessageMap();
 
         config.setSubjectTranslations(subjectMap);
         config.setMessageTranslations(messageMap);
@@ -173,6 +194,8 @@ public final class VerifyEmailAccountStageTest {
 
         assertThat(actionRequest.getAction()).isSameAs("send");
         assertThat(actionRequest.getContent()).stringAt("/to").isEqualTo(TEST_EMAIL_ID);
+        assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(INFO_MAIL_ID);
+        assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(subjectMap.get(Locale.ENGLISH));
         assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(infoEmailId);
         assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(subjectMap.get(Locale.ENGLISH));
         assertThat(actionRequest.getContent()).stringAt("/body").matches(
@@ -227,4 +250,42 @@ public final class VerifyEmailAccountStageTest {
     private JsonValue newJsonValueWithEmail() {
         return json(TEST_EMAIL_ID);
     }
+
+    private JsonValue newJsonValueInputEmail() {
+        return json(object(
+                field(VerifyEmailAccountStage.REQUIREMENT_KEY_EMAIL, TEST_EMAIL_ID)));
+    }
+
+    private JsonValue newJsonValueUser() {
+        return json(object(
+                field("firstName", "first name"),
+                field("_Id", "user1")));
+    }
+
+    private VerifyEmailAccountConfig newVerifyEmailAccountConfig() {
+        return new VerifyEmailAccountConfig()
+                .setIdentityEmailField("mail")
+                .setMessageTranslations(newMessageMap())
+                .setVerificationLinkToken("%link%")
+                .setVerificationLink("http://localhost:9999/example/#passwordReset/")
+                .setEmailServiceUrl("/email")
+                .setFrom(INFO_MAIL_ID)
+                .setSubjectTranslations(newSubjectMap())
+                .setMimeType("html");
+    }
+
+    private Map<Locale, String> newMessageMap() {
+        Map<Locale, String> messageMap = new HashMap<>();
+        messageMap.put(Locale.ENGLISH, "<h3>This is your reset email.</h3>"
+                + "<h4><a href=\"%link%\">Email verification link</a></h4>");
+        return messageMap;
+    }
+
+    private Map<Locale, String> newSubjectMap() {
+        Map<Locale, String> subjectMap = new HashMap<>();
+        subjectMap.put(Locale.ENGLISH, "Reset password email");
+        subjectMap.put(Locale.GERMAN, "Deutsch Thema");
+        return subjectMap;
+    }
+
 }

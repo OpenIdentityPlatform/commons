@@ -15,6 +15,7 @@
  */
 package org.forgerock.selfservice.stages.kba;
 
+import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newEmptyObject;
@@ -76,7 +77,7 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
                 "Identity service url should be configured");
 
         Reject.ifTrue(config.getQuestions() == null || config.getQuestions().size() < 1,
-                "KBA Answers are not set for the user with Id: " + userId);
+                "KBA questions should be configured");
 
         Reject.ifTrue(config.getNumberOfQuestionsUserMustAnswer() < 1,
                 "Number of questions user must answer is configured as "
@@ -178,9 +179,10 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
 
     private JsonValue getKbaAnswersSetDuringRegistration(SecurityAnswerVerificationConfig config,
             JsonValue userJsonValue) {
-        return userJsonValue.get(new JsonPointer(
+        JsonValue answers = userJsonValue.get(new JsonPointer(
                 (config.getKbaPropertyName() != null)
                         ? config.getKbaPropertyName() : DEFAULT_VALUE_KBA_PROPERTY_NAME));
+        return (answers == null) ? json(array()) : answers;
     }
 
 

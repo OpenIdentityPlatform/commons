@@ -14,7 +14,8 @@
       "mimeType": "text/plain",
       "from": "noreply@example.com",
       "verificationLink": "/verifyemail",
-      "verificationLinkToken": "abc123"
+      "verificationLinkToken": "abc123",
+      "identityEmailField" : "mail"
     },
     {
       "name" : "userQuery",

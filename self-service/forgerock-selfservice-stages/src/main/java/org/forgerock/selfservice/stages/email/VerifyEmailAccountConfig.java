@@ -41,6 +41,7 @@ public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAc
     private String mimeType;
     private String verificationLink;
     private String verificationLinkToken;
+    private String identityEmailField;
 
     /**
      * Gets the URL for the email service.
@@ -193,6 +194,28 @@ public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAc
      */
     public VerifyEmailAccountConfig setVerificationLink(String verificationLink) {
         this.verificationLink = verificationLink;
+        return this;
+    }
+
+    /**
+     * Gets the field name for the identity email address.
+     *
+     * @return the identity email address field name
+     */
+    public String getIdentityEmailField() {
+        return identityEmailField;
+    }
+
+    /**
+     * Sets the field name for the identity email address.
+     *
+     * @param identityEmailField
+     *         the identity email address field name
+     *
+     * @return this config instance
+     */
+    public VerifyEmailAccountConfig setIdentityEmailField(String identityEmailField) {
+        this.identityEmailField = identityEmailField;
         return this;
     }
 

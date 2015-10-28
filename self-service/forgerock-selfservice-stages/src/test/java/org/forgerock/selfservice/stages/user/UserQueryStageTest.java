@@ -205,11 +205,11 @@ public final class UserQueryStageTest {
         userQueryStage.advance(context, config);
 
         // Then
-        ArgumentCaptor<String> queryArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(context).putState(eq(USER_ID_FIELD), queryArgumentCaptor.capture());
-        assertThat(queryArgumentCaptor.getValue()).isEqualTo("user1");
-        verify(context).putState(eq(EMAIL_FIELD), queryArgumentCaptor.capture());
-        assertThat(queryArgumentCaptor.getValue()).isEqualTo("email1");
+        ArgumentCaptor<String> putStateArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(context).putState(eq(USER_ID_FIELD), putStateArgumentCaptor.capture());
+        assertThat(putStateArgumentCaptor.getValue()).isEqualTo("user1");
+        verify(context).putState(eq(EMAIL_FIELD), putStateArgumentCaptor.capture());
+        assertThat(putStateArgumentCaptor.getValue()).isEqualTo("email1");
     }
 
     private UserQueryConfig newUserQueryStageConfig() {

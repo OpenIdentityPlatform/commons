@@ -23,7 +23,8 @@
         "fr": "<h3>Cliquez pour réinitialiser votre mot de passe</h3><h4><a href=\"%link%\">Mot de passe lien de réinitialisation</a></h4>"
       },
       "verificationLinkToken": "%link%",
-      "verificationLink": "http://localhost:9999/example/#passwordReset/"
+      "verificationLink": "http://localhost:9999/example/#passwordReset/",
+      "identityEmailField" : "mail"
     },
     {
       "name" : "captcha",
