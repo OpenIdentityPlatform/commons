@@ -13,8 +13,9 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.syslog;
+
+import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration.EventBufferingConfiguration;
 
 import java.net.InetSocketAddress;
 
@@ -28,8 +29,8 @@ public enum TransportProtocol {
      */
     TCP {
         @Override
-        public SyslogPublisher getPublisher(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config) {
-            return new SyslogTcpPublisher(socket, config.getConnectTimeout());
+        SyslogConnection getSyslogConnection(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config) {
+            return new TcpSyslogConnection(socket, config.getConnectTimeout());
         }
     },
 
@@ -38,11 +39,21 @@ public enum TransportProtocol {
      */
     UDP {
         @Override
-        public SyslogPublisher getPublisher(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config) {
-            return new SyslogUdpPublisher(socket);
+        SyslogConnection getSyslogConnection(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config) {
+            return new UdpSyslogConnection(socket);
         }
     };
 
-    public abstract SyslogPublisher getPublisher(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config);
+    public SyslogPublisher getPublisher(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config) {
+        SyslogConnection syslogConnection = getSyslogConnection(socket, config);
+        EventBufferingConfiguration buffering = config.getBuffering();
+        if (buffering.isEnabled()) {
+            return new AsynchronousSyslogPublisher("SyslogHandler", syslogConnection);
+        } else {
+            return new SynchronousSyslogPublisher(syslogConnection);
+        }
+    }
+
+    abstract SyslogConnection getSyslogConnection(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config);
 
 }

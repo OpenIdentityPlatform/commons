@@ -14,40 +14,46 @@
  * Copyright 2013 Cybernetica AS
  * Portions copyright 2014-2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.syslog;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 
 /**
- * A {@link SyslogPublisher} implementation that publishes Syslog messages via UDP packets.
+ * A {@link SyslogConnection} implementation that publishes Syslog messages using the UDP protocol.
  */
-public class SyslogUdpPublisher extends SyslogPublisher {
+class UdpSyslogConnection implements SyslogConnection {
 
+    private final SocketAddress socketAddress;
     private DatagramSocket datagramSocket;
 
-    public SyslogUdpPublisher(InetSocketAddress socketAddress) {
-        super(socketAddress);
+    public UdpSyslogConnection(InetSocketAddress socketAddress) {
+        this.socketAddress = socketAddress;
     }
 
     @Override
-    protected void reconnect() throws IOException {
+    public void reconnect() throws IOException {
         if (datagramSocket == null) {
             datagramSocket = new DatagramSocket();
         }
     }
 
     @Override
-    protected void sendLogRecord(byte[] bytes) throws IOException {
-        DatagramPacket packet = new DatagramPacket(bytes, bytes.length, socketAddress);
+    public void send(byte[] syslogMessage) throws IOException {
+        DatagramPacket packet = new DatagramPacket(syslogMessage, syslogMessage.length, socketAddress);
         datagramSocket.send(packet);
     }
 
     @Override
-    protected void closeConnection() {
+    public void flush() throws IOException {
+        // do nothing
+    }
+
+    @Override
+    public void close() {
         if (datagramSocket != null) {
             datagramSocket.close();
         }

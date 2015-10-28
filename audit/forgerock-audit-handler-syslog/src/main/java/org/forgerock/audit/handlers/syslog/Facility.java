@@ -13,7 +13,6 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.syslog;
 
 /**

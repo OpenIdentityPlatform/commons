@@ -13,7 +13,6 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.syslog;
 
 import static java.util.Collections.unmodifiableMap;
@@ -22,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.forgerock.util.Reject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +47,9 @@ import java.util.Map;
           "SEVERE" : "EMERGENCY",
           "WARNING" : "WARNING",
           "INFO" : "INFORMATIONAL"
+        },
+        "buffering" : {
+          "enabled" : "true"
         }
       }]
     }
@@ -76,6 +79,10 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
     @JsonProperty
     @JsonPropertyDescription("audit.handlers.syslog.severityFieldMappings")
     private List<SeverityFieldMapping> severityFieldMappings = new ArrayList<>();
+
+    /** Event buffering is disabled by default. */
+    @JsonPropertyDescription("audit.handlers.syslog.buffering")
+    protected EventBufferingConfiguration buffering = new EventBufferingConfiguration();
 
     /**
      * Returns the protocol over which messages transmitted to the Syslog daemon.
@@ -137,7 +144,7 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
     /**
      * Returns the timeout after which attempts to connect to the Syslog daemon will be abandoned.
      * <p/>
-     * Only applies when {@link TransportProtocol.TCP} is active.
+     * Only applies when {@link TransportProtocol#TCP} is active.
      *
      * @return the connect timeout.
      */
@@ -148,7 +155,7 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
     /**
      * Sets the timeout after which attempts to connect to the Syslog daemon will be abandoned.
      * <p/>
-     * Only applies when {@link TransportProtocol.TCP} is active.
+     * Only applies when {@link TransportProtocol#TCP} is active.
      *
      * @param connectTimeout
      *          the connect timeout.
@@ -197,6 +204,25 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
      */
     public void setSeverityFieldMappings(List<SeverityFieldMapping> severityFieldMappings) {
         this.severityFieldMappings = severityFieldMappings;
+    }
+
+    /**
+     * Returns the configuration for events buffering.
+     *
+     * @return the configuration
+     */
+    public EventBufferingConfiguration getBuffering() {
+        return buffering;
+    }
+
+    /**
+     * Sets the configuration for events buffering.
+     *
+     * @param bufferingConfiguration
+     *            The configuration
+     */
+    public void setBufferingConfiguration(EventBufferingConfiguration bufferingConfiguration) {
+        this.buffering = bufferingConfiguration;
     }
 
     /**
@@ -276,4 +302,35 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
         }
     }
 
+    /**
+     * Configuration of event buffering.
+     */
+    public static class EventBufferingConfiguration {
+
+        @JsonPropertyDescription("audit.handlers.syslog.buffering.enabled")
+        private boolean enabled;
+
+        @JsonPropertyDescription("audit.handlers.syslog.buffering.maxSize")
+        private int maxSize = 5000;
+
+        /**
+         * Indicates if event buffering is enabled.
+         *
+         * @return {@code true} if buffering is enabled.
+         */
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        /**
+         * Sets the buffering status.
+         *
+         * @param enabled
+         *            Indicates if buffering is enabled.
+         */
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+    }
 }

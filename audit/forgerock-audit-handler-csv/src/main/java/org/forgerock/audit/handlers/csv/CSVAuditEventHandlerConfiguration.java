@@ -45,8 +45,7 @@ import org.forgerock.util.time.Duration;
  *    },
  *    "buffering" : {
  *      "enabled" : "true",
- *      "autoFlush" : "true",
- *      "maxSize" : "25"
+ *      "autoFlush" : "true"
  *    }
  *  }
  * </pre>
@@ -313,9 +312,6 @@ public class CSVAuditEventHandlerConfiguration extends FileBasedEventHandlerConf
         @JsonPropertyDescription("audit.handlers.csv.buffering.autoFlush")
         private boolean autoFlush = true;
 
-        @JsonPropertyDescription("audit.handlers.csv.buffering.maxSize")
-        private int maxSize = 5000;
-
         /**
          * Indicates if event buffering is enabled.
          *
@@ -354,24 +350,5 @@ public class CSVAuditEventHandlerConfiguration extends FileBasedEventHandlerConf
             this.autoFlush = auto;
         }
 
-        /**
-         * Returns the maximum size of the queue.
-         *
-         * @return maxSize Maximum number of events in the queue.
-         */
-        public int getMaxSize() {
-            return maxSize;
-        }
-
-        /**
-         * Sets the maximum size of the events queue.
-         *
-         * @param maxSize
-         *            Maximum number of events in the queue.
-         */
-        public void setMaxSize(int maxSize) {
-            Reject.ifFalse(maxSize >= 1);
-            this.maxSize = maxSize;
-        }
     }
 }

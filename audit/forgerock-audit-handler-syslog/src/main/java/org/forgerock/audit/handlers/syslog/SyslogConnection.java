@@ -19,21 +19,15 @@ package org.forgerock.audit.handlers.syslog;
 import java.io.IOException;
 
 /**
- * Responsible for transmitting Syslog messages to a Syslog server.
+ * Abstraction over Syslog connection types such as TCP or UDP.
  */
-interface SyslogPublisher extends AutoCloseable {
+interface SyslogConnection extends AutoCloseable {
 
-    /**
-     * Send the provided message to the Syslog server.
-     *
-     * @param syslogMessage The message to transmit to the Syslog server.
-     *
-     * @throws IOException If connecting or publishing events to the Syslog daemon failed.
-     */
-    void publishMessage(String syslogMessage) throws IOException;
+    void reconnect() throws IOException;
 
-    /**
-     * Closes the underlying connection.
-     */
+    void send(byte[] syslogMessage) throws IOException;
+
+    void flush() throws IOException;
+
     void close();
 }

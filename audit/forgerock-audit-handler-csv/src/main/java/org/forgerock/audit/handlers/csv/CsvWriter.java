@@ -130,8 +130,7 @@ public class CsvWriter implements AutoCloseable {
 
         if (config.getBuffering().isEnabled()) {
             EventBufferingConfiguration bufferConfig = config.getBuffering();
-            textWriter = new AsynchronousTextWriter("CsvHandler", bufferConfig.getMaxSize(),
-                    bufferConfig.isAutoFlush(), textWriter);
+            textWriter = new AsynchronousTextWriter("CsvHandler", bufferConfig.isAutoFlush(), textWriter);
         }
         return new TextWriterAdapter(textWriter);
     }

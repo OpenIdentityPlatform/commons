@@ -18,9 +18,13 @@ package org.forgerock.audit.events.handlers.writers;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.forgerock.util.Reject;
 import org.slf4j.Logger;
@@ -29,71 +33,69 @@ import org.slf4j.LoggerFactory;
 /**
  * A Text Writer which writes log records asynchronously to character-based stream.
  * <p>
- * The records are buffered in a queue and written asynchronously. If maximum capacity of the queue is
+ * The records are buffered in a queue and written asynchronously. If maximum CAPACITY of the queue is
  * reached, then calls to {@code write()} method are blocked. This prevent OOM errors while allowing
  * good write performances.
  */
 public class AsynchronousTextWriter implements TextWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsynchronousTextWriter.class);
+    /** Maximum number of messages that can be queued before producers start to block. */
+    private static final int CAPACITY = 5000;
 
     /** The wrapped Text Writer. */
     private final TextWriter writer;
 
     /** Queue to store unpublished records. */
-    private final LinkedBlockingQueue<String> queue;
-
-    /** The capacity for the queue. */
-    private final int capacity;
-
-    private final AtomicBoolean stopRequested;
-    private final WriterThread writerThread;
+    private final BlockingQueue<String> queue;
+    /** Single threaded executor which runs the WriterTask. */
+    private final ExecutorService executorService;
+    /** Flag for determining if the wrapped TextWriter should be flushed after each event is written. */
     private final boolean autoFlush;
+    /** Flag for notifying the WriterTask to exit. */
+    private volatile boolean stopRequested;
 
     /**
      * Construct a new AsynchronousTextWriter wrapper.
      *
      * @param name
      *            the name of the thread.
-     * @param capacity
-     *            the size of the queue before it gets flushed.
      * @param autoFlush
      *            indicates if the underlying writer should be flushed after the queue is flushed.
      * @param writer
      *            a character stream used for output.
      */
-    public AsynchronousTextWriter(String name, int capacity, boolean autoFlush, TextWriter writer) {
+    public AsynchronousTextWriter(final String name, final boolean autoFlush, final TextWriter writer) {
         Reject.ifNull(writer);
         this.autoFlush = autoFlush;
         this.writer = writer;
-
-        this.queue = new LinkedBlockingQueue<>(capacity);
-        this.capacity = capacity;
-        this.stopRequested = new AtomicBoolean(false);
-
-        this.writerThread = new WriterThread(name);
-        this.writerThread.start();
+        this.queue = new LinkedBlockingQueue<>(CAPACITY);
+        this.stopRequested = false;
+        this.executorService = Executors.newSingleThreadExecutor(new ThreadFactory() {
+            @Override
+            public Thread newThread(Runnable runnable) {
+                return new Thread(runnable, name);
+            }
+        });
+        executorService.execute(new WriterTask());
     }
 
     /**
      * The publisher thread is responsible for emptying the queue of log records waiting to published.
      */
-    private class WriterThread extends Thread {
-
-        WriterThread(String name) {
-            super(name);
-        }
+    private class WriterTask implements Runnable {
 
         /**
          * Runs until queue is empty AND we've been asked to terminate.
          */
         @Override
         public void run() {
-            ArrayList<String> drainList = new ArrayList<>(capacity);
+            List<String> drainList = new ArrayList<>(CAPACITY);
 
-            while (!stopRequested.get() || !queue.isEmpty()) {
+            boolean interrupted = false;
+            while (!stopRequested || !queue.isEmpty()) {
                 try {
-                    queue.drainTo(drainList, capacity);
+                    queue.drainTo(drainList, CAPACITY);
                     if (drainList.isEmpty()) {
                         String message = queue.poll(10, TimeUnit.SECONDS);
                         if (message != null) {
@@ -114,7 +116,11 @@ public class AsynchronousTextWriter implements TextWriter {
                 } catch (InterruptedException ex) {
                     // Ignore. We'll rerun the loop
                     // and presumably fall out.
+                    interrupted = true;
                 }
+            }
+            if (interrupted) {
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -135,7 +141,8 @@ public class AsynchronousTextWriter implements TextWriter {
      */
     @Override
     public void write(String record) {
-        while (!stopRequested.get()) {
+        boolean interrupted = false;
+        while (!stopRequested) {
             // Put request on queue for writer
             try {
                 queue.put(record);
@@ -143,7 +150,11 @@ public class AsynchronousTextWriter implements TextWriter {
             } catch (InterruptedException e) {
                 // We expect this to happen. Just ignore it and hopefully
                 // drop out in the next try.
+                interrupted = true;
             }
+        }
+        if (interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -184,35 +195,26 @@ public class AsynchronousTextWriter implements TextWriter {
      *            If the wrapped writer should be closed as well.
      */
     public void shutdown(boolean shutdownWrapped) {
-        stopRequested.set(true);
+        stopRequested = true;
 
         // Wait for writer thread to terminate
-        while (writerThread.isAlive()) {
+        executorService.shutdown();
+        boolean interrupted = false;
+        while (!executorService.isTerminated()) {
             try {
-                // Interrupt the thread if its blocking
-                writerThread.interrupt();
-                writerThread.join();
-            } catch (InterruptedException ex) {
-                // Ignore; we gotta wait..
-            }
-        }
-
-        // The writer writerThread SHOULD have drained the queue.
-        // If not, handle outstanding requests ourselves,
-        // and push them to the writer.
-        if (!queue.isEmpty()) {
-            while (!queue.isEmpty()) {
-                String message = queue.poll();
-                writeMessage(message);
-            }
-            if (autoFlush) {
-                flush();
+                executorService.awaitTermination(1, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                interrupted = true;
             }
         }
 
         // Shutdown the wrapped writer.
         if (shutdownWrapped) {
             writer.shutdown();
+        }
+
+        if (interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 }

@@ -54,7 +54,6 @@ public class CsvWriterTest {
 
         EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
         bufferConfig.setEnabled(true);
-        bufferConfig.setMaxSize(3);
         CsvSecurity csvSecurity = new CsvSecurity();
         csvSecurity.setFilename(CsvSecureMapWriterTest.KEYSTORE_FILENAME);
         csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);

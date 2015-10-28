@@ -19,8 +19,7 @@
         },
         "buffering" : {
           "enabled": "true",
-          "autoFlush": "true",
-          "maxSize": "25"
+          "autoFlush": "true"
         },
         "fileRotation" : {
           "rotationFileSuffix" : "-MM.dd.yy-kk.mm.ss",
@@ -53,9 +52,7 @@
           }
         }],
         "buffering" : {
-          "enabled" : "true",
-          "autoFlush" : "false",
-          "maxSize" : "25"
+          "enabled" : "true"
         }
       }
     },

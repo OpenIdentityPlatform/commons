@@ -14,7 +14,6 @@
  * Copyright 2013 Cybernetica AS
  * Portions copyright 2014-2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.syslog;
 
 import static java.util.Arrays.asList;
@@ -52,7 +51,7 @@ import java.util.Set;
  *
  * @see <a href="https://tools.ietf.org/html/rfc5424">RFC-5424</a>
  */
-public class SyslogFormatter {
+class SyslogFormatter {
 
     private static final Logger logger = LoggerFactory.getLogger(SyslogFormatter.class);
 

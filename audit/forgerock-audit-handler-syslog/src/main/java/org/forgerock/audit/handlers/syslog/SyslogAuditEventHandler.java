@@ -14,7 +14,6 @@
  * Copyright 2013 Cybernetica AS
  * Portions copyright 2014-2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.syslog;
 
 import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
@@ -22,7 +21,6 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.net.InetSocketAddress;
-import java.util.Collections;
 import javax.inject.Inject;
 
 import org.forgerock.audit.Audit;
@@ -129,7 +127,7 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase {
     @Override
     public void shutdown() {
         synchronized (publisher) {
-            publisher.closeConnection();
+            publisher.close();
         }
     }
 
@@ -139,7 +137,7 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase {
         try {
             final String syslogMessage = formatAsSyslogMessage(topic, event);
             synchronized (publisher) {
-                publisher.publishSyslogMessages(Collections.singletonList(syslogMessage));
+                publisher.publishMessage(syslogMessage);
             }
 
             return newResourceResponse(

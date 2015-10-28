@@ -14,38 +14,43 @@
  * Copyright 2013 Cybernetica AS
  * Portions copyright 2014-2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.syslog;
 
+import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.nio.charset.StandardCharsets;
 
 /**
- * A {@link SyslogPublisher} implementation that publishes Syslog messages using the TCP protocol.
+ * A {@link SyslogConnection} implementation that publishes Syslog messages using the TCP protocol.
  */
-public class SyslogTcpPublisher extends SyslogPublisher {
+class TcpSyslogConnection implements SyslogConnection {
 
-    private static final Logger logger = LoggerFactory.getLogger(SyslogPublisher.class);
+    private static final Logger logger = LoggerFactory.getLogger(TcpSyslogConnection.class);
 
+    private final SocketAddress socketAddress;
+    private final int connectTimeout; // ms
     private Socket socket = null;
-    private int connectTimeout = 30000; // ms
+    private OutputStream outputStream;
 
-    public SyslogTcpPublisher(InetSocketAddress socketAddress, int connectTimeout) {
-        super(socketAddress);
+    TcpSyslogConnection(InetSocketAddress socketAddress, int connectTimeout) {
+        this.socketAddress = socketAddress;
         this.connectTimeout = connectTimeout;
     }
 
     @Override
-    protected void reconnect() throws IOException {
+    public void reconnect() throws IOException {
         if (socket == null) {
             connect();
         } else if (!socket.isConnected() || socket.isClosed()) {
-            closeConnection();
+            close();
             connect();
         }
     }
@@ -54,10 +59,11 @@ public class SyslogTcpPublisher extends SyslogPublisher {
         socket = new Socket();
         socket.connect(socketAddress, connectTimeout);
         socket.setKeepAlive(true);
+        outputStream = new BufferedOutputStream(socket.getOutputStream());
     }
 
     /**
-     * Sends the log record to Syslog over TCP in the correct format.
+     * Sends the Syslog message bytes to Syslog over TCP in the correct format.
      *
      * Per <a href="https://tools.ietf.org/html/rfc6587#section-3.4.1">RFC 6587</a> the TCP messages should have the
      * following structure:
@@ -75,20 +81,31 @@ public class SyslogTcpPublisher extends SyslogPublisher {
      * }
      * </pre>
      *
-     * @param bytes The log record's byte[] representation.
+     * @param syslogMessage The log record's byte[] representation.
      * @throws IOException {@inheritDoc}
      */
     @Override
-    protected void sendLogRecord(byte[] bytes) throws IOException {
-        OutputStream out = socket.getOutputStream();
-        out.write(String.valueOf(bytes.length).getBytes("UTF-8"));
-        out.write(' ');
-        out.write(bytes);
-        out.flush();
+    public void send(byte[] syslogMessage) throws IOException {
+        Reject.ifNull(outputStream, "TCP connection must be established before calling send");
+        outputStream.write(String.valueOf(syslogMessage.length).getBytes(StandardCharsets.UTF_8));
+        outputStream.write(' ');
+        outputStream.write(syslogMessage);
     }
 
     @Override
-    protected void closeConnection() {
+    public void flush() throws IOException {
+        if (outputStream != null){
+            outputStream.flush();
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            flush();
+        } catch (IOException e) {
+            logger.warn("Error when flushing the connection", e);
+        }
         if (socket != null) {
             try {
                 socket.close();
