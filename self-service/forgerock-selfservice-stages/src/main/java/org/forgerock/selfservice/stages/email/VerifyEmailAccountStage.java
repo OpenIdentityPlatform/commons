@@ -23,6 +23,7 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -180,14 +181,16 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
         String subjectText = null;
         String bodyText = null;
         try {
-            subjectText = preferredLocales.getTranslationFromLocaleMap(subjectMap);
+            subjectText = getTranslationFromLocaleMap(preferredLocales, subjectMap);
+            //subjectText = preferredLocales.getTranslationFromLocaleMap(subjectMap);
         } catch (IllegalArgumentException iae) {
             throw ResourceException.newResourceException(ResourceException.BAD_REQUEST,
                     "No translations available for email subject");
         }
 
         try {
-            bodyText = preferredLocales.getTranslationFromLocaleMap(messageMap);
+            bodyText = getTranslationFromLocaleMap(preferredLocales, messageMap);
+            // bodyText = preferredLocales.getTranslationFromLocaleMap(messageMap);
         } catch (IllegalArgumentException iae) {
             throw ResourceException.newResourceException(ResourceException.BAD_REQUEST,
                     "No translations available for email body");
@@ -211,4 +214,52 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
         }
     }
 
+    /****************************************************************************************************************
+     * NOTE: Remove these functions once forgerock-util has been updated.
+     ****************************************************************************************************************/
+
+    /**
+     * Using the user's preferred locales (for example, from the "Accept-Language" header in the HTTP context),
+     * select the most optimal (string) translation from the map.  If there is nothing acceptable, throw an exception.
+     *
+     * @param translations Map of locales to strings
+     * @return the most appropriate string given the above
+     * @throws IllegalArgumentException If an acceptable string cannot be found
+     *
+     * TODO: REMOVE ME ONCE FORGEROCK UTIL HAS BEEN UPDATED
+     */
+    private String getTranslationFromLocaleMap(PreferredLocales preferredLocales, Map<Locale, String> translations) {
+        List<Locale> locales = preferredLocales.getLocales();
+        for (Locale locale : locales) {
+            String translation = getTranslation(locales, locale, translations);
+            if (translation != null) {
+                return translation;
+            }
+        }
+        throw new IllegalArgumentException("Cannot find suitable translation from given choices");
+    }
+
+    /**
+     * @param locales The preferred locales
+     * @param locale The desired locale
+     * @param translations The translations
+     * @return A translation or null if not available
+     *
+     * TODO: REMOVE ME ONCE FORGEROCK UTIL HAS BEEN UPDATED
+     */
+    private String getTranslation(List<Locale> locales, Locale locale, Map<Locale, String> translations) {
+        String translation = translations.get(locale);
+        if (translation != null) {
+            return translation;
+        }
+        String languageTag = locale.toLanguageTag();
+        int parentTagEnd = languageTag.lastIndexOf("-");
+        if (parentTagEnd > -1) {
+            Locale parent = Locale.forLanguageTag(languageTag.substring(0, parentTagEnd));
+            if (!locales.contains(parent)) {
+                return getTranslation(locales, parent, translations);
+            }
+        }
+        return null;
+    }
 }
