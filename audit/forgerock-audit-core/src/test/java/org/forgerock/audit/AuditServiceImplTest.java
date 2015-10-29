@@ -57,6 +57,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -91,7 +92,7 @@ public class AuditServiceImplTest {
         final String topic = "access";
         final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
-        configuration.setName("mock");
+        configuration.setName(QUERY_HANDLER_NAME);
         configuration.setTopics(Collections.singleton(topic));
         final AuditService auditService = newAuditService()
                 .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic))
@@ -160,6 +161,64 @@ public class AuditServiceImplTest {
         assertThat(promise)
                 .failedWithException()
                 .isInstanceOf(ResourceException.class);
+    }
+
+    @Test
+    public void shouldFailCreateRequestIfHandlerConfiguredForQueriesThrowsException() throws Exception {
+        //given
+        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME, "access");
+        final AuditEventHandler queryHandler = mock(AuditEventHandler.class);
+        given(queryHandler.isEnabled()).willReturn(true);
+        given(queryHandler.getName()).willReturn(QUERY_HANDLER_NAME);
+        given(queryHandler.getHandledTopics()).willReturn(new HashSet<>(Arrays.asList("access")));
+        final PassThroughAuditEventHandler otherHandler = spyPassThroughAuditEventHandler("otherHandler");
+        final Set<AuditEventHandler> handlers = asSet(queryHandler, otherHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
+        auditService.startup();
+
+        final Promise<ResourceResponse, ResourceException> exception = new InternalServerErrorException().asPromise();
+        given(queryHandler.publishEvent(any(Context.class), eq("access"), any(JsonValue.class))).willReturn(exception);
+        final CreateRequest createRequest = makeCreateRequest();
+
+        //when
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleCreate(new RootContext(), createRequest);
+
+        //then
+        verify(queryHandler, times(1)).publishEvent(any(Context.class), eq("access"), any(JsonValue.class));
+        verify(otherHandler, times(1)).publishEvent(any(Context.class), eq("access"), any(JsonValue.class));
+        assertThat(promise)
+                .failedWithException()
+                .isInstanceOf(InternalServerErrorException.class);
+    }
+
+    @Test
+    public void shouldIgnoreCreateRequestExceptionsNotComingFromHandlerConfiguredForQueries() throws Exception {
+        //given
+        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME, "access");
+        final PassThroughAuditEventHandler queryHandler = spyPassThroughAuditEventHandler(QUERY_HANDLER_NAME);
+        final AuditEventHandler otherHandler = mock(AuditEventHandler.class);
+        given(otherHandler.isEnabled()).willReturn(true);
+        given(otherHandler.getName()).willReturn("otherHandler");
+        given(otherHandler.getHandledTopics()).willReturn(new HashSet<>(Arrays.asList("access")));
+        final Set<AuditEventHandler> handlers = asSet(queryHandler, otherHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
+        auditService.startup();
+
+        final Promise<ResourceResponse, ResourceException> exception = new InternalServerErrorException().asPromise();
+        given(otherHandler.publishEvent(any(Context.class), eq("access"), any(JsonValue.class))).willReturn(exception);
+        final CreateRequest createRequest = makeCreateRequest();
+
+        //when
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleCreate(new RootContext(), createRequest);
+
+        //then
+        verify(queryHandler, times(1)).publishEvent(any(Context.class), eq("access"), any(JsonValue.class));
+        verify(otherHandler, times(1)).publishEvent(any(Context.class), eq("access"), any(JsonValue.class));
+        final ResourceResponse resource = promise.get();
+        assertThat(resource).isNotNull();
+        assertThat(resource.getContent().asMap()).isEqualTo(createRequest.getContent().asMap());
     }
 
     @Test
@@ -605,7 +664,7 @@ public class AuditServiceImplTest {
         final String topic = "access";
         final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
-        configuration.setName("mock");
+        configuration.setName(QUERY_HANDLER_NAME);
         configuration.setTopics(Collections.singleton(topic));
         final AuditService auditService = newAuditService()
                 .withConfiguration(getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic))
