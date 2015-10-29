@@ -15,12 +15,12 @@
       "emailServiceUrl": "/email",
       "from": "info@admin.org",
       "subjectTranslations": {
-        "en_GB": "Reset your password",
-        "fr_FR": "Réinitialisez votre mot de passe"
+        "en": "Reset your password",
+        "fr": "Réinitialisez votre mot de passe"
       },
       "messageTranslations": {
-        "en_GB": "<h3>Click to reset your password</h3><h4><a href=\"%link%\">Password reset link</a></h4>",
-        "fr_FR": "<h3>Cliquez pour réinitialiser votre mot de passe</h3><h4><a href=\"%link%\">Mot de passe lien de réinitialisation</a></h4>"
+        "en": "<h3>Click to reset your password</h3><h4><a href=\"%link%\">Password reset link</a></h4>",
+        "fr": "<h3>Cliquez pour réinitialiser votre mot de passe</h3><h4><a href=\"%link%\">Mot de passe lien de réinitialisation</a></h4>"
       },
       "verificationLinkToken": "%link%",
       "verificationLink": "http://localhost:9999/example/#passwordReset/"

@@ -4,12 +4,12 @@
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
       "subjectTranslations": {
-        "en_GB": "Register new account",
-        "fr_FR": "Créer un nouveau compte"
+        "en": "Register new account",
+        "fr": "Créer un nouveau compte"
       },
       "messageTranslations": {
-        "en_GB": "Click this link to register: %link%",
-        "fr_FR": "Clicker le linke a registre: %link%"
+        "en": "Click this link to register: %link%",
+        "fr": "Clicker le linke a registre: %link%"
       },
       "mimeType": "text/plain",
       "from": "noreply@example.com",
