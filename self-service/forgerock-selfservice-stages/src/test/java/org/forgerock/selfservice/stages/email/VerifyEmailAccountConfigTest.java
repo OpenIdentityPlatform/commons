@@ -46,10 +46,10 @@ public final class VerifyEmailAccountConfigTest {
         assertThat(verifyEmailAccountConfig.getFrom()).isEqualTo("noreply@example.com");
         assertThat(verifyEmailAccountConfig.getVerificationLink()).isEqualTo("/verifyemail");
         assertThat(verifyEmailAccountConfig.getVerificationLinkToken()).isEqualTo("abc123");
-        assertThat(verifyEmailAccountConfig.getMessageMap()).containsKey(new Locale("en", "GB"));
-        assertThat(verifyEmailAccountConfig.getMessageMap()).containsKey(new Locale("fr", "FR"));
-        assertThat(verifyEmailAccountConfig.getSubjectMap()).containsKey(new Locale("en", "GB"));
-        assertThat(verifyEmailAccountConfig.getSubjectMap()).containsKey(new Locale("fr", "FR"));
+        assertThat(verifyEmailAccountConfig.getMessageTranslations()).containsKey(new Locale("en", "GB"));
+        assertThat(verifyEmailAccountConfig.getMessageTranslations()).containsKey(new Locale("fr", "FR"));
+        assertThat(verifyEmailAccountConfig.getSubjectTranslations()).containsKey(new Locale("en", "GB"));
+        assertThat(verifyEmailAccountConfig.getSubjectTranslations()).containsKey(new Locale("fr", "FR"));
     }
 
 }

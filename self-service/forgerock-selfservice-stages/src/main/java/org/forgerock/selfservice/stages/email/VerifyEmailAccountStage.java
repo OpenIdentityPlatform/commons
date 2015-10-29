@@ -41,11 +41,9 @@ import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
-import org.forgerock.services.context.Context;
 import org.forgerock.util.i18n.PreferredLocales;
 
 import javax.inject.Inject;
-import java.util.UUID;
 
 /**
  * Having retrieved the email address from the context or in response to the initial requirements, verifies the
@@ -170,8 +168,8 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
                            String email, VerifyEmailAccountConfig config) throws ResourceException {
 
         String emailUrl = config.getVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
-        Map<Locale, String> messageMap = config.getMessageMap();
-        Map<Locale, String> subjectMap = config.getSubjectMap();
+        Map<Locale, String> messageMap = config.getMessageTranslations();
+        Map<Locale, String> subjectMap = config.getSubjectTranslations();
 
         PreferredLocales preferredLocales = processContext.getPreferredLocales();
         if (preferredLocales == null) {

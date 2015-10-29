@@ -22,9 +22,6 @@ import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
-import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.*;
-import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -35,7 +32,6 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
@@ -153,7 +149,6 @@ public final class VerifyEmailAccountStageTest {
         config.setEmailServiceUrl("/email");
         final String infoEmailId = "info@admin.org";
         config.setFrom(infoEmailId);
-        final String emailSubject = "Reset password email";
 
         Map<Locale, String> subjectMap = new HashMap<>();
         Map<Locale, String> messageMap = new HashMap<>();
@@ -163,8 +158,8 @@ public final class VerifyEmailAccountStageTest {
         messageMap.put(Locale.ENGLISH, "<h3>This is your reset email.</h3>"
                             + "<h4><a href=\"%link%\">Email verification link</a></h4>");
 
-        config.setSubjectMap(subjectMap);
-        config.setMessageMap(messageMap);
+        config.setSubjectTranslations(subjectMap);
+        config.setMessageTranslations(messageMap);
 
         // When
         StageResponse stageResponse = verifyEmailStage.advance(context, config);

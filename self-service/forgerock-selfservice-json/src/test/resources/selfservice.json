@@ -3,11 +3,11 @@
     {
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
-      "subjectMap": {
+      "subjectTranslations": {
         "en_GB": "Register new account",
         "fr_FR": "Créer un nouveau compte"
       },
-      "messageMap": {
+      "messageTranslations": {
         "en_GB": "Click this link to register: %link%",
         "fr_FR": "Clicker le linke a registre: %link%"
       },

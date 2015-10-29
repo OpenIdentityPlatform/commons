@@ -4,11 +4,11 @@
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
       "from": "info@admin.org",
-      "subjectMap": {
+      "subjectTranslations": {
         "en_GB": "Register new account",
         "fr_FR": "Créer un nouveau compte"
       },
-      "messageMap": {
+      "messageTranslations": {
         "en_GB": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
         "fr_FR": "<h3>Ceci est votre mail d'inscription.</h3><h4><a href=\"%link%\">Lien de vérification Email</a></h4>"
       },

@@ -35,9 +35,9 @@ public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAc
     public static final String NAME = "emailValidation";
 
     private String emailServiceUrl;
-    private Map<Locale, String> subjectMap;
+    private Map<Locale, String> subjectTranslations;
     private String from;
-    private Map<Locale, String> messageMap;
+    private Map<Locale, String> messageTranslations;
     private String mimeType;
     private String verificationLink;
     private String verificationLinkToken;
@@ -69,20 +69,20 @@ public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAc
      *
      * @return the email subject map (locale to string)
      */
-    public Map<Locale, String> getSubjectMap() {
-        return subjectMap;
+    public Map<Locale, String> getSubjectTranslations() {
+        return subjectTranslations;
     }
 
     /**
      * Sets the subject map for the verification email.
      *
-     * @param subjectMap
+     * @param subjectTranslations
      *         the email subject map (locale to string)
      *
      * @return this config instance
      */
-    public VerifyEmailAccountConfig setSubjectMap(Map<Locale, String> subjectMap) {
-        this.subjectMap = subjectMap;
+    public VerifyEmailAccountConfig setSubjectTranslations(Map<Locale, String> subjectTranslations) {
+        this.subjectTranslations = subjectTranslations;
         return this;
     }
 
@@ -91,20 +91,20 @@ public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAc
      *
      * @return the email message map (locale to string)
      */
-    public Map<Locale, String> getMessageMap() {
-        return messageMap;
+    public Map<Locale, String> getMessageTranslations() {
+        return messageTranslations;
     }
 
     /**
      * Sets the message map for the verification email.
      *
-     * @param messageMap
+     * @param messageTranslations
      *         the email message map (locale to string)
      *
      * @return this config instance
      */
-    public VerifyEmailAccountConfig setMessageMap(Map<Locale, String> messageMap) {
-        this.messageMap = messageMap;
+    public VerifyEmailAccountConfig setMessageTranslations(Map<Locale, String> messageTranslations) {
+        this.messageTranslations = messageTranslations;
         return this;
     }
 
