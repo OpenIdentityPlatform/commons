@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.forgerock</groupId>
     <artifactId>forgerock-parent</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
   </parent>
 
   <groupId>org.forgerock.commons</groupId>
@@ -37,8 +37,8 @@
   </licenses>
 
   <scm>
-    <developerConnection>scm:git:https://stash.forgerock.org/scm/commons/forgerock-persistit.git</developerConnection>
-    <connection>scm:git:https://stash.forgerock.org/scm/commons/forgerock-persistit.git</connection>
+    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-persistit.git</developerConnection>
+    <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-persistit.git</connection>
     <url>https://stash.forgerock.org/projects/COMMONS/repos/forgerock-persistit/browse</url>
     <tag>HEAD</tag>
   </scm>
