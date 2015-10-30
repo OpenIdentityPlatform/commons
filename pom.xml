@@ -10,7 +10,7 @@
 
   <groupId>org.forgerock.commons</groupId>
   <artifactId>forgerock-persistit</artifactId>
-  <version>4.1.0-SNAPSHOT</version>
+  <version>4.2.0</version>
   <packaging>pom</packaging>
 
   <name>ForgeRock Persistit</name>
@@ -40,7 +40,7 @@
     <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-persistit.git</developerConnection>
     <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-persistit.git</connection>
     <url>https://stash.forgerock.org/projects/COMMONS/repos/forgerock-persistit/browse</url>
-    <tag>HEAD</tag>
+    <tag>4.2.0</tag>
   </scm>
 
   <distributionManagement>
