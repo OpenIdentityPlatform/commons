@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.handlers.csv;
 
 import java.io.File;
 import java.io.FileInputStream;

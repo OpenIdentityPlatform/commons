@@ -1,5 +1,5 @@
 {
-  "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+  "class" : "org.forgerock.audit.handlers.csv.CSVAuditEventHandler",
   "config" : {
     "name" : "csv",
     "topics": [ "access", "activity", "config", "authentication" ],

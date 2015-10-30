@@ -13,17 +13,17 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.handlers.csv;
 
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.ENTRY_INITIAL_KEY;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.ENTRY_SIGNATURE;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.HEADER_HMAC;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.HEADER_SIGNATURE;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.HMAC_ALGORITHM;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.SIGNATURE_ALGORITHM;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureUtils.dataToSign;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureUtils.readPublicKeyFromKeyStore;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureUtils.readSecretKeyFromKeyStore;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.ENTRY_INITIAL_KEY;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.ENTRY_SIGNATURE;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_HMAC;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_SIGNATURE;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HMAC_ALGORITHM;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.SIGNATURE_ALGORITHM;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.dataToSign;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readPublicKeyFromKeyStore;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readSecretKeyFromKeyStore;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;

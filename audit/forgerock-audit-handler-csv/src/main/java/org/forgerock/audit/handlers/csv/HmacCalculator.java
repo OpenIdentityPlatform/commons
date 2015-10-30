@@ -14,7 +14,7 @@
 * Copyright 2015 ForgeRock AS.
 */
 
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.handlers.csv;
 
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;

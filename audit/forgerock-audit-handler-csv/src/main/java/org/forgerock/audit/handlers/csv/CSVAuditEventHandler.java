@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.handlers.csv;
 
 import static org.forgerock.audit.events.AuditEventHelper.ARRAY_TYPE;
 import static org.forgerock.audit.events.AuditEventHelper.OBJECT_TYPE;

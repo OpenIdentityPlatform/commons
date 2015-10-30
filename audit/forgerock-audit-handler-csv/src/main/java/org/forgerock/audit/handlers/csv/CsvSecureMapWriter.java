@@ -13,19 +13,19 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.handlers.csv;
 
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.ENTRY_CURRENT_KEY;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.ENTRY_CURRENT_SIGNATURE;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.HEADER_HMAC;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.HEADER_SIGNATURE;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureConstants.SIGNATURE_ALGORITHM;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureUtils.dataToSign;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureUtils.readPrivateKeyFromKeyStore;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureUtils.readSecretKeyFromKeyStore;
-import static org.forgerock.audit.events.handlers.csv.CsvSecureUtils.writeToKeyStore;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.ENTRY_CURRENT_KEY;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.ENTRY_CURRENT_SIGNATURE;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_HMAC;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_SIGNATURE;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.SIGNATURE_ALGORITHM;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.dataToSign;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readPrivateKeyFromKeyStore;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readSecretKeyFromKeyStore;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.writeToKeyStore;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
@@ -44,6 +44,7 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.locks.ReentrantLock;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 

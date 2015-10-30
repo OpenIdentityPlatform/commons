@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.handlers.csv;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
@@ -40,7 +40,7 @@ import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
-import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;

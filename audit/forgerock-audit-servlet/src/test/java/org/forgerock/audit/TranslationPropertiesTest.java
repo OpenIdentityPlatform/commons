@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
-import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration;
+import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration;
 import org.forgerock.json.JsonValue;

@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.events.handlers.csv;
+package org.forgerock.audit.handlers.csv;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
@@ -26,7 +26,7 @@ import java.io.Writer;
 import java.util.Map;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
-import org.forgerock.audit.events.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
 import org.forgerock.audit.events.handlers.writers.RotatableWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriter;
