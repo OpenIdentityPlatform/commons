@@ -15,11 +15,6 @@
         "WARNING" : "WARNING",
         "INFO" : "INFORMATIONAL"
       }
-    }],
-    "buffering" : {
-      "enabled" : "true",
-      "autoFlush" : "false",
-      "maxSize" : "25"
-    }
+    }]
   }
 }

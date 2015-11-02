@@ -28,10 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.retention.TimestampFilenameFilter;
-import org.forgerock.util.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

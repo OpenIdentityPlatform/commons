@@ -25,12 +25,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
 import org.forgerock.audit.events.handlers.writers.RotatableWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriterAdapter;
+import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapReader;

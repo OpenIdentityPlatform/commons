@@ -32,11 +32,6 @@
           "context" : "custom_array"
         }
       }
-    ],
-    "buffering" : {
-      "enabled" : "true",
-      "autoFlush" : "true",
-      "maxSize" : 25
-    }
+    ]
   }
 }
