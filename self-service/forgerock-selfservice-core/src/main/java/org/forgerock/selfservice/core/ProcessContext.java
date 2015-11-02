@@ -87,7 +87,7 @@ public interface ProcessContext {
 
     /**
      * Puts a value into the additions referenced by the json pointer.
-     * </p>
+     * <p/>
      * Additions are included in the response of successfully completing a flow.
      *
      * @param jsonPointer

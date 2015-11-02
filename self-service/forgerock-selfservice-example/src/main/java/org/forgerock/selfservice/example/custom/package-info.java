@@ -14,12 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
-
 /**
- * This interface acts a marker class for all implementing visitors that intend to visit stage configs.
- *
- * @since 0.3.0
+ * This package contains a basic example implementation of a custom progress stage.
  */
-public interface StageConfigVisitor {
-}
+package org.forgerock.selfservice.example.custom;

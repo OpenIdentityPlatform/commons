@@ -36,7 +36,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.config.StageConfigVisitor;
-import org.forgerock.selfservice.core.exceptions.StageConfigException;
+import org.forgerock.selfservice.core.config.StageConfigException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.services.context.Context;

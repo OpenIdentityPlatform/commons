@@ -15,6 +15,6 @@
  */
 
 /**
- * This package contains all the exceptions.
+ * This package contains a common approach to dynamic progress stage handling.
  */
-package org.forgerock.selfservice.core.exceptions;
+package org.forgerock.selfservice.stages.dynamic;

@@ -37,10 +37,19 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.selfservice.core.AnonymousProcessService;
+import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
+import org.forgerock.selfservice.core.config.StageConfig;
+import org.forgerock.selfservice.core.config.StageConfigException;
+import org.forgerock.selfservice.example.custom.MathProblemStageConfig;
 import org.forgerock.selfservice.json.JsonConfig;
+import org.forgerock.selfservice.stages.dynamic.DynamicConfigVisitor;
+import org.forgerock.selfservice.stages.dynamic.DynamicConfigVisitorImpl;
+import org.forgerock.selfservice.stages.dynamic.DynamicProgressStageProvider;
+import org.forgerock.selfservice.stages.dynamic.DynamicStageConfig;
 import org.forgerock.util.Factory;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +59,7 @@ import java.util.Map;
  */
 public final class ExampleSelfServiceApplication implements HttpApplication {
 
+    private DynamicConfigVisitor dynamicConfigVisitor;
     private ConnectionFactory crestConnectionFactory;
     private Router crestRouter;
     private JsonValue appConfig;
@@ -58,11 +68,27 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     @Override
     public Handler start() throws HttpApplicationException {
         try {
+            dynamicConfigVisitor = new DynamicConfigVisitorImpl(new DynamicProgressStageProvider() {
+
+                @Override
+                public ProgressStage<DynamicStageConfig> get(
+                        Class<? extends ProgressStage<DynamicStageConfig>> progressStageClass) {
+                    try {
+                        // Assumes an empty constructor.
+                        return progressStageClass.newInstance();
+                    } catch (InstantiationException | IllegalAccessException e) {
+                        throw new StageConfigException("Unable to instantiate progress stage", e);
+                    }
+                }
+
+            });
+
             appConfig = JsonReader.jsonFileToJsonValue("/config.json");
             httpClient = new Client(new HttpClientHandler());
 
             crestRouter = new Router();
             crestConnectionFactory = newInternalConnectionFactory(crestRouter);
+
             registerCRESTServices();
 
             org.forgerock.http.routing.Router chfRouter = new org.forgerock.http.routing.Router();
@@ -88,7 +114,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
 
         RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,
-                new ExampleStageConfigVisitor(crestConnectionFactory, httpClient),
+                new ExampleStageConfigVisitor(dynamicConfigVisitor, crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
@@ -99,8 +125,14 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/registration.json"), Map.class));
         ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
 
+        // TODO: Presently injecting dynamic stage until there is a viable JSON solution.
+        List<StageConfig<? super ExampleStageConfigVisitor>> stages = config.getStageConfigs();
+        stages.add(0, new MathProblemStageConfig()
+                .setLeftValue(5)
+                .setRightValue(10));
+
         RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,
-                new ExampleStageConfigVisitor(crestConnectionFactory, httpClient),
+                new ExampleStageConfigVisitor(dynamicConfigVisitor, crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));

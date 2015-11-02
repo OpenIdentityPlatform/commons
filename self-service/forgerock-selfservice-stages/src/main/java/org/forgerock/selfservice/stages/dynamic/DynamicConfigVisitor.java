@@ -14,25 +14,28 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.exceptions;
+package org.forgerock.selfservice.stages.dynamic;
+
+import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.config.StageConfigVisitor;
 
 /**
- * Represents some framework error around the use of progress stages and configs.
+ * Visitor that dynamically builds progress stages based of the class name defined in the config.
  *
- * @since 0.1.0
+ * @since 0.7.0
  */
-public final class StageConfigException extends RuntimeException {
-
-    private static final long serialVersionUID = 1L;
+public interface DynamicConfigVisitor extends StageConfigVisitor {
 
     /**
-     * Creates an exception instance.
+     * Builds a progress stage as defined in the config and is then bound to that config.
+     * <p/>
+     * The defined progress stage must be able to consume the type of config passed.
      *
-     * @param message
-     *         should detail the cause of the error
+     * @param config
+     *         dynamic stage config
+     *
+     * @return dynamic progress stage and config binding
      */
-    public StageConfigException(String message) {
-        super(message);
-    }
+    ProgressStageBinder<?> build(DynamicStageConfig config);
 
 }

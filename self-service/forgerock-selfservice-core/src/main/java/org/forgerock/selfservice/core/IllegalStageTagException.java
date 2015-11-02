@@ -14,12 +14,25 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
+package org.forgerock.selfservice.core;
 
 /**
- * This interface acts a marker class for all implementing visitors that intend to visit stage configs.
+ * Exception that represents an unknown stage tag.
  *
- * @since 0.3.0
+ * @since 0.1.0
  */
-public interface StageConfigVisitor {
+public final class IllegalStageTagException extends IllegalArgumentException {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Creates a new exception instance.
+     *
+     * @param stageTag
+     *         represents the illegal/invalid stage tag
+     */
+    public IllegalStageTagException(String stageTag) {
+        super("Unknown stage tag " + stageTag);
+    }
+
 }

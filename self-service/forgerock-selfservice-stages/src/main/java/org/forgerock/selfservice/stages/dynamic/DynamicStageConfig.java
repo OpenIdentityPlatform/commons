@@ -14,12 +14,25 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
+package org.forgerock.selfservice.stages.dynamic;
+
+import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
- * This interface acts a marker class for all implementing visitors that intend to visit stage configs.
+ * Stage config that allows for dynamic approach to progress stage
+ * instantiation and therefore supports runtime customisation.
  *
- * @since 0.3.0
+ * @since 0.7.0
  */
-public interface StageConfigVisitor {
+public interface DynamicStageConfig extends StageConfig<DynamicConfigVisitor> {
+
+    /**
+     * Progress stage class name to be instantiated.
+     * <p/>
+     * The declared progress stage must be able to consume the stage config subtype.
+     *
+     * @return progress stage class name
+     */
+    String getProgressStageClassName();
+
 }

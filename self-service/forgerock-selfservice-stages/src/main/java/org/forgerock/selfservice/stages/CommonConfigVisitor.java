@@ -17,6 +17,7 @@
 package org.forgerock.selfservice.stages;
 
 import org.forgerock.selfservice.stages.captcha.CaptchaConfigVisitor;
+import org.forgerock.selfservice.stages.dynamic.DynamicConfigVisitor;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfigVisitor;
 import org.forgerock.selfservice.stages.kba.KbaConfigVisitor;
 import org.forgerock.selfservice.stages.registration.UserRegistrationConfigVisitor;
@@ -29,7 +30,5 @@ import org.forgerock.selfservice.stages.user.UserConfigVisitor;
  * @since 0.3.0
  */
 public interface CommonConfigVisitor extends CaptchaConfigVisitor, KbaConfigVisitor, ResetConfigVisitor,
-        UserRegistrationConfigVisitor, UserConfigVisitor,
-        VerifyEmailAccountConfigVisitor {
-
+        UserRegistrationConfigVisitor, UserConfigVisitor, VerifyEmailAccountConfigVisitor, DynamicConfigVisitor {
 }

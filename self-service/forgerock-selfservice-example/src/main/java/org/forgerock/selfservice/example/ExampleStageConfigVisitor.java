@@ -19,10 +19,11 @@ package org.forgerock.selfservice.example;
 import org.forgerock.http.Client;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.selfservice.core.ProgressStageBinder;
-import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.stages.CommonConfigVisitor;
 import org.forgerock.selfservice.stages.captcha.CaptchaStage;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
+import org.forgerock.selfservice.stages.dynamic.DynamicConfigVisitor;
+import org.forgerock.selfservice.stages.dynamic.DynamicStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
@@ -35,10 +36,10 @@ import org.forgerock.selfservice.stages.reset.ResetStage;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
 import org.forgerock.selfservice.stages.user.UserDetailsConfig;
 import org.forgerock.selfservice.stages.user.UserDetailsStage;
-
-import javax.inject.Inject;
 import org.forgerock.selfservice.stages.user.UserQueryConfig;
 import org.forgerock.selfservice.stages.user.UserQueryStage;
+
+import javax.inject.Inject;
 
 /**
  * Example stage config visitor.
@@ -47,11 +48,14 @@ import org.forgerock.selfservice.stages.user.UserQueryStage;
  */
 final class ExampleStageConfigVisitor implements CommonConfigVisitor {
 
+    private final DynamicConfigVisitor dynamicConfigVisitor;
     private final ConnectionFactory connectionFactory;
     private final Client httpClient;
 
     @Inject
-    public ExampleStageConfigVisitor(ConnectionFactory connectionFactory, Client httpClient) {
+    public ExampleStageConfigVisitor(DynamicConfigVisitor dynamicConfigVisitor,
+            ConnectionFactory connectionFactory, Client httpClient) {
+        this.dynamicConfigVisitor = dynamicConfigVisitor;
         this.connectionFactory = connectionFactory;
         this.httpClient = httpClient;
     }
@@ -97,8 +101,8 @@ final class ExampleStageConfigVisitor implements CommonConfigVisitor {
     }
 
     @Override
-    public ProgressStageBinder<?> build(StageConfig<?> config) {
-        throw new UnsupportedOperationException("Unknown config type " + config.getName());
+    public ProgressStageBinder<?> build(DynamicStageConfig config) {
+        return dynamicConfigVisitor.build(config);
     }
 
 }

@@ -17,8 +17,8 @@
 package org.forgerock.selfservice.stages;
 
 import org.forgerock.selfservice.core.ProgressStageBinder;
-import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
+import org.forgerock.selfservice.stages.dynamic.DynamicStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
@@ -87,7 +87,7 @@ public abstract class CommonConfigVisitorDecorator implements CommonConfigVisito
     }
 
     @Override
-    public ProgressStageBinder<?> build(StageConfig<?> config) {
+    public ProgressStageBinder<?> build(DynamicStageConfig config) {
         return decoratedVisitor.build(config);
     }
 

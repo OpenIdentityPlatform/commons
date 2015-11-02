@@ -35,7 +35,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
-import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
+import org.forgerock.selfservice.core.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;

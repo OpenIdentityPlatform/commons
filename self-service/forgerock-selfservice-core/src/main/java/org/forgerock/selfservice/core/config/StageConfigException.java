@@ -14,25 +14,37 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.exceptions;
+package org.forgerock.selfservice.core.config;
 
 /**
- * Exception that represents an unknown stage tag.
+ * Represents some framework error around the use of progress stages and configs.
  *
  * @since 0.1.0
  */
-public final class IllegalStageTagException extends IllegalArgumentException {
+public final class StageConfigException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a new exception instance.
+     * Creates an exception instance.
      *
-     * @param stageTag
-     *         represents the illegal/invalid stage tag
+     * @param message
+     *         should detail the cause of the error
      */
-    public IllegalStageTagException(String stageTag) {
-        super("Unknown stage tag " + stageTag);
+    public StageConfigException(String message) {
+        super(message);
+    }
+
+    /**
+     * Creates an exception instance.
+     *
+     * @param message
+     *         should detail the cause of the error
+     * @param cause
+     *         underlying cause
+     */
+    public StageConfigException(String message, Throwable cause) {
+        super(message, cause);
     }
 
 }

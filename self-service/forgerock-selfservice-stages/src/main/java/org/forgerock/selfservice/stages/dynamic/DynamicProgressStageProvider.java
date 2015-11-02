@@ -14,12 +14,25 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.core.config;
+package org.forgerock.selfservice.stages.dynamic;
+
+import org.forgerock.selfservice.core.ProgressStage;
 
 /**
- * This interface acts a marker class for all implementing visitors that intend to visit stage configs.
+ * Provider is responsible for delivering progress stages based of the passed progress stage class.
  *
- * @since 0.3.0
+ * @since 0.7.0
  */
-public interface StageConfigVisitor {
+public interface DynamicProgressStageProvider {
+
+    /**
+     * Given the progress stage class, delivers up a corresponding progress stage instance.
+     *
+     * @param progressStageClass
+     *         progress stage class
+     *
+     * @return progress stage instance
+     */
+    ProgressStage<DynamicStageConfig> get(Class<? extends ProgressStage<DynamicStageConfig>> progressStageClass);
+
 }
