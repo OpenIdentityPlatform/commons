@@ -18,6 +18,8 @@ package org.forgerock.audit.handlers.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.util.query.QueryFilter.*;
 
+import org.forgerock.audit.handlers.jdbc.query.StringSQLQueryFilterVisitor;
+import org.forgerock.audit.handlers.jdbc.query.StringSQLRenderer;
 import org.forgerock.util.query.QueryFilter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

@@ -26,14 +26,14 @@ import org.forgerock.json.JsonPointer;
 public class TableMappingParametersPair {
 
     private TableMapping tableMapping;
-    private Map<String, FieldValuePair> parameters;
+    private Map<String, Object> parameters;
 
     /**
      * Creates a TableMappingParametersPair given a {@link TableMapping}. A empty parameter map is created.
      * @param tableMapping The {@link TableMapping} to create the pair with.
      */
     public TableMappingParametersPair(final TableMapping tableMapping) {
-        this(tableMapping, new LinkedHashMap<String, FieldValuePair>());
+        this(tableMapping, new LinkedHashMap<String, Object>());
     }
 
     /**
@@ -41,7 +41,7 @@ public class TableMappingParametersPair {
      * @param tableMapping A {@link TableMapping}.
      * @param parameters A Map of replacement parameters.
      */
-    public TableMappingParametersPair(final TableMapping tableMapping, final Map<String, FieldValuePair> parameters) {
+    public TableMappingParametersPair(final TableMapping tableMapping, final Map<String, Object> parameters) {
         this.tableMapping = tableMapping;
         this.parameters = parameters;
     }
@@ -58,7 +58,7 @@ public class TableMappingParametersPair {
      * Gets the replacement parameters in the pair.
      * @return A map of replacement parameters.
      */
-    public Map<String, FieldValuePair> getParameters() {
+    public Map<String, Object> getParameters() {
         return parameters;
     }
 
@@ -74,41 +74,6 @@ public class TableMappingParametersPair {
         } else {
             //remove forward slash and return the result
             return tableMapping.getFieldToColumn().get(fieldString.substring(1));
-        }
-    }
-
-    /**
-     * Stores a field and value as a pair.
-     */
-    static class FieldValuePair {
-
-        private JsonPointer field;
-        private Object value;
-
-        /**
-         * Creates a FieldValuePair given a field and a value.
-         * @param field
-         * @param value
-         */
-        public FieldValuePair(final JsonPointer field, final Object value) {
-            this.field = field;
-            this.value = value;
-        }
-
-        /**
-         * Gets the {@link JsonPointer} field value.
-         * @return The field value.
-         */
-        public JsonPointer getField() {
-            return field;
-        }
-
-        /**
-         * Gets the value from the FiledValuePair.
-         * @return A value object.
-         */
-        public Object getValue() {
-            return value;
         }
     }
 }

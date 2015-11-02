@@ -13,19 +13,22 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc;
+package org.forgerock.audit.handlers.jdbc.providers;
 
 import static org.forgerock.util.Utils.joinAsString;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.TableMappingParametersPair.FieldValuePair;
+import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.Parameter;
+import org.forgerock.audit.handlers.jdbc.utils.SQLStatementParser;
+import org.forgerock.audit.handlers.jdbc.query.StringSQLQueryFilterVisitor;
+import org.forgerock.audit.handlers.jdbc.TableMapping;
+import org.forgerock.audit.handlers.jdbc.TableMappingParametersPair;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
@@ -43,42 +46,30 @@ public class GenericDatabaseStatementProvider extends BaseDatabaseStatementProvi
     private final StringSQLQueryFilterVisitor queryFilterVisitor = new StringSQLQueryFilterVisitor();
 
     /**
-     * Builds a query statement for databases supporting limit and offset.
+     * Builds a query event for databases supporting limit and offset.
      * {@inheritDoc}
      */
     @Override
-    public PreparedStatement buildQueryStatement(final TableMapping mapping, final QueryRequest queryRequest,
-            final JsonValue auditEventMetadata, final Connection connection)
-            throws AuditException {
-        final NamedPreparedStatement namedPreparedStatement;
-        final String querySelectStatement;
+    public JDBCAuditEvent buildQueryEvent(final TableMapping mapping, final QueryRequest queryRequest,
+            final JsonValue eventTopicMetaData) throws AuditException {
         final TableMappingParametersPair tableMappingParametersPair = new TableMappingParametersPair(mapping);
-        try {
-            querySelectStatement = buildQuerySql(queryRequest, tableMappingParametersPair);
-            logger.info("Built query select statement: {}", querySelectStatement);
-        } catch (SQLException e) {
-            logger.error("Unable to create query sql statement");
-            throw new AuditException("Unable to create query sql statement", e);
+        final String querySelectStatement = buildQuerySql(queryRequest, tableMappingParametersPair);
+        logger.info("Built query select statement: {}", querySelectStatement);
+
+        final SQLStatementParser sqlStatementParser = new SQLStatementParser(querySelectStatement);
+        final List<Parameter> params = new LinkedList<>();
+        for (String field : sqlStatementParser.getNamedParameters()) {
+            final JsonPointer fieldPointer = new JsonPointer(field);
+            params.add(
+                    new Parameter(
+                            getParameterType(eventTopicMetaData, fieldPointer),
+                            tableMappingParametersPair.getParameters().get(field)));
         }
-
-        try {
-            namedPreparedStatement = new NamedPreparedStatement(connection, querySelectStatement);
-            for (Map.Entry<String, FieldValuePair> entry : tableMappingParametersPair.getParameters().entrySet()) {
-
-                final JsonPointer field = entry.getValue().getField();
-                final Object value = entry.getValue().getValue();
-                namedPreparedStatement.setObject(entry.getKey(), value, getType(auditEventMetadata, field));
-            }
-            return namedPreparedStatement.getPreparedStatement();
-        } catch (SQLException e) {
-            logger.error("Unable to create the PreparedStatement for the query operation", e);
-            throw new AuditException("Unable to create the PreparedStatement for the query operation", e);
-        }
-
+        return new JDBCAuditEvent(sqlStatementParser.getSqlStatement(), params);
     }
 
     private String buildQuerySql(final QueryRequest queryRequest,
-            final TableMappingParametersPair tableMappingParametersPair) throws SQLException {
+            final TableMappingParametersPair tableMappingParametersPair) {
         final TableMapping tableMapping = tableMappingParametersPair.getTableMapping();
 
         int offsetParam = queryRequest.getPagedResultsOffset();

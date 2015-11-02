@@ -15,7 +15,7 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.audit.events.EventTopicsMetaDataBuilder.coreTopicSchemas;
 import static org.forgerock.json.JsonValue.field;
@@ -33,16 +33,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.ConnectionPool;
 import org.forgerock.audit.json.AuditJsonConfig;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -54,6 +52,8 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.test.assertj.AssertJJsonValueAssert;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
@@ -62,26 +62,16 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 @SuppressWarnings("javadoc")
 public class JDBCAuditEventHandlerTest {
 
     public static final String H2_DRIVER = "org.h2.Driver";
     public static final String H2_JDBC_URL = "jdbc:h2:mem:audit";
-    public static final String H2_JDBC_USERNAME = "";
-    public static final String H2_JDBC_PASSWORD = "";
 
     public static final String EVENTS_JSON = "/events.json";
 
     public static final String AUDIT_SQL_SCRIPT = "/audit.sql";
     public static final String TEST_AUDIT_EVENT_TOPIC = "test";
-    public static final String AUDIT_TEST_TABLE_NAME = "audittest";
-    public static final String ID_TABLE_COLUMN = "objectid";
-    public static final String EVENTNAME_TABLE_COLUMN = "eventname";
-    public static final String TIMESTAMP_TABLE_COLUMN = "activitydate";
-    public static final String USER_ID_TABLE_COLUMN = "userid";
-    public static final String TRANSACTIONID_TABLE_COLUMN = "transactionid";
 
     public static final String SHUTDOWN = "SHUTDOWN";
 
@@ -98,11 +88,10 @@ public class JDBCAuditEventHandlerTest {
     public static final String CUSTOM_OBJECT_FIELD = "customObject";
     public static final String CUSTOM_OBJECT_KEY_FIELD = "key";
     public static final String CUSTOM_OBJECT_VALUE = "value";
-    public static final String CUSTOM_OBJECT_COLUMN = "custom_object";
     public static final String CUSTOM_ARRAY_FIELD = "customArray";
     public static final String CUSTOM_ARRAY_VALUE = "Item1";
-    public static final String CUSTOM_ARRAY_COLUMN = "custom_array";
-    public static final String H2 = "h2";
+
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     private Connection connection;
 
@@ -134,7 +123,26 @@ public class JDBCAuditEventHandlerTest {
         final EventTopicsMetaData eventTopicsMetaData = coreTopicSchemas()
                 .withAdditionalTopicSchemas(additionalSchema).build();
         final AuditServiceBuilder auditServiceBuilder = newAuditService().withEventTopicsMetaData(eventTopicsMetaData);
-        final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler-config.json"));
+        final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler.json"));
+
+        // when
+        AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
+
+        // then
+        AuditService auditService = auditServiceBuilder.build();
+        auditService.startup();
+        AuditEventHandler registeredHandler = auditService.getRegisteredHandler("jdbc");
+        assertThat(registeredHandler).isNotNull();
+    }
+
+    @Test
+    public void canConfigureBufferedJdbcHandlerFromJsonAndRegisterWithAuditService() throws Exception {
+        // given
+        final JsonValue additionalSchema = json(object(field("test", getEventsMetaData())));
+        final EventTopicsMetaData eventTopicsMetaData = coreTopicSchemas()
+                .withAdditionalTopicSchemas(additionalSchema).build();
+        final AuditServiceBuilder auditServiceBuilder = newAuditService().withEventTopicsMetaData(eventTopicsMetaData);
+        final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler.json"));
 
         // when
         AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
@@ -153,7 +161,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testPublish() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         System.out.println(new ObjectMapper().writeValueAsString(configuration));
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
@@ -171,7 +179,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testCreateWithEmptyDB() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
@@ -189,7 +197,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testCreateWithNoTableMapping() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         configuration.setTableMappings(new LinkedList<TableMapping>());
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
@@ -206,7 +214,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testRead() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
@@ -235,7 +243,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testReadWithNoEntry() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final Context context = new RootContext();
 
@@ -250,7 +258,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testReadWithEmptyDB() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
@@ -270,7 +278,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testReadWithNoTableMapping() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
@@ -292,7 +300,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testQuery() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
@@ -331,7 +339,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testQueryWithEmptyDB() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
@@ -366,7 +374,7 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testQueryWithNoTableMapping() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration();
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
         JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
@@ -399,6 +407,24 @@ public class JDBCAuditEventHandlerTest {
                 .isInstanceOf(InternalServerErrorException.class);
     }
 
+    @Test
+    public void testPublishWithBuffering() throws Exception {
+        // given
+        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(true);
+        System.out.println(new ObjectMapper().writeValueAsString(configuration));
+        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JsonValue event = makeEvent();
+        final Context context = new RootContext();
+
+        // when
+        final Promise<ResourceResponse, ResourceException> promise =
+                handler.publishEvent(context, TEST_AUDIT_EVENT_TOPIC, event);
+
+        // then
+        AssertJPromiseAssert.assertThat(promise).succeeded();
+        AssertJJsonValueAssert.assertThat(promise.get().getContent()).isEqualTo(event);
+    }
+
     private JDBCAuditEventHandler createJDBCAuditEventHandler(final JDBCAuditEventHandlerConfiguration configuration)
             throws Exception {
         EventTopicsMetaData eventsMetaData = getEventsMetaData();
@@ -408,43 +434,27 @@ public class JDBCAuditEventHandlerTest {
         return handler;
     }
 
-    private JDBCAuditEventHandlerConfiguration createConfiguration() {
-        final JDBCAuditEventHandlerConfiguration configuration = new JDBCAuditEventHandlerConfiguration();
-        configuration.setName("jdbc");
-        final List<TableMapping> tableMappings = new LinkedList<>();
-        final TableMapping tableMapping = new TableMapping();
-        final Map<String, String> fieldToColumn = new LinkedHashMap<>();
-        fieldToColumn.put(ID_FIELD, ID_TABLE_COLUMN);
-        fieldToColumn.put(EVENT_NAME_FIELD, EVENTNAME_TABLE_COLUMN);
-        fieldToColumn.put(TIMESTAMP_FIELD, TIMESTAMP_TABLE_COLUMN);
-        fieldToColumn.put(USER_ID_FIELD, USER_ID_TABLE_COLUMN);
-        fieldToColumn.put(TRANSACTION_ID_FIELD, TRANSACTIONID_TABLE_COLUMN);
-        fieldToColumn.put(CUSTOM_OBJECT_FIELD, CUSTOM_OBJECT_COLUMN);
-        fieldToColumn.put(CUSTOM_ARRAY_FIELD, CUSTOM_ARRAY_COLUMN);
-        tableMapping.setEvent(TEST_AUDIT_EVENT_TOPIC);
-        tableMapping.setTable(AUDIT_TEST_TABLE_NAME);
-        tableMapping.setFieldToColumn(fieldToColumn);
-        tableMappings.add(tableMapping);
-        configuration.setTableMappings(tableMappings);
-        ConnectionPool connectionPool = new ConnectionPool();
-        connectionPool.setUsername(H2_JDBC_USERNAME);
-        connectionPool.setPassword(H2_JDBC_PASSWORD);
-        connectionPool.setJdbcUrl(H2_JDBC_URL);
-        configuration.setConnectionPool(connectionPool);
-        configuration.setDatabaseName(H2);
-        return configuration;
+    private JDBCAuditEventHandlerConfiguration createConfiguration(final boolean bufferingEnabled) throws Exception {
+        if (bufferingEnabled) {
+            return mapper.readValue(
+                    getResource("/event-handler-config-buffering.json"), JDBCAuditEventHandlerConfiguration.class);
+
+        } else {
+            return mapper.readValue(
+                    getResource("/event-handler-config.json"), JDBCAuditEventHandlerConfiguration.class);
+        }
     }
 
 
     private JsonValue makeEvent() {
-      final AuditEvent testAuditEvent = TestAuditEventBuilder.testAuditEventBuilder()
+        final AuditEvent testAuditEvent = TestAuditEventBuilder.testAuditEventBuilder()
               .eventName(EVENT_NAME_VALUE)
               .userId(USER_ID_VALUE)
               .timestamp(System.currentTimeMillis())
               .transactionId(TRANSACTION_ID_VALUE)
               .customObject(Collections.<String, Object>singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
               .customArray(Collections.singletonList(CUSTOM_ARRAY_VALUE)).toEvent();
-      testAuditEvent.getValue().put(ID_FIELD, ID_VALUE);
+        testAuditEvent.getValue().put(ID_FIELD, ID_VALUE);
         return testAuditEvent.getValue();
     }
 

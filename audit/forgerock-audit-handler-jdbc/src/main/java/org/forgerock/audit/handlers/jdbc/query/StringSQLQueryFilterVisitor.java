@@ -13,13 +13,14 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc;
+package org.forgerock.audit.handlers.jdbc.query;
 
 import static org.forgerock.util.Utils.joinAsString;
 
 import java.util.LinkedList;
 import java.util.List;
 
+import org.forgerock.audit.handlers.jdbc.TableMappingParametersPair;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
@@ -110,11 +111,10 @@ public class StringSQLQueryFilterVisitor
     @Override
     public StringSQLRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand, JsonPointer field,
             Object valueAssertion) {
-        ++objectNumber;
-        String value = "${v"+objectNumber + "}";
-        parameters.getParameters().put(value, new TableMappingParametersPair.FieldValuePair(field, valueAssertion));
+        String value = "${"+ field.toString() + "}";
+        parameters.getParameters().put(field.toString(), valueAssertion);
         return new StringSQLRenderer(parameters.getColumnName(field) + " " + operand + " " + value);
-        }
+    }
 
     /**
      * {@inheritDoc}

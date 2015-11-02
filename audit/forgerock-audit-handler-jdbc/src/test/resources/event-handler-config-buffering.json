@@ -31,11 +31,10 @@
     }
   ],
   "buffering" : {
-    "enabled" : "false",
+    "enabled" : "true",
     "autoFlush" : "true",
     "maxSize" : 25,
     "writeInterval" : "500 milliseconds",
-    "writerThreads" : 10,
-    "maxBatchedEvents" : 40
+    "writerThreads" : 10
   }
 }

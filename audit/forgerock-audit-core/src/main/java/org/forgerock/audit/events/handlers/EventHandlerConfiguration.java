@@ -18,7 +18,6 @@ package org.forgerock.audit.events.handlers;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-
 /**
  * Base class for audit event handler configuration.
  */
@@ -93,5 +92,4 @@ public abstract class EventHandlerConfiguration {
     public void setTopics(Set<String> topics) {
         this.topics = topics;
     }
-
 }

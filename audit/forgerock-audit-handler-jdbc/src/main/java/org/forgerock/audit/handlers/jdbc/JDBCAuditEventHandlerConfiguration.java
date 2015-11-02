@@ -15,14 +15,15 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-
+import java.sql.PreparedStatement;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+import org.forgerock.util.Reject;
 
 /**
  * Configures the JDBC mapping and connection pool.
@@ -39,6 +40,9 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
     @JsonProperty(required = true)
     @JsonPropertyDescription("audit.handlers.jdbc.databaseName")
     private String databaseName;
+
+    @JsonPropertyDescription("audit.handlers.jdbc.databaseName")
+    private EventBufferingConfiguration buffering;
 
     /**
      * Gets the table mappings for the audit events.
@@ -302,6 +306,157 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
          */
         public void setAutoCommit(boolean autoCommit) {
             this.autoCommit = autoCommit;
+        }
+    }
+
+    /**
+     * Returns the configuration for events buffering.
+     *
+     * @return the configuration
+     */
+    public EventBufferingConfiguration getBuffering() {
+        return buffering;
+    }
+
+    /**
+     * Sets the configuration for events buffering.
+     *
+     * @param bufferingConfiguration
+     *            The configuration
+     */
+    public void setBufferingConfiguration(EventBufferingConfiguration bufferingConfiguration) {
+        this.buffering = bufferingConfiguration;
+    }
+
+    /**
+     * Configuration of event buffering.
+     */
+    public static class EventBufferingConfiguration {
+
+        @JsonPropertyDescription("audit.handlers.jdbc.buffering.enabled")
+        private boolean enabled;
+
+        @JsonPropertyDescription("audit.handlers.jdbc.buffering.autoFlush")
+        private boolean autoFlush = true;
+
+        @JsonPropertyDescription("audit.handlers.jdbc.buffering.maxSize")
+        private int maxSize = 5000;
+
+        @JsonPropertyDescription("audit.handlers.jdbc.buffering.interval")
+        private String writeInterval = "disabled";
+
+        @JsonPropertyDescription("audit.handlers.jdbc.buffering.writerThreads")
+        private int writerThreads = 1;
+
+        @JsonPropertyDescription("audit.handlers.jdbc.buffering.maxBatchedEvents")
+        private int maxBatchedEvents = 100;
+
+
+        /**
+         * Indicates if event buffering is enabled.
+         *
+         * @return {@code true} if buffering is enabled.
+         */
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        /**
+         * Sets the buffering status.
+         *
+         * @param enabled
+         *            Indicates if buffering is enabled.
+         */
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        /**
+         * Indicates if events are automatically flushed after being written.
+         *
+         * @return {@code true} if events must be flushed
+         */
+        public boolean isAutoFlush() {
+            return autoFlush;
+        }
+
+        /**
+         * Sets the auto flush indicator.
+         *
+         * @param auto
+         *            Indicates if events are automatically flushed after being written.
+         */
+        public void setAutoFlush(boolean auto) {
+            this.autoFlush = auto;
+        }
+
+        /**
+         * Returns the maximum size of the queue.
+         *
+         * @return maxSize Maximum number of events in the queue.
+         */
+        public int getMaxSize() {
+            return maxSize;
+        }
+
+        /**
+         * Sets the maximum size of the events queue.
+         *
+         * @param maxSize
+         *            Maximum number of events in the queue.
+         */
+        public void setMaxSize(int maxSize) {
+            Reject.ifFalse(maxSize >= 1);
+            this.maxSize = maxSize;
+        }
+
+        /**
+         * Gets the interval to write the queued buffered events.
+         * @return The interval as a string.
+         */
+        public String getWriteInterval() {
+            return writeInterval;
+        }
+
+        /**
+         * Sets the interval to write the queued buffered events.
+         * @param writeInterval The interval as a string.
+         */
+        public void setWriteInterval(String writeInterval) {
+            this.writeInterval = writeInterval;
+        }
+
+        /**
+         * Gets the number of writer threads to use to write buffered events.
+         * @return The number of writer threads.
+         */
+        public int getWriterThreads() {
+            return writerThreads;
+        }
+
+        /**
+         * Sets the number of writer threads to use to write buffered events.
+         * @param writerThreads The number of writer threads.
+         */
+        public void setWriterThreads(int writerThreads) {
+            Reject.ifFalse(writerThreads >= 1);
+            this.writerThreads = writerThreads;
+        }
+
+        /**
+         * Gets the maximum number of events that can be batched into a {@link PreparedStatement}.
+         * @return The maximum number of batches.
+         */
+        public int getMaxBatchedEvents() {
+            return maxBatchedEvents;
+        }
+
+        /**
+         * Sets the maximum number of events that can be batched into a {@link PreparedStatement}.
+         * @param maxBatchedEvents The maximum number of batches.
+         */
+        public void setMaxBatchedEvents(int maxBatchedEvents) {
+            this.maxBatchedEvents = maxBatchedEvents;
         }
     }
 }

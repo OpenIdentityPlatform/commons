@@ -20,14 +20,6 @@ import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
@@ -43,6 +35,13 @@ import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.ConnectionPool;
+import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.audit.handlers.jdbc.providers.DatabaseStatementProvider;
+import org.forgerock.audit.handlers.jdbc.providers.GenericDatabaseStatementProvider;
+import org.forgerock.audit.handlers.jdbc.providers.OracleDatabaseStatementProvider;
+import org.forgerock.audit.handlers.jdbc.publishers.BufferedJDBCAuditEventExecutor;
+import org.forgerock.audit.handlers.jdbc.publishers.JDBCAuditEventExecutor;
+import org.forgerock.audit.handlers.jdbc.publishers.JDBCAuditEventExecutorImpl;
 import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -56,6 +55,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,6 +73,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
     private final DataSource dataSource;
     private final DatabaseStatementProvider databaseStatementProvider;
     private final boolean sharedDataSource;
+    private final JDBCAuditEventExecutor jdbcAuditEventExecutor;
 
     /**
      * Create a new JDBCAuditEventHandler instance.
@@ -100,6 +101,20 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
             this.dataSource = new HikariDataSource(createHikariConfig(configuration.getConnectionPool()));
         }
         this.databaseStatementProvider = getDatabaseStatementProvider(configuration.getDatabaseName());
+        final JDBCAuditEventExecutor jdbcAuditEventExecutor = new JDBCAuditEventExecutorImpl(this.dataSource);
+        final EventBufferingConfiguration bufferConfig = configuration.getBuffering();
+        if (bufferConfig.isEnabled()) {
+            this.jdbcAuditEventExecutor = new BufferedJDBCAuditEventExecutor(
+                    bufferConfig.getMaxSize(),
+                    bufferConfig.isAutoFlush(),
+                    jdbcAuditEventExecutor,
+                    Duration.duration(bufferConfig.getWriteInterval()),
+                    bufferConfig.getWriterThreads(),
+                    bufferConfig.getMaxBatchedEvents(),
+                    dataSource);
+        } else {
+            this.jdbcAuditEventExecutor = jdbcAuditEventExecutor;
+        }
     }
 
     /**
@@ -118,6 +133,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
         if (!sharedDataSource && dataSource instanceof HikariDataSource) {
             ((HikariDataSource) dataSource).close();
         }
+        jdbcAuditEventExecutor.close();
     }
 
     /**
@@ -133,27 +149,15 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
-        Connection connection = null;
         try {
-            logger.info("Create called for audit event {} with content {}", topic, event);
-            connection = dataSource.getConnection();
-            if (connection == null) {
-                logger.error("No database connection");
-                return new InternalServerErrorException("No database connection").asPromise();
-            }
             final TableMapping mapping = getTableMapping(topic);
-            try (PreparedStatement createStatement =
-                    databaseStatementProvider.buildCreateStatement(event, mapping, connection,
-                            eventTopicsMetaData.getSchema(topic))) {
-                execute(createStatement);
-            }
-        } catch (AuditException | SQLException e) {
+            final JDBCAuditEvent jdbcAuditEvent = databaseStatementProvider.buildCreateEvent(
+                    event, mapping, eventTopicsMetaData.getSchema(topic));
+            jdbcAuditEventExecutor.createAuditEvent(jdbcAuditEvent);
+        } catch (AuditException e) {
             final String error = String.format("Unable to create audit entry for %s", topic);
             logger.error(error, e);
-            CleanupHelper.rollback(connection);
             return new InternalServerErrorException(error, e).asPromise();
-        } finally {
-            CleanupHelper.close(connection);
         }
         return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, event).asPromise();
     }
@@ -165,71 +169,50 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
     public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String topic,
             final QueryRequest queryRequest, final QueryResourceHandler queryResourceHandler) {
         final String auditEventTopic = queryRequest.getResourcePathObject().get(0);
-        Connection connection = null;
         try {
-            logger.info("Query called for audit event: {} with queryFilter: {}", topic,
+            logger.debug("Query called for audit event: {} with queryFilter: {}", topic,
                     queryRequest.getQueryFilter());
-            connection = dataSource.getConnection();
-            if (connection == null) {
-                logger.error("No database connection");
-                return new InternalServerErrorException("No database connection").asPromise();
-            }
 
             final TableMapping mapping = getTableMapping(topic);
-            final List<Map<String, Object>> results = new LinkedList<>();
-            try (PreparedStatement queryStatement =
-                    databaseStatementProvider.buildQueryStatement(
-                            mapping, queryRequest, eventTopicsMetaData.getSchema(auditEventTopic), connection)) {
-                results.addAll(execute(queryStatement));
-            }
+            final List<Map<String, Object>> results =
+                    jdbcAuditEventExecutor.queryAuditEvent(
+                            databaseStatementProvider.buildQueryEvent(
+                                    mapping, queryRequest, eventTopicsMetaData.getSchema(topic)));
 
             for (Map<String, Object> entry : results) {
                 final JsonValue result = processEntry(entry, mapping, topic);
-                queryResourceHandler.handleResource(newResourceResponse(result.get(ResourceResponse.FIELD_CONTENT_ID)
-                        .asString(), null, result));
+                queryResourceHandler.handleResource(
+                        newResourceResponse(result.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, result));
             }
             return newQueryResponse(String.valueOf(queryRequest.getPagedResultsOffset() + results.size()),
                             CountPolicy.EXACT, results.size()).asPromise();
-        } catch (AuditException | SQLException e) {
+        } catch (AuditException e) {
             final String error = String.format("Unable to query audit entry for %s", auditEventTopic);
             logger.error(error, e);
-            CleanupHelper.rollback(connection);
             return new InternalServerErrorException(error, e).asPromise();
-        } finally {
-            CleanupHelper.close(connection);
         }
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         JsonValue result;
-        Connection connection = null;
         try {
-            logger.info("Read called for audit event {} with id {}", topic, resourceId);
-            connection = dataSource.getConnection();
-            if (connection == null) {
-                logger.error("No database connection");
-                return new InternalServerErrorException("No database connection").asPromise();
-            }
+            logger.debug("Read called for audit event {} with id {}", topic, resourceId);
 
             final TableMapping mapping = getTableMapping(topic);
-            final List<Map<String, Object>> resultSet = new LinkedList<>();
-            try (PreparedStatement readStatement =
-                    databaseStatementProvider.buildReadStatement(mapping, resourceId, connection)) {
-                resultSet.addAll(execute(readStatement));
-            }
+            final List<Map<String, Object>> results =
+                    jdbcAuditEventExecutor.readAuditEvent(
+                            databaseStatementProvider.buildReadEvent(
+                                    mapping, resourceId, eventTopicsMetaData.getSchema(topic)));
 
-            if (resultSet.isEmpty()) {
+            if (results.isEmpty()) {
                 return new NotFoundException(String.format("Entry not found for id: %s", resourceId)).asPromise();
             }
-            result = processEntry(resultSet.get(0), mapping, topic);
-        } catch (AuditException | SQLException e ) {
+            result = processEntry(results.get(0), mapping, topic);
+        } catch (AuditException e) {
             final String error = String.format("Unable to read audit entry for %s", topic);
             logger.error(error, e);
-            CleanupHelper.rollback(connection);
             return new InternalServerErrorException(error, e).asPromise();
-        } finally {
-            CleanupHelper.close(connection);
         }
         return newResourceResponse(resourceId, null, result).asPromise();
     }
@@ -241,17 +224,6 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
             }
         }
         throw new AuditException(String.format("No table mapping found for audit event type: %s", auditEventTopic));
-    }
-
-    private List<Map<String,Object>> execute(final PreparedStatement preparedStatement) throws AuditException {
-        logger.info("Executing sql query");
-        try {
-            preparedStatement.execute();
-            return convertResultSetToList(preparedStatement.getResultSet());
-        } catch (SQLException e) {
-            logger.error("Unable to execute the prepared statement", e.getMessage());
-            throw new AuditException("Unable to execute the prepared statement", e);
-        }
     }
 
     private JsonValue processEntry(final Map<String, Object> sqlResult, final TableMapping tableMapping,
@@ -279,28 +251,6 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
             throw new AuditException("Unable to process retrieved entry", e);
         }
         return result;
-    }
-
-    private List<Map<String,Object>> convertResultSetToList(final ResultSet resultSet) throws AuditException{
-        final List<Map<String,Object>> list = new ArrayList<>();
-        try (final ResultSet rs = resultSet) {
-            if (rs == null) {
-                return list;
-            }
-            final ResultSetMetaData md = resultSet.getMetaData();
-            final int columns = md.getColumnCount();
-            while (rs.next()) {
-                final HashMap<String, Object> row = new HashMap<>(columns);
-                for (int i = 1; i <= columns; ++i) {
-                    row.put(md.getColumnName(i).toLowerCase(), rs.getString(i));
-                }
-                list.add(row);
-            }
-            return list;
-        } catch (SQLException e) {
-            logger.error("Unable to handle result set.", e);
-            throw new AuditException("Unable to handle result set", e);
-        }
     }
 
     private HikariConfig createHikariConfig(ConnectionPool connectionPool) {

@@ -13,19 +13,21 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc;
+package org.forgerock.audit.handlers.jdbc.providers;
 
 import static org.forgerock.util.Utils.joinAsString;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.TableMappingParametersPair.FieldValuePair;
+import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.Parameter;
+import org.forgerock.audit.handlers.jdbc.TableMapping;
+import org.forgerock.audit.handlers.jdbc.TableMappingParametersPair;
+import org.forgerock.audit.handlers.jdbc.query.StringSQLQueryFilterVisitor;
+import org.forgerock.audit.handlers.jdbc.utils.SQLStatementParser;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
@@ -34,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides the query statement for an oracle database.
+ * Provides the query event for an oracle database.
  */
 public class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvider {
     private static final Logger logger = LoggerFactory.getLogger(OracleDatabaseStatementProvider.class);
@@ -42,33 +44,27 @@ public class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvid
     private final StringSQLQueryFilterVisitor queryFilterVisitor = new StringSQLQueryFilterVisitor();
 
     /**
-     * Builds a {@link PreparedStatement} that will query an oracle database.
+     * Builds a {@link JDBCAuditEvent} that will query an oracle database.
      * {@inheritDoc}
      */
     @Override
-    public PreparedStatement buildQueryStatement(final TableMapping mapping, final QueryRequest queryRequest,
-            final JsonValue auditEventMetadata, final Connection connection)
-            throws AuditException {
-        final NamedPreparedStatement namedPreparedStatement;
+    public JDBCAuditEvent buildQueryEvent(final TableMapping mapping, final QueryRequest queryRequest,
+            final JsonValue eventTopicMetaData) throws AuditException {
         final String querySelectStatement;
         final TableMappingParametersPair tableMappingParametersPair = new TableMappingParametersPair(mapping);
 
         querySelectStatement = buildQuerySQL(queryRequest, tableMappingParametersPair);
         logger.info("Built query select statement: {}", querySelectStatement);
 
-        try {
-            namedPreparedStatement = new NamedPreparedStatement(connection, querySelectStatement);
-            for (Map.Entry<String, FieldValuePair> entry : tableMappingParametersPair.getParameters().entrySet()) {
-
-                final JsonPointer field = entry.getValue().getField();
-                final Object value = entry.getValue().getValue();
-                namedPreparedStatement.setObject(entry.getKey(), value, getType(auditEventMetadata, field));
-            }
-            return namedPreparedStatement.getPreparedStatement();
-        } catch (SQLException e) {
-            logger.error("Unable to create the PreparedStatement for the query operation", e);
-            throw new AuditException("Unable to create the PreparedStatement for the query operation", e);
+        final SQLStatementParser sqlStatementParser = new SQLStatementParser(querySelectStatement);
+        final List<Parameter> params = new LinkedList<>();
+        for (String field : sqlStatementParser.getNamedParameters()) {
+            params.add(
+                    new Parameter(
+                            getParameterType(eventTopicMetaData, new JsonPointer(field)),
+                            tableMappingParametersPair.getParameters().get(field)));
         }
+        return new JDBCAuditEvent(sqlStatementParser.getSqlStatement(), params);
     }
 
     private String buildQuerySQL(final QueryRequest queryRequest,
