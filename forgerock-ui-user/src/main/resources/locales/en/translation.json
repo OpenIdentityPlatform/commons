@@ -110,6 +110,7 @@
             "enableCookies" : "Cookies must be enabled to login",
             "reloadGrid" : "Reload Grid",
             "clearFilters" : "Clear Filters",
+            "passwordPlaceholder": "••••••••••••",
             "validation" : {
                 "VALID_PHONE_FORMAT": "Must be a valid phone number",
                 "VALID_NAME_FORMAT": "Must have valid name characters",
