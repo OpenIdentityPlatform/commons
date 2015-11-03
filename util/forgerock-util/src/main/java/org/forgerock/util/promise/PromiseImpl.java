@@ -425,7 +425,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
                 }
             }
 
-            private void callNestedPromise(Promise<VOUT, EOUT> nestedPromise) {
+            private void callNestedPromise(Promise<? extends VOUT, ? extends EOUT> nestedPromise) {
                 nestedPromise
                         .thenOnResult(chained)
                         .thenOnException(chained)

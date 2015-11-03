@@ -20,6 +20,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.fail;
 
+import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 import org.forgerock.util.AsyncFunction;
@@ -241,4 +242,60 @@ public class PromiseImplTest {
             assertThat(e).isSameAs(runtimeException);
         }
     }
+
+    @Test
+    public void promiseSupportsCovariantReturnType() {
+        assertThat(supplyNumber(false).getOrThrowUninterruptibly()).isEqualTo(123L);
+        assertThat(supplyNumber(true).getOrThrowUninterruptibly()).isEqualTo(1.23);
+    }
+
+    private Promise<? extends Number, NeverThrowsException> supplyNumber(boolean wantDouble) {
+        if (wantDouble) {
+            return supplyDouble();
+        } else {
+            return supplyLong();
+        }
+    }
+
+    private Promise<Double, NeverThrowsException> supplyDouble() {
+        return Promises.newResultPromise(1.23);
+    }
+
+    private Promise<Long, NeverThrowsException> supplyLong() {
+        return Promises.newResultPromise(123L);
+    }
+
+    @Test
+    public void promiseSupportsCovariantExceptionType() {
+        try {
+            throwException(false).getOrThrowUninterruptibly();
+            fail();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(IOException.class);
+        }
+
+        try {
+            throwException(true).getOrThrowUninterruptibly();
+            fail();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(RuntimeException.class);
+        }
+    }
+
+    private Promise<Void, ? extends Exception> throwException(boolean wantRuntimeException) {
+        if (wantRuntimeException) {
+            return throwRuntimeException();
+        } else {
+            return throwIOException();
+        }
+    }
+
+    private Promise<Void, RuntimeException> throwRuntimeException() {
+        return Promises.newExceptionPromise(new RuntimeException());
+    }
+
+    private Promise<Void, IOException> throwIOException() {
+        return Promises.newExceptionPromise(new IOException());
+    }
+
 }

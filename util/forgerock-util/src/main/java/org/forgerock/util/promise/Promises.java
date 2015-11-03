@@ -197,9 +197,9 @@ public final class Promises {
                 final AsyncFunction<? super E, VOUT, EOUT> onException) {
             try {
                 if (hasResult()) {
-                    return onResult.apply(getResult());
+                    return (Promise<VOUT, EOUT>) onResult.apply(getResult());
                 } else if (hasException()) {
-                    return onException.apply(getException());
+                    return (Promise<VOUT, EOUT>) onException.apply(getException());
                 } else {
                     return new RuntimeExceptionPromise<>(getRuntimeException());
                 }

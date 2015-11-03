@@ -74,7 +74,7 @@ import org.forgerock.util.promise.Promise;
  */
 // @FunctionalInterface
 public interface AsyncFunction<VIN, VOUT, E extends Exception> extends
-        Function<VIN, Promise<VOUT, E>, E> {
+        Function<VIN, Promise<? extends VOUT, ? extends E>, E> {
 
     /**
      * Asynchronously applies this function to the input parameter {@code value}
@@ -88,6 +88,6 @@ public interface AsyncFunction<VIN, VOUT, E extends Exception> extends
      *             If this function cannot be applied to {@code value}.
      */
     @Override
-    Promise<VOUT, E> apply(VIN value) throws E;
+    Promise<? extends VOUT, ? extends E> apply(VIN value) throws E;
 
 }
