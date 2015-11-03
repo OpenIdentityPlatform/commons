@@ -15,22 +15,21 @@
  */
 package org.forgerock.audit.handlers.csv;
 
+import org.forgerock.audit.secure.JcaKeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreSecureStorage;
+import org.forgerock.audit.secure.SecureStorage;
+
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
 import static org.forgerock.util.time.Duration.duration;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.util.Map;
 
 import org.forgerock.util.time.Duration;
@@ -42,12 +41,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 
+@SuppressWarnings("javadoc")
 public class CsvSecureMapWriterTest {
 
     static final String KEYSTORE_FILENAME = "target/test-classes/keystore-signature.jks";
     static final String KEYSTORE_PASSWORD = "password";
 
-    private File keystore;
+    private KeyStoreHandler keyStoreHandler;
+    private SecureStorage secureStorage;
     private final Duration signatureInterval = duration("100 milliseconds");
 
     @BeforeMethod
@@ -60,7 +61,7 @@ public class CsvSecureMapWriterTest {
         cleanupKeystore();
     }
 
-    void cleanupKeystore() throws KeyStoreException, IOException, IllegalStateException, NoSuchAlgorithmException, CertificateException {
+    void cleanupKeystore() throws Exception {
         // This keystore was generated using the following command-line :
         // keytool -genkeypair -alias "Signature" -dname CN=a -keystore src/test/resources/keystore-signature.jks \
         // -storepass password -storetype JCEKS -keypass password -keyalg RSA -sigalg SHA256withRSA
@@ -70,16 +71,10 @@ public class CsvSecureMapWriterTest {
 
         // Then list the keystore's content to ensure what is inside.
         // keytool -list -keystore src/test/resources/keystore-signature.jks -storepass password -storetype JCEKS
-        keystore = new File(KEYSTORE_FILENAME);
-        if (!keystore.exists()) {
-            throw new IllegalStateException("Expected to read the keystore " + keystore.getAbsolutePath());
-        }
+        keyStoreHandler = new JcaKeyStoreHandler("JCEKS", KEYSTORE_FILENAME, KEYSTORE_PASSWORD);
+        secureStorage = new KeyStoreSecureStorage(keyStoreHandler);
 
-        KeyStore store = KeyStore.getInstance("JCEKS");
-        try (FileInputStream fis = new FileInputStream(keystore)) {
-            store.load(fis, KEYSTORE_PASSWORD.toCharArray());
-        }
-
+        KeyStore store = keyStoreHandler.getStore();
         assertThat(store.containsAlias("InitialKey")).isTrue();
         assertThat(store.containsAlias("Signature")).isTrue();
 
@@ -87,9 +82,7 @@ public class CsvSecureMapWriterTest {
         store.deleteEntry("CurrentKey");
         store.deleteEntry("CurrentSignature");
 
-        try (FileOutputStream fos = new FileOutputStream(keystore)) {
-            store.store(fos, KEYSTORE_PASSWORD.toCharArray());
-        }
+        keyStoreHandler.store();
 
         // Export the SecretKey to a separate keystore for the verifier
         // keytool -importkeystore -srckeystore src/test/resources/keystore-signature.jks \
@@ -124,8 +117,7 @@ public class CsvSecureMapWriterTest {
         Writer writer = new FileWriter(actual);
         ICsvMapWriter csvMapWriter = new CsvMapWriter(writer , CsvPreference.EXCEL_PREFERENCE);
         try (CsvSecureMapWriter csvHMACWriter = new CsvSecureMapWriter(csvMapWriter,
-                keystore.getAbsolutePath(),
-                KEYSTORE_PASSWORD,
+                secureStorage,
                 signatureInterval,
                 false)) {
             final String header = "FOO";
@@ -148,8 +140,7 @@ public class CsvSecureMapWriterTest {
         Writer writer = new StringWriter();
         ICsvMapWriter csvMapWriter = new CsvMapWriter(writer , CsvPreference.STANDARD_PREFERENCE);
         try (CsvSecureMapWriter csvHMACWriter = new CsvSecureMapWriter(csvMapWriter,
-                keystore.getAbsolutePath(),
-                KEYSTORE_PASSWORD,
+                secureStorage,
                 signatureInterval,
                 false)) {
             String header = "FOO";
@@ -174,8 +165,7 @@ public class CsvSecureMapWriterTest {
         Writer writer = new FileWriter(actual);
         ICsvMapWriter csvMapWriter = new CsvMapWriter(writer, CsvPreference.EXCEL_PREFERENCE);
         try (CsvSecureMapWriter csvHMACWriter = new CsvSecureMapWriter(csvMapWriter,
-                keystore.getAbsolutePath(),
-                KEYSTORE_PASSWORD,
+                secureStorage,
                 signatureInterval,
                 false)) {
             final String header = "FOO";

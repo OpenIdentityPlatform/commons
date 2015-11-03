@@ -17,25 +17,13 @@ package org.forgerock.audit.handlers.csv;
 
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.ENTRY_CURRENT_KEY;
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.ENTRY_CURRENT_SIGNATURE;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_HMAC;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_SIGNATURE;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.SIGNATURE_ALGORITHM;
 import static org.forgerock.audit.handlers.csv.CsvSecureUtils.dataToSign;
-import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readPrivateKeyFromKeyStore;
-import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readSecretKeyFromKeyStore;
-import static org.forgerock.audit.handlers.csv.CsvSecureUtils.writeToKeyStore;
 
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.Signature;
 import java.security.SignatureException;
-import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -49,6 +37,8 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.forgerock.audit.rotation.RotationHooks;
+import org.forgerock.audit.secure.SecureStorage;
+import org.forgerock.audit.secure.SecureStorageException;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
@@ -70,11 +60,9 @@ public class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
     private final HmacCalculator hmacCalculator;
     private final ScheduledExecutorService scheduler;
     private final ReentrantLock signatureLock = new ReentrantLock();
-    private final Signature signer;
     private final Runnable signatureTask;
+    private final SecureStorage secureStorage;
     private final Duration signatureInterval;
-    private final String keystoreFilename;
-    private final String keystorePassword;
     private ScheduledFuture<?> scheduledSignature;
 
     private String lastHMAC;
@@ -94,9 +82,8 @@ public class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
      * @param keystorePassword the password to unlock the keystore
      * @param signatureInterval the interval to insert a signature
      */
-    CsvSecureMapWriter(ICsvMapWriter delegate, String keystoreFilename, String keystorePassword,
-            Duration signatureInterval) {
-        this(delegate, keystoreFilename, keystorePassword, signatureInterval, true);
+    CsvSecureMapWriter(ICsvMapWriter delegate, SecureStorage secureStorage, Duration signatureInterval) {
+        this(delegate, secureStorage, signatureInterval, true);
     }
 
     /**
@@ -108,52 +95,36 @@ public class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
      * keystore the current key used for the HMAC hashing instead of the initial key.
      *
      * @param delegate the real CsvMapWriter to write to.
-     * @param keystoreFilename a path to the keystore filename
-     * @param keystorePassword the password to unlock the keystore
+     * @param secureStorage the storage containing the keys
      * @param signatureInterval the interval to insert a signature
      * @param resume check if we are resuming an existing file.
      */
-    CsvSecureMapWriter(ICsvMapWriter delegate, String keystoreFilename, String keystorePassword,
-            Duration signatureInterval, boolean resume) {
+    CsvSecureMapWriter(ICsvMapWriter delegate, SecureStorage secureStorage, Duration signatureInterval, boolean resume) {
         this.delegate = delegate;
+        this.secureStorage = secureStorage;
         this.signatureInterval = signatureInterval;
-        this.keystoreFilename = keystoreFilename;
-        this.keystorePassword = keystorePassword;
-
-        try {
-            signer = Signature.getInstance(CsvSecureConstants.SIGNATURE_ALGORITHM);
-
-            // Init signer
-            PrivateKey privateKey = readPrivateKeyFromKeyStore(keystoreFilename, CsvSecureConstants.ENTRY_SIGNATURE,
-                    keystorePassword);
-            signer.initSign(privateKey);
-        } catch (IOException | InvalidKeyException | NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e);
-        }
 
         try {
             SecretKey currentKey;
             if (resume) {
-                currentKey = readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_CURRENT_KEY, keystoreFilename,
-                        keystorePassword);
+                currentKey = secureStorage.readCurrentKey();
                 if (currentKey == null) {
                     throw new IllegalStateException("We are supposed to resume but there is not entry for CurrentKey.");
                 }
-                logger.info("Resuming the writer verifier with the key " + Base64.encode(currentKey.getEncoded()));
+                logger.debug("Resuming the writer verifier with the key " + Base64.encode(currentKey.getEncoded()));
             } else {
                 // Is it a fresh new keystore ?
-                currentKey = readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_INITIAL_KEY, keystoreFilename,
-                        keystorePassword);
+                currentKey = secureStorage.readInitialKey();
                 if (currentKey == null) {
                     throw new IllegalStateException("Expecting to find an initial key into the keystore.");
                 }
-                logger.info("Starting the writer with the key " + Base64.encode(currentKey.getEncoded()));
+                logger.debug("Starting the writer with the key " + Base64.encode(currentKey.getEncoded()));
 
                 // As we start to work, store the current key too
-                writeToKeyStore(currentKey, CsvSecureConstants.ENTRY_CURRENT_KEY, keystoreFilename, keystorePassword);
+                secureStorage.writeCurrentKey(currentKey);
             }
             this.hmacCalculator = new HmacCalculator(currentKey, CsvSecureConstants.HMAC_ALGORITHM);
-        } catch (IOException | GeneralSecurityException e) {
+        } catch (SecureStorageException e) {
             throw new RuntimeException(e);
         }
 
@@ -239,26 +210,20 @@ public class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
         // and the signature's row write, as the calculation uses the lastHMAC.
         signatureLock.lock();
         try {
-            lastSignature = calculateSignature();
+            lastSignature = secureStorage.sign(dataToSign(lastSignature, lastHMAC));
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
             logger.info("Writing signature :" + lastSignature);
             write(values, header);
 
             // Store the current signature into the Keystore
-            writeToKeyStore(new SecretKeySpec(lastSignature, SIGNATURE_ALGORITHM), ENTRY_CURRENT_SIGNATURE,
-                    keystoreFilename, keystorePassword);
-        } catch (IOException | GeneralSecurityException ex) {
+            secureStorage.writeCurrentSignatureKey(new SecretKeySpec(lastSignature, SIGNATURE_ALGORITHM));
+        } catch (SecureStorageException ex) {
             logger.error(ex.getMessage(), ex);
             throw new IOException(ex);
         } finally {
             signatureLock.unlock();
             flush();
         }
-    }
-
-    private byte[] calculateSignature() throws SignatureException {
-        signer.update(dataToSign(lastSignature, lastHMAC));
-        return signer.sign();
     }
 
     @Override
@@ -280,7 +245,7 @@ public class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
             delegate.write(newValues, newNameMapping, newProcessors);
             delegate.flush();
             // Store the current key
-            writeToKeyStore(hmacCalculator.getCurrentKey(), ENTRY_CURRENT_KEY, keystoreFilename, keystorePassword);
+            secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
 
             // Schedule a signature task only if needed.
             if (!values.containsKey(HEADER_SIGNATURE)
@@ -293,7 +258,7 @@ public class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
                     logger.error(e.getMessage(), e);
                 }
             }
-        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException ex) {
+        } catch (SecureStorageException ex) {
             throw new IOException(ex);
         } finally {
             signatureLock.unlock();

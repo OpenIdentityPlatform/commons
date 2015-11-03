@@ -37,11 +37,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
+import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.json.AuditJsonConfig;
+import org.forgerock.audit.providers.DefaultSecureStorageProvider;
+import org.forgerock.audit.providers.SecureStorageProvider;
+import org.forgerock.audit.secure.JcaKeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreSecureStorage;
+import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryFilters;
@@ -63,6 +70,8 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class CsvAuditEventHandlerTest {
 
+    static final String KEYSTORE_FILENAME = "target/test-classes/keystore-signature.jks";
+
     /**
      * Integration test.
      */
@@ -70,6 +79,27 @@ public class CsvAuditEventHandlerTest {
     public void canConfigureCsvHandlerFromJsonAndRegisterWithAuditService() throws Exception {
         // given
         final AuditServiceBuilder auditServiceBuilder = newAuditService();
+        DependencyProvider dependencyProvider = new DependencyProvider() {
+
+            @Override
+            public <T> T getDependency(Class<T> clazz) throws ClassNotFoundException {
+                if (clazz.getName().equals(SecureStorageProvider.class.getName())) {
+                    try {
+                        final DefaultSecureStorageProvider provider = new DefaultSecureStorageProvider();
+                        KeyStoreHandler keyStoreHandler =
+                                new JcaKeyStoreHandler("JCEKS", KEYSTORE_FILENAME, "password");
+                        SecureStorage storage = new KeyStoreSecureStorage(keyStoreHandler);
+                        provider.registerSecureStorage("csvSecureKeystore", storage);
+                        return (T) provider;
+                    } catch (Exception ex) {
+                        throw new ClassNotFoundException();
+                    }
+                }
+                throw new RuntimeException(clazz + " not found");
+            }
+
+        };
+        auditServiceBuilder.withDependencyProvider(dependencyProvider);
         final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler-config.json"));
 
         // when
@@ -78,8 +108,12 @@ public class CsvAuditEventHandlerTest {
         // then
         AuditService auditService = auditServiceBuilder.build();
         auditService.startup();
-        AuditEventHandler registeredHandler = auditService.getRegisteredHandler("csv");
-        assertThat(registeredHandler).isNotNull();
+        try {
+            AuditEventHandler registeredHandler = auditService.getRegisteredHandler("csv");
+            assertThat(registeredHandler).isNotNull();
+        } finally {
+            auditService.shutdown();
+        }
     }
 
     private InputStream getResource(String resourceName) {
@@ -91,8 +125,10 @@ public class CsvAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
+        SecureStorageProvider storageProvider = new DefaultSecureStorageProvider();
         final CsvAuditEventHandler csvHandler = new CsvAuditEventHandler(
-                getConfigWithBuffering(logDirectory), getEventTopicsMetaData());
+                getConfigWithBuffering(logDirectory), getEventTopicsMetaData(), storageProvider);
+
         csvHandler.startup();
         final Context context = new RootContext();
         try {
@@ -281,10 +317,15 @@ public class CsvAuditEventHandlerTest {
         config.setName("csv");
         config.setTopics(eventTopicsMetaData.getTopics());
         config.setLogDirectory(tempDirectory.toString());
+        final SecureStorageProvider keyStoreHandlerProvider;
         if (enableSecurity) {
             config.setSecurity(getCsvSecurityConfig());
+            keyStoreHandlerProvider = setupSecureStorageProvider();
+        } else {
+            keyStoreHandlerProvider = new DefaultSecureStorageProvider();
         }
-        CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData);
+
+        CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData, keyStoreHandlerProvider);
         handler.startup();
         return spy(handler);
     }
@@ -292,13 +333,7 @@ public class CsvAuditEventHandlerTest {
     private CsvSecurity getCsvSecurityConfig() throws Exception {
         CsvAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CsvAuditEventHandlerConfiguration.CsvSecurity();
         csvSecurity.setEnabled(true);
-        final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath();
-        csvSecurity.setFilename(keystorePath);
-        csvSecurity.setPassword("forgerock");
-
-        // Force the initial key so we'll have reproducible builds.
-        SecretKey secretKey = new SecretKeySpec(Base64.decode("zmq4EoprX52XLGyLkMENcin0gv0jwYyrySi3YOqfhFY="), "RAW");
-        CsvSecureUtils.writeToKeyStore(secretKey, csvSecurity.getFilename(), "InitialKey", csvSecurity.getPassword());
+        csvSecurity.setSecureStorageName("csvSecure");
 
         return csvSecurity;
     }
@@ -324,6 +359,20 @@ public class CsvAuditEventHandlerTest {
             }
         }
         return new EventTopicsMetaData(events);
+    }
+
+    private SecureStorageProvider setupSecureStorageProvider() throws Exception {
+        final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath();
+        DefaultSecureStorageProvider provider = new DefaultSecureStorageProvider();
+        final KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler("JCEKS", keystorePath, "forgerock");
+        KeyStoreSecureStorage storage = new KeyStoreSecureStorage(keyStoreHandler);
+        provider.registerSecureStorage("csvSecure", storage);
+
+        // Force the initial key so we'll have reproducible builds.
+        SecretKey secretKey = new SecretKeySpec(Base64.decode("zmq4EoprX52XLGyLkMENcin0gv0jwYyrySi3YOqfhFY="), "RAW");
+        storage.writeToKeyStore(keyStoreHandler, secretKey, "InitialKey", keyStoreHandler.getPassword());
+
+        return provider;
     }
 
 }

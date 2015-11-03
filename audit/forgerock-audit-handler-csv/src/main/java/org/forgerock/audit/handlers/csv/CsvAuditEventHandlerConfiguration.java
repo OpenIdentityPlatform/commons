@@ -18,6 +18,7 @@ package org.forgerock.audit.handlers.csv;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
@@ -218,6 +219,9 @@ public class CsvAuditEventHandlerConfiguration extends FileBasedEventHandlerConf
         @JsonPropertyDescription("audit.handlers.csv.security.password")
         private String password;
 
+        @JsonPropertyDescription("audit.handlers.csv.security.secureStorageName")
+        private String secureStorageName ;
+
         @JsonPropertyDescription("audit.handlers.csv.security.signatureInterval")
         private String signatureInterval;
 
@@ -299,6 +303,15 @@ public class CsvAuditEventHandlerConfiguration extends FileBasedEventHandlerConf
         public Duration getSignatureIntervalDuration() {
             return signatureIntervalDuration;
         }
+
+        public void setSecureStorageName(String keyStoreName) {
+            this.secureStorageName = keyStoreName;
+        }
+
+        public String getSecureStorageName() {
+            return secureStorageName;
+        }
+
     }
 
     /**

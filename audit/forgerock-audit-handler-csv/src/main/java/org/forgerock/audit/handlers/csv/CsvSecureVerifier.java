@@ -15,30 +15,18 @@
  */
 package org.forgerock.audit.handlers.csv;
 
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.ENTRY_INITIAL_KEY;
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.ENTRY_SIGNATURE;
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_HMAC;
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_SIGNATURE;
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HMAC_ALGORITHM;
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.SIGNATURE_ALGORITHM;
-import static org.forgerock.audit.handlers.csv.CsvSecureUtils.dataToSign;
-import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readPublicKeyFromKeyStore;
-import static org.forgerock.audit.handlers.csv.CsvSecureUtils.readSecretKeyFromKeyStore;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.*;
+import static org.forgerock.audit.handlers.csv.CsvSecureUtils.*;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.Signature;
 import java.security.SignatureException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
 
+import org.forgerock.audit.secure.SecureStorage;
+import org.forgerock.audit.secure.SecureStorageException;
 import org.forgerock.util.encode.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +41,7 @@ public class CsvSecureVerifier {
 
     private ICsvMapReader csvReader;
     private final HmacCalculator hmacCalculator;
-    private final String keystoreFilename;
-    private final String keystorePassword;
-    private Signature verifier;
+    private final SecureStorage secureStorage;
     private String lastHMAC;
     private byte[] lastSignature;
     private String[] headers;
@@ -63,39 +49,24 @@ public class CsvSecureVerifier {
     /**
      * Constructs a new verifier
      *
-     * @param csvReader the underlying reader to read the CSV file
-     * @param keystoreFilename a path to the keystore filename
-     * @param keystorePassword the password to unlock the keystore
+     * @param csvReader
+     *            the underlying reader to read the CSV file
+     * @param secureStorage
+     *            the secure storage containing keys
      */
-    public CsvSecureVerifier(ICsvMapReader csvReader, String keystoreFilename, String keystorePassword) {
+    public CsvSecureVerifier(ICsvMapReader csvReader, SecureStorage secureStorage) {
         this.csvReader = csvReader;
-        this.keystoreFilename = keystoreFilename;
-        this.keystorePassword = keystorePassword;
+        this.secureStorage = secureStorage;
 
         try {
-            verifier = Signature.getInstance(SIGNATURE_ALGORITHM);
-
-            // Init signer
-            PublicKey publicKey = readPublicKeyFromKeyStore(keystoreFilename, ENTRY_SIGNATURE, keystorePassword);
-            if (publicKey == null) {
-                throw new IllegalStateException("Expected to find a public key within the entry named "
-                        + ENTRY_SIGNATURE + " in the keystore " + keystoreFilename);
-            }
-            verifier.initVerify(publicKey);
-        } catch (IOException | InvalidKeyException | NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e);
-        }
-
-        try {
-            SecretKey currentKey = readSecretKeyFromKeyStore(ENTRY_INITIAL_KEY, keystoreFilename, keystorePassword);
+            SecretKey currentKey = secureStorage.readInitialKey();
             if (currentKey == null) {
                 throw new IllegalStateException("Expecting to find an initial key into the keystore.");
             }
             logger.info("Starting the verifier with the key " + Base64.encode(currentKey.getEncoded()));
 
             this.hmacCalculator = new HmacCalculator(currentKey, HMAC_ALGORITHM);
-        } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException
-                | UnrecoverableEntryException e) {
+        } catch (SecureStorageException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -170,9 +141,8 @@ public class CsvSecureVerifier {
 
     private boolean verifySignature(final String encodedSign) throws IOException {
         try {
-            verifier.update(dataToSign(lastSignature, lastHMAC));
             byte[] signature = Base64.decode(encodedSign);
-            boolean verify = verifier.verify(signature);
+            boolean verify = secureStorage.verify(dataToSign(lastSignature, lastHMAC), signature);
             if (!verify) {
                 logger.info("The signature does not match the expecting one.");
                 return false;
@@ -180,7 +150,7 @@ public class CsvSecureVerifier {
                 lastSignature = signature;
                 return true;
             }
-        }catch (SignatureException ex) {
+        } catch (SecureStorageException ex) {
             logger.error(ex.getMessage(), ex);
             throw new IOException(ex);
         }

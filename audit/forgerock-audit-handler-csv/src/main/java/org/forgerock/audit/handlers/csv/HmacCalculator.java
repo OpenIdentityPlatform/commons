@@ -41,7 +41,7 @@ class HmacCalculator {
     public HmacCalculator(SecretKey currentKey, String hmacAlgorithm) {
         this.currentKey = currentKey;
         this.hmacAlgorithm = hmacAlgorithm;
-    
+
         try {
             messageDigest = MessageDigest.getInstance("SHA-256");
             mac = Mac.getInstance(hmacAlgorithm);

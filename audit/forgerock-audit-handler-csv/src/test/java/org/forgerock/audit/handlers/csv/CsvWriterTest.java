@@ -15,6 +15,8 @@
  */
 package org.forgerock.audit.handlers.csv;
 
+import static org.forgerock.audit.handlers.csv.CsvSecureMapWriterTest.KEYSTORE_PASSWORD;
+import static org.forgerock.audit.handlers.csv.CsvSecureMapWriterTest.KEYSTORE_FILENAME;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -31,18 +33,29 @@ import java.util.Map;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.retention.TimestampFilenameFilter;
+import org.forgerock.audit.secure.JcaKeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreSecureStorage;
+import org.forgerock.audit.secure.SecureStorage;
 import org.joda.time.format.DateTimeFormat;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class CsvWriterTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(CsvWriterTest.class);
     public static final String TIME_STAMP_FORMAT = "-MM.dd.yy-kk.mm.ss.SSS";
     public static final String PREFIX = "Prefix-";
+
+    private SecureStorage secureStorage;
+
+    @BeforeMethod
+    public void setup() throws Exception {
+        KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler("JCEKS", KEYSTORE_FILENAME, KEYSTORE_PASSWORD);
+        secureStorage = new KeyStoreSecureStorage(keyStoreHandler);
+    }
 
     @Test
     public void shouldCreateBufferedSecureCsvFile() throws Exception {
@@ -55,21 +68,18 @@ public class CsvWriterTest {
         EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
         bufferConfig.setEnabled(true);
         CsvSecurity csvSecurity = new CsvSecurity();
-        csvSecurity.setFilename(CsvSecureMapWriterTest.KEYSTORE_FILENAME);
-        csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
         csvSecurity.setEnabled(true);
         csvSecurity.setSignatureInterval("3 seconds");
         CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             Map<String, String> values = getValues(header, "one-a", "one-b", "one-c");
             writer.writeRow(values);
         }
 
         try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
-            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, CsvSecureMapWriterTest.KEYSTORE_FILENAME,
-                    CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, secureStorage);
             assertThat(verifier.verify()).isTrue();
         }
     }
@@ -89,19 +99,17 @@ public class CsvWriterTest {
         EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
         bufferConfig.setEnabled(false);
         CsvSecurity csvSecurity = new CsvSecurity();
-        csvSecurity.setFilename(CsvSecureMapWriterTest.KEYSTORE_FILENAME);
-        csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
         csvSecurity.setEnabled(true);
         csvSecurity.setSignatureInterval("3 seconds");
         CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             Map<String, String> values = getValues(header, "one-a", "one-b", "one-c");
             writer.writeRow(values);
         }
 
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "riri");
             values.put(header[1], "fifi");
@@ -111,14 +119,13 @@ public class CsvWriterTest {
         }
 
         try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
-            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, CsvSecureMapWriterTest.KEYSTORE_FILENAME,
-                    CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, secureStorage);
             assertThat(verifier.verify()).isTrue();
         }
 
         // Expecting to fail
         header = new String[] { "child1", "child2", "child3", "enfant4" };
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "Joe");
             values.put(header[1], "William");
@@ -145,7 +152,7 @@ public class CsvWriterTest {
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
 
-        final CsvWriter csvWriter = new CsvWriter(csvFile, headers, csvPreference, configuration);
+        final CsvWriter csvWriter = new CsvWriter(csvFile, headers, csvPreference, null, configuration);
         csvWriter.close();
 
         final List<String> contents = Files.readAllLines(csvFile.toPath(), Charset.defaultCharset());
@@ -166,22 +173,20 @@ public class CsvWriterTest {
         EventBufferingConfiguration bufferConfig = new EventBufferingConfiguration();
         bufferConfig.setEnabled(false);
         CsvSecurity csvSecurity = new CsvSecurity();
-        csvSecurity.setFilename(CsvSecureMapWriterTest.KEYSTORE_FILENAME);
-        csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
         csvSecurity.setEnabled(true);
         csvSecurity.setSignatureInterval("3 seconds");
         CsvAuditEventHandlerConfiguration configuration =
                 createCsvAuditEventHandlerConfigurationWithRotation(bufferConfig, 1000L);
         configuration.setSecurity(csvSecurity);
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
+        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             writeNRows(header, writer, 12);
         }
 
         // TODO - Commenting this test part out until the verifier can verify a rotated log file.
         // verify the new audit file that was created after the rotation
         //try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
-        //    CsvSecureVerifier verifier = new CsvSecureVerifier(reader, CsvSecureMapWriterTest.KEYSTORE_FILENAME,
-        //            CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+        //    CsvSecureVerifier verifier = new CsvSecureVerifier(reader, CsvSecureMapWriterTest.TRUSTSTORE_FILENAME,
+        //            CsvSecureMapWriterTest.TRUSTSTORE_PASSWORD);
         //    assertThat(verifier.verify()).isTrue();
         //}
 
@@ -194,8 +199,7 @@ public class CsvWriterTest {
             file.deleteOnExit();
         }
         try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(files[0])), csvPreference)) {
-            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, CsvSecureMapWriterTest.KEYSTORE_FILENAME,
-                    CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
+            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, secureStorage);
             assertThat(verifier.verify()).isTrue();
         }
     }

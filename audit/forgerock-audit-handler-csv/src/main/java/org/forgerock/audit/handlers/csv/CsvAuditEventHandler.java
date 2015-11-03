@@ -15,6 +15,7 @@
  */
 package org.forgerock.audit.handlers.csv;
 
+import static org.forgerock.audit.secure.KeyStoreSecureStorage.JCEKS_KEYSTORE_TYPE;
 import static org.forgerock.audit.events.AuditEventHelper.ARRAY_TYPE;
 import static org.forgerock.audit.events.AuditEventHelper.OBJECT_TYPE;
 import static org.forgerock.audit.events.AuditEventHelper.dotNotationToJsonPointer;
@@ -41,11 +42,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.inject.Inject;
 
+import org.forgerock.audit.Audit;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.providers.SecureStorageProvider;
+import org.forgerock.audit.secure.JcaKeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreSecureStorage;
+import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -88,6 +99,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     private final Map<String, JsonPointer> jsonPointerByField = new HashMap<>();
     /** Caches the dot notation for each field. */
     private final Map<String, String> fieldDotNotationByField = new HashMap<>();
+    private SecureStorage secureStorage;
 
     /**
      * Create a new CsvAuditEventHandler instance.
@@ -96,19 +108,37 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
      *          Configuration parameters that can be adjusted by system administrators.
      * @param eventTopicsMetaData
      *          Meta-data for all audit event topics.
+     * @param secureStorageProvider
+     *          The secure storage to use for keys.
      */
     @Inject
     public CsvAuditEventHandler(
             final CsvAuditEventHandlerConfiguration configuration,
-            final EventTopicsMetaData eventTopicsMetaData) {
+            final EventTopicsMetaData eventTopicsMetaData,
+            @Audit SecureStorageProvider secureStorageProvider) {
 
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = configuration;
         this.csvPreference = createCsvPreference(this.configuration);
-        if (configuration.getSecurity().isEnabled()) {
-            Duration duration = configuration.getSecurity().getSignatureIntervalDuration();
+        CsvSecurity security = configuration.getSecurity();
+        if (security.isEnabled()) {
+            Duration duration = security.getSignatureIntervalDuration();
             Reject.ifTrue(duration.isZero() || duration.isUnlimited(),
                     "The signature interval can't be zero or unlimited");
+
+            if (security.getFilename() != null) {
+                try {
+                    KeyStoreHandler keyStoreHandler =
+                            new JcaKeyStoreHandler(JCEKS_KEYSTORE_TYPE, security.getFilename(), security.getPassword());
+                    secureStorage = new KeyStoreSecureStorage(keyStoreHandler);
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(
+                            "Unable to create secure storage from file: " + security.getFilename(), e);
+                }
+            }
+            else {
+                secureStorage = secureStorageProvider.getSecureStorage(configuration.getSecurity().getSecureStorageName());
+            }
         }
         for (String topic : this.eventTopicsMetaData.getTopics()) {
             try {
@@ -247,7 +277,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     private synchronized CsvWriter createCsvMapWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
-        return new CsvWriter(auditFile, headers, csvPreference, configuration);
+        return new CsvWriter(auditFile, headers, csvPreference, secureStorage, configuration);
     }
 
     private ICsvMapReader createCsvMapReader(final File auditFile) throws IOException {

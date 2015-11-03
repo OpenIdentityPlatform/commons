@@ -26,6 +26,7 @@ import java.io.Writer;
 import java.util.Map;
 
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
 import org.forgerock.audit.events.handlers.writers.RotatableWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriter;
@@ -52,8 +53,8 @@ public class CsvWriter implements AutoCloseable {
     private ICsvMapWriter csvWriter;
     private RotatableWriter rotatableWriter;
 
-    CsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, CsvAuditEventHandlerConfiguration config)
-            throws IOException {
+    CsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, SecureStorage secureStorage,
+            CsvAuditEventHandlerConfiguration config) throws IOException {
         boolean fileAlreadyInitialized = csvFile.exists();
         final CsvSecurity securityConfiguration = config.getSecurity();
         CsvSecureVerifier verifier = null;
@@ -63,8 +64,7 @@ public class CsvWriter implements AutoCloseable {
             try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
                 final String[] actualHeaders;
                 if (securityConfiguration.isEnabled()) {
-                    verifier = new CsvSecureVerifier(
-                            reader, securityConfiguration.getFilename(), securityConfiguration.getPassword());
+                    verifier = new CsvSecureVerifier(reader, secureStorage);
                     if (!verifier.verify()) {
                         logger.info("The existing secure CSV file was tampered.");
                         throw new IOException("The CSV file was tampered.");
@@ -94,8 +94,7 @@ public class CsvWriter implements AutoCloseable {
 
         csvWriter = new CsvMapWriter(constructWriter(csvFile, fileAlreadyInitialized, config), csvPreference, false);
         if (securityConfiguration.isEnabled()) {
-            csvWriter = new CsvSecureMapWriter(csvWriter, securityConfiguration.getFilename(),
-                    securityConfiguration.getPassword(), securityConfiguration.getSignatureIntervalDuration(),
+            csvWriter = new CsvSecureMapWriter(csvWriter, secureStorage, securityConfiguration.getSignatureIntervalDuration(),
                     fileAlreadyInitialized);
             CsvSecureMapWriter csvSecureWriter = (CsvSecureMapWriter) csvWriter;
             if (fileAlreadyInitialized) {
