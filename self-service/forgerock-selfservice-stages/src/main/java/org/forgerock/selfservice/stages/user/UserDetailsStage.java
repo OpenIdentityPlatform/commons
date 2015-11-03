@@ -52,13 +52,7 @@ public final class UserDetailsStage implements ProgressStage<UserDetailsConfig> 
 
     @Override
     public StageResponse advance(ProcessContext context, UserDetailsConfig config) throws ResourceException {
-        JsonValue user = context
-                .getInput()
-                .get("user");
-
-        if (user.isNull()) {
-            throw new BadRequestException("user has not been specified");
-        }
+        JsonValue user = context.getInput().get("user").required();
 
         processEmail(context, config, user);
 

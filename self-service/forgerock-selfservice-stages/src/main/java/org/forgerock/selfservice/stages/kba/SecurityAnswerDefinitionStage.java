@@ -26,7 +26,6 @@ import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.oneOf;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
@@ -108,11 +107,7 @@ public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<Securi
     @Override
     public StageResponse advance(ProcessContext context, SecurityAnswerDefinitionConfig config)
             throws ResourceException {
-
-        JsonValue kba = context.getInput().get("kba");
-        if (kba.isNull()) {
-            throw new BadRequestException("KBA has not been specified");
-        }
+        JsonValue kba = context.getInput().get("kba").required();
 
         hashAnswers(kba);
         addKbaToContext(context, config, kba);
@@ -132,7 +127,7 @@ public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<Securi
 
     private JsonValue hashAnswer(String answerTextValue) throws InternalServerErrorException {
         try {
-            return cryptoService.hash(answerTextValue, CryptoConstants.ALGORITHM_SHA_256);
+            return cryptoService.hash(normaliseAnswer(answerTextValue), CryptoConstants.ALGORITHM_SHA_256);
         } catch (JsonCryptoException e) {
             throw new InternalServerErrorException("Error while hashing the answer", e);
         }

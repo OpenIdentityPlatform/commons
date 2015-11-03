@@ -93,11 +93,8 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
 
         JsonValue user = findUser(context.getRequestContext(), queryFilter.asString(), config);
 
-        String userId = user.get(new JsonPointer(config.getIdentityIdField())).asString();
-        context.putState(USER_ID_FIELD, userId);
-
-        String emailId = user.get(new JsonPointer(config.getIdentityEmailField())).asString();
-        context.putState(EMAIL_FIELD, emailId);
+        putState(USER_ID_FIELD, context, config.getIdentityIdField(), user);
+        putState(EMAIL_FIELD, context, config.getIdentityEmailField(), user);
 
         return StageResponse.newBuilder().build();
     }
@@ -142,6 +139,13 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
         }
 
         return user.get(0);
+    }
+
+    private void putState(String key, ProcessContext context, String userFieldName, JsonValue user) {
+        JsonValue value = user.get(new JsonPointer(userFieldName));
+        if (value != null) {
+            context.putState(key, value.asString());
+        }
     }
 
 }

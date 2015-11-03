@@ -217,7 +217,7 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
 
     private boolean match(String answerProvidedByUser, JsonValue answerSetByUser) throws InternalServerErrorException {
         try {
-            return cryptoService.matches(answerProvidedByUser, answerSetByUser);
+            return cryptoService.matches(normaliseAnswer(answerProvidedByUser), answerSetByUser);
         } catch (JsonCryptoException e) {
             throw new InternalServerErrorException("Error while matching the answers", e);
         }

@@ -43,4 +43,15 @@ abstract class AbstractKbaStage<C extends AbstractKbaStageConfig<?>> implements 
         this.cryptoService = new CryptoService();
     }
 
+    /**
+     * Normalises the given answer.
+     *
+     * @param answer
+     *            the string value to be normalised.
+     * @return normalised string value.
+     */
+    protected String normaliseAnswer(String answer) {
+        return (answer == null ? null : answer.toLowerCase());
+    }
+
 }

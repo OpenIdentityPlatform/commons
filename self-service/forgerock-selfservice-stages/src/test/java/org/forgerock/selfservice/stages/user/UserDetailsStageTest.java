@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ResourceResponse;
@@ -87,8 +88,8 @@ public final class UserDetailsStageTest {
         assertThat(jsonValue).stringAt("properties/user/type").isEqualTo("object");
     }
 
-    @Test(expectedExceptions = BadRequestException.class,
-            expectedExceptionsMessageRegExp = "user has not been specified")
+    @Test(expectedExceptions = JsonValueException.class,
+            expectedExceptionsMessageRegExp = "/user: Expecting a value")
     public void testAdvanceUserNotSpecified() throws Exception {
         // Given
         given(context.getInput()).willReturn(newEmptyJsonValue());

@@ -25,6 +25,7 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.services.context.Context;
@@ -104,6 +105,18 @@ public final class CaptchaStageTest {
         assertThat(jsonValue).stringAt("properties/response/recaptchaSiteKey").isEqualTo("siteKey1");
     }
 
+    @Test (expectedExceptions = JsonValueException.class,
+            expectedExceptionsMessageRegExp = "/response: Expecting a value")
+    public void testAdvanceNoInput() throws Exception {
+        // Given
+        config.setRecaptchaSecretKey("6Le4og4TAAAAAFPprcsXlHE9bYYPAMX794A6R3Mv");
+        config.setRecaptchaUri("https://www.google.com/recaptcha/api/siteverify");
+        given(context.getInput()).willReturn(newEmptyJsonValue());
+        given(handler.handle(any(Context.class), any(Request.class))).willReturn(newPromiseFailure());
+        // When
+        captchaStage.advance(context, config);
+    }
+
     @Test (expectedExceptions = BadRequestException.class,
             expectedExceptionsMessageRegExp = "Recaptcha verification is unsuccessful\\. "
                     + "\\{ \"success\": false, \"error-codes\": \\[ \"missing-input-response\", "
@@ -147,6 +160,10 @@ public final class CaptchaStageTest {
                 field("error-codes",
                         array("missing-input-response", "missing-input-secret")))));
         return Promises.newResultPromise(response);
+    }
+
+    private JsonValue newEmptyJsonValue() {
+        return json(object());
     }
 
 }

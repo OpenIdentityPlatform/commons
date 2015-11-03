@@ -75,8 +75,7 @@ public final class CaptchaStage implements ProgressStage<CaptchaStageConfig> {
 
     @Override
     public StageResponse advance(ProcessContext context, CaptchaStageConfig config) throws ResourceException {
-        JsonValue response = context.getInput().get("response");
-        Reject.ifTrue(response.isNull(), "Captcha stage expects a response");
+        JsonValue response = context.getInput().get("response").required();
 
         verifyRecaptchaResponse(config, response);
 

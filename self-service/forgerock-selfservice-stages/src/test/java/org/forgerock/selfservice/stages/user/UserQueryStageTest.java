@@ -24,6 +24,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
@@ -188,6 +189,32 @@ public final class UserQueryStageTest {
     }
 
     @Test
+    public void testAdvanceUserWithoutEmail() throws Exception {
+        // Given
+        given(context.getInput()).willReturn(newJsonValueWithQueryFields());
+        given(factory.getConnection()).willReturn(connection);
+        given(resourceResponse.getContent()).willReturn(newJsonValueUserWithoutEmail());
+        doAnswer(new Answer<Object>() {
+            @Override
+            public Object answer(InvocationOnMock invocation) throws Throwable {
+                ((QueryResourceHandler) invocation.getArguments()[2]).handleResource(resourceResponse);
+                return null;
+            }
+        }).when(connection).query(any(Context.class), any(QueryRequest.class), any(QueryResourceHandler.class));
+
+        // When
+        userQueryStage.advance(context, config);
+
+        // Then
+        ArgumentCaptor<String> putStateArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+        verify(context).putState(eq(USER_ID_FIELD), putStateArgumentCaptor.capture());
+        assertThat(putStateArgumentCaptor.getValue()).isEqualTo("user1");
+
+        verify(context, never()).putState(eq(EMAIL_FIELD), putStateArgumentCaptor.capture());
+    }
+
+    @Test
     public void testAdvance() throws Exception {
         // Given
         given(context.getInput()).willReturn(newJsonValueWithQueryFields());
@@ -244,6 +271,12 @@ public final class UserQueryStageTest {
                 field("firstName", "first name"),
                 field("_Id", "user1"),
                 field("email", "email1")));
+    }
+
+    private JsonValue newJsonValueUserWithoutEmail() {
+        return json(object(
+                field("firstName", "first name"),
+                field("_Id", "user1")));
     }
 
 }

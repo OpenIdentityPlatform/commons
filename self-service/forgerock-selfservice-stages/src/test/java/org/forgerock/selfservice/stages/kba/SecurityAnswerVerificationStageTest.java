@@ -341,11 +341,11 @@ public final class SecurityAnswerVerificationStageTest {
     }
 
     private Object newHashedAnswer1() {
-        return newHashedAnswer("w0X1Te92Gc9J1i/7fRBIXgMdMcrCjrE1q579sg5n+OxMGaNykcj6ZnesbE3I0PYQ");
+        return newHashedAnswer("5ZwZSsqn13LEI4vHhZoI9EcafcO17h06z0wLNzZp2WI3QocVVuQ/eKb5l+wlDGSl");
     }
 
     private Object newHashedAnswer2() {
-        return newHashedAnswer("MPMMDkAYnDIKqfRiR8KE3orXm+BwnohN07UGts10jhp0YnUkSiYu6t7OTZpZCaaF");
+        return newHashedAnswer("V10qqk0CyImH0cI7Psb4YNmIEr5iZHgYtCnl4fOvZS2TTMlYdiI8nt1LbpqZiYMt");
     }
 
     private Object newHashedAnswerX() {
