@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
@@ -56,7 +57,6 @@ import java.util.List;
  *
  * @since 0.1.0
  */
-
 public final class AnonymousProcessService<V extends StageConfigVisitor> extends AbstractRequestHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(AnonymousProcessService.class);
@@ -70,6 +70,7 @@ public final class AnonymousProcessService<V extends StageConfigVisitor> extends
     private static final String STATUS_FIELD = "status";
     private static final String SUCCESS_FIELD = "success";
     private static final String REQUIREMENTS_FIELD = "requirements";
+    private static final String ADDITIONS_FIELD = "additions";
     private static final String END_VALUE = "end";
 
     private static final int INITIAL_STAGE_INDEX = 0;
@@ -215,7 +216,7 @@ public final class AnonymousProcessService<V extends StageConfigVisitor> extends
             ProgressStageBinder<?> stage) throws ResourceException {
         if (context.getStageIndex() + 1 == stageConfigs.size()) {
             // Flow complete, render completion response.
-            return renderCompletion(stage);
+            return renderCompletion(context, stage);
         }
 
         // Stage satisfied, move onto the next stage.
@@ -272,14 +273,22 @@ public final class AnonymousProcessService<V extends StageConfigVisitor> extends
                         field(REQUIREMENTS_FIELD, response.getRequirements().asMap())));
     }
 
-    private JsonValue renderCompletion(ProgressStageBinder<?> stage) {
-        return json(
+    private JsonValue renderCompletion(ProcessContextImpl context, ProgressStageBinder<?> stage) {
+        JsonValue response = json(
                 object(
                         field(TYPE_FIELD, stage.getName()),
                         field(TAG_FIELD, END_VALUE),
                         field(STATUS_FIELD,
                                 object(
                                         field(SUCCESS_FIELD, true)))));
+
+        JsonValue successAdditions = context.hasSuccessAdditions()
+                ? context.getSuccessAdditions()
+                : emptyJson();
+
+        response.add(ADDITIONS_FIELD, successAdditions.asMap());
+
+        return response;
     }
 
     private ProgressStageBinder<?> retrieveStage(ProcessContextImpl context) {

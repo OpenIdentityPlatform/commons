@@ -38,6 +38,7 @@ final class ProcessContextImpl implements ProcessContext {
     private static final String STAGE_INDEX_KEY = "stageIndex";
     private static final String STAGE_TAG_KEY = "stageTag";
     private static final String PROCESS_STATE_KEY = "processState";
+    private static final String SUCCESS_ADDITIONS_KEY = "_successAdditions";
 
     private final Context requestContext;
     private final Request request;
@@ -90,12 +91,30 @@ final class ProcessContextImpl implements ProcessContext {
         state.put(new JsonPointer(jsonPointer), value);
     }
 
+    @Override
+    public void putSuccessAddition(String jsonPointer, Object value) {
+        if (!state.isDefined(SUCCESS_ADDITIONS_KEY)) {
+            state.add(SUCCESS_ADDITIONS_KEY, emptyJson());
+        }
+
+        JsonValue successAdditions = state.get(SUCCESS_ADDITIONS_KEY);
+        successAdditions.put(new JsonPointer(jsonPointer), value);
+    }
+
     int getStageIndex() {
         return stageIndex;
     }
 
     JsonValue getState() {
         return state;
+    }
+
+    boolean hasSuccessAdditions() {
+        return state.isDefined(SUCCESS_ADDITIONS_KEY);
+    }
+
+    JsonValue getSuccessAdditions() {
+        return state.get(SUCCESS_ADDITIONS_KEY);
     }
 
     JsonValue toJson() {

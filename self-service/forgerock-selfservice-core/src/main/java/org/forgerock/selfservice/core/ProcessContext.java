@@ -85,4 +85,16 @@ public interface ProcessContext {
      */
     void putState(String jsonPointer, Object value);
 
+    /**
+     * Puts a value into the additions referenced by the json pointer.
+     * </p>
+     * Additions are included in the response of successfully completing a flow.
+     *
+     * @param jsonPointer
+     *         json point to additions value
+     * @param value
+     *         the corresponding value
+     */
+    void putSuccessAddition(String jsonPointer, Object value);
+
 }
