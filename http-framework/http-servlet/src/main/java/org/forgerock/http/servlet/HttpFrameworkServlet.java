@@ -23,7 +23,6 @@ import static org.forgerock.util.Utils.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -188,7 +187,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         final UriRouterContext uriRouterContext;
         try {
             request = createRequest(req);
-            uriRouterContext = createRouterContext(sessionContext, req);
+            uriRouterContext = createRouterContext(sessionContext, req, request);
         } catch (URISyntaxException e) {
             Response response = new Response(Status.BAD_REQUEST);
             response.setEntity(e.getMessage());
@@ -301,12 +300,13 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 .build();
     }
 
-    private UriRouterContext createRouterContext(Context parent, HttpServletRequest req) throws URISyntaxException {
+    private UriRouterContext createRouterContext(Context parent, HttpServletRequest req, final Request request)
+            throws URISyntaxException {
         String matchedUri = routingBase.extractMatchedUri(req);
         final String requestURI = req.getRequestURI();
         String remaining = requestURI.substring(requestURI.indexOf(matchedUri) + matchedUri.length());
         return new UriRouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap(),
-                new URI(requestURI));
+                request.getUri().asURI());
     }
 
     private void writeResponse(Request request, Response response, HttpServletResponse servletResponse,
