@@ -480,6 +480,7 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      *            The completion handler which will be notified upon an
      *            uncaught runtime exception completion of this
      *            {@code Promise}.
+     * @return This {@code Promise}.
      */
-    void thenOnRuntimeException(RuntimeExceptionHandler onRuntimeException);
+    Promise<V, E> thenOnRuntimeException(RuntimeExceptionHandler onRuntimeException);
 }

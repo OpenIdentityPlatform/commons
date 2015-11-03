@@ -39,7 +39,7 @@ Note: waiting on https://jira.codehaus.org/browse/MCLIRR-62 to be resolved to av
     <to>%regex[org\.forgerock\.opendj\.ldap\.ConnectionFactory newHeartBeatConnectionFactory\(org\.forgerock\.opendj\.ldap\.ConnectionFactory,\s*long,\s*long,\s*java\.util\.concurrent\.TimeUnit(,\s*org\.forgerock\.opendj\.ldap\.requests\.SearchRequest(,\s*java\.util\.concurrent\.ScheduledExecutorService)?)?\)]</to>
     <justification>OPENDJ-1058: Added a timeout parameter to actively shutdown dead connections</justification>
   </difference>
--->  
+-->
 	<difference>
 		<className>%regex[org/forgerock/util/promise/(Promise|PromiseImpl)]</className>
 		<differenceType>7002</differenceType>
@@ -75,7 +75,7 @@ Note: waiting on https://jira.codehaus.org/browse/MCLIRR-62 to be resolved to av
 		<differenceType>7012</differenceType>
 		<method>org.forgerock.util.promise.Promise thenFinally(java.lang.Runnable)</method>
 		<justification>COMMONS-5 Promise API improvements</justification>
-	</difference>    
+	</difference>
 	<difference>
 	    <className>%regex[org/forgerock/util/promise/(Async)?Function]</className>
 	    <differenceType>8001</differenceType>
@@ -150,7 +150,7 @@ Note: waiting on https://jira.codehaus.org/browse/MCLIRR-62 to be resolved to av
 	<difference>
 		<className>org/forgerock/util/promise/Promise</className>
 		<differenceType>7012</differenceType>
-		<method>void thenOnRuntimeException(org.forgerock.util.promise.RuntimeExceptionHandler)</method>
+		<method>org.forgerock.util.promise.Promise thenOnRuntimeException(org.forgerock.util.promise.RuntimeExceptionHandler)</method>
 		<justification>Allow for handling of runtime exceptions</justification>
 	</difference>
 </differences>

@@ -436,7 +436,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     }
 
     @Override
-    public final void thenOnRuntimeException(final RuntimeExceptionHandler onRuntimeException) {
+    public final Promise<V, E> thenOnRuntimeException(final RuntimeExceptionHandler onRuntimeException) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
             public void handleStateChange(int newState, V result, E exception, RuntimeException runtimeException) {
@@ -445,6 +445,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
                 }
             }
         });
+        return this;
     }
 
     /**

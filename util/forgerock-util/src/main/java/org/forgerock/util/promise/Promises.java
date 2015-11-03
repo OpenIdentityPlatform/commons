@@ -211,10 +211,11 @@ public final class Promises {
         }
 
         @Override
-        public void thenOnRuntimeException(RuntimeExceptionHandler onRuntimeException) {
+        public Promise<V, E> thenOnRuntimeException(RuntimeExceptionHandler onRuntimeException) {
             if (getRuntimeException() != null) {
                 onRuntimeException.handleRuntimeException(getRuntimeException());
             }
+            return this;
         }
 
         abstract RuntimeException getRuntimeException();
