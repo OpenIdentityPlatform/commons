@@ -15,8 +15,10 @@
  */
 package org.forgerock.selfservice.stages.email;
 
-import static org.forgerock.json.JsonValue.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
@@ -24,7 +26,7 @@ import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import org.assertj.core.api.Assertions;
@@ -33,6 +35,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.Request;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
@@ -163,7 +166,9 @@ public final class VerifyEmailAccountStageTest {
         locales.add(Locale.ENGLISH);
         PreferredLocales preferredLocales = new PreferredLocales(locales);
 
-        given(context.getPreferredLocales()).willReturn(preferredLocales);
+        Request request = mock(Request.class);
+        given(request.getPreferredLocales()).willReturn(preferredLocales);
+        given(context.getRequest()).willReturn(request);
 
         given(context.containsState(EMAIL_FIELD)).willReturn(true);
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());

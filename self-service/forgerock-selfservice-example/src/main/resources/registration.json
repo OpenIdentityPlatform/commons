@@ -4,6 +4,7 @@
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
       "from": "info@admin.org",
+      "mimeType": "text/html",
       "subjectTranslations": {
         "en": "Register new account",
         "fr": "Créer un nouveau compte"

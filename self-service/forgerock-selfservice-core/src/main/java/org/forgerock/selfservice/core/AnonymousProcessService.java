@@ -40,7 +40,6 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
-import org.forgerock.util.i18n.PreferredLocales;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,8 +107,7 @@ public final class AnonymousProcessService<V extends StageConfigVisitor> extends
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
-            JsonValue clientResponse = initiateProcess(new SelfServiceContext(context),
-                                                            request.getPreferredLocales());
+            JsonValue clientResponse = initiateProcess(new SelfServiceContext(context), request);
             return newResourceResponse("1", "1.0", clientResponse).asPromise();
         } catch (ResourceException | RuntimeException e) {
             return logAndAdaptException(e).asPromise();
@@ -148,10 +146,9 @@ public final class AnonymousProcessService<V extends StageConfigVisitor> extends
     /*
      * Responsible for retrieving the requirements from the first stage in the flow.
      */
-    private JsonValue initiateProcess(Context requestContext,
-                                      PreferredLocales preferredLocales) throws ResourceException {
+    private JsonValue initiateProcess(Context requestContext, ReadRequest request) throws ResourceException {
         ProcessContextImpl context = ProcessContextImpl
-                .newBuilder(requestContext, INITIAL_STAGE_INDEX, preferredLocales)
+                .newBuilder(requestContext, request, INITIAL_STAGE_INDEX)
                 .build();
 
         ProgressStageBinder<?> stage = retrieveStage(context);
@@ -178,13 +175,10 @@ public final class AnonymousProcessService<V extends StageConfigVisitor> extends
         ProcessContextImpl.Builder contextBuilder;
 
         if (snapshotTokenValue.isNotNull()) {
-            JsonValue jsonContext = snapshotAuthor
-                    .retrieveSnapshotFrom(snapshotTokenValue.asString());
-            contextBuilder = ProcessContextImpl.newBuilder(requestContext, jsonContext,
-                                                                            request.getPreferredLocales());
+            JsonValue jsonContext = snapshotAuthor.retrieveSnapshotFrom(snapshotTokenValue.asString());
+            contextBuilder = ProcessContextImpl.newBuilder(requestContext, request, jsonContext);
         } else {
-            contextBuilder = ProcessContextImpl.newBuilder(requestContext, INITIAL_STAGE_INDEX,
-                                                                            request.getPreferredLocales());
+            contextBuilder = ProcessContextImpl.newBuilder(requestContext, request, INITIAL_STAGE_INDEX);
         }
 
         JsonValue input = clientInput.get(INPUT_FIELD);
@@ -228,7 +222,7 @@ public final class AnonymousProcessService<V extends StageConfigVisitor> extends
         int nextIndex = context.getStageIndex() + 1;
 
         ProcessContextImpl nextContext = ProcessContextImpl
-                .newBuilder(context.getRequestContext(), nextIndex)
+                .newBuilder(context.getRequestContext(), context.getRequest(), nextIndex)
                 .setState(context.getState())
                 .build();
 

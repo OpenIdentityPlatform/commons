@@ -22,11 +22,11 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.core.ServiceUtils.emptyJson;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.Request;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
-import org.forgerock.util.i18n.PreferredLocales;
 
 /**
  * Concrete implementation of process context. Also exposes state to be consumed only by the service.
@@ -40,24 +40,29 @@ final class ProcessContextImpl implements ProcessContext {
     private static final String PROCESS_STATE_KEY = "processState";
 
     private final Context requestContext;
+    private final Request request;
     private final int stageIndex;
     private final String stageTag;
     private final JsonValue input;
     private final JsonValue state;
-    private final PreferredLocales preferredLocales;
 
     private ProcessContextImpl(Builder builder) {
         requestContext = builder.requestContext;
+        request = builder.request;
         stageIndex = builder.stageIndex;
         stageTag = builder.stageTag;
         input = builder.input;
         state = builder.state;
-        preferredLocales = builder.preferredLocales;
     }
 
     @Override
     public Context getRequestContext() {
         return requestContext;
+    }
+
+    @Override
+    public Request getRequest() {
+        return request;
     }
 
     @Override
@@ -85,11 +90,6 @@ final class ProcessContextImpl implements ProcessContext {
         state.put(new JsonPointer(jsonPointer), value);
     }
 
-    @Override
-    public PreferredLocales getPreferredLocales() {
-        return preferredLocales;
-    }
-
     int getStageIndex() {
         return stageIndex;
     }
@@ -112,18 +112,18 @@ final class ProcessContextImpl implements ProcessContext {
     static final class Builder {
 
         private final Context requestContext;
+        private final Request request;
         private final int stageIndex;
         private String stageTag;
         private JsonValue state;
         private JsonValue input;
-        private PreferredLocales preferredLocales;
 
-        private Builder(Context requestContext, int stageIndex, PreferredLocales preferredLocales) {
-            Reject.ifNull(requestContext);
+        private Builder(Context requestContext, Request request, int stageIndex) {
+            Reject.ifNull(requestContext, request);
             Reject.ifTrue(stageIndex < 0);
             this.requestContext = requestContext;
+            this.request = request;
             this.stageIndex = stageIndex;
-            this.preferredLocales = preferredLocales;
             stageTag = INITIAL_TAG;
             state = emptyJson();
             input = emptyJson();
@@ -133,17 +133,18 @@ final class ProcessContextImpl implements ProcessContext {
             Reject.ifNull(previous);
             stageIndex = previous.stageIndex;
             requestContext = previous.requestContext;
+            request = previous.request;
             stageTag = previous.stageTag;
             state = previous.state;
             input = previous.input;
-            preferredLocales = previous.preferredLocales;
         }
 
-        private Builder(Context requestContext, JsonValue jsonContext, PreferredLocales preferredLocales) {
-            Reject.ifNull(requestContext, jsonContext);
+        private Builder(Context requestContext, Request request, JsonValue jsonContext) {
+            Reject.ifNull(requestContext, request, jsonContext);
             Reject.ifTrue(jsonContext.get(STAGE_INDEX_KEY).isNull(), "Stage index missing");
 
             this.requestContext = requestContext;
+            this.request = request;
 
             stageIndex = jsonContext
                     .get(STAGE_INDEX_KEY)
@@ -155,8 +156,6 @@ final class ProcessContextImpl implements ProcessContext {
 
             state = jsonContext.get(PROCESS_STATE_KEY);
             input = emptyJson();
-
-            this.preferredLocales = preferredLocales;
         }
 
         Builder setStageTag(String stageTag) {
@@ -182,16 +181,12 @@ final class ProcessContextImpl implements ProcessContext {
         }
     }
 
-    static Builder newBuilder(Context requestContext, int stageIndex) {
-        return new Builder(requestContext, stageIndex, null);
+    static Builder newBuilder(Context requestContext, Request request, int stageIndex) {
+        return new Builder(requestContext, request, stageIndex);
     }
 
-    static Builder newBuilder(Context requestContext, int stageIndex, PreferredLocales preferredLocales) {
-        return new Builder(requestContext, stageIndex, preferredLocales);
-    }
-
-    static Builder newBuilder(Context requestContext, JsonValue jsonContext, PreferredLocales preferredLocales) {
-        return new Builder(requestContext, jsonContext, preferredLocales);
+    static Builder newBuilder(Context requestContext, Request request, JsonValue jsonContext) {
+        return new Builder(requestContext, request, jsonContext);
     }
 
     static Builder newBuilder(ProcessContextImpl previous) {

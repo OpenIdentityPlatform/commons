@@ -24,10 +24,6 @@ import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -43,11 +39,14 @@ import org.forgerock.selfservice.core.exceptions.IllegalStageTagException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenCallback;
 import org.forgerock.selfservice.stages.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.util.Reject;
 import org.forgerock.util.i18n.PreferredLocales;
 
 import javax.inject.Inject;
-import org.forgerock.services.context.Context;
-import org.forgerock.util.Reject;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Having retrieved the email address from the context or in response to the initial requirements, verifies the
@@ -197,35 +196,13 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
     }
 
     private void sendEmail(ProcessContext processContext, String snapshotToken, String code,
-                           String email, VerifyEmailAccountConfig config) throws ResourceException {
+            String email, VerifyEmailAccountConfig config) throws ResourceException {
 
         String emailUrl = config.getVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
-        Map<Locale, String> messageMap = config.getMessageTranslations();
-        Map<Locale, String> subjectMap = config.getSubjectTranslations();
 
-        PreferredLocales preferredLocales = processContext.getPreferredLocales();
-        if (preferredLocales == null) {
-            throw ResourceException.newResourceException(ResourceException.BAD_REQUEST,
-                    "No locales available in the context");
-        }
-
-        String subjectText = null;
-        String bodyText = null;
-        try {
-            subjectText = getTranslationFromLocaleMap(preferredLocales, subjectMap);
-            //subjectText = preferredLocales.getTranslationFromLocaleMap(subjectMap);
-        } catch (IllegalArgumentException iae) {
-            throw ResourceException.newResourceException(ResourceException.BAD_REQUEST,
-                    "No translations available for email subject");
-        }
-
-        try {
-            bodyText = getTranslationFromLocaleMap(preferredLocales, messageMap);
-            // bodyText = preferredLocales.getTranslationFromLocaleMap(messageMap);
-        } catch (IllegalArgumentException iae) {
-            throw ResourceException.newResourceException(ResourceException.BAD_REQUEST,
-                    "No translations available for email body");
-        }
+        PreferredLocales preferredLocales = processContext.getRequest().getPreferredLocales();
+        String subjectText = getTranslationFromLocaleMap(preferredLocales, config.getSubjectTranslations());
+        String bodyText = getTranslationFromLocaleMap(preferredLocales, config.getMessageTranslations());
 
         bodyText = bodyText.replace(config.getVerificationLinkToken(), emailUrl);
 
@@ -252,12 +229,16 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
     /**
      * Using the user's preferred locales (for example, from the "Accept-Language" header in the HTTP context),
      * select the most optimal (string) translation from the map.  If there is nothing acceptable, throw an exception.
-     *
-     * @param translations Map of locales to strings
-     * @return the most appropriate string given the above
-     * @throws IllegalArgumentException If an acceptable string cannot be found
-     *
+     * <p/>
      * TODO: REMOVE ME ONCE FORGEROCK UTIL HAS BEEN UPDATED
+     *
+     * @param translations
+     *         Map of locales to strings
+     *
+     * @return the most appropriate string given the above
+     *
+     * @throws IllegalArgumentException
+     *         If an acceptable string cannot be found
      */
     private String getTranslationFromLocaleMap(PreferredLocales preferredLocales, Map<Locale, String> translations) {
         List<Locale> locales = preferredLocales.getLocales();
@@ -271,12 +252,18 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
     }
 
     /**
-     * @param locales The preferred locales
-     * @param locale The desired locale
-     * @param translations The translations
-     * @return A translation or null if not available
-     *
+     * Retrieves the appropriate translation.
+     * <p/>
      * TODO: REMOVE ME ONCE FORGEROCK UTIL HAS BEEN UPDATED
+     *
+     * @param locales
+     *         The preferred locales
+     * @param locale
+     *         The desired locale
+     * @param translations
+     *         The translations
+     *
+     * @return A translation or null if not available
      */
     private String getTranslation(List<Locale> locales, Locale locale, Map<Locale, String> translations) {
         String translation = translations.get(locale);
@@ -293,4 +280,5 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
         }
         return null;
     }
+
 }

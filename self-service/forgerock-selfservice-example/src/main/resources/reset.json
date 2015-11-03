@@ -14,6 +14,7 @@
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
       "from": "info@admin.org",
+      "mimeType": "text/html",
       "subjectTranslations": {
         "en": "Reset your password",
         "fr": "Réinitialisez votre mot de passe"
