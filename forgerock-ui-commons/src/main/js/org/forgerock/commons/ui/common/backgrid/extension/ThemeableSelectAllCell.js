@@ -34,9 +34,9 @@
  * }
  */
 define("org/forgerock/commons/ui/common/backgrid/extension/ThemeableSelectAllCell", [
-    "backgrid",
-    "backgrid-selectall"
-], function (Backgrid, BackgridSelectAll) {
+    "backgrid-selectall",
+    "org/forgerock/commons/ui/common/backgrid/Backgrid"
+], function (BackgridSelectAll, Backgrid) {
     Backgrid.Extension.ThemeableSelectAllCell = Backgrid.Extension.SelectRowCell.extend({
         /**
          * @inheritdoc

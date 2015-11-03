@@ -30,9 +30,9 @@
  */
 define("org/forgerock/commons/ui/common/backgrid/extension/ThemeablePaginator", [
     "jquery",
-    "backgrid",
-    "backgrid.paginator"
-], function ($, Backgrid, BackgridPaginator) {
+    "backgrid.paginator",
+    "org/forgerock/commons/ui/common/backgrid/Backgrid"
+], function ($, BackgridPaginator, Backgrid) {
     Backgrid.Extension.ThemeablePaginator = Backgrid.Extension.Paginator.extend({
         /**
          * @default

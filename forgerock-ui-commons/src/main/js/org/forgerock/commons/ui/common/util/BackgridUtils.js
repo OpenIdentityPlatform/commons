@@ -26,7 +26,7 @@
 define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     "jquery",
     "underscore",
-    "backgrid",
+    "org/forgerock/commons/ui/common/backgrid/Backgrid",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "moment",

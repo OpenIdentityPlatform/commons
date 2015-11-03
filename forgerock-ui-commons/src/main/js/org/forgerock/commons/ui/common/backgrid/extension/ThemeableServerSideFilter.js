@@ -29,9 +29,9 @@
  * new Backgrid.Extension.ThemeableServerSideFilter({ ... });
  */
 define("org/forgerock/commons/ui/common/backgrid/extension/ThemeableServerSideFilter", [
-    "backgrid",
-    "backgrid-filter"
-], function (Backgrid, BackgridFilter) {
+    "backgrid-filter",
+    "org/forgerock/commons/ui/common/backgrid/Backgrid"
+], function (BackgridFilter, Backgrid) {
     Backgrid.Extension.ThemeableServerSideFilter = Backgrid.Extension.ServerSideFilter.extend({
         /**
          * @default
