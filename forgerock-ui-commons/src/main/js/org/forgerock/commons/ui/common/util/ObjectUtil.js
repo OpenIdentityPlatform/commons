@@ -17,7 +17,7 @@
 /*global define*/
 
 define("org/forgerock/commons/ui/common/util/ObjectUtil", [
-    "underscore"
+    "lodash"
 ], function (_) {
     /**
      * @exports org/forgerock/commons/ui/common/util/ObjectUtil
@@ -41,8 +41,8 @@ define("org/forgerock/commons/ui/common/util/ObjectUtil", [
                     return p[1] !== undefined;
                 })
                 .map(function (p) {
-                    if (_.indexOf(["string","boolean","number"], (typeof p[1])) !== -1 || p[1] === null) {
-                      return { "pointer": "/" + p[0], "value": p[1]};
+                    if (_.indexOf(["string","boolean","number"], (typeof p[1])) !== -1 || _.isEmpty(p[1])) {
+                        return { "pointer": "/" + p[0], "value": p[1]};
                     } else {
                         return _.map(pointerList(p[1]), function (child) {
                             return {"pointer": "/" + p[0] + child.pointer, "value": child.value };
@@ -57,6 +57,73 @@ define("org/forgerock/commons/ui/common/util/ObjectUtil", [
                   map[entry.pointer] = entry.value;
                   return map;
               }, {});
+    };
+
+    /**
+     * Uses a JSONPointer string to find a value within a provided object
+     * Examples:
+     *   getValueFromPointer({test:["apple", {"foo":"bar", "hello": "world"}]}, "/test/0") returns: "apple"
+     *   getValueFromPointer({test:["apple", {"foo":"bar", "hello": "world"}]}, "/test/1/foo") returns: "bar"
+     *   getValueFromPointer({test:["apple", {"foo":"bar", "hello": "world"}]}, "/test/1") returns:
+     *      {"foo":"bar", "hello": "world"}
+     *   getValueFromPointer({test:["apple", {"foo":"bar", "hello": "world"}]}, "/test2") returns: undefined
+     *   getValueFromPointer({test:["apple", {"foo":"bar", "hello": "world"}]}, "/") returns:
+            {test:["apple", {"foo":"bar", "hello": "world"}]}
+     *
+     * @param {object} object - the object to search within
+     * @param {string} pointer - the JSONPointer to use to find the value within the object
+     */
+    obj.getValueFromPointer = function (object, pointer) {
+        var pathParts = pointer.split("/");
+        // remove first item which came from the leading slash
+        pathParts.shift(1);
+        if (pathParts[0] === "") { // the case when pointer is just "/"
+            return object;
+        }
+
+        return _.reduce(pathParts, function (result, path) {
+            if (_.isObject(result)) {
+                return result[path];
+            } else {
+                return result;
+            }
+        }, object);
+    };
+
+    /**
+     * Look through the provided object to see how far it can be traversed using a given JSONPointer string
+     * Halts at the first undefined entry, or when it has reached the end of the pointer path.
+     * Returns a JSONPointer that represents the point at which it was unable to go further
+     * Examples:
+     *   walkDefinedPath({test:["apple", {"foo":"bar", "hello": "world"}]}, "/test/0") returns: "/test/0"
+     *   walkDefinedPath({test:["apple", {"foo":"bar", "hello": "world"}]}, "/test/3/foo") returns: "/test/3"
+     *   walkDefinedPath({test:["apple", {"foo":"bar", "hello": "world"}]}, "/missing") returns: "/missing"
+     *   walkDefinedPath({test:["apple", {"foo":"bar", "hello": "world"}]}, "/missing/bar") returns: "/missing"
+     *
+     * @param {object} object - the object to walk through
+     * @param {string} pointer - the JSONPointer to use to walk through the object
+     */
+    obj.walkDefinedPath = function (object, pointer) {
+        var finalPath = "",
+            node = object,
+            currentPathPart,
+            pathParts = pointer.split("/");
+
+        // remove first item which came from the leading slash
+        pathParts.shift(1);
+
+        // walk through the path, stopping when hitting undefined
+        while (node !== undefined && node !== null && pathParts.length) {
+            currentPathPart = pathParts.shift(1);
+            finalPath += ("/" + currentPathPart);
+            node = node[currentPathPart];
+        }
+
+        // if the whole object needs to be added....
+        if (finalPath === "") {
+            finalPath = "/";
+        }
+        return finalPath;
     };
 
     /**
@@ -76,7 +143,9 @@ define("org/forgerock/commons/ui/common/util/ObjectUtil", [
      * @param {object} oldObject - the object to start from
      */
     obj.generatePatchSet = function (newObject, oldObject) {
-        var newPointerMap = obj.toJSONPointerMap(newObject),
+        var newObjectClosure = newObject, // needed to have access to newObject within _ functions
+            oldObjectClosure = oldObject, // needed to have access to oldObject within _ functions
+            newPointerMap = obj.toJSONPointerMap(newObject),
             previousPointerMap = obj.toJSONPointerMap(oldObject),
             newValues = _.chain(newPointerMap)
                          .pairs()
@@ -84,21 +153,26 @@ define("org/forgerock/commons/ui/common/util/ObjectUtil", [
                             return previousPointerMap[p[0]] !== p[1];
                          })
                          .map(function (p) {
-                            if (previousPointerMap[p[0]] === undefined) {
-                                return { "operation": "add", "field": p[0], "value": p[1] };
-                            } else {
-                                return { "operation": "replace", "field": p[0], "value": p[1] };
-                            }
+                            var finalPathToAdd = obj.walkDefinedPath(oldObjectClosure, p[0]),
+                                operation = (obj.getValueFromPointer(oldObjectClosure, p[0]) === undefined) ? "add" : "replace";
+                            return { "operation": operation, "field": finalPathToAdd, "value": obj.getValueFromPointer(newObjectClosure, finalPathToAdd) };
                          })
+                         // Filter out duplicates which might result from adding whole containers
+                         // Have to stringify the patch operations to do object comparisons with uniq
+                         .uniq(JSON.stringify)
                          .value(),
             removedValues = _.chain(previousPointerMap)
                              .pairs()
                              .filter(function (p) {
-                                return newPointerMap[p[0]] === undefined;
+                                return obj.getValueFromPointer(newObjectClosure, p[0]) === undefined;
                              })
                              .map(function (p) {
-                                    return { "operation": "remove", "field": p[0] };
+                                var finalPathToRemove = obj.walkDefinedPath(newObjectClosure, p[0]);
+                                return { "operation": "remove", "field": finalPathToRemove };
                              })
+                             // Filter out duplicates which might result from deleting whole containers
+                             // Have to stringify the patch operations to do object comparisons with uniq
+                             .uniq(JSON.stringify)
                              .value();
 
            return newValues.concat(removedValues);
