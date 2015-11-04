@@ -77,8 +77,4 @@ public class NoOpAuditEventHandler extends AuditEventHandlerBase {
         return newResourceResponse(resourceId, null, json(object())).asPromise();
     }
 
-    @Override
-    public Class<EventHandlerConfiguration> getConfigurationClass() {
-        return EventHandlerConfiguration.class;
-    }
 }

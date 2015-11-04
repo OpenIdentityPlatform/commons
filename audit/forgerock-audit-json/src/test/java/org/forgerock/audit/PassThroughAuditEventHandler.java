@@ -95,8 +95,4 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase {
                 new NotSupportedException("The " + RequestType.READ + " operation is not supported.")).asPromise();
     }
 
-    @Override
-    public Class<PassThroughAuditEventHandlerConfiguration> getConfigurationClass() {
-        return PassThroughAuditEventHandlerConfiguration.class;
-    }
 }

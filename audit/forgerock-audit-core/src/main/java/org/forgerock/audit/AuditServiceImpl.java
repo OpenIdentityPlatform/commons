@@ -32,7 +32,6 @@ import java.util.Set;
 
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.audit.filter.Filter;
 import org.forgerock.audit.filter.FilterChainBuilder;
 import org.forgerock.json.JsonValue;
@@ -435,11 +434,6 @@ final class AuditServiceImpl implements AuditService {
 
         @Override
         public Set<String> getHandledTopics() {
-            throw new UnsupportedOperationException("Unsupported.");
-        }
-
-        @Override
-        public Class<EventHandlerConfiguration> getConfigurationClass() {
             throw new UnsupportedOperationException("Unsupported.");
         }
 

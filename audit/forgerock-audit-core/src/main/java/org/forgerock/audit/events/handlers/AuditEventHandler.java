@@ -71,12 +71,6 @@ public interface AuditEventHandler {
     Set<String> getHandledTopics();
 
     /**
-     * Gets the configuration class for the audit event handler.
-     * @return the configuration class for the audit event handler
-     */
-    Class<?> getConfigurationClass();
-
-    /**
      * Publishes an event to the provided topic.
      *
      * @param context

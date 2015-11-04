@@ -15,6 +15,10 @@
  */
 package org.forgerock.audit.json;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
@@ -263,25 +267,33 @@ public class AuditJsonConfig {
     }
 
     /**
-     * Gets the configuration schema for an audit event handler as json schema.
-     * @param auditEventHandler The audit event handler to get the config schema for.
+     * Gets the configuration schema for an audit event handler as json schema. The supplied json config must contain
+     * a field called class with the value of the audit event handler implementation class.
+     * @param className The class name to get the configuration for.
+     * @param classLoader The {@link ClassLoader} to use to load the event handler and event handler config class.
      * @return The config schema as json schema.
      * @throws AuditException If any error occurs parsing the config class for schema.
      */
-    public static JsonValue getAuditEventHandlerConfigurationSchema(final AuditEventHandler auditEventHandler)
-            throws AuditException {
+    public static JsonValue getAuditEventHandlerConfigurationSchema(final String className,
+            final ClassLoader classLoader) throws AuditException {
+        final Class<? extends EventHandlerConfiguration> eventHandlerConfiguration =
+                getAuditEventHandlerConfigurationClass(
+                        className,
+                        getAuditEventHandlerClass(
+                                className,
+                                json(object(field("class", className))),
+                                classLoader),
+                        classLoader);
         try {
             SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
-            mapper.acceptJsonFormatVisitor(mapper.constructType(auditEventHandler.getConfigurationClass()), visitor);
+            mapper.acceptJsonFormatVisitor(mapper.constructType(eventHandlerConfiguration), visitor);
             JsonSchema jsonSchema = visitor.finalSchema();
-            jsonSchema.setId("/");
             return new JsonValue(mapper.readValue(mapper.writeValueAsString(jsonSchema), Map.class));
         } catch (IOException e) {
-            logger.error("Unable to parse configuration class schema for class {}",
-                    auditEventHandler.getClass().getName(), e);
-            throw new AuditException(
-                    String.format("Unable to parse configuration class schema for class %s",
-                            auditEventHandler.getClass().getName()), e);
+            final String error = String.format("Unable to parse configuration class schema for configuration class %s",
+                    eventHandlerConfiguration.getName());
+            logger.error(error, e);
+            throw new AuditException(error, e);
         }
     }
 

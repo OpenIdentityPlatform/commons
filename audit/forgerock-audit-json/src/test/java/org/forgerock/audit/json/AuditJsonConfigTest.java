@@ -15,20 +15,16 @@
  */
 package org.forgerock.audit.json;
 
-import java.io.InputStream;
-import java.util.Collections;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
-import static org.forgerock.audit.events.EventTopicsMetaDataBuilder.coreTopicSchemas;
 import static org.forgerock.audit.json.AuditJsonConfig.parseAuditServiceConfiguration;
+
+import java.io.InputStream;
 
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
-import org.forgerock.audit.PassThroughAuditEventHandler;
-import org.forgerock.audit.PassThroughAuditEventHandlerConfiguration;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.DataProvider;
@@ -82,20 +78,15 @@ public class AuditJsonConfigTest {
     @Test
     public void testGetAuditEventHandlerConfigurationSchema() throws Exception {
         //given
-        PassThroughAuditEventHandlerConfiguration configuration = new PassThroughAuditEventHandlerConfiguration();
-        configuration.setName("pass");
-        configuration.setTopics(Collections.singleton("access"));
-        final AuditEventHandler auditEventHandler = new PassThroughAuditEventHandler(
-                configuration, coreTopicSchemas().build());
+        final JsonValue expectedSchema = loadJsonValue("/audit-passthrough-handler-schema.json");
 
         //when
-        final JsonValue schema = AuditJsonConfig.getAuditEventHandlerConfigurationSchema(auditEventHandler);
+        final JsonValue schema =
+                AuditJsonConfig.getAuditEventHandlerConfigurationSchema(
+                        "org.forgerock.audit.PassThroughAuditEventHandler", getClass().getClassLoader());
 
         //then
-        assertThat(schema.get("type").asString()).isEqualTo("object");
-        assertThat(schema.get("id").asString()).isEqualTo("/");
-        assertThat(schema.get("properties").get("message")).isNotNull();
-        assertThat(schema.get("properties").get("buffering")).isNotNull();
+        assertThat(schema.asMap()).isEqualTo(expectedSchema.asMap());
     }
 
     private AuditServiceConfiguration loadConfiguration() throws AuditException {

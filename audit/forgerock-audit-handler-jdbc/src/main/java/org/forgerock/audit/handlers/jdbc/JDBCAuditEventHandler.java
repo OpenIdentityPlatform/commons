@@ -140,14 +140,6 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
      * {@inheritDoc}
      */
     @Override
-    public Class<JDBCAuditEventHandlerConfiguration> getConfigurationClass() {
-        return JDBCAuditEventHandlerConfiguration.class;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
         try {
             final TableMapping mapping = getTableMapping(topic);

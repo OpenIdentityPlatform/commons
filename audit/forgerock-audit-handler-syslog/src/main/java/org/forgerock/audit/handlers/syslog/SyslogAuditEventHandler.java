@@ -117,11 +117,6 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase {
         }
     }
 
-    @Override
-    public Class<SyslogAuditEventHandlerConfiguration> getConfigurationClass() {
-        return SyslogAuditEventHandlerConfiguration.class;
-    }
-
     /** {@inheritDoc} */
     @Override
     public void startup() {
