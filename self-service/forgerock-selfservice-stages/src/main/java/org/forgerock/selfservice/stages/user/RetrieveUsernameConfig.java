@@ -14,37 +14,31 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.stages;
+package org.forgerock.selfservice.stages.user;
+
+import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
- * Constants class for defining fields for common state shared across stages.
+ * Configuration for the retrieve username stage.
  *
- * @since 0.1.0
+ * @since 0.7.0
  */
-public final class CommonStateFields {
+public final class RetrieveUsernameConfig implements StageConfig<UserConfigVisitor> {
 
-    private CommonStateFields() {
-        throw new UnsupportedOperationException();
+    /**
+     * Name of the stage configuration.
+     */
+    public static final String NAME = "retrieveUsername";
+
+    @Override
+    public String getName() {
+        return NAME;
     }
 
-    /**
-     * The userId field.
-     */
-    public static final String USER_ID_FIELD = "userId";
-
-    /**
-     * The email address field.
-     */
-    public static final String EMAIL_FIELD = "mail";
-
-    /**
-     * The user field. This would be a Json object with properties such as name, kba etc.
-     */
-    public static final String USER_FIELD = "user";
-
-    /**
-     * The username field.
-     */
-    public static final String USERNAME_FIELD = "username";
+    @Override
+    public ProgressStageBinder<?> accept(UserConfigVisitor visitor) {
+        return visitor.build(this);
+    }
 
 }

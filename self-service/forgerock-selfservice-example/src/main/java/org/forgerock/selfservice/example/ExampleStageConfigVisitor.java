@@ -34,6 +34,8 @@ import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
 import org.forgerock.selfservice.stages.registration.UserRegistrationStage;
 import org.forgerock.selfservice.stages.reset.ResetStage;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
+import org.forgerock.selfservice.stages.user.RetrieveUsernameConfig;
+import org.forgerock.selfservice.stages.user.RetrieveUsernameStage;
 import org.forgerock.selfservice.stages.user.UserDetailsConfig;
 import org.forgerock.selfservice.stages.user.UserDetailsStage;
 import org.forgerock.selfservice.stages.user.UserQueryConfig;
@@ -103,6 +105,11 @@ final class ExampleStageConfigVisitor implements CommonConfigVisitor {
     @Override
     public ProgressStageBinder<?> build(DynamicStageConfig config) {
         return dynamicConfigVisitor.build(config);
+    }
+
+    @Override
+    public ProgressStageBinder<?> build(RetrieveUsernameConfig config) {
+        return ProgressStageBinder.bind(new RetrieveUsernameStage(), config);
     }
 
 }
