@@ -37,11 +37,11 @@ public class RotatableWriterTest {
     private static final int MAX_NUMBER_OF_HISTORY_FILES = 3;
     private static final int MAX_BYTES_TO_WRITE = 100;
     private static final int MAX_BYTES_TO_WRITE_DISABLED = 0;
-    private static final long TWO_SECONDS = 2 * 1000;
+    private static final long ONE_SECOND_AS_LONG = 2 * 1000;
     private static final String DISABLED = "disabled";
 
     @Test
-    public void TestCreation() throws Exception {
+    public void testCreation() throws Exception {
         // given
         final File initialFile = getTempFile();
         final FileBasedEventHandlerConfiguration configuration =
@@ -59,7 +59,7 @@ public class RotatableWriterTest {
     }
 
     @Test
-    public void TestBytesWritten() throws Exception {
+    public void testBytesWritten() throws Exception {
         // given
         final File initialFile = getTempFile();
         final FileBasedEventHandlerConfiguration configuration =
@@ -78,7 +78,7 @@ public class RotatableWriterTest {
     }
 
     @Test
-    public void TestRotationWhenFileIsTooLarge() throws Exception {
+    public void testRotationWhenFileIsTooLarge() throws Exception {
         // given
         final File initialFile = getTempFile();
         final FileBasedEventHandlerConfiguration configuration =
@@ -104,14 +104,15 @@ public class RotatableWriterTest {
     }
 
     @Test
-    public void TestRotationWhenFileIsTooOld() throws Exception {
+    public void testRotationWhenFileIsTooOld() throws Exception {
         // given
+        final int maxNumberOfHistoricalFiles = 1;
         final File initialFile = getTempFile();
         final FileBasedEventHandlerConfiguration configuration =
                 createFileBasedAuditEventHandlerConfiguration(
                         ONE_SECOND,
                         MAX_BYTES_TO_WRITE_DISABLED,
-                        1,
+                        maxNumberOfHistoricalFiles,
                         0);
         final RotatableWriter rotatableFile = new RotatableWriter(initialFile, configuration, true);
         final TimestampFilenameFilter timestampFilenameFilter =
@@ -120,18 +121,31 @@ public class RotatableWriterTest {
         // when
         writeBytes(rotatableFile, MAX_BYTES_TO_WRITE);
 
-        Thread.sleep(TWO_SECONDS);
+        Thread.sleep(ONE_SECOND_AS_LONG);
+
+        boolean success = false;
+        // loop to test the historical files eventually equal 1. Make sure loop only iterates
+        // for a maximum of 1 second.
+        for(int iteration = 0; iteration < 20; iteration++) {
+            final File[] historicalFiles = initialFile.getParentFile().listFiles(timestampFilenameFilter);
+            if (historicalFiles.length == maxNumberOfHistoricalFiles) {
+                success = true;
+                break;
+            }
+            // sleep 50 ms
+            Thread.sleep(50);
+        }
 
         // then
         assertThat(rotatableFile.getBytesWritten()).isEqualTo(0L);
         assertThat(initialFile.getParentFile()).isDirectory();
         final File[] historicalFiles = initialFile.getParentFile().listFiles(timestampFilenameFilter);
         cleanupFilesWhenDone(historicalFiles);
-        assertThat(historicalFiles).isNotEmpty().hasSize(1);
+        assertThat(success).isTrue().as("Check the max number of historical files was %d", maxNumberOfHistoricalFiles);
     }
 
     @Test
-    public void TestRetentionWithMaxNumberOfFiles() throws Exception {
+    public void testRetentionWithMaxNumberOfFiles() throws Exception {
         // given
         final File initialFile = getTempFile();
         final FileBasedEventHandlerConfiguration configuration =
@@ -159,7 +173,7 @@ public class RotatableWriterTest {
     }
 
     @Test
-    public void TestRetentionWithMaxSizeOfFile() throws Exception {
+    public void testRetentionWithMaxSizeOfFile() throws Exception {
         // given
         final File initialFile = getTempFile();
         final FileBasedEventHandlerConfiguration configuration =
