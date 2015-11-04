@@ -76,10 +76,8 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context, VerifyEmailAccountConfig config) {
         Reject.ifNull(config.getEmailServiceUrl(), "Email service url should be configured");
-        Reject.ifNull(config.getFrom(), "From Email should be configured");
         Reject.ifNull(config.getMessageTranslations(), "Email message should be configured");
         Reject.ifNull(config.getSubjectTranslations(), "Email subject should be configured");
-        Reject.ifNull(config.getMimeType(), "Mime type should be configured");
         Reject.ifNull(config.getVerificationLink(), "Verification link should be configured");
         Reject.ifNull(config.getVerificationLinkToken(), "Verification link token should be configured");
         Reject.ifNull(config.getIdentityEmailField(), "Identity email field should be configured");
