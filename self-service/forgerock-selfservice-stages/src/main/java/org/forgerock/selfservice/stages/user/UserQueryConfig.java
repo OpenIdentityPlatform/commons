@@ -35,7 +35,6 @@ public final class UserQueryConfig implements StageConfig<UserConfigVisitor> {
     private String identityServiceUrl;
     private String identityIdField;
     private String identityEmailField;
-    private String identityUsernameField;
 
     /**
      * Gets the set of query fields to be used when looking up the user.
@@ -122,28 +121,6 @@ public final class UserQueryConfig implements StageConfig<UserConfigVisitor> {
      */
     public UserQueryConfig setIdentityEmailField(String identityEmailField) {
         this.identityEmailField = identityEmailField;
-        return this;
-    }
-
-    /**
-     * Gets the field name for the identity username.
-     *
-     * @return the identity username field name
-     */
-    public String getIdentityUsernameField() {
-        return identityUsernameField;
-    }
-
-    /**
-     * Sets the field name for the identity username.
-     *
-     * @param identityUsernameField
-     *         the identity username field name
-     *
-     * @return this config instance
-     */
-    public UserQueryConfig setIdentityUsernameField(String identityUsernameField) {
-        this.identityUsernameField = identityUsernameField;
         return this;
     }
 

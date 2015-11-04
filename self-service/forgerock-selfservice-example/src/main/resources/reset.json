@@ -8,7 +8,6 @@
       ],
       "identityIdField" : "_id",
       "identityEmailField" : "mail",
-      "identityUsernameField" : "userName",
       "identityServiceUrl" : "/users"
     },
     {

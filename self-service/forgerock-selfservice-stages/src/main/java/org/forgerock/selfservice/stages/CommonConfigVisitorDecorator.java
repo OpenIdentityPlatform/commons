@@ -24,7 +24,6 @@ import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
 import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
-import org.forgerock.selfservice.stages.user.RetrieveUsernameConfig;
 import org.forgerock.selfservice.stages.user.UserDetailsConfig;
 import org.forgerock.selfservice.stages.user.UserQueryConfig;
 
@@ -89,11 +88,6 @@ public abstract class CommonConfigVisitorDecorator implements CommonConfigVisito
 
     @Override
     public ProgressStageBinder<?> build(DynamicStageConfig config) {
-        return decoratedVisitor.build(config);
-    }
-
-    @Override
-    public ProgressStageBinder<?> build(RetrieveUsernameConfig config) {
         return decoratedVisitor.build(config);
     }
 

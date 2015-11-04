@@ -95,7 +95,6 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "internal"),
                     CrestHttp.newHttpHandler(crestConnectionFactory));
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "reset"), registerResetHandler());
-            chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "username"), registerUsernameHandler());
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "registration"),
                     registerRegistrationHandler());
             return chfRouter;
@@ -112,18 +111,6 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     private Handler registerResetHandler() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/reset.json"), Map.class));
-        ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
-
-        RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,
-                new ExampleStageConfigVisitor(dynamicConfigVisitor, crestConnectionFactory, httpClient),
-                new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
-
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
-    }
-
-    private Handler registerUsernameHandler() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/username.json"), Map.class));
         ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
 
         RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,

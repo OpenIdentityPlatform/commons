@@ -17,7 +17,6 @@ package org.forgerock.selfservice.stages.user;
 
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
-import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -77,7 +76,6 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
                 "User query stage expects query fields");
         Reject.ifNull(config.getIdentityEmailField(), "User query stage expects identity email field");
         Reject.ifNull(config.getIdentityIdField(), "User query stage expects identity id field");
-        Reject.ifNull(config.getIdentityUsernameField(), "User query stage expects identity username field");
         Reject.ifNull(config.getIdentityServiceUrl(), "User query stage expects identity service url");
 
         return RequirementsBuilder.newInstance("Find your account")
@@ -97,7 +95,6 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
 
         putState(USER_ID_FIELD, context, config.getIdentityIdField(), user);
         putState(EMAIL_FIELD, context, config.getIdentityEmailField(), user);
-        putState(USERNAME_FIELD, context, config.getIdentityUsernameField(), user);
 
         return StageResponse.newBuilder().build();
     }

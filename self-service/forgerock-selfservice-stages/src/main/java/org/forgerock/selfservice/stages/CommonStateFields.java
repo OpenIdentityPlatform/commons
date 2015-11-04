@@ -42,9 +42,4 @@ public final class CommonStateFields {
      */
     public static final String USER_FIELD = "user";
 
-    /**
-     * The username field.
-     */
-    public static final String USERNAME_FIELD = "username";
-
 }
