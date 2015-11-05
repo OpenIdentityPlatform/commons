@@ -6,7 +6,7 @@
         "userName",
         "mail"
       ],
-      "identityIdField" : "_id",
+      "identityIdField" : "userName",
       "identityEmailField" : "mail",
       "identityServiceUrl" : "/users"
     },

@@ -46,4 +46,14 @@ public interface UserConfigVisitor extends StageConfigVisitor {
      */
     ProgressStageBinder<?> build(UserQueryConfig config);
 
+    /**
+     * Builds a username retrieve stage bound to the username retrieve config.
+     *
+     * @param config
+     *         username retrieve config
+     *
+     * @return username retrieve stage binding
+     */
+    ProgressStageBinder<?> build(RetrieveUsernameConfig config);
+
 }

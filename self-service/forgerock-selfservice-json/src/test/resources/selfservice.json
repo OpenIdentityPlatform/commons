@@ -20,9 +20,12 @@
     {
       "name" : "userQuery",
       "identityServiceUrl" : "/users",
-      "identityIdField" : "userId",
+      "identityIdField" : "userName",
       "identityEmailField" : "email",
       "validQueryFields" : ["username", "email"]
+    },
+    {
+      "name" : "retrieveUsername"
     },
     {
       "name" : "userDetails",
