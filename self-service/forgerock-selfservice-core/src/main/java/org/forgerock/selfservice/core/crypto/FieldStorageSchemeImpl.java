@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.selfservice.stages.crypto;
+package org.forgerock.selfservice.core.crypto;
 
 import java.security.MessageDigest;
 import java.security.SecureRandom;

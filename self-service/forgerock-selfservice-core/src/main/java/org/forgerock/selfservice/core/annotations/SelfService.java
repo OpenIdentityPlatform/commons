@@ -14,8 +14,25 @@
  * Copyright 2015 ForgeRock AS.
  */
 
+package org.forgerock.selfservice.core.annotations;
+
+
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.PARAMETER;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import javax.inject.Qualifier;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
 /**
- * This package contains crypto related implementations for self-service.
- * The files in this package are mostly copied from IDM and shall be replaced by a commons component in the future.
+ * Denotes self service dependencies.
+ *
+ * @since 0.3.0
  */
-package org.forgerock.selfservice.stages.crypto;
+@Qualifier
+@Target({ FIELD, PARAMETER, METHOD })
+@Retention(RUNTIME)
+public @interface SelfService {
+}

@@ -13,27 +13,30 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.selfservice.stages.crypto;
+package org.forgerock.selfservice.core.crypto;
 
 /**
- * Constants for use with the Cryptography Service.
+ * This interface defines a field storage scheme.
  *
  * @since 0.2.0
  */
-public final class CryptoConstants {
+public interface FieldStorageScheme {
 
     /**
-     * A salted hash encryption storage type.
+     * Returns a hashed, salted, and encoded version of the supplied plain text field.
+     *
+     * @param plaintext a plain text version of the field to encode.
+     * @return a hashed, salted, and encoded field.
      */
-    public static final String STORAGE_TYPE_HASH = "salted-hash";
+    public String hashField(String plaintext);
 
     /**
-     * The name of the message digest algorithm that should be used to generate 256-bit SHA-2 hashes.
+     * Returns true if the supplied plain text field matches the supplied stored field after being
+     * encoded and compared, false otherwise.
+     *
+     * @param plaintextfield the plain text field to compare.
+     * @param storedField    the encoded field to compare.
+     * @return true if the fields match, false otherwise.
      */
-    public static final String ALGORITHM_SHA_256 = "SHA-256";
-
-    private CryptoConstants() {
-        throw new UnsupportedOperationException();
-    }
-
+    public boolean fieldMatches(String plaintextfield, String storedField);
 }

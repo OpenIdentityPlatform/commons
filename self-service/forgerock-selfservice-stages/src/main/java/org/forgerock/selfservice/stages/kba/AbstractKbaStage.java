@@ -17,7 +17,7 @@ package org.forgerock.selfservice.stages.kba;
 
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.selfservice.core.ProgressStage;
-import org.forgerock.selfservice.stages.crypto.CryptoService;
+import org.forgerock.selfservice.core.crypto.CryptoService;
 
 /**
  * Base class for KBA stages.

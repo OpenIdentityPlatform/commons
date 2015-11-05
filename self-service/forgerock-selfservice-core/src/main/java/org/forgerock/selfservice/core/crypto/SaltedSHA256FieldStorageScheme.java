@@ -13,26 +13,27 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
+package org.forgerock.selfservice.core.crypto;
 
-package org.forgerock.selfservice.stages;
-
-
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.ElementType.PARAMETER;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-
-import javax.inject.Qualifier;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import static org.forgerock.selfservice.core.crypto.CryptoConstants.ALGORITHM_SHA_256;
 
 /**
- * Denotes self service dependencies.
+ * This class defines a field storage scheme based on the 256-bit SHA-2 algorithm defined in FIPS 180-2.
  *
- * @since 0.3.0
+ * @since 0.2.0
  */
-@Qualifier
-@Target({ FIELD, PARAMETER, METHOD })
-@Retention(RUNTIME)
-public @interface SelfService {
+class SaltedSHA256FieldStorageScheme extends FieldStorageSchemeImpl {
+
+    /**
+     * Size of the digest in bytes.
+     */
+    private static final int SHA256_LENGTH = 256 / 8;
+
+    /**
+     * Creates a new instance of this field storage scheme.
+     */
+    public SaltedSHA256FieldStorageScheme() throws Exception {
+        super(SHA256_LENGTH, ALGORITHM_SHA_256);
+    }
 }
+

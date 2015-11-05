@@ -13,27 +13,8 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.selfservice.stages.crypto;
-
-import static org.forgerock.selfservice.stages.crypto.CryptoConstants.ALGORITHM_SHA_256;
 
 /**
- * This class defines a field storage scheme based on the 256-bit SHA-2 algorithm defined in FIPS 180-2.
- *
- * @since 0.2.0
+ * This package contains annotations that allow product detection of Self-Service components.
  */
-class SaltedSHA256FieldStorageScheme extends FieldStorageSchemeImpl {
-
-    /**
-     * Size of the digest in bytes.
-     */
-    private static final int SHA256_LENGTH = 256 / 8;
-
-    /**
-     * Creates a new instance of this field storage scheme.
-     */
-    public SaltedSHA256FieldStorageScheme() throws Exception {
-        super(SHA256_LENGTH, ALGORITHM_SHA_256);
-    }
-}
-
+package org.forgerock.selfservice.core.annotations;

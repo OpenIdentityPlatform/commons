@@ -32,8 +32,8 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
-import org.forgerock.selfservice.stages.SelfService;
-import org.forgerock.selfservice.stages.crypto.JsonCryptoException;
+import org.forgerock.selfservice.core.crypto.JsonCryptoException;
+import org.forgerock.selfservice.core.annotations.SelfService;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
 

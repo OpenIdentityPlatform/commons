@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.stages.crypto;
+package org.forgerock.selfservice.core.crypto;
 
 import static org.forgerock.json.JsonValue.*;
 
@@ -26,6 +26,11 @@ import org.forgerock.json.JsonValue;
  * @since 0.2.0
  */
 public class CryptoService {
+    private static final String CRYPTO = "$crypto";
+    private static final String TYPE = "type";
+    private static final String VALUE = "value";
+    private static final String ALGORITHM = "algorithm";
+    private static final String DATA = "data";
 
     /**
      * Hashes a string value. Generates a new salt value.
@@ -42,11 +47,27 @@ public class CryptoService {
         final FieldStorageScheme fieldStorageScheme = getFieldStorageScheme(algorithm);
         final String encodedField = fieldStorageScheme.hashField(plainTextValue);
         return json(object(
-                field("$crypto", object(
-                        field("value", object(
-                                field("algorithm", algorithm),
-                                field("data", encodedField))),
-                        field("type", CryptoConstants.STORAGE_TYPE_HASH)))));
+                field(CRYPTO, object(
+                        field(VALUE, object(
+                                field(ALGORITHM, algorithm),
+                                field(DATA, encodedField))),
+                        field(TYPE, CryptoConstants.STORAGE_TYPE_HASH)))));
+    }
+
+    /**
+     * Detects if a String is hashed.
+     *
+     * @param value the JSON value to check.
+     * @return true if hashed, false otherwise.
+     */
+    public boolean isHashed(JsonValue value) {
+        return value != null
+                && value.isNotNull()
+                && value.isDefined(CRYPTO)
+                && value.get(CRYPTO).get(TYPE).isString()
+                && value.get(CRYPTO).isDefined(VALUE)
+                && value.get(CRYPTO).get(VALUE).isDefined(ALGORITHM)
+                && value.get(CRYPTO).get(VALUE).get(ALGORITHM).isString();
     }
 
     /**
@@ -63,10 +84,10 @@ public class CryptoService {
      *            if an exception occurred while matching
      */
     public boolean matches(String plainTextValue, JsonValue value) throws JsonCryptoException {
-        JsonValue cryptoValue = value.get("$crypto").get("value");
-        String algorithm = cryptoValue.get("algorithm").asString();
+        JsonValue cryptoValue = value.get(CRYPTO).get(VALUE);
+        String algorithm = cryptoValue.get(ALGORITHM).asString();
         final FieldStorageScheme fieldStorageScheme = getFieldStorageScheme(algorithm);
-        return fieldStorageScheme.fieldMatches(plainTextValue, cryptoValue.get("data").asString());
+        return fieldStorageScheme.fieldMatches(plainTextValue, cryptoValue.get(DATA).asString());
     }
 
     private FieldStorageScheme getFieldStorageScheme(String algorithm) throws JsonCryptoException {

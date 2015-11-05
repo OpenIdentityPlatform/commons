@@ -17,6 +17,7 @@
 package org.forgerock.selfservice.example;
 
 import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
+import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
@@ -33,11 +34,13 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.ProgressStage;
+import org.forgerock.selfservice.core.UserUpdateService;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.config.StageConfigException;
@@ -98,6 +101,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "username"), registerUsernameHandler());
             chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "registration"),
                     registerRegistrationHandler());
+            chfRouter.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "user"), registerUserKBAUpdateHandler());
             return chfRouter;
         } catch (Exception e) {
             throw new HttpApplicationException("Some error starting", e);
@@ -149,6 +153,11 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
+    }
+
+    private Handler registerUserKBAUpdateHandler() {
+        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(
+                new UserUpdateService(crestConnectionFactory, resourcePath("users"))));
     }
 
     @Override

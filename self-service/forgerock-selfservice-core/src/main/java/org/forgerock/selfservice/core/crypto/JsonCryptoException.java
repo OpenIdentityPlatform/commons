@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.selfservice.stages.crypto;
+package org.forgerock.selfservice.core.crypto;
 
 /**
  * An exception that is thrown during JSON cryptographic operations.
