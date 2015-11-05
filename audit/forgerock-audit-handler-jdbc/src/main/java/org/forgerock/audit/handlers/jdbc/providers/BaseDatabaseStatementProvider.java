@@ -25,11 +25,11 @@ import java.util.Map;
 
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.events.AuditEventHelper;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
 import org.forgerock.audit.handlers.jdbc.Parameter;
 import org.forgerock.audit.handlers.jdbc.Parameter.Type;
 import org.forgerock.audit.handlers.jdbc.TableMapping;
-import org.forgerock.audit.handlers.jdbc.utils.SQLStatementParser;
+import org.forgerock.audit.handlers.jdbc.utils.SqlStatementParser;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
@@ -49,7 +49,7 @@ public abstract class BaseDatabaseStatementProvider implements DatabaseStatement
      * {@inheritDoc}
      */
     @Override
-    public JDBCAuditEvent buildReadEvent(final TableMapping mapping, final String id,
+    public JdbcAuditEvent buildReadEvent(final TableMapping mapping, final String id,
             final JsonValue eventTopicMetaData) throws AuditException {
         final String idTableColumn = mapping.getFieldToColumn().get("_id");
 
@@ -57,8 +57,8 @@ public abstract class BaseDatabaseStatementProvider implements DatabaseStatement
         String selectStatement = String.format("SELECT * FROM %s WHERE %s = ?", mapping.getTable(), idTableColumn);
 
         logger.info("Built select statement: {}", selectStatement);
-        final JDBCAuditEvent jdbcAuditEvent =
-                new JDBCAuditEvent(
+        final JdbcAuditEvent jdbcAuditEvent =
+                new JdbcAuditEvent(
                         selectStatement,
                         Collections.singletonList(
                                 new Parameter(
@@ -71,7 +71,7 @@ public abstract class BaseDatabaseStatementProvider implements DatabaseStatement
      * {@inheritDoc}
      */
     @Override
-    public JDBCAuditEvent buildCreateEvent(final JsonValue content, final TableMapping tableMapping,
+    public JdbcAuditEvent buildCreateEvent(final JsonValue content, final TableMapping tableMapping,
             final JsonValue eventTopicMetaData) throws AuditException {
         final Map<String, String> fieldToColumn = tableMapping.getFieldToColumn();
 
@@ -81,7 +81,7 @@ public abstract class BaseDatabaseStatementProvider implements DatabaseStatement
                 tableMapping.getTable(), columns, replacementTokens);
         logger.info("Built insert sql: {}", insertStatement);
 
-        final SQLStatementParser sqlStatementParser = new SQLStatementParser(insertStatement);
+        final SqlStatementParser sqlStatementParser = new SqlStatementParser(insertStatement);
         final List<Parameter> params = new LinkedList<>();
         for (String field : sqlStatementParser.getNamedParameters()) {
             final JsonPointer fieldPointer = new JsonPointer(field);
@@ -91,14 +91,14 @@ public abstract class BaseDatabaseStatementProvider implements DatabaseStatement
                             content.get(fieldPointer) == null ? null : content.get(fieldPointer).getObject());
             params.add(parameter);
         }
-        return new JDBCAuditEvent(sqlStatementParser.getSqlStatement(), params);
+        return new JdbcAuditEvent(sqlStatementParser.getSqlStatement(), params);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public abstract JDBCAuditEvent buildQueryEvent(final TableMapping mapping, final QueryRequest queryRequest,
+    public abstract JdbcAuditEvent buildQueryEvent(final TableMapping mapping, final QueryRequest queryRequest,
             final JsonValue eventTopicMetaData) throws AuditException;
 
     /**

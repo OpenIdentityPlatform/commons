@@ -34,14 +34,14 @@ import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.ConnectionPool;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandlerConfiguration.ConnectionPool;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.handlers.jdbc.providers.DatabaseStatementProvider;
 import org.forgerock.audit.handlers.jdbc.providers.GenericDatabaseStatementProvider;
 import org.forgerock.audit.handlers.jdbc.providers.OracleDatabaseStatementProvider;
-import org.forgerock.audit.handlers.jdbc.publishers.BufferedJDBCAuditEventExecutor;
-import org.forgerock.audit.handlers.jdbc.publishers.JDBCAuditEventExecutor;
-import org.forgerock.audit.handlers.jdbc.publishers.JDBCAuditEventExecutorImpl;
+import org.forgerock.audit.handlers.jdbc.publishers.BufferedJdbcAuditEventExecutor;
+import org.forgerock.audit.handlers.jdbc.publishers.JdbcAuditEventExecutor;
+import org.forgerock.audit.handlers.jdbc.publishers.JdbcAuditEventExecutorImpl;
 import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -62,21 +62,21 @@ import org.slf4j.LoggerFactory;
 /**
  * Implements a {@link AuditEventHandler} to write {@link AuditEvent}s to a JDBC repository.
  **/
-public class JDBCAuditEventHandler extends AuditEventHandlerBase {
+public class JdbcAuditEventHandler extends AuditEventHandlerBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(JDBCAuditEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(JdbcAuditEventHandler.class);
     public static final String MYSQL = "mysql";
     public static final String H2 = "h2";
     public static final String ORACLE = "oracle";
 
-    private final JDBCAuditEventHandlerConfiguration configuration;
+    private final JdbcAuditEventHandlerConfiguration configuration;
     private final DataSource dataSource;
     private final DatabaseStatementProvider databaseStatementProvider;
     private final boolean sharedDataSource;
-    private final JDBCAuditEventExecutor jdbcAuditEventExecutor;
+    private final JdbcAuditEventExecutor jdbcAuditEventExecutor;
 
     /**
-     * Create a new JDBCAuditEventHandler instance.
+     * Create a new JdbcAuditEventHandler instance.
      *
      * @param configuration
      *          Configuration parameters that can be adjusted by system administrators.
@@ -86,8 +86,8 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
      *          Connection pool. If this parameter is null, then a Hikari data source will be created.
      */
     @Inject
-    public JDBCAuditEventHandler(
-            final JDBCAuditEventHandlerConfiguration configuration,
+    public JdbcAuditEventHandler(
+            final JdbcAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData,
             @Audit final DataSource dataSource) {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
@@ -101,10 +101,10 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
             this.dataSource = new HikariDataSource(createHikariConfig(configuration.getConnectionPool()));
         }
         this.databaseStatementProvider = getDatabaseStatementProvider(configuration.getDatabaseType());
-        final JDBCAuditEventExecutor jdbcAuditEventExecutor = new JDBCAuditEventExecutorImpl(this.dataSource);
+        final JdbcAuditEventExecutor jdbcAuditEventExecutor = new JdbcAuditEventExecutorImpl(this.dataSource);
         final EventBufferingConfiguration bufferConfig = configuration.getBuffering();
         if (bufferConfig.isEnabled()) {
-            this.jdbcAuditEventExecutor = new BufferedJDBCAuditEventExecutor(
+            this.jdbcAuditEventExecutor = new BufferedJdbcAuditEventExecutor(
                     bufferConfig.getMaxSize(),
                     bufferConfig.isAutoFlush(),
                     jdbcAuditEventExecutor,
@@ -143,7 +143,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
     public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String topic, JsonValue event) {
         try {
             final TableMapping mapping = getTableMapping(topic);
-            final JDBCAuditEvent jdbcAuditEvent = databaseStatementProvider.buildCreateEvent(
+            final JdbcAuditEvent jdbcAuditEvent = databaseStatementProvider.buildCreateEvent(
                     event, mapping, eventTopicsMetaData.getSchema(topic));
             jdbcAuditEventExecutor.createAuditEvent(jdbcAuditEvent);
         } catch (AuditException e) {

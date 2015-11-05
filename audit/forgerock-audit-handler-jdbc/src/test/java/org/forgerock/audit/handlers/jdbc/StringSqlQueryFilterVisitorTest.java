@@ -18,8 +18,8 @@ package org.forgerock.audit.handlers.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.util.query.QueryFilter.*;
 
-import org.forgerock.audit.handlers.jdbc.query.StringSQLQueryFilterVisitor;
-import org.forgerock.audit.handlers.jdbc.query.StringSQLRenderer;
+import org.forgerock.audit.handlers.jdbc.query.StringSqlQueryFilterVisitor;
+import org.forgerock.audit.handlers.jdbc.query.StringSqlRenderer;
 import org.forgerock.util.query.QueryFilter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -30,14 +30,14 @@ import org.forgerock.json.JsonPointer;
 /**
  * Tests basic QueryFilter-to-SQL-Where-Clause creation using a basic SQL syntax.
  */
-public class StringSQLQueryFilterVisitorTest {
+public class StringSqlQueryFilterVisitorTest {
 
     /* a visitor to generate base value assertions */
-    private StringSQLQueryFilterVisitor visitor = new StringSQLQueryFilterVisitor() {
+    private StringSqlQueryFilterVisitor visitor = new StringSqlQueryFilterVisitor() {
         @Override
-        public StringSQLRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand, JsonPointer field, Object valueAssertion) {
+        public StringSqlRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand, JsonPointer field, Object valueAssertion) {
             String quote = valueAssertion instanceof String ? "'" : "";
-            return new StringSQLRenderer(field.leaf())
+            return new StringSqlRenderer(field.leaf())
                     .append(" ")
                     .append(operand)
                     .append(" ")
@@ -47,8 +47,8 @@ public class StringSQLQueryFilterVisitorTest {
         }
 
         @Override
-        public StringSQLRenderer visitPresentFilter(TableMappingParametersPair parameters, JsonPointer field) {
-            return new StringSQLRenderer(field.leaf()).append(" IS NOT NULL");
+        public StringSqlRenderer visitPresentFilter(TableMappingParametersPair parameters, JsonPointer field) {
+            return new StringSqlRenderer(field.leaf()).append(" IS NOT NULL");
         }
     };
 
@@ -93,7 +93,7 @@ public class StringSQLQueryFilterVisitorTest {
 
     @Test(dataProvider = "sqlData")
     public void testToString(QueryFilter<JsonPointer> filter, String whereClause) {
-        assertThat(filter.accept(visitor, null).toSQL()).isEqualTo(whereClause);
+        assertThat(filter.accept(visitor, null).toSql()).isEqualTo(whereClause);
     }
 
     private static JsonPointer ptr(String jsonPointer){

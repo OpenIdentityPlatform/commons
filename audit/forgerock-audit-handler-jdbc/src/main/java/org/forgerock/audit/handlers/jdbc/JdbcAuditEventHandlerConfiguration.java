@@ -28,7 +28,7 @@ import org.forgerock.util.Reject;
 /**
  * Configures the JDBC mapping and connection pool.
  */
-public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguration {
+public class JdbcAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonPropertyDescription("audit.handlers.jdbc.connectionPool")
     private ConnectionPool connectionPool = new ConnectionPool();

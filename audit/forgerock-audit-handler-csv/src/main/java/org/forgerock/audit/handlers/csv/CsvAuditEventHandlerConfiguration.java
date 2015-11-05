@@ -50,7 +50,7 @@ import org.forgerock.util.time.Duration;
  *  }
  * </pre>
  */
-public class CSVAuditEventHandlerConfiguration extends FileBasedEventHandlerConfiguration {
+public class CsvAuditEventHandlerConfiguration extends FileBasedEventHandlerConfiguration {
 
     @JsonProperty(required=true)
     @JsonPropertyDescription("audit.handlers.csv.logDirectory")

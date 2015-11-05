@@ -22,7 +22,7 @@ import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 
 /**
- * An abstract {@link QueryFilterVisitor} to produce SQL via an {@link SQLRenderer}.
+ * An abstract {@link QueryFilterVisitor} to produce SQL via an {@link SqlRenderer}.
  * Includes implementation patterns for the standard
  *
  * <ul>
@@ -54,7 +54,7 @@ import org.forgerock.util.query.QueryFilterVisitor;
  *     <li>@{link #visitOrFilter(Object, List&lt;QueryFilter&gt;, Object)} to dictate how the composite
  *     function OR behaves</li>
  */
-public abstract class AbstractSQLQueryFilterVisitor<R extends SQLRenderer<?>, P> implements QueryFilterVisitor<R, P, JsonPointer> {
+public abstract class AbstractSqlQueryFilterVisitor<R extends SqlRenderer<?>, P> implements QueryFilterVisitor<R, P, JsonPointer> {
 
     /**
      * A templating method that will generate the actual value assertion.

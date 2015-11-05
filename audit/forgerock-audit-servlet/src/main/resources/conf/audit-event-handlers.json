@@ -1,7 +1,7 @@
 {
   "eventHandlers" : [
     {
-      "class" : "org.forgerock.audit.handlers.csv.CSVAuditEventHandler",
+      "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
       "config" : {
         "name" : "csv",
         "topics": [ "access", "activity", "config", "authentication" ],
@@ -57,7 +57,7 @@
       }
     },
     {
-      "class" : "org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandler",
+      "class" : "org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandler",
       "config" : {
         "name" : "jdbc",
         "topics": [ "access", "activity", "config", "authentication" ],

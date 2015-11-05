@@ -28,8 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
-import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.retention.TimestampFilenameFilter;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
@@ -59,7 +59,7 @@ public class CsvWriterTest {
         csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
         csvSecurity.setEnabled(true);
         csvSecurity.setSignatureInterval("3 seconds");
-        CSVAuditEventHandlerConfiguration configuration = new CSVAuditEventHandlerConfiguration();
+        CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
         try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
@@ -93,7 +93,7 @@ public class CsvWriterTest {
         csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
         csvSecurity.setEnabled(true);
         csvSecurity.setSignatureInterval("3 seconds");
-        CSVAuditEventHandlerConfiguration configuration = new CSVAuditEventHandlerConfiguration();
+        CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
         try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
@@ -141,7 +141,7 @@ public class CsvWriterTest {
         bufferConfig.setEnabled(false);
         CsvSecurity csvSecurity = new CsvSecurity();
         csvSecurity.setEnabled(false);
-        CSVAuditEventHandlerConfiguration configuration = new CSVAuditEventHandlerConfiguration();
+        CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
 
@@ -170,8 +170,8 @@ public class CsvWriterTest {
         csvSecurity.setPassword(CsvSecureMapWriterTest.KEYSTORE_PASSWORD);
         csvSecurity.setEnabled(true);
         csvSecurity.setSignatureInterval("3 seconds");
-        CSVAuditEventHandlerConfiguration configuration =
-                createCSVAuditEventHandlerConfigurationWithRotation(bufferConfig, 1000L);
+        CsvAuditEventHandlerConfiguration configuration =
+                createCsvAuditEventHandlerConfigurationWithRotation(bufferConfig, 1000L);
         configuration.setSecurity(csvSecurity);
         try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, configuration)) {
             writeNRows(header, writer, 12);
@@ -208,9 +208,9 @@ public class CsvWriterTest {
         return values;
     }
 
-    private CSVAuditEventHandlerConfiguration createCSVAuditEventHandlerConfigurationWithRotation(
+    private CsvAuditEventHandlerConfiguration createCsvAuditEventHandlerConfigurationWithRotation(
             final EventBufferingConfiguration eventBufferingConfiguration, long maxFileSize) {
-        CSVAuditEventHandlerConfiguration configuration = new CSVAuditEventHandlerConfiguration();
+        CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationFileSuffix(TIME_STAMP_FORMAT);
         configuration.getFileRotation().setRotationFilePrefix(PREFIX);

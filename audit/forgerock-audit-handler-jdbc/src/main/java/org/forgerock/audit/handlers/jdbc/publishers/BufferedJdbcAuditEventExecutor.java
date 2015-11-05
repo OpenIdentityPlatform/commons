@@ -36,7 +36,7 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
 import org.forgerock.audit.handlers.jdbc.Parameter;
 import org.forgerock.audit.handlers.jdbc.utils.CleanupHelper;
 import org.forgerock.util.Reject;
@@ -45,17 +45,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Buffers the create events to a {@link JDBCAuditEventExecutor}.
+ * Buffers the create events to a {@link JdbcAuditEventExecutor}.
  */
-public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
-    private static final Logger logger = LoggerFactory.getLogger(BufferedJDBCAuditEventExecutor.class);
+public class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
+    private static final Logger logger = LoggerFactory.getLogger(BufferedJdbcAuditEventExecutor.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    /** The wrapped {@link JDBCAuditEventExecutor}. */
-    private final JDBCAuditEventExecutor delegate;
+    /** The wrapped {@link JdbcAuditEventExecutor}. */
+    private final JdbcAuditEventExecutor delegate;
 
     /** Queue to store unpublished events. */
-    private final LinkedBlockingQueue<JDBCAuditEvent> queue;
+    private final LinkedBlockingQueue<JdbcAuditEvent> queue;
 
     private volatile boolean stopRequested;
     private final ScheduledExecutorService queueWatcher;
@@ -65,16 +65,16 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
     private final DataSource dataSource;
 
     /**
-     * Created a BufferedJDBCAuditEventExecutor with a given queue capacity, and the {@link JDBCAuditEventExecutor}
+     * Created a BufferedJdbcAuditEventExecutor with a given queue capacity, and the {@link JdbcAuditEventExecutor}
      * to use.
      * @param capacity The capacity of the buffered queue.
      * @param autoFlush Whether the queue needs to be auto flushed or not.
-     * @param delegate The {@link JDBCAuditEventExecutor} to delegate the operations too.
+     * @param delegate The {@link JdbcAuditEventExecutor} to delegate the operations too.
      * @param writeInterval The interval to trigger write events.
      * @param threads The number of writer threads.
      */
-    public BufferedJDBCAuditEventExecutor(int capacity, boolean autoFlush, JDBCAuditEventExecutor delegate,
-            Duration writeInterval, int threads, int maxBatchedEvents, final DataSource dataSource) {
+    public BufferedJdbcAuditEventExecutor(int capacity, boolean autoFlush, JdbcAuditEventExecutor delegate,
+                                          Duration writeInterval, int threads, int maxBatchedEvents, final DataSource dataSource) {
         Reject.ifNull(delegate);
         this.autoFlush = autoFlush;
         this.delegate = delegate;
@@ -93,7 +93,7 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
     public void flush() {
         try {
             while (!queue.isEmpty()) {
-                Collection<JDBCAuditEvent> events = new ArrayList<>(maxBatchedEvents);
+                Collection<JdbcAuditEvent> events = new ArrayList<>(maxBatchedEvents);
                 queue.drainTo(events, maxBatchedEvents);
                 try {
                     workerPool.submit(new DatabaseWriterTask(events, dataSource));
@@ -123,7 +123,7 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
     }
 
     @Override
-    public void createAuditEvent(JDBCAuditEvent event) throws AuditException {
+    public void createAuditEvent(JdbcAuditEvent event) throws AuditException {
         while (!stopRequested) {
             // Put request on queue for writer
             if (queue.offer(event)) {
@@ -133,12 +133,12 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
     }
 
     @Override
-    public List<Map<String, Object>> readAuditEvent(JDBCAuditEvent event) throws AuditException {
+    public List<Map<String, Object>> readAuditEvent(JdbcAuditEvent event) throws AuditException {
         return delegate.readAuditEvent(event);
     }
 
     @Override
-    public List<Map<String, Object>> queryAuditEvent(JDBCAuditEvent event) throws AuditException {
+    public List<Map<String, Object>> queryAuditEvent(JdbcAuditEvent event) throws AuditException {
         return delegate.queryAuditEvent(event);
     }
 
@@ -153,7 +153,7 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
         @Override
         public void run() {
             while (!stopRequested && !queue.isEmpty()) {
-                Collection<JDBCAuditEvent> events = new ArrayList<>(maxBatchedEvents);
+                Collection<JdbcAuditEvent> events = new ArrayList<>(maxBatchedEvents);
                 queue.drainTo(events, maxBatchedEvents);
 
                 // Handle the case where the task cannot be submitted.
@@ -169,10 +169,10 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
 
     private class DatabaseWriterTask implements Runnable {
 
-        final private Collection<JDBCAuditEvent> events;
+        final private Collection<JdbcAuditEvent> events;
         final private DataSource dataSource;
 
-        public DatabaseWriterTask(final Collection<JDBCAuditEvent> events, final DataSource dataSource) {
+        public DatabaseWriterTask(final Collection<JdbcAuditEvent> events, final DataSource dataSource) {
             this.events = checkNotNull(events);
             this.dataSource = dataSource;
         }
@@ -190,7 +190,7 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
 
                 // Use a PreparedStatement batch to insert the events into the DB
                 try  (final PreparedStatement preparedStatement = connection.prepareStatement(events.iterator().next().getSql())) {
-                    for (JDBCAuditEvent event : events) {
+                    for (JdbcAuditEvent event : events) {
                         preparedStatement.clearParameters();
                         try {
                             initializePreparedStatement(preparedStatement, event.getParams());

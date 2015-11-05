@@ -1,5 +1,5 @@
 {
-  "class" : "org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandler",
+  "class" : "org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandler",
   "config" : {
     "name" : "jdbc",
     "topics": [ "test" ],

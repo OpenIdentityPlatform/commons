@@ -25,12 +25,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Map;
 
-import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
 import org.forgerock.audit.events.handlers.writers.RotatableWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriterAdapter;
-import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapReader;
@@ -52,7 +52,7 @@ public class CsvWriter implements AutoCloseable {
     private ICsvMapWriter csvWriter;
     private RotatableWriter rotatableWriter;
 
-    CsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, CSVAuditEventHandlerConfiguration config)
+    CsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, CsvAuditEventHandlerConfiguration config)
             throws IOException {
         boolean fileAlreadyInitialized = csvFile.exists();
         final CsvSecurity securityConfiguration = config.getSecurity();
@@ -117,7 +117,7 @@ public class CsvWriter implements AutoCloseable {
         }
     }
 
-    private Writer constructWriter(File csvFile, boolean append, CSVAuditEventHandlerConfiguration config)
+    private Writer constructWriter(File csvFile, boolean append, CsvAuditEventHandlerConfiguration config)
                     throws IOException {
         TextWriter textWriter;
         if (config.getFileRotation().isRotationEnabled()) {

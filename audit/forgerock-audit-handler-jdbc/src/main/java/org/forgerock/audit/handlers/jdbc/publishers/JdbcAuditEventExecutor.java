@@ -19,38 +19,38 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
 
 /**
  * Interface that defines the  methods needed to interact with a JDBC database.
  */
-public interface JDBCAuditEventExecutor {
+public interface JdbcAuditEventExecutor {
 
     /**
-     * Creates a {@link JDBCAuditEvent}
-     * @param event The {@link JDBCAuditEvent} to create.
-     * @throws AuditException If unable to create the {@link JDBCAuditEvent}.
+     * Creates a {@link JdbcAuditEvent}
+     * @param event The {@link JdbcAuditEvent} to create.
+     * @throws AuditException If unable to create the {@link JdbcAuditEvent}.
      */
-    void createAuditEvent(final JDBCAuditEvent event) throws AuditException;
+    void createAuditEvent(final JdbcAuditEvent event) throws AuditException;
 
     /**
-     * Reads a {@link JDBCAuditEvent}
-     * @param event The {@link JDBCAuditEvent} to read.
-     * @return The read {@link JDBCAuditEvent} data.
-     * @throws AuditException If unable to read the {@link JDBCAuditEvent}.
+     * Reads a {@link JdbcAuditEvent}
+     * @param event The {@link JdbcAuditEvent} to read.
+     * @return The read {@link JdbcAuditEvent} data.
+     * @throws AuditException If unable to read the {@link JdbcAuditEvent}.
      */
-    List<Map<String,Object>> readAuditEvent(final JDBCAuditEvent event) throws AuditException;
+    List<Map<String,Object>> readAuditEvent(final JdbcAuditEvent event) throws AuditException;
 
     /**
-     * Queries a {@link JDBCAuditEvent}
-     * @param event The {@link JDBCAuditEvent} to query.
-     * @return The read {@link JDBCAuditEvent} data.
-     * @throws AuditException If unable to query the {@link JDBCAuditEvent}.
+     * Queries a {@link JdbcAuditEvent}
+     * @param event The {@link JdbcAuditEvent} to query.
+     * @return The read {@link JdbcAuditEvent} data.
+     * @throws AuditException If unable to query the {@link JdbcAuditEvent}.
      */
-    List<Map<String,Object>> queryAuditEvent(final JDBCAuditEvent event) throws AuditException;
+    List<Map<String,Object>> queryAuditEvent(final JdbcAuditEvent event) throws AuditException;
 
     /**
-     * Closes JDBCAuditEventExecutor and performs cleanup.
+     * Closes JdbcAuditEventExecutor and performs cleanup.
      */
     void close();
 

@@ -75,12 +75,12 @@ import org.supercsv.util.CsvContext;
 /**
  * Handles AuditEvents by writing them to a CSV file.
  */
-public class CSVAuditEventHandler extends AuditEventHandlerBase {
+public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(CSVAuditEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(CsvAuditEventHandler.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private final CSVAuditEventHandlerConfiguration configuration;
+    private final CsvAuditEventHandlerConfiguration configuration;
     private final CsvPreference csvPreference;
     private final Map<String, CsvWriter> writers = new HashMap<>();
     private final Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
@@ -90,7 +90,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
     private final Map<String, String> fieldDotNotationByField = new HashMap<>();
 
     /**
-     * Create a new CSVAuditEventHandler instance.
+     * Create a new CsvAuditEventHandler instance.
      *
      * @param configuration
      *          Configuration parameters that can be adjusted by system administrators.
@@ -98,8 +98,8 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
      *          Meta-data for all audit event topics.
      */
     @Inject
-    public CSVAuditEventHandler(
-            final CSVAuditEventHandlerConfiguration configuration,
+    public CsvAuditEventHandler(
+            final CsvAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData) {
 
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
@@ -121,7 +121,7 @@ public class CSVAuditEventHandler extends AuditEventHandlerBase {
         }
     }
 
-    private CsvPreference createCsvPreference(final CSVAuditEventHandlerConfiguration config) {
+    private CsvPreference createCsvPreference(final CsvAuditEventHandlerConfiguration config) {
         return new CsvPreference.Builder(
                 config.getFormatting().getQuoteChar(),
                 config.getFormatting().getDelimiterChar(),

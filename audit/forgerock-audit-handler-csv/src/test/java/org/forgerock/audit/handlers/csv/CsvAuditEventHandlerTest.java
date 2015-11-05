@@ -39,8 +39,8 @@ import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.CsvSecurity;
-import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration.EventBufferingConfiguration;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
@@ -61,7 +61,7 @@ import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
-public class CSVAuditEventHandlerTest {
+public class CsvAuditEventHandlerTest {
 
     /**
      * Integration test.
@@ -89,9 +89,9 @@ public class CSVAuditEventHandlerTest {
     @Test
     public void testCreatingAuditLogEntryWithBuffering() throws Exception {
         //given
-        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = new CSVAuditEventHandler(
+        final CsvAuditEventHandler csvHandler = new CsvAuditEventHandler(
                 getConfigWithBuffering(logDirectory), getEventTopicsMetaData());
         csvHandler.startup();
         final Context context = new RootContext();
@@ -119,9 +119,9 @@ public class CSVAuditEventHandlerTest {
     @Test
     public void testCreatingAuditLogEntry() throws Exception {
         //given
-        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final CsvAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
         final Context context = new RootContext();
 
         final CreateRequest createRequest = makeCreateRequest();
@@ -145,9 +145,9 @@ public class CSVAuditEventHandlerTest {
     @Test
     public void testReadingAuditLogEntry() throws Exception {
         //given
-        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final CsvAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
         final Context context = new RootContext();
 
         final ResourceResponse event = createAccessEvent(csvHandler);
@@ -190,9 +190,9 @@ public class CSVAuditEventHandlerTest {
     @Test
     public void testQueryOnAuditLogEntry() throws Exception{
         //given
-        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final CsvAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
         final Context context = new RootContext();
 
         final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
@@ -255,9 +255,9 @@ public class CSVAuditEventHandlerTest {
 
     @Test
     public void testCreateCsvLogEntryWritesToFile() throws Exception {
-        final Path logDirectory = Files.createTempDirectory("CSVAuditEventHandlerTest");
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CSVAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final CsvAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
         final Context context = new RootContext();
 
         final JsonValue content = json(
@@ -274,23 +274,23 @@ public class CSVAuditEventHandlerTest {
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }
 
-    private CSVAuditEventHandler createAndConfigureHandler(Path tempDirectory, boolean enableSecurity)
+    private CsvAuditEventHandler createAndConfigureHandler(Path tempDirectory, boolean enableSecurity)
             throws Exception {
         EventTopicsMetaData eventTopicsMetaData = getEventTopicsMetaData();
-        CSVAuditEventHandlerConfiguration config = new CSVAuditEventHandlerConfiguration();
+        CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
         config.setName("csv");
         config.setTopics(eventTopicsMetaData.getTopics());
         config.setLogDirectory(tempDirectory.toString());
         if (enableSecurity) {
             config.setSecurity(getCsvSecurityConfig());
         }
-        CSVAuditEventHandler handler = new CSVAuditEventHandler(config, eventTopicsMetaData);
+        CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData);
         handler.startup();
         return spy(handler);
     }
 
     private CsvSecurity getCsvSecurityConfig() throws Exception {
-        CSVAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CSVAuditEventHandlerConfiguration.CsvSecurity();
+        CsvAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CsvAuditEventHandlerConfiguration.CsvSecurity();
         csvSecurity.setEnabled(true);
         final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath();
         csvSecurity.setFilename(keystorePath);
@@ -304,10 +304,10 @@ public class CSVAuditEventHandlerTest {
     }
 
     /** Returns a configuration with buffering enabled. */
-    private CSVAuditEventHandlerConfiguration getConfigWithBuffering(Path tempDir) {
+    private CsvAuditEventHandlerConfiguration getConfigWithBuffering(Path tempDir) {
         EventBufferingConfiguration config = new EventBufferingConfiguration();
         config.setEnabled(true);
-        CSVAuditEventHandlerConfiguration handlerConfig = new CSVAuditEventHandlerConfiguration();
+        CsvAuditEventHandlerConfiguration handlerConfig = new CsvAuditEventHandlerConfiguration();
         handlerConfig.setName("csv");
         handlerConfig.setTopics(Collections.singleton("access"));
         handlerConfig.setLogDirectory(tempDir.toString());

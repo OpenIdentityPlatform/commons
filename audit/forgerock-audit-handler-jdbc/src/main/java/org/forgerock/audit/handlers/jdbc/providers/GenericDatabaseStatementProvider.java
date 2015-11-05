@@ -23,10 +23,10 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
 import org.forgerock.audit.handlers.jdbc.Parameter;
-import org.forgerock.audit.handlers.jdbc.utils.SQLStatementParser;
-import org.forgerock.audit.handlers.jdbc.query.StringSQLQueryFilterVisitor;
+import org.forgerock.audit.handlers.jdbc.utils.SqlStatementParser;
+import org.forgerock.audit.handlers.jdbc.query.StringSqlQueryFilterVisitor;
 import org.forgerock.audit.handlers.jdbc.TableMapping;
 import org.forgerock.audit.handlers.jdbc.TableMappingParametersPair;
 import org.forgerock.json.JsonPointer;
@@ -43,20 +43,20 @@ public class GenericDatabaseStatementProvider extends BaseDatabaseStatementProvi
 
     private static final Logger logger = LoggerFactory.getLogger(GenericDatabaseStatementProvider.class);
 
-    private final StringSQLQueryFilterVisitor queryFilterVisitor = new StringSQLQueryFilterVisitor();
+    private final StringSqlQueryFilterVisitor queryFilterVisitor = new StringSqlQueryFilterVisitor();
 
     /**
      * Builds a query event for databases supporting limit and offset.
      * {@inheritDoc}
      */
     @Override
-    public JDBCAuditEvent buildQueryEvent(final TableMapping mapping, final QueryRequest queryRequest,
+    public JdbcAuditEvent buildQueryEvent(final TableMapping mapping, final QueryRequest queryRequest,
             final JsonValue eventTopicMetaData) throws AuditException {
         final TableMappingParametersPair tableMappingParametersPair = new TableMappingParametersPair(mapping);
         final String querySelectStatement = buildQuerySql(queryRequest, tableMappingParametersPair);
         logger.info("Built query select statement: {}", querySelectStatement);
 
-        final SQLStatementParser sqlStatementParser = new SQLStatementParser(querySelectStatement);
+        final SqlStatementParser sqlStatementParser = new SqlStatementParser(querySelectStatement);
         final List<Parameter> params = new LinkedList<>();
         for (String field : sqlStatementParser.getNamedParameters()) {
             final JsonPointer fieldPointer = new JsonPointer(field);
@@ -65,7 +65,7 @@ public class GenericDatabaseStatementProvider extends BaseDatabaseStatementProvi
                             getParameterType(eventTopicMetaData, fieldPointer),
                             tableMappingParametersPair.getParameters().get(field)));
         }
-        return new JDBCAuditEvent(sqlStatementParser.getSqlStatement(), params);
+        return new JdbcAuditEvent(sqlStatementParser.getSqlStatement(), params);
     }
 
     private String buildQuerySql(final QueryRequest queryRequest,
@@ -93,7 +93,7 @@ public class GenericDatabaseStatementProvider extends BaseDatabaseStatementProvi
 
         return String.format("SELECT * FROM %s WHERE %s %s",
                 tableMapping.getTable(),
-                queryRequest.getQueryFilter().accept(queryFilterVisitor, tableMappingParametersPair).toSQL(),
+                queryRequest.getQueryFilter().accept(queryFilterVisitor, tableMappingParametersPair).toSql(),
                 pageClause);
     }
 }

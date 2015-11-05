@@ -21,8 +21,8 @@ import static org.assertj.core.api.Assertions.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
-import org.forgerock.audit.handlers.csv.CSVAuditEventHandlerConfiguration;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandlerConfiguration;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeMethod;
@@ -59,13 +59,13 @@ public class TranslationPropertiesTest {
     @Test
     public void translationsExistForAllCsvAuditEventHandlerConfigurationProperties() throws Exception {
         assertThat(translationKeys).containsAll(
-                propertyTranslationKeysOf(jsonSchemaForPojo(CSVAuditEventHandlerConfiguration.class)));
+                propertyTranslationKeysOf(jsonSchemaForPojo(CsvAuditEventHandlerConfiguration.class)));
     }
 
     @Test
-    public void translationsExistForAllJDBCAuditEventHandlerConfigurationProperties() throws Exception {
+    public void translationsExistForAllJdbcAuditEventHandlerConfigurationProperties() throws Exception {
         assertThat(translationKeys).containsAll(
-                propertyTranslationKeysOf(jsonSchemaForPojo(JDBCAuditEventHandlerConfiguration.class)));
+                propertyTranslationKeysOf(jsonSchemaForPojo(JdbcAuditEventHandlerConfiguration.class)));
     }
 
     @Test

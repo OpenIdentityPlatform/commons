@@ -22,12 +22,12 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
 import org.forgerock.audit.handlers.jdbc.Parameter;
 import org.forgerock.audit.handlers.jdbc.TableMapping;
 import org.forgerock.audit.handlers.jdbc.TableMappingParametersPair;
-import org.forgerock.audit.handlers.jdbc.query.StringSQLQueryFilterVisitor;
-import org.forgerock.audit.handlers.jdbc.utils.SQLStatementParser;
+import org.forgerock.audit.handlers.jdbc.query.StringSqlQueryFilterVisitor;
+import org.forgerock.audit.handlers.jdbc.utils.SqlStatementParser;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
@@ -41,22 +41,22 @@ import org.slf4j.LoggerFactory;
 public class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvider {
     private static final Logger logger = LoggerFactory.getLogger(OracleDatabaseStatementProvider.class);
 
-    private final StringSQLQueryFilterVisitor queryFilterVisitor = new StringSQLQueryFilterVisitor();
+    private final StringSqlQueryFilterVisitor queryFilterVisitor = new StringSqlQueryFilterVisitor();
 
     /**
-     * Builds a {@link JDBCAuditEvent} that will query an oracle database.
+     * Builds a {@link JdbcAuditEvent} that will query an oracle database.
      * {@inheritDoc}
      */
     @Override
-    public JDBCAuditEvent buildQueryEvent(final TableMapping mapping, final QueryRequest queryRequest,
+    public JdbcAuditEvent buildQueryEvent(final TableMapping mapping, final QueryRequest queryRequest,
             final JsonValue eventTopicMetaData) throws AuditException {
         final String querySelectStatement;
         final TableMappingParametersPair tableMappingParametersPair = new TableMappingParametersPair(mapping);
 
-        querySelectStatement = buildQuerySQL(queryRequest, tableMappingParametersPair);
+        querySelectStatement = buildQuerySql(queryRequest, tableMappingParametersPair);
         logger.info("Built query select statement: {}", querySelectStatement);
 
-        final SQLStatementParser sqlStatementParser = new SQLStatementParser(querySelectStatement);
+        final SqlStatementParser sqlStatementParser = new SqlStatementParser(querySelectStatement);
         final List<Parameter> params = new LinkedList<>();
         for (String field : sqlStatementParser.getNamedParameters()) {
             params.add(
@@ -64,10 +64,10 @@ public class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvid
                             getParameterType(eventTopicMetaData, new JsonPointer(field)),
                             tableMappingParametersPair.getParameters().get(field)));
         }
-        return new JDBCAuditEvent(sqlStatementParser.getSqlStatement(), params);
+        return new JdbcAuditEvent(sqlStatementParser.getSqlStatement(), params);
     }
 
-    private String buildQuerySQL(final QueryRequest queryRequest,
+    private String buildQuerySql(final QueryRequest queryRequest,
             final TableMappingParametersPair tableMappingParametersPair) {
         final int offsetParam = queryRequest.getPagedResultsOffset();
         int pageSizeParam = queryRequest.getPageSize();
@@ -75,7 +75,7 @@ public class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvid
             pageSizeParam = Integer.MAX_VALUE;
         }
 
-        final String filterString = queryRequest.getQueryFilter().accept(queryFilterVisitor, tableMappingParametersPair).toSQL();
+        final String filterString = queryRequest.getQueryFilter().accept(queryFilterVisitor, tableMappingParametersPair).toSql();
 
         // default to ordering by id
         String keysClause = "ORDER BY id ASC";

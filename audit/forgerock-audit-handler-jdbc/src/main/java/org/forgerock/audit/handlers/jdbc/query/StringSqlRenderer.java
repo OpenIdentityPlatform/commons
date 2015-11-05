@@ -16,9 +16,9 @@
 package org.forgerock.audit.handlers.jdbc.query;
 
 /**
- * An {@link SQLRenderer} implementation that renders SQL as a String
+ * An {@link SqlRenderer} implementation that renders SQL as a String
  */
-public class StringSQLRenderer implements SQLRenderer<String> {
+public class StringSqlRenderer implements SqlRenderer<String> {
     private final StringBuilder sb = new StringBuilder();
 
     /**
@@ -26,7 +26,7 @@ public class StringSQLRenderer implements SQLRenderer<String> {
      *
      * @param s the string to startup
      */
-    public StringSQLRenderer(String s) {
+    public StringSqlRenderer(String s) {
         sb.append(s);
     }
 
@@ -36,7 +36,7 @@ public class StringSQLRenderer implements SQLRenderer<String> {
      * @param s the additional SQL string
      * @return the StringSQLRenderer object
      */
-    public StringSQLRenderer append(String s) {
+    public StringSqlRenderer append(String s) {
         sb.append(s);
         return this;
     }
@@ -47,7 +47,7 @@ public class StringSQLRenderer implements SQLRenderer<String> {
      * @return the SQL String.
      */
     @Override
-    public String toSQL() {
+    public String toSql() {
         return sb.toString();
     }
 
@@ -58,6 +58,6 @@ public class StringSQLRenderer implements SQLRenderer<String> {
      */
     @Override
     public String toString() {
-        return toSQL();
+        return toSql();
     }
 }

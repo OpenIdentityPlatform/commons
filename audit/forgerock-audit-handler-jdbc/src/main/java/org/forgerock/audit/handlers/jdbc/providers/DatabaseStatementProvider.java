@@ -17,7 +17,7 @@
 package org.forgerock.audit.handlers.jdbc.providers;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
 import org.forgerock.audit.handlers.jdbc.TableMapping;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
@@ -28,32 +28,32 @@ import org.forgerock.json.resource.QueryRequest;
 public interface DatabaseStatementProvider {
 
     /**
-     * Builds a {@link JDBCAuditEvent} that can be used to create a prepared statement to create an event.
+     * Builds a {@link JdbcAuditEvent} that can be used to create a prepared statement to create an event.
      * @param content The content of the audit event.
      * @param tableMapping The TableMapping of json fields to table columns.
-     * @return A {@link JDBCAuditEvent}.
-     * @throws AuditException If unable to create the {@link JDBCAuditEvent}.
+     * @return A {@link JdbcAuditEvent}.
+     * @throws AuditException If unable to create the {@link JdbcAuditEvent}.
      */
-    JDBCAuditEvent buildCreateEvent(JsonValue content, TableMapping tableMapping,
+    JdbcAuditEvent buildCreateEvent(JsonValue content, TableMapping tableMapping,
             JsonValue eventTopicMetaData) throws AuditException;
 
     /**
-     * Builds a {@link JDBCAuditEvent} that can be used to create a prepared statement to read an event.
+     * Builds a {@link JdbcAuditEvent} that can be used to create a prepared statement to read an event.
      * @param mapping The TableMapping of json fields to table columns.
      * @param id The id of the object to read.
-     * @return A {@link JDBCAuditEvent}.
-     * @throws AuditException If unable to create the {@link JDBCAuditEvent}.
+     * @return A {@link JdbcAuditEvent}.
+     * @throws AuditException If unable to create the {@link JdbcAuditEvent}.
      */
-    JDBCAuditEvent buildReadEvent(TableMapping mapping, String id, JsonValue eventTopicMetaData)
+    JdbcAuditEvent buildReadEvent(TableMapping mapping, String id, JsonValue eventTopicMetaData)
             throws AuditException;
 
     /**
-     * Builds a {@link JDBCAuditEvent} that can be used to create a prepared statement to query an event.
+     * Builds a {@link JdbcAuditEvent} that can be used to create a prepared statement to query an event.
      * @param mapping The TableMapping of json fields to table columns.
      * @param queryRequest The QueryRequest sent to the audit event handler.
-     * @return A {@link JDBCAuditEvent}.
-     * @throws AuditException If unable to create the {@link JDBCAuditEvent}.
+     * @return A {@link JdbcAuditEvent}.
+     * @throws AuditException If unable to create the {@link JdbcAuditEvent}.
      */
-    JDBCAuditEvent buildQueryEvent(TableMapping mapping, QueryRequest queryRequest,
+    JdbcAuditEvent buildQueryEvent(TableMapping mapping, QueryRequest queryRequest,
             JsonValue eventTopicMetaData) throws AuditException;
 }

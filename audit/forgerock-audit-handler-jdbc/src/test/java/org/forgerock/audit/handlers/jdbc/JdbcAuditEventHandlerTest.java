@@ -63,7 +63,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
-public class JDBCAuditEventHandlerTest {
+public class JdbcAuditEventHandlerTest {
 
     public static final String H2_DRIVER = "org.h2.Driver";
     public static final String H2_JDBC_URL = "jdbc:h2:mem:audit";
@@ -161,9 +161,9 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testPublish() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
         System.out.println(new ObjectMapper().writeValueAsString(configuration));
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -179,8 +179,8 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testCreateWithEmptyDB() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -197,9 +197,9 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testCreateWithNoTableMapping() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
         configuration.setTableMappings(new LinkedList<TableMapping>());
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -214,8 +214,8 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testRead() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -243,8 +243,8 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testReadWithNoEntry() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final Context context = new RootContext();
 
         // when
@@ -258,8 +258,8 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testReadWithEmptyDB() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -278,8 +278,8 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testReadWithNoTableMapping() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
-        JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -288,7 +288,7 @@ public class JDBCAuditEventHandlerTest {
                 handler.publishEvent(context, TEST_AUDIT_EVENT_TOPIC, event);
 
         configuration.setTableMappings(new LinkedList<TableMapping>());
-        handler = createJDBCAuditEventHandler(configuration);
+        handler = createJdbcAuditEventHandler(configuration);
 
         // when
         promise = handler.readEvent(context, TEST_AUDIT_EVENT_TOPIC, promise.get().getId());
@@ -300,8 +300,8 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testQuery() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -339,8 +339,8 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testQueryWithEmptyDB() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -374,8 +374,8 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testQueryWithNoTableMapping() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(false);
-        JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(false);
+        JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -389,7 +389,7 @@ public class JDBCAuditEventHandlerTest {
         final List<ResourceResponse> resourceResponses = new LinkedList<>();
 
         configuration.setTableMappings(new LinkedList<TableMapping>());
-        handler = createJDBCAuditEventHandler(configuration);
+        handler = createJdbcAuditEventHandler(configuration);
 
         // when
         final Promise<QueryResponse, ResourceException> queryPromise =
@@ -410,9 +410,9 @@ public class JDBCAuditEventHandlerTest {
     @Test
     public void testPublishWithBuffering() throws Exception {
         // given
-        final JDBCAuditEventHandlerConfiguration configuration = createConfiguration(true);
+        final JdbcAuditEventHandlerConfiguration configuration = createConfiguration(true);
         System.out.println(new ObjectMapper().writeValueAsString(configuration));
-        final JDBCAuditEventHandler handler = createJDBCAuditEventHandler(configuration);
+        final JdbcAuditEventHandler handler = createJdbcAuditEventHandler(configuration);
         final JsonValue event = makeEvent();
         final Context context = new RootContext();
 
@@ -425,23 +425,23 @@ public class JDBCAuditEventHandlerTest {
         AssertJJsonValueAssert.assertThat(promise.get().getContent()).isEqualTo(event);
     }
 
-    private JDBCAuditEventHandler createJDBCAuditEventHandler(final JDBCAuditEventHandlerConfiguration configuration)
+    private JdbcAuditEventHandler createJdbcAuditEventHandler(final JdbcAuditEventHandlerConfiguration configuration)
             throws Exception {
         EventTopicsMetaData eventsMetaData = getEventsMetaData();
         configuration.setTopics(eventsMetaData.getTopics());
-        JDBCAuditEventHandler handler = new JDBCAuditEventHandler(configuration, eventsMetaData, null);
+        JdbcAuditEventHandler handler = new JdbcAuditEventHandler(configuration, eventsMetaData, null);
         handler.startup();
         return handler;
     }
 
-    private JDBCAuditEventHandlerConfiguration createConfiguration(final boolean bufferingEnabled) throws Exception {
+    private JdbcAuditEventHandlerConfiguration createConfiguration(final boolean bufferingEnabled) throws Exception {
         if (bufferingEnabled) {
             return mapper.readValue(
-                    getResource("/event-handler-config-buffering.json"), JDBCAuditEventHandlerConfiguration.class);
+                    getResource("/event-handler-config-buffering.json"), JdbcAuditEventHandlerConfiguration.class);
 
         } else {
             return mapper.readValue(
-                    getResource("/event-handler-config.json"), JDBCAuditEventHandlerConfiguration.class);
+                    getResource("/event-handler-config.json"), JdbcAuditEventHandlerConfiguration.class);
         }
     }
 

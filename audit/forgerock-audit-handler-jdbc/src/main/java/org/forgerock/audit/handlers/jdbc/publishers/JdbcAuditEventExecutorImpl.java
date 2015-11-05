@@ -29,23 +29,23 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JDBCAuditEvent;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
 import org.forgerock.audit.handlers.jdbc.Parameter;
 import org.forgerock.audit.handlers.jdbc.utils.CleanupHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JDBCAuditEventExecutorImpl implements JDBCAuditEventExecutor {
-    private static final Logger logger = LoggerFactory.getLogger(JDBCAuditEventExecutorImpl.class);
+public class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
+    private static final Logger logger = LoggerFactory.getLogger(JdbcAuditEventExecutorImpl.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private final DataSource dataSource;
 
-    public JDBCAuditEventExecutorImpl(final DataSource dataSource) {
+    public JdbcAuditEventExecutorImpl(final DataSource dataSource) {
         this.dataSource = dataSource;
     }
 
-    private List<Map<String,Object>> execute(final JDBCAuditEvent event) throws AuditException {
+    private List<Map<String,Object>> execute(final JdbcAuditEvent event) throws AuditException {
         logger.debug("Publishing event");
         Connection connection = null;
         final List<Map<String,Object>> results;
@@ -118,17 +118,17 @@ public class JDBCAuditEventExecutorImpl implements JDBCAuditEventExecutor {
     }
 
     @Override
-    public void createAuditEvent(JDBCAuditEvent event) throws AuditException {
+    public void createAuditEvent(JdbcAuditEvent event) throws AuditException {
         execute(event);
     }
 
     @Override
-    public List<Map<String, Object>> readAuditEvent(JDBCAuditEvent event) throws AuditException {
+    public List<Map<String, Object>> readAuditEvent(JdbcAuditEvent event) throws AuditException {
         return execute(event);
     }
 
     @Override
-    public List<Map<String, Object>> queryAuditEvent(JDBCAuditEvent event) throws AuditException {
+    public List<Map<String, Object>> queryAuditEvent(JdbcAuditEvent event) throws AuditException {
         return execute(event);
     }
 

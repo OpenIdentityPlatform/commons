@@ -21,16 +21,16 @@ import java.util.List;
 /**
  * Stores the sql query string and the parameters that correspond to the ?'s in the query string.
  */
-public class JDBCAuditEvent {
+public class JdbcAuditEvent {
     private final String sql;
     private final List<Parameter> params;
 
     /**
-     * Creates a JDBCAuditEvent given a sql string and a list of parameters.
+     * Creates a JdbcAuditEvent given a sql string and a list of parameters.
      * @param sql The sql string.
      * @param params The list of parameters for the sql string.
      */
-    public JDBCAuditEvent(final String sql, final List<Parameter> params) {
+    public JdbcAuditEvent(final String sql, final List<Parameter> params) {
         this.sql = sql;
         this.params = new LinkedList<>(params);
     }
