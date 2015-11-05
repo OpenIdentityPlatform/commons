@@ -49,6 +49,7 @@ public abstract class HeaderFactory<H extends Header> {
                     put(CookieHeader.class, CookieHeader.NAME);
                     put(LocationHeader.class, LocationHeader.NAME);
                     put(SetCookieHeader.class, SetCookieHeader.NAME);
+                    put(TransactionIdHeader.class, TransactionIdHeader.NAME);
                     put(WarningHeader.class, WarningHeader.NAME);
                 }
             });
@@ -69,6 +70,7 @@ public abstract class HeaderFactory<H extends Header> {
                     put(CookieHeader.NAME, new CookieHeader.Factory());
                     put(LocationHeader.NAME, new LocationHeader.Factory());
                     put(SetCookieHeader.NAME, new SetCookieHeader.Factory());
+                    put(TransactionIdHeader.NAME, new TransactionIdHeader.Factory());
                     put(WarningHeader.NAME, new WarningHeader.Factory());
                     if (size() != HEADER_NAMES.size()) {
                         throw new IllegalStateException("Misconfigured maps");

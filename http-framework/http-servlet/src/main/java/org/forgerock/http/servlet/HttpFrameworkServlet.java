@@ -18,6 +18,7 @@
 package org.forgerock.http.servlet;
 
 import static java.util.Collections.*;
+import static org.forgerock.http.handler.Handlers.chainOf;
 import static org.forgerock.http.io.IO.*;
 import static org.forgerock.util.Utils.*;
 
@@ -40,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.filter.TransactionIdInboundFilter;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -129,7 +131,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
             storage = newTemporaryStorage(tmpDir);
         }
         try {
-            handler = application.start();
+            handler = chainOf(application.start(), new TransactionIdInboundFilter());
         } catch (HttpApplicationException e) {
             throw new ServletException("Failed to start HTTP Application", e);
         }
