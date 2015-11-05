@@ -93,10 +93,11 @@ public final class VerifyEmailAccountStageTest {
 
     @Test
     public void testGatherInitialRequirementsWithEmailInContext() throws Exception {
-        // When
+        // Given
         given(context.containsState(EMAIL_FIELD)).willReturn(true);
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
 
+        // When
         JsonValue jsonValue = verifyEmailStage.gatherInitialRequirements(context, config);
 
         // Then
@@ -175,18 +176,6 @@ public final class VerifyEmailAccountStageTest {
 
         given(factory.getConnection()).willReturn(connection);
 
-        config.setVerificationLinkToken("%link%");
-        config.setVerificationLink("http://localhost:9999/example/#passwordReset/");
-        config.setEmailServiceUrl("/email");
-        final String infoEmailId = "info@admin.org";
-        config.setFrom(infoEmailId);
-
-        Map<Locale, String> subjectMap = newSubjectMap();
-        Map<Locale, String> messageMap = newMessageMap();
-
-        config.setSubjectTranslations(subjectMap);
-        config.setMessageTranslations(messageMap);
-
         // When
         StageResponse stageResponse = verifyEmailStage.advance(context, config);
         SnapshotTokenCallback callback = stageResponse.getCallback();
@@ -200,9 +189,8 @@ public final class VerifyEmailAccountStageTest {
         assertThat(actionRequest.getAction()).isSameAs("send");
         assertThat(actionRequest.getContent()).stringAt("/to").isEqualTo(TEST_EMAIL_ID);
         assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(INFO_MAIL_ID);
-        assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(subjectMap.get(Locale.ENGLISH));
-        assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(infoEmailId);
-        assertThat(actionRequest.getContent()).stringAt("/subject").isEqualTo(subjectMap.get(Locale.ENGLISH));
+        assertThat(actionRequest.getContent()).stringAt("/subject")
+                .isEqualTo(config.getSubjectTranslations().get(Locale.ENGLISH));
         assertThat(actionRequest.getContent()).stringAt("/body").matches(
                 "<h3>This is your reset email\\.</h3><h4>"
                 + "<a href=\"http://localhost:9999/example/#passwordReset/&token=token1&code="
