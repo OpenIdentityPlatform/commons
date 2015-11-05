@@ -28,7 +28,6 @@
     <description>Writes audit event to a configured JDBC database</description>
 
     <properties>
-        <hikaricp.version>2.4.1</hikaricp.version>
         <h2database.version>1.4.188</h2database.version>
     </properties>
 
@@ -49,7 +48,6 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-            <version>${hikaricp.version}</version>
             <scope>provided</scope>
         </dependency>
 

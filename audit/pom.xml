@@ -56,6 +56,7 @@
         <supercsv.version>2.4.0</supercsv.version>
         <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
         <javax.inject.version>1</javax.inject.version>
+        <hikaricp.version>2.4.1</hikaricp.version>
     </properties>
 
     <modules>
@@ -81,6 +82,11 @@
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>${javax.inject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikaricp.version}</version>
             </dependency>
 
             <!-- Third party dependencies -->
