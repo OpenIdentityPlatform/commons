@@ -100,7 +100,7 @@ public class JDBCAuditEventHandler extends AuditEventHandlerBase {
             sharedDataSource = false;
             this.dataSource = new HikariDataSource(createHikariConfig(configuration.getConnectionPool()));
         }
-        this.databaseStatementProvider = getDatabaseStatementProvider(configuration.getDatabaseName());
+        this.databaseStatementProvider = getDatabaseStatementProvider(configuration.getDatabaseType());
         final JDBCAuditEventExecutor jdbcAuditEventExecutor = new JDBCAuditEventExecutorImpl(this.dataSource);
         final EventBufferingConfiguration bufferConfig = configuration.getBuffering();
         if (bufferConfig.isEnabled()) {

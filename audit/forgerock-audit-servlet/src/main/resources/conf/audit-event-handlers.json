@@ -61,7 +61,7 @@
       "config" : {
         "name" : "jdbc",
         "topics": [ "access", "activity", "config", "authentication" ],
-        "databaseName" : "mysql",
+        "databaseType" : "mysql",
         "connectionPool" : {
           "jdbcUrl" : "jdbc:mysql://localhost:3306/audit?allowMultiQueries=true&characterEncoding=utf8",
           "username" : "auditAdmin",

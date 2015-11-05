@@ -1,7 +1,7 @@
 {
   "name" : "jdbc",
   "topics": [ "test" ],
-  "databaseName" : "h2",
+  "databaseType" : "h2",
   "connectionPool" : {
     "dataSourceClassName" : null,
     "jdbcUrl" : "jdbc:h2:mem:audit",

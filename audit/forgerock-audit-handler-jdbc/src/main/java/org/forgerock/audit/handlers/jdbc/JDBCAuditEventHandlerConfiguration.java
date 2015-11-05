@@ -38,10 +38,10 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
     private List<TableMapping> tableMappings = new LinkedList<>();
 
     @JsonProperty(required = true)
-    @JsonPropertyDescription("audit.handlers.jdbc.databaseName")
-    private String databaseName;
+    @JsonPropertyDescription("audit.handlers.jdbc.databaseType")
+    private String databaseType;
 
-    @JsonPropertyDescription("audit.handlers.jdbc.databaseName")
+    @JsonPropertyDescription("audit.handlers.jdbc.buffering")
     private EventBufferingConfiguration buffering;
 
     /**
@@ -80,19 +80,19 @@ public class JDBCAuditEventHandlerConfiguration extends EventHandlerConfiguratio
     }
 
     /**
-     * Gets the name of the database.
-     * @return The name of the database.
+     * Gets the type of the database.
+     * @return The type of the database.
      */
-    public String getDatabaseName() {
-        return databaseName;
+    public String getDatabaseType() {
+        return databaseType;
     }
 
     /**
-     * Sets the name of the database.
-     * @return The name of the database.
+     * Sets the type of the database.
+     * @return The type of the database.
      */
-    public void setDatabaseName(String databaseName) {
-        this.databaseName = databaseName;
+    public void setDatabaseType(String databaseType) {
+        this.databaseType = databaseType;
     }
 
     public static class ConnectionPool {

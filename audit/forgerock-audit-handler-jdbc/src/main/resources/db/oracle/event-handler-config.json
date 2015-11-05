@@ -2,7 +2,7 @@
   "name" : "jdbc",
   "class" : "org.forgerock.audit.handlers.jdbc.JDBCAuditEventHandler",
   "config" : {
-    "databaseName" : "oracle",
+    "databaseType" : "oracle",
     "connectionPool" : {
       "jdbcUrl": "jdbc:oracle:thin:@//localhost:1521/XE",
       "username": "audit",

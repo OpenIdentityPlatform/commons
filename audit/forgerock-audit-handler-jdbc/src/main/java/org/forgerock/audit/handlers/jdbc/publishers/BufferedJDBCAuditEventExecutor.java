@@ -16,6 +16,7 @@
 package org.forgerock.audit.handlers.jdbc.publishers;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -113,27 +114,11 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
     @Override
     public void close() {
         stopRequested = true;
-        try {
-            if (autoFlush) {
-                flush();
-            }
-            queueWatcher.shutdown();
-            while (!queueWatcher.awaitTermination(500, TimeUnit.MILLISECONDS)) {
-                logger.debug("Waiting to terminate the queue watcher.");
-            }
-        } catch (InterruptedException ex) {
-            logger.error("Unable to terminate the queue watcher", ex);
-            Thread.currentThread().interrupt();
+        if (autoFlush) {
+            flush();
         }
-        try {
-            workerPool.shutdown();
-            while (!workerPool.awaitTermination(500, TimeUnit.MILLISECONDS)) {
-                logger.debug("Waiting to terminate the worker pool.");
-            }
-        } catch (InterruptedException ex) {
-            logger.error("Unable to terminate the worker pool", ex);
-            Thread.currentThread().interrupt();
-        }
+        shutdownPool(queueWatcher);
+        shutdownPool(workerPool);
         delegate.close();
     }
 
@@ -188,21 +173,25 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
         final private DataSource dataSource;
 
         public DatabaseWriterTask(final Collection<JDBCAuditEvent> events, final DataSource dataSource) {
-            this.events = events;
+            this.events = checkNotNull(events);
             this.dataSource = dataSource;
         }
 
         @Override
         public void run() {
+            if (events.isEmpty()) {
+                return;
+            }
+
             Connection connection = null;
             try {
                 connection = dataSource.getConnection();
+                connection.setAutoCommit(false);
 
                 // Use a PreparedStatement batch to insert the events into the DB
-                if (events != null && events.iterator().hasNext()) {
-                    final PreparedStatement preparedStatement =
-                            connection.prepareStatement(events.iterator().next().getSql());
+                try  (final PreparedStatement preparedStatement = connection.prepareStatement(events.iterator().next().getSql())) {
                     for (JDBCAuditEvent event : events) {
+                        preparedStatement.clearParameters();
                         try {
                             initializePreparedStatement(preparedStatement, event.getParams());
                             preparedStatement.addBatch();
@@ -211,8 +200,8 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
                         }
                     }
                     preparedStatement.executeBatch();
-                    preparedStatement.close();
                 }
+                CleanupHelper.commit(connection);
             } catch (SQLException e) {
                 logger.error("Unable to create events in the queue.", e);
                 CleanupHelper.rollback(connection);
@@ -247,5 +236,17 @@ public class BufferedJDBCAuditEventExecutor implements JDBCAuditEventExecutor {
             }
         }
 
+    }
+
+    private void shutdownPool(final ExecutorService executorService) {
+        try {
+            executorService.shutdown();
+            while (!executorService.awaitTermination(500, TimeUnit.MILLISECONDS)) {
+                logger.debug("Waiting to terminate the executor service.");
+            }
+        } catch (InterruptedException ex) {
+            logger.error("Unable to terminate the executor service", ex);
+            Thread.currentThread().interrupt();
+        }
     }
 }

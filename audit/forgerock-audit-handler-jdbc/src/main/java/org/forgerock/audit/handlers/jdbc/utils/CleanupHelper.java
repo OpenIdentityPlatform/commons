@@ -28,6 +28,23 @@ public class CleanupHelper {
     final static Logger logger = LoggerFactory.getLogger(CleanupHelper.class);
 
     /**
+     * Commits the changes to the JDBC connection.
+     * @param connection The jdbc connection.
+     * @throws SQLException If the commit fails.
+     * Failures to commit are logged
+     */
+    public static void commit(Connection connection) throws SQLException {
+        if (connection != null) {
+            try {
+                connection.commit();
+            } catch (SQLException ex) {
+                logger.warn("Failure during connection commit ", ex);
+                throw ex;
+            }
+        }
+    }
+
+    /**
      * Closes the JDBC connection.
      * @param connection The connection to try to close if not null.
      * Failures to close are logged, no exception is propagated up
@@ -45,6 +62,7 @@ public class CleanupHelper {
     /**
      * Rolls back changes to the {@link Connection}.
      * @param connection The {@link Connection} to rollback the changes.
+     * Failures to rollback are logged, no exception is propagated up
      */
     public static void rollback(Connection connection) {
         try {
