@@ -1,0 +1,11 @@
+{{#if status.success}}
+<div class="alert alert-success" role="alert">
+    {{t "common.user.forgotUsername.found"}} <strong>{{additions.userName}}</strong>
+</div>
+{{else}}
+<div class="alert alert-danger" role="alert">
+    <strong>{{t i18n.failed}}</strong>
+    <p>{{status.reason}}</p>
+</div>
+<a href="#" id="restart">{{t i18n.tryAgain}}</a>
+{{/if}}

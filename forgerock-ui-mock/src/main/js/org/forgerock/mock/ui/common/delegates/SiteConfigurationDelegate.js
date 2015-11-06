@@ -45,6 +45,7 @@ define("org/forgerock/mock/ui/common/delegates/SiteConfigurationDelegate", [
 
         successCallback({
             "passwordResetLink": "",
+            "forgotUsername": true,
             "selfRegistration": true,
             "passwordReset": true,
             "lang": "en"

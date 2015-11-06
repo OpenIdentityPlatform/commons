@@ -1,3 +1,18 @@
+
+.login {
+    hr {
+        border-top: 1px solid #ddd;
+    }
+    @media (min-width: @screen-xs) {
+        .remember-forgot ul {
+            li + li:before {
+                content: "| ";
+                color: #ccc;
+            }
+        }
+    }
+}
+
 #userQuery {
     label.separator {
         color: #666;

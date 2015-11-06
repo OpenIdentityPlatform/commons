@@ -79,6 +79,88 @@
 
         server.respondWith(
             "GET",
+            "/mock/selfservice/username",
+            [
+                200,
+                {
+                    "Content-Type": "application/json;charset=UTF-8"
+                },
+                JSON.stringify(
+                    {
+                        "type" : "userQuery",
+                        "tag" : "initial",
+                        "requirements" : {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "description": "Find your account",
+                            "type" : "object",
+                            "required" : [
+                                "queryFilter"
+                            ],
+                            "properties" : {
+                                "queryFilter" : {
+                                    "description" : "filter string to find account",
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    }
+                )
+            ]
+        );
+
+
+        server.respondWith(
+            "POST",
+            "/mock/selfservice/username?_action=submitRequirements",
+            function (request) {
+                var requestContent = JSON.parse(request.requestBody),
+                    headers = { "Content-Type": "application/json;charset=UTF-8" };
+                switch (requestContent.token) {
+                    case undefined:
+                        if (_.isObject(requestContent.input) && _.isString(requestContent.input.queryFilter)) {
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "type" : "retrieveUsername",
+                                    "tag" : "end",
+                                    "additions" : {
+                                        "userName" : "test"
+                                    },
+                                    "status" : {
+                                        "success": true
+                                    }
+                                })
+                            );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "queryFilter is missing"
+                                })
+                            );
+                        }
+                    break;
+                    default:
+                        request.respond(
+                            400,
+                            headers,
+                            JSON.stringify({
+                                "code": 400,
+                                "reason": "Bad Request",
+                                "message": "Token provided not recognized"
+                            })
+                        );
+                }
+            }
+        );
+
+
+        server.respondWith(
+            "GET",
             "/mock/selfservice/reset",
             [
                 200,

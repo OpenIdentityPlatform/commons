@@ -30,6 +30,7 @@ require.config({
             "Footer": "org/forgerock/mock/ui/common/components/Footer",
             "ThemeManager": "org/forgerock/mock/ui/common/util/ThemeManager",
             "LoginView": "org/forgerock/commons/ui/common/LoginView",
+            "ForgotUsernameView": "org/forgerock/commons/ui/user/anonymousProcess/ForgotUsernameView",
             "PasswordResetView": "org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
             "RegisterView": "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",

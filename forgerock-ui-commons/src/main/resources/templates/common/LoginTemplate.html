@@ -15,17 +15,30 @@
                                 <input type="checkbox" type="checkbox" name="loginRemember"> {{t "templates.user.LoginTemplate.loginRemember"}}
                             </label>
                         </div>
-                        {{#if passwordResetLink}}
-                        <a class="pull-right" href="{{passwordResetLink}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
-                        {{else}}
-                        {{#if passwordReset}}
-                        <a class="pull-right" href="{{url 'passwordReset'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a>
-                        {{/if}}
-                        {{/if}}
                     </div>
                     <input type="submit" name="loginButton" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t "common.user.login"}}">
+
+                    <div class="text-center clearfix remember-forgot">
+                        <ul>
+
+                            {{#if forgotUsername}}
+                            <li><a href="{{url 'forgotUsername'}}">{{t "templates.user.LoginTemplate.forgotUsername"}}</a></li>
+                            {{/if}}
+
+                            {{#if passwordResetLink}}
+                            <li><a href="{{passwordResetLink}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></li>
+                            {{else}}
+                            {{#if passwordReset}}
+                            <li><a href="{{url 'passwordReset'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></li>
+                            {{/if}}
+                            {{/if}}
+
+                        </ul>
+                    </div>
+
                     {{#if selfRegistration}}
                     <div class="toggle-login-register">
+                        <hr>
                         {{t "templates.user.LoginTemplate.noAccountQuestion"}} <a href="{{url 'selfRegistration'}}">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
                     </div>
                     {{/if}}

@@ -50,10 +50,11 @@
             },
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
-                "noAccountQuestion" : "Don't have an account?",
-                "registerAccount" : "Register your account",
+                "noAccountQuestion" : "New here?",
+                "registerAccount" : "Create an account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
-                "resetPassword" : "Reset your Password"
+                "resetPassword" : "Forgot Password?",
+                "forgotUsername" : "Forgot Username?"
             },
             "404" : {
                 "pageNotFound" : "Page not found",
@@ -173,6 +174,12 @@
                 "completed": "Your account has been successfully registered.",
                 "failed": "Unable to register your account",
                 "tryAgain": "Try Registering Again",
+                "return": "Return to Login Page"
+            },
+            "forgotUsername" : {
+                "title" : "Retrieve Your Username",
+                "found": "Username found:",
+                "tryAgain": "Try Finding Your Username Again",
                 "return": "Return to Login Page"
             },
             "kba" : {

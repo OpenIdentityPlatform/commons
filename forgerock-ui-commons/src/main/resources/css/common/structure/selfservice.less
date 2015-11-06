@@ -1,3 +1,46 @@
+
+.login {
+    .remember-forgot {
+        overflow: auto;
+        margin: 20px 0;
+        ul {
+            padding: 0;
+            margin: 0;
+            list-style-type: none;
+            li {
+                display: block;
+                margin-bottom: 10px;
+
+                @media (min-width: @screen-xs) {
+                    display: inline;
+                    margin-bottom: 0;
+                }
+
+                a {
+                    margin: 0 20px;
+                }
+            }
+        }
+    }
+
+    .toggle-login-register {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .remember-forgot {
+        .forgot-password {
+            float: right;
+            padding: 0;
+        }
+
+        .checkbox {
+            margin: 0;
+        }
+    }
+}
+
+
 #userQuery {
     label.separator {
         text-align: center;

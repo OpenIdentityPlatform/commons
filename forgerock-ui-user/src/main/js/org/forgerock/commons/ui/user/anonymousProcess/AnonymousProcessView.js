@@ -36,17 +36,53 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
 ], function($, _, form2js, AbstractView, AnonymousProcessDelegate, Constants, EventManager, Router, UIUtils, ValidatorsManager) {
+
+    /**
+     * Given a position in the DOM, look for children elements which comprise a
+     * boolean expression. Using all of those found with content, return a filter
+     * string which represents them.
+     */
+    function walkTreeForFilterStrings(basicNode) {
+        var groupValues,
+            node = $(basicNode);
+
+        if (node.hasClass("filter-value") && node.val().length > 0) {
+            return node.attr('name') + ' eq "' + node.val().replace('"', '\\"') + '"';
+        } else if (node.hasClass("filter-group")) {
+            groupValues = _.chain(node.find(">.form-group>.filter-value, >.filter-group"))
+                           .map(walkTreeForFilterStrings)
+                           .filter(function (value) {
+                               return value.length > 0;
+                           })
+                           .value();
+
+            if (groupValues.length === 0) {
+                return "";
+            } else if (groupValues.length === 1) {
+                return groupValues[0];
+            }
+
+            if (node.hasClass("filter-or")) {
+                return "(" + groupValues.join(" OR ") + ")";
+            } else {
+                return "(" + groupValues.join(" AND ") + ")";
+            }
+        } else {
+            return "";
+        }
+    }
+
     /**
      * @exports org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView
      *
      * To use this generic object, it is required that two properties be defined prior to initialization:
-     * "endpoint" - the Anonymous Process endpoint registered on the backend under Constants.context
+     * "processType" - the Anonymous Process type registered on the backend under the selfservice context
      * "i18nBase" - the base of the translation file that contains the entries specific to this instance
      *
      * Example:
      *
      *    new AnonymousProcessView.extend({
-     *         endpoint: "reset",
+     *         processType: "reset",
      *         i18nBase: "common.user.passwordReset"
      *     });
      */
@@ -57,14 +93,23 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
         events: {
             "submit form": "formSubmit",
             "click #restart": "restartProcess",
-            "onValidate": "onValidate"
+            "onValidate": "onValidate",
+            "change #userQuery :input": "buildQueryFilter",
+            "keyup #userQuery :input": "buildQueryFilter",
+            "customValidate #userQuery": "validateForm"
         },
         data: {
             i18n: {}
         },
 
         getFormContent: function () {
-            return form2js($(this.element).find("form")[0]);
+            if (this.$el.find("form").attr("id") === "userQuery") {
+                return {
+                    queryFilter: this.$el.find(":input[name=queryFilter]").val()
+                };
+            } else {
+                return form2js($(this.element).find("form")[0]);
+            }
         },
 
         formSubmit: function(event) {
@@ -84,7 +129,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
             this.stateData = {};
 
             if (!this.delegate || args[0] !== "/continue") {
-                this.setDelegate(this.endpoint, params.token);
+                this.setDelegate(Constants.SELF_SERVICE_CONTEXT + this.processType, params.token);
             }
 
             if (params.token) {
@@ -138,14 +183,14 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                         processStatePromise.resolve
                     );
                 },
-                attemptCustomTemplate = function (stateData) {
-                    UIUtils.compileTemplate(baseTemplateUrl + response.type + "-" + response.tag + ".html", stateData)
+                attemptCustomTemplate = _.bind(function (stateData) {
+                    UIUtils.compileTemplate(baseTemplateUrl + this.processType + "/" + response.type + "-" + response.tag + ".html", stateData)
                         .then(function (renderedTemplate) {
                             processStatePromise.resolve(renderedTemplate);
                         }, function () {
                             loadGenericTemplate(stateData);
                         });
-                };
+                }, this);
 
             if (_.has(response, "requirements")) {
                 this.stateData = _.extend({
@@ -153,7 +198,8 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                 }, this.data);
             } else {
                 this.stateData = _.extend({
-                    status: response.status
+                    status: response.status,
+                    additions: response.additions
                 }, this.data);
             }
 
@@ -170,6 +216,42 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                 this.$el.find(":input:visible:first").focus();
             }, this));
 
+        },
+
+        buildQueryFilter: function () {
+            this.$el.find(":input[name=queryFilter]")
+                .val(walkTreeForFilterStrings(this.$el.find("#filterContainer")));
+            this.validateForm();
+        },
+        validateForm: function () {
+            var button = this.$el.find("input[type=submit]"),
+                incompleteAndGroup = false;
+
+            // there has to be some value in the queryFilter or the whole thing is invalid
+            if (this.$el.find(":input[name=queryFilter]").val().length === 0) {
+                button.prop("disabled", true);
+                return;
+            }
+
+            // filter-and groups must have each of their children filled-out
+            this.$el.find(".filter-and").each(function () {
+                // if there are any values at all specified for this "and" group...
+                if (walkTreeForFilterStrings(this).length > 0) {
+                    // then we need to make sure that they are all populated
+                    incompleteAndGroup = !(
+                        // check all direct filter-value fields for content
+                        _.reduce($(">.form-group>.filter-value", this), function (state, field) {
+                            return state && field.value.length > 0;
+                        }, true) &&
+                        // check all direct sub-groups for content
+                        _.reduce($(">.filter-group", this), function (state, subGroup) {
+                            return walkTreeForFilterStrings(subGroup).length > 0;
+                        }, true)
+                    );
+                }
+            });
+
+            button.prop("disabled", incompleteAndGroup);
         }
 
     });

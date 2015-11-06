@@ -30,9 +30,8 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
     "form2js",
     "handlebars",
     "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView",
-    "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function($, _, form2js, Handlebars, AnonymousProcessView, Constants, ValidatorsManager) {
+], function($, _, form2js, Handlebars, AnonymousProcessView, ValidatorsManager) {
     var SelfRegistrationView = AnonymousProcessView.extend({
         partials: [
             "partials/process/_kbaItem.html"
@@ -41,7 +40,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
             "click #kbaStage #provideAnother": "addKBAQuestion",
             "change #kbaStage .kba-questions": "toggleCustomQuestion"
         }, AnonymousProcessView.prototype.events),
-        endpoint: Constants.SELF_SERVICE_CONTEXT + "registration",
+        processType: "registration",
         i18nBase: "common.user.selfRegistration",
         addKBAQuestion: function (e) {
             e.preventDefault();

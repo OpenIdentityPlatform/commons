@@ -38,6 +38,13 @@ define("config/routes/UserRoutesConfig", [
             pattern: "profile/?",
             defaults: ["details"]
         },
+        "forgotUsername": {
+            view: "ForgotUsernameView",
+            url: /forgotUsername(\/[^\&]*)(\&.+)?/,
+            pattern: "forgotUsername??",
+            argumentNames: ["realm", "additionalParameters"],
+            defaults: ["/", ""]
+        },
         "passwordReset": {
             view: "PasswordResetView",
             url: /passwordReset(\/[^\&]*)(\&.+)?/,

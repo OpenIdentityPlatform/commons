@@ -24,14 +24,14 @@
 
 /*global define */
 
-define("org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView", [
+define("org/forgerock/commons/ui/user/anonymousProcess/ForgotUsernameView", [
     "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView"
 ], function(AnonymousProcessView) {
 
-    var PasswordResetView = AnonymousProcessView.extend({
-        processType: "reset",
-        i18nBase: "common.user.passwordReset"
+    var ForgotUsernameView = AnonymousProcessView.extend({
+        processType: "username",
+        i18nBase: "common.user.forgotUsername"
     });
 
-    return new PasswordResetView();
+    return new ForgotUsernameView();
 });
