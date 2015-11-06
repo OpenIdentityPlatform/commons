@@ -17,6 +17,7 @@ package org.forgerock.http.filter;
 
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
+import org.forgerock.http.header.MalformedHeaderException;
 import org.forgerock.http.header.TransactionIdHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -34,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * {@code
  * Handler handler = Handlers.chainOf(new HttpClientHandler(httpClient), new TransactionIdOutboundFilter());
- }
+ * }
  * </pre>
  *
  */
@@ -47,9 +48,14 @@ public class TransactionIdOutboundFilter implements Filter {
         if (context.containsContext(TransactionIdContext.class)) {
             TransactionIdContext txContext = context.asContext(TransactionIdContext.class);
             final String subTxId = txContext.getTransactionId().createSubTransactionId().getValue();
-            request.getHeaders().put(TransactionIdHeader.NAME, subTxId);
+            try {
+                request.getHeaders().add(new TransactionIdHeader(subTxId));
+            } catch (MalformedHeaderException ex) {
+                // Should not happen as the value is always valid.
+                logger.error("An error occured while building the TransactionIdHeader", ex);
+            }
         } else {
-            logger.debug("Expecting to find an instance of TransactionIdContext in the chain, but there was none.");
+            logger.trace("Expecting to find an instance of TransactionIdContext in the chain, but there was none.");
         }
 
         return next.handle(context, request);
