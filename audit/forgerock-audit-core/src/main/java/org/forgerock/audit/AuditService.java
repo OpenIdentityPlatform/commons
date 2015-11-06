@@ -130,9 +130,15 @@ public interface AuditService extends RequestHandler {
             Context context, QueryRequest request, QueryResourceHandler handler);
 
     /**
-     * Audit service does not support actions on audit entries.
-     * <p/>
-     * The returned promise will resolve to a {@link NotSupportedException}.
+     * Audit service may support actions on the service itself or on handlers.
+     * <p>
+     * One of the following paths format is expected:
+     * <pre>
+     * [path-to-audit-service]?_action=XXX : call a global action on audit service
+     * [path-to-audit-service/[topic]?_action=XXX : call an action on audit service and a single topic
+     * [path-to-audit-service]?_action=XXX&handler=HHH : call on action on a specific handler
+     * [path-to-audit-service/[topic]?_action=XXX&handler=HHH : call on action on a specific handler and topic
+     * </pre>
      */
     @Override
     Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request);

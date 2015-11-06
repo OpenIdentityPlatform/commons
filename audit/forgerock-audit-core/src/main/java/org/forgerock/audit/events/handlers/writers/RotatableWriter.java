@@ -110,35 +110,16 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         if (!rotationEnabled || isRotating.get()) {
             return;
         }
+        writerLock.writeLock().lock();
         try {
             for (RotationPolicy rotationPolicy : rotationPolicies) {
-                writerLock.writeLock().lock();
                 if (rotationPolicy.shouldRotateFile(this)) {
                     logger.info("Must rotate:" + file);
                     isRotating.set(true);
-                    File currentFile = fileNamingPolicy.getInitialName();
-                    if (currentFile.exists()) {
-                        File newFile = fileNamingPolicy.getNextName();
-                        rotationHooks.preRotationAction();
-                        writer.close();
-                        if (currentFile.renameTo(newFile)) {
-                            rotationHappened = true;
-                            if (!currentFile.exists()) {
-                                currentFile.createNewFile();
-                                writer = constructWriter(currentFile, true);
-                                rotationHooks.postRotationAction();
-                            }
-                        } else {
-                            logger.error("Unable to rename the audit file {}", currentFile.toString());
-                            writer = constructWriter(currentFile, true);
-                        }
-                        lastRotationTime = DateTime.now();
-
-                        // don't check the remaining rotation policies since we already rotated
-                        if (rotationHappened) {
-                            logger.info("Finished rotation for:" + file);
-                            break;
-                        }
+                    rotationHappened = rotate();
+                    if (rotationHappened) {
+                        logger.info("Finished rotation for:" + file);
+                        break;
                     }
                 }
             }
@@ -150,6 +131,29 @@ public class RotatableWriter implements TextWriter, RotatableObject {
             isRotating.set(false);
             writerLock.writeLock().unlock();
         }
+    }
+
+    private boolean rotate() throws IOException {
+        boolean rotationHappened = false;
+        File currentFile = fileNamingPolicy.getInitialName();
+        if (currentFile.exists()) {
+            File newFile = fileNamingPolicy.getNextName();
+            rotationHooks.preRotationAction();
+            writer.close();
+            if (currentFile.renameTo(newFile)) {
+                rotationHappened = true;
+                if (!currentFile.exists()) {
+                    currentFile.createNewFile();
+                    writer = constructWriter(currentFile, true);
+                    rotationHooks.postRotationAction();
+                }
+            } else {
+                logger.error("Unable to rename the audit file {}", currentFile.toString());
+                writer = constructWriter(currentFile, true);
+            }
+            lastRotationTime = DateTime.now();
+        }
+        return rotationHappened;
     }
 
     private Set<File> checkRetention() throws IOException {
@@ -227,6 +231,25 @@ public class RotatableWriter implements TextWriter, RotatableObject {
             lock.unlock();
         }
         rotateIfNeeded();
+    }
+
+    /**
+     * Forces a rotation of the writer.
+     *
+     * @return {@code true} if rotation was done, {@code false} otherwise.
+     * @throws IOException
+     *          If an error occurs
+     */
+    public boolean forceRotation() throws IOException {
+        writerLock.writeLock().lock();
+        try {
+            isRotating.set(true);
+            return rotate();
+        }
+        finally {
+            isRotating.set(false);
+            writerLock.writeLock().unlock();
+        }
     }
 
     @Override

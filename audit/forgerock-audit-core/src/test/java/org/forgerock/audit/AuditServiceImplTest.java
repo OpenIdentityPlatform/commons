@@ -311,7 +311,7 @@ public class AuditServiceImplTest {
         final Promise<ActionResponse, ResourceException> promise =
                 auditService.handleAction(
                         new RootContext(),
-                        Requests.newActionRequest("_id", "unknownAction"));
+                        Requests.newActionRequest("access", "unknownAction"));
 
         //then
         assertThat(promise)

@@ -135,6 +135,19 @@ public class CsvWriter implements AutoCloseable {
     }
 
     /**
+     * Forces rotation of the writer.
+     * <p>
+     * Rotation is possible only if file rotation is enabled.
+     *
+     * @return {@code true} if rotation was done, {@code false} otherwise.
+     * @throws IOException
+     *          If an error occurs
+     */
+    public boolean forceRotation() throws IOException {
+        return rotatableWriter != null ? rotatableWriter.forceRotation() : false;
+    }
+
+    /**
      * Write a row into the CSV files.
      * @param values The keys of the {@link Map} have to match the column's header.
      * @throws IOException

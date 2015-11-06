@@ -16,6 +16,8 @@
 
 package org.forgerock.audit.handlers.csv;
 
+import static org.forgerock.audit.AuditServiceProxy.ACTION_PARAM_TARGET_HANDLER;
+import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.ROTATE_FILE_ACTION_NAME;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.json.JsonValue.*;
@@ -26,7 +28,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -40,7 +41,7 @@ import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration.FileRotation;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.audit.providers.DefaultSecureStorageProvider;
@@ -50,6 +51,7 @@ import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
@@ -65,6 +67,7 @@ import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.mockito.ArgumentCaptor;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -125,11 +128,7 @@ public class CsvAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        SecureStorageProvider storageProvider = new DefaultSecureStorageProvider();
-        final CsvAuditEventHandler csvHandler = new CsvAuditEventHandler(
-                getConfigWithBuffering(logDirectory), getEventTopicsMetaData(), storageProvider);
-
-        csvHandler.startup();
+        final CsvAuditEventHandler csvHandler = getBufferedHandler(logDirectory);
         final Context context = new RootContext();
         try {
 
@@ -157,7 +156,7 @@ public class CsvAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CsvAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final CsvAuditEventHandler csvHandler = getBasicHandler(logDirectory);
         final Context context = new RootContext();
 
         final CreateRequest createRequest = makeCreateRequest();
@@ -183,7 +182,7 @@ public class CsvAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CsvAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final CsvAuditEventHandler csvHandler = getBasicHandler(logDirectory);
         final Context context = new RootContext();
 
         final ResourceResponse event = createAccessEvent(csvHandler);
@@ -228,7 +227,7 @@ public class CsvAuditEventHandlerTest {
         //given
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CsvAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final CsvAuditEventHandler csvHandler = getBasicHandler(logDirectory);
         final Context context = new RootContext();
 
         final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
@@ -293,7 +292,7 @@ public class CsvAuditEventHandlerTest {
     public void testCreateCsvLogEntryWritesToFile() throws Exception {
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
-        final CsvAuditEventHandler csvHandler = createAndConfigureHandler(logDirectory, false);
+        final CsvAuditEventHandler csvHandler = getBasicHandler(logDirectory);
         final Context context = new RootContext();
 
         final JsonValue content = json(
@@ -310,44 +309,105 @@ public class CsvAuditEventHandlerTest {
         assertThat(logDirectory.resolve("access.csv").toFile()).hasContent(expectedContent);
     }
 
-    private CsvAuditEventHandler createAndConfigureHandler(Path tempDirectory, boolean enableSecurity)
-            throws Exception {
+    @DataProvider
+    private Object[][] rotateActionData() {
+        return new Object[][] {
+                // label, is rotation enabled ?
+                { "rotation enabled", true },
+                { "rotation not enabled", false }
+        };
+    }
+
+    @Test(dataProvider="rotateActionData")
+    public void testActionToRotateFile(String label, boolean isRotationEnabled) throws Exception {
+        final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
+        logDirectory.toFile().deleteOnExit();
+        final CsvAuditEventHandler csvHandler =
+                isRotationEnabled ? getRotationEnabledHandler(logDirectory) : getBasicHandler(logDirectory);
+        final Context context = new RootContext();
+        try {
+        final JsonValue content = json(
+                object(
+                        field("_id", "1"),
+                        field("timestamp", "123456"),
+                        field("transactionId", "A10000")));
+        csvHandler.publishEvent(context, "access", Requests.newCreateRequest("access", content).getContent());
+
+        // delete file action should remove the file and create a fresh one
+        ActionRequest actionRequest = Requests.newActionRequest("access", ROTATE_FILE_ACTION_NAME)
+                .setAdditionalParameter(ACTION_PARAM_TARGET_HANDLER, "csv");
+        csvHandler.handleAction(context, "access", actionRequest);
+        }
+        finally {
+            csvHandler.shutdown();
+        }
+
+        assertThat(logDirectory.resolve("access.csv").toFile()).as("when " + label)
+            .hasContent("\"_id\",\"timestamp\",\"transactionId\"\n");
+    }
+
+    private CsvAuditEventHandler getBasicHandler(Path tempDirectory) throws Exception {
+        return createAndConfigureHandler(tempDirectory, false, false, false);
+    }
+
+    private CsvAuditEventHandler getBufferedHandler(Path tempDirectory) throws Exception {
+        return createAndConfigureHandler(tempDirectory, false, true, false);
+    }
+
+    private CsvAuditEventHandler getRotationEnabledHandler(Path tempDirectory) throws Exception {
+        return createAndConfigureHandler(tempDirectory, false, false, true);
+    }
+
+    private CsvAuditEventHandler createAndConfigureHandler(Path tempDirectory, boolean enableSecurity,
+            boolean enableBuffering, boolean enableRotation) throws Exception {
         EventTopicsMetaData eventTopicsMetaData = getEventTopicsMetaData();
+        CsvAuditEventHandlerConfiguration config = getCsvHandlerConfig(tempDirectory, eventTopicsMetaData);
+        if (enableSecurity) {
+            addSecurityConfig(config);
+        }
+        if (enableBuffering) {
+            addBufferingConfig(config);
+        }
+        if (enableRotation) {
+            addRotationConfig(config);
+        }
+        SecureStorageProvider storageProvider = enableSecurity ?
+                setupSecureStorageProvider() :
+                new DefaultSecureStorageProvider();
+        CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData, storageProvider);
+        handler.startup();
+        return handler; //spy(handler);
+    }
+
+    private CsvAuditEventHandlerConfiguration getCsvHandlerConfig(
+            Path tempDirectory, EventTopicsMetaData eventTopicsMetaData) {
         CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
         config.setName("csv");
         config.setTopics(eventTopicsMetaData.getTopics());
         config.setLogDirectory(tempDirectory.toString());
-        final SecureStorageProvider keyStoreHandlerProvider;
-        if (enableSecurity) {
-            config.setSecurity(getCsvSecurityConfig());
-            keyStoreHandlerProvider = setupSecureStorageProvider();
-        } else {
-            keyStoreHandlerProvider = new DefaultSecureStorageProvider();
-        }
-
-        CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData, keyStoreHandlerProvider);
-        handler.startup();
-        return spy(handler);
+        return config;
     }
 
-    private CsvSecurity getCsvSecurityConfig() throws Exception {
+    private void addSecurityConfig(CsvAuditEventHandlerConfiguration config) throws Exception {
         CsvAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CsvAuditEventHandlerConfiguration.CsvSecurity();
         csvSecurity.setEnabled(true);
         csvSecurity.setSecureStorageName("csvSecure");
-
-        return csvSecurity;
+        config.setSecurity(csvSecurity);
     }
 
-    /** Returns a configuration with buffering enabled. */
-    private CsvAuditEventHandlerConfiguration getConfigWithBuffering(Path tempDir) {
-        EventBufferingConfiguration config = new EventBufferingConfiguration();
-        config.setEnabled(true);
-        CsvAuditEventHandlerConfiguration handlerConfig = new CsvAuditEventHandlerConfiguration();
-        handlerConfig.setName("csv");
-        handlerConfig.setTopics(Collections.singleton("access"));
-        handlerConfig.setLogDirectory(tempDir.toString());
-        handlerConfig.setBufferingConfiguration(config);
-        return handlerConfig;
+    private void addRotationConfig(CsvAuditEventHandlerConfiguration config) {
+        FileRotation fileRotation = new FileRotation();
+        fileRotation.setRotationEnabled(true);
+        fileRotation.setRotationFilePrefix("prefix");
+        fileRotation.setRotationInterval("disabled");
+        fileRotation.setMaxFileSize(100000);
+        config.setFileRotation(fileRotation);
+    }
+
+    private void addBufferingConfig(CsvAuditEventHandlerConfiguration config) {
+        EventBufferingConfiguration conf = new EventBufferingConfiguration();
+        conf.setEnabled(true);
+        config.setBufferingConfiguration(conf);
     }
 
     private EventTopicsMetaData getEventTopicsMetaData() throws Exception {

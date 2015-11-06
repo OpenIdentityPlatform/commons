@@ -48,6 +48,9 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class AuditServiceProxy implements AuditService {
 
+    /** Parameter that may be used when using an action, to provide the name of the handler to use as a target. */
+    public static final String ACTION_PARAM_TARGET_HANDLER = "handler";
+
     private final ReentrantReadWriteLock delegateLock;
     private AuditService delegate;
 

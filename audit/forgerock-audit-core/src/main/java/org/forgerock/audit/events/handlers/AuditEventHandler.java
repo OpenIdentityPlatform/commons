@@ -20,6 +20,8 @@ import java.util.Set;
 
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
@@ -117,4 +119,17 @@ public interface AuditEventHandler {
      * @return whether or not the audit event handler is enabled
      */
     boolean isEnabled();
+
+    /**
+     * Performs an action.
+     *
+     * @param context
+     *          The context chain that initiated the event.
+     * @param topic
+     *          The topic on which action is performed.
+     * @param request
+     *          The request with the action.
+     * @return a promise with either a response or an exception
+     */
+    Promise<ActionResponse, ResourceException> handleAction(Context context, String topic, ActionRequest request);
 }

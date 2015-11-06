@@ -15,7 +15,11 @@
  */
 package org.forgerock.audit.handlers.csv;
 
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.audit.secure.KeyStoreSecureStorage.JCEKS_KEYSTORE_TYPE;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static java.lang.String.format;
 import static org.forgerock.audit.events.AuditEventHelper.ARRAY_TYPE;
 import static org.forgerock.audit.events.AuditEventHelper.OBJECT_TYPE;
 import static org.forgerock.audit.events.AuditEventHelper.dotNotationToJsonPointer;
@@ -53,12 +57,15 @@ import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.providers.SecureStorageProvider;
+import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
@@ -68,6 +75,7 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
@@ -89,6 +97,10 @@ import org.supercsv.util.CsvContext;
 public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvAuditEventHandler.class);
+
+    /** Name of action to force file rotation. */
+    public static final String ROTATE_FILE_ACTION_NAME = "rotate";
+
     private static final ObjectMapper mapper = new ObjectMapper();
 
     private final CsvAuditEventHandlerConfiguration configuration;
@@ -236,14 +248,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         } catch (IOException ex) {
             // Re-try once in case the writer stream became closed for some reason
             logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
-            synchronized (this) {
-                resetWriter(topic, csvWriter);
-                try {
-                    openWriter(topic, getAuditLogFile(topic));
-                } catch (IOException e) {
-                    throw new BadRequestException(e);
-                }
-            }
+            resetAndReopenWriter(topic, csvWriter, false);
             try {
                 writeEvent(topic, csvWriter, event);
             } catch (IOException e) {
@@ -339,6 +344,43 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         }
     }
 
+    @Override
+    public Promise<ActionResponse, ResourceException> handleAction(
+            Context context, String topic, ActionRequest request) {
+        try {
+            String action = request.getAction();
+            if (topic == null) {
+                return new BadRequestException(format("Topic is required for action %s", action)).asPromise();
+            }
+            if (action.equals(ROTATE_FILE_ACTION_NAME)) {
+                return handleRotateAction(topic);
+            }
+            final String error = format("This action is unknown for the CSV handler: %s", action);
+            return new BadRequestException(error).asPromise();
+        } catch (BadRequestException e) {
+            return e.asPromise();
+        }
+    }
+
+    private Promise<ActionResponse, ResourceException> handleRotateAction(String topic)
+            throws BadRequestException {
+        CsvWriter csvWriter = writers.get(topic);
+        if (configuration.getFileRotation().isRotationEnabled()) {
+            try {
+                if (!csvWriter.forceRotation()) {
+                    throw new BadRequestException(format("Unable to rotate file for topic: ", topic));
+                }
+            } catch (IOException e) {
+                throw new BadRequestException("Error when rotating file for topic: " + topic, e);
+            }
+        }
+        else {
+            // use a default rotation instead
+            resetAndReopenWriter(topic, csvWriter, true);
+        }
+        return Responses.newActionResponse(json(object(field("rotated", "true")))).asPromise();
+    }
+
     private File getAuditLogFile(final String type) {
         return new File(configuration.getLogDirectory(), type + ".csv");
     }
@@ -363,6 +405,27 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             return value.asString();
         }
         return value.toString();
+    }
+
+    private void resetAndReopenWriter(final String topic, CsvWriter csvWriter, boolean forceRotation)
+            throws BadRequestException {
+        synchronized (this) {
+            resetWriter(topic, csvWriter);
+            try {
+                File auditLogFile = getAuditLogFile(topic);
+                if (forceRotation) {
+                    TimeStampFileNamingPolicy namingPolicy = new TimeStampFileNamingPolicy(auditLogFile, null, null);
+                    File rotatedFile = namingPolicy.getNextName();
+                    if (!auditLogFile.renameTo(rotatedFile)) {
+                        throw new BadRequestException(
+                                format("Unable to rename file %s to %s when rotating", auditLogFile, rotatedFile));
+                    }
+                }
+                openWriter(topic, auditLogFile);
+            } catch (IOException e) {
+                throw new BadRequestException(e);
+            }
+        }
     }
 
     private void resetWriter(final String auditEventType, final CsvWriter writerToReset) {

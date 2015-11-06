@@ -15,6 +15,8 @@
  */
 package org.forgerock.audit;
 
+import static java.lang.String.format;
+import static org.forgerock.audit.AuditServiceProxy.ACTION_PARAM_TARGET_HANDLER;
 import static org.forgerock.audit.events.AuditEventBuilder.TIMESTAMP;
 import static org.forgerock.audit.events.AuditEventBuilder.TRANSACTION_ID;
 import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
@@ -185,7 +187,7 @@ final class AuditServiceImpl implements AuditService {
             final String id = request.getResourcePathObject().size() > 1
                     ? request.getResourcePathObject().tail(1).toString()
                     : null;
-            final String topic = establishAuditEventTopic(request.getResourcePathObject());
+            final String topic = establishTopic(request.getResourcePathObject(), true);
             return queryHandler.readEvent(context, topic, id);
         } catch (Exception e) {
             return adapt(e).asPromise();
@@ -204,7 +206,7 @@ final class AuditServiceImpl implements AuditService {
                 return newUnhandledEventResponse().asPromise();
             }
 
-            final String topic = establishAuditEventTopic(request.getResourcePathObject());
+            final String topic = establishTopic(request.getResourcePathObject(), true);
             rejectIfMissingTransactionIdOrTimestamp(request);
             establishAuditEventId(request);
             filters.doFilter(topic, request.getContent());
@@ -236,12 +238,12 @@ final class AuditServiceImpl implements AuditService {
         logger.debug("Audit create id {}", auditEventId);
     }
 
-    private String establishAuditEventTopic(final ResourcePath path) throws ResourceException {
+    private String establishTopic(final ResourcePath path, boolean isTopicRequired) throws ResourceException {
         String topic = path.head(1).toString();
-        if (topic == null) {
+        if (isTopicRequired && topic == null) {
             throw new BadRequestException("Audit service called without specifying event topic in the identifier");
         }
-        if (!eventTopicsMetaData.containsTopic(topic)) {
+        if (topic != null && !eventTopicsMetaData.containsTopic(topic)) {
             throw new NotSupportedException("Audit service called with unknown event topic " + topic);
         }
         return topic;
@@ -303,7 +305,7 @@ final class AuditServiceImpl implements AuditService {
         try {
             logger.debug("Audit query called for {}", request.getResourcePath());
             checkLifecycleStateIsRunning();
-            final String topic = establishAuditEventTopic(request.getResourcePathObject());
+            final String topic = establishTopic(request.getResourcePathObject(), true);
             return queryHandler.queryEvents(context, topic, request, handler);
         } catch (Exception e) {
             return adapt(e).asPromise();
@@ -312,9 +314,23 @@ final class AuditServiceImpl implements AuditService {
 
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
-        final String error = String.format("Unable to handle action: %s", request.getAction());
-        logger.error(error);
-        return new BadRequestException(error).asPromise();
+        try {
+            String handlerName = request.getAdditionalParameter(ACTION_PARAM_TARGET_HANDLER);
+            String topic = establishTopic(request.getResourcePathObject(), false);
+            if (handlerName == null) {
+                // no action is currently managed at the audit service level, so throw an exception
+                return new BadRequestException(format("Unable to handle action: %s", request.getAction())).asPromise();
+            }
+            // Propagate the action to the given handler
+            AuditEventHandler handler = auditEventHandlersByName.get(handlerName);
+            if (handler == null) {
+                return new BadRequestException(format("Action references an unknown handler name: %s", handlerName))
+                        .asPromise();
+            }
+            return handler.handleAction(context, topic, request);
+        } catch (Exception e) {
+            return adapt(e).asPromise();
+        }
     }
 
     private Collection<AuditEventHandler> getAuditEventHandlersForEvent(final String auditEvent) {
@@ -483,6 +499,11 @@ final class AuditServiceImpl implements AuditService {
         @Override
         public boolean isEnabled() {
             return true;
+        }
+
+        @Override
+        public Promise<ActionResponse, ResourceException> handleAction(Context context, String topic, ActionRequest request) {
+            throw new UnsupportedOperationException("Unsupported.");
         }
     }
 }

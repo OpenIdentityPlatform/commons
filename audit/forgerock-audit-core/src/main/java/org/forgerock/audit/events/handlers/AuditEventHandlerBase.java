@@ -18,6 +18,12 @@ package org.forgerock.audit.events.handlers;
 import java.util.Set;
 
 import org.forgerock.audit.events.EventTopicsMetaData;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Abstract AuditEventHandler class.
@@ -64,6 +70,11 @@ public abstract class AuditEventHandlerBase implements AuditEventHandler {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    @Override
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, String topic, ActionRequest request) {
+        return new BadRequestException(String.format("Unable to handle action: %s", request.getAction())).asPromise();
     }
 
 }
