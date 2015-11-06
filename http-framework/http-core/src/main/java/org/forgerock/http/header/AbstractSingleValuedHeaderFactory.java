@@ -28,7 +28,14 @@ abstract class AbstractSingleValuedHeaderFactory<H extends Header> extends Heade
 
     @Override
     protected final H parse(List<String> values) throws MalformedHeaderException {
-        return values.size() == 1 ? parse(values.get(0)) : null;
+        switch (values.size()) {
+        case 0:
+            return null;
+        case 1:
+            return parse(values.get(0));
+        default:
+            throw new MalformedHeaderException("Do not expect more than 1 value.");
+        }
     }
 
 }
