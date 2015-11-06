@@ -31,6 +31,8 @@ public final class SecurityAnswerDefinitionConfig extends AbstractKbaStageConfig
      */
     public static final String NAME = "kbaSecurityAnswerDefinitionStage";
 
+    private int numberOfAnswersUserMustSet;
+
     /**
      * Creates a new SecurityAnswerDefinitionConfig.
      *
@@ -39,6 +41,28 @@ public final class SecurityAnswerDefinitionConfig extends AbstractKbaStageConfig
      */
     public SecurityAnswerDefinitionConfig(@JsonProperty("kbaConfig") KbaConfig kbaConfig) {
         super(kbaConfig);
+    }
+
+    /**
+     * Gets the number of answers that user must set.
+     *
+     * @return the number of answers to be set
+     */
+    public int getNumberOfAnswersUserMustSet() {
+        return numberOfAnswersUserMustSet;
+    }
+
+    /**
+     * Sets the number of answers that user must set.
+     *
+     * @param numberOfAnswersUserMustSet
+     *         the number of answers to be set
+     *
+     * @return this config instance
+     */
+    public SecurityAnswerDefinitionConfig setNumberOfAnswersUserMustSet(int numberOfAnswersUserMustSet) {
+        this.numberOfAnswersUserMustSet = numberOfAnswersUserMustSet;
+        return this;
     }
 
     @Override

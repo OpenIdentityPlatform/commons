@@ -49,7 +49,7 @@ public final class RequirementsBuilderTest {
                                                                         "What was your pet's name?",
                                                                         "Who was your first employer?")))))
                         .addRequireProperty("kbaV2",
-                                newArray(
+                                newArray(2,
                                         oneOf(
                                                 json(object(field("$ref", "#/definitions/systemQuestion"))),
                                                 json(object(field("$ref", "#/definitions/userQuestion"))))))
@@ -75,6 +75,7 @@ public final class RequirementsBuilderTest {
                 .isEqualTo("What was your pet's name?");
         assertThat(jsonValue).stringAt("properties/user/properties/kba/questions/1")
                 .isEqualTo("Who was your first employer?");
+        assertThat(jsonValue).integerAt("properties/kbaV2/minItems").isEqualTo(2);
         assertThat(jsonValue).stringAt("properties/kbaV2/items/oneOf/0/$ref")
                 .isEqualTo("#/definitions/systemQuestion");
         assertThat(jsonValue).stringAt("definitions/systemQuestion/properties/questionId/description")

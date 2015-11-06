@@ -78,6 +78,8 @@ public final class SecurityAnswerDefinitionStageTest {
 
     @Test
     public void testGatherInitialRequirements() throws Exception {
+        // Given
+        config.setNumberOfAnswersUserMustSet(2);
 
         // When
         JsonValue jsonValue = securityAnswerDefinitionStage.gatherInitialRequirements(context, config);
@@ -95,6 +97,7 @@ public final class SecurityAnswerDefinitionStageTest {
                 .isEqualTo("Who was your first employer?");
 
         assertThat(jsonValue).stringAt("properties/kba/type").isEqualTo("array");
+        assertThat(jsonValue).integerAt("properties/kba/minItems").isEqualTo(2);
 
         assertThat(jsonValue).stringAt("properties/kba/items/oneOf/0/$ref")
                 .isEqualTo("#/definitions/systemQuestion");
@@ -105,7 +108,19 @@ public final class SecurityAnswerDefinitionStageTest {
                 .isEqualTo("Id of predefined question");
         assertThat(jsonValue).booleanAt("definitions/systemQuestion/additionalProperties")
                 .isEqualTo(false);
+    }
 
+    @Test (expectedExceptions = IllegalArgumentException.class)
+    public void testAdvanceInsufficientKbaAnswersSetByUser() throws Exception {
+        // Given
+        JsonValue kbaInput = newJsonValueKba();
+        given(context.getInput()).willReturn(kbaInput);
+        config.setNumberOfAnswersUserMustSet(kbaInput.get("kba").asList().size() + 1);
+
+        given(context.getState(USER_FIELD)).willReturn(newJsonValueUser());
+
+        // When
+        securityAnswerDefinitionStage.advance(context, config);
     }
 
     @Test

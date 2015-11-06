@@ -72,7 +72,7 @@ public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<Securi
         return RequirementsBuilder
                 .newInstance("Knowledge based questions")
                 .addRequireProperty("kba",
-                        newArray(
+                        newArray(config.getNumberOfAnswersUserMustSet(),
                                 oneOf(
                                         json(object(field("$ref", "#/definitions/systemQuestion"))),
                                         json(object(field("$ref", "#/definitions/userQuestion")))))
@@ -108,6 +108,7 @@ public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<Securi
     public StageResponse advance(ProcessContext context, SecurityAnswerDefinitionConfig config)
             throws ResourceException {
         JsonValue kba = context.getInput().get("kba").required();
+        Reject.ifFalse(kba.size() >= config.getNumberOfAnswersUserMustSet());
 
         hashAnswers(kba);
         addKbaToContext(context, config, kba);

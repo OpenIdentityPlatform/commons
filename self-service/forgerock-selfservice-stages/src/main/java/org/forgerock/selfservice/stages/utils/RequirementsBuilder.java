@@ -274,9 +274,30 @@ public final class RequirementsBuilder {
      * @return a new builder instance
      */
     public static RequirementsBuilder newArray(RequirementsBuilder builder) {
+        return newArray(0, builder);
+    }
+
+    /**
+     * Creates a new builder instance for array type creation.
+     *
+     * @param minItems
+     *         minimum number of items must present in the array
+     * @param builder
+     *         for the array item
+     *
+     * @return a new builder instance
+     */
+    public static RequirementsBuilder newArray(int minItems, RequirementsBuilder builder) {
         RequirementsBuilder newBuilder = new RequirementsBuilder(BuilderType.ARRAY, null);
+        newBuilder.addMinItems(minItems);
         newBuilder.addArrayItem(builder);
         return newBuilder;
+    }
+
+    private void addMinItems(int minItems) {
+        if (minItems > 0) {
+            jsonValue.add("minItems", minItems);
+        }
     }
 
     private void addArrayItem(RequirementsBuilder builder) {
