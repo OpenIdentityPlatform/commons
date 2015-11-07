@@ -178,6 +178,8 @@
             },
             "forgotUsername" : {
                 "title" : "Retrieve Your Username",
+                "checkEmail" : "An email containing your username has been sent to your account.",
+                "failed": "Unable to retrieve your username",
                 "found": "Username found:",
                 "tryAgain": "Try Finding Your Username Again",
                 "return": "Return to Login Page"
