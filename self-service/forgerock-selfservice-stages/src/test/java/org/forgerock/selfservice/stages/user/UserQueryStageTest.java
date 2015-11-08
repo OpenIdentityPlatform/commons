@@ -20,6 +20,7 @@ import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -107,12 +108,26 @@ public final class UserQueryStageTest {
     }
 
     @Test (expectedExceptions = NullPointerException.class,
+            expectedExceptionsMessageRegExp = "User query stage expects identity username field")
+    public void testGatherInitialRequirementsNoIdentityUsernameField() throws Exception {
+        // Given
+        config = new UserQueryConfig()
+                .setIdentityEmailField("email")
+                .setIdentityIdField("_Id")
+                .setValidQueryFields(newQueryFields());
+
+        // When
+        userQueryStage.gatherInitialRequirements(context, config);
+    }
+
+    @Test (expectedExceptions = NullPointerException.class,
             expectedExceptionsMessageRegExp = "User query stage expects identity service url")
     public void testGatherInitialRequirementsNoIdentityServiceUrl() throws Exception {
         // Given
         config = new UserQueryConfig()
                 .setIdentityEmailField("email")
                 .setIdentityIdField("_Id")
+                .setIdentityUsernameField("userName")
                 .setValidQueryFields(newQueryFields());
 
         // When
@@ -237,12 +252,15 @@ public final class UserQueryStageTest {
         assertThat(putStateArgumentCaptor.getValue()).isEqualTo("user1");
         verify(context).putState(eq(EMAIL_FIELD), putStateArgumentCaptor.capture());
         assertThat(putStateArgumentCaptor.getValue()).isEqualTo("email1");
+        verify(context).putState(eq(USERNAME_FIELD), putStateArgumentCaptor.capture());
+        assertThat(putStateArgumentCaptor.getValue()).isEqualTo("Alice");
     }
 
     private UserQueryConfig newUserQueryStageConfig() {
         return new UserQueryConfig()
                 .setIdentityEmailField("/email")
                 .setIdentityIdField("_Id")
+                .setIdentityUsernameField("username")
                 .setIdentityServiceUrl("/users")
                 .setValidQueryFields(newQueryFields());
     }
@@ -270,12 +288,14 @@ public final class UserQueryStageTest {
         return json(object(
                 field("firstName", "first name"),
                 field("_Id", "user1"),
+                field("username", "Alice"),
                 field("email", "email1")));
     }
 
     private JsonValue newJsonValueUserWithoutEmail() {
         return json(object(
                 field("firstName", "first name"),
+                field("username", "Alice"),
                 field("_Id", "user1")));
     }
 

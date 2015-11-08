@@ -16,7 +16,7 @@
 
 package org.forgerock.selfservice.stages.user;
 
-import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
@@ -38,15 +38,15 @@ public final class RetrieveUsernameStage implements ProgressStage<RetrieveUserna
     @Override
     public JsonValue gatherInitialRequirements(ProcessContext context, RetrieveUsernameConfig config)
             throws ResourceException {
-        Reject.ifFalse(context.containsState(USER_ID_FIELD),
-                "Retrieve username stage expects user id in the context");
+        Reject.ifFalse(context.containsState(USERNAME_FIELD),
+                "Retrieve username stage expects user name in the context");
 
         return RequirementsBuilder.newEmptyRequirements();
     }
 
     @Override
     public StageResponse advance(ProcessContext context, RetrieveUsernameConfig config) throws ResourceException {
-        String userName = context.getState(USER_ID_FIELD).asString();
+        String userName = context.getState(USERNAME_FIELD).asString();
 
         context.putSuccessAddition(KEY_ADDITIONS_USERNAME, userName);
 

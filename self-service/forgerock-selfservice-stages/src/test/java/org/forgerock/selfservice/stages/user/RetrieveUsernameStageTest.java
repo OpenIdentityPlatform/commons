@@ -18,7 +18,7 @@ package org.forgerock.selfservice.stages.user;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
-import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 import static org.forgerock.selfservice.stages.user.RetrieveUsernameStage.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
@@ -56,7 +56,7 @@ public final class RetrieveUsernameStageTest {
     }
 
     @Test (expectedExceptions = IllegalArgumentException.class,
-            expectedExceptionsMessageRegExp = "Retrieve username stage expects user id in the context")
+            expectedExceptionsMessageRegExp = "Retrieve username stage expects user name in the context")
     public void testGatherInitialRequirementsNoUserName() throws Exception {
         // When
         retrieveUsernameStage.gatherInitialRequirements(context, config);
@@ -65,8 +65,8 @@ public final class RetrieveUsernameStageTest {
     @Test
     public void testGatherInitialRequirements() throws Exception {
         // When
-        given(context.containsState(USER_ID_FIELD)).willReturn(true);
-        given(context.getState(USER_ID_FIELD)).willReturn(newJsonValueUsername());
+        given(context.containsState(USERNAME_FIELD)).willReturn(true);
+        given(context.getState(USERNAME_FIELD)).willReturn(newJsonValueUsername());
 
         JsonValue jsonValue = retrieveUsernameStage.gatherInitialRequirements(context, config);
 
@@ -77,8 +77,8 @@ public final class RetrieveUsernameStageTest {
     @Test
     public void testAdvance() throws Exception {
         // Given
-        given(context.containsState(USER_ID_FIELD)).willReturn(true);
-        given(context.getState(USER_ID_FIELD)).willReturn(newJsonValueUsername());
+        given(context.containsState(USERNAME_FIELD)).willReturn(true);
+        given(context.getState(USERNAME_FIELD)).willReturn(newJsonValueUsername());
 
         // When
         retrieveUsernameStage.advance(context, config);
