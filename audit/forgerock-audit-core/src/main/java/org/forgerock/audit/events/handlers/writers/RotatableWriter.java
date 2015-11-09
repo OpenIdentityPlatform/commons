@@ -16,6 +16,8 @@
 
 package org.forgerock.audit.events.handlers.writers;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -192,15 +194,23 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      */
     @Override
     public void close() throws IOException {
-        try {
-            if (rotator != null) {
-                rotator.shutdown();
-                rotator.awaitTermination(5L, TimeUnit.MINUTES);
+        if (rotator != null) {
+            boolean interrupted = false;
+            rotator.shutdown();
+            try {
+                while (!rotator.awaitTermination(500, MILLISECONDS)) {
+                    logger.debug("Waiting to terminate the rotator thread.");
+                }
+            } catch (InterruptedException ex) {
+                logger.error("Unable to terminate the rotator thread", ex);
+                interrupted = true;
+            } finally {
+                if (interrupted) {
+                    Thread.currentThread().interrupt();
+                }
             }
-            writer.close();
-        } catch (InterruptedException e) {
-            logger.error("Unable to close the rotation thread", e);
         }
+        writer.close();
     }
 
     @Override
