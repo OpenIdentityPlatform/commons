@@ -184,9 +184,10 @@ final class AuditServiceImpl implements AuditService {
         try {
             logger.debug("Audit read called for {}", request.getResourcePath());
             checkLifecycleStateIsRunning();
-            final String id = request.getResourcePathObject().size() > 1
-                    ? request.getResourcePathObject().tail(1).toString()
-                    : null;
+            if (request.getResourcePathObject().size() != 2) {
+                return new BadRequestException("Invalid resource path object specified.").asPromise();
+            }
+            final String id = request.getResourcePathObject().tail(1).toString();
             final String topic = establishTopic(request.getResourcePathObject(), true);
             return queryHandler.readEvent(context, topic, id);
         } catch (Exception e) {

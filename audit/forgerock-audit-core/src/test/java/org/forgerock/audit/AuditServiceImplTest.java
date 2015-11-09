@@ -695,6 +695,55 @@ public class AuditServiceImplTest {
         assertThat(resource.getContent().asMap()).isEqualTo(expectedResponseContent.asMap());
     }
 
+    @Test
+    public void shouldNotDelegateReadRequestToConfiguredHandlerForQueriesWhenNoResourceIdIsGiven() throws Exception {
+        //given
+        final String topic = "access";
+        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic);
+        final PassThroughAuditEventHandler queryAuditEventHandler = spyPassThroughAuditEventHandler(QUERY_HANDLER_NAME);
+        final PassThroughAuditEventHandler otherAuditEventHandler = spyPassThroughAuditEventHandler("otherHandler");
+        final Set<AuditEventHandler> handlers = asSet(queryAuditEventHandler, otherAuditEventHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
+        auditService.startup();
+
+        reset(otherAuditEventHandler); // So verifyZeroInteractions will work
+
+        final ReadRequest readRequest = Requests.newReadRequest(topic);
+
+        //when
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleRead(new RootContext(), readRequest);
+
+        //then
+        assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
+        verifyZeroInteractions(otherAuditEventHandler);
+    }
+
+    @Test
+    public void shouldNotDelegateReadRequestToConfiguredHandlerForQueriesWhenInvalidResourcePathGiven() throws Exception {
+        //given
+        final String topic = "access";
+        final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic);
+        final PassThroughAuditEventHandler queryAuditEventHandler = spyPassThroughAuditEventHandler(QUERY_HANDLER_NAME);
+        final PassThroughAuditEventHandler otherAuditEventHandler = spyPassThroughAuditEventHandler("otherHandler");
+        final Set<AuditEventHandler> handlers = asSet(queryAuditEventHandler, otherAuditEventHandler);
+        final AuditService auditService = new AuditServiceImpl(configuration, eventTopicsMetaData, handlers);
+        auditService.startup();
+
+        reset(otherAuditEventHandler); // So verifyZeroInteractions will work
+
+        final ReadRequest readRequest = Requests.newReadRequest(topic, "id");
+        readRequest.setResourcePath(readRequest.getResourcePathObject().child("ThirdPathField"));
+
+        //when
+        final Promise<ResourceResponse, ResourceException> promise =
+                auditService.handleRead(new RootContext(), readRequest);
+
+        //then
+        assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
+        verifyZeroInteractions(otherAuditEventHandler);
+    }
+
     private AuditServiceConfiguration getAuditServiceConfiguration(String queryHandlerName, String topic) {
         final AuditServiceConfiguration config = new AuditServiceConfiguration();
         config.setHandlerForQueries(queryHandlerName);
