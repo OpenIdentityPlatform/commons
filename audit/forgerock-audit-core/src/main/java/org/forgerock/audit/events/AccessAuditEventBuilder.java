@@ -292,7 +292,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
         final Map<String, String> cookies = new LinkedHashMap<>();
         for (final Cookie cookie : listOfCookies) {
-            cookies.put(cookie.getName(), cookie.toString());
+            cookies.put(cookie.getName(), cookie.getValue());
         }
         httpRequest(secure, method, path, queryParameters, headers, cookies);
         return self();

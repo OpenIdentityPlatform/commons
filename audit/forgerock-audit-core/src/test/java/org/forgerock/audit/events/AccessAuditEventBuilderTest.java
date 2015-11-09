@@ -81,7 +81,9 @@ public class AccessAuditEventBuilderTest {
         queryParameters.put("parameter1", asList("value1", "value2"));
         queryParameters.put("parameter2", asList("value1", "value2"));
 
-        List<String> expectedCookieNames = asList("iPlanetDirectoryPro", "sessionId");
+        Map<String, String> expectedCookies = new HashMap<>();
+        expectedCookies.put("iPlanetDirectoryPro", "sensitive");
+        expectedCookies.put("sessionId", "sensitive");
 
         AuditEvent event = productAccessEvent()
                 .transactionId("transactionId")
@@ -109,8 +111,7 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(HTTP).get(REQUEST).get(METHOD).asString()).isEqualTo("GET");
         assertThat(value.get(HTTP).get(REQUEST).get(HEADERS).asMapOfList(String.class)).isEqualTo(requestHeaders);
         assertThat(value.get(HTTP).get(REQUEST).get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(queryParameters);
-        assertThat(value.get(HTTP).get(REQUEST).get(COOKIES).asMap(String.class))
-                .containsOnlyKeys(expectedCookieNames.toArray(new String[0]));
+        assertThat(value.get(HTTP).get(REQUEST).get(COOKIES).asMap(String.class)).isEqualTo(expectedCookies);
         assertThat(value.get(HTTP).get(RESPONSE).get(HEADERS).asMapOfList(String.class)).isEqualTo(responseHeaders);
         assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");
         assertThat(value.get(REQUEST).get(OPERATION).asString()).isEqualTo("reconcile");
