@@ -24,8 +24,8 @@
     "userAgent": "",
     "isExternal": false,
     "isSecure": true,
-    "localAddress": "",
-    "localName": "",
+    "localAddress": "127.0.0.1",
+    "localName": "localhost",
     "localPort": -1,
     "parent": {
       "class": "org.forgerock.services.context.RootContext",

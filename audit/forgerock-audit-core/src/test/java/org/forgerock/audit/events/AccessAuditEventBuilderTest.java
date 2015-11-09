@@ -35,6 +35,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.http.HttpContext;
+import org.forgerock.services.context.Context;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -281,9 +282,9 @@ public class AccessAuditEventBuilderTest {
     }
 
     @Test
-    public void canPopulateServerFromHttpContext() throws Exception {
+    public void canPopulateServerFromContext() throws Exception {
         // Given
-        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"),
+        Context context = new HttpContext(jsonFromFile("/httpContext.json"),
                 Thread.currentThread().getContextClassLoader());
 
         // When
@@ -291,13 +292,14 @@ public class AccessAuditEventBuilderTest {
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .userId("someone@forgerock.com")
-                .serverFromHttpContext(httpContext)
+                .serverFromContext(context)
                 .toEvent();
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(8080);
-        assertThat(value.get(SERVER).get(HOST).asString()).isEqualTo("product.example.com");
+        assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(-1);
+        assertThat(value.get(SERVER).get(HOST).asString()).isEqualTo("localhost");
+        assertThat(value.get(SERVER).get(IP).asString()).isEqualTo("127.0.0.1");
     }
 
     private void assertEvent(AuditEvent event) {

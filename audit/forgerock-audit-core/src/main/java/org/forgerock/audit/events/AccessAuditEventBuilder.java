@@ -38,6 +38,7 @@ import org.forgerock.http.protocol.Cookie;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Request;
+import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.annotations.VisibleForTesting;
@@ -175,14 +176,10 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @param context the CREST context
      * @return this builder
      */
-    public final T serverFromHttpContext(Context context) {
-        if (context.containsContext(HTTP_CONTEXT_NAME)) {
-            JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
-            final String hostHeader = httpContext.get(HEADERS).get(HOST_HEADER).get(0).asString();
-            final String[] hostHeaderParts = hostHeader.split(":");
-            if (hostHeaderParts.length == 2) {
-                server(null, Integer.parseInt(hostHeaderParts[1]), hostHeaderParts[0]);
-            }
+    public final T serverFromContext(Context context) {
+        if (context.containsContext(ClientContext.class)) {
+            ClientContext clientContext = context.asContext(ClientContext.class);
+            server(clientContext.getLocalAddress(), clientContext.getLocalPort(), clientContext.getLocalName());
         }
         return self();
     }
