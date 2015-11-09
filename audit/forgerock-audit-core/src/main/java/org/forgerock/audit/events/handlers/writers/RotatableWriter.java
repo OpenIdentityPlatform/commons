@@ -266,6 +266,18 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     }
 
     private void addRotationPolicies(final FileRotation fileRotation, final Duration duration) {
+        // add SizeBasedRotationPolicy if a non zero size is supplied
+        final long maxFileSize = fileRotation.getMaxFileSize();
+        if (maxFileSize > 0) {
+            rotationPolicies.add(new SizeBasedRotationPolicy(maxFileSize));
+        }
+
+        // add FixedTimeRotationPolicy
+        final List<String> rotationTimes = fileRotation.getRotationTimes();
+        if (!rotationTimes.isEmpty()) {
+            rotationPolicies.add(new FixedTimeRotationPolicy(rotationTimes));
+        }
+
         // add TimeLimitRotationPolicy if enabled
         if (!duration.isZero()){
             rotationPolicies.add(new TimeLimitRotationPolicy(duration));
@@ -284,18 +296,6 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                     0,
                     duration.to(TimeUnit.MILLISECONDS),
                     TimeUnit.MILLISECONDS);
-        }
-
-        // add SizeBasedRotationPolicy if a non zero size is supplied
-        final long maxFileSize = fileRotation.getMaxFileSize();
-        if (maxFileSize > 0) {
-            rotationPolicies.add(new SizeBasedRotationPolicy(maxFileSize));
-        }
-
-        // add FixedTimeRotationPolicy
-        final List<String> rotationTimes = fileRotation.getRotationTimes();
-        if (!rotationTimes.isEmpty()) {
-            rotationPolicies.add(new FixedTimeRotationPolicy(rotationTimes));
         }
     }
 
