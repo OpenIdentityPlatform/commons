@@ -32,15 +32,10 @@ public final class LocaleUtils {
         throw new UnsupportedOperationException();
     }
 
-    /****************************************************************************************************************
-     * NOTE: Remove these functions once forgerock-util has been updated.
-     ****************************************************************************************************************/
-
     /**
      * Using the user's preferred locales (for example, from the "Accept-Language" header in the HTTP context),
      * select the most optimal (string) translation from the map.  If there is nothing acceptable, throw an exception.
      * <p/>
-     * TODO: REMOVE ME ONCE FORGEROCK UTIL HAS BEEN UPDATED
      *
      * @param preferredLocales
      *         the preferred locales
@@ -67,7 +62,6 @@ public final class LocaleUtils {
     /**
      * Retrieves the appropriate translation.
      * <p/>
-     * TODO: REMOVE ME ONCE FORGEROCK UTIL HAS BEEN UPDATED
      *
      * @param locales
      *         The preferred locales
