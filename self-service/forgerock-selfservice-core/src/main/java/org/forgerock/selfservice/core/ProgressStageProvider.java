@@ -14,7 +14,25 @@
  * Copyright 2015 ForgeRock AS.
  */
 
+package org.forgerock.selfservice.core;
+
+import org.forgerock.selfservice.core.config.StageConfig;
+
 /**
- * This package contains a common approach to dynamic progress stage handling.
+ * Progress stage provider.
+ *
+ * @since 0.8.0
  */
-package org.forgerock.selfservice.stages.dynamic;
+public interface ProgressStageProvider {
+
+    /**
+     * Given the progress stage class retrieves a corresponding instance of the class.
+     *
+     * @param progressStageClass
+     *         progress stage class
+     *
+     * @return progress stage instance
+     */
+    ProgressStage<StageConfig> get(Class<? extends ProgressStage<StageConfig>> progressStageClass);
+
+}

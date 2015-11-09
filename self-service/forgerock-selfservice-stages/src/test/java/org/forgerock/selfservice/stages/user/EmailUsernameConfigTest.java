@@ -35,7 +35,7 @@ public final class EmailUsernameConfigTest {
         mapper.registerSubtypes(
                 new NamedType(EmailUsernameConfig.class, EmailUsernameConfig.NAME)
         );
-        StageConfig<?> config = mapper.readValue(getClass().getResource("/emailUsername.json"), StageConfig.class);
+        StageConfig config = mapper.readValue(getClass().getResource("/emailUsername.json"), StageConfig.class);
 
         assertThat(config).isInstanceOf(EmailUsernameConfig.class);
         EmailUsernameConfig emailUsernameConfig = (EmailUsernameConfig) config;

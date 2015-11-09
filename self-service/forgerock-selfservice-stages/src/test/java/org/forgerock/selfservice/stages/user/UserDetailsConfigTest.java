@@ -36,7 +36,7 @@ public final class UserDetailsConfigTest {
         mapper.registerSubtypes(
                 new NamedType(UserDetailsConfig.class, UserDetailsConfig.NAME)
         );
-        StageConfig<?> config = mapper.readValue(getClass().getResource("/userDetails.json"), StageConfig.class);
+        StageConfig config = mapper.readValue(getClass().getResource("/userDetails.json"), StageConfig.class);
 
         assertThat(config).isInstanceOf(UserDetailsConfig.class);
         UserDetailsConfig kbaConfig = (UserDetailsConfig) config;

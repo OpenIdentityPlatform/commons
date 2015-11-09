@@ -17,57 +17,84 @@
 package org.forgerock.selfservice.core;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.config.StageConfig;
+import org.forgerock.selfservice.core.config.StageConfigException;
 import org.forgerock.util.Reject;
 
 /**
- * Binds together the progress stage with its config. Acts to enforce the generic binding between the two
- * but also assists in the passing of the config to keep the progress stages from maintaining thread state,
- * therefore promoting thread safety.
+ * Progress stage binder is responsible for creating bindings between the stage configs and their consuming stages.
  *
- * @param <C>
- *         type that describes the stage config
- *
- * @since 0.1.0
+ * @since 0.8.0
  */
-public final class ProgressStageBinder<C extends StageConfig<?>> {
+final class ProgressStageBinder {
 
-    private final ProgressStage<C> delegatedStage;
-    private final C stageConfig;
+    private final ProgressStageProvider provider;
 
-    private ProgressStageBinder(ProgressStage<C> delegatedStage, C stageConfig) {
-        Reject.ifNull(delegatedStage, stageConfig);
-        this.delegatedStage = delegatedStage;
-        this.stageConfig = stageConfig;
+    ProgressStageBinder(ProgressStageProvider provider) {
+        this.provider = provider;
     }
 
-    JsonValue gatherInitialRequirements(ProcessContext context) throws ResourceException {
-        return delegatedStage.gatherInitialRequirements(context, stageConfig);
+    ProgressStageBinding<?> getBinding(StageConfig config) {
+        Reject.ifNull(config, "Stage config instance is expected");
+        Reject.ifNull(config.getProgressStageClassName(), "Progress stage class name is expected");
+
+        try {
+            // Safe cast as all progress stages can consume stage configs.
+            @SuppressWarnings("unchecked")
+            Class<? extends ProgressStage<StageConfig>> typedProgressStageClass =
+                    (Class<? extends ProgressStage<StageConfig>>) Class
+                            .forName(config.getProgressStageClassName())
+                            .asSubclass(ProgressStage.class);
+
+            ProgressStage<StageConfig> stage = provider.get(typedProgressStageClass);
+            return ProgressStageBinding.bind(new ProxyProgressStage(stage), config);
+
+        } catch (ClassNotFoundException cnfE) {
+            throw new StageConfigException("Configured progress stage class not found", cnfE);
+        } catch (ClassCastException ccE) {
+            throw new StageConfigException("Configured class name does not represent a progress stage", ccE);
+        }
     }
 
-    StageResponse advance(ProcessContext context) throws ResourceException {
-        return delegatedStage.advance(context, stageConfig);
-    }
-
-    String getName() {
-        return stageConfig.getName();
-    }
-
-    /**
-     * Create a new binder instance.
-     *
-     * @param stage
-     *         the progress stage
-     * @param config
-     *         the stage config
-     * @param <C>
-     *         the stage config type shared by the progress stage
-     *
-     * @return a new binder instance
+    /*
+     * Due to reflection stage config typing cannot be defined here, it is handled at runtime.
+     * In the case of invalid configuration this may result in a class cast exception.
+     * This proxy captures such exceptions and reports more a helpful exception.
      */
-    public static <C extends StageConfig<?>> ProgressStageBinder<C> bind(ProgressStage<C> stage, C config) {
-        return new ProgressStageBinder<>(stage, config);
+    private static final class ProxyProgressStage implements ProgressStage<StageConfig> {
+
+        private final ProgressStage<StageConfig> actualStage;
+
+        private ProxyProgressStage(ProgressStage<StageConfig> actualStage) {
+            this.actualStage = actualStage;
+        }
+
+        @Override
+        public JsonValue gatherInitialRequirements(
+                ProcessContext context, StageConfig config) throws ResourceException {
+            try {
+                return actualStage.gatherInitialRequirements(context, config);
+            } catch (ClassCastException ccE) {
+                throw new InternalServerErrorException(
+                        "Configured progress stage is unable to consume config of type "
+                                + config.getClass().getName(), ccE);
+            }
+        }
+
+        @Override
+        public StageResponse advance(
+                ProcessContext context, StageConfig config) throws ResourceException {
+            try {
+                return actualStage.advance(context, config);
+            } catch (ClassCastException ccE) {
+                throw new InternalServerErrorException(
+                        "Configured progress stage is unable to consume config of type "
+                                + config.getClass().getName(), ccE);
+            }
+        }
+
     }
 
 }

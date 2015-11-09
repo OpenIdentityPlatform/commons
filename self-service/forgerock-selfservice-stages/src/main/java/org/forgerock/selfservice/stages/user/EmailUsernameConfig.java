@@ -15,17 +15,17 @@
  */
 package org.forgerock.selfservice.stages.user;
 
+import org.forgerock.selfservice.core.config.StageConfig;
+
 import java.util.Locale;
 import java.util.Map;
-import org.forgerock.selfservice.core.ProgressStageBinder;
-import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
  * Configuration for the email based user name retrieval stage.
  *
  * @since 0.8.0
  */
-public final class EmailUsernameConfig implements StageConfig<UserConfigVisitor> {
+public final class EmailUsernameConfig implements StageConfig {
 
     /**
      * Name of the stage configuration.
@@ -177,8 +177,8 @@ public final class EmailUsernameConfig implements StageConfig<UserConfigVisitor>
     }
 
     @Override
-    public ProgressStageBinder<?> accept(UserConfigVisitor visitor) {
-        return visitor.build(this);
+    public String getProgressStageClassName() {
+        return EmailUsernameStage.class.getName();
     }
 
 }

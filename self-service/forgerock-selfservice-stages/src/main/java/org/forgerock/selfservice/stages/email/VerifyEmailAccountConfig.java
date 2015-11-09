@@ -16,7 +16,6 @@
 
 package org.forgerock.selfservice.stages.email;
 
-import org.forgerock.selfservice.core.ProgressStageBinder;
 import org.forgerock.selfservice.core.config.StageConfig;
 
 import java.util.Locale;
@@ -27,7 +26,7 @@ import java.util.Map;
  *
  * @since 0.1.0
  */
-public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAccountConfigVisitor> {
+public final class VerifyEmailAccountConfig implements StageConfig {
 
     /**
      * Name of the stage configuration.
@@ -225,8 +224,8 @@ public final class VerifyEmailAccountConfig implements StageConfig<VerifyEmailAc
     }
 
     @Override
-    public ProgressStageBinder<?> accept(VerifyEmailAccountConfigVisitor visitor) {
-        return visitor.build(this);
+    public String getProgressStageClassName() {
+        return VerifyEmailAccountStage.class.getName();
     }
 
 }

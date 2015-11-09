@@ -17,18 +17,14 @@
 package org.forgerock.selfservice.core.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.forgerock.selfservice.core.ProgressStageBinder;
 
 /**
  * Represents the configuration for a given progress stage.
  *
- * @param <V>
- *         type that describes the stage config visitor
- *
  * @since 0.1.0
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
-public interface StageConfig<V extends StageConfigVisitor> {
+public interface StageConfig {
 
     /**
      * Gets the name of the stage configuration.
@@ -38,13 +34,10 @@ public interface StageConfig<V extends StageConfigVisitor> {
     String getName();
 
     /**
-     * Accepts the passed visitor.
+     * Gets the class name of the consuming progress stage.
      *
-     * @param visitor
-     *         stage config visitor
-     *
-     * @return a new progress stage binder
+     * @return the progress stage class name
      */
-    ProgressStageBinder<?> accept(V visitor);
+    String getProgressStageClassName();
 
 }

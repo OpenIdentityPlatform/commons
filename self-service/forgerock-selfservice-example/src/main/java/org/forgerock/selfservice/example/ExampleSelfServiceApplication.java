@@ -34,22 +34,15 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.selfservice.core.AnonymousProcessService;
-import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.UserUpdateService;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.config.StageConfigException;
 import org.forgerock.selfservice.example.custom.MathProblemStageConfig;
 import org.forgerock.selfservice.json.JsonConfig;
-import org.forgerock.selfservice.stages.dynamic.DynamicConfigVisitor;
-import org.forgerock.selfservice.stages.dynamic.DynamicConfigVisitorImpl;
-import org.forgerock.selfservice.stages.dynamic.DynamicProgressStageProvider;
-import org.forgerock.selfservice.stages.dynamic.DynamicStageConfig;
 import org.forgerock.util.Factory;
 
 import java.util.List;
@@ -62,7 +55,6 @@ import java.util.Map;
  */
 public final class ExampleSelfServiceApplication implements HttpApplication {
 
-    private DynamicConfigVisitor dynamicConfigVisitor;
     private ConnectionFactory crestConnectionFactory;
     private Router crestRouter;
     private JsonValue appConfig;
@@ -71,20 +63,6 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     @Override
     public Handler start() throws HttpApplicationException {
         try {
-            dynamicConfigVisitor = new DynamicConfigVisitorImpl(new DynamicProgressStageProvider() {
-
-                @Override
-                public ProgressStage<DynamicStageConfig> get(
-                        Class<? extends ProgressStage<DynamicStageConfig>> progressStageClass) {
-                    try {
-                        // Assumes an empty constructor.
-                        return progressStageClass.newInstance();
-                    } catch (InstantiationException | IllegalAccessException e) {
-                        throw new StageConfigException("Unable to instantiate progress stage", e);
-                    }
-                }
-
-            });
 
             appConfig = JsonReader.jsonFileToJsonValue("/config.json");
             httpClient = new Client(new HttpClientHandler());
@@ -116,10 +94,10 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     private Handler registerResetHandler() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/reset.json"), Map.class));
-        ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
+        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
 
-        RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,
-                new ExampleStageConfigVisitor(dynamicConfigVisitor, crestConnectionFactory, httpClient),
+        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
+                new ExampleProgressStageProvider(crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
@@ -128,10 +106,10 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     private Handler registerUsernameHandler() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/username.json"), Map.class));
-        ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
+        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
 
-        RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,
-                new ExampleStageConfigVisitor(dynamicConfigVisitor, crestConnectionFactory, httpClient),
+        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
+                new ExampleProgressStageProvider(crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
@@ -140,16 +118,16 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     private Handler registerRegistrationHandler() throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/registration.json"), Map.class));
-        ProcessInstanceConfig<ExampleStageConfigVisitor> config = JsonConfig.buildProcessInstanceConfig(json);
+        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
 
         // TODO: Presently injecting dynamic stage until there is a viable JSON solution.
-        List<StageConfig<? super ExampleStageConfigVisitor>> stages = config.getStageConfigs();
+        List<StageConfig> stages = config.getStageConfigs();
         stages.add(0, new MathProblemStageConfig()
                 .setLeftValue(5)
                 .setRightValue(10));
 
-        RequestHandler userSelfServiceService = new AnonymousProcessService<>(config,
-                new ExampleStageConfigVisitor(dynamicConfigVisitor, crestConnectionFactory, httpClient),
+        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
+                new ExampleProgressStageProvider(crestConnectionFactory, httpClient),
                 new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
 
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));

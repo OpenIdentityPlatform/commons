@@ -16,14 +16,12 @@
 package org.forgerock.selfservice.json;
 
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
-import org.forgerock.selfservice.core.config.StageConfigVisitor;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
@@ -76,14 +74,12 @@ public final class JsonConfig {
      *
      * @param json
      *         the value to be converted
-     * @param <V>
-     *         the stage config visitor type
      *
      * @return ProcessInstanceConfig
      * the one built from the provided json
      */
-    public static <V extends StageConfigVisitor> ProcessInstanceConfig<V> buildProcessInstanceConfig(JsonValue json) {
-        return OBJECT_MAPPER.convertValue(json.getObject(), new TypeReference<ProcessInstanceConfig<V>>() { });
+    public static ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) {
+        return OBJECT_MAPPER.convertValue(json.getObject(), ProcessInstanceConfig.class);
     }
 
 }

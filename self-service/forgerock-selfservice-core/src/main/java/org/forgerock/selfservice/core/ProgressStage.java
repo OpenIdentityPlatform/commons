@@ -35,7 +35,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
  *
  * @since 0.1.0
  */
-public interface ProgressStage<C extends StageConfig<?>> {
+public interface ProgressStage<C extends StageConfig> {
 
     /**
      * Response for defining any initial requirements the stage may have.

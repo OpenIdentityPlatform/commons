@@ -27,14 +27,11 @@ import java.util.List;
 /**
  * Represents the configuration for an instance of the anonymous process service.
  *
- * @param <V>
- *         type that describes the stage config visitor
- *
  * @since 0.1.0
  */
-public final class ProcessInstanceConfig<V extends StageConfigVisitor> {
+public final class ProcessInstanceConfig {
 
-    private List<StageConfig<? super V>> stageConfigs;
+    private List<StageConfig> stageConfigs;
     @JsonProperty("snapshotToken")
     private SnapshotTokenConfig snapshotTokenConfig;
     @JsonProperty("storage")
@@ -49,7 +46,7 @@ public final class ProcessInstanceConfig<V extends StageConfigVisitor> {
      *
      * @return this config
      */
-    public ProcessInstanceConfig<V> setStageConfigs(List<StageConfig<? super V>> stageConfigs) {
+    public ProcessInstanceConfig setStageConfigs(List<StageConfig> stageConfigs) {
         Reject.ifNull(stageConfigs);
         this.stageConfigs = new ArrayList<>(stageConfigs);
         return this;
@@ -60,7 +57,7 @@ public final class ProcessInstanceConfig<V extends StageConfigVisitor> {
      *
      * @return the list of stage configs
      */
-    public List<StageConfig<? super V>> getStageConfigs() {
+    public List<StageConfig> getStageConfigs() {
         return stageConfigs;
     }
 
@@ -72,7 +69,7 @@ public final class ProcessInstanceConfig<V extends StageConfigVisitor> {
      *
      * @return this config
      */
-    public ProcessInstanceConfig<V> setSnapshotTokenConfig(SnapshotTokenConfig snapshotTokenConfig) {
+    public ProcessInstanceConfig setSnapshotTokenConfig(SnapshotTokenConfig snapshotTokenConfig) {
         Reject.ifNull(snapshotTokenConfig);
         this.snapshotTokenConfig = snapshotTokenConfig;
         return this;
@@ -95,7 +92,7 @@ public final class ProcessInstanceConfig<V extends StageConfigVisitor> {
      *
      * @return this config
      */
-    public ProcessInstanceConfig<V> setStorageType(StorageType storageType) {
+    public ProcessInstanceConfig setStorageType(StorageType storageType) {
         Reject.ifNull(storageType);
         this.storageType = storageType;
         return this;

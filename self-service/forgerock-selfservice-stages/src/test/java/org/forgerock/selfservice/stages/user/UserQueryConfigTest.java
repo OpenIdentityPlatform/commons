@@ -35,7 +35,7 @@ public final class UserQueryConfigTest {
         mapper.registerSubtypes(
                 new NamedType(UserQueryConfig.class, UserQueryConfig.NAME)
         );
-        StageConfig<?> config = mapper.readValue(getClass().getResource("/userQuery.json"), StageConfig.class);
+        StageConfig config = mapper.readValue(getClass().getResource("/userQuery.json"), StageConfig.class);
 
         assertThat(config).isInstanceOf(UserQueryConfig.class);
         UserQueryConfig queryConfig = (UserQueryConfig) config;

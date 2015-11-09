@@ -15,7 +15,6 @@
  */
 package org.forgerock.selfservice.stages.captcha;
 
-import org.forgerock.selfservice.core.ProgressStageBinder;
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
@@ -23,7 +22,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
  *
  * @since 0.2.0
  */
-public final class CaptchaStageConfig implements StageConfig<CaptchaConfigVisitor> {
+public final class CaptchaStageConfig implements StageConfig {
 
     /**
      * Name of the stage configuration.
@@ -108,8 +107,8 @@ public final class CaptchaStageConfig implements StageConfig<CaptchaConfigVisito
     }
 
     @Override
-    public ProgressStageBinder<?> accept(CaptchaConfigVisitor visitor) {
-        return visitor.build(this);
+    public String getProgressStageClassName() {
+        return CaptchaStage.class.getName();
     }
 
 }

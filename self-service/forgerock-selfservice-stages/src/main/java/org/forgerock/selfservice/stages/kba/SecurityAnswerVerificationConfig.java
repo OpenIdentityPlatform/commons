@@ -16,7 +16,6 @@
 package org.forgerock.selfservice.stages.kba;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.forgerock.selfservice.core.ProgressStageBinder;
 
 /**
  * Configuration for the KBA Security Answer Verification Stage.
@@ -94,8 +93,8 @@ public final class SecurityAnswerVerificationConfig extends AbstractKbaStageConf
     }
 
     @Override
-    public ProgressStageBinder<?> accept(KbaConfigVisitor visitor) {
-        return visitor.build(this);
+    public String getProgressStageClassName() {
+        return SecurityAnswerVerificationStage.class.getName();
     }
 
     @Override

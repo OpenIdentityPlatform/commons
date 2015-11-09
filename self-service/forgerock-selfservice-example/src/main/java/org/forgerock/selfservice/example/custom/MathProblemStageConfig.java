@@ -16,16 +16,14 @@
 
 package org.forgerock.selfservice.example.custom;
 
-import org.forgerock.selfservice.core.ProgressStageBinder;
-import org.forgerock.selfservice.stages.dynamic.DynamicConfigVisitor;
-import org.forgerock.selfservice.stages.dynamic.DynamicStageConfig;
+import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
  * Represents the config for a simple math problem to be solved.
  *
  * @since 0.7.0
  */
-public final class MathProblemStageConfig implements DynamicStageConfig {
+public final class MathProblemStageConfig implements StageConfig {
 
     private final static String NAME = "MathProblem";
 
@@ -84,11 +82,6 @@ public final class MathProblemStageConfig implements DynamicStageConfig {
     @Override
     public String getName() {
         return NAME;
-    }
-
-    @Override
-    public ProgressStageBinder<?> accept(DynamicConfigVisitor visitor) {
-        return visitor.build(this);
     }
 
 }

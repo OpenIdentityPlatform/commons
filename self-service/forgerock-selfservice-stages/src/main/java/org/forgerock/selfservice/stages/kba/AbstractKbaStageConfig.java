@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @since 0.2.0
  */
-abstract class AbstractKbaStageConfig<C extends AbstractKbaStageConfig<C>> implements StageConfig<KbaConfigVisitor> {
+abstract class AbstractKbaStageConfig<C extends AbstractKbaStageConfig<C>> implements StageConfig {
 
     private KbaConfig config;
 
@@ -84,6 +84,6 @@ abstract class AbstractKbaStageConfig<C extends AbstractKbaStageConfig<C>> imple
      *
      * @return this object
      */
-    public abstract C self();
+    protected abstract C self();
 
 }

@@ -15,16 +15,16 @@
  */
 package org.forgerock.selfservice.stages.user;
 
-import java.util.Set;
-import org.forgerock.selfservice.core.ProgressStageBinder;
 import org.forgerock.selfservice.core.config.StageConfig;
+
+import java.util.Set;
 
 /**
  * Configuration for the user query stage.
  *
  * @since 0.5.0
  */
-public final class UserQueryConfig implements StageConfig<UserConfigVisitor> {
+public final class UserQueryConfig implements StageConfig {
 
     /**
      * Name of the stage configuration.
@@ -130,8 +130,8 @@ public final class UserQueryConfig implements StageConfig<UserConfigVisitor> {
     }
 
     @Override
-    public ProgressStageBinder<?> accept(UserConfigVisitor visitor) {
-        return visitor.build(this);
+    public String getProgressStageClassName() {
+        return UserQueryStage.class.getName();
     }
 
 }

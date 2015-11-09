@@ -113,9 +113,7 @@ public final class UserUpdateService implements RequestHandler {
                         : cryptoService.hash(answer.asString(), CryptoConstants.ALGORITHM_SHA_256);
                 hashedAnswers.add(object(
                                 field("questionId", questionId),
-                                field("answer", hashedAnswer.getObject())
-                        )
-                );
+                                field("answer", hashedAnswer.getObject())));
             }
 
             return connectionFactory.getConnection().patch(
