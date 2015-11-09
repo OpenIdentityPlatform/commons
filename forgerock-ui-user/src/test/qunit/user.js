@@ -101,10 +101,10 @@ define([
                         routePromise.then(function () {
                             QUnit.equal(window.location.hash, "#profile/password", "Route updates on tab change");
 
-                            QUnit.equal($("input[name=password]", userProfileView.$el)[0], document.activeElement, "First name field has focus on page load");
+                            QUnit.equal($("input[name=password]", userProfileView.$el)[0], document.activeElement, "Password field has focus on page load");
 
-                            $("#userPasswordTab #input-password", userProfileView.$el).val("newPassword").trigger('change');
-                            $("#userPasswordTab #input-confirmPassword", userProfileView.$el).val("newPassword").trigger('change');
+                            $("#userPasswordTab #input-password", userProfileView.$el).val("newPassw0rd").trigger('change');
+                            $("#userPasswordTab #input-confirmPassword", userProfileView.$el).val("newPassw0rd").trigger('change');
 
                             $("body").one("shown.bs.modal", function () {
                                 QUnit.ok(/Password/.test($("#confirmPasswordFormExplanation em").text()), "Password change triggers confirm password dialog");
@@ -127,7 +127,9 @@ define([
                                 });
                                 $('#userPasswordTab input[type=submit]', userProfileView.$el).trigger('click');
                             });
-                            $('#userPasswordTab input[type=submit]', userProfileView.$el).trigger('click');
+                            _.delay(function () { // push this to the bottom of the event loop, so the validation logic can apply
+                                $('#userPasswordTab input[type=submit]', userProfileView.$el).trigger('click');
+                            });
                         });
 
                     });

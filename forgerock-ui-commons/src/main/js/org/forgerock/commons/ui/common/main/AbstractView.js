@@ -176,10 +176,6 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                     ValidatorsUtils.showValidation($input, $form);
                     if(validationMessage.length){
                         $input.parents(".form-group").addClass('has-feedback has-error');
-                        //clean up existing popover if validation messsage is different
-                        if ($input.data()["bs.popover"] && !_.isEqual(validationMessage,$input.data()["bs.popover"].options.validationMessage)) {
-                            $input.popover('destroy');
-                        }
                         $input.popover({
                             validationMessage: validationMessage,
                             content: '<i class="fa fa-exclamation-circle"></i> ' + validationMessage.join('<br><i class="fa fa-exclamation-circle"></i> '),

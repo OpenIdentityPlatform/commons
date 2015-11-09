@@ -31,7 +31,8 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
-    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+    "org/forgerock/commons/ui/common/util/ValidatorsUtils",
+    "bootstrap"
 ], function($, _, AbstractConfigurationAware, ModuleLoader, ValidatorsUtils) {
     var obj = new AbstractConfigurationAware();
     function jsonEditorNodeCallbackHandler(node) {
@@ -99,11 +100,11 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                 event = "change blur paste";
             }
 
-            _.each(input.attr('data-validator').split(' '), function(type){
-                input.on(event, function (e) {
-                    obj.validate.call({input: input, el: el, validatorType: type}, e);
-                    validateDependents(input);
-                });
+            input.on(event, function (e) {
+                //clean up existing popover
+                input.popover('destroy');
+                obj.validate.call({input: input, el: el, validatorType: input.attr('data-validator')}, e);
+                validateDependents(input);
             });
 
         });
@@ -307,23 +308,44 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     };
 
     obj.validate = function(event) {
-        var parameters = [this.el, this.input, _.bind(obj.afterValidation, this)], validatorConfig, i;
-        _.each(this.validatorType.split(' '), _.bind(function (vt) {
+        var messages = []; // collection of all failure messages received from the various validators
 
-            validatorConfig = obj.configuration.validators[vt];
+        $.when.apply($, _.map(this.validatorType.split(' '), function (vt) {
+            var deferred = $.Deferred(),
+                parameters = [
+                    this.el,         // the element containing the whole form
+                    this.input,      // the specific input within the form being validated
+                    function (failures) { // the callback function for when the validator is complete
+                        _.each(failures, function (failure) {
+                            messages.push(failure);
+                        });
+                        deferred.resolve();
+                    }
+                ],
+                validatorConfig = obj.configuration.validators[vt];
 
-            if(validatorConfig) {
+            if (validatorConfig) {
                 this.el.trigger("onValidate", [this.input, "inProgress"]);
 
-                for(i = 0; i < validatorConfig.dependencies.length; i++) {
-                    parameters.push(require(validatorConfig.dependencies[i]));
-                }
+                $.when.apply($, _.map(validatorConfig.dependencies, ModuleLoader.load))
+                    .then(_.bind(function () {
+                        parameters = parameters.concat(_.toArray(arguments));
+                        validatorConfig.validator.apply(this, parameters);
+                    }, this));
 
-                validatorConfig.validator.apply(this, parameters);
             } else {
                 console.error("Could not find such validator: " + validatorConfig);
+                deferred.resolve();
             }
-
+            return deferred.promise();
+        }, this))
+        .always(_.bind(function () {
+            // pass all of the validation failures returned to the afterValidation method
+            if (messages.length) {
+                obj.afterValidation.call(this, messages);
+            } else {
+                obj.afterValidation.call(this, false);
+            }
         }, this));
     };
 

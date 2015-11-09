@@ -24,62 +24,78 @@
 
 /*global define */
 
-/**
- * @author mbilski
- */
 define("config/validators/CommonValidators", [
     "jquery"
 ], function($) {
     var obj = {
         "required": {
             "name": "Required field",
-            "dependencies": [
-            ],
-            "validator": function(el, input, callback) {
+            "dependencies": [ ],
+            "validator": function(el, input, callback, Base64) {
                 var v = input.val();
                 if (!v || v === "") {
                     callback([$.t("common.form.validation.required")]);
-                    return;
+                } else {
+                    callback();
                 }
 
-                callback();
             }
         },
         "passwordConfirm": {
             "name": "Password confirmation",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-            ],
-            "validator": function(el, input, callback, utils) {
+            "dependencies": [ ],
+            "validator": function(el, input, callback) {
                 var confirmValue = input.val(),
                     mainInput = el.find("input[data-validation-dependents=passwordConfirm]");
 
                 if (mainInput.val() !== confirmValue || mainInput.attr("data-validation-status") === "error") {
                     callback([$.t("common.form.validation.confirmationMatchesPassword")]);
-                    return;
+                } else {
+                    callback();
                 }
-
-                callback();
             }
         },
         "minLength": {
-            "name": "Password validator",
-            "dependencies": [
-                "org/forgerock/commons/ui/common/util/ValidatorsUtils"
-            ],
-            "validator": function(el, input, callback, utils) {
+            "name": "Minimum number of characters",
+            "dependencies": [ ],
+            "validator": function(el, input, callback) {
                 var v = input.val(),
-                    errors = [],
                     len = input.attr('minLength');
 
                 if (v.length < len) {
-                    errors.push($.t("common.form.validation.MIN_LENGTH", {minLength: len}));
-                }
-
-                if (errors.length === 0) {
-                    callback();
+                    callback([$.t("common.form.validation.MIN_LENGTH", {minLength: len})]);
                 } else {
-                    callback(errors);
+                    callback();
+                }
+            }
+        },
+        "atLeastXNumbers": {
+            "name": "Minimum occurrence of numeric characters in string",
+            "dependencies": [ ],
+            "validator": function(el, input, callback) {
+                var v = input.val(),
+                    minNumbers = input.attr('atLeastXNumbers'),
+                    foundNumbers = v.match(/\d/g);
+
+                if (!foundNumbers || foundNumbers.length < minNumbers) {
+                    callback([$.t("common.form.validation.AT_LEAST_X_NUMBERS", {numNums: minNumbers})]);
+                } else {
+                    callback();
+                }
+            }
+        },
+        "atLeastXCapitalLetters": {
+            "name": "Minimum occurrence of capital letter characters in string",
+            "dependencies": [ ],
+            "validator": function(el, input, callback) {
+                var v = input.val(),
+                    minCapitals = input.attr('atLeastXCapitalLetters'),
+                    foundCapitals = v.match(/[(A-Z)]/g);
+
+                if (!foundCapitals || foundCapitals.length < minCapitals) {
+                    callback([$.t("common.form.validation.AT_LEAST_X_CAPITAL_LETTERS", {numCaps: minCapitals})]);
+                } else {
+                    callback();
                 }
             }
         }

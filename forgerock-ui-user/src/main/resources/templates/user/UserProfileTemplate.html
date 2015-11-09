@@ -67,7 +67,9 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="input-password">{{t "common.user.password"}}</label>
                         <div class="col-sm-6">
-                            <input class="form-control" type="password" id="input-password" name="password" value="" data-validation-dependents="passwordConfirm" data-validator-event="keyup" />
+                            <input class="form-control" type="password" id="input-password" name="password" value=""
+                                data-validation-dependents="passwordConfirm" data-validator-event="keyup"
+                                data-validator="required minLength atLeastXNumbers atLeastXCapitalLetters" minLength="8" atLeastXNumbers="1" atLeastXCapitalLetters="1" />
                             <div class="validation-message"></div>
                             <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
                         </div>
@@ -75,7 +77,8 @@
                     <div class="form-group">
                         <label class="col-sm-3 control-label" for="input-confirmPassword">{{t 'common.user.confirmPassword'}}</label>
                         <div class="col-sm-6">
-                            <input class="form-control" type="password" id="input-confirmPassword" value="" data-validator="passwordConfirm" data-validator-event="keyup" />
+                            <input class="form-control" type="password" id="input-confirmPassword" value=""
+                                data-validator="passwordConfirm" data-validator-event="keyup" />
                             <div class="validation-message"></div>
                             <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
                         </div>

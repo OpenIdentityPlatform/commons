@@ -64,6 +64,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
 
         focusInput: function (e) {
+            ValidatorsManager.validateAllFields($($(e.target).attr("href")).find("form"));
             $($(e.target).attr("href")).find(":input:not([readonly]):first").focus();
         },
 
