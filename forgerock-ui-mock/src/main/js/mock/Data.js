@@ -491,6 +491,7 @@
                                 "properties": {
                                   "kba": {
                                     "type": "array",
+                                    "minItems": 2,
                                     "items": {
                                       "type": "object",
                                       "oneOf": [
@@ -563,7 +564,8 @@
                 break;
                 case "mockToken3":
                     if (_.isObject(requestContent.input) &&
-                        _.isObject(requestContent.input.kba)) {
+                        _.isArray(requestContent.input.kba) &&
+                        requestContent.input.kba.length >= 2) {
                         request.respond(
                             200,
                             headers,

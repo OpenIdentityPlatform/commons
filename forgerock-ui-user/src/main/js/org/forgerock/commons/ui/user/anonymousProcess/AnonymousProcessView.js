@@ -171,7 +171,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
             delete this.delegate;
             delete this.stateData;
             EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
-                route: _.extend({}, Router.currentRoute, { forceUpdate: true }) 
+                route: _.extend({}, Router.currentRoute, { forceUpdate: true })
             });
         },
 
@@ -211,7 +211,7 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
                 loadGenericTemplate(this.stateData);
             }
 
-            processStatePromise.then(_.bind(function (content) {
+            return processStatePromise.then(_.bind(function (content) {
                 this.$el.find("#processContent").html(content);
                 ValidatorsManager.bindValidators(this.$el);
                 ValidatorsManager.validateAllFields(this.$el);

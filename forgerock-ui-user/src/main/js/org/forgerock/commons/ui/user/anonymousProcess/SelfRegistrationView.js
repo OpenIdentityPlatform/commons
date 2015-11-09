@@ -43,7 +43,9 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
         processType: "registration",
         i18nBase: "common.user.selfRegistration",
         addKBAQuestion: function (e) {
-            e.preventDefault();
+            if (e) {
+                e.preventDefault();
+            }
             var nextIndex = this.$el.find("#kbaItems li").length,
                 newQuestion = $("<li>").html(
                 Handlebars.compile("{{> process/_kbaItem}}")({
@@ -79,6 +81,21 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
             } else {
                 return form2js($form[0]);
             }
+        },
+        renderProcessState: function (response) {
+            AnonymousProcessView.prototype
+                .renderProcessState.call(this, response)
+                .then(_.bind(function () {
+                    if (response.type === "kbaSecurityAnswerDefinitionStage" &&
+                        response.tag === "initial") {
+                        // initialize the stage with at least 1 (but up to minItems) kba pairs
+                        _.times(response.requirements.properties.kba.minItems || 1,
+                                function () {
+                                    this.addKBAQuestion();
+                                },
+                                this);
+                    }
+                }, this));
         }
     });
 
