@@ -16,17 +16,14 @@
 package org.forgerock.audit.events;
 
 import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.fieldIfNotNull;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.util.Reject.checkNotNull;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -161,11 +158,11 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T server(String ip, int port, String host) {
-        JsonValue object = json(object(
+        final Object server = object(
                 field(HOST, host),
                 field(IP, ip),
-                field(PORT, port)));
-        jsonValue.put(SERVER, object);
+                field(PORT, port));
+        jsonValue.put(SERVER, server);
         return self();
     }
 
@@ -205,11 +202,11 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T client(String ip, int port, String host) {
-        JsonValue object = json(object(
+        final Object client = object(
                 field(HOST, host),
                 field(IP, ip),
-                field(PORT, port)));
-        jsonValue.put(CLIENT, object);
+                field(PORT, port));
+        jsonValue.put(CLIENT, client);
         return self();
     }
 
@@ -232,10 +229,10 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T client(String ip, String host) {
-        JsonValue object = json(object(
+        final Object client = object(
                 field(HOST, host),
-                field(IP, ip)));
-        jsonValue.put(CLIENT, object);
+                field(IP, ip));
+        jsonValue.put(CLIENT, client);
         return self();
     }
 
@@ -247,10 +244,10 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T request(String protocol, String operation) {
-        JsonValue object = json(object(
+        final Object request = object(
                 field(PROTOCOL, protocol),
-                field(OPERATION, operation)));
-        jsonValue.put(REQUEST, object);
+                field(OPERATION, operation));
+        jsonValue.put(REQUEST, request);
         return self();
     }
 
@@ -264,11 +261,11 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      */
     public final T request(String protocol, String operation, JsonValue detail) {
         Reject.ifNull(detail);
-        JsonValue object = json(object(
+        final Object request = object(
                 field(PROTOCOL, protocol),
                 field(OPERATION, operation),
-                field(DETAIL, detail.getObject())));
-        jsonValue.put(REQUEST, object);
+                field(DETAIL, detail.getObject()));
+        jsonValue.put(REQUEST, request);
         return self();
     }
 
@@ -311,15 +308,14 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      */
     public final T httpRequest(boolean secure, String method, String path,  Map<String, List<String>> queryParameters,
             Map<String, List<String>> headers, Map<String, String> cookies) {
-        JsonValue object = json(object(
+        final Object httpRequest = object(
                 field(SECURE, secure),
                 field(METHOD, method),
                 field(PATH, path),
                 field(QUERY_PARAMETERS, queryParameters),
                 field(HEADERS, headers),
-                field(COOKIES, cookies)));
-        getOrCreateHttp().put(REQUEST, object.getObject());
-
+                field(COOKIES, cookies));
+        getOrCreateHttp().put(REQUEST, httpRequest);
         return self();
     }
 
@@ -330,10 +326,8 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T httpResponse(Map<String, List<String>> headers) {
-        JsonValue object = json(object(
-                field(HEADERS, headers)));
-        getOrCreateHttp().put(RESPONSE, object);
-
+        final Object httpResponse = object(field(HEADERS, headers));
+        getOrCreateHttp().put(RESPONSE, httpResponse);
         return self();
     }
 
@@ -374,12 +368,12 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T response(ResponseStatus status, String statusCode, long elapsedTime, TimeUnit elapsedTimeUnits) {
-        JsonValue object = json(object(
+        final Object response = object(
                 field(STATUS, status == null ? null : status.toString()),
                 field(STATUS_CODE, statusCode),
                 field(ELAPSED_TIME, elapsedTime),
-                field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.name())));
-        jsonValue.put(RESPONSE, object);
+                field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.name()));
+        jsonValue.put(RESPONSE, response);
         return self();
     }
 
@@ -396,13 +390,13 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public final T responseWithDetail(ResponseStatus status, String statusCode,
             long elapsedTime, TimeUnit elapsedTimeUnits, JsonValue detail) {
         Reject.ifNull(detail);
-        JsonValue object = json(object(
+        final Object response = object(
                 field(STATUS, status == null ? null : status.toString()),
                 field(STATUS_CODE, statusCode),
                 field(ELAPSED_TIME, elapsedTime),
                 field(ELAPSED_TIME_UNITS, elapsedTimeUnits == null ? null : elapsedTimeUnits.name()),
-                field(DETAIL, detail.getObject())));
-        jsonValue.put(RESPONSE, object);
+                field(DETAIL, detail.getObject()));
+        jsonValue.put(RESPONSE, response);
         return self();
     }
 
