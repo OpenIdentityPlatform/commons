@@ -60,6 +60,7 @@ import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
+import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -386,22 +387,12 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         Set<String> fieldOrder = fieldOrderByTopic.get(topic);
         Map<String, String> cells = new HashMap<>(fieldOrder.size());
         for (String key : fieldOrder) {
-            final String value = extractFieldValue(obj, key);
-            if (!value.isEmpty()) {
+            final String value = JsonValueUtils.extractValueAsString(obj, key);
+            if (value != null && !value.isEmpty()) {
                 cells.put(fieldDotNotationByField.get(key), value);
             }
         }
         csvWriter.writeRow(cells);
-    }
-
-    private String extractFieldValue(final JsonValue json, final String fieldName) {
-        JsonValue value = json.get(jsonPointerByField.get(fieldName));
-        if (value == null) {
-            return "";
-        } else if (value.isString()) {
-            return value.asString();
-        }
-        return value.toString();
     }
 
     private void resetAndReopenWriter(final String topic, CsvWriter csvWriter, boolean forceRotation)

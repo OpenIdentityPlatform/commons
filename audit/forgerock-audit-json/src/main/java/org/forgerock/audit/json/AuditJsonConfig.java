@@ -29,6 +29,7 @@ import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,7 +126,7 @@ public class AuditJsonConfig {
      *          If any error occurs.
      */
     public static AuditServiceConfiguration parseAuditServiceConfiguration(JsonValue json) throws AuditException {
-        return parseAuditServiceConfiguration(json.toString());
+        return parseAuditServiceConfiguration(JsonValueUtils.extractValueAsString(json, "/"));
     }
 
     /**
@@ -163,7 +164,7 @@ public class AuditJsonConfig {
         Class<? extends AuditEventHandler> handlerClass = getAuditEventHandlerClass(name, jsonConfig, classLoader);
         Class<? extends EventHandlerConfiguration> configClass =
                 getAuditEventHandlerConfigurationClass(name, handlerClass, classLoader);
-        EventHandlerConfiguration configuration = parseAuditEventHandlerConfiguration(name, configClass, jsonConfig);
+        EventHandlerConfiguration configuration = parseAuditEventHandlerConfiguration(configClass, jsonConfig);
         auditServiceBuilder.withAuditEventHandler(handlerClass, configuration);
     }
 
@@ -243,8 +244,6 @@ public class AuditJsonConfig {
      *
      * @param <C>
      *          The type of the configuration bean for the event handler.
-     * @param handlerName
-     *          The name of the handler to create.
      * @param jsonConfig
      *          The configuration of the audit event handler as JSON.
      * @return the fully configured audit event handler
@@ -252,18 +251,13 @@ public class AuditJsonConfig {
      *             If any error occurs while instantiating the configuration from JSON.
      */
     private static <C extends EventHandlerConfiguration> C parseAuditEventHandlerConfiguration(
-            String handlerName, Class<C> clazz, JsonValue jsonConfig) throws AuditException {
-        try {
-            C configuration = null;
-            JsonValue conf = jsonConfig.get(CONFIG_FIELD);
-            if (conf != null) {
-                configuration = mapper.readValue(conf.toString(), clazz);
-            }
-            return configuration;
-        } catch (IOException e) {
-            throw new AuditException(String.format("An error occurred while trying to generate "
-                    + "the configuration class for the handler '%s'", handlerName), e);
+            Class<C> clazz, JsonValue jsonConfig) throws AuditException {
+        C configuration = null;
+        JsonValue conf = jsonConfig.get(CONFIG_FIELD);
+        if (conf != null) {
+            configuration = mapper.convertValue(conf.getObject(), clazz);
         }
+        return configuration;
     }
 
     /**

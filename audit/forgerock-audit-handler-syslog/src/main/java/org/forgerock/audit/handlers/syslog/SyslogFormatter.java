@@ -22,7 +22,7 @@ import static org.forgerock.audit.events.AuditEventBuilder.*;
 import static org.forgerock.audit.events.AuditEventHelper.getAuditEventSchema;
 import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotation;
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
-import static org.forgerock.audit.util.JsonValueUtils.extractValue;
+import static org.forgerock.audit.util.JsonValueUtils.extractValueAsString;
 
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.events.EventTopicsMetaData;
@@ -303,7 +303,7 @@ class SyslogFormatter {
                 sd.append(" ");
                 sd.append(formattedName);
                 sd.append("=\"");
-                sd.append(formatParamValue(extractValue(auditEvent, fieldName)));
+                sd.append(formatParamValue(extractValueAsString(auditEvent, fieldName)));
                 sd.append("\"");
             }
             sd.append("]");

@@ -16,11 +16,6 @@
 
 package org.forgerock.audit.util;
 
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
-import org.forgerock.util.query.QueryFilter;
-import org.forgerock.util.query.QueryFilterVisitor;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,11 +26,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.query.QueryFilterVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Contains some JsonValue Utility methods.
  */
 public final class JsonValueUtils {
 
+    private static final Logger logger = LoggerFactory.getLogger(JsonValueUtils.class);
+    private static final ObjectMapper mapper = new ObjectMapper();
+    
     private JsonValueUtils() {
 
     }
@@ -124,15 +132,19 @@ public final class JsonValueUtils {
      * @return A non-null String representation of the field's value. If the specified field is not present or has
      *         a null value, an empty string will be returned.
      */
-    public static String extractValue(final JsonValue json, final String fieldName) {
+    public static String extractValueAsString(final JsonValue json, final String fieldName) {
         JsonValue value = json.get(new JsonPointer(fieldName));
-        final String rawStr;
+        String rawStr = null;
         if (value == null) {
             rawStr = "";
         } else if (value.isString()) {
             rawStr = value.asString();
         } else {
-            rawStr = value.toString();
+            try {
+                rawStr = mapper.writeValueAsString(value.getObject());
+            } catch (JsonProcessingException e) {
+                logger.error("Unable to write the value for field {} as a string.", fieldName);
+            }
         }
         return rawStr;
     }
