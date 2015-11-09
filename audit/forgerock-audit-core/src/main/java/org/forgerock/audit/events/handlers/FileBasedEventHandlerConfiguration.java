@@ -263,7 +263,7 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
          * policy is disabled.
          * @param minFreeSpaceRequired The minimum free space the system must contain.
          */
-        public void setMinFreeSpaceRequired(final int minFreeSpaceRequired) {
+        public void setMinFreeSpaceRequired(final long minFreeSpaceRequired) {
             this.minFreeSpaceRequired = minFreeSpaceRequired;
         }
     }
