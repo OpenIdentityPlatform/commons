@@ -15,10 +15,6 @@
  */
 package org.forgerock.audit.handlers.csv;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.audit.secure.KeyStoreSecureStorage.JCEKS_KEYSTORE_TYPE;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
 import static java.lang.String.format;
 import static org.forgerock.audit.events.AuditEventHelper.ARRAY_TYPE;
 import static org.forgerock.audit.events.AuditEventHelper.OBJECT_TYPE;
@@ -27,9 +23,13 @@ import static org.forgerock.audit.events.AuditEventHelper.getAuditEventPropertie
 import static org.forgerock.audit.events.AuditEventHelper.getAuditEventSchema;
 import static org.forgerock.audit.events.AuditEventHelper.getPropertyType;
 import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotation;
+import static org.forgerock.audit.secure.KeyStoreSecureStorage.JCEKS_KEYSTORE_TYPE;
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.JSONVALUE_FILTER_VISITOR;
 import static org.forgerock.audit.util.JsonValueUtils.expand;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -46,16 +46,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.inject.Inject;
 
-import org.forgerock.audit.Audit;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.providers.SecureStorageProvider;
 import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
@@ -260,11 +258,10 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     private CsvWriter writeEvent(final String topic, CsvWriter csvWriter, final JsonValue event)
                     throws IOException {
         writeEntry(topic, csvWriter, event);
-        // TODO: uncomment the following statements once super-csv is released with unwrapped buffer
-        // EventBufferingConfiguration bufferConfig = configuration.getBuffering();
-        //if (!bufferConfig.isEnabled() || !bufferConfig.isAutoFlush()) {
+        EventBufferingConfiguration bufferConfig = configuration.getBuffering();
+        if (!bufferConfig.isEnabled() || !bufferConfig.isAutoFlush()) {
             csvWriter.flush();
-        //}
+        }
         return csvWriter;
     }
 
