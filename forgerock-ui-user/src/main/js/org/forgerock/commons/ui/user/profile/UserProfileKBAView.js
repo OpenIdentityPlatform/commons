@@ -80,9 +80,10 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
         },
         checkKBAChanges: function (e) {
             var target = $(e.target),
+                attributeName = _.keys(form2js(e.target))[0],
                 kbaPair = target.closest(".kba-pair"),
                 form = target.closest("form"),
-                currentKbaInfo = this.changesPendingWidgets[form.attr("id")].data.watchedObj.subform.kbaInfo,
+                currentKbaInfo = this.changesPendingWidgets[form.attr("id")].data.watchedObj.subform[attributeName],
                 predefinedQuestion = kbaPair.find(".kba-questions"),
                 customQuestionContainer = kbaPair.find(".custom-question"),
                 answer = kbaPair.find(".answer :input"),
@@ -123,35 +124,46 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
         },
         getFormContent: function (form) {
             if (form.id === "KBA") {
-                return {
-                    kbaInfo: _.chain(form2js(form, ".", false).kbaInfo)
-                        .map(function (kbaPair, index) {
-                            var newPair = {};
+                var formContent = form2js(form, ".", false);
+                // cannot rely upon a particular named field in the form content,
+                // so apply the logic to all fields found in the form
+                return _(formContent)
+                        .map(function (value, key) {
+                            if (_.isArray(value)) {
+                                return [
+                                    key,
+                                    _(value)
+                                        .map(function (kbaPair, index) {
+                                            var newPair = {};
 
-                            // deleted pairs will be hidden
-                            if ($(form).is(":visible") && !$(form).find(".kba-pair[index="+index+"]:visible").length) {
-                                // express their removal via an explicit undefined value in that position
-                                return undefined;
-                            }
+                                            // deleted pairs will be hidden
+                                            if ($(form).is(":visible") && !$(form).find(".kba-pair[index="+index+"]:visible").length) {
+                                                // express their removal via an explicit undefined value in that position
+                                                return undefined;
+                                            }
 
-                            if (kbaPair.answer && kbaPair.answer.length) {
-                                newPair.answer = kbaPair.answer;
-                            } else if (_.isObject(this.data.user.kbaInfo[index])) {
-                                newPair.answer = this.data.user.kbaInfo[index].answer;
-                            }
+                                            if (kbaPair.answer && kbaPair.answer.length) {
+                                                newPair.answer = kbaPair.answer;
+                                            } else if (_.isObject(this.data.user[key][index])) {
+                                                newPair.answer = this.data.user[key][index].answer;
+                                            }
 
-                            if (kbaPair.questionId === "custom") {
-                                newPair.customQuestion = kbaPair.customQuestion;
+                                            if (kbaPair.questionId === "custom") {
+                                                newPair.customQuestion = kbaPair.customQuestion;
+                                            } else {
+                                                newPair.questionId = kbaPair.questionId;
+                                            }
+                                            return newPair;
+                                        }, this)
+                                        .compact()
+                                        .value()
+                                ];
                             } else {
-                                newPair.questionId = kbaPair.questionId;
+                                return [ key, value ];
                             }
-                            return newPair;
                         }, this)
-                        .filter(function (kbaPair) {
-                            return !_.isUndefined(kbaPair);
-                        })
-                        .value()
-                };
+                        .object()
+                        .value();
             } else {
                 return UserProfileView.getFormContent.call(this, form);
             }
@@ -187,11 +199,25 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
                 form = this.$el.find(".tab-content #userKBATab form")[0];
                 newContent = Handlebars.compile("{{> profile/_kbaTab}}")(this.data);
                 $("#kbaItems", form).empty().append($(newContent).find("#kbaItems"));
-                js2form(form, {
-                    "kbaInfo": _.map(this.data.user.kbaInfo, function (kbaPair) {
-                        return _.omit(kbaPair, "answer");
-                    })
-                });
+                js2form(form,
+                    // use the form structure to find out which fields are defined for the kba form...
+                    _(form2js(form, ".", false))
+                     .map(function (value, key) {
+                         // omit the "answer" property from any array found there...
+                         if (_.isArray(this.data.user[key])) {
+                             return [
+                                 key,
+                                 _.map(this.data.user[key], function (kbaPair) {
+                                     return _.omit(kbaPair, "answer");
+                                 })
+                             ];
+                         } else {
+                             return [ key, this.data.user[key] ];
+                         }
+                     }, this)
+                     .object()
+                     .value()
+                );
 
                 _.each($(".kba-questions", form), function (kbaSelect) {
                     var customQuestionContainer = $(kbaSelect).closest(".kba-pair").find(".custom-question"),
