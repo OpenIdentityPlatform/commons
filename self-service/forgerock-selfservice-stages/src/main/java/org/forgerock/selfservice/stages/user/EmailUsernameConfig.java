@@ -19,6 +19,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Configuration for the email based user name retrieval stage.
@@ -179,6 +180,34 @@ public final class EmailUsernameConfig implements StageConfig {
     @Override
     public String getProgressStageClassName() {
         return EmailUsernameStage.class.getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof EmailUsernameConfig)) {
+            return false;
+        }
+
+        EmailUsernameConfig that = (EmailUsernameConfig) o;
+        return Objects.equals(getName(), that.getName())
+                && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName())
+                && Objects.equals(emailServiceUrl, that.emailServiceUrl)
+                && Objects.equals(subjectTranslations, that.subjectTranslations)
+                && Objects.equals(from, that.from)
+                && Objects.equals(messageTranslations, that.messageTranslations)
+                && Objects.equals(mimeType, that.mimeType)
+                && Objects.equals(usernameToken, that.usernameToken);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getProgressStageClassName(),
+                emailServiceUrl, subjectTranslations, from, messageTranslations,
+                mimeType, usernameToken);
     }
 
 }

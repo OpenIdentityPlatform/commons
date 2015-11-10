@@ -58,6 +58,7 @@ public final class UserUpdateService extends AbstractRequestHandler {
      *
      * @param connectionFactory a ConnectionFactory with access to the <em>identityService</em> route.
      * @param identityService the route to the identity service used to patch the user
+     * @param kbaPropertyField the pointer where KBA is stored in the user
      */
     @Inject
     public UserUpdateService(@SelfService ConnectionFactory connectionFactory, ResourcePath identityService,

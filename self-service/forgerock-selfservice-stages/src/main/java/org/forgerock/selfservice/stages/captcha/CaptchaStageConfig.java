@@ -15,6 +15,8 @@
  */
 package org.forgerock.selfservice.stages.captcha;
 
+import java.util.Objects;
+
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
@@ -109,6 +111,30 @@ public final class CaptchaStageConfig implements StageConfig {
     @Override
     public String getProgressStageClassName() {
         return CaptchaStage.class.getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof CaptchaStageConfig)) {
+            return false;
+        }
+
+        CaptchaStageConfig that = (CaptchaStageConfig) o;
+        return Objects.equals(getName(), that.getName())
+                && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName())
+                && Objects.equals(recaptchaSiteKey, that.recaptchaSiteKey)
+                && Objects.equals(recaptchaSecretKey, that.recaptchaSecretKey)
+                && Objects.equals(recaptchaUri, that.recaptchaUri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getProgressStageClassName(),
+                recaptchaSiteKey, recaptchaSecretKey, recaptchaUri);
     }
 
 }

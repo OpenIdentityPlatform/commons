@@ -20,6 +20,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
 
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Configuration for the email account verification stage.
@@ -226,6 +227,36 @@ public final class VerifyEmailAccountConfig implements StageConfig {
     @Override
     public String getProgressStageClassName() {
         return VerifyEmailAccountStage.class.getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof VerifyEmailAccountConfig)) {
+            return false;
+        }
+
+        VerifyEmailAccountConfig that = (VerifyEmailAccountConfig) o;
+        return Objects.equals(getName(), that.getName())
+                && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName())
+                && Objects.equals(emailServiceUrl, that.emailServiceUrl)
+                && Objects.equals(subjectTranslations, that.subjectTranslations)
+                && Objects.equals(from, that.from)
+                && Objects.equals(messageTranslations, that.messageTranslations)
+                && Objects.equals(mimeType, that.mimeType)
+                && Objects.equals(verificationLink, that.verificationLink)
+                && Objects.equals(verificationLinkToken, that.verificationLinkToken)
+                && Objects.equals(identityEmailField, that.identityEmailField);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getProgressStageClassName(),
+                emailServiceUrl, subjectTranslations, from, messageTranslations, mimeType,
+                verificationLink, verificationLinkToken, identityEmailField);
     }
 
 }

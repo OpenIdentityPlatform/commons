@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 /**
  * Represents the configuration for a given progress stage.
+ * It is recommended to implement hash code as the hash taken from the config is used to determine service uniqueness.
  *
  * @since 0.1.0
  */

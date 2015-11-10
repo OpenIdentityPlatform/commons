@@ -16,6 +16,8 @@
 
 package org.forgerock.selfservice.stages.user;
 
+import java.util.Objects;
+
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
@@ -38,6 +40,26 @@ public final class RetrieveUsernameConfig implements StageConfig {
     @Override
     public String getProgressStageClassName() {
         return RetrieveUsernameStage.class.getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof RetrieveUsernameConfig)) {
+            return false;
+        }
+
+        RetrieveUsernameConfig that = (RetrieveUsernameConfig) o;
+        return Objects.equals(getName(), that.getName())
+                && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getProgressStageClassName());
     }
 
 }

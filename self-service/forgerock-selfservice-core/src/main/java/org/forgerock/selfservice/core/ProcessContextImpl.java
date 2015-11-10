@@ -39,10 +39,12 @@ final class ProcessContextImpl implements ProcessContext {
     private static final String STAGE_TAG_KEY = "stageTag";
     private static final String PROCESS_STATE_KEY = "processState";
     private static final String SUCCESS_ADDITIONS_KEY = "_successAdditions";
+    private static final String CONFIG_VERSION_KEY = "versionKey";
 
     private final Context requestContext;
     private final Request request;
     private final int stageIndex;
+    private final int configVersion;
     private final String stageTag;
     private final JsonValue input;
     private final JsonValue state;
@@ -51,6 +53,7 @@ final class ProcessContextImpl implements ProcessContext {
         requestContext = builder.requestContext;
         request = builder.request;
         stageIndex = builder.stageIndex;
+        configVersion = builder.configVersion;
         stageTag = builder.stageTag;
         input = builder.input;
         state = builder.state;
@@ -105,6 +108,10 @@ final class ProcessContextImpl implements ProcessContext {
         return stageIndex;
     }
 
+    int getConfigVersion() {
+        return configVersion;
+    }
+
     JsonValue getState() {
         return state;
     }
@@ -121,6 +128,7 @@ final class ProcessContextImpl implements ProcessContext {
         return json(
                 object(
                         field(STAGE_INDEX_KEY, stageIndex),
+                        field(CONFIG_VERSION_KEY, configVersion),
                         field(STAGE_TAG_KEY, stageTag),
                         field(PROCESS_STATE_KEY, state)));
     }
@@ -132,17 +140,17 @@ final class ProcessContextImpl implements ProcessContext {
 
         private final Context requestContext;
         private final Request request;
-        private final int stageIndex;
+        private int stageIndex;
+        private int configVersion;
         private String stageTag;
         private JsonValue state;
         private JsonValue input;
 
-        private Builder(Context requestContext, Request request, int stageIndex) {
+        private Builder(Context requestContext, Request request) {
             Reject.ifNull(requestContext, request);
-            Reject.ifTrue(stageIndex < 0);
+
             this.requestContext = requestContext;
             this.request = request;
-            this.stageIndex = stageIndex;
             stageTag = INITIAL_TAG;
             state = emptyJson();
             input = emptyJson();
@@ -150,7 +158,9 @@ final class ProcessContextImpl implements ProcessContext {
 
         private Builder(ProcessContextImpl previous) {
             Reject.ifNull(previous);
+
             stageIndex = previous.stageIndex;
+            configVersion = previous.configVersion;
             requestContext = previous.requestContext;
             request = previous.request;
             stageTag = previous.stageTag;
@@ -160,13 +170,15 @@ final class ProcessContextImpl implements ProcessContext {
 
         private Builder(Context requestContext, Request request, JsonValue jsonContext) {
             Reject.ifNull(requestContext, request, jsonContext);
-            Reject.ifTrue(jsonContext.get(STAGE_INDEX_KEY).isNull(), "Stage index missing");
 
             this.requestContext = requestContext;
             this.request = request;
 
             stageIndex = jsonContext
                     .get(STAGE_INDEX_KEY)
+                    .asInteger();
+            configVersion = jsonContext
+                    .get(CONFIG_VERSION_KEY)
                     .asInteger();
             stageTag = jsonContext
                     .get(STAGE_TAG_KEY)
@@ -175,6 +187,17 @@ final class ProcessContextImpl implements ProcessContext {
 
             state = jsonContext.get(PROCESS_STATE_KEY);
             input = emptyJson();
+        }
+
+        Builder setStageIndex(int stageIndex) {
+            Reject.ifTrue(stageIndex < 0);
+            this.stageIndex = stageIndex;
+            return this;
+        }
+
+        Builder setConfigVersion(int configVersion) {
+            this.configVersion = configVersion;
+            return this;
         }
 
         Builder setStageTag(String stageTag) {
@@ -200,8 +223,8 @@ final class ProcessContextImpl implements ProcessContext {
         }
     }
 
-    static Builder newBuilder(Context requestContext, Request request, int stageIndex) {
-        return new Builder(requestContext, request, stageIndex);
+    static Builder newBuilder(Context requestContext, Request request) {
+        return new Builder(requestContext, request);
     }
 
     static Builder newBuilder(Context requestContext, Request request, JsonValue jsonContext) {

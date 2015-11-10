@@ -19,6 +19,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.util.Reject;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Defines the common configurations for the KBA stages.
@@ -85,5 +86,26 @@ abstract class AbstractKbaStageConfig<C extends AbstractKbaStageConfig<C>> imple
      * @return this object
      */
     protected abstract C self();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        AbstractKbaStageConfig<?> that = (AbstractKbaStageConfig<?>) o;
+        return Objects.equals(getName(), that.getName())
+                && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName())
+                && Objects.equals(config, that.config);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getProgressStageClassName(), config);
+    }
 
 }

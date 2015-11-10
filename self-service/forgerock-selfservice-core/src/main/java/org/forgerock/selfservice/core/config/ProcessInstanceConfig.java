@@ -23,6 +23,7 @@ import org.forgerock.util.Reject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Represents the configuration for an instance of the anonymous process service.
@@ -105,6 +106,27 @@ public final class ProcessInstanceConfig {
      */
     public StorageType getStorageType() {
         return storageType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof ProcessInstanceConfig)) {
+            return false;
+        }
+
+        ProcessInstanceConfig that = (ProcessInstanceConfig) o;
+        return Objects.equals(stageConfigs, that.stageConfigs)
+                && Objects.equals(snapshotTokenConfig, that.snapshotTokenConfig)
+                && Objects.equals(storageType, that.storageType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stageConfigs, snapshotTokenConfig, storageType);
     }
 
 }

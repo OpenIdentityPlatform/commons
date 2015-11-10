@@ -69,11 +69,10 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     private static final String ADDITIONS_FIELD = "additions";
     private static final String END_VALUE = "end";
 
-    private static final int INITIAL_STAGE_INDEX = 0;
-
     private final ProgressStageBinder progressStageBinder;
     private final List<StageConfig> stageConfigs;
     private final SnapshotAuthor snapshotAuthor;
+    private final int configVersion;
 
     /**
      * Initialises the anonymous process service with the passed config.
@@ -96,6 +95,7 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
 
         progressStageBinder = new ProgressStageBinder(progressStageProvider);
         stageConfigs = config.getStageConfigs();
+        configVersion = config.hashCode();
 
         SnapshotTokenHandler snapshotTokenHandler = tokenHandlerFactory.get(config.getSnapshotTokenConfig());
         snapshotAuthor = config.getStorageType().newSnapshotAuthor(snapshotTokenHandler, processStore);
@@ -145,7 +145,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
      */
     private JsonValue initiateProcess(Context requestContext, ReadRequest request) throws ResourceException {
         ProcessContextImpl context = ProcessContextImpl
-                .newBuilder(requestContext, request, INITIAL_STAGE_INDEX)
+                .newBuilder(requestContext, request)
+                .setConfigVersion(configVersion)
                 .build();
 
         ProgressStageBinding<?> stage = retrieveStage(context);
@@ -175,7 +176,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
             JsonValue jsonContext = snapshotAuthor.retrieveSnapshotFrom(snapshotTokenValue.asString());
             contextBuilder = ProcessContextImpl.newBuilder(requestContext, request, jsonContext);
         } else {
-            contextBuilder = ProcessContextImpl.newBuilder(requestContext, request, INITIAL_STAGE_INDEX);
+            contextBuilder = ProcessContextImpl.newBuilder(requestContext, request)
+                    .setConfigVersion(configVersion);
         }
 
         JsonValue input = clientInput.get(INPUT_FIELD);
@@ -187,6 +189,10 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         ProcessContextImpl context = contextBuilder
                 .setInput(input)
                 .build();
+
+        if (configVersion != context.getConfigVersion()) {
+            throw new BadRequestException("Invalid token");
+        }
 
         ProgressStageBinding<?> stage = retrieveStage(context);
 
@@ -219,7 +225,9 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
         int nextIndex = context.getStageIndex() + 1;
 
         ProcessContextImpl nextContext = ProcessContextImpl
-                .newBuilder(context.getRequestContext(), context.getRequest(), nextIndex)
+                .newBuilder(context.getRequestContext(), context.getRequest())
+                .setStageIndex(nextIndex)
+                .setConfigVersion(context.getConfigVersion())
                 .setState(context.getState())
                 .build();
 

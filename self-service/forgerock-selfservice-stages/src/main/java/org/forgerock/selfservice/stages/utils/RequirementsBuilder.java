@@ -343,4 +343,5 @@ public final class RequirementsBuilder {
     public static JsonValue newEmptyRequirements() {
         return emptyJson();
     }
+
 }

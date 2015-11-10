@@ -16,6 +16,7 @@
 package org.forgerock.selfservice.stages.kba;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Represents a single KBA question in various Locales.
@@ -72,5 +73,24 @@ public final class KbaConfig {
         return this;
     }
 
-}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
 
+        if (!(o instanceof KbaConfig)) {
+            return false;
+        }
+
+        KbaConfig kbaConfig = (KbaConfig) o;
+        return Objects.equals(questions, kbaConfig.questions)
+                && Objects.equals(kbaPropertyName, kbaConfig.kbaPropertyName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(questions, kbaPropertyName);
+    }
+
+}

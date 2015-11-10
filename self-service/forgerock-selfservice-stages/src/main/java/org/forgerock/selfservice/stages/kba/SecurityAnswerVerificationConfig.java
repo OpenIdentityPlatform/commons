@@ -15,6 +15,8 @@
  */
 package org.forgerock.selfservice.stages.kba;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -100,6 +102,22 @@ public final class SecurityAnswerVerificationConfig extends AbstractKbaStageConf
     @Override
     public SecurityAnswerVerificationConfig self() {
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        SecurityAnswerVerificationConfig that = (SecurityAnswerVerificationConfig) o;
+        return Objects.equals(numberOfQuestionsUserMustAnswer, that.numberOfQuestionsUserMustAnswer)
+                && Objects.equals(identityServiceUrl, that.identityServiceUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), identityServiceUrl, numberOfQuestionsUserMustAnswer);
     }
 
 }

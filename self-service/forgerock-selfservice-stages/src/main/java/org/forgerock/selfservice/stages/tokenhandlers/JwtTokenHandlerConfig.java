@@ -16,6 +16,8 @@
 
 package org.forgerock.selfservice.stages.tokenhandlers;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
@@ -211,4 +213,31 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
         this.tokenLifeTimeInSeconds = tokenLifeTimeInSeconds;
         return this;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof JwtTokenHandlerConfig)) {
+            return false;
+        }
+
+        JwtTokenHandlerConfig that = (JwtTokenHandlerConfig) o;
+        return Objects.equals(keyPairSize, that.keyPairSize)
+                && Objects.equals(tokenLifeTimeInSeconds, that.tokenLifeTimeInSeconds)
+                && Objects.equals(sharedKey, that.sharedKey)
+                && Objects.equals(keyPairAlgorithm, that.keyPairAlgorithm)
+                && Objects.equals(jweAlgorithm, that.jweAlgorithm)
+                && Objects.equals(encryptionMethod, that.encryptionMethod)
+                && Objects.equals(jwsAlgorithm, that.jwsAlgorithm);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sharedKey, keyPairAlgorithm, keyPairSize, jweAlgorithm,
+                encryptionMethod, jwsAlgorithm, tokenLifeTimeInSeconds);
+    }
+
 }

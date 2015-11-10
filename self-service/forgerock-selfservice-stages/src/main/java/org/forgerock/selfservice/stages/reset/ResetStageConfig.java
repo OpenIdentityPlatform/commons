@@ -16,6 +16,8 @@
 
 package org.forgerock.selfservice.stages.reset;
 
+import java.util.Objects;
+
 import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
@@ -85,6 +87,29 @@ public final class ResetStageConfig implements StageConfig {
     @Override
     public String getProgressStageClassName() {
         return ResetStage.class.getName();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof ResetStageConfig)) {
+            return false;
+        }
+
+        ResetStageConfig that = (ResetStageConfig) o;
+        return Objects.equals(getName(), that.getName())
+                && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName())
+                && Objects.equals(identityServiceUrl, that.identityServiceUrl)
+                && Objects.equals(identityPasswordField, that.identityPasswordField);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getProgressStageClassName(),
+                identityServiceUrl, identityPasswordField);
     }
 
 }
