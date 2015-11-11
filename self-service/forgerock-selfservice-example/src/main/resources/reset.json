@@ -36,10 +36,10 @@
     },
     {
       "name" : "kbaSecurityAnswerVerificationStage",
-      "kbaPropertyName" : "kbaInfo",
       "identityServiceUrl" : "/users",
       "numberOfQuestionsUserMustAnswer" : "1",
       "kbaConfig": {
+        "kbaPropertyName" : "kbaInfo",
         "questions": {
           "1": {
             "en": "What's your favorite color?",

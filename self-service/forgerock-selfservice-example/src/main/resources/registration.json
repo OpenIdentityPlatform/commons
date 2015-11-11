@@ -23,8 +23,8 @@
     },
     {
       "name" : "kbaSecurityAnswerDefinitionStage",
-      "kbaPropertyName" : "kbaInfo",
       "kbaConfig": {
+        "kbaPropertyName" : "kbaInfo",
         "questions": {
           "1": {
             "en": "What's your favorite color?",
