@@ -17,4 +17,4 @@
 /**
  * This package contains a basic example implementation of a custom progress stage.
  */
-package org.forgerock.selfservice.example.custom;
+package org.forgerock.selfservice.custom;

@@ -16,7 +16,7 @@
 package org.forgerock.selfservice.stages.captcha;
 
 import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newEmptyObject;
+import static org.forgerock.selfservice.core.util.RequirementsBuilder.newEmptyObject;
 
 import org.forgerock.http.Client;
 import org.forgerock.http.protocol.Request;
@@ -28,7 +28,7 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
-import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.selfservice.core.util.RequirementsBuilder;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;

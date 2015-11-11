@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.example.custom;
+package org.forgerock.selfservice.custom;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -22,7 +22,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
-import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.selfservice.core.util.RequirementsBuilder;
 
 /**
  * Progress stages prompts for the solution to a basic math problem.

@@ -17,6 +17,7 @@
 package org.forgerock.selfservice.core.config;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.annotation.JsonTypeResolver;
 
 /**
  * Represents the configuration for a given progress stage.
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
  * @since 0.1.0
  */
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
+@JsonTypeResolver(ClassNameFallbackPropertyTypeResolver.class)
 public interface StageConfig {
 
     /**
