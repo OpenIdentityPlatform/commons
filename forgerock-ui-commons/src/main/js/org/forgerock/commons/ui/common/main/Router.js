@@ -179,14 +179,14 @@ define("org/forgerock/commons/ui/common/main/Router", [
             if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
                 return conf.loggedUser.uiroles.indexOf(role) !== -1;
             })) {
-                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
+                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, { fromRouter: true });
                 return false;
             }
         }
 
-        if(route.excludedRole) {
+        if (route.excludedRole) {
             if(conf.loggedUser && conf.loggedUser.uiroles.indexOf(route.excludedRole) !== -1) {
-                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED);
+                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, { fromRouter: true });
                 return false;
             }
         }
