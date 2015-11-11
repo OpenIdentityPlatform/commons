@@ -76,7 +76,8 @@ public class TranslationPropertiesTest {
 
     private Properties loadTranslations() throws IOException {
         Properties properties = new Properties();
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("translation.properties")) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("commonsAuditTranslation" +
+                ".properties")) {
             properties.load(inputStream);
         }
         return properties;
