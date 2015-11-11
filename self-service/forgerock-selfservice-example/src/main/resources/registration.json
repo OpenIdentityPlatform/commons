@@ -1,6 +1,11 @@
 {
   "stageConfigs": [
     {
+      "class" : "org.forgerock.selfservice.custom.MathProblemStageConfig",
+      "leftValue" : 12,
+      "rightValue" : 4
+    },
+    {
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
       "from": "info@admin.org",

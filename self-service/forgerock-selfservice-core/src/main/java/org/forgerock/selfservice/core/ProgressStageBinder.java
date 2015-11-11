@@ -31,9 +31,11 @@ import org.forgerock.util.Reject;
 final class ProgressStageBinder {
 
     private final ProgressStageProvider provider;
+    private final ClassLoader classLoader;
 
-    ProgressStageBinder(ProgressStageProvider provider) {
+    ProgressStageBinder(ProgressStageProvider provider, ClassLoader classLoader) {
         this.provider = provider;
+        this.classLoader = classLoader;
     }
 
     ProgressStageBinding<?> getBinding(StageConfig config) {
@@ -45,7 +47,7 @@ final class ProgressStageBinder {
             @SuppressWarnings("unchecked")
             Class<? extends ProgressStage<StageConfig>> typedProgressStageClass =
                     (Class<? extends ProgressStage<StageConfig>>) Class
-                            .forName(config.getProgressStageClassName())
+                            .forName(config.getProgressStageClassName(), true, classLoader)
                             .asSubclass(ProgressStage.class);
 
             ProgressStage<StageConfig> stage = provider.get(typedProgressStageClass);

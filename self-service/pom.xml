@@ -27,7 +27,7 @@
 
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-selfservice</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.10.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Commons Self Service Framework</name>
@@ -37,6 +37,7 @@
 
     <modules>
         <module>forgerock-selfservice-core</module>
+        <module>forgerock-selfservice-custom-stage</module>
         <module>forgerock-selfservice-example</module>
         <module>forgerock-selfservice-example-ui</module>
         <module>forgerock-selfservice-json</module>

@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.stages.utils;
+package org.forgerock.selfservice.core.util;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;

@@ -38,15 +38,10 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.http.CrestHttp;
-import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.UserUpdateService;
-import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
-import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.example.custom.MathProblemStageConfig;
-import org.forgerock.selfservice.json.JsonConfig;
+import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
 import org.forgerock.util.Factory;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -92,46 +87,30 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
         crestRouter.addRoute(uriTemplate("email"), new ExampleEmailService(appConfig.get("mailserver")));
     }
 
-    private Handler registerResetHandler() throws Exception {
+    private Handler buildHandler(String configResource) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
-        JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/reset.json"), Map.class));
-        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
+        JsonValue json = new JsonValue(mapper.readValue(getClass().getResource(configResource), Map.class));
 
-        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new ExampleProgressStageProvider(crestConnectionFactory, httpClient),
-                new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
+        RequestHandler service = JsonAnonymousProcessServiceBuilder.newBuilder()
+                .withJsonConfig(json)
+                .withProgressStageProvider(new ExampleProgressStageProvider(crestConnectionFactory, httpClient))
+                .withTokenHandlerFactory(new ExampleTokenHandlerFactory())
+                .withProcessStore(new SimpleInMemoryStore())
+                .build();
 
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
+        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(service));
+    }
+
+    private Handler registerResetHandler() throws Exception {
+        return buildHandler("/reset.json");
     }
 
     private Handler registerUsernameHandler() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/username.json"), Map.class));
-        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
-
-        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new ExampleProgressStageProvider(crestConnectionFactory, httpClient),
-                new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
-
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
+        return buildHandler("/username.json");
     }
 
     private Handler registerRegistrationHandler() throws Exception {
-        ObjectMapper mapper = new ObjectMapper();
-        JsonValue json = new JsonValue(mapper.readValue(getClass().getResource("/registration.json"), Map.class));
-        ProcessInstanceConfig config = JsonConfig.buildProcessInstanceConfig(json);
-
-        // TODO: Presently injecting dynamic stage until there is a viable JSON solution.
-        List<StageConfig> stages = config.getStageConfigs();
-        stages.add(0, new MathProblemStageConfig()
-                .setLeftValue(5)
-                .setRightValue(10));
-
-        RequestHandler userSelfServiceService = new AnonymousProcessService(config,
-                new ExampleProgressStageProvider(crestConnectionFactory, httpClient),
-                new ExampleTokenHandlerFactory(), new SimpleInMemoryStore());
-
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(userSelfServiceService));
+        return buildHandler("/registration.json");
     }
 
     private Handler registerUserKBAUpdateHandler() {

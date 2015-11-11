@@ -20,9 +20,9 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
-import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newArray;
-import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newObject;
-import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.oneOf;
+import static org.forgerock.selfservice.core.util.RequirementsBuilder.newArray;
+import static org.forgerock.selfservice.core.util.RequirementsBuilder.newObject;
+import static org.forgerock.selfservice.core.util.RequirementsBuilder.oneOf;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -33,7 +33,7 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
 import org.forgerock.selfservice.core.util.Answers;
-import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.selfservice.core.util.RequirementsBuilder;
 import org.forgerock.util.Reject;
 
 import javax.inject.Inject;

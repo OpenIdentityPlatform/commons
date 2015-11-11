@@ -18,7 +18,7 @@ package org.forgerock.selfservice.stages.kba;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
-import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.newEmptyObject;
+import static org.forgerock.selfservice.core.util.RequirementsBuilder.newEmptyObject;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -35,7 +35,7 @@ import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.crypto.JsonCryptoException;
 import org.forgerock.selfservice.core.annotations.SelfService;
 import org.forgerock.selfservice.core.util.Answers;
-import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
+import org.forgerock.selfservice.core.util.RequirementsBuilder;
 import org.forgerock.util.Reject;
 
 import javax.inject.Inject;
