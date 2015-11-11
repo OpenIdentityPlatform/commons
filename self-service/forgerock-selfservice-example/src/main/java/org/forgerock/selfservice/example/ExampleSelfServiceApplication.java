@@ -29,6 +29,7 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.MemoryBackend;
@@ -135,7 +136,7 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
 
     private Handler registerUserKBAUpdateHandler() {
         return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(
-                new UserUpdateService(crestConnectionFactory, resourcePath("users"))));
+                new UserUpdateService(crestConnectionFactory, resourcePath("users"), new JsonPointer("kbaInfo"))));
     }
 
     @Override

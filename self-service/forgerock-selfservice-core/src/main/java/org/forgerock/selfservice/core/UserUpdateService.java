@@ -25,25 +25,15 @@ import javax.inject.Inject;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.selfservice.core.annotations.SelfService;
 import org.forgerock.selfservice.core.crypto.CryptoConstants;
 import org.forgerock.selfservice.core.crypto.CryptoService;
@@ -56,12 +46,12 @@ import org.forgerock.util.promise.Promise;
  *
  * @since 0.8.0
  */
-public final class UserUpdateService implements RequestHandler {
-    private static final JsonPointer KBAINFO = new JsonPointer("/kbaInfo");
+public final class UserUpdateService extends AbstractRequestHandler {
 
     private final CryptoService cryptoService;
     private final ConnectionFactory connectionFactory;
     private final ResourcePath identityService;
+    private final JsonPointer kbaPropertyField;
 
     /**
      * Construct a service to update the user's KBA info.
@@ -70,25 +60,12 @@ public final class UserUpdateService implements RequestHandler {
      * @param identityService the route to the identity service used to patch the user
      */
     @Inject
-    public UserUpdateService(@SelfService ConnectionFactory connectionFactory, ResourcePath identityService) {
+    public UserUpdateService(@SelfService ConnectionFactory connectionFactory, ResourcePath identityService,
+            JsonPointer kbaPropertyField) {
         this.connectionFactory = connectionFactory;
         this.cryptoService = new CryptoService();
         this.identityService = identityService;
-    }
-
-    @Override
-    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest actionRequest) {
-        return new NotSupportedException("Action not supported for this endpoint").asPromise();
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest createRequest) {
-        return new NotSupportedException("Create not supported for this endpoint").asPromise();
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest deleteRequest) {
-        return new NotSupportedException("Delete not supported for this endpoint").asPromise();
+        this.kbaPropertyField = kbaPropertyField;
     }
 
     @Override
@@ -98,9 +75,9 @@ public final class UserUpdateService implements RequestHandler {
         }
         PatchOperation patch = patchRequest.getPatchOperations().get(0);
         if (!PatchOperation.OPERATION_REPLACE.equals(patch.getOperation())
-                || !KBAINFO.equals(patch.getField())
+                || !kbaPropertyField.equals(patch.getField())
                 || !patch.getValue().isList()) {
-            return new BadRequestException("Patch operation must replace " + KBAINFO).asPromise();
+            return new BadRequestException("Patch operation must replace " + kbaPropertyField).asPromise();
         }
 
         try {
@@ -121,28 +98,12 @@ public final class UserUpdateService implements RequestHandler {
                     // performing the patch/update
                     context,
                     newPatchRequest(identityService.child(patchRequest.getResourcePath()),
-                            PatchOperation.replace(KBAINFO, hashedAnswers.getObject())))
+                            PatchOperation.replace(kbaPropertyField, hashedAnswers.getObject())))
                     .asPromise();
         } catch (JsonCryptoException e) {
             return new InternalServerErrorException("Error while hashing the answer", e).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         }
-    }
-
-    @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest queryRequest,
-            QueryResourceHandler queryResourceHandler) {
-        return new NotSupportedException("Query not supported for this endpoint").asPromise();
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest readRequest) {
-        return new NotSupportedException("Read not supported for this endpoint").asPromise();
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest updateRequest) {
-        return new NotSupportedException("Update not supported for this endpoint").asPromise();
     }
 }
