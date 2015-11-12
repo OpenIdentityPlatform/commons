@@ -32,8 +32,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
-import org.forgerock.selfservice.core.crypto.CryptoConstants;
-import org.forgerock.selfservice.core.crypto.JsonCryptoException;
+import org.forgerock.selfservice.core.util.Answers;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
 
@@ -120,17 +119,9 @@ public final class SecurityAnswerDefinitionStage extends AbstractKbaStage<Securi
         List<Object> questions = kba.asList();
         for (int kbaArrayIndex = 0; kbaArrayIndex < questions.size(); kbaArrayIndex++) {
             JsonPointer pointerToAnswer = getPointerToAnswer(kbaArrayIndex);
-            String answerTextValue = kba.get(pointerToAnswer).asString();
-            JsonValue answerHashed = hashAnswer(answerTextValue);
+            JsonValue answerValue = kba.get(pointerToAnswer);
+            JsonValue answerHashed = Answers.hashAnswer(cryptoService, answerValue);
             kba.put(pointerToAnswer, answerHashed);
-        }
-    }
-
-    private JsonValue hashAnswer(String answerTextValue) throws InternalServerErrorException {
-        try {
-            return cryptoService.hash(normaliseAnswer(answerTextValue), CryptoConstants.ALGORITHM_SHA_256);
-        } catch (JsonCryptoException e) {
-            throw new InternalServerErrorException("Error while hashing the answer", e);
         }
     }
 

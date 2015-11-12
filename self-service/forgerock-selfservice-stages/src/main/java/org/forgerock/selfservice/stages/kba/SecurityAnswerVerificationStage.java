@@ -34,6 +34,7 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.crypto.JsonCryptoException;
 import org.forgerock.selfservice.core.annotations.SelfService;
+import org.forgerock.selfservice.core.util.Answers;
 import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.util.Reject;
 
@@ -217,7 +218,7 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
 
     private boolean match(String answerProvidedByUser, JsonValue answerSetByUser) throws InternalServerErrorException {
         try {
-            return cryptoService.matches(normaliseAnswer(answerProvidedByUser), answerSetByUser);
+            return cryptoService.matches(Answers.normaliseAnswer(answerProvidedByUser), answerSetByUser);
         } catch (JsonCryptoException e) {
             throw new InternalServerErrorException("Error while matching the answers", e);
         }

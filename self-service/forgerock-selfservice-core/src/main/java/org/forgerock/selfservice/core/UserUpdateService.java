@@ -28,16 +28,14 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
-import org.forgerock.selfservice.core.crypto.CryptoConstants;
 import org.forgerock.selfservice.core.crypto.CryptoService;
-import org.forgerock.selfservice.core.crypto.JsonCryptoException;
+import org.forgerock.selfservice.core.util.Answers;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
@@ -86,9 +84,7 @@ public final class UserUpdateService extends AbstractRequestHandler {
             for (JsonValue value : patch.getValue()) {
                 final String questionId = value.get("questionId").asString();
                 final JsonValue answer = value.get("answer");
-                final JsonValue hashedAnswer = cryptoService.isHashed(answer)
-                        ? answer
-                        : cryptoService.hash(answer.asString(), CryptoConstants.ALGORITHM_SHA_256);
+                final JsonValue hashedAnswer = Answers.hashAnswer(cryptoService, answer);
                 hashedAnswers.add(object(
                                 field("questionId", questionId),
                                 field("answer", hashedAnswer.getObject())));
@@ -101,8 +97,6 @@ public final class UserUpdateService extends AbstractRequestHandler {
                     newPatchRequest(identityService.child(patchRequest.getResourcePath()),
                             PatchOperation.replace(kbaPropertyField, hashedAnswers.getObject())))
                     .asPromise();
-        } catch (JsonCryptoException e) {
-            return new InternalServerErrorException("Error while hashing the answer", e).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         }
