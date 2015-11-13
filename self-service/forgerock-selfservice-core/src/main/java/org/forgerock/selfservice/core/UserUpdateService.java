@@ -25,14 +25,24 @@ import javax.inject.Inject;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.AbstractRequestHandler;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.selfservice.core.annotations.SelfService;
 import org.forgerock.selfservice.core.crypto.CryptoService;
 import org.forgerock.selfservice.core.util.Answers;
@@ -44,7 +54,7 @@ import org.forgerock.util.promise.Promise;
  *
  * @since 0.8.0
  */
-public final class UserUpdateService extends AbstractRequestHandler {
+public final class UserUpdateService implements CollectionResourceProvider {
 
     private final CryptoService cryptoService;
     private final ConnectionFactory connectionFactory;
@@ -68,11 +78,31 @@ public final class UserUpdateService extends AbstractRequestHandler {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest patchRequest) {
-        if (patchRequest.getPatchOperations().isEmpty() || patchRequest.getPatchOperations().size() > 1) {
+    public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
+        return new NotSupportedException().asPromise();
+    }
+
+    @Override
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
+        return new NotSupportedException().asPromise();
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
+        return new NotSupportedException().asPromise();
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId, DeleteRequest request) {
+        return new NotSupportedException().asPromise();
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+        if (request.getPatchOperations().isEmpty() || request.getPatchOperations().size() > 1) {
             return new BadRequestException("Patch expects one operation").asPromise();
         }
-        PatchOperation patch = patchRequest.getPatchOperations().get(0);
+        PatchOperation patch = request.getPatchOperations().get(0);
         if (!PatchOperation.OPERATION_REPLACE.equals(patch.getOperation())
                 || !kbaPropertyField.equals(patch.getField())
                 || !patch.getValue().isList()) {
@@ -86,19 +116,34 @@ public final class UserUpdateService extends AbstractRequestHandler {
                 final JsonValue answer = value.get("answer");
                 final JsonValue hashedAnswer = Answers.hashAnswer(cryptoService, answer);
                 hashedAnswers.add(object(
-                                field("questionId", questionId),
-                                field("answer", hashedAnswer.getObject())));
+                        field("questionId", questionId),
+                        field("answer", hashedAnswer.getObject())));
             }
 
             return connectionFactory.getConnection().patch(
                     // do NOT wrap context in SelfServiceContext for this call -- it is authenticated as the user
                     // performing the patch/update
                     context,
-                    newPatchRequest(identityService.child(patchRequest.getResourcePath()),
+                    newPatchRequest(identityService.child(resourceId),
                             PatchOperation.replace(kbaPropertyField, hashedAnswers.getObject())))
                     .asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         }
+    }
+
+    @Override
+    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest request, QueryResourceHandler handler) {
+        return new NotSupportedException().asPromise();
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
+        return new NotSupportedException().asPromise();
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
+        return new NotSupportedException().asPromise();
     }
 }

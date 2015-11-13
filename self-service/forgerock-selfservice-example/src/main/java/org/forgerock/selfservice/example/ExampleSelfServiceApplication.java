@@ -135,8 +135,8 @@ public final class ExampleSelfServiceApplication implements HttpApplication {
     }
 
     private Handler registerUserKBAUpdateHandler() {
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(
-                new UserUpdateService(crestConnectionFactory, resourcePath("users"), new JsonPointer("kbaInfo"))));
+        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(Resources.newCollection(
+                new UserUpdateService(crestConnectionFactory, resourcePath("users"), new JsonPointer("kbaInfo")))));
     }
 
     @Override
