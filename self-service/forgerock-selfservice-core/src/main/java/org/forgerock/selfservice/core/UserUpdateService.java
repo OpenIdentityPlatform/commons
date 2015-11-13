@@ -56,6 +56,10 @@ import org.forgerock.util.promise.Promise;
  */
 public final class UserUpdateService implements CollectionResourceProvider {
 
+    private static final String FIELD_QUESTION_ID = "questionId";
+    private static final String FIELD_CUSTOM_QUESTION = "customQuestion";
+    private static final String FIELD_ANSWER = "answer";
+
     private final CryptoService cryptoService;
     private final ConnectionFactory connectionFactory;
     private final ResourcePath identityService;
@@ -112,12 +116,23 @@ public final class UserUpdateService implements CollectionResourceProvider {
         try {
             final JsonValue hashedAnswers = json(array());
             for (JsonValue value : patch.getValue()) {
-                final String questionId = value.get("questionId").asString();
-                final JsonValue answer = value.get("answer");
+                final JsonValue answer = value.get(FIELD_ANSWER);
+                if (answer.isNull()) {
+                    throw new BadRequestException("Patch content must contain an " + FIELD_ANSWER);
+                }
                 final JsonValue hashedAnswer = Answers.hashAnswer(cryptoService, answer);
-                hashedAnswers.add(object(
-                        field("questionId", questionId),
-                        field("answer", hashedAnswer.getObject())));
+                if (value.isDefined(FIELD_QUESTION_ID)) {
+                    hashedAnswers.add(object(
+                            field(FIELD_QUESTION_ID, value.get(FIELD_QUESTION_ID).asString()),
+                            field(FIELD_ANSWER, hashedAnswer.getObject())));
+                } else if (value.isDefined(FIELD_CUSTOM_QUESTION)) {
+                    hashedAnswers.add(object(
+                            field(FIELD_CUSTOM_QUESTION, value.get(FIELD_CUSTOM_QUESTION).asString()),
+                            field(FIELD_ANSWER, hashedAnswer.getObject())));
+                } else {
+                    throw new BadRequestException("Patch content must contain either a " + FIELD_QUESTION_ID
+                            + " or a " + FIELD_CUSTOM_QUESTION);
+                }
             }
 
             return connectionFactory.getConnection().patch(
