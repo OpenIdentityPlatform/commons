@@ -21,8 +21,14 @@ import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_HMAC;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_SIGNATURE;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.SIGNATURE_ALGORITHM;
 import static org.forgerock.audit.handlers.csv.CsvSecureUtils.dataToSign;
+import static org.forgerock.util.Reject.checkNotNull;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Writer;
 import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,27 +42,37 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
+import org.forgerock.audit.events.handlers.writers.RotatableWriter;
+import org.forgerock.audit.events.handlers.writers.TextWriter;
+import org.forgerock.audit.events.handlers.writers.TextWriterAdapter;
 import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.audit.secure.SecureStorageException;
+import org.forgerock.util.Reject;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.supercsv.cellprocessor.ift.CellProcessor;
-import org.supercsv.io.ICsvMapWriter;
+import org.supercsv.io.CsvMapReader;
+import org.supercsv.io.ICsvMapReader;
+import org.supercsv.prefs.CsvPreference;
 
 /**
- * This class wraps an ICsvMapWriter and silently adds 2 last columns : HMAC and SIGNATURE.
+ * Responsible for writing to a CSV file; silently adds 2 last columns : HMAC and SIGNATURE.
  * The column HMAC is filled with the HMAC calculation of the current row and a key.
  * The column SIGNATURE is filled with the signature calculation of the last HMAC and the last signature if any.
  */
-class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
+class SecureCsvWriter implements CsvWriter {
 
-    private static final Logger logger = LoggerFactory.getLogger(CsvSecureMapWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(SecureCsvWriter.class);
 
-    private final ICsvMapWriter delegate;
+    private final CsvFormatter csvFormatter;
+    private final String[] headers;
+    private Writer csvWriter;
+    private RotatableWriter rotatableWriter;
+
     private final HmacCalculator hmacCalculator;
     private final ScheduledExecutorService scheduler;
     private final ReentrantLock signatureLock = new ReentrantLock();
@@ -66,47 +82,52 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
     private ScheduledFuture<?> scheduledSignature;
 
     private String lastHMAC;
-    private String[] header;
     private byte[] lastSignature;
 
-    /**
-     * Constructs a new CsvSecureMapWriter.
-     *
-     * The keystore pointed by {@code keystoreFilename} has to contain a {@code SecretKey} stored with the alias
-     * {@plain InitialKey}.
-     * In case {@code resume} is true, that means we are resuming an existing CSV file, so that will lookup into the
-     * keystore the current key used for the HMAC hashing instead of the initial key.
-     *
-     * @param delegate the real CsvMapWriter to write to.
-     * @param keystoreFilename a path to the keystore filename
-     * @param keystorePassword the password to unlock the keystore
-     * @param signatureInterval the interval to insert a signature
-     */
-    CsvSecureMapWriter(ICsvMapWriter delegate, SecureStorage secureStorage, Duration signatureInterval) {
-        this(delegate, secureStorage, signatureInterval, true);
-    }
+    SecureCsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, SecureStorage secureStorage,
+                      CsvAuditEventHandlerConfiguration config) throws IOException {
+        Reject.ifFalse(config.getSecurity().isEnabled(), "SecureCsvWriter should only be used if security is enabled");
+        boolean fileAlreadyInitialized = csvFile.exists();
+        final CsvAuditEventHandlerConfiguration.CsvSecurity securityConfiguration = config.getSecurity();
+        CsvSecureVerifier verifier = null;
+        if (fileAlreadyInitialized) {
+            // Run the CsvVerifier to check that the file was not tampered,
+            // and get the headers and lastSignature for free
+            try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
+                final String[] actualHeaders;
+                verifier = new CsvSecureVerifier(reader, secureStorage);
+                if (!verifier.verify()) {
+                    logger.info("The existing secure CSV file was tampered.");
+                    throw new IOException("The CSV file was tampered.");
+                } else {
+                    logger.info("The existing secure CSV file was not tampered.");
+                }
+                actualHeaders = verifier.getHeaders();
+                // Assert that the 2 headers equals.
+                if (actualHeaders == null) {
+                    fileAlreadyInitialized = false;
+                } else {
+                    if (actualHeaders.length != headers.length) {
+                        throw new IOException("Resuming an existing CSV file but the headers do not match.");
+                    }
+                    for (int idx = 0; idx < actualHeaders.length; idx++) {
+                        if (!actualHeaders[idx].equals(headers[idx])) {
+                            throw new IOException("Resuming an existing CSV file but the headers do not match.");
+                        }
+                    }
+                }
+            }
+        }
+        this.headers = checkNotNull(headers, "The headers can't be null.");
+        csvFormatter = new CsvFormatter(csvPreference);
+        csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
 
-    /**
-     * Constructs a new CsvSecureMapWriter.
-     *
-     * The keystore pointed by {@code keystoreFilename} has to contain a {@code SecretKey} stored with the alias
-     * {@plain InitialKey}.
-     * In case {@code resume} is true, that means we are resuming an existing CSV file, so that will lookup into the
-     * keystore the current key used for the HMAC hashing instead of the initial key.
-     *
-     * @param delegate the real CsvMapWriter to write to.
-     * @param secureStorage the storage containing the keys
-     * @param signatureInterval the interval to insert a signature
-     * @param resume check if we are resuming an existing file.
-     */
-    CsvSecureMapWriter(ICsvMapWriter delegate, SecureStorage secureStorage, Duration signatureInterval, boolean resume) {
-        this.delegate = delegate;
         this.secureStorage = secureStorage;
-        this.signatureInterval = signatureInterval;
+        this.signatureInterval = securityConfiguration.getSignatureIntervalDuration();
 
         try {
             SecretKey currentKey;
-            if (resume) {
+            if (fileAlreadyInitialized) {
                 currentKey = secureStorage.readCurrentKey();
                 if (currentKey == null) {
                     throw new IllegalStateException("We are supposed to resume but there is not entry for CurrentKey.");
@@ -128,6 +149,10 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
             throw new RuntimeException(e);
         }
 
+        if (rotatableWriter != null) {
+            rotatableWriter.registerRotationHooks(new SecureCsvWriterRotationHooks());
+        }
+
         scheduler = Executors.newScheduledThreadPool(1);
 
         signatureTask = new Runnable() {
@@ -142,11 +167,37 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
                 }
             }
         };
+
+        if (fileAlreadyInitialized) {
+            setLastHMAC(verifier.getLastHMAC());
+            setLastSignature(verifier.getLastSignature());
+        } else {
+            writeHeader(headers);
+            csvWriter.flush();
+        }
+    }
+
+    private Writer constructWriter(File csvFile, boolean append, CsvAuditEventHandlerConfiguration config)
+            throws IOException {
+        TextWriter textWriter;
+        if (config.getFileRotation().isRotationEnabled()) {
+            rotatableWriter = new RotatableWriter(csvFile, config, append);
+            textWriter = rotatableWriter;
+        }
+        else {
+            textWriter = new TextWriter.Stream(new FileOutputStream(csvFile, append));
+        }
+
+        if (config.getBuffering().isEnabled()) {
+            CsvAuditEventHandlerConfiguration.EventBufferingConfiguration bufferConfig = config.getBuffering();
+            textWriter = new AsynchronousTextWriter("CsvHandler", bufferConfig.isAutoFlush(), textWriter);
+        }
+        return new TextWriterAdapter(textWriter);
     }
 
     @Override
     public void flush() throws IOException {
-        delegate.flush();
+        csvWriter.flush();
     }
 
     @Override
@@ -167,7 +218,7 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
         } finally {
             signatureLock.unlock();
         }
-        delegate.close();
+        csvWriter.close();
     }
 
     private void forceWriteSignature() throws IOException {
@@ -177,31 +228,13 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
         }
     }
 
-    @Override
-    public int getLineNumber() {
-        return delegate.getLineNumber();
-    }
-
-    @Override
-    public int getRowNumber() {
-        return delegate.getRowNumber();
-    }
-
-    @Override
-    public void write(Map<String, ?> values, String... nameMapping) throws IOException {
-        write(values, nameMapping, nameMapping == null ? null : new CellProcessor[nameMapping.length]);
-    }
-
-    @Override
-    public void writeComment(String comment) throws IOException {
-        delegate.writeComment(comment);
-    }
-
-    @Override
     public void writeHeader(String... header) throws IOException {
-        this.header = header;
+        writeHeader(csvWriter, header);
+    }
+
+    public void writeHeader(Writer writer, String... header) throws IOException {
         String[] newHeader = addExtraColumns(header);
-        delegate.writeHeader(newHeader);
+        writer.write(csvFormatter.formatHeader(newHeader));
     }
 
     @VisibleForTesting
@@ -213,7 +246,7 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
             lastSignature = secureStorage.sign(dataToSign(lastSignature, lastHMAC));
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
             logger.info("Writing signature :" + lastSignature);
-            write(values, header);
+            writeEvent(values);
 
             // Store the current signature into the Keystore
             secureStorage.writeCurrentSignatureKey(new SecretKeySpec(lastSignature, SIGNATURE_ALGORITHM));
@@ -226,24 +259,46 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
         }
     }
 
-    @Override
-    public void write(Map<String, ?> values, String[] nameMapping, CellProcessor[] processors) throws IOException {
+    /**
+     * Forces rotation of the writer.
+     * <p>
+     * Rotation is possible only if file rotation is enabled.
+     *
+     * @return {@code true} if rotation was done, {@code false} otherwise.
+     * @throws IOException
+     *          If an error occurs
+     */
+    public boolean forceRotation() throws IOException {
+        return rotatableWriter != null ? rotatableWriter.forceRotation() : false;
+    }
+
+    /**
+     * Write a row into the CSV files.
+     * @param values The keys of the {@link Map} have to match the column's header.
+     * @throws IOException
+     */
+    public void writeEvent(Map<String, String> values) throws IOException {
+        writeEvent(csvWriter, values);
+    }
+
+    /**
+     * Write a row into the CSV files.
+     * @param values The keys of the {@link Map} have to match the column's header.
+     * @throws IOException
+     */
+    public void writeEvent(Writer writer, Map<String, String> values) throws IOException {
         signatureLock.lock();
         try {
-            logger.info("Writing data : " + values + " for " + Arrays.toString(nameMapping));
-            String[] newNameMapping = addExtraColumns(nameMapping);
+            logger.info("Writing data : " + values + " for " + Arrays.toString(headers));
+            String[] extendedHeaders = addExtraColumns(headers);
 
-            Map<String, Object> newValues = new HashMap<>(values);
+            Map<String, String> extendedValues = new HashMap<>(values);
             if (!values.containsKey(CsvSecureConstants.HEADER_SIGNATURE)) {
-                insertHMACSignature(newValues, nameMapping);
+                insertHMACSignature(extendedValues, headers);
             }
 
-            CellProcessor[] newProcessors = new CellProcessor[newNameMapping.length];
-            System.arraycopy(processors, 0, newProcessors, 0, processors.length);
-            newProcessors[processors.length] = null;
-
-            delegate.write(newValues, newNameMapping, newProcessors);
-            delegate.flush();
+            writer.write(csvFormatter.formatEvent(extendedValues, extendedHeaders));
+            writer.flush();
             // Store the current key
             secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
 
@@ -265,7 +320,7 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
         }
     }
 
-    private void insertHMACSignature(Map<String, Object> values, String[] nameMapping) throws IOException {
+    private void insertHMACSignature(Map<String, String> values, String[] nameMapping) throws IOException {
         try {
             lastHMAC = hmacCalculator.calculate(dataToSign(logger, values, nameMapping));
             values.put(CsvSecureConstants.HEADER_HMAC, lastHMAC);
@@ -283,10 +338,6 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
         return newHeader;
     }
 
-    void setHeader(String[] header) {
-        this.header = header;
-    }
-
     void setLastHMAC(String lastHMac) {
         this.lastHMAC = lastHMac;
     }
@@ -295,27 +346,13 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
         this.lastSignature = lastSignature;
     }
 
-    @Override
-    public void postRotationAction() throws IOException {
-        // ensure
-        writeHeader(header);
-        writeLastSignature();
-        flush();
-    }
-
-    @Override
-    public void preRotationAction() throws IOException {
-        // ensure the final signature is written
-        forceWriteSignature();
-    }
-
-    void writeLastSignature() throws IOException {
+    void writeLastSignature(Writer writer) throws IOException {
         // We have to prevent from writing another line between the signature calculation
         // and the signature's row write, as the calculation uses the lastHMAC.
         signatureLock.lock();
         try {
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
-            write(values, header);
+            writeEvent(writer, values);
         } catch (IOException ex) {
             logger.error(ex.getMessage(), ex);
             throw new IOException(ex);
@@ -324,4 +361,20 @@ class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
         }
     }
 
+    private class SecureCsvWriterRotationHooks implements RotationHooks {
+
+        @Override
+        public void postRotationAction(Writer writer) throws IOException {
+            // ensure the first signature is written
+            writeHeader(writer, headers);
+            writeLastSignature(writer);
+            writer.flush();
+        }
+
+        @Override
+        public void preRotationAction(Writer writer) throws IOException {
+            // ensure the final signature is written
+            forceWriteSignature();
+        }
+    }
 }

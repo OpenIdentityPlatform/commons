@@ -280,7 +280,11 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     private synchronized CsvWriter createCsvMapWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
-        return new CsvWriter(auditFile, headers, csvPreference, secureStorage, configuration);
+        if (configuration.getSecurity().isEnabled()) {
+            return new SecureCsvWriter(auditFile, headers, csvPreference, secureStorage, configuration);
+        } else {
+            return new StandardCsvWriter(auditFile, headers, csvPreference, configuration);
+        }
     }
 
     private ICsvMapReader createCsvMapReader(final File auditFile) throws IOException {
@@ -392,7 +396,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 cells.put(fieldDotNotationByField.get(key), value);
             }
         }
-        csvWriter.writeRow(cells);
+        csvWriter.writeEvent(cells);
     }
 
     private void resetAndReopenWriter(final String topic, CsvWriter csvWriter, boolean forceRotation)

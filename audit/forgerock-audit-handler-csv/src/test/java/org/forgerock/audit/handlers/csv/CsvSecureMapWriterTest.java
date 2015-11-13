@@ -113,41 +113,22 @@ public class CsvSecureMapWriterTest {
 
     @Test
     public void shouldGenerateHMACColumn() throws Exception {
-        File actual = new File("target/test-classes/shouldGenerateHMACColumn-actual.txt");
-        Writer writer = new FileWriter(actual);
-        ICsvMapWriter csvMapWriter = new CsvMapWriter(writer , CsvPreference.EXCEL_PREFERENCE);
-        try (CsvSecureMapWriter csvHMACWriter = new CsvSecureMapWriter(csvMapWriter,
-                secureStorage,
-                signatureInterval,
-                false)) {
-            final String header = "FOO";
+        final String header = "FOO";
+        final File actual = new File("target/test-classes/shouldGenerateHMACColumn-actual.txt");
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, secureStorage, getConfig())) {
             Map<String, String> values;
 
-            csvHMACWriter.writeHeader(header);
+//            secureCsvWriter.writeHeader(header);
 
             values = singletonMap(header, "bar");
-            csvHMACWriter.write(values, header);
+            secureCsvWriter.writeEvent(values);
 
             values = singletonMap(header, "quix");
-            csvHMACWriter.write(values, header);
+            secureCsvWriter.writeEvent(values);
         }
 
         assertThat(contentOf(actual)).isEqualTo(contentOf(new File("target/test-classes/shouldGenerateHMACColumn-expected.txt")));
-    }
-
-    @Test
-    public void shouldGenerateHeaderWithRecordAndBlockSignatureColumns() throws Exception {
-        Writer writer = new StringWriter();
-        ICsvMapWriter csvMapWriter = new CsvMapWriter(writer , CsvPreference.STANDARD_PREFERENCE);
-        try (CsvSecureMapWriter csvHMACWriter = new CsvSecureMapWriter(csvMapWriter,
-                secureStorage,
-                signatureInterval,
-                false)) {
-            String header = "FOO";
-            csvHMACWriter.writeHeader(header);
-        }
-
-        assertThat(writer.toString()).isEqualTo("FOO,HMAC,SIGNATURE\r\n");
     }
 
     @Test
@@ -161,17 +142,12 @@ public class CsvSecureMapWriterTest {
         // - close
         // - assert that the file contains header, row, signature
 
-        File actual = new File("target/test-classes/shouldGeneratePeriodicallySignature-actual.txt");
-        Writer writer = new FileWriter(actual);
-        ICsvMapWriter csvMapWriter = new CsvMapWriter(writer, CsvPreference.EXCEL_PREFERENCE);
-        try (CsvSecureMapWriter csvHMACWriter = new CsvSecureMapWriter(csvMapWriter,
-                secureStorage,
-                signatureInterval,
-                false)) {
-            final String header = "FOO";
-            csvHMACWriter.writeHeader(header);
+        final File actual = new File("target/test-classes/shouldGeneratePeriodicallySignature-actual.txt");
+        final String header = "FOO";
+        try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, secureStorage, getConfig())) {
 
-            csvHMACWriter.write(singletonMap(header, "bar"), header);
+            secureCsvWriter.writeEvent(singletonMap(header, "bar"));
 
             // A signature has to be generated during this timelapse.
             Thread.sleep(200);
@@ -183,7 +159,7 @@ public class CsvSecureMapWriterTest {
             assertThat(contentOf(actual)).isEqualTo(contentOf(new File("target/test-classes/shouldGeneratePeriodicallySignature-partial.txt")));
 
 
-            csvHMACWriter.write(singletonMap(header, "quix"), header);
+            secureCsvWriter.writeEvent(singletonMap(header, "quix"));
         }
 
         // We expect :
@@ -194,4 +170,12 @@ public class CsvSecureMapWriterTest {
         // - signature // because of closing the CsvWriter
         assertThat(contentOf(actual)).isEqualTo(contentOf(new File("target/test-classes/shouldGeneratePeriodicallySignature-expected.txt")));
     }
+
+    private CsvAuditEventHandlerConfiguration getConfig() {
+        CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
+        configuration.getSecurity().setEnabled(true);
+        configuration.getSecurity().setSignatureInterval(signatureInterval.toString());
+        return configuration;
+    }
+
 }

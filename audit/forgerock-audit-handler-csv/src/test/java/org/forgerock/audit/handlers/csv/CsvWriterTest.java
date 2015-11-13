@@ -73,9 +73,9 @@ public class CsvWriterTest {
         CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             Map<String, String> values = getValues(header, "one-a", "one-b", "one-c");
-            writer.writeRow(values);
+            writer.writeEvent(values);
         }
 
         try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
@@ -104,18 +104,18 @@ public class CsvWriterTest {
         CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             Map<String, String> values = getValues(header, "one-a", "one-b", "one-c");
-            writer.writeRow(values);
+            writer.writeEvent(values);
         }
 
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "riri");
             values.put(header[1], "fifi");
             values.put(header[2], "loulou");
 
-            writer.writeRow(values);
+            writer.writeEvent(values);
         }
 
         try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
@@ -125,14 +125,14 @@ public class CsvWriterTest {
 
         // Expecting to fail
         header = new String[] { "child1", "child2", "child3", "enfant4" };
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "Joe");
             values.put(header[1], "William");
             values.put(header[2], "Jack");
             values.put(header[3], "Averell");
 
-            writer.writeRow(values);
+            writer.writeEvent(values);
             fail("We should not be able to write Dalton's brothers.");
         } catch (IOException e) {
             // This is ok, we expect to have this exception.
@@ -152,7 +152,7 @@ public class CsvWriterTest {
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
 
-        final CsvWriter csvWriter = new CsvWriter(csvFile, headers, csvPreference, null, configuration);
+        final StandardCsvWriter csvWriter = new StandardCsvWriter(csvFile, headers, csvPreference, configuration);
         csvWriter.close();
 
         final List<String> contents = Files.readAllLines(csvFile.toPath(), Charset.defaultCharset());
@@ -178,7 +178,7 @@ public class CsvWriterTest {
         CsvAuditEventHandlerConfiguration configuration =
                 createCsvAuditEventHandlerConfigurationWithRotation(bufferConfig, 1000L);
         configuration.setSecurity(csvSecurity);
-        try (CsvWriter writer = new CsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, secureStorage, configuration)) {
             writeNRows(header, writer, 12);
         }
 
@@ -228,7 +228,7 @@ public class CsvWriterTest {
     private void writeNRows(String[] header, CsvWriter writer, int nbRows) throws IOException {
         for (int i = 1; i <= nbRows; i++) {
             String number = "________________" + String.valueOf(i);
-            writer.writeRow(getValues(header, number + "-A", number + "-B", number + "-C"));
+            writer.writeEvent(getValues(header, number + "-A", number + "-B", number + "-C"));
         }
     }
 }

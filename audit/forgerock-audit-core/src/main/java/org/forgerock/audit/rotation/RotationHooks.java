@@ -16,32 +16,36 @@
 package org.forgerock.audit.rotation;
 
 import java.io.IOException;
+import java.io.Writer;
 
+/**
+ * Callback hooks to allow custom action to be taken before and after file rotation occurs.
+ */
 public interface RotationHooks {
     /**
      * Method to run an action just after file has been rotated.
      * @throws IOException If the post action fails.
      */
-    void postRotationAction() throws IOException;
+    void postRotationAction(Writer writer) throws IOException;
 
     /**
      * Method to run an action just before file will be rotated.
      * @throws IOException If the pre action fails.
      */
-    void preRotationAction() throws IOException;
+    void preRotationAction(Writer writer) throws IOException;
 
     /**
      * {@link RotationHooks} that do nothing.
      */
-    class NullRotatationHooks implements RotationHooks {
+    class NoOpRotatationHooks implements RotationHooks {
 
         @Override
-        public void postRotationAction() throws IOException {
+        public void postRotationAction(Writer writer) throws IOException {
             // do nothing
         }
 
         @Override
-        public void preRotationAction() throws IOException {
+        public void preRotationAction(Writer writer) throws IOException {
             // do nothing
         }
     }

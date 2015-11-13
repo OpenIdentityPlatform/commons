@@ -16,9 +16,9 @@
 package org.forgerock.audit.handlers.csv;
 
 import java.io.IOException;
+import java.io.Writer;
 
 import org.forgerock.audit.rotation.RotationHooks;
-import org.supercsv.io.ICsvMapWriter;
 
 /**
  * Creates a {@link RotationHooks} for super csv.
@@ -26,20 +26,21 @@ import org.supercsv.io.ICsvMapWriter;
 class CsvRotationHooks implements RotationHooks {
 
     private final String[] headers;
-    private final ICsvMapWriter csvMapWriter;
+    private final CsvFormatter formatter;
 
-    public CsvRotationHooks(final ICsvMapWriter mapWriter, final String... headers) {
-        this.csvMapWriter = mapWriter;
+    public CsvRotationHooks(final CsvFormatter formatter, final String... headers) {
+        this.formatter = formatter;
         this.headers = headers;
     }
 
     @Override
-    public void postRotationAction() throws IOException {
-        csvMapWriter.writeHeader(headers);
+    public void postRotationAction(Writer writer) throws IOException {
+        String headerRow = formatter.formatHeader(headers);
+        writer.write(headerRow);
     }
 
     @Override
-    public void preRotationAction() throws IOException {
+    public void preRotationAction(Writer writer) throws IOException {
         // do nothing
     }
 }

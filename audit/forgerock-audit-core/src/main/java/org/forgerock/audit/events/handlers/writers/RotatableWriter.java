@@ -68,7 +68,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     private DateTime lastRotationTime;
     private final boolean rotationEnabled;
     private final File file;
-    private RotationHooks rotationHooks = new RotationHooks.NullRotatationHooks();
+    private RotationHooks rotationHooks = new RotationHooks.NoOpRotatationHooks();
     private final AtomicBoolean isRotating = new AtomicBoolean(false);
     /** The underlying output stream. */
     private MeteredStream meteredStream;
@@ -140,14 +140,14 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         File currentFile = fileNamingPolicy.getInitialName();
         if (currentFile.exists()) {
             File newFile = fileNamingPolicy.getNextName();
-            rotationHooks.preRotationAction();
+            rotationHooks.preRotationAction(writer);
             writer.close();
             if (currentFile.renameTo(newFile)) {
                 rotationHappened = true;
                 if (!currentFile.exists()) {
                     currentFile.createNewFile();
                     writer = constructWriter(currentFile, true);
-                    rotationHooks.postRotationAction();
+                    rotationHooks.postRotationAction(writer);
                 }
             } else {
                 logger.error("Unable to rename the audit file {}", currentFile.toString());
