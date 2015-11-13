@@ -27,7 +27,7 @@
 
 define("org/forgerock/commons/ui/user/delegates/KBADelegate", [
     "jquery",
-    "underscore",
+    "lodash",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -38,16 +38,21 @@ define("org/forgerock/commons/ui/user/delegates/KBADelegate", [
 
     KBADelegate.getQuestions = function () {
         return this.serviceCall({
-            "url" : "kbaQuestions"
+            "url" : "kba"
         }).then(function (response) {
-            return response.questions;
+            return _.map(response.questions, function (value, key) {
+                return {
+                    "id" : key,
+                    "question" : value
+                };
+            });
         });
     };
 
     KBADelegate.saveKBAInfo = function (user) {
         return this.serviceCall({
             "type": "PATCH",
-            "url": "user",
+            "url": "user/" + Configuration.loggedUser.id,
             "data": JSON.stringify(
                 _(user)
                  .map(function (value, key) {

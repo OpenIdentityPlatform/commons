@@ -22,6 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
+  /*jslint regexp:false */
 /*global define, _ */
 
  define("mock/Data", [
@@ -31,26 +32,20 @@
  ], function (_, Configuration, LocalStorage) {
     return function (server) {
 
-    var kbaQuestions = [
-        {
-            "id": "1",
-            "question": {
-                "en_GB": "What's your favorite colour?",
-                "fr": "Quelle est votre couleur préférée?",
-                "en": "What's your favorite color?"
-            }
-        },
-        {
-            "id": "2",
-            "question": {
-                "en": "Who was your first employer?"
-            }
-        }
-    ];
+    var kbaQuestions = {
+          "1": {
+            "en": "What's your favorite color?",
+            "en_GB": "What's your favorite colour?",
+            "fr": "Quelle est votre couleur préférée?"
+          },
+          "2": {
+            "en": "Who was your first employer?"
+          }
+        };
 
         server.respondWith(
             "GET",
-            "/mock/selfservice/kbaQuestions",
+            "/mock/selfservice/kba",
             [
                 200,
                 {
@@ -64,7 +59,7 @@
 
         server.respondWith(
             "PATCH",
-            "/mock/selfservice/user",
+            /\/mock\/selfservice\/user\/.*/,
             function (request) {
                 var requestContent = JSON.parse(request.requestBody),
                     headers = { "Content-Type": "application/json;charset=UTF-8" };
