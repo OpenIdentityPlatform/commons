@@ -45,9 +45,9 @@ public final class IO {
     public static final int DEFAULT_TMP_MEMORY_LIMIT = 64 * 1_024;
 
     /**
-     * 1 MiB.
+     * 1 GiB.
      */
-    public static final int DEFAULT_TMP_FILE_LIMIT = 1 * 1_024 * 1_024;
+    public static final int DEFAULT_TMP_FILE_LIMIT = 1 * 1_024 * 1_024 * 1_024;
 
     /** Size of buffer to use during streaming. */
     private static final int BUF_SIZE = 8 * 1_024;
