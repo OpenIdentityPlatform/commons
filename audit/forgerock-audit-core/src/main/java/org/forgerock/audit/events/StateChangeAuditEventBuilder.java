@@ -17,6 +17,7 @@ package org.forgerock.audit.events;
 
 import static org.forgerock.json.JsonValue.array;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Request;
 
@@ -89,24 +90,46 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
     }
 
     /**
-     * Sets the provided before state as JSON for the event.
+     * Records the previous state of the modified object as a String.
      *
-     * @param stateAsJson A JSON representation of the object's previous state.
+     * @param state A String representation of the object's previous state.
      * @return this builder
      */
-    public final T before(String stateAsJson) {
-        jsonValue.put(BEFORE, stateAsJson);
+    public final T before(String state) {
+        jsonValue.put(BEFORE, state);
         return self();
     }
 
     /**
-     * Sets the provided after state as JSON for the event.
+     * Records the previous state of the modified object as JSON.
      *
-     * @param stateAsJson A JSON representation of the object's new state.
+     * @param state A JSON representation of the object's previous state.
      * @return this builder
      */
-    public final T after(String stateAsJson) {
-        jsonValue.put(AFTER, stateAsJson);
+    public final T before(JsonValue state) {
+        jsonValue.put(BEFORE, state.getObject());
+        return self();
+    }
+
+    /**
+     * Records the new state of the modified object as a String.
+     *
+     * @param state A String representation of the object's new state.
+     * @return this builder
+     */
+    public final T after(String state) {
+        jsonValue.put(AFTER, state);
+        return self();
+    }
+
+    /**
+     * Records the new state of the modified object as JSON.
+     *
+     * @param state A JSON representation of the object's new state.
+     * @return this builder
+     */
+    public final T after(JsonValue state) {
+        jsonValue.put(AFTER, state.getObject());
         return self();
     }
 

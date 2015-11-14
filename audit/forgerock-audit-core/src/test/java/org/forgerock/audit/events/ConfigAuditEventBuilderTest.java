@@ -17,7 +17,11 @@ package org.forgerock.audit.events;
 
 import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.audit.events.ActivityAuditEventBuilderTest.OpenProductActivityAuditEventBuilder.productActivityEvent;
 import static org.forgerock.audit.events.ConfigAuditEventBuilderTest.OpenProductConfigAuditEventBuilder.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.util.HashMap;
 import java.util.List;
@@ -93,6 +97,48 @@ public class ConfigAuditEventBuilderTest {
                 .toEvent();
 
         assertEvent(event);
+    }
+
+    @Test
+    public void beforeAndAfterFieldsCanStoreString() {
+        String beforeState = "<rev>1</rev>";
+        String afterState = "<rev>2</rev>";
+
+        AuditEvent event = productActivityEvent()
+                .timestamp(1427293286239L)
+                .transactionId("transactionId")
+                .eventName("AM-REALM-CREATE")
+                .objectId("thing")
+                .operation("UPDATE")
+                .before(beforeState)
+                .after(afterState)
+                .toEvent();
+
+        assertThat(event.getValue().get(BEFORE).isString()).describedAs("before stored as object").isTrue();
+        assertThat(event.getValue().get(BEFORE).asString()).isEqualTo(beforeState);
+        assertThat(event.getValue().get(AFTER).isString()).describedAs("after stored as object").isTrue();
+        assertThat(event.getValue().get(AFTER).asString()).isEqualTo(afterState);
+    }
+
+    @Test
+    public void beforeAndAfterFieldsCanStoreNavigableJson() {
+        JsonValue beforeState = json(object(field("rev", "1")));
+        JsonValue afterState = json(object(field("rev", "2")));
+
+        AuditEvent event = productActivityEvent()
+                .timestamp(1427293286239L)
+                .transactionId("transactionId")
+                .eventName("AM-REALM-CREATE")
+                .objectId("thing")
+                .operation("UPDATE")
+                .before(beforeState)
+                .after(afterState)
+                .toEvent();
+
+        assertThat(event.getValue().get(BEFORE).isMap()).describedAs("before stored as object").isTrue();
+        assertThat(event.getValue().get(BEFORE).get("rev").asString()).isEqualTo("1");
+        assertThat(event.getValue().get(AFTER).isMap()).describedAs("after stored as object").isTrue();
+        assertThat(event.getValue().get(AFTER).get("rev").asString()).isEqualTo("2");
     }
 
     private void assertEvent(AuditEvent event) {
