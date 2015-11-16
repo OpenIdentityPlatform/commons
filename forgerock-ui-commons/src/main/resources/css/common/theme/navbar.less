@@ -23,7 +23,9 @@
     margin:0;
 
     &.navbar-inverse{
+
         background-image: none;
+        font-size:12px;
 
         .dropdown-menu {
             background-color: #000;
@@ -48,7 +50,6 @@
             &>li>a {
                 letter-spacing: 1px;
                 color: #999;
-                line-height: 40px;
                 -webkit-transition: none;
                 -moz-transition: none;
                 -o-transition: none;
@@ -56,7 +57,8 @@
                 text-transform: uppercase;
                 font-size: 13px;
                 font-weight: 600;
-                padding: 0 15px 0 25px;
+                line-height: 30px;
+                
                 [class^="icon-"],.fa{
                     padding-right:3px;
                     min-width: 22px;
@@ -167,10 +169,6 @@
     margin: 0;
 }
 
-.navbar #navbarBrand a {
-    margin: 5px 0 0 5px;
-}
-
 /* Medium devices (desktops, 768px and up)*/
 @media (min-width: @screen-sm) {
 
@@ -179,7 +177,7 @@
     }
 
     .navbar #navbarBrand a {
-        margin: -5px 0 0 -15px;
+        margin: -1px 0 0 -15px;
     }
 
     .navbar-fixed-top {
@@ -195,7 +193,8 @@
 
     .navbar.navbar-inverse .dropdown-menu>li>a {
         line-height: 20px;
-        padding: 6px 20px;
+        padding-top: 6px;
+        padding-bottom: 6px;
     }
 
     .navbar .dropdown-menu {
@@ -212,12 +211,10 @@
         margin-bottom: 30px;
     }
 
-
     #subNavHolder {
         z-index:10;
         display:block;
     }
-
 
     #subNavBar {
         .nav-subnav>li.active>a {
@@ -297,10 +294,8 @@
     }
 }
 
-
 /* Medium devices (desktops, 992px and up)*/
 @media (min-width: @screen-md) {
-
     .navbar-inverse #main-nav {
         border-right: none;
     }
@@ -318,5 +313,9 @@
 @media (min-width: @screen-lg) {
     .navbar.navbar-inverse .navbar-admin > li > a > i{
         display: inline-block;
+    }
+
+    .navbar.navbar-inverse{
+        font-size: 14px;
     }
 }

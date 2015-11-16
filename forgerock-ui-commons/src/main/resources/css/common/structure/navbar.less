@@ -19,7 +19,8 @@
         .dropdown-menu {
             .dropdown-header  {
                 line-height: 20px;
-                padding: 6px 20px;
+                padding-top: 6px;
+                padding-bottom: 6px;
             }
         }
 
@@ -41,6 +42,31 @@
         a {
             display: inline-block;
             vertical-align: middle;
+        }
+    }
+
+}
+
+#loginContent {
+    .caret {
+        margin-left: 5px;
+    }
+
+    .fa {
+        margin: 0 5px 0 -1px;
+    }
+}
+
+@media (min-width: @screen-sm) {
+    #loginContent > li {
+        margin-bottom: -10px;
+    }
+
+    &.navbar-inverse {
+        .dropdown-menu {
+            .dropdown-header  {
+                line-height: 20px;
+            }
         }
     }
 }
