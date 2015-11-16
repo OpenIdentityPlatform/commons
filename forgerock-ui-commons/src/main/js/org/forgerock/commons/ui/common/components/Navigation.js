@@ -24,8 +24,10 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function($, _, Backbone, AbstractConfigurationAware, AbstractView, Configuration, EventManager, ModuleLoader) {
+    "org/forgerock/commons/ui/common/util/ModuleLoader",
+    "org/forgerock/commons/ui/common/main/Router",
+    "NavigationFilter"
+], function($, _, Backbone, AbstractConfigurationAware, AbstractView, Configuration, EventManager, ModuleLoader, Router, NavigationFilter) {
     var obj = new AbstractConfigurationAware();
 
 
@@ -173,12 +175,25 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
                         this.data.admin = _.contains(Configuration.loggedUser.uiroles, "ui-admin");
 
-                        this.data.userBar = _.map(obj.configuration.userBar, function (link) {
-                            if (_.has(link, "i18nKey")) {
-                                link.label = $.t(link.i18nKey);
-                            }
-                            return link;
-                        });
+                        this.data.userBar = _.chain(obj.configuration.userBar)
+                            .map(function (link) {
+                                if (_.has(link, "i18nKey")) {
+                                    link.label = $.t(link.i18nKey);
+                                }
+                                return link;
+                            })
+                            .filter(function(link) {
+                                if (!link.visibleToRoles) {
+                                    return true;
+                                }
+
+                                if (link.navGroup !== Router.currentRoute.navGroup) {
+                                    return false;
+                                }
+
+                                return _.intersection(Configuration.loggedUser.uiroles, link.visibleToRoles).length > 0;
+                            })
+                            .value();
 
                         if(obj.configuration.username) {
 
@@ -209,34 +224,37 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
             },
 
-            addLinksFromConfiguration: function(linkName) {
-                var urlName,
-                    subUrl,
-                    subUrlName,
-                    baseActive,
-                    navObj;
+            addLinksFromConfiguration: function(context) {
+                var baseActive,
+                    self = this;
 
-                for (urlName in obj.configuration.links[linkName].urls) {
+                if (!Configuration.loggedUser || !context) {
+                    return;
+                }
 
-                    navObj = obj.configuration.links[linkName].urls[urlName];
-                    baseActive = this.isCurrent(navObj.url) || this.isCurrent(navObj.baseUrl) || this.childIsCurrent(navObj.urls);
+                _.each(context.urls, function(navObj) {
+                    var userHasRole = _.intersection(Configuration.loggedUser.uiroles, navObj.visibleToRoles).length > 0;
+                    if(navObj.visibleToRoles && !userHasRole) {
+                        return;
+                    }
 
-                    this.data.topNav.push(this.buildNavElement(navObj, baseActive));
+                    baseActive = self.isCurrent(navObj.url) || self.isCurrent(navObj.baseUrl) || self.childIsCurrent(navObj.urls);
+
+                    self.data.topNav.push(self.buildNavElement(navObj, baseActive));
 
                     // dropdown menus display as submenus and only render for the baseActive.
                     if (navObj.dropdown !== true){
 
                         if (baseActive && navObj.urls) {
-                            for (subUrlName in navObj.urls) {
-                                subUrl = navObj.urls[subUrlName];
-                                this.data.subNav.push(this.buildNavElement(subUrl, this.isCurrent(subUrl.url)));
-                            }
+                            _.each(navObj.urls, function(subUrl) {
+                                self.data.subNav.push(self.buildNavElement(subUrl, self.isCurrent(subUrl.url)));
+                            });
 
                             //Added to provide reference for responsive design submenus to appear in the correct location.
-                            this.data.topNav[this.data.topNav.length - 1].subNav = this.data.subNav;
+                            self.data.topNav[self.data.topNav.length - 1].subNav = self.data.subNav;
                         }
                     }
-                }
+                });
             },
 
             buildNavElement: function (navObj, active) {
@@ -313,22 +331,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
             reload: function() {
                 this.clear();
 
-                var link,
-                    linkName,
-                    linkHasNoRole,
-                    userHasNecessaryRole;
-
-                for (linkName in obj.configuration.links) {
-                    link = obj.configuration.links[linkName];
-
-                    linkHasNoRole = !link.role;
-                    userHasNecessaryRole = link.role && Configuration.loggedUser && _.contains(Configuration.loggedUser.uiroles, link.role);
-
-                    if (linkHasNoRole || userHasNecessaryRole) {
-                        this.addLinksFromConfiguration(linkName);
-                        return;
-                    }
-                }
+                this.addLinksFromConfiguration(NavigationFilter.filter(obj.configuration.links));
             }
         });
 

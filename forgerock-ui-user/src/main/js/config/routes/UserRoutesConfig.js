@@ -33,10 +33,11 @@ define("config/routes/UserRoutesConfig", [
     var obj = {
         "profile": {
             view: "UserProfileView",
-            role: "ui-user",
+            role: "ui-self-service-user",
             url: /profile\/(.*)/,
             pattern: "profile/?",
-            defaults: ["details"]
+            defaults: ["details"],
+            navGroup: "user"
         },
         "forgotUsername": {
             view: "ForgotUsernameView",
