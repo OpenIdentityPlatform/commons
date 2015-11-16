@@ -1,14 +1,14 @@
 <nav id="mainNavHolder" class="navbar navbar-default navbar-static-top navbar-inverse" role="navigation">
     <div class="container">
         <div class="navbar-header">
-            {{#if username}}
+            {{#if user.username}}
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#mainNavBar" aria-expanded="false" aria-controls="navbar">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
             {{/if}}
-            <ul class="nav navbar-nav {{#if admin}}navbar-admin{{/if}}">
+            <ul class="nav list-unstyled {{#if admin}}navbar-admin{{/if}}">
                 <li id="navbarBrand">
                     <a href="#" title="{{theme.settings.logo.title}}">
                         <img style="{{#if theme.settings.logo.width}}width:{{theme.settings.logo.width}};{{/if}}{{#if theme.settings.logo.height}} height:{{theme.settings.logo.height}};{{/if}}"
@@ -19,7 +19,7 @@
             </ul>
         </div>
 
-        {{#if username}}
+        {{#if user.username}}
         <div id="mainNavBar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav {{#if admin}}navbar-admin{{/if}}">
                 {{#each topNav}}
@@ -105,18 +105,18 @@
                     </a>
                     {{#if userBar.length}}
                     <ul class="dropdown-menu" role="menu" id="navDropdownMenu">
-                        {{#if usernameConf.isLink}}
-                        <li>
-                            <a href="{{usernameConf.href}}">
-                                <span id="user_name">{{username}}</span>
-                                <small>{{usernameConf.secondaryLabel}}</small>
+
+                        <li {{#unless user.href}}class="dropdown-header"{{/unless}}> <!-- dropdown-no-link-->
+                            {{#if user.href}}
+                            <a href="{{user.href}}">
+                            {{/if}}
+                                {{#if user.label}}<div><small>{{t user.label}}</small></div>{{/if}}
+                                <strong id="user_name">{{user.username}}</strong>
+                                {{#if user.secondaryLabel}}<div><small>{{t user.secondaryLabel}}</small></div>{{/if}}
+                            {{#if user.href}}
                             </a>
+                            {{/if}}
                         </li>
-                        {{else}}
-                        <li class="dropdown-header">
-                            <span id="user_name">{{username}}</span>
-                        </li>
-                        {{/if}}
 
                         <li class="divider"></li>
 

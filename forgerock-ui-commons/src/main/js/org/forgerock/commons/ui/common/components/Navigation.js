@@ -28,8 +28,17 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
     "org/forgerock/commons/ui/common/main/Router",
     "NavigationFilter"
 ], function($, _, Backbone, AbstractConfigurationAware, AbstractView, Configuration, EventManager, ModuleLoader, Router, NavigationFilter) {
-    var obj = new AbstractConfigurationAware();
+    var obj = new AbstractConfigurationAware(),
 
+        getUserName = function () {
+            if (Configuration.loggedUser.has('userName')) {
+                return Configuration.loggedUser.get('userName'); //idm
+            } else if (Configuration.loggedUser.has('cn')) {
+                return Configuration.loggedUser.get('cn'); //am
+            } else {
+                return Configuration.loggedUser.id; //fallback option
+            }
+        };
 
     /*
         Navigation is configured from AppConfiguration in each forgerock application. There are several items that can be controlled and configured.
@@ -37,16 +46,16 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
 
         Username: Configuration of control of the username in userbar. This can be configured in two primary ways
 
-            isLink - Boolean controlling if it is a link or static field (defaults to static username if nothing provided)
-            href - Link location
-            secondaryLabel - Provides a secondary title that will sit below username
+            href - Link location. If provided the username (and any additional labels) will become a link, otherwise if nothing provided it will default to a static field.
+            label - Provides a title that will sit above the username.
+            secondaryLabel - Provides a secondary title that will sit below username.
 
             Example:
 
              username: {
-                 "isLink": true,
                  "href" : "#profile/",
-                 "secondaryLabel" : "config.AppConfiguration.Navigation.linksviewProfile"
+                 "label" : "config.AppConfiguration.Navigation.username.label",
+                 "secondaryLabel" : "config.AppConfiguration.Navigation.username.secondaryLabel"
              },
 
         Userbar: Configuration of the menu items in the userbar
@@ -148,6 +157,7 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                     EventManager.sendEvent(event, e);
                 }
             },
+
             render: function(args, callback) {
                 /*
                    The user information is shown at the top of the userBar widget,
@@ -163,14 +173,6 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                         // in rare cases Configuration.loggedUser can be reset by the time bootstap has loaded
                         if (!Configuration.loggedUser) {
                             return;
-                        }
-
-                        if (Configuration.loggedUser.has('userName')) {
-                            this.data.username = Configuration.loggedUser.get('userName'); //idm
-                        } else if (Configuration.loggedUser.has('cn')) {
-                            this.data.username = Configuration.loggedUser.get('cn'); //am
-                        } else {
-                            this.data.username = Configuration.loggedUser.id; //fallback option
                         }
 
                         this.data.admin = _.contains(Configuration.loggedUser.uiroles, "ui-admin");
@@ -195,22 +197,12 @@ define("org/forgerock/commons/ui/common/components/Navigation", [
                             })
                             .value();
 
-                        if(obj.configuration.username) {
-
-                            if(obj.configuration.username.secondaryLabel) {
-                                obj.configuration.username.secondaryLabel = $.t(obj.configuration.username.secondaryLabel);
-                            }
-
-                            this.data.usernameConf = {
-                                "isLink" : obj.configuration.username.isLink,
-                                "href" : obj.configuration.username.href,
-                                "secondaryLabel" : obj.configuration.username.secondaryLabel
-                            };
-                        } else {
-                            this.data.usernameConf = {
-                                "isLink" : false
-                            };
-                        }
+                        this.data.user = {
+                            username: getUserName(),
+                            label: _.get(obj.configuration, "username.label"),
+                            secondaryLabel: _.get(obj.configuration, "username.secondaryLabel"),
+                            href: _.get(obj.configuration, "username.href")
+                        };
 
                         this.reload();
                         this.parentRender(callback);
