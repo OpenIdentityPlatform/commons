@@ -26,6 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.services.TransactionId;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.services.context.TransactionIdContext;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -41,8 +44,8 @@ public class AuditTrailTest {
     public void setUp() {
         auditApi = mock(AuditApi.class);
         contextMap = new HashMap<>();
-
-        auditTrail = new AuditTrail(auditApi, contextMap);
+        auditTrail =
+                new AuditTrail(new TransactionIdContext(new RootContext(), new TransactionId()), auditApi, contextMap);
     }
 
     @Test
@@ -58,10 +61,11 @@ public class AuditTrailTest {
         verify(auditApi).audit(auditMessageCaptor.capture());
 
         JsonValue auditMessage = auditMessageCaptor.getValue();
-        assertThat(auditMessage.asMap()).hasSize(3);
+        assertThat(auditMessage.asMap()).hasSize(4);
         assertThat(auditMessage.get("requestId").getObject()).isNotNull();
         assertThat(auditMessage.get("context").required().size()).isEqualTo(0);
         assertThat(auditMessage.get("entries").required().size()).isEqualTo(0);
+        assertThat(auditMessage.get("transactionId").getObject()).isNotNull();
     }
 
     @Test
@@ -86,8 +90,9 @@ public class AuditTrailTest {
         verify(auditApi).audit(auditMessageCaptor.capture());
 
         JsonValue auditMessage = auditMessageCaptor.getValue();
-        assertThat(auditMessage.asMap()).hasSize(6);
+        assertThat(auditMessage.asMap()).hasSize(7);
         assertThat(auditMessage.get("requestId").getObject()).isNotNull();
+        assertThat(auditMessage.get("transactionId").getObject()).isNotNull();
         assertThat(auditMessage.get("result").asString()).isEqualTo("SUCCESSFUL");
         assertThat(auditMessage.get("principal").asList(String.class)).containsExactly("PRINCIPAL");
         assertThat(auditMessage.get("context").required().size()).isEqualTo(0);
@@ -140,8 +145,9 @@ public class AuditTrailTest {
         verify(auditApi).audit(auditMessageCaptor.capture());
 
         JsonValue auditMessage = auditMessageCaptor.getValue();
-        assertThat(auditMessage.asMap()).hasSize(5);
+        assertThat(auditMessage.asMap()).hasSize(6);
         assertThat(auditMessage.get("requestId").getObject()).isNotNull();
+        assertThat(auditMessage.get("transactionId").getObject()).isNotNull();
         assertThat(auditMessage.get("result").asString()).isEqualTo("FAILED");
         assertThat(auditMessage.get("principal").asList(String.class)).containsExactly("admin", "demo");
         assertThat(auditMessage.get("context").required().size()).isEqualTo(0);

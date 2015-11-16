@@ -50,7 +50,8 @@ public interface AuditApi {
      *         ...
      *       }
      *     }, ...
-     *   ]
+     *   ],
+     *   "transactionId" : "..."
      * }
      * }
      *
@@ -77,7 +78,8 @@ public interface AuditApi {
      *         ...
      *       }
      *     }, ...
-     *   ]
+     *   ],
+     *   "transactionId" : "..."
      * }
      * }
      *

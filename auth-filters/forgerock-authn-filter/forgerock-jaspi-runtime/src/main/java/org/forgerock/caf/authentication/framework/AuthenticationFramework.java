@@ -17,12 +17,12 @@
 package org.forgerock.caf.authentication.framework;
 
 import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_TRAIL_KEY;
-import static org.forgerock.caf.authentication.framework.AuthContexts.*;
+import static org.forgerock.caf.authentication.framework.AuthContexts.withAuditing;
+import static org.forgerock.caf.authentication.framework.AuthContexts.withLogging;
+import static org.forgerock.caf.authentication.framework.AuthContexts.withValidation;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSendFailure;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.isSuccess;
 
-import javax.security.auth.Subject;
-import javax.security.auth.message.AuthStatus;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
@@ -30,16 +30,18 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import javax.security.auth.Subject;
+import javax.security.auth.message.AuthStatus;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
-import org.forgerock.services.context.AttributesContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
+import org.forgerock.services.context.AttributesContext;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -134,7 +136,7 @@ public final class AuthenticationFramework {
 
         final Subject clientSubject = new Subject();
         Map<String, Object> contextMap = new HashMap<>();
-        AuditTrail auditTrail = new AuditTrail(auditApi, contextMap);
+        AuditTrail auditTrail = new AuditTrail(context, auditApi, contextMap);
         final MessageContextImpl messageContext = new MessageContextImpl(context, request, auditTrail);
 
         //TODO these need to be gone...

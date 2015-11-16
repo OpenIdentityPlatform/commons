@@ -16,7 +16,10 @@
 
 package org.forgerock.caf.authentication.framework;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +28,8 @@ import java.util.UUID;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.json.JsonValue;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.TransactionIdContext;
 
 /**
  * <p>Responsible for tracking the auditing of an authentication attempt including auditing each of the modules that
@@ -74,6 +79,7 @@ public class AuditTrail {
     private static final String INFO_KEY = "info";
     private static final String SUCCESSFUL_RESULT = "SUCCESSFUL";
     private static final String FAILED_RESULT = "FAILED";
+    private static final String TRANSACTION_ID = "transactionId";
 
     private final AuditApi api;
     private final List<Map<String, Object>> entries = new ArrayList<>();
@@ -83,12 +89,13 @@ public class AuditTrail {
 
     /**
      * Constructs a new AuditTrail instance.
-     *
+     * @param context The {@link Context} used to make the auth request.
      * @param api An instance of the {@code AuditApi}.
      */
-    AuditTrail(AuditApi api, Map<String, Object> contextMap) {
+    AuditTrail(Context context, AuditApi api, Map<String, Object> contextMap) {
         this.api = api;
         auditMessage.put(CONTEXT_KEY, contextMap);
+        auditMessage.put(TRANSACTION_ID, getTransactionId(context));
     }
 
     /**
@@ -220,5 +227,13 @@ public class AuditTrail {
     @Override
     public String toString() {
         return auditMessage.toString();
+    }
+
+    private String getTransactionId(final Context context) {
+        if (context.containsContext(TransactionIdContext.class)) {
+            return context.asContext(TransactionIdContext.class).getTransactionId().getValue();
+        } else {
+            return null;
+        }
     }
 }
