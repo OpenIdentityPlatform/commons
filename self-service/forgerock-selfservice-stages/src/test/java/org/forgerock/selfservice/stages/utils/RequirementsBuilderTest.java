@@ -13,11 +13,11 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.selfservice.core.util;
+package org.forgerock.selfservice.stages.utils;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
-import static org.forgerock.selfservice.core.util.RequirementsBuilder.*;
+import static org.forgerock.selfservice.stages.utils.RequirementsBuilder.*;
 
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.Test;

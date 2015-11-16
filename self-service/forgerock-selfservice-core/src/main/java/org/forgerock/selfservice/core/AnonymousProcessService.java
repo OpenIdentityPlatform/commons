@@ -85,17 +85,15 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
      *         snapshot token handler factory
      * @param processStore
      *         store for locally persisted state
-     * @param classLoader
-     *         class loader used for dynamic stage class instantiation
      */
     @Inject
     public AnonymousProcessService(ProcessInstanceConfig config, ProgressStageProvider progressStageProvider,
-            SnapshotTokenHandlerFactory tokenHandlerFactory, ProcessStore processStore, ClassLoader classLoader) {
+            SnapshotTokenHandlerFactory tokenHandlerFactory, ProcessStore processStore) {
         Reject.ifNull(config, progressStageProvider, tokenHandlerFactory, processStore);
         Reject.ifNull(config.getStageConfigs(), config.getSnapshotTokenConfig(), config.getStorageType());
         Reject.ifTrue(config.getStageConfigs().isEmpty());
 
-        progressStageBinder = new ProgressStageBinder(progressStageProvider, classLoader);
+        progressStageBinder = new ProgressStageBinder(progressStageProvider);
         stageConfigs = config.getStageConfigs();
         configVersion = config.hashCode();
 

@@ -16,11 +16,9 @@
 package org.forgerock.selfservice.json;
 
 import com.fasterxml.jackson.core.Version;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
@@ -37,23 +35,16 @@ import org.forgerock.selfservice.stages.user.UserDetailsConfig;
 import org.forgerock.selfservice.stages.user.UserQueryConfig;
 
 /**
- * Encapsulation of custom configuration for deserializing JSON to {@link ProcessInstanceConfig}.
+ * Static utility methods for deserializing config objects from JSON.
  *
  * @since 0.2.0
  */
-final class JsonConfig {
+public final class JsonConfig {
 
-    private final ClassLoader classLoader;
-    private final ObjectMapper mapper;
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
-    JsonConfig(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-        mapper = new ObjectMapper();
-        mapper
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                /* TODO when on Jackson 2.6.x
-                .setTypeFactory(TypeFactory.defaultInstance().withClassLoader(classLoader))
-                */
+    static {
+        OBJECT_MAPPER
                 .registerModule(
                         new SimpleModule("SelfServiceModule", Version.unknownVersion())
                                 .addDeserializer(StorageType.class, new StorageTypeDeserializer()))
@@ -74,27 +65,21 @@ final class JsonConfig {
                         new NamedType(JwtTokenHandlerConfig.class, JwtTokenHandlerConfig.TYPE));
     }
 
+    private JsonConfig() {
+
+    }
+
     /**
      * Builds ProcessInstanceConfig instance from a JsonValue instance.
      *
      * @param json
      *         the value to be converted
+     *
      * @return ProcessInstanceConfig
-     *         the one built from the provided json
+     * the one built from the provided json
      */
-    ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) {
-
-        /* TODO when on Jackson 2.6.x, the class loader wil be set above and we'll just
-        return mapper.convertValue(json.getObject(), ProcessInstanceConfig.class);
-         */
-
-        // Jackson 2.5 and lower
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(classLoader);
-            return mapper.convertValue(json.getObject(), ProcessInstanceConfig.class);
-        } finally {
-            Thread.currentThread().setContextClassLoader(loader);
-        }
+    public static ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) {
+        return OBJECT_MAPPER.convertValue(json.getObject(), ProcessInstanceConfig.class);
     }
+
 }

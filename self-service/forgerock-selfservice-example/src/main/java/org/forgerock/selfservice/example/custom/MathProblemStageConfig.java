@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.selfservice.custom;
+package org.forgerock.selfservice.example.custom;
 
 import org.forgerock.selfservice.core.config.StageConfig;
 

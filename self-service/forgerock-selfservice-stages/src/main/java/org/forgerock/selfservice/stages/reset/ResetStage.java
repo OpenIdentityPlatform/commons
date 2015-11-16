@@ -32,7 +32,7 @@ import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
-import org.forgerock.selfservice.core.util.RequirementsBuilder;
+import org.forgerock.selfservice.stages.utils.RequirementsBuilder;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 

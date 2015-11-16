@@ -37,7 +37,6 @@
 
     <modules>
         <module>forgerock-selfservice-core</module>
-        <module>forgerock-selfservice-custom-stage</module>
         <module>forgerock-selfservice-example</module>
         <module>forgerock-selfservice-example-ui</module>
         <module>forgerock-selfservice-json</module>

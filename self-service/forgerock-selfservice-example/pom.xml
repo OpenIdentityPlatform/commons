@@ -39,11 +39,6 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-selfservice-custom-stage</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-selfservice-stages</artifactId>
             <version>${project.version}</version>
         </dependency>
