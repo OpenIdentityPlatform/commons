@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-rest</artifactId>
-    <version>4.0.1-SNAPSHOT</version>
+    <version>4.0.1</version>
   </parent>
   <artifactId>json-resource-examples</artifactId>
   <name>JSON Resource examples</name>
