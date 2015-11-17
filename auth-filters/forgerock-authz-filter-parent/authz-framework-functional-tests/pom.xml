@@ -19,11 +19,11 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-authz-filter-parent</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>authz-framework-functional-tests</artifactId>
-    <version>3.1.0</version>
+    <version>3.1.1-SNAPSHOT</version>
     <packaging>war</packaging>
 
     <name>Authorization Framework Functional Tests</name>
