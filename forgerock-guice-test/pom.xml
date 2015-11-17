@@ -21,11 +21,11 @@
     <parent>
         <artifactId>forgerock-guice</artifactId>
         <groupId>org.forgerock.commons</groupId>
-        <version>2.0.0-SNAPSHOT</version>
+        <version>2.0.0</version>
     </parent>
 
     <artifactId>forgerock-guice-test</artifactId>
-    <version>2.0.0-SNAPSHOT</version>
+    <version>2.0.0</version>
 
     <name>ForgeRock Guice Test</name>
     <description>ForgeRock Guice Test Library</description>
