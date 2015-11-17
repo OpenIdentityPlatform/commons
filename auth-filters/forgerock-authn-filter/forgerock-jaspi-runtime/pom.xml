@@ -50,8 +50,6 @@
         <dependency>
             <groupId>org.forgerock.http</groupId>
             <artifactId>chf-http-core</artifactId>
-            <!-- // TODO remove when version is released. -->
-            <version>2.0.1-SNAPSHOT</version>
         </dependency>
 
         <dependency> <!-- Required for JsonValue and ResourceException -->
