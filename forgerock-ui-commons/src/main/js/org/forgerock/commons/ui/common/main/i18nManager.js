@@ -21,8 +21,9 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
     "underscore",
     "require",
     "handlebars",
-    "i18next"
-], function($, _, require, Handlebars, i18next) {
+    "i18next",
+    "module"
+], function($, _, require, Handlebars, i18next, Module) {
 
     var obj = {};
 
@@ -32,8 +33,14 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
      * Takes the following options: serverLang, paramLang, defaultLang, and nameSpace.
      * i18nManger with i18next will try to detect the user language and load the corresponding translation in the following order:
      * 1) paramLang which is a query string parameter (&locale=fr).
-     * 2) serverLang, a 2 digit language code passed in from server.
+     * 2) serverLang, a 2-5 character long language or locale code passed in from server. The value can be "en" or
+     * "en-US" for example.
      * 3) defaultLang will be the default language set inside the Constants.DEFAULT_LANGUAGE.
+     *
+     * Note that the "load" field controls how the localization files are resolved:
+     * 1) current: always use the value that was passed in as "lang" (may be just "en", or "en-US")
+     * 2) unspecific: always use the non country-specific locale (so "en" in case lang was "en-US")
+     * 3) not set/other value: country-specific first, then non-country specific
      *
      * @param {object} options
      * @param {string} options.paramLang which is a query string parameter, optionally space separated, (&locale=zh fr).
@@ -77,7 +84,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
         var locales = [],
             opts = {},
-            nameSpace = options.nameSpace ? options.nameSpace : "translation";
+            nameSpace = options.nameSpace ? options.nameSpace : "translation",
+            loadMode;
         if (options.paramLang && options.paramLang.locale) {
             locales = options.paramLang.locale.split(" ");
             options.serverLang = locales.shift();
@@ -92,13 +100,15 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
         }
         obj.lang = options.serverLang;
 
+        loadMode = Module.config().i18nLoad || "current";
+
         opts = {
             fallbackLng: locales,
             detectLngQS: "locale",
             useCookie: false,
             getAsync: false,
             lng: options.serverLang,
-            load: "current",
+            load: loadMode,
             ns: nameSpace,
             nsseparator: ":::",
             resGetPath: require.toUrl("locales/__lng__/__ns__.json")
