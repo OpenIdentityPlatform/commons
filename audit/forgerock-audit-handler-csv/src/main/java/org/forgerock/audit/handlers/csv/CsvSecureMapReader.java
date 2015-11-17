@@ -29,7 +29,7 @@ import org.supercsv.io.ICsvMapReader;
  * It does not do any checking regarding the HMAC validity.
  *
  */
-public class CsvSecureMapReader implements ICsvMapReader {
+class CsvSecureMapReader implements ICsvMapReader {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvSecureMapReader.class);
 

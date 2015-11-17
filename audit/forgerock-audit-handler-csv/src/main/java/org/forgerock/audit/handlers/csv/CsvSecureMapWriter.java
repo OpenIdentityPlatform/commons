@@ -52,7 +52,7 @@ import org.supercsv.io.ICsvMapWriter;
  * The column HMAC is filled with the HMAC calculation of the current row and a key.
  * The column SIGNATURE is filled with the signature calculation of the last HMAC and the last signature if any.
  */
-public class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
+class CsvSecureMapWriter implements ICsvMapWriter, RotationHooks {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvSecureMapWriter.class);
 

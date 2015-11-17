@@ -45,7 +45,7 @@ import org.supercsv.prefs.CsvPreference;
  * This a thin wrap above the ICsvMapWriter from supercsv, as we need to keep consistency when resuming a CSV file :
  * same headers, last HMAC, last signature.
  */
-public class CsvWriter implements AutoCloseable {
+class CsvWriter implements AutoCloseable {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvWriter.class);
 

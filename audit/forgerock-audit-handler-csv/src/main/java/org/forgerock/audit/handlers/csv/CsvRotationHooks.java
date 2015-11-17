@@ -23,7 +23,7 @@ import org.supercsv.io.ICsvMapWriter;
 /**
  * Creates a {@link RotationHooks} for super csv.
  */
-public class CsvRotationHooks implements RotationHooks {
+class CsvRotationHooks implements RotationHooks {
 
     private final String[] headers;
     private final ICsvMapWriter csvMapWriter;

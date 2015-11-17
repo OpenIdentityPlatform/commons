@@ -35,7 +35,7 @@ import org.supercsv.io.ICsvMapReader;
 /**
  * This class aims to verify a secure CSV file.
  */
-public class CsvSecureVerifier {
+class CsvSecureVerifier {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvSecureVerifier.class);
 

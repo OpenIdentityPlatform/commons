@@ -16,7 +16,7 @@ import org.slf4j.Logger;
  *
  * Holds the methods shared between the CsvSecure classes.
  */
-public class CsvSecureUtils {
+class CsvSecureUtils {
 
     /**
      *
