@@ -18,7 +18,7 @@
     <parent>
         <artifactId>forgerock-rest</artifactId>
         <groupId>org.forgerock.commons</groupId>
-        <version>4.0.1</version>
+        <version>4.0.2-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
