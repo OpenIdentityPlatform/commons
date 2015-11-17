@@ -63,6 +63,18 @@ public final class ClientTest {
         assertThat(response.getStatus()).isEqualTo(Status.OK);
     }
 
+    @Test
+    public void testSendWithContext() throws Exception {
+        RootContext context = new RootContext();
+        Request request = new Request().setUri("http://example.com").setMethod("GET");
+
+        when(handler.handle(context, request))
+                .thenReturn(newResponsePromise(new Response(Status.TEAPOT)));
+
+        final Response response = client.send(context, request).get();
+        assertThat(response.getStatus()).isEqualTo(Status.TEAPOT);
+    }
+
     // Disabled due to incompatibility with JDK7 Rhino.
     @Test(enabled = false)
     public void testSendFromJavaScript() throws Exception {

@@ -27,13 +27,13 @@ import org.forgerock.util.promise.Promise;
  * An HTTP client which forwards requests to a wrapped {@link Handler}.
  */
 public final class Client {
-    private final Context context;
+    private final Context defaultContext;
     private final Handler handler;
 
     /**
      * Creates a new {@code Client} which will route HTTP requests to the
      * provided {@link Handler} using a {@link RootContext} allocated during
-     * construction.
+     * construction when none is provided.
      *
      * @param handler
      *            The HTTP handler.
@@ -44,16 +44,16 @@ public final class Client {
 
     /**
      * Creates a new {@code Client} which will route HTTP requests to the
-     * provided {@link Handler} using the specified {@link Context}.
+     * provided {@link Handler} using the specified {@link Context} if none is provided.
      *
      * @param handler
      *            The HTTP handler.
-     * @param context
-     *            The context to pass in with each HTTP request.
+     * @param defaultContext
+     *            The context to pass in with HTTP request when none is provided.
      */
-    public Client(final Handler handler, final Context context) {
+    public Client(final Handler handler, final Context defaultContext) {
         this.handler = handler;
-        this.context = context;
+        this.defaultContext = defaultContext;
     }
 
     /**
@@ -65,6 +65,20 @@ public final class Client {
      * @return A promise representing the pending HTTP response.
      */
     public Promise<Response, NeverThrowsException> send(final Request request) {
+        return handler.handle(defaultContext, request);
+    }
+
+    /**
+     * Sends an HTTP request and returns a {@code Promise} representing the
+     * pending HTTP response.
+     *
+     * @param context
+     *            The associated processing context.
+     * @param request
+     *            The HTTP request to send.
+     * @return A promise representing the pending HTTP response.
+     */
+    public Promise<Response, NeverThrowsException> send(final Context context, final Request request) {
         return handler.handle(context, request);
     }
 }
