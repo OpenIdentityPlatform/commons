@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.forgerock.commons</groupId>
   <artifactId>forgerock-bom</artifactId>
-  <version>2.0.1-SNAPSHOT</version>
+  <version>2.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>ForgeRock Bill Of Materials</name>
   <description>Common BOM for ForgeRock projects.
@@ -110,9 +110,10 @@
     <json-ref.version>3.0.0</json-ref.version>
     <json-schema.version>3.0.0</json-schema.version>
     <json-web-token.version>3.0.0</json-web-token.version>
-    <forgerock-http-framework.version>2.0.0</forgerock-http-framework.version>
-    <forgerock-rest.version>4.0.0</forgerock-rest.version>
-    <forgerock-auth-filters.version>3.0.0</forgerock-auth-filters.version>
+    <forgerock-http-framework.version>2.1.0</forgerock-http-framework.version>
+    <forgerock-rest.version>4.0.1</forgerock-rest.version>
+    <forgerock-auth-filters.version>3.1.0</forgerock-auth-filters.version>
+    <forgerock-audit.version>2.0.0</forgerock-audit.version>
   </properties>
 
   <prerequisites>
@@ -504,6 +505,37 @@
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-authz-oauth2-restlet</artifactId>
         <version>${forgerock-auth-filters.version}</version>
+      </dependency>
+
+      <!-- ForgeRock Audit dependencies -->
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-audit-core</artifactId>
+        <version>${forgerock-audit.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-audit-json</artifactId>
+        <version>${forgerock-audit.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-audit-handler-csv</artifactId>
+        <version>${forgerock-audit.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-audit-handler-syslog</artifactId>
+        <version>${forgerock-audit.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-audit-handler-jbdc</artifactId>
+        <version>${forgerock-audit.version}</version>
       </dependency>
 
     </dependencies>
