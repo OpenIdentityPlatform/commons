@@ -50,7 +50,7 @@
       <tag>HEAD</tag>
   </scm>
     <properties>
-        <commons.forgerock-bom.version>2.1.0</commons.forgerock-bom.version>
+        <commons.forgerock-bom.version>2.1.1</commons.forgerock-bom.version>
         <forgerock-guava.version>18.0.1</forgerock-guava.version>
 
         <jodaTime.version>2.1</jodaTime.version>
