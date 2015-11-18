@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-jaspi-modules</artifactId>
-        <version>3.1.1-SNAPSHOT</version>
+        <version>3.1.1</version>
     </parent>
 
     <artifactId>forgerock-jaspi-openam-session-module</artifactId>
