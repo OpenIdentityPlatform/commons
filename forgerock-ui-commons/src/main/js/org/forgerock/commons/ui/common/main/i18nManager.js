@@ -71,7 +71,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
                 fallback = _.find($.i18n.options.fallbackLng, function (lng) {
                     return _.has(map, lng);
                 });
-                return new Handlebars.SafeString(fallback);
+                return new Handlebars.SafeString(map[fallback]);
             }
         });
 
