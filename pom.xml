@@ -105,11 +105,11 @@
     <!-- Shared components versions -->
     <forgerock-guava.version>18.0.3</forgerock-guava.version>
     <forgerock-util.version>3.0.0</forgerock-util.version>
-    <json-crypto.version>3.0.0</json-crypto.version>
-    <json-patch.version>3.0.0</json-patch.version>
-    <json-ref.version>3.0.0</json-ref.version>
-    <json-schema.version>3.0.0</json-schema.version>
-    <json-web-token.version>3.0.0</json-web-token.version>
+    <json-crypto.version>3.0.1</json-crypto.version>
+    <json-patch.version>3.0.1</json-patch.version>
+    <json-ref.version>3.0.1</json-ref.version>
+    <json-schema.version>3.0.1</json-schema.version>
+    <json-web-token.version>3.0.1</json-web-token.version>
     <forgerock-http-framework.version>2.1.0</forgerock-http-framework.version>
     <forgerock-rest.version>4.0.1</forgerock-rest.version>
     <forgerock-auth-filters.version>3.1.0</forgerock-auth-filters.version>
