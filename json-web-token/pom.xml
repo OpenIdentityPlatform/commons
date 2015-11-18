@@ -24,7 +24,7 @@
 
     <groupId>org.forgerock.commons</groupId>
     <artifactId>json-web-token</artifactId>
-    <version>3.0.1</version>
+    <version>3.0.2-SNAPSHOT</version>
     <name>JSON Web Token</name>
     <description>ForgeRock JSON Web Token library</description>
     <packaging>bundle</packaging>
@@ -37,7 +37,7 @@
         <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/json-web-token.git</connection>
         <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/json-web-token.git</developerConnection>
         <url>http://stash.forgerock.org/projects/COMMONS/repos/json-web-token/browse</url>
-      <tag>3.0.1</tag>
+      <tag>HEAD</tag>
   </scm>
     <ciManagement>
         <system>jenkins</system>
