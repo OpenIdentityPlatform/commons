@@ -62,7 +62,7 @@
     </modules>
 
     <properties>
-        <forgerock-bom.version>2.1.0</forgerock-bom.version>
+        <forgerock-bom.version>2.1.1</forgerock-bom.version>
         <restlet.version>2.1.2</restlet.version>
     </properties>
 
