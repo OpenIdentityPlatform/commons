@@ -19,9 +19,11 @@ package org.forgerock.http.apache.async;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.forgerock.http.handler.HttpClientHandler.*;
 
+import java.security.GeneralSecurityException;
+import java.util.List;
+
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import java.security.GeneralSecurityException;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -107,11 +109,17 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
             break;
         }
 
+        List<String> protocols = options.get(OPTION_SSL_ENABLED_PROTOCOLS);
+
         // Create a registry of custom connection session strategies for supported protocol schemes
         Registry<SchemeIOSessionStrategy> registry =
                 RegistryBuilder.<SchemeIOSessionStrategy>create()
                         .register("http", NoopIOSessionStrategy.INSTANCE)
-                        .register("https", new SSLIOSessionStrategy(sslContext, verifier))
+                        .register("https",
+                                   new SSLIOSessionStrategy(sslContext,
+                                                           protocols.toArray(new String[protocols.size()]),
+                                                           null,
+                                                           verifier))
                         .build();
 
         // Timeouts
@@ -121,6 +129,7 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
 
         // Create I/O reactor configuration
         IOReactorConfig.Builder reactorBuilder = IOReactorConfig.custom();
+
         if (!connectTimeout.isUnlimited()) {
             reactorBuilder.setConnectTimeout((int) connectTimeout.to(MILLISECONDS));
         }

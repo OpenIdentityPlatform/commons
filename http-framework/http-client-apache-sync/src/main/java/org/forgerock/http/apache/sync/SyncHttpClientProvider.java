@@ -19,14 +19,28 @@
 package org.forgerock.http.apache.sync;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.forgerock.http.handler.HttpClientHandler.*;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_CONNECT_TIMEOUT;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_HOSTNAME_VERIFIER;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_KEY_MANAGERS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_MAX_CONNECTIONS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_RETRY_REQUESTS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_REUSE_CONNECTIONS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_SO_TIMEOUT;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSLCONTEXT_ALGORITHM;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSL_ENABLED_PROTOCOLS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_TEMPORARY_STORAGE;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_TRUST_MANAGERS;
 
-import javax.net.ssl.SSLContext;
 import java.security.GeneralSecurityException;
+import java.util.List;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
 
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.forgerock.http.HttpApplicationException;
@@ -83,16 +97,23 @@ public final class SyncHttpClientProvider implements HttpClientProvider {
         } catch (final GeneralSecurityException e) {
             throw new HttpApplicationException(e);
         }
-        builder.setSslcontext(context);
 
+        final HostnameVerifier hostnameVerifier;
         switch (options.get(OPTION_HOSTNAME_VERIFIER)) {
         case ALLOW_ALL:
-            builder.setSSLHostnameVerifier(NoopHostnameVerifier.INSTANCE);
+            hostnameVerifier = NoopHostnameVerifier.INSTANCE;
             break;
         default:
-            builder.setSSLHostnameVerifier(new DefaultHostnameVerifier());
+            hostnameVerifier = new DefaultHostnameVerifier();
             break;
         }
+
+        List<String> protocols = options.get(OPTION_SSL_ENABLED_PROTOCOLS);
+
+        builder.setSSLSocketFactory(new SSLConnectionSocketFactory(context,
+                                                                   protocols.toArray(new String[protocols.size()]),
+                                                                   null,
+                                                                   hostnameVerifier));
 
         // FIXME: is this equivalent to original OpenIG config?
         builder.disableCookieManagement();

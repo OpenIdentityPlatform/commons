@@ -20,6 +20,8 @@ import static org.forgerock.util.time.Duration.duration;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.TrustManager;
@@ -136,6 +138,17 @@ public final class HttpClientHandler implements Handler, Closeable {
      * SSLContext algorithm to be used when making SSL/TLS connections.
      */
     public static final Option<String> OPTION_SSLCONTEXT_ALGORITHM = Option.withDefault("TLS");
+
+    /**
+     * List of SSL protocols to be enabled on the HttpClient.
+     * Defaults to the list of SSL protocols supported by the Java runtime.
+     *
+     * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#jssenames">
+     *     JDK 7 Supported Protocols</a>
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static final Option<List<String>> OPTION_SSL_ENABLED_PROTOCOLS =
+            (Option) Option.of(List.class, Collections.<String>emptyList());
 
     /**
      * Creates a new HTTP client using default client options. The returned
