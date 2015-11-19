@@ -57,7 +57,6 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-util</artifactId>
-            <version>2.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.http</groupId>
