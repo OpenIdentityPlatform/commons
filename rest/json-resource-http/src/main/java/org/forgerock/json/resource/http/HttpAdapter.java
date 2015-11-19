@@ -640,7 +640,8 @@ final class HttpAdapter implements Handler {
 
         // Check content-type.
         final String contentType = ContentTypeHeader.valueOf(req).getType();
-        if (!req.getMethod().equalsIgnoreCase(HttpUtils.METHOD_GET) && contentType != null
+        if (!req.getMethod().equalsIgnoreCase(HttpUtils.METHOD_GET)
+                && contentType != null
                 && !CONTENT_TYPE_REGEX.matcher(contentType).matches()
                 && !HttpUtils.isMultiPartRequest(contentType)) {
             // TODO: i18n

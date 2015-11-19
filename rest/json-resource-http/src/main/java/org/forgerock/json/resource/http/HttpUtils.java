@@ -815,7 +815,12 @@ public final class HttpUtils {
     private static Object parseJsonBody(org.forgerock.http.protocol.Request req, boolean allowEmpty)
             throws ResourceException {
         try {
-            boolean isMultiPartRequest = isMultiPartRequest(req.getHeaders().getFirst(ContentTypeHeader.class));
+            String contentType = req.getHeaders().getFirst(ContentTypeHeader.class);
+            if (contentType == null && !allowEmpty) {
+                throw new BadRequestException(
+                        "The request could not be processed because the content-type was not specified and is required");
+            }
+            boolean isMultiPartRequest = isMultiPartRequest(contentType);
             MimeMultipart mimeMultiparts = null;
             JsonParser jsonParser;
             if (isMultiPartRequest) {
