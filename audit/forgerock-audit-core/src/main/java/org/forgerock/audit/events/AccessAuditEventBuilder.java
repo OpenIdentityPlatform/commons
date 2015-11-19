@@ -19,9 +19,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -183,17 +181,23 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
     /**
      * Sets the provided client ip and port for the event.
+     * <p/>
+     * If reverse DNS lookup is enabled, this builder will attempt to lookup the
+     * client hostname from the provided IP address.
      *
      * @param ip the ip of the client.
      * @param port the port of the client.
      * @return this builder
      */
     public final T client(String ip, int port) {
-        return client(ip, port, null);
+        return client(ip, port, getHostNameIfReverseDnsLookupEnabled(ip));
     }
 
     /**
      * Sets the provided client hostname, ip and port for the event.
+     * <p/>
+     * If host is null, even if reverse DNS lookup is enabled, no attempt is made to lookup the
+     * client hostname from the provided IP address.
      *
      * @param ip the ip of the client.
      * @param port the port of the client.
@@ -212,16 +216,22 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
     /**
      * Sets the provided client ip for the event.
+     * <p/>
+     * If reverse DNS lookup is enabled, this builder will attempt to lookup the
+     * client hostname from the provided IP address.
      *
      * @param ip the ip of the client.
      * @return this builder
      */
     public final T client(String ip) {
-        return client(ip, null);
+        return client(ip, getHostNameIfReverseDnsLookupEnabled(ip));
     }
 
     /**
      * Sets the provided client hostname and ip for the event.
+     * <p/>
+     * If host is null, even if reverse DNS lookup is enabled, no attempt is made to lookup the
+     * client hostname from the provided IP address.
      *
      * @param ip the ip of the client.
      * @param host the hostname of the client.
@@ -411,18 +421,22 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         if (context.containsContext(HTTP_CONTEXT_NAME)) {
             JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
             String ipAddress = httpContext.get(HTTP_CONTEXT_REMOTE_ADDRESS).asString();
-            String hostName = null;
-            if (performReverseDnsLookup) {
-                try {
-                    InetAddress ipAddr = InetAddress.getByName(ipAddress);
-                    hostName = ipAddr.getHostName();
-                } catch (UnknownHostException e) {
-                    logger.debug("Unable to lookup client host name for {}.", ipAddress);
-                }
-            }
-            client(ipAddress, hostName);
+            client(ipAddress);
         }
         return self();
+    }
+
+    private String getHostNameIfReverseDnsLookupEnabled(String ipAddress) {
+        String hostName = null;
+        if (performReverseDnsLookup) {
+            try {
+                InetAddress ipAddr = InetAddress.getByName(ipAddress);
+                hostName = ipAddr.getHostName();
+            } catch (UnknownHostException e) {
+                logger.debug("Unable to lookup client host name for {}.", ipAddress);
+            }
+        }
+        return hostName;
     }
 
     /**
@@ -472,7 +486,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @see #transactionIdFromRootContext(Context)
      * @see #clientFromHttpContext(Context)
      * @see #httpFromHttpContext(Context)
-     * @see #userIdFromSecurityContext(Context)
      * @see #requestFromCrestRequest(Request)
      *
      * @return this builder
@@ -483,14 +496,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
         httpFromHttpContext(context);
         requestFromCrestRequest(request);
         return self();
-    }
-
-    private String urlEncode(String string) {
-        try {
-            return URLEncoder.encode(string, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return string;
-        }
     }
 
     /**
