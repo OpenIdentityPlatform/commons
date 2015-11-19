@@ -151,6 +151,17 @@ public final class HttpClientHandler implements Handler, Closeable {
             (Option) Option.of(List.class, Collections.<String>emptyList());
 
     /**
+     * List of JSSE ciphers to be enabled on the HttpClient.
+     * Defaults to the list of ciphers supported by the Java runtime.
+     *
+     * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#ciphersuites">
+     *     JDK 7 Cipher Suite Names</a>
+     */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    public static final Option<List<String>> OPTION_SSL_CIPHER_SUITES =
+            (Option) Option.of(List.class, Collections.<String>emptyList());
+
+    /**
      * Creates a new HTTP client using default client options. The returned
      * client must be closed when it is no longer needed by the application.
      *

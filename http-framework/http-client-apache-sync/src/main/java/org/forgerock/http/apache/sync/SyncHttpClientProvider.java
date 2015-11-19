@@ -27,6 +27,7 @@ import static org.forgerock.http.handler.HttpClientHandler.OPTION_RETRY_REQUESTS
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_REUSE_CONNECTIONS;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_SO_TIMEOUT;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSLCONTEXT_ALGORITHM;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSL_CIPHER_SUITES;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSL_ENABLED_PROTOCOLS;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_TEMPORARY_STORAGE;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_TRUST_MANAGERS;
@@ -109,10 +110,11 @@ public final class SyncHttpClientProvider implements HttpClientProvider {
         }
 
         List<String> protocols = options.get(OPTION_SSL_ENABLED_PROTOCOLS);
+        List<String> ciphers = options.get(OPTION_SSL_CIPHER_SUITES);
 
         builder.setSSLSocketFactory(new SSLConnectionSocketFactory(context,
                                                                    protocols.toArray(new String[protocols.size()]),
-                                                                   null,
+                                                                   ciphers.toArray(new String[ciphers.size()]),
                                                                    hostnameVerifier));
 
         // FIXME: is this equivalent to original OpenIG config?

@@ -110,6 +110,7 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
         }
 
         List<String> protocols = options.get(OPTION_SSL_ENABLED_PROTOCOLS);
+        List<String> ciphers = options.get(OPTION_SSL_CIPHER_SUITES);
 
         // Create a registry of custom connection session strategies for supported protocol schemes
         Registry<SchemeIOSessionStrategy> registry =
@@ -118,7 +119,7 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
                         .register("https",
                                    new SSLIOSessionStrategy(sslContext,
                                                            protocols.toArray(new String[protocols.size()]),
-                                                           null,
+                                                           ciphers.toArray(new String[ciphers.size()]),
                                                            verifier))
                         .build();
 
