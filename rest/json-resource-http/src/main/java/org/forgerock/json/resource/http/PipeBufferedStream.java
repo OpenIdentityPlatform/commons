@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Portions Copyright 2014 ForgeRock AS.
+ * Portions Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -21,6 +21,7 @@ import static org.forgerock.http.io.IO.newBranchingInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.forgerock.http.io.BranchingInputStream;
 import org.forgerock.http.io.Buffer;
@@ -32,15 +33,19 @@ import org.forgerock.util.Factory;
  * {@link org.forgerock.http.io.BranchingInputStream}.
  */
 final class PipeBufferedStream {
-
     private final OutputStream outputStream;
     private final BranchingInputStream inputStream;
+    /** The buffer will be closed once both the input and output stream are closed. */
+    private final AtomicInteger bufferRefCount = new AtomicInteger(2);
     private final Buffer buffer;
     private int position = 0;
 
     PipeBufferedStream() {
+        this(IO.newTemporaryStorage());
+    }
+
+    PipeBufferedStream(final Factory<Buffer> bufferFactory) {
         outputStream = new PipeOutputStream();
-        Factory<Buffer> bufferFactory = IO.newTemporaryStorage();
         inputStream = newBranchingInputStream(new PipeInputStream(), bufferFactory);
         this.buffer = bufferFactory.newInstance();
     }
@@ -63,10 +68,21 @@ final class PipeBufferedStream {
         return inputStream;
     }
 
+    private void closeBufferIfNeeded() throws IOException {
+        if (bufferRefCount.decrementAndGet() == 0) {
+            buffer.close();
+        }
+    }
+
     private class PipeOutputStream extends OutputStream {
         @Override
         public void write(int i) throws IOException {
             buffer.append(new byte[]{(byte) i}, 0, 1);
+        }
+
+        @Override
+        public void close() throws IOException {
+            closeBufferIfNeeded();
         }
     }
 
@@ -80,6 +96,11 @@ final class PipeBufferedStream {
                 buffer.read(position++, b, 0, 1);
                 return b[0];
             }
+        }
+
+        @Override
+        public void close() throws IOException {
+            closeBufferIfNeeded();
         }
     }
 }

@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource.http;
 
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -24,6 +25,8 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 import org.forgerock.http.io.BranchingInputStream;
+import org.forgerock.http.io.Buffer;
+import org.forgerock.util.Factory;
 import org.testng.annotations.Test;
 
 public class PipeBufferedStreamTest {
@@ -99,5 +102,47 @@ public class PipeBufferedStreamTest {
         assertEquals(fullRead, "{\"result\":["
                 + "{\"intField\":42,\"stringField\":\"stringValue\"}" + "]," + "\"resultCount\":1,"
                 + "\"error\":{\"code\":404,\"reason\":\"Not Found\",\"message\":\"Not Found\"}}");
+    }
+
+    @Test
+    public void shouldCloseBufferAfterOutputStreamThenInputStreamAreClosed() throws Exception {
+        Buffer mockBuffer = mock(Buffer.class);
+        @SuppressWarnings("unchecked")
+        Factory<Buffer> mockBufferFactory = mock(Factory.class);
+        when(mockBufferFactory.newInstance()).thenReturn(mockBuffer);
+
+        PipeBufferedStream pipe = new PipeBufferedStream(mockBufferFactory);
+        OutputStream outputStream = pipe.getIn();
+        BranchingInputStream inputStream = pipe.getOut();
+
+        verify(mockBufferFactory, times(1)).newInstance();
+        verify(mockBuffer, times(0)).close();
+
+        outputStream.close();
+        verify(mockBuffer, times(0)).close();
+
+        inputStream.close();
+        verify(mockBuffer, times(1)).close();
+    }
+
+    @Test
+    public void shouldCloseBufferAfterInputStreamThenOutputStreamAreClosed() throws Exception {
+        Buffer mockBuffer = mock(Buffer.class);
+        @SuppressWarnings("unchecked")
+        Factory<Buffer> mockBufferFactory = mock(Factory.class);
+        when(mockBufferFactory.newInstance()).thenReturn(mockBuffer);
+
+        PipeBufferedStream pipe = new PipeBufferedStream(mockBufferFactory);
+        OutputStream outputStream = pipe.getIn();
+        BranchingInputStream inputStream = pipe.getOut();
+
+        verify(mockBufferFactory, times(1)).newInstance();
+        verify(mockBuffer, times(0)).close();
+
+        inputStream.close();
+        verify(mockBuffer, times(0)).close();
+
+        outputStream.close();
+        verify(mockBuffer, times(1)).close();
     }
 }
