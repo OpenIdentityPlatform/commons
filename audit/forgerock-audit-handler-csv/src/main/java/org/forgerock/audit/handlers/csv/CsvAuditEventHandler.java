@@ -274,11 +274,11 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     }
 
     private void openWriter(final String topic, File auditFile) throws IOException {
-        final CsvWriter writer = createCsvMapWriter(auditFile, topic);
+        final CsvWriter writer = createCsvWriter(auditFile, topic);
         writers.put(topic, writer);
     }
 
-    private synchronized CsvWriter createCsvMapWriter(final File auditFile, String topic) throws IOException {
+    private synchronized CsvWriter createCsvWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
         if (configuration.getSecurity().isEnabled()) {
             return new SecureCsvWriter(auditFile, headers, csvPreference, secureStorage, configuration);

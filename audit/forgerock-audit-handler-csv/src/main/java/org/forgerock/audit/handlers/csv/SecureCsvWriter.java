@@ -42,7 +42,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter;
 import org.forgerock.audit.events.handlers.writers.RotatableWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriterAdapter;
@@ -163,7 +162,7 @@ class SecureCsvWriter implements CsvWriter {
                 try {
                     writeSignature();
                 } catch (Exception ex) {
-                    logger.error("An error occured while writing the signature", ex);
+                    logger.error("An error occurred while writing the signature", ex);
                 }
             }
         };
@@ -183,14 +182,12 @@ class SecureCsvWriter implements CsvWriter {
         if (config.getFileRotation().isRotationEnabled()) {
             rotatableWriter = new RotatableWriter(csvFile, config, append);
             textWriter = rotatableWriter;
-        }
-        else {
+        } else {
             textWriter = new TextWriter.Stream(new FileOutputStream(csvFile, append));
         }
 
         if (config.getBuffering().isEnabled()) {
-            CsvAuditEventHandlerConfiguration.EventBufferingConfiguration bufferConfig = config.getBuffering();
-            textWriter = new AsynchronousTextWriter("CsvHandler", bufferConfig.isAutoFlush(), textWriter);
+            logger.warn("Secure CSV logging does not support buffering. Buffering config will be ignored.");
         }
         return new TextWriterAdapter(textWriter);
     }
