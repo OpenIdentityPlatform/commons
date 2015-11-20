@@ -140,8 +140,8 @@ define("org/forgerock/commons/ui/common/components/ChangesPending", [
              * @returns {boolean} whether two passed objects are equal
              */
             compareObjects: function(property, obj1, obj2) {
-                var val1 = obj1[property],
-                    val2 = obj2[property],
+                var val1 = _.clone(obj1[property], true),
+                    val2 = _.clone(obj2[property], true),
                     deleteEmptyProperties = function (obj) {
                         _.each(obj, function(prop, key) {
                             if (_.isEmpty(prop) && !_.isNumber(prop) && !_.isBoolean(prop)) {
