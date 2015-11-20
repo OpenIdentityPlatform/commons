@@ -17,6 +17,7 @@ package org.forgerock.audit.handlers.csv;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Map;
 
 import org.supercsv.io.CsvMapWriter;
@@ -24,39 +25,82 @@ import org.supercsv.prefs.CsvPreference;
 
 /**
  * Responsible for formatting audit events and column headers as CSV strings.
+ * <p/>
+ * Objects are assumed to be used from a single thread and are therefore not thread-safe.
  */
 class CsvFormatter {
 
-    final StringWriter stringWriter;
+    final StringBuilderWriter writer;
     final CsvMapWriter csvWriter;
 
     public CsvFormatter(CsvPreference csvPreference) {
-        stringWriter = new StringWriter();
-        csvWriter = new CsvMapWriter(stringWriter, csvPreference, false);
+        writer = new StringBuilderWriter();
+        csvWriter = new CsvMapWriter(writer, csvPreference, false);
     }
 
     public String formatHeader(String[] headers) throws IOException {
         csvWriter.writeHeader(headers);
-        return takeBufferContents();
+        return writer.takeBufferContents();
     }
 
     public String formatEvent(Map<String, String> values, String[] headers) throws IOException {
         csvWriter.write(values, headers);
-        return takeBufferContents();
+        return writer.takeBufferContents();
     }
 
-    private String takeBufferContents() {
-        String bufferContents = getBufferContents();
-        clearBuffer();
-        return bufferContents;
-    }
+    /**
+     * Adapter that exposes {@link Writer} interface to allow supercsv output to be collected to a {@link StringBuffer}.
+     * <p/>
+     * This is an alternative to using {@link StringWriter} that avoids unnecessary synchronization.
+     * <p/>
+     * Due to the lack of synchronization, objects are not thread-safe.
+     */
+    private static final class StringBuilderWriter extends Writer {
 
-    private String getBufferContents() {
-        return stringWriter.toString();
-    }
+        private final StringBuilder buffer;
 
-    private void clearBuffer() {
-        stringWriter.getBuffer().setLength(0);
+        private StringBuilderWriter() {
+            buffer = new StringBuilder();
+        }
+
+        @Override
+        public void write(int c) throws IOException {
+            buffer.append(c);
+        }
+
+        @Override
+        public void write(char cbuf[]) throws IOException {
+            buffer.append(cbuf);
+        }
+
+        @Override
+        public void write(final char[] cbuf, final int off, final int len) throws IOException {
+            buffer.append(cbuf, off, len);
+        }
+
+        @Override
+        public void write(String str) throws IOException {
+            buffer.append(str);
+        }
+
+        @Override
+        public void write(String str, int off, int len) throws IOException {
+            buffer.append(str, off, len);
+        }
+
+        @Override
+        public void flush() throws IOException {
+        }
+
+        @Override
+        public void close() throws IOException {
+        }
+
+        public String takeBufferContents() {
+            String s = buffer.toString();
+            buffer.setLength(0);
+            return s;
+        }
     }
 
 }
