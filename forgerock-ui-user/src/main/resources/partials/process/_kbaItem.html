@@ -4,7 +4,8 @@
             <div class="panel-body kbaSet">
 
                 <div class="form-group">
-                    <select name="kba[{{index}}].questionId" class="form-control input-lg kba-questions" data-validator="required">
+                    <label class="sr-only" for="kba[{{index}}].questionId">{{t 'common.user.kba.selectQuestion'}}</label>
+                    <select name="kba[{{index}}].questionId" id="kba[{{index}}].questionId" class="form-control input-lg kba-questions" data-validator="required">
                         <option value="">{{t 'common.user.kba.selectQuestion'}}...</option>
                     {{#each questions}}
                         <option value="{{id}}">{{mapTranslate question}}</option>

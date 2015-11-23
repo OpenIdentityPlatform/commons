@@ -11,7 +11,7 @@
         {{#if required}}required data-validator="required"{{/if}}
         />
         {{#unless noValidation}}
-        <div class="validation-message"></div>
+        <div role="status" class="validation-message"></div>
         <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
         {{/unless}}
         {{#if helpKey}}

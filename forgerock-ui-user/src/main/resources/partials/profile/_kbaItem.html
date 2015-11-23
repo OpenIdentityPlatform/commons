@@ -2,10 +2,10 @@
 <div class="kba-pair" index="{{index}}" {{#if isNew}} isNew="true"{{/if}}>
 
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="input-kbaInfo[{{index}}].customQuestion">{{t "common.user.securityQuestion"}}</label>
+        <label class="col-sm-3 control-label" for="kbaInfo[{{index}}].questionId">{{t "common.user.securityQuestion"}}</label>
         <div class="col-sm-6">
 
-            <select name="kbaInfo[{{index}}].questionId" class="form-control kba-questions" data-validator="required">
+            <select name="kbaInfo[{{index}}].questionId" id="kbaInfo[{{index}}].questionId" class="form-control kba-questions" data-validator="required">
                 <option value="">{{t 'common.user.kba.selectQuestion'}}...</option>
             {{#each questions}}
                 <option value="{{id}}">{{mapTranslate question}}</option>
@@ -13,7 +13,7 @@
                 <option value="custom">{{t 'common.user.kba.provideYourOwn'}}:</option>
             </select>
 
-            <div class="validation-message"></div>
+            <div role="status" class="validation-message"></div>
             <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
@@ -30,7 +30,7 @@
                     data-validator="required"
                     data-validator-event="keyup"
             />
-            <div class="validation-message"></div>
+            <div role="status" class="validation-message"></div>
             <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
@@ -44,7 +44,7 @@
                     type="text"
                     name="kbaInfo[{{index}}].answer"
                     data-validator-event="keyup"
-                    placeholder="{{t "common.form.passwordPlaceholder"}}"
+                    placeholder="{{t 'common.form.passwordPlaceholder'}}"
             />
             <div class="validation-message"></div>
             <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
@@ -53,7 +53,7 @@
 
     <div class="form-group">
         <div class="col-sm-6 col-sm-offset-3">
-            <a class="delete-KBA-question" href="#">{{t "common.form.delete"}}</a>
+            <a href="#" role="button" class="delete-KBA-question">{{t "common.form.delete"}}</a>
             <hr>
         </div>
     </div>

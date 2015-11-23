@@ -43,7 +43,7 @@ define("org/forgerock/commons/ui/common/backgrid/extension/ThemeableServerSideFi
          */
         template: function (data) {
          return '<input class="form-control input-sm" type="search" ' + (data.placeholder ? 'placeholder="' + data.placeholder + '"' : '') + ' name="' + data.name + '" ' + (data.value ? 'value="' + data.value + '"' : '') + '/>' +
-                '<a class="fa fa-times form-control-feedback" data-backgrid-action="clear" href="#"></a>';
+                '<a class="fa fa-times form-control-feedback" data-backgrid-action="clear" role="button" href="#"></a>';
         }
     });
 

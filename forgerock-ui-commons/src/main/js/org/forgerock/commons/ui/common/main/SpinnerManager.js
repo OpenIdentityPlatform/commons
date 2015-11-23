@@ -33,12 +33,12 @@ define("org/forgerock/commons/ui/common/main/SpinnerManager", [
 ], function($, Spinner) {
 
     var obj = {};
-    
+
     obj.showSpinner = function(priority) {
         if(obj.spinner) {
             obj.hideSpinner();
         }
-        
+
         obj.spinner = new Spinner().spin(document.getElementById('wrapper'));
         $(".spinner").position({
                                 of: $(window),
@@ -49,13 +49,17 @@ define("org/forgerock/commons/ui/common/main/SpinnerManager", [
         if (priority && (!obj.priority || priority > obj.priority)) {
             obj.priority = priority;
         }
+
+        $("#wrapper").attr("aria-busy", true);
     };
-    
+
     obj.hideSpinner = function(priority) {
         if(obj.spinner && (!obj.priority || (priority && priority >= obj.priority))) {
             obj.spinner.stop();
             delete obj.priority;
         }
+
+        $("#wrapper").attr("aria-busy", false);
     };
 
     return obj;

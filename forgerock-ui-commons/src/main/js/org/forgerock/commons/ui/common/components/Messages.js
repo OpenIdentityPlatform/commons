@@ -106,7 +106,7 @@ define("org/forgerock/commons/ui/common/components/Messages", [
 
         showMessage: function() {
             var _this = this,
-                alertClass =  "alert-info",
+                alertClass = "alert-info",
                 alertIcon = "alert-message-icon",
                 delay = _this.delay + (this.list[0].message.length * 20);
 
