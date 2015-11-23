@@ -16,6 +16,8 @@
 package org.forgerock.audit.events.handlers.writers;
 
 import static java.lang.String.valueOf;
+import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.util.Files.newFile;
 import static org.assertj.core.util.Files.temporaryFolderPath;
@@ -23,201 +25,352 @@ import static org.assertj.core.util.Strings.concat;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
+import org.forgerock.audit.retention.FileNamingPolicy;
+import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.retention.TimestampFilenameFilter;
+import org.forgerock.audit.rotation.FixedTimeRotationPolicy;
+import org.forgerock.audit.rotation.RotationPolicy;
+import org.forgerock.audit.rotation.SizeBasedRotationPolicy;
+import org.forgerock.audit.rotation.TimeLimitRotationPolicy;
+import org.forgerock.util.time.Duration;
+import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class RotatableWriterTest {
 
-    private static final String TIME_STAMP_FORMAT = "-MM.dd.yy-kk.mm.ss.SSS";
-    private static final String PREFIX = "Prefix-";
     private static final String ONE_SECOND = "1 second";
     private static final int MAX_NUMBER_OF_HISTORY_FILES = 3;
     private static final int MAX_BYTES_TO_WRITE = 100;
-    private static final int MAX_BYTES_TO_WRITE_DISABLED = 0;
-    private static final long ONE_SECOND_AS_LONG = 2 * 1000;
-    private static final String DISABLED = "disabled";
+    private static final String ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-kk.mm.ss.SSS";
+
+    private RotatableWriter rotatableWriter;
+
+    @AfterMethod
+    protected void tearDown() throws IOException {
+        if (rotatableWriter != null) {
+            rotatableWriter.close(); // ensure that ScheduledExecutorService gets shutdown
+        }
+    }
 
     @Test
-    public void testCreation() throws Exception {
+    public void testInitializesBytesWrittenAndLastRotationTimeFromFileMetaData() throws Exception {
         // given
-        final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration =
-                createFileBasedAuditEventHandlerConfiguration(
-                        DISABLED,
-                        MAX_BYTES_TO_WRITE,
-                        0,
-                        0);
-        final RotatableWriter rotatableFile = new RotatableWriter(initialFile, configuration, true);
+        final File file = getTempFile();
+        Files.write(file.toPath(), new byte[]{1});
+        final long oneSecondAgo = setLastModifiedToOneSecondAgo(file);
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
 
         // when
+        rotatableWriter = new RotatableWriter(file, configuration, true);
 
         // then
-        assertThat(rotatableFile.getBytesWritten()).isEqualTo(0L);
+        assertThat(rotatableWriter.getBytesWritten()).isEqualTo(1L);
+        assertThat(rotatableWriter.getLastRotationTime().getMillis()).isEqualTo(oneSecondAgo);
     }
 
     @Test
     public void testBytesWritten() throws Exception {
         // given
-        final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration =
-                createFileBasedAuditEventHandlerConfiguration(
-                        DISABLED,
-                        MAX_BYTES_TO_WRITE,
-                        0,
-                        0);
-        final RotatableWriter rotatableFile = new RotatableWriter(initialFile, configuration, true);
+        final File file = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        rotatableWriter = new RotatableWriter(file, configuration, true);
 
         // when
-        writeBytes(rotatableFile, MAX_BYTES_TO_WRITE);
+        writeThenFlushBytes(rotatableWriter, MAX_BYTES_TO_WRITE);
 
         // then
-        assertThat(rotatableFile.getBytesWritten()).isEqualTo(MAX_BYTES_TO_WRITE);
+        assertThat(rotatableWriter.getBytesWritten()).isEqualTo(MAX_BYTES_TO_WRITE);
     }
 
     @Test
-    public void testRotationWhenFileIsTooLarge() throws Exception {
+    public void testCreatesNoRotationPoliciesForDefaultConfiguration() throws IOException {
         // given
-        final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration =
-                createFileBasedAuditEventHandlerConfiguration(
-                        DISABLED,
-                        MAX_BYTES_TO_WRITE,
-                        1,
-                        0);
-        final RotatableWriter rotatableFile = new RotatableWriter(initialFile, configuration, true);
-        final TimestampFilenameFilter timestampFilenameFilter =
-                new TimestampFilenameFilter(initialFile, PREFIX, DateTimeFormat.forPattern(TIME_STAMP_FORMAT));
+        final File file = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
 
         // when
-        writeBytes(rotatableFile, MAX_BYTES_TO_WRITE+1);
-        rotatableFile.rotateIfNeeded();
+        rotatableWriter = new RotatableWriter(file, configuration, true);
 
         // then
-        assertThat(rotatableFile.getBytesWritten()).isEqualTo(0L);
-        assertThat(initialFile.getParentFile()).isDirectory();
-        final File[] historicalFiles = initialFile.getParentFile().listFiles(timestampFilenameFilter);
-        cleanupFilesWhenDone(historicalFiles);
-        assertThat(historicalFiles).isNotEmpty().hasSize(1);
+        List<RotationPolicy> rotationPolicies = rotatableWriter.getRotationPolicies();
+        assertThat(rotationPolicies.isEmpty()).isTrue();
     }
 
     @Test
-    public void testRotationWhenFileIsTooOld() throws Exception {
+    public void testCreatesSizeBasedRotationPolicyIfMaxFileSizeConfigured() throws IOException {
         // given
-        final int maxNumberOfHistoricalFiles = 1;
         final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration =
-                createFileBasedAuditEventHandlerConfiguration(
-                        ONE_SECOND,
-                        MAX_BYTES_TO_WRITE_DISABLED,
-                        maxNumberOfHistoricalFiles,
-                        0);
-        final RotatableWriter rotatableFile = new RotatableWriter(initialFile, configuration, true);
-        final TimestampFilenameFilter timestampFilenameFilter =
-                new TimestampFilenameFilter(initialFile, PREFIX, DateTimeFormat.forPattern(TIME_STAMP_FORMAT));
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setMaxFileSize(100);
 
         // when
-        writeBytes(rotatableFile, MAX_BYTES_TO_WRITE);
-
-        Thread.sleep(ONE_SECOND_AS_LONG);
-
-        boolean success = false;
-        // loop to test the historical files eventually equal 1. Make sure loop only iterates
-        // for a maximum of 1 second.
-        for(int iteration = 0; iteration < 20; iteration++) {
-            final File[] historicalFiles = initialFile.getParentFile().listFiles(timestampFilenameFilter);
-            if (historicalFiles.length == maxNumberOfHistoricalFiles) {
-                success = true;
-                break;
-            }
-            // sleep 50 ms
-            Thread.sleep(50);
-        }
+        rotatableWriter = new RotatableWriter(initialFile, configuration, true);
 
         // then
-        assertThat(rotatableFile.getBytesWritten()).isEqualTo(0L);
-        assertThat(initialFile.getParentFile()).isDirectory();
-        final File[] historicalFiles = initialFile.getParentFile().listFiles(timestampFilenameFilter);
-        cleanupFilesWhenDone(historicalFiles);
-        assertThat(success).isTrue().as("Check the max number of historical files was %d", maxNumberOfHistoricalFiles);
+        List<RotationPolicy> rotationPolicies = rotatableWriter.getRotationPolicies();
+        assertThat(rotationPolicies.size()).isEqualTo(1);
+        assertThat(((SizeBasedRotationPolicy) rotationPolicies.get(0)).getMaxFileSizeInBytes()).isEqualTo(100);
+    }
+
+    @Test
+    public void testSkipsCreationOfSizeBasedRotationPolicyIfConfiguredMaxFileSizeLessThanOrEqualToZero()
+            throws IOException {
+        // given
+        final File initialFile = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setMaxFileSize(0);
+
+        // when
+        rotatableWriter = new RotatableWriter(initialFile, configuration, true);
+
+        // then
+        List<RotationPolicy> rotationPolicies = rotatableWriter.getRotationPolicies();
+        assertThat(rotationPolicies.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void testCreatesFixedTimeRotationPolicyIfRotationTimesConfigured() throws IOException {
+        // given
+        final File initialFile = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationTimes(asList("0 seconds", "12 hours"));
+
+        // when
+        rotatableWriter = new RotatableWriter(initialFile, configuration, true);
+
+        // then
+        List<RotationPolicy> rotationPolicies = rotatableWriter.getRotationPolicies();
+        assertThat(rotationPolicies.size()).isEqualTo(1);
+        List<Duration> dailyRotationTimes = ((FixedTimeRotationPolicy) rotationPolicies.get(0)).getDailyRotationTimes();
+        assertThat(dailyRotationTimes.get(0).to(SECONDS)).isEqualTo(0);
+        assertThat(dailyRotationTimes.get(1).to(TimeUnit.HOURS)).isEqualTo(12);
+    }
+
+    @Test
+    public void testSkipsCreationOfFixedTimeRotationPolicyIfConfiguredRotationTimeIsUnlimitedOrInvalid()
+            throws IOException {
+        // given
+        final File initialFile = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationTimes(asList("unlimited", "winter"));
+
+        // when
+        rotatableWriter = new RotatableWriter(initialFile, configuration, true);
+
+        // then
+        List<RotationPolicy> rotationPolicies = rotatableWriter.getRotationPolicies();
+        assertThat(rotationPolicies.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void testCreatesTimeLimitRotationPolicyIfRotationIntervalConfigured() throws IOException {
+        // given
+        final File initialFile = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationInterval("1 hour");
+
+        // when
+        rotatableWriter = new RotatableWriter(initialFile, configuration, true);
+
+        // then
+        List<RotationPolicy> rotationPolicies = rotatableWriter.getRotationPolicies();
+        assertThat(rotationPolicies.size()).isEqualTo(1);
+        Duration rotationInterval = ((TimeLimitRotationPolicy) rotationPolicies.get(0)).getRotationInterval();
+        assertThat(rotationInterval.to(TimeUnit.HOURS)).isEqualTo(1);
+    }
+
+    @DataProvider
+    private Object[][] ignoredRotationIntervals() {
+        return new Object[][] {
+                {"unlimited"},
+                {"zero"},
+                {"winter"}
+        };
+    }
+
+    @Test(dataProvider = "ignoredRotationIntervals")
+    public void testSkipsCreationOfTimeLimitRotationPolicyIfConfiguredRotationIntervalIsZeroOrUnlimitedOrInvalid(
+            String rotationInterval) throws IOException {
+        // given
+        final File initialFile = getTempFile();
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationInterval(rotationInterval);
+
+        // when
+        rotatableWriter = new RotatableWriter(initialFile, configuration, true);
+
+        // then
+        List<RotationPolicy> rotationPolicies = rotatableWriter.getRotationPolicies();
+        assertThat(rotationPolicies.isEmpty()).isTrue();
+    }
+
+    @Test
+    public void testRotationForSizeBasedRotationPolicy() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testRotationForSizeBasedRotationPolicy";
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
+        configuration.getFileRetention().setMaxNumberOfHistoryFiles(1);
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+
+        // when
+        writeThenFlushBytes(rotatableWriter, MAX_BYTES_TO_WRITE);
+        writeThenFlushBytes(rotatableWriter, 1); // need to let the policies see the flushed bytes
+
+        // then
+        assertRetainedHistoricalFiles(file, prefix, 1);
+        assertThat(rotatableWriter.getBytesWritten()).isEqualTo(0L);
+    }
+
+    @Test
+    public void testRotationForTimeLimitRotationPolicy() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testRotationForTimeLimitRotationPolicy";
+        setLastModifiedToOneSecondAgo(file);
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        configuration.getFileRotation().setRotationInterval(ONE_SECOND);
+        configuration.getFileRetention().setMaxNumberOfHistoryFiles(1);
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+
+        // when
+        writeThenFlushBytes(rotatableWriter, 1);
+
+        // then
+        assertRetainedHistoricalFiles(file, prefix, 1);
+        assertThat(rotatableWriter.getBytesWritten()).isEqualTo(0L);
+    }
+
+    // TODO: testRotationForFixedTimeRotationPolicy
+
+    @Test
+    public void testCanForceRotation() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified";
+        setLastModifiedToOneSecondAgo(file);
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        configuration.getFileRetention().setMaxNumberOfHistoryFiles(1);
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+
+        // when
+        rotatableWriter.forceRotation();
+
+        // then
+        assertRetainedHistoricalFiles(file, prefix, 1);
+        assertThat(rotatableWriter.getBytesWritten()).isEqualTo(0L);
+    }
+
+    @Test
+    public void testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified() throws Exception {
+        // given
+        final File file = getTempFile();
+        final String prefix = "testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified";
+        setLastModifiedToOneSecondAgo(file);
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setRotationFilePrefix(prefix);
+        configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
+        configuration.getFileRotation().setRotationInterval("1 second");
+        configuration.getFileRotation().setRotationCheckInterval("100 ms");
+        configuration.getFileRetention().setMaxNumberOfHistoryFiles(1);
+        rotatableWriter = new RotatableWriter(file, configuration, true);
+
+        // when
+        Thread.sleep(1200);
+
+        // then
+        assertRetainedHistoricalFiles(file, prefix, 1);
+        assertThat(rotatableWriter.getBytesWritten()).isEqualTo(0L);
     }
 
     @Test
     public void testRetentionWithMaxNumberOfFiles() throws Exception {
         // given
-        final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration =
-                createFileBasedAuditEventHandlerConfiguration(
-                        DISABLED,
-                        MAX_BYTES_TO_WRITE,
-                        MAX_NUMBER_OF_HISTORY_FILES,
-                        0);
-        final RotatableWriter rotatableFile = new RotatableWriter(initialFile, configuration, true);
-        final TimestampFilenameFilter timestampFilenameFilter =
-                new TimestampFilenameFilter(initialFile, PREFIX, DateTimeFormat.forPattern(TIME_STAMP_FORMAT));
+        final File file = getTempFile();
+        final String prefix = "testRetentionWithMaxNumberOfFiles";
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
+        configuration.getFileRetention().setMaxNumberOfHistoryFiles(MAX_NUMBER_OF_HISTORY_FILES);
+        final FileNamingPolicy fileNamingPolicy =
+                new TimeStampFileNamingPolicyWithNamedBasedOrdering(file, ROTATION_FILE_SUFFIX, prefix);
+        rotatableWriter = new RotatableWriter(file, configuration, true, fileNamingPolicy);
 
         // when
-        for (int i = 0; i < 4; i++) {
-            // do 4 rotates of the log file.
-            writeBytes(rotatableFile, MAX_BYTES_TO_WRITE + 1);
-            rotatableFile.rotateIfNeeded();
+        Set<File> allHistoricalFiles = new HashSet<>();
+        for (int i = 0; i < MAX_NUMBER_OF_HISTORY_FILES + 1; i++) {
+            // force sufficient file rotations for files to start getting deleted
+            writeThenFlushBytes(rotatableWriter, MAX_BYTES_TO_WRITE + 1);
+            rotatableWriter.rotateIfNeeded();
+            allHistoricalFiles = getAllHistoricalFiles(file, prefix, i + 1, allHistoricalFiles);
         }
 
         // then
-        assertThat(initialFile.getParentFile()).isDirectory();
-        final File[] historicalFiles = initialFile.getParentFile().listFiles(timestampFilenameFilter);
-        cleanupFilesWhenDone(historicalFiles);
-        assertThat(historicalFiles).isNotEmpty().hasSize(MAX_NUMBER_OF_HISTORY_FILES);
+        assertThat(allHistoricalFiles).isNotEmpty().hasSize(MAX_NUMBER_OF_HISTORY_FILES + 1);
+        assertRetainedHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
     }
 
     @Test
     public void testRetentionWithMaxSizeOfFile() throws Exception {
         // given
-        final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration =
-                createFileBasedAuditEventHandlerConfiguration(
-                        DISABLED,
-                        MAX_BYTES_TO_WRITE,
-                        0,
-                        MAX_BYTES_TO_WRITE * MAX_NUMBER_OF_HISTORY_FILES);
-        final RotatableWriter rotatableFile = new RotatableWriter(initialFile, configuration, true);
-        final TimestampFilenameFilter timestampFilenameFilter =
-                new TimestampFilenameFilter(initialFile, PREFIX, DateTimeFormat.forPattern(TIME_STAMP_FORMAT));
+        final File file = getTempFile();
+        final String prefix = "testRetentionWithMaxSizeOfFile";
+        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.getFileRotation().setRotationEnabled(true);
+        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
+        configuration.getFileRetention().setMaxDiskSpaceToUse(MAX_BYTES_TO_WRITE * MAX_NUMBER_OF_HISTORY_FILES);
+        final FileNamingPolicy fileNamingPolicy =
+                new TimeStampFileNamingPolicyWithNamedBasedOrdering(file, ROTATION_FILE_SUFFIX, prefix);
+        rotatableWriter = new RotatableWriter(file, configuration, true, fileNamingPolicy);
 
         // when
-        for (int i = 0; i < 4; i++) {
-            // do 4 rotates of the log file.
-            writeBytes(rotatableFile, MAX_BYTES_TO_WRITE);
-            rotatableFile.rotateIfNeeded();
+        Set<File> allHistoricalFiles = new HashSet<>();
+        for (int i = 0; i < MAX_NUMBER_OF_HISTORY_FILES + 1; i++) {
+            // force sufficient file rotations for files to start getting deleted
+            writeThenFlushBytes(rotatableWriter, MAX_BYTES_TO_WRITE);
+            rotatableWriter.rotateIfNeeded();
+            allHistoricalFiles = getAllHistoricalFiles(file, prefix, i + 1, allHistoricalFiles);
         }
 
         // then
-        assertThat(initialFile.getParentFile()).isDirectory();
-        final File[] historicalFiles = initialFile.getParentFile().listFiles(timestampFilenameFilter);
-        cleanupFilesWhenDone(historicalFiles);
-        assertThat(historicalFiles).isNotEmpty().hasSize(MAX_NUMBER_OF_HISTORY_FILES);
+        assertThat(allHistoricalFiles).isNotEmpty().hasSize(MAX_NUMBER_OF_HISTORY_FILES + 1);
+        assertRetainedHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
     }
 
-    private FileBasedEventHandlerConfiguration createFileBasedAuditEventHandlerConfiguration(
-            final String rotationInterval, final long maxFileSize, final int maxNumberOfHistoryFiles,
-            final long maxDiskSpaceToUse) {
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
-        configuration.getFileRotation().setRotationEnabled(true);
-        configuration.getFileRotation().setRotationFileSuffix(TIME_STAMP_FORMAT);
-        configuration.getFileRotation().setRotationFilePrefix(PREFIX);
-        configuration.getFileRotation().setMaxFileSize(maxFileSize);
-        configuration.getFileRotation().setRotationInterval(rotationInterval);
-        configuration.getFileRetention().setMaxDiskSpaceToUse(maxDiskSpaceToUse);
-        configuration.getFileRetention().setMaxNumberOfHistoryFiles(maxNumberOfHistoryFiles);
-        configuration.getFileRetention().setMinFreeSpaceRequired(0);
-        return configuration;
-    }
+    // TODO: testRetentionWithFreeDiskSpaceRetentionPolicy - how?
 
-    private void writeBytes(final RotatableWriter writer, final int bytesToWrite) throws IOException {
-            writer.write(new String(new byte[bytesToWrite]));
-            writer.flush();
+    private void writeThenFlushBytes(final RotatableWriter writer, final int bytesToWrite) throws IOException {
+        writer.write(new String(new byte[bytesToWrite]));
+        writer.flush();
     }
 
     private File getTempFile() {
@@ -228,12 +381,72 @@ public class RotatableWriterTest {
         return file;
     }
 
+    private long setLastModifiedToOneSecondAgo(final File file) {
+        final DateTime currentTime = new DateTime();
+        // round down to nearest second in case filesystem doesn't support millisecond accuracy
+        final long currentTimeMillisTruncatedToSecond = currentTime.getMillis() - currentTime.getMillisOfSecond();
+        final long oneSecondAgo = currentTimeMillisTruncatedToSecond - 1000;
+        boolean modified = file.setLastModified(oneSecondAgo);
+        assertThat(modified).as("can update file timestamps from tests").isTrue();
+        return oneSecondAgo;
+    }
+
+    private void assertRetainedHistoricalFiles(File file, String prefix, int expectedNumber) throws InterruptedException {
+        Set<File> retainedHistoricalFiles = getAllHistoricalFiles(file, prefix, expectedNumber, new HashSet<File>());
+        assertThat(retainedHistoricalFiles).isNotEmpty().hasSize(expectedNumber);
+    }
+
+    private Set<File> getAllHistoricalFiles(File file, String prefix, int expectedNumber, Set<File> existingFiles)
+            throws InterruptedException {
+        // try to load the expected number of historical files, give up if unsuccessful after 1 second
+        Set<File> allHistoricalFiles = new HashSet<>(existingFiles);
+        for (int iteration = 0; iteration < 20; iteration++) {
+            allHistoricalFiles.addAll(getRetainedHistoricalFiles(file, prefix));
+            if (allHistoricalFiles.size() == expectedNumber) {
+                return allHistoricalFiles;
+            }
+            Thread.sleep(50);
+        }
+        return allHistoricalFiles;
+    }
+
+    private Set<File> getRetainedHistoricalFiles(File file, String prefix) {
+        final TimestampFilenameFilter timestampFilenameFilter =
+                new TimestampFilenameFilter(file, prefix, DateTimeFormat.forPattern(ROTATION_FILE_SUFFIX));
+        assertThat(file.getParentFile()).isDirectory();
+        final File[] historicalFiles = file.getParentFile().listFiles(timestampFilenameFilter);
+        cleanupFilesWhenDone(historicalFiles);
+        return new HashSet<>(Arrays.asList(historicalFiles));
+    }
+
     private void cleanupFilesWhenDone(File[] files) {
         if (files != null) {
             for (File file: files) {
                 file.deleteOnExit();
             }
         }
+    }
+
+    private static class TimeStampFileNamingPolicyWithNamedBasedOrdering extends TimeStampFileNamingPolicy {
+
+        public TimeStampFileNamingPolicyWithNamedBasedOrdering(final File initialFile, final String timeStampFormat,
+                final String prefix) {
+            super(initialFile, timeStampFormat, prefix);
+        }
+
+        /**
+         * List the files in the initial file directory that match the prefix, name and suffix format.
+         * {@inheritDoc}
+         */
+        @Override
+        public List<File> listFiles() {
+            List<File> fileList = super.listFiles();
+            // make sure the files are sorted from oldest to newest by filename - timestamps won't be accurate enough.
+            Collections.sort(fileList);
+            return fileList;
+        }
+
+
     }
 
 }

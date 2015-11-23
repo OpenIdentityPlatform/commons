@@ -68,26 +68,33 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
      * Groups the file rotation config parameters.
      */
     public static class FileRotation {
+
+        public static final long NO_MAX_FILE_SIZE = -1;
+        public static final String DEFAULT_ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-kk.mm.ss";
+
         @JsonPropertyDescription("audit.handlers.file.rotationEnabled")
         private boolean rotationEnabled = false;
 
         // size based rotation config parameters
         @JsonPropertyDescription("audit.handlers.file.maxFileSize")
-        private long maxFileSize;
+        private long maxFileSize = NO_MAX_FILE_SIZE;
 
         // time Based Rotation config parameters
         @JsonPropertyDescription("audit.handlers.file.rotationFilePrefix")
-        private String rotationFilePrefix;
+        private String rotationFilePrefix = null;
 
         // fixed time based rotation config parameters
         @JsonPropertyDescription("audit.handlers.file.rotationTimes")
         private List<String> rotationTimes = new LinkedList<>();
 
         @JsonPropertyDescription("audit.handlers.file.rotationFileSuffix")
-        private String rotationFileSuffix = "-MM.dd.yy-kk.mm";
+        private String rotationFileSuffix = DEFAULT_ROTATION_FILE_SUFFIX;
 
         @JsonPropertyDescription("audit.handlers.file.rotationInterval")
-        private String rotationInterval = "-1 seconds";
+        private String rotationInterval = "disabled";
+
+        @JsonPropertyDescription("audit.handlers.file.rotationCheckInterval")
+        private String rotationCheckInterval = "disabled";
 
         /**
          * Gets log rotation enabled state. By default log rotation is disabled.
@@ -222,20 +229,62 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
         public void setRotationTimes(List<String> rotationTimes) {
             this.rotationTimes.addAll(rotationTimes);
         }
+
+        /**
+         * Gets the interval to check time-based file rotation policies. The interval should be set as a {@link Duration}.
+         * <p/>
+         * Examples of valid durations are:
+         * <pre>
+         *      5 seconds
+         *      5 minutes
+         *      5 hours
+         *      disabled
+         * </pre>
+         * <p/>
+         * A value of "zero" or "disabled" means that time-based file rotation is disabled.
+         *
+         * @return The interval duration.
+         */
+        public String getRotationCheckInterval() {
+            return rotationCheckInterval;
+        }
+
+        /**
+         * Sets the interval to check time-based file rotation policies. The interval should be set as a {@link Duration}.
+         * <p/>
+         * Examples of valid durations are:
+         * <pre>
+         *      5 seconds
+         *      5 minutes
+         *      5 hours
+         *      disabled
+         * </pre>
+         * <p/>
+         * A value of "zero" or "disabled" means that time-based file rotation is disabled.
+         *
+         * @param rotationCheckInterval The interval duration.
+         */
+        public void setRotationCheckInterval(String rotationCheckInterval) {
+            this.rotationCheckInterval = rotationCheckInterval;
+        }
     }
 
     /**
      * Groups the file retention config parameters.
      */
     public static class FileRetention {
+
+        public static final int UNLIMITED_HISTORY_FILES = -1;
+        public static final long ANY_DISK_SPACE = -1;
+
         @JsonPropertyDescription("audit.handlers.file.maxNumberOfHistoryFiles")
-        private int maxNumberOfHistoryFiles;
+        private int maxNumberOfHistoryFiles = UNLIMITED_HISTORY_FILES;
 
         @JsonPropertyDescription("audit.handlers.file.maxDiskSpaceToUse")
-        private long maxDiskSpaceToUse;
+        private long maxDiskSpaceToUse = ANY_DISK_SPACE;
 
         @JsonPropertyDescription("audit.handlers.file.minFreeSpaceRequired")
-        private long minFreeSpaceRequired;
+        private long minFreeSpaceRequired = ANY_DISK_SPACE;
 
         /**
          * Gets the maximum number of historical log files to retain. -1 disables pruning of old history files.

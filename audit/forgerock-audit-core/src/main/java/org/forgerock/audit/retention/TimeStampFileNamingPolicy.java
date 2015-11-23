@@ -15,6 +15,8 @@
  */
 package org.forgerock.audit.retention;
 
+import static org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration.FileRotation.DEFAULT_ROTATION_FILE_SUFFIX;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -35,7 +37,6 @@ import org.slf4j.LoggerFactory;
 public class TimeStampFileNamingPolicy implements FileNamingPolicy {
 
     private static final Logger logger = LoggerFactory.getLogger(TimeStampFileNamingPolicy.class);
-    private static final String DEFAULT_SUFFIX_DATE_FORMAT = "-MM.dd.yy-kk.mm";
 
     private final File initialFile;
     private DateTimeFormatter suffixDateFormat;
@@ -63,7 +64,7 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
         }
         if (suffixDateFormat == null) {
             // fallback to a default date format, so the filenames will differ
-            suffixDateFormat = DateTimeFormat.forPattern(DEFAULT_SUFFIX_DATE_FORMAT);
+            suffixDateFormat = DateTimeFormat.forPattern(DEFAULT_ROTATION_FILE_SUFFIX);
         }
         this.timestampFilenameFilter = new TimestampFilenameFilter(initialFile, prefix, suffixDateFormat);
     }

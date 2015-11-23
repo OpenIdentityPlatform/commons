@@ -17,6 +17,7 @@ package org.forgerock.audit.rotation;
 
 import org.forgerock.util.time.Duration;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,16 +38,19 @@ public class TimeLimitRotationPolicy implements RotationPolicy {
 
     /**
      * Checks whether or not a {@link RotatableObject} needs rotation.
-     * @param file The file to be checked.
+     * @param rotatable The rotatable to be checked.
      * @return True - If the {@link RotatableObject} needs rotation.
      *         False - If the {@link RotatableObject} doesn't need rotation.
      */
     @Override
-    public boolean shouldRotateFile(RotatableObject file) {
-        final org.joda.time.Duration timeSinceLastRotation =
-                new org.joda.time.Duration(file.getLastRotationTime(), DateTime.now());
-        return !rotationInterval.isZero()
-                && timeSinceLastRotation.getMillis() >= rotationInterval.convertTo(TimeUnit.MILLISECONDS).getValue();
+    public boolean shouldRotateFile(RotatableObject rotatable) {
+        if (rotationInterval.isZero() || rotationInterval.isUnlimited()) {
+            return false;
+        } else {
+            final org.joda.time.Duration timeSinceLastRotation =
+                    new org.joda.time.Duration(rotatable.getLastRotationTime(), DateTime.now(DateTimeZone.UTC));
+            return timeSinceLastRotation.getMillis() >= rotationInterval.convertTo(TimeUnit.MILLISECONDS).getValue();
+        }
     }
 
     /**

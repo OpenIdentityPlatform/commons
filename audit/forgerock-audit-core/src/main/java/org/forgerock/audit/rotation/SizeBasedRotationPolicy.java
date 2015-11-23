@@ -38,6 +38,15 @@ public class SizeBasedRotationPolicy implements RotationPolicy {
      */
     @Override
     public boolean shouldRotateFile(RotatableObject file) {
-        return maxFileSizeInBytes <= 0L ? false : file.getBytesWritten() >= maxFileSizeInBytes;
+        return maxFileSizeInBytes > 0L && file.getBytesWritten() >= maxFileSizeInBytes;
+    }
+
+    /**
+     * Gets the maximum size (in bytes) a file may grow to before being rotated.
+     *
+     * @return the maximum file size permitted by this policy.
+     */
+    public long getMaxFileSizeInBytes() {
+        return maxFileSizeInBytes;
     }
 }

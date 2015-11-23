@@ -126,9 +126,11 @@ class CsvSecureVerifier {
         try {
             SecretKey currentKey = secureStorage.readCurrentKey();
             if (currentKey != null) {
-                return Arrays.equals(hmacCalculator.getCurrentKey().getEncoded(), currentKey.getEncoded())
-                        && lastRowWasSigned;
+                boolean keysMatch = Arrays.equals(hmacCalculator.getCurrentKey().getEncoded(), currentKey.getEncoded());
+                logger.trace("keysMatch={}, lastRowWasSigned={}", keysMatch, lastRowWasSigned);
+                return keysMatch && lastRowWasSigned;
             } else {
+                logger.trace("currentKey is null");
                 return false;
             }
         } catch (SecureStorageException ex) {

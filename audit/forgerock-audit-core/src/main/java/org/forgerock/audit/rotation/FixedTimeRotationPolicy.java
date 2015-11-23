@@ -15,10 +15,10 @@
  */
 package org.forgerock.audit.rotation;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.forgerock.util.time.Duration;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -29,37 +29,34 @@ import org.slf4j.LoggerFactory;
  */
 public class FixedTimeRotationPolicy implements RotationPolicy {
     private static final Logger logger = LoggerFactory.getLogger(FixedTimeRotationPolicy.class);
-    private List<org.forgerock.util.time.Duration> rotationTimes = new LinkedList<>();
+    private final List<Duration> dailyRotationTimes;
 
     /**
      * Constructs a {@link FixedTimeRotationPolicy} given a list of milliseconds after midnight to rotateIfNeeded the files.
      *
-     * @param rotationTimes List of milliseconds after midnight to rotateIfNeeded the log file. For example a list consisting of
-     *                      [10,20,30] will rotateIfNeeded the log file 10, 20, and 30 milliseconds after midnight.
+     * @param rotationTimes List of {@link Duration} objects specifying the time after midnight to rotate the log file.
      */
-    public FixedTimeRotationPolicy(final List<String> rotationTimes ) {
-        for (final String rotationTime : rotationTimes) {
-            try {
-                this.rotationTimes.add(org.forgerock.util.time.Duration.duration(rotationTime));
-            } catch (IllegalArgumentException e) {
-                logger.warn("Invalid duration for: {}", rotationTime);
-            }
-        }
+    public FixedTimeRotationPolicy(final List<Duration> rotationTimes) {
+        dailyRotationTimes = rotationTimes;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean shouldRotateFile(RotatableObject file) {
+    public boolean shouldRotateFile(RotatableObject rotatable) {
         final DateTime currentTime = new DateTime();
         final DateTime midnight = new DateMidnight().toDateTime();
-        for (final org.forgerock.util.time.Duration msSinceBeginningOfDay : rotationTimes) {
-            final DateTime nextRotationTime = midnight.plus(msSinceBeginningOfDay.to(TimeUnit.MILLISECONDS));
-            if (currentTime.isAfter(nextRotationTime) && file.getLastRotationTime().isBefore(nextRotationTime)) {
+        for (final Duration dailyRotationTime : dailyRotationTimes) {
+            final DateTime nextRotationTime = midnight.plus(dailyRotationTime.to(TimeUnit.MILLISECONDS));
+            if (currentTime.isAfter(nextRotationTime) && rotatable.getLastRotationTime().isBefore(nextRotationTime)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public List<Duration> getDailyRotationTimes() {
+        return dailyRotationTimes;
     }
 }

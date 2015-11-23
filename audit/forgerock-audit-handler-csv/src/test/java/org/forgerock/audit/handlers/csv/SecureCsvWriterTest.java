@@ -27,11 +27,11 @@ import java.io.FilenameFilter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
@@ -39,6 +39,8 @@ import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.AfterClass;
@@ -48,13 +50,14 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class SecureCsvWriterTest {
 
+    private static final Logger logger = LoggerFactory.getLogger(SecureCsvWriterTest.class);
+
     static final String KEYSTORE_FILENAME = "target/test-classes/keystore-signature.jks";
     static final String KEYSTORE_PASSWORD = "password";
 
     private KeyStoreHandlerDecorator keyStoreHandler;
     private SecureStorage secureStorage;
     private final Duration signatureInterval = duration("100 milliseconds");
-    private final Duration rotationInterval = duration("2 seconds");
     private Random random;
 
     @BeforeMethod
@@ -141,7 +144,7 @@ public class SecureCsvWriterTest {
         actual.delete();
         final String header = "FOO";
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
-                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, getConfig(false), keyStoreHandler, random)) {
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig(), keyStoreHandler, random)) {
             Map<String, String> values;
 
 //            secureCsvWriter.writeHeader(header);
@@ -171,7 +174,7 @@ public class SecureCsvWriterTest {
         actual.delete();
         final String header = "FOO";
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
-                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, getConfig(false), keyStoreHandler, random)) {
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig(), keyStoreHandler, random)) {
 
             secureCsvWriter.writeEvent(singletonMap(header, "bar"));
 
@@ -197,37 +200,34 @@ public class SecureCsvWriterTest {
         assertThat(contentOf(actual)).isEqualTo(contentOf(new File("target/test-classes/shouldGeneratePeriodicallySignature-expected.txt")));
     }
 
-    private CsvAuditEventHandlerConfiguration getConfig(boolean withRotation) {
+    private CsvAuditEventHandlerConfiguration createBasicSecureConfig() {
         CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.getSecurity().setEnabled(true);
         configuration.getSecurity().setSignatureInterval(signatureInterval.toString());
-
-        if (withRotation) {
-            FileBasedEventHandlerConfiguration.FileRotation fileRotation = new FileBasedEventHandlerConfiguration.FileRotation();
-            fileRotation.setRotationEnabled(withRotation);
-//            fileRotation.setMaxFileSize(20);
-            fileRotation.setRotationInterval(rotationInterval.toString()); // TODO we should not have to provide this value if we want to rotate based on size.
-            configuration.setFileRotation(fileRotation);
-        }
         return configuration;
     }
 
     @Test
     public void shouldRotateCsvAndKeyStoreFile() throws Exception {
         final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
-        logDirectory.toFile().deleteOnExit();
-
         final String filename = "shouldRotateCsvAndKeyStoreFile.csv";
         final File actual = new File(logDirectory.toFile(), filename);
         final String header = "FOO";
+        CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
+        config.getSecurity().setEnabled(true);
+        config.getSecurity().setSignatureInterval("5 minutes"); // ensure no periodically added signatures during test
+        config.getFileRotation().setRotationEnabled(true);
+        config.getFileRotation().setRotationFileSuffix("-MM.dd.yy-kk.mm.ss.SSS");
+        config.getFileRotation().setMaxFileSize(20);
+
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
-                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, getConfig(true), keyStoreHandler, random)) {
-            secureCsvWriter.writeEvent(singletonMap(header, "bar"));
-
-            // Wait for the rotation to happen
-            Thread.sleep(rotationInterval.to(TimeUnit.MILLISECONDS) + 500);
-
-            secureCsvWriter.writeEvent(singletonMap(header, "quix"));
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
+            secureCsvWriter.writeEvent(singletonMap(header, "one"));
+            secureCsvWriter.writeEvent(singletonMap(header, "two"));
+            secureCsvWriter.writeEvent(singletonMap(header, "three"));
+            secureCsvWriter.writeEvent(singletonMap(header, "four"));
+            secureCsvWriter.writeEvent(singletonMap(header, "five"));
+            secureCsvWriter.writeEvent(singletonMap(header, "six"));
         }
 
         File[] csvFiles = actual.getParentFile().listFiles(new FilenameFilter() {
@@ -236,8 +236,19 @@ public class SecureCsvWriterTest {
                 return name.startsWith(filename) && !name.endsWith(".keystore");
             }
         });
-        assertThat(csvFiles).hasSize(2);
-        for (File csvFile : csvFiles) {
+        assertThat(csvFiles).hasSize(7);
+        Arrays.sort(csvFiles);
+        // Confirm that the first file is the current file
+        // (this file is not verifiable currently as it doesn't end with a signature)
+        assertThat(csvFiles[0].getName()).isEqualTo(filename);
+        // Verify all of the archived files except the final one
+        for (int i = 1; i < csvFiles.length - 1; i++) {
+            File csvFile = csvFiles[i];
+            if (csvFile.getName().equals(filename)) {
+                logger.trace("Skipping verification of {} as won't end with signature", csvFile);
+                continue;
+            }
+            logger.trace("Verifying file {}", csvFile);
             try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), CsvPreference.EXCEL_PREFERENCE)) {
                 String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
                 KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, csvFile.getPath() + ".keystore", password);
@@ -246,6 +257,12 @@ public class SecureCsvWriterTest {
                 assertThat(verifier.verify()).as("File " + csvFile.getName()).isTrue();
             }
         }
+        // The final file is not verifiable currently as it doesn't contain any audit events (so no HMAC entry).
+        // This means lastHMAC will be null when running CsvSecureVerifier.verifySignature and verification fails
+        // See CAUD-225.
+        logger.trace("Skipping verification of {} as it doesn't contain a HMAC and" +
+                "verification of the closing signature will fail", csvFiles[6].getName());
+
     }
 
 }

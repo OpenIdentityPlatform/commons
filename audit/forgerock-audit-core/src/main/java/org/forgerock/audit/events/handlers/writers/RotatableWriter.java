@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,8 +51,10 @@ import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.rotation.RotationPolicy;
 import org.forgerock.audit.rotation.SizeBasedRotationPolicy;
 import org.forgerock.audit.rotation.TimeLimitRotationPolicy;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.time.Duration;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +64,7 @@ import org.slf4j.LoggerFactory;
 public class RotatableWriter implements TextWriter, RotatableObject {
 
     private static final Logger logger = LoggerFactory.getLogger(RotatableWriter.class);
+    private static final Duration ZERO = Duration.duration("zero");
 
     private final List<RotationPolicy> rotationPolicies = new LinkedList<>();
     private final List<RetentionPolicy> retentionPolicies = new LinkedList<>();
@@ -86,26 +90,33 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      */
     public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
             final boolean append) throws IOException {
-        this.file = file;
-        final FileRotation fileRotation = configuration.getFileRotation();
-        final FileRetention fileRetention = configuration.getFileRetention();
-        // Add TimeStampFileNamingPolicy
-        fileNamingPolicy =
+        this(file, configuration, append,
                 new TimeStampFileNamingPolicy(
                         file,
-                        fileRotation.getRotationFileSuffix(),
-                        fileRotation.getRotationFilePrefix());
-
-        this.rotationEnabled = fileRotation.isRotationEnabled();
-        this.lastRotationTime = DateTime.now();
-        this.writer = constructWriter(file, append);
-        addRetentionPolicies(fileRetention);
-        addRotationPolicies(fileRotation, Duration.duration(fileRotation.getRotationInterval()));
+                        configuration.getFileRotation().getRotationFileSuffix(),
+                        configuration.getFileRotation().getRotationFilePrefix()));
     }
 
     /**
-     * Rotates the managed file if necessary.
-     * @throws IOException If unable to rotateIfNeeded the log file.
+     * This constructor allows tests to set an alternative FileNamingPolicy as TimeStampFileNamingPolicy lists files
+     * for deletion by their last modified timestamps but these timestamps are only accurate to the nearest second.
+     */
+    @VisibleForTesting
+    public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
+                           final boolean append, final FileNamingPolicy fileNamingPolicy) throws IOException {
+        this.file = file;
+        this.fileNamingPolicy = fileNamingPolicy;
+        this.rotationEnabled = configuration.getFileRotation().isRotationEnabled();
+        this.lastRotationTime = new DateTime(file.lastModified(), DateTimeZone.UTC);
+        this.writer = constructWriter(file, append);
+        addRetentionPolicies(configuration.getFileRetention());
+        addRotationPolicies(configuration.getFileRotation());
+    }
+
+    /**
+     * Rotate the log file if any of the configured rotation policies determine that rotation is required.
+     *
+     * @throws IOException If unable to rotate the log file.
      */
     @Override
     public void rotateIfNeeded() throws IOException {
@@ -124,8 +135,8 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                         if (logger.isTraceEnabled()) {
                             logger.trace("Finished rotation for: {}", file.getAbsolutePath());
                         }
-                        break;
                     }
+                    break;
                 }
             }
             Set<File> filesToDelete = checkRetention(); // return the files to delete, but do not delete them
@@ -154,17 +165,20 @@ public class RotatableWriter implements TextWriter, RotatableObject {
             }
             if (currentFile.renameTo(newFile)) {
                 rotationHappened = true;
-                if (!currentFile.exists()) {
-                    currentFile.createNewFile();
+                if (currentFile.createNewFile()) {
                     writer = constructWriter(currentFile, true);
                     context.setWriter(writer);
                     rotationHooks.postRotationAction(context);
+                } else {
+                    logger.error("Unable to resume writing to audit file {}; further events will not be logged",
+                            currentFile.toString());
                 }
             } else {
-                logger.error("Unable to rename the audit file {}", currentFile.toString());
+                logger.error("Unable to rename the audit file {}; further events will continue to be logged to " +
+                        "the current file", currentFile.toString());
                 writer = constructWriter(currentFile, true);
             }
-            lastRotationTime = DateTime.now();
+            lastRotationTime = DateTime.now(DateTimeZone.UTC);
         }
         return rotationHappened;
     }
@@ -179,7 +193,14 @@ public class RotatableWriter implements TextWriter, RotatableObject {
 
     private void deleteFiles(final Set<File> files) {
         for (final File file : files) {
-            file.delete();
+            if (logger.isInfoEnabled()) {
+                logger.info("Deleting file {}", file.getAbsolutePath());
+            }
+            if (!file.delete()) {
+                if (logger.isWarnEnabled()) {
+                    logger.warn("Could not delete file {}", file.getAbsolutePath());
+                }
+            }
         }
     }
 
@@ -282,11 +303,22 @@ public class RotatableWriter implements TextWriter, RotatableObject {
             throws IOException {
         FileOutputStream stream = new FileOutputStream(csvFile, append);
         meteredStream = new MeteredStream(stream, file.length());
-        OutputStreamWriter osw = new OutputStreamWriter(meteredStream, "UTF-8");
+        OutputStreamWriter osw = new OutputStreamWriter(meteredStream, StandardCharsets.UTF_8);
         return new BufferedWriter(osw);
     }
 
-    private void addRotationPolicies(final FileRotation fileRotation, final Duration duration) {
+    private void addRotationPolicies(final FileRotation fileRotation) {
+        final Duration rotationCheckInterval =
+                parseDuration("rotation check interval", fileRotation.getRotationCheckInterval(), ZERO);
+        final Duration rotationInterval = parseDuration("rotation interval", fileRotation.getRotationInterval(), ZERO);
+        final List<Duration> dailyRotationTimes = new LinkedList<>();
+        for (final String rotationTime : fileRotation.getRotationTimes()) {
+            Duration duration = parseDuration("rotation time", rotationTime, null);
+            if (duration != null && !duration.isUnlimited()) {
+                dailyRotationTimes.add(duration);
+            }
+        }
+
         // add SizeBasedRotationPolicy if a non zero size is supplied
         final long maxFileSize = fileRotation.getMaxFileSize();
         if (maxFileSize > 0) {
@@ -294,14 +326,21 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         }
 
         // add FixedTimeRotationPolicy
-        final List<String> rotationTimes = fileRotation.getRotationTimes();
-        if (!rotationTimes.isEmpty()) {
-            rotationPolicies.add(new FixedTimeRotationPolicy(rotationTimes));
+        if (!dailyRotationTimes.isEmpty()) {
+            rotationPolicies.add(new FixedTimeRotationPolicy(dailyRotationTimes));
         }
 
         // add TimeLimitRotationPolicy if enabled
-        if (!duration.isZero()){
-            rotationPolicies.add(new TimeLimitRotationPolicy(duration));
+        if (!(rotationInterval.isZero() || rotationInterval.isUnlimited())) {
+            rotationPolicies.add(new TimeLimitRotationPolicy(rotationInterval));
+        }
+
+        if (!rotationPolicies.isEmpty()) {
+            if (rotationCheckInterval.isUnlimited() || rotationCheckInterval.isZero()) {
+                logger.warn("No rotation check interval set; " +
+                        "rotation policies will only be evaluated when writing to files.");
+                return;
+            }
             rotator = Executors.newScheduledThreadPool(1);
             rotator.scheduleAtFixedRate(
                     new Runnable() {
@@ -310,14 +349,28 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                             try {
                                 rotateIfNeeded();
                             } catch (Exception e) {
-                                logger.error("Failed to rotateIfNeeded file: {}", fileNamingPolicy.getInitialName(), e);
+                                logger.error("Failed to rotate file: {}", fileNamingPolicy.getInitialName(), e);
                             }
                         }
                     },
                     0,
-                    duration.to(TimeUnit.MILLISECONDS),
+                    rotationCheckInterval.to(TimeUnit.MILLISECONDS),
                     TimeUnit.MILLISECONDS);
         }
+    }
+
+    private Duration parseDuration(String description, String duration, Duration defaultValue) {
+        try {
+            return Duration.duration(duration);
+        } catch (IllegalArgumentException e) {
+            logger.warn("Invalid {} value: '{}'", description, duration);
+            return defaultValue;
+        }
+    }
+
+    @VisibleForTesting
+    List<RotationPolicy> getRotationPolicies() {
+        return rotationPolicies;
     }
 
     private void addRetentionPolicies(final FileRetention fileRetention) {

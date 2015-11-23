@@ -151,9 +151,9 @@ class SecureCsvWriter implements CsvWriter {
                 @Override
                 public void run() {
                     try {
-                        writeSignature();
+                        writeSignature(csvWriter);
                     } catch (Exception ex) {
-                        logger.error("An error occured while writing the signature", ex);
+                        logger.error("An error occurred while writing the signature", ex);
                     }
                 }
             };
@@ -200,6 +200,12 @@ class SecureCsvWriter implements CsvWriter {
     @Override
     public void close() throws IOException {
         flush();
+        signatureLock.lock();
+        try {
+            forceWriteSignature(csvWriter);
+        } finally {
+            signatureLock.unlock();
+        }
         scheduler.shutdown();
         try {
             while (!scheduler.awaitTermination(500, MILLISECONDS)) {
@@ -209,19 +215,13 @@ class SecureCsvWriter implements CsvWriter {
             logger.error("Unable to terminate the scheduler", ex);
             Thread.currentThread().interrupt();
         }
-        signatureLock.lock();
-        try {
-            forceWriteSignature();
-        } finally {
-            signatureLock.unlock();
-        }
         csvWriter.close();
     }
 
-    private void forceWriteSignature() throws IOException {
+    private void forceWriteSignature(Writer writer) throws IOException {
         if (scheduledSignature != null && scheduledSignature.cancel(false)) {
             // We were able to cancel it before it starts, so let's generate the signature now.
-            writeSignature();
+            writeSignature(writer);
         }
     }
 
@@ -232,21 +232,25 @@ class SecureCsvWriter implements CsvWriter {
     public void writeHeader(Writer writer, String... header) throws IOException {
         String[] newHeader = addExtraColumns(header);
         writer.write(csvFormatter.formatHeader(newHeader));
+        logger.trace("Header written to file");
         headerWritten = true;
     }
 
     @VisibleForTesting
-    void writeSignature() throws IOException {
+    void writeSignature(Writer writer) throws IOException {
         // We have to prevent from writing another line between the signature calculation
         // and the signature's row write, as the calculation uses the lastHMAC.
         signatureLock.lock();
         try {
             lastSignature = secureStorage.sign(dataToSign(lastSignature, lastHMAC));
+            logger.trace("Calculated new Signature");
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
-            writeEvent(values);
+            writeEvent(writer, values);
+            logger.trace("Signature written to file");
 
             // Store the current signature into the Keystore
             secureStorage.writeCurrentSignatureKey(new SecretKeySpec(lastSignature, SIGNATURE_ALGORITHM));
+            logger.trace("Signature written to secureStorage");
         } catch (SecureStorageException ex) {
             logger.error(ex.getMessage(), ex);
             throw new IOException(ex);
@@ -337,21 +341,22 @@ class SecureCsvWriter implements CsvWriter {
         return newHeader;
     }
 
-    void setLastHMAC(String lastHMac) {
+    private void setLastHMAC(String lastHMac) {
         this.lastHMAC = lastHMac;
     }
 
-    void setLastSignature(byte[] lastSignature) {
+    private void setLastSignature(byte[] lastSignature) {
         this.lastSignature = lastSignature;
     }
 
-    void writeLastSignature(Writer writer) throws IOException {
+    private void writeLastSignature(Writer writer) throws IOException {
         // We have to prevent from writing another line between the signature calculation
         // and the signature's row write, as the calculation uses the lastHMAC.
         signatureLock.lock();
         try {
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
             writeEvent(writer, values);
+            logger.trace("Signature from previous file written to new file");
         } catch (IOException ex) {
             logger.error(ex.getMessage(), ex);
             throw new IOException(ex);
@@ -365,7 +370,7 @@ class SecureCsvWriter implements CsvWriter {
         @Override
         public void preRotationAction(RotationContext context) throws IOException {
             // ensure the final signature is written
-            forceWriteSignature();
+            forceWriteSignature(context.getWriter());
         }
 
         @Override
@@ -374,12 +379,14 @@ class SecureCsvWriter implements CsvWriter {
             String currentName = keyStoreFile.getName();
             String nextName = currentName.replaceFirst(context.getInitialFile().getName(), context.getNextFile().getName());
             final File nextFile = new File(keyStoreFile.getParent(), nextName);
+            logger.trace("Renaming keystore file {} to {}", currentName, nextName);
             boolean renamed = keyStoreFile.renameTo(nextFile);
             if (!renamed) {
                 logger.error("Unable to rename {} to {}", keyStoreFile.getAbsolutePath(), nextFile.getAbsolutePath());
             }
             try {
                 secureStorage.setKeyStoreHandler(new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(), keyStorePassword));
+                logger.trace("Updated secureStorage to reference new keyStoreFile");
                 initHmacCalculatorWithRandomData();
             } catch (Exception ex) {
                 throw new IOException(ex);

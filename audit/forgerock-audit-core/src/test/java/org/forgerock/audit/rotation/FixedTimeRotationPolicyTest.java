@@ -16,6 +16,7 @@
 package org.forgerock.audit.rotation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.util.time.Duration.duration;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.forgerock.util.time.Duration;
 import org.joda.time.DateMidnight;
 import org.joda.time.DateTime;
 import org.testng.annotations.Test;
@@ -35,7 +37,7 @@ public class FixedTimeRotationPolicyTest {
     public void TestRotation() {
         // given
         // rotateIfNeeded 50 ms after midnight
-        final List<String> rotationTimes = Collections.singletonList(ONE_MINUTE);
+        final List<Duration> rotationTimes = Collections.singletonList(Duration.duration(ONE_MINUTE));
         final FixedTimeRotationPolicy rotationPolicy = new FixedTimeRotationPolicy(rotationTimes);
         final RotatableObject rotatableObject = mock(RotatableObject.class);
         final DateTime midnight = new DateMidnight().toDateTime();
@@ -46,8 +48,7 @@ public class FixedTimeRotationPolicyTest {
 
         // then
         final DateTime currentTime = new DateTime();
-        if (currentTime.isAfter(
-                midnight.plus(org.forgerock.util.time.Duration.duration(ONE_MINUTE).to(TimeUnit.MILLISECONDS)))) {
+        if (currentTime.isAfter(midnight.plus(duration(ONE_MINUTE).to(TimeUnit.MILLISECONDS)))) {
             assertThat(rotate).isTrue();
         } else {
             assertThat(rotate).isFalse();
