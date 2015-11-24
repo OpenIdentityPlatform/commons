@@ -98,7 +98,7 @@ public class JdbcAuditEventHandler extends AuditEventHandlerBase {
         if (dataSource != null) {
             sharedDataSource = true;
         } else {
-            logger.error("No connection pool (DataSource) provided; defaulting to Hikari");
+            logger.info("No connection pool (DataSource) provided for JDBC Audit Event Handler; defaulting to Hikari");
             sharedDataSource = false;
             dataSource = new HikariDataSource(createHikariConfig(configuration.getConnectionPool()));
         }
