@@ -34,14 +34,12 @@ import org.forgerock.util.encode.Base64;
 class HmacCalculator {
 
     private SecretKey currentKey;
-    private MessageDigest messageDigest;
+    private final MessageDigest messageDigest;
     private final Mac mac;
     private final String hmacAlgorithm;
 
-    public HmacCalculator(SecretKey currentKey, String hmacAlgorithm) {
-        this.currentKey = currentKey;
+    public HmacCalculator(String hmacAlgorithm) {
         this.hmacAlgorithm = hmacAlgorithm;
-
         try {
             messageDigest = MessageDigest.getInstance("SHA-256");
             mac = Mac.getInstance(hmacAlgorithm);
@@ -52,6 +50,10 @@ class HmacCalculator {
 
     SecretKey getCurrentKey() {
         return currentKey;
+    }
+
+    public void setCurrentKey(byte[] bytes) {
+        this.currentKey = new SecretKeySpec(bytes, hmacAlgorithm);
     }
 
     /**
@@ -86,6 +88,6 @@ class HmacCalculator {
         // k1 = digest(k0)
         messageDigest.reset();
         messageDigest.update(currentKey.getEncoded());
-        currentKey = new SecretKeySpec(messageDigest.digest(), hmacAlgorithm);
+        currentKey = new SecretKeySpec(messageDigest.digest(), messageDigest.getAlgorithm());
     }
 }

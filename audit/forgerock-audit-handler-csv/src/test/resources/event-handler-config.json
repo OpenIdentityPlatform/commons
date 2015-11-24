@@ -12,10 +12,10 @@
     "security" : {
       "enabled" : "true",
       "signatureInterval" : "3 seconds",
-      "secureStorageName" : "csvSecure"
+      "keyStoreHandlerName" : "csvSecure"
     },
     "buffering" : {
-      "enabled" : "true",
+      "enabled" : "false",
       "autoFlush" : "true"
     }
   }

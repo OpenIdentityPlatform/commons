@@ -31,6 +31,8 @@ class CsvSecureConstants {
     static final String ENTRY_CURRENT_KEY = "CurrentKey";
     // The alias to lookup the private key into the keystore
     static final String ENTRY_SIGNATURE = "Signature";
+    // The alias to lookup the password into the keystore
+    static final String ENTRY_PASSWORD = "Password";
 
     static final String HEADER_HMAC = "HMAC";
     static final String HEADER_SIGNATURE = "SIGNATURE";

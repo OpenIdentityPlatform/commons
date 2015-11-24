@@ -23,7 +23,6 @@ import static org.forgerock.audit.events.AuditEventHelper.getAuditEventPropertie
 import static org.forgerock.audit.events.AuditEventHelper.getAuditEventSchema;
 import static org.forgerock.audit.events.AuditEventHelper.getPropertyType;
 import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotation;
-import static org.forgerock.audit.secure.KeyStoreSecureStorage.JCEKS_KEYSTORE_TYPE;
 import static org.forgerock.audit.util.JsonSchemaUtils.generateJsonPointers;
 import static org.forgerock.audit.util.JsonValueUtils.JSONVALUE_FILTER_VISITOR;
 import static org.forgerock.audit.util.JsonValueUtils.expand;
@@ -37,6 +36,8 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,21 +46,20 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
+
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
-import org.forgerock.audit.providers.SecureStorageProvider;
+import org.forgerock.audit.providers.KeyStoreHandlerProvider;
 import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
-import org.forgerock.audit.secure.KeyStoreSecureStorage;
-import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -90,6 +90,8 @@ import org.supercsv.prefs.CsvPreference;
 import org.supercsv.quote.AlwaysQuoteMode;
 import org.supercsv.util.CsvContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * Handles AuditEvents by writing them to a CSV file.
  */
@@ -101,6 +103,15 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     public static final String ROTATE_FILE_ACTION_NAME = "rotate";
 
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final Random random;
+
+    static {
+        try {
+            random = SecureRandom.getInstance("SHA1PRNG");
+        } catch (NoSuchAlgorithmException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 
     private final CsvAuditEventHandlerConfiguration configuration;
     private final CsvPreference csvPreference;
@@ -110,7 +121,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     private final Map<String, JsonPointer> jsonPointerByField = new HashMap<>();
     /** Caches the dot notation for each field. */
     private final Map<String, String> fieldDotNotationByField = new HashMap<>();
-    private SecureStorage secureStorage;
+    private KeyStoreHandler keyStoreHandler;
 
     /**
      * Create a new CsvAuditEventHandler instance.
@@ -119,14 +130,14 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
      *          Configuration parameters that can be adjusted by system administrators.
      * @param eventTopicsMetaData
      *          Meta-data for all audit event topics.
-     * @param secureStorageProvider
+     * @param keyStoreHandlerProvider
      *          The secure storage to use for keys.
      */
     @Inject
     public CsvAuditEventHandler(
             final CsvAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData,
-            @Audit SecureStorageProvider secureStorageProvider) {
+            @Audit KeyStoreHandlerProvider keyStoreHandlerProvider) {
 
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = configuration;
@@ -137,18 +148,16 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             Reject.ifTrue(duration.isZero() || duration.isUnlimited(),
                     "The signature interval can't be zero or unlimited");
 
-            if (security.getFilename() != null) {
+            if (security.getKeyStoreHandlerName() != null) {
+                this.keyStoreHandler = keyStoreHandlerProvider.getKeystoreHandler(security.getKeyStoreHandlerName());
+            } else {
                 try {
-                    KeyStoreHandler keyStoreHandler =
-                            new JcaKeyStoreHandler(JCEKS_KEYSTORE_TYPE, security.getFilename(), security.getPassword());
-                    secureStorage = new KeyStoreSecureStorage(keyStoreHandler);
+                    keyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, security.getFilename(),
+                            security.getPassword());
                 } catch (Exception e) {
                     throw new IllegalArgumentException(
                             "Unable to create secure storage from file: " + security.getFilename(), e);
                 }
-            }
-            else {
-                secureStorage = secureStorageProvider.getSecureStorage(configuration.getSecurity().getSecureStorageName());
             }
         }
         for (String topic : this.eventTopicsMetaData.getTopics()) {
@@ -281,7 +290,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     private synchronized CsvWriter createCsvWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
         if (configuration.getSecurity().isEnabled()) {
-            return new SecureCsvWriter(auditFile, headers, csvPreference, secureStorage, configuration);
+            return new SecureCsvWriter(auditFile, headers, csvPreference, configuration, keyStoreHandler, random);
         } else {
             return new StandardCsvWriter(auditFile, headers, csvPreference, configuration);
         }

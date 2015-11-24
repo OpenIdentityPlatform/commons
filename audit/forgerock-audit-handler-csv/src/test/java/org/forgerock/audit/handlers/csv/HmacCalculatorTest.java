@@ -20,9 +20,8 @@ import static org.mockito.Mockito.spy;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-
-import javax.crypto.spec.SecretKeySpec;
 
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -45,7 +44,8 @@ public class HmacCalculatorTest {
 
     @Test
     public void shouldCalculateHMAC() throws Exception {
-        HmacCalculator hmacCalculator = spy(new HmacCalculator(new SecretKeySpec("forgerock".getBytes("UTF-8"), "HmacSHA256"), "HmacSHA256"));
+        HmacCalculator hmacCalculator = spy(new HmacCalculator("HmacSHA256"));
+        hmacCalculator.setCurrentKey("forgerock".getBytes(StandardCharsets.UTF_8));
 
         byte[] data = "rockstar".getBytes("UTF-8");
         String base64HMAC;

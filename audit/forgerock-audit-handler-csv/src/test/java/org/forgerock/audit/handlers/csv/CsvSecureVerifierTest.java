@@ -15,16 +15,15 @@
  */
 package org.forgerock.audit.handlers.csv;
 
-import org.forgerock.audit.secure.JcaKeyStoreHandler;
-import org.forgerock.audit.secure.KeyStoreHandler;
-import org.forgerock.audit.secure.KeyStoreSecureStorage;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.FileReader;
 import java.io.Reader;
 import java.io.StringReader;
 
+import org.forgerock.audit.secure.JcaKeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
+import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.supercsv.io.CsvMapReader;
 import org.supercsv.io.ICsvMapReader;
 import org.supercsv.prefs.CsvPreference;
@@ -41,8 +40,10 @@ public class CsvSecureVerifierTest {
     public void shouldVerifyValidFile() throws Exception {
         Reader reader = new FileReader("src/test/resources/shouldGeneratePeriodicallySignature-expected.txt");
         ICsvMapReader csvMapReader = new CsvMapReader(reader, CsvPreference.EXCEL_PREFERENCE);
-        KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler("JCEKS", TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD);
-        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvMapReader, new KeyStoreSecureStorage(keyStoreHandler, true));
+        KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD));
+        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvMapReader, new KeyStoreSecureStorage(keyStoreHandler, 
+                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
         assertThat(csvVerifier.verify()).isTrue();
     }
 
@@ -51,8 +52,10 @@ public class CsvSecureVerifierTest {
         StringReader reader = new StringReader(content);
         ICsvMapReader csvMapReader = new CsvMapReader(reader, CsvPreference.EXCEL_PREFERENCE);
 
-        KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler("JCEKS", TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD);
-        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvMapReader, new KeyStoreSecureStorage(keyStoreHandler, true));
+        KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD));
+        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvMapReader, new KeyStoreSecureStorage(keyStoreHandler,
+                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
         assertThat(csvVerifier.verify()).isFalse();
     }
 

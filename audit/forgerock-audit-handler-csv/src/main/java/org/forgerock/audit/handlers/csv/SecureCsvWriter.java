@@ -33,6 +33,7 @@ import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -47,7 +48,10 @@ import org.forgerock.audit.events.handlers.writers.TextWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriterAdapter;
 import org.forgerock.audit.rotation.RotationContext;
 import org.forgerock.audit.rotation.RotationHooks;
-import org.forgerock.audit.secure.SecureStorage;
+import org.forgerock.audit.secure.JcaKeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
+import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorageException;
 import org.forgerock.util.Reject;
 import org.forgerock.util.annotations.VisibleForTesting;
@@ -73,40 +77,54 @@ class SecureCsvWriter implements CsvWriter {
     private Writer csvWriter;
     private RotatableWriter rotatableWriter;
 
-    private final HmacCalculator hmacCalculator;
+    private HmacCalculator hmacCalculator;
     private final ScheduledExecutorService scheduler;
     private final ReentrantLock signatureLock = new ReentrantLock();
     private final Runnable signatureTask;
-    private final SecureStorage secureStorage;
+    private KeyStoreSecureStorage secureStorage;
     private final Duration signatureInterval;
     private ScheduledFuture<?> scheduledSignature;
 
     private String lastHMAC;
     private byte[] lastSignature;
+    private boolean headerWritten = false;
+    private final Random random;
+    private File keyStoreFile;
+    private String keyStorePassword;
 
-    SecureCsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, SecureStorage secureStorage,
-                      CsvAuditEventHandlerConfiguration config) throws IOException {
+    SecureCsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, CsvAuditEventHandlerConfiguration config,
+            KeyStoreHandler keyStoreHandler, Random random) throws IOException {
         Reject.ifFalse(config.getSecurity().isEnabled(), "SecureCsvWriter should only be used if security is enabled");
-        boolean fileAlreadyInitialized = csvFile.exists();
-        final CsvAuditEventHandlerConfiguration.CsvSecurity securityConfiguration = config.getSecurity();
-        CsvSecureVerifier verifier = null;
-        if (fileAlreadyInitialized) {
-            // Run the CsvVerifier to check that the file was not tampered,
-            // and get the headers and lastSignature for free
-            try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
-                final String[] actualHeaders;
-                verifier = new CsvSecureVerifier(reader, secureStorage);
-                if (!verifier.verify()) {
-                    logger.info("The existing secure CSV file was tampered.");
-                    throw new IOException("The CSV file was tampered.");
-                } else {
-                    logger.info("The existing secure CSV file was not tampered.");
+        final boolean fileAlreadyInitialized = csvFile.exists() && csvFile.length() > 0;
+        this.random = random;
+        this.keyStoreFile = new File(csvFile.getPath() + ".keystore");
+        this.headers = checkNotNull(headers, "The headers can't be null.");
+        this.csvFormatter = new CsvFormatter(csvPreference);
+        this.csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
+        this.hmacCalculator = new HmacCalculator(CsvSecureConstants.HMAC_ALGORITHM);
+
+        try {
+            KeyStoreHandlerDecorator keyStoreHandlerDecorated = new KeyStoreHandlerDecorator(keyStoreHandler);
+            this.keyStorePassword = Base64.encode(keyStoreHandlerDecorated.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+            KeyStoreHandler hmacKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(), keyStorePassword);
+            this.secureStorage = new KeyStoreSecureStorage(hmacKeyStoreHandler, keyStoreHandlerDecorated.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE), keyStoreHandlerDecorated.readPrivateKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE));
+            final CsvAuditEventHandlerConfiguration.CsvSecurity securityConfiguration = config.getSecurity();
+            if (fileAlreadyInitialized) {
+                // Run the CsvVerifier to check that the file was not tampered.
+                CsvSecureVerifier verifier;
+                try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
+                    verifier = new CsvSecureVerifier(reader, secureStorage);
+                    if (!verifier.verify()) {
+                        logger.info("The existing secure CSV file was tampered.");
+                        throw new IOException("The CSV file was tampered.");
+                    } else {
+                        logger.info("The existing secure CSV file was not tampered.");
+                    }
                 }
-                actualHeaders = verifier.getHeaders();
-                // Assert that the 2 headers equals.
-                if (actualHeaders == null) {
-                    fileAlreadyInitialized = false;
-                } else {
+
+                // Assert that the 2 headers are equal.
+                final String[] actualHeaders = verifier.getHeaders();
+                if (actualHeaders != null) {
                     if (actualHeaders.length != headers.length) {
                         throw new IOException("Resuming an existing CSV file but the headers do not match.");
                     }
@@ -116,65 +134,52 @@ class SecureCsvWriter implements CsvWriter {
                         }
                     }
                 }
-            }
-        }
-        this.headers = checkNotNull(headers, "The headers can't be null.");
-        csvFormatter = new CsvFormatter(csvPreference);
-        csvWriter = constructWriter(csvFile, fileAlreadyInitialized, config);
 
-        this.secureStorage = secureStorage;
-        this.signatureInterval = securityConfiguration.getSignatureIntervalDuration();
-
-        try {
-            SecretKey currentKey;
-            if (fileAlreadyInitialized) {
-                currentKey = secureStorage.readCurrentKey();
+                SecretKey currentKey = secureStorage.readCurrentKey();
                 if (currentKey == null) {
                     throw new IllegalStateException("We are supposed to resume but there is not entry for CurrentKey.");
                 }
-                logger.debug("Resuming the writer verifier with the key " + Base64.encode(currentKey.getEncoded()));
+                this.hmacCalculator.setCurrentKey(currentKey.getEncoded());
+                logger.debug("Resuming the writer with the key " + Base64.encode(hmacCalculator.getCurrentKey().getEncoded()));
+                
+                setLastHMAC(verifier.getLastHMAC());
+                setLastSignature(verifier.getLastSignature());
+                this.headerWritten = true;
             } else {
-                // Is it a fresh new keystore ?
-                currentKey = secureStorage.readInitialKey();
-                if (currentKey == null) {
-                    throw new IllegalStateException("Expecting to find an initial key into the keystore.");
-                }
-                logger.debug("Starting the writer with the key " + Base64.encode(currentKey.getEncoded()));
-
-                // As we start to work, store the current key too
-                secureStorage.writeCurrentKey(currentKey);
+                initHmacCalculatorWithRandomData();
             }
-            this.hmacCalculator = new HmacCalculator(currentKey, CsvSecureConstants.HMAC_ALGORITHM);
-        } catch (SecureStorageException e) {
+
+            this.signatureInterval = securityConfiguration.getSignatureIntervalDuration();
+            this.scheduler = Executors.newScheduledThreadPool(1);
+            this.signatureTask = new Runnable() {
+                @Override
+                public void run() {
+                    logger.info("Writing a signature.");
+
+                    try {
+                        writeSignature();
+                    } catch (Exception ex) {
+                        logger.error("An error occured while writing the signature", ex);
+                    }
+                }
+            };
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
 
-        if (rotatableWriter != null) {
-            rotatableWriter.registerRotationHooks(new SecureCsvWriterRotationHooks());
-        }
+    private void initHmacCalculatorWithRandomData() throws SecureStorageException {
+        this.hmacCalculator.setCurrentKey(getRandomBytes());
+        logger.debug("Starting the writer with the key " + Base64.encode(hmacCalculator.getCurrentKey().getEncoded()));
+        // As we start to work, store the key as the initial one and the current one too
+        secureStorage.writeInitialKey(hmacCalculator.getCurrentKey());
+        secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
+    }
 
-        scheduler = Executors.newScheduledThreadPool(1);
-
-        signatureTask = new Runnable() {
-            @Override
-            public void run() {
-                logger.info("Writing a signature.");
-
-                try {
-                    writeSignature();
-                } catch (Exception ex) {
-                    logger.error("An error occurred while writing the signature", ex);
-                }
-            }
-        };
-
-        if (fileAlreadyInitialized) {
-            setLastHMAC(verifier.getLastHMAC());
-            setLastSignature(verifier.getLastSignature());
-        } else {
-            writeHeader(headers);
-            csvWriter.flush();
-        }
+    private byte[] getRandomBytes() {
+        byte[] randomBytes = new byte[32];
+        this.random.nextBytes(randomBytes);
+        return randomBytes;
     }
 
     private Writer constructWriter(File csvFile, boolean append, CsvAuditEventHandlerConfiguration config)
@@ -182,6 +187,7 @@ class SecureCsvWriter implements CsvWriter {
         TextWriter textWriter;
         if (config.getFileRotation().isRotationEnabled()) {
             rotatableWriter = new RotatableWriter(csvFile, config, append);
+            rotatableWriter.registerRotationHooks(new SecureCsvWriterRotationHooks());
             textWriter = rotatableWriter;
         } else {
             textWriter = new TextWriter.Stream(new FileOutputStream(csvFile, append));
@@ -233,6 +239,7 @@ class SecureCsvWriter implements CsvWriter {
     public void writeHeader(Writer writer, String... header) throws IOException {
         String[] newHeader = addExtraColumns(header);
         writer.write(csvFormatter.formatHeader(newHeader));
+        headerWritten = true;
     }
 
     @VisibleForTesting
@@ -243,7 +250,7 @@ class SecureCsvWriter implements CsvWriter {
         try {
             lastSignature = secureStorage.sign(dataToSign(lastSignature, lastHMAC));
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
-            logger.info("Writing signature :" + lastSignature);
+            logger.info("Writing signature :" + Base64.encode(lastSignature));
             writeEvent(values);
 
             // Store the current signature into the Keystore
@@ -287,7 +294,9 @@ class SecureCsvWriter implements CsvWriter {
     public void writeEvent(Writer writer, Map<String, String> values) throws IOException {
         signatureLock.lock();
         try {
-            logger.info("Writing data : " + values + " for " + Arrays.toString(headers));
+            if (!headerWritten) {
+                writeHeader(headers);
+            }
             String[] extendedHeaders = addExtraColumns(headers);
 
             Map<String, String> extendedValues = new HashMap<>(values);
@@ -369,6 +378,21 @@ class SecureCsvWriter implements CsvWriter {
 
         @Override
         public void postRotationAction(RotationContext context) throws IOException {
+            // Rename the keystore and create a new one.
+            String currentName = keyStoreFile.getName();
+            String nextName = currentName.replaceFirst(((File) context.getAttribute("initialName")).getName(), ((File) context.getAttribute("nextName")).getName());
+            boolean renamed = keyStoreFile.renameTo(new File(keyStoreFile.getParent(), nextName));
+            if (!renamed) {
+                // What to do ?
+            }
+            try {
+                secureStorage.setKeyStoreHandler(new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(), keyStorePassword));
+                initHmacCalculatorWithRandomData();
+            } catch (Exception ex) {
+                throw new IOException(ex);
+            }
+
+
             Writer writer = (Writer) context.getAttribute("writer");
             // ensure the signature chaining along the files
             writeHeader(writer, headers);

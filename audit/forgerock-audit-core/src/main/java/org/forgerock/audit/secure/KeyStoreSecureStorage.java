@@ -16,19 +16,14 @@
 package org.forgerock.audit.secure;
 
 import java.security.InvalidKeyException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
-import java.security.UnrecoverableEntryException;
-import java.security.cert.Certificate;
 
 import javax.crypto.SecretKey;
 
-import org.forgerock.util.annotations.VisibleForTesting;
 
 /**
  * Implementation of a secure storage using a keystore.
@@ -51,57 +46,68 @@ public class KeyStoreSecureStorage implements SecureStorage {
     public static final String HMAC_ALGORITHM = "HmacSHA256";
     public static final String JCEKS_KEYSTORE_TYPE = "JCEKS";
 
-    private final KeyStoreHandler keyStoreHandler;
-    private final Signature verifier;
-    private final Signature signer;
-    private final boolean verifyOnly;
+    private KeyStoreHandlerDecorator keyStoreHandler;
+    private Signature verifier;
+    private Signature signer;
 
     /**
-     * Creates the storage with a keystore handler.
-     *
-     * @param keyStoreHandler
-     *          Handler of a keystore.
-     */
-    public KeyStoreSecureStorage(KeyStoreHandler keyStoreHandler) {
-        this(keyStoreHandler, false);
-    }
-
-    /**
-     * Creates the storage with a keystore handler and an option to verify only.
+     * Creates the storage with a keystore handler, initialized to verify only.
      *
      * @param keyStoreHandler
      *            Handler of a keystore.
-     * @param verifyOnly
-     *            Indicates if storage should be used for verify operation only. In that case, no signer will be
-     *            initialised with the signature private key.
+     * @param privateKey
+     *            The private key used to initialize the signer
      */
-    public KeyStoreSecureStorage(KeyStoreHandler keyStoreHandler, boolean verifyOnly) {
-        this.keyStoreHandler = keyStoreHandler;
-        this.verifyOnly = verifyOnly;
+    public KeyStoreSecureStorage(KeyStoreHandler keyStoreHandler, PrivateKey privateKey) {
+        this(keyStoreHandler, null, privateKey);
+    }
 
-        if (verifyOnly) {
-            signer = null;
-        }
-        else {
+    /**
+     * Creates the storage with a keystore handler, initialized to verify only.
+     *
+     * @param keyStoreHandler
+     *            Handler of a keystore.
+     * @param publicKey
+     *            The public key used to initialize the verifier
+     */
+    public KeyStoreSecureStorage(KeyStoreHandler keyStoreHandler, PublicKey publicKey) {
+        this(keyStoreHandler, publicKey, null);
+    }
+
+    /**
+     * Creates the storage with a keystore handler, initialized to verify only.
+     *
+     * @param keyStoreHandler
+     *            Handler of a keystore.
+     * @param publicKey
+     *            The public key used to initialize the verifier
+     * @param privateKey
+     *            The private key used to initialize the signer
+     */
+    public KeyStoreSecureStorage(KeyStoreHandler keyStoreHandler, PublicKey publicKey, PrivateKey privateKey) {
+        setKeyStoreHandler(keyStoreHandler);
+
+        if (privateKey != null) {
             try {
                 signer = Signature.getInstance(KeyStoreSecureStorage.SIGNATURE_ALGORITHM);
-                signer.initSign(readSignaturePrivateKey());
-            } catch (SecureStorageException | InvalidKeyException | NoSuchAlgorithmException e) {
+                signer.initSign(privateKey);
+            } catch (InvalidKeyException | NoSuchAlgorithmException e) {
                 throw new IllegalArgumentException(e);
             }
         }
 
-        try {
-            verifier = Signature.getInstance(KeyStoreSecureStorage.SIGNATURE_ALGORITHM);
-            PublicKey publicKey = readSignaturePublicKey();
-            if (publicKey == null) {
-                throw new IllegalStateException("Expected to find a public key within the entry named "
-                        + KeyStoreSecureStorage.ENTRY_SIGNATURE + " in the secure storage");
+        if (publicKey != null) {
+            try {
+                verifier = Signature.getInstance(KeyStoreSecureStorage.SIGNATURE_ALGORITHM);
+                verifier.initVerify(publicKey);
+            } catch (InvalidKeyException | NoSuchAlgorithmException e) {
+                throw new IllegalArgumentException(e);
             }
-            verifier.initVerify(publicKey);
-        } catch (InvalidKeyException | NoSuchAlgorithmException | SecureStorageException e) {
-            throw new IllegalArgumentException(e);
         }
+    }
+
+    public void setKeyStoreHandler(KeyStoreHandler keyStoreHandler) {
+        this.keyStoreHandler = new KeyStoreHandlerDecorator(keyStoreHandler);
     }
 
     @Override
@@ -110,40 +116,47 @@ public class KeyStoreSecureStorage implements SecureStorage {
     }
 
     @Override
-    public PublicKey readSignaturePublicKey() throws SecureStorageException {
-        return readPublicKeyFromKeyStore(keyStoreHandler, KeyStoreSecureStorage.ENTRY_SIGNATURE);
-    }
-
-    @Override
-    public PrivateKey readSignaturePrivateKey() throws SecureStorageException {
-        return readPrivateKeyFromKeyStore(keyStoreHandler, KeyStoreSecureStorage.ENTRY_SIGNATURE, getPassword());
-    }
-
-    @Override
     public SecretKey readCurrentKey() throws SecureStorageException {
-        return readSecretKeyFromKeyStore(keyStoreHandler, KeyStoreSecureStorage.ENTRY_CURRENT_KEY, getPassword());
+        return keyStoreHandler.readSecretKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_CURRENT_KEY);
     }
 
     @Override
     public SecretKey readInitialKey() throws SecureStorageException {
-        return readSecretKeyFromKeyStore(keyStoreHandler, KeyStoreSecureStorage.ENTRY_INITIAL_KEY, getPassword());
+        return keyStoreHandler.readSecretKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_INITIAL_KEY);
     }
 
     @Override
     public void writeCurrentSignatureKey(SecretKey key) throws SecureStorageException {
-        writeToKeyStore(keyStoreHandler, key, KeyStoreSecureStorage.ENTRY_CURRENT_SIGNATURE, keyStoreHandler.getPassword());
+        keyStoreHandler.writeToKeyStore(key, KeyStoreSecureStorage.ENTRY_CURRENT_SIGNATURE, keyStoreHandler.getPassword());
+        try {
+            keyStoreHandler.store();
+        } catch (Exception ex) {
+            throw new SecureStorageException(ex);
+        }
     }
 
     @Override
     public void writeCurrentKey(SecretKey key) throws SecureStorageException {
-        writeToKeyStore(keyStoreHandler, key, KeyStoreSecureStorage.ENTRY_CURRENT_KEY, keyStoreHandler.getPassword());
+        writeKey(key, KeyStoreSecureStorage.ENTRY_CURRENT_KEY);
+    }
+
+
+    @Override
+    public void writeInitialKey(SecretKey key) throws SecureStorageException {
+        writeKey(key, KeyStoreSecureStorage.ENTRY_INITIAL_KEY);
+    }
+
+    private void writeKey(SecretKey key, String alias) throws SecureStorageException {
+        keyStoreHandler.writeToKeyStore(key, alias, keyStoreHandler.getPassword());
+        try {
+            keyStoreHandler.store();
+        } catch (Exception ex) {
+            throw new SecureStorageException(ex);
+        }
     }
 
     @Override
     public byte[] sign(byte[] signedData) throws SecureStorageException {
-        if (verifyOnly) {
-            throw new SecureStorageException("Signing is not enabled, verify mode only");
-        }
         try {
             signer.update(signedData);
             return signer.sign();
@@ -158,73 +171,6 @@ public class KeyStoreSecureStorage implements SecureStorage {
             verifier.update(signedData);
             return verifier.verify(signature);
         } catch (SignatureException e) {
-            throw new SecureStorageException(e);
-        }
-    }
-
-    /**
-     * Writes to the secret storage.
-     *
-     * @param keyStoreHandler
-     *            The key store containing the key.
-     * @param secretKey
-     *            The data to be written to the secret storage
-     * @param alias
-     *            The kind of cryptoMaterial, whether it is a signature or a key
-     * @param password
-     *            The password to read the key
-     * @throws SecureStorageException
-     *             if it fails to write secret data from secret store
-     */
-     @VisibleForTesting
-     public void writeToKeyStore(KeyStoreHandler keyStoreHandler, SecretKey secretKey, String alias, String password)
-            throws SecureStorageException {
-        // Note that it need JCEKS to support secret keys.
-        try {
-            KeyStore store = keyStoreHandler.getStore();
-            if (store.containsAlias(alias)) {
-                store.deleteEntry(alias);
-            }
-            KeyStore.SecretKeyEntry secKeyEntry = new KeyStore.SecretKeyEntry(secretKey);
-            KeyStore.ProtectionParameter params = new KeyStore.PasswordProtection(password.toCharArray());
-            store.setEntry(alias, secKeyEntry, params);
-        } catch (KeyStoreException ex) {
-            throw new SecureStorageException(ex);
-        }
-    }
-
-    private PublicKey readPublicKeyFromKeyStore(KeyStoreHandler keyStoreHandler, String alias)
-            throws SecureStorageException {
-        try {
-            KeyStore store = keyStoreHandler.getStore();
-            Certificate certificate = store.getCertificate(alias);
-            return certificate.getPublicKey();
-        } catch (KeyStoreException ex) {
-            throw new SecureStorageException("Error when reading public key: " + alias, ex);
-        }
-    }
-
-    private PrivateKey readPrivateKeyFromKeyStore(KeyStoreHandler keyStoreHandler, String alias, String password)
-            throws SecureStorageException {
-        try {
-            KeyStore store = keyStoreHandler.getStore();
-            KeyStore.ProtectionParameter params = password != null ?
-                    new KeyStore.PasswordProtection(password.toCharArray()) : null;
-            KeyStore.PrivateKeyEntry keyentry = (KeyStore.PrivateKeyEntry) store.getEntry(alias, params);
-            return keyentry != null ? keyentry.getPrivateKey() : null;
-        } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException ex) {
-            throw new SecureStorageException(ex);
-        }
-    }
-
-    private SecretKey readSecretKeyFromKeyStore(KeyStoreHandler keyStoreHandler, String alias, String password)
-            throws SecureStorageException {
-        try {
-            KeyStore store = keyStoreHandler.getStore();
-            KeyStore.ProtectionParameter params = new KeyStore.PasswordProtection(password.toCharArray());
-            KeyStore.SecretKeyEntry keyentry = (KeyStore.SecretKeyEntry) store.getEntry(alias, params);
-            return keyentry != null ? keyentry.getSecretKey() : null;
-        } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException e) {
             throw new SecureStorageException(e);
         }
     }

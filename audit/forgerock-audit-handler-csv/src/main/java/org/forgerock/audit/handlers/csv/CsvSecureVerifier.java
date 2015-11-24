@@ -59,13 +59,14 @@ class CsvSecureVerifier {
         this.secureStorage = secureStorage;
 
         try {
-            SecretKey currentKey = secureStorage.readInitialKey();
-            if (currentKey == null) {
+            SecretKey initialKey = secureStorage.readInitialKey();
+            if (initialKey == null) {
                 throw new IllegalStateException("Expecting to find an initial key into the keystore.");
             }
-            logger.info("Starting the verifier with the key " + Base64.encode(currentKey.getEncoded()));
+            logger.info("Starting the verifier with the key " + Base64.encode(initialKey.getEncoded()));
 
-            this.hmacCalculator = new HmacCalculator(currentKey, HMAC_ALGORITHM);
+            this.hmacCalculator = new HmacCalculator(HMAC_ALGORITHM);
+            this.hmacCalculator.setCurrentKey(initialKey.getEncoded());
         } catch (SecureStorageException e) {
             throw new IllegalStateException(e);
         }
@@ -98,7 +99,10 @@ class CsvSecureVerifier {
             final String encodedSign = values.get(HEADER_SIGNATURE);
             // The field HEADER_SIGNATURE is filled so let's check that special row
             if (encodedSign != null) {
-                if (!verifySignature(encodedSign)) {
+                if (csvReader.getRowNumber() == 2) {
+                    // Special case : this is a rotated file, do not verify the signature but store it.
+                    lastSignature = Base64.decode(encodedSign);
+                } else if (!verifySignature(encodedSign)) {
                     logger.info("The signature at row " + csvReader.getRowNumber() + " is not correct.");
                     return false;
                 } else {

@@ -15,33 +15,12 @@
  */
 package org.forgerock.audit.secure;
 
-import java.security.PrivateKey;
-import java.security.PublicKey;
-
 import javax.crypto.SecretKey;
 
 /**
  * Represents a storage for secure keys, to be used for signing files.
  */
 public interface SecureStorage {
-
-    /**
-     * Reads the signature public key.
-     *
-     * @return the public key for the signature
-     * @throws SecureStorageException
-     *          If an errors occurs.
-     */
-    PublicKey readSignaturePublicKey() throws SecureStorageException;
-
-    /**
-     * Reads the signature private key.
-     *
-     * @return the private key for the signature
-     * @throws SecureStorageException
-     *          If an errors occurs.
-     */
-    PrivateKey readSignaturePrivateKey() throws SecureStorageException;
 
     /**
      * Writes the current signature key.
@@ -79,6 +58,15 @@ public interface SecureStorage {
      *          If an errors occurs.
      */
     SecretKey readInitialKey() throws SecureStorageException;
+
+    /**
+     * Writes the initial key.
+     *
+     * @param key the initial key
+     * @throws SecureStorageException
+     *          If an errors occurs.
+     */
+    void writeInitialKey(SecretKey key) throws SecureStorageException;
 
     /**
      * Signs the provided data.

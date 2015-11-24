@@ -15,15 +15,38 @@
  */
 package org.forgerock.audit;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Base DependencyProvider that has provides no dependencies.
  */
 public class DependencyProviderBase implements DependencyProvider {
+
+    private final Map<Class<?>, Object> dependencies = new HashMap<>();
+
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("unchecked")
     @Override
     public <T> T getDependency(Class<T> clazz) throws ClassNotFoundException {
-        throw new ClassNotFoundException("No instance registered for class: " + clazz.getName());
+        T dependency = (T) dependencies.get(clazz);
+        if (dependency == null) {
+            throw new ClassNotFoundException("No instance registered for class: " + clazz.getName());
+        } else {
+            return dependency;
+        }
+    }
+
+    /**
+     * Register a new provided dependency.
+     * @param <T>
+     * @param clazz the class to register
+     * @param obj the instance to provide
+     * @return the previous values registered for {@literal clazz}
+     */
+    public <T> T register(Class<T> clazz, T obj) {
+        return (T) dependencies.put(clazz, obj);
     }
 }

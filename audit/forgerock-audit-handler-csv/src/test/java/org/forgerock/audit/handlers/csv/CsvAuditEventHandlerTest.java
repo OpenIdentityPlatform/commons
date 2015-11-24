@@ -16,17 +16,16 @@
 
 package org.forgerock.audit.handlers.csv;
 
-import static org.forgerock.audit.AuditServiceProxy.ACTION_PARAM_TARGET_HANDLER;
-import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.ROTATE_FILE_ACTION_NAME;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
+import static org.forgerock.audit.AuditServiceProxy.ACTION_PARAM_TARGET_HANDLER;
+import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.ROTATE_FILE_ACTION_NAME;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -34,25 +33,19 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
-import org.forgerock.audit.DependencyProvider;
+import org.forgerock.audit.DependencyProviderBase;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration.FileRotation;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.json.AuditJsonConfig;
-import org.forgerock.audit.providers.DefaultSecureStorageProvider;
-import org.forgerock.audit.providers.SecureStorageProvider;
+import org.forgerock.audit.providers.DefaultKeyStoreHandlerProvider;
+import org.forgerock.audit.providers.KeyStoreHandlerProvider;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
-import org.forgerock.audit.secure.KeyStoreSecureStorage;
-import org.forgerock.audit.secure.SecureStorage;
+import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
@@ -66,12 +59,13 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
-import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("javadoc")
 public class CsvAuditEventHandlerTest {
@@ -85,28 +79,17 @@ public class CsvAuditEventHandlerTest {
     public void canConfigureCsvHandlerFromJsonAndRegisterWithAuditService() throws Exception {
         // given
         final AuditServiceBuilder auditServiceBuilder = newAuditService();
-        DependencyProvider dependencyProvider = new DependencyProvider() {
 
-            @Override
-            public <T> T getDependency(Class<T> clazz) throws ClassNotFoundException {
-                if (clazz.getName().equals(SecureStorageProvider.class.getName())) {
-                    try {
-                        final DefaultSecureStorageProvider provider = new DefaultSecureStorageProvider();
-                        KeyStoreHandler keyStoreHandler =
-                                new JcaKeyStoreHandler("JCEKS", KEYSTORE_FILENAME, "password");
-                        SecureStorage storage = new KeyStoreSecureStorage(keyStoreHandler);
-                        provider.registerSecureStorage("csvSecureKeystore", storage);
-                        return (T) provider;
-                    } catch (Exception ex) {
-                        throw new ClassNotFoundException();
-                    }
-                }
-                throw new RuntimeException(clazz + " not found");
-            }
+        final DefaultKeyStoreHandlerProvider provider = new DefaultKeyStoreHandlerProvider();
+        KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, "password");
+        KeyStoreHandlerDecorator deco = new KeyStoreHandlerDecorator(keyStoreHandler);
+        provider.registerKeyStoreHandler("csvSecure", keyStoreHandler);
+        DependencyProviderBase dependencyProvider = new DependencyProviderBase();
+        dependencyProvider.register(KeyStoreHandlerProvider.class, provider);
 
-        };
         auditServiceBuilder.withDependencyProvider(dependencyProvider);
         final JsonValue config = AuditJsonConfig.getJson(getResource("/event-handler-config.json"));
+        config.get("/config/logDirectory").setObject(System.getProperty("java.io.tmpdir"));
 
         // when
         AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
@@ -348,7 +331,7 @@ public class CsvAuditEventHandlerTest {
             csvHandler.shutdown();
         }
 
-        assertThat(logDirectory.resolve("access.csv").toFile()).as("when " + label)
+        assertThat(logDirectory.resolve("access.csv").toFile()).as("when " + label + " in " + logDirectory.toString())
             .hasContent("\"_id\",\"timestamp\",\"transactionId\"\n");
     }
 
@@ -419,14 +402,14 @@ public class CsvAuditEventHandlerTest {
     private static class CsvAuditEventHandlerBuilder {
         final CsvAuditEventHandlerConfiguration config;
         final EventTopicsMetaData eventTopicsMetaData;
-        SecureStorageProvider storageProvider;
+        KeyStoreHandlerProvider keystoreHandlerProvider;
 
         private CsvAuditEventHandlerBuilder() throws Exception {
             this.eventTopicsMetaData = getEventTopicsMetaData();
             this.config = new CsvAuditEventHandlerConfiguration();
             config.setName("csv");
             config.setTopics(eventTopicsMetaData.getTopics());
-            storageProvider = new DefaultSecureStorageProvider();
+            keystoreHandlerProvider = new DefaultKeyStoreHandlerProvider();
         }
 
         private CsvAuditEventHandlerBuilder loggingTo(Path directory) {
@@ -437,24 +420,10 @@ public class CsvAuditEventHandlerTest {
         private CsvAuditEventHandlerBuilder withSecureLoggingEnabled() throws Exception {
             CsvAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CsvAuditEventHandlerConfiguration.CsvSecurity();
             csvSecurity.setEnabled(true);
-            csvSecurity.setSecureStorageName("csvSecure");
+            csvSecurity.setKeyStoreHandlerName("csvSecure");
             config.setSecurity(csvSecurity);
-            storageProvider = setupSecureStorageProvider();
+            keystoreHandlerProvider = setupKeyStoreHandlerProvider();
             return this;
-        }
-
-        private SecureStorageProvider setupSecureStorageProvider() throws Exception {
-            final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath();
-            DefaultSecureStorageProvider provider = new DefaultSecureStorageProvider();
-            final KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler("JCEKS", keystorePath, "forgerock");
-            KeyStoreSecureStorage storage = new KeyStoreSecureStorage(keyStoreHandler);
-            provider.registerSecureStorage("csvSecure", storage);
-
-            // Force the initial key so we'll have reproducible builds.
-            SecretKey secretKey = new SecretKeySpec(Base64.decode("zmq4EoprX52XLGyLkMENcin0gv0jwYyrySi3YOqfhFY="), "RAW");
-            storage.writeToKeyStore(keyStoreHandler, secretKey, "InitialKey", keyStoreHandler.getPassword());
-
-            return provider;
         }
 
         private EventTopicsMetaData getEventTopicsMetaData() throws Exception {
@@ -491,13 +460,22 @@ public class CsvAuditEventHandlerTest {
         }
 
         private CsvAuditEventHandler build() throws ResourceException {
-            CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData, storageProvider);
+            CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData, keystoreHandlerProvider);
             handler.startup();
             return handler;
         }
 
-    }
+        private KeyStoreHandlerProvider setupKeyStoreHandlerProvider() throws Exception {
+            final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath();
+            DefaultKeyStoreHandlerProvider provider = new DefaultKeyStoreHandlerProvider();
+            final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
+                    new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keystorePath, "forgerock"));
+            provider.registerKeyStoreHandler("csvSecure", keyStoreHandler);
 
+            return provider;
+        }
+
+    }
     private static CsvAuditEventHandlerBuilder csvAuditEventHandler() throws Exception {
         return new CsvAuditEventHandlerBuilder();
     }

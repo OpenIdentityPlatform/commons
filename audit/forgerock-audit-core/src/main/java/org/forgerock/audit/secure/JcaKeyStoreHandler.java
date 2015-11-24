@@ -26,6 +26,7 @@ package org.forgerock.audit.secure;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -66,9 +67,15 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
     }
 
     private void init() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
-        try (InputStream in = new BufferedInputStream(new FileInputStream(location))) {
-            store = KeyStore.getInstance(type);
-            store.load(in, password.toCharArray());
+        File ksFile = new File(location);
+        store = KeyStore.getInstance(type);
+        if (ksFile.exists()) {
+            try (InputStream in = new BufferedInputStream(new FileInputStream(location))) {
+                store.load(in, password.toCharArray());
+            }
+        } else {
+            // Create an empty one
+            store.load(null, password.toCharArray());
         }
     }
 
