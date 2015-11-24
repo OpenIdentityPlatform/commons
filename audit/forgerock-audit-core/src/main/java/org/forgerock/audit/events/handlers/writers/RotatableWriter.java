@@ -45,6 +45,7 @@ import org.forgerock.audit.retention.SizeBasedRetentionPolicy;
 import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.rotation.FixedTimeRotationPolicy;
 import org.forgerock.audit.rotation.RotatableObject;
+import org.forgerock.audit.rotation.RotationContext;
 import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.rotation.RotationPolicy;
 import org.forgerock.audit.rotation.SizeBasedRotationPolicy;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
  */
 public class RotatableWriter implements TextWriter, RotatableObject {
 
-    private static Logger logger = LoggerFactory.getLogger(RotatableWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(RotatableWriter.class);
 
     private final List<RotationPolicy> rotationPolicies = new LinkedList<>();
     private final List<RetentionPolicy> retentionPolicies = new LinkedList<>();
@@ -108,7 +109,6 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      */
     @Override
     public void rotateIfNeeded() throws IOException {
-        boolean rotationHappened = false;
         if (!rotationEnabled || isRotating.get()) {
             return;
         }
@@ -118,8 +118,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                 if (rotationPolicy.shouldRotateFile(this)) {
                     logger.info("Must rotate:" + file);
                     isRotating.set(true);
-                    rotationHappened = rotate();
-                    if (rotationHappened) {
+                    if (rotate()) {
                         logger.info("Finished rotation for:" + file);
                         break;
                     }
@@ -137,17 +136,23 @@ public class RotatableWriter implements TextWriter, RotatableObject {
 
     private boolean rotate() throws IOException {
         boolean rotationHappened = false;
+        RotationContext context = new RotationContext();
+        context.putAttribute("writer", writer);
         File currentFile = fileNamingPolicy.getInitialName();
+        context.putAttribute("initialName", currentFile);
         if (currentFile.exists()) {
             File newFile = fileNamingPolicy.getNextName();
-            rotationHooks.preRotationAction(writer);
+            context.putAttribute("nextName", newFile);
+            rotationHooks.preRotationAction(context);
             writer.close();
+            logger.debug("Renaming {} to {}", currentFile.getAbsolutePath(), newFile.getAbsolutePath());
             if (currentFile.renameTo(newFile)) {
                 rotationHappened = true;
                 if (!currentFile.exists()) {
                     currentFile.createNewFile();
                     writer = constructWriter(currentFile, true);
-                    rotationHooks.postRotationAction(writer);
+                    context.putAttribute("writer", writer);
+                    rotationHooks.postRotationAction(context);
                 }
             } else {
                 logger.error("Unable to rename the audit file {}", currentFile.toString());

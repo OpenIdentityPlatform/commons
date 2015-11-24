@@ -45,6 +45,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.forgerock.audit.events.handlers.writers.RotatableWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriterAdapter;
+import org.forgerock.audit.rotation.RotationContext;
 import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.audit.secure.SecureStorageException;
@@ -361,17 +362,18 @@ class SecureCsvWriter implements CsvWriter {
     private class SecureCsvWriterRotationHooks implements RotationHooks {
 
         @Override
-        public void postRotationAction(Writer writer) throws IOException {
-            // ensure the first signature is written
-            writeHeader(writer, headers);
-            writeLastSignature(writer);
-            writer.flush();
+        public void preRotationAction(RotationContext context) throws IOException {
+            // ensure the final signature is written
+            forceWriteSignature();
         }
 
         @Override
-        public void preRotationAction(Writer writer) throws IOException {
-            // ensure the final signature is written
-            forceWriteSignature();
+        public void postRotationAction(RotationContext context) throws IOException {
+            Writer writer = (Writer) context.getAttribute("writer");
+            // ensure the signature chaining along the files
+            writeHeader(writer, headers);
+            writeLastSignature(writer);
+            writer.flush();
         }
     }
 }

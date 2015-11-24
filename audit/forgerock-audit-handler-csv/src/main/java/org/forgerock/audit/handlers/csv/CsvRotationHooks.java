@@ -18,6 +18,7 @@ package org.forgerock.audit.handlers.csv;
 import java.io.IOException;
 import java.io.Writer;
 
+import org.forgerock.audit.rotation.RotationContext;
 import org.forgerock.audit.rotation.RotationHooks;
 
 /**
@@ -34,13 +35,14 @@ class CsvRotationHooks implements RotationHooks {
     }
 
     @Override
-    public void postRotationAction(Writer writer) throws IOException {
+    public void postRotationAction(RotationContext context) throws IOException {
+        Writer writer = (Writer) context.getAttribute("writer");
         String headerRow = formatter.formatHeader(headers);
         writer.write(headerRow);
     }
 
     @Override
-    public void preRotationAction(Writer writer) throws IOException {
+    public void preRotationAction(RotationContext context) throws IOException {
         // do nothing
     }
 }
