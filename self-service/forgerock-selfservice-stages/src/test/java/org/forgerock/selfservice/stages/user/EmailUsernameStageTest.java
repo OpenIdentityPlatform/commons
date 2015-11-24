@@ -19,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
-import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -89,8 +89,8 @@ public final class EmailUsernameStageTest {
             expectedExceptionsMessageRegExp = "Retrieve username stage expects email Id in the context")
     public void testGatherInitialRequirementsNoEmailInContext() throws Exception {
         // Given
-        given(context.containsState(USER_ID_FIELD)).willReturn(true);
-        given(context.getState(USER_ID_FIELD)).willReturn(newJsonValueWithUserId());
+        given(context.containsState(USERNAME_FIELD)).willReturn(true);
+        given(context.getState(USERNAME_FIELD)).willReturn(newJsonValueWithUserId());
 
         // When
         emailUsernameStage.gatherInitialRequirements(context, config);
@@ -102,8 +102,8 @@ public final class EmailUsernameStageTest {
         given(context.containsState(EMAIL_FIELD)).willReturn(true);
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
 
-        given(context.containsState(USER_ID_FIELD)).willReturn(true);
-        given(context.getState(USER_ID_FIELD)).willReturn(newJsonValueWithUserId());
+        given(context.containsState(USERNAME_FIELD)).willReturn(true);
+        given(context.getState(USERNAME_FIELD)).willReturn(newJsonValueWithUserId());
 
         // When
         JsonValue jsonValue = emailUsernameStage.gatherInitialRequirements(context, config);
@@ -118,8 +118,8 @@ public final class EmailUsernameStageTest {
         given(context.containsState(EMAIL_FIELD)).willReturn(true);
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
 
-        given(context.containsState(USER_ID_FIELD)).willReturn(true);
-        given(context.getState(USER_ID_FIELD)).willReturn(newJsonValueWithUserId());
+        given(context.containsState(USERNAME_FIELD)).willReturn(true);
+        given(context.getState(USERNAME_FIELD)).willReturn(newJsonValueWithUserId());
 
         List<Locale> locales = new ArrayList<>();
         locales.add(Locale.ENGLISH);

@@ -17,7 +17,7 @@ package org.forgerock.selfservice.stages.user;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
-import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 import static org.forgerock.selfservice.stages.utils.LocaleUtils.getTranslationFromLocaleMap;
 
 import javax.inject.Inject;
@@ -63,7 +63,7 @@ public final class EmailUsernameStage implements ProgressStage<EmailUsernameConf
         Reject.ifNull(config.getSubjectTranslations(), "Email subject should be configured");
         Reject.ifNull(config.getUsernameToken(), "User name token should be configured");
 
-        Reject.ifFalse(context.containsState(USER_ID_FIELD),
+        Reject.ifFalse(context.containsState(USERNAME_FIELD),
                 "Retrieve username stage expects user Id in the context");
         Reject.ifFalse(context.containsState(EMAIL_FIELD),
                 "Retrieve username stage expects email Id in the context");
@@ -75,7 +75,7 @@ public final class EmailUsernameStage implements ProgressStage<EmailUsernameConf
     public StageResponse advance(ProcessContext context, final EmailUsernameConfig config)
             throws ResourceException {
         String email = context.getState(EMAIL_FIELD).asString();
-        String username = context.getState(USER_ID_FIELD).asString();
+        String username = context.getState(USERNAME_FIELD).asString();
 
         sendEmail(context, username, email, config);
 
