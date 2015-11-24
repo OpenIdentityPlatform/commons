@@ -33,13 +33,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Buffers the create events to a {@link JdbcAuditEventExecutor}.
@@ -216,6 +217,9 @@ class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
                         preparedStatement.setString(i, (String) parameter.getParameter());
                         break;
                     case NUMBER:
+                        preparedStatement.setFloat(i, (Float) parameter.getParameter());
+                        break;
+                    case INTEGER:
                         preparedStatement.setInt(i, (Integer) parameter.getParameter());
                         break;
                     case BOOLEAN:

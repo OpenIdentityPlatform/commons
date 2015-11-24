@@ -20,17 +20,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.sql.DataSource;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
     private static final Logger logger = LoggerFactory.getLogger(JdbcAuditEventExecutorImpl.class);
@@ -81,7 +83,7 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
         while (resultSet.next()) {
             final HashMap<String, Object> row = new HashMap<>(columns);
             for (int i = 1; i <= columns; ++i) {
-                row.put(md.getColumnName(i).toLowerCase(), resultSet.getString(i));
+                row.put(md.getColumnName(i).toLowerCase(), getResultSetObject(resultSet, md.getColumnType(i), i));
             }
             list.add(row);
         }
@@ -97,6 +99,9 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
                     preparedStatement.setString(i, (String) parameter.getParameter());
                     break;
                 case NUMBER:
+                    preparedStatement.setFloat(i, (Float) parameter.getParameter());
+                    break;
+                case INTEGER:
                     preparedStatement.setInt(i, (Integer) parameter.getParameter());
                     break;
                 case BOOLEAN:
@@ -111,6 +116,31 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
                     throw new AuditException("Unknown class type");
             }
             i++;
+        }
+    }
+
+    private Object getResultSetObject(final ResultSet resultSet, final int type, int column)
+            throws SQLException {
+        switch (type) {
+            case Types.INTEGER:
+            case Types.TINYINT:
+            case Types.SMALLINT:
+            case Types.BIGINT:
+                return resultSet.getInt(column);
+            case Types.FLOAT:
+                return resultSet.getFloat(column);
+            case Types.VARCHAR:
+            case Types.NCHAR:
+            case Types.NVARCHAR:
+            case Types.LONGNVARCHAR:
+            case Types.LONGVARCHAR:
+            case Types.CLOB:
+            case Types.NCLOB:
+                return resultSet.getString(column);
+            case Types.BOOLEAN:
+                return resultSet.getBoolean(column);
+            default:
+                return resultSet.getString(column);
         }
     }
 

@@ -4,6 +4,7 @@ CREATE  TABLE IF NOT EXISTS `audittest` (
   `transactionid` VARCHAR(56) NOT NULL ,
   `eventname` VARCHAR(255) ,
   `userid` VARCHAR(255) NULL ,
+  `custom_integer` INT NULL ,
   `custom_object` TEXT NULL ,
   `custom_array` TEXT NULL ,
   PRIMARY KEY (`objectid`) );

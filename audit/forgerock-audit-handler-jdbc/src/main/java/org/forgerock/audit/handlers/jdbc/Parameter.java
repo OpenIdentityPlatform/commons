@@ -19,6 +19,7 @@ class Parameter {
     public enum Type {
         STRING,
         NUMBER,
+        INTEGER,
         BOOLEAN,
         ARRAY,
         OBJECT

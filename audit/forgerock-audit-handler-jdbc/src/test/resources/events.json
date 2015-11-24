@@ -20,6 +20,9 @@
         "userId": {
           "type": "string"
         },
+        "customInteger": {
+          "type": "integer"
+        },
         "customObject": {
           "type": "object"
         },

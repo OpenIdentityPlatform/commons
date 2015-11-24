@@ -33,7 +33,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.AuditEvent;
@@ -61,6 +60,8 @@ import org.h2.tools.RunScript;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("javadoc")
 public class JdbcAuditEventHandlerTest {
@@ -90,6 +91,8 @@ public class JdbcAuditEventHandlerTest {
     public static final String CUSTOM_OBJECT_VALUE = "value";
     public static final String CUSTOM_ARRAY_FIELD = "customArray";
     public static final String CUSTOM_ARRAY_VALUE = "Item1";
+    public static final String CUSTOM_INTEGER_FIELD = "customInteger";
+    public static final int CUSTOM_INTEGER_VALUE = 1;
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -237,7 +240,8 @@ public class JdbcAuditEventHandlerTest {
                 .containsEntry(USER_ID_FIELD, USER_ID_VALUE)
                 .containsEntry(CUSTOM_OBJECT_FIELD,
                         Collections.singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
-                .containsEntry(CUSTOM_ARRAY_FIELD, Collections.singletonList(CUSTOM_ARRAY_VALUE));
+                .containsEntry(CUSTOM_ARRAY_FIELD, Collections.singletonList(CUSTOM_ARRAY_VALUE))
+                .containsEntry(CUSTOM_INTEGER_FIELD, CUSTOM_INTEGER_VALUE);
     }
 
     @Test
@@ -333,7 +337,8 @@ public class JdbcAuditEventHandlerTest {
                 .containsEntry(USER_ID_FIELD, USER_ID_VALUE)
                 .containsEntry(CUSTOM_OBJECT_FIELD,
                         Collections.singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
-                .containsEntry(CUSTOM_ARRAY_FIELD, Collections.singletonList(CUSTOM_ARRAY_VALUE));
+                .containsEntry(CUSTOM_ARRAY_FIELD, Collections.singletonList(CUSTOM_ARRAY_VALUE))
+                .containsEntry(CUSTOM_INTEGER_FIELD, CUSTOM_INTEGER_VALUE);
     }
 
     @Test
@@ -448,12 +453,14 @@ public class JdbcAuditEventHandlerTest {
 
     private JsonValue makeEvent() {
         final AuditEvent testAuditEvent = TestAuditEventBuilder.testAuditEventBuilder()
-              .eventName(EVENT_NAME_VALUE)
-              .userId(USER_ID_VALUE)
-              .timestamp(System.currentTimeMillis())
-              .transactionId(TRANSACTION_ID_VALUE)
-              .customObject(Collections.<String, Object>singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
-              .customArray(Collections.singletonList(CUSTOM_ARRAY_VALUE)).toEvent();
+                .eventName(EVENT_NAME_VALUE)
+                .userId(USER_ID_VALUE)
+                .timestamp(System.currentTimeMillis())
+                .transactionId(TRANSACTION_ID_VALUE)
+                .customObject(Collections.<String, Object>singletonMap(CUSTOM_OBJECT_KEY_FIELD, CUSTOM_OBJECT_VALUE))
+                .customArray(Collections.singletonList(CUSTOM_ARRAY_VALUE))
+                .customInteger(CUSTOM_INTEGER_VALUE)
+                .toEvent();
         testAuditEvent.getValue().put(ID_FIELD, ID_VALUE);
         return testAuditEvent.getValue();
     }
@@ -484,6 +491,11 @@ public class JdbcAuditEventHandlerTest {
 
         public T customArray(List<String> object) {
             jsonValue.put(CUSTOM_ARRAY_FIELD, object);
+            return self();
+        }
+
+        public T customInteger(final int integer) {
+            jsonValue.put(CUSTOM_INTEGER_FIELD, integer);
             return self();
         }
     }

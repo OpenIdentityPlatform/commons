@@ -25,6 +25,7 @@
         "timestamp" : "activitydate",
         "transactionId" : "transactionid",
         "userId" : "userid",
+        "customInteger" : "custom_integer",
         "customObject" : "custom_object",
         "customArray" : "custom_array"
       }
