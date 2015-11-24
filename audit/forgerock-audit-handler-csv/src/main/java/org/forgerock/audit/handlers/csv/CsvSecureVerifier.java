@@ -63,7 +63,6 @@ class CsvSecureVerifier {
             if (initialKey == null) {
                 throw new IllegalStateException("Expecting to find an initial key into the keystore.");
             }
-            logger.info("Starting the verifier with the key " + Base64.encode(initialKey.getEncoded()));
 
             this.hmacCalculator = new HmacCalculator(HMAC_ALGORITHM);
             this.hmacCalculator.setCurrentKey(initialKey.getEncoded());
@@ -84,7 +83,7 @@ class CsvSecureVerifier {
         }
 
         if (!(HEADER_HMAC.equals(header[header.length - 2]) && HEADER_SIGNATURE.equals(header[header.length - 1]))) {
-            logger.info("Found only " + checkCount + " checked headers from : " + Arrays.toString(header));
+            logger.debug("Found only {} checked headers from : {}", checkCount, Arrays.toString(header));
             return false;
         }
         this.headers = new String[header.length - 2];
@@ -94,7 +93,7 @@ class CsvSecureVerifier {
         boolean lastRowWasSigned = false;
         Map<String, String> values;
         while ((values = csvReader.read(header)) != null) {
-            logger.info("Verifying row " + csvReader.getRowNumber());
+            logger.trace("Verifying row {}", csvReader.getRowNumber());
             lastRowWasSigned = false;
             final String encodedSign = values.get(HEADER_SIGNATURE);
             // The field HEADER_SIGNATURE is filled so let's check that special row
@@ -103,10 +102,10 @@ class CsvSecureVerifier {
                     // Special case : this is a rotated file, do not verify the signature but store it.
                     lastSignature = Base64.decode(encodedSign);
                 } else if (!verifySignature(encodedSign)) {
-                    logger.info("The signature at row " + csvReader.getRowNumber() + " is not correct.");
+                    logger.trace("The signature at row {} is not correct.", csvReader.getRowNumber());
                     return false;
                 } else {
-                    logger.info("The signature at row " + csvReader.getRowNumber() + " is correct.");
+                    logger.trace("The signature at row {} is correct.", csvReader.getRowNumber());
                     lastRowWasSigned = true;
                     // The signature is OK : let's continue to the next row
                     continue;
@@ -114,10 +113,10 @@ class CsvSecureVerifier {
             } else {
                 // Otherwise every row must contain a valid HEADER_HMAC
                 if (!verifyHMAC(values, header)) {
-                    logger.info("The HMac at row " + csvReader.getRowNumber() + " is not correct.");
+                    logger.trace("The HMac at row {} is not correct.", csvReader.getRowNumber());
                     return false;
                 } else {
-                    logger.info("The HMac at row " + csvReader.getRowNumber() + " is correct.");
+                    logger.trace("The HMac at row {} is correct.", csvReader.getRowNumber());
                     // The HMAC is OK : let's continue to the next row
                     continue;
                 }
@@ -142,7 +141,7 @@ class CsvSecureVerifier {
             String actualHMAC = values.get(HEADER_HMAC);
             String expectedHMAC = hmacCalculator.calculate(dataToSign(logger, values, dropExtraHeaders(header)));
             if (!actualHMAC.equals(expectedHMAC)) {
-                logger.info("The HMAC is not valid. Expected : " + expectedHMAC + " Found : " + actualHMAC);
+                logger.trace("The HMAC is not valid. Expected : {} Found : {}", expectedHMAC, actualHMAC);
                 return false;
             } else {
                 lastHMAC = actualHMAC;
@@ -159,7 +158,7 @@ class CsvSecureVerifier {
             byte[] signature = Base64.decode(encodedSign);
             boolean verify = secureStorage.verify(dataToSign(lastSignature, lastHMAC), signature);
             if (!verify) {
-                logger.info("The signature does not match the expecting one.");
+                logger.trace("The signature does not match the expecting one.");
                 return false;
             } else {
                 lastSignature = signature;

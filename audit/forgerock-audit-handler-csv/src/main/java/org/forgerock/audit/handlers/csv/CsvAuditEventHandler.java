@@ -185,14 +185,14 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
      */
     @Override
     public void startup() throws ResourceException {
-        logger.info("Audit logging to: {}", configuration.getLogDirectory());
+        logger.trace("Audit logging to: {}", configuration.getLogDirectory());
         File file = new File(configuration.getLogDirectory());
         if (!file.isDirectory()) {
             if (file.exists()) {
-                logger.warn("Specified path is file but should be a directory: " + configuration.getLogDirectory());
+                logger.warn("Specified path is file but should be a directory: {}", configuration.getLogDirectory());
             } else {
                 if (!file.mkdirs()) {
-                    logger.warn("Unable to create audit directory in the path: " + configuration.getLogDirectory());
+                    logger.warn("Unable to create audit directory in the path: {}", configuration.getLogDirectory());
                 }
             }
         }
@@ -201,7 +201,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             try {
                 openWriter(topic, auditLogFile);
             } catch (IOException e) {
-                logger.error("Error when creating audit file: " + auditLogFile, e);
+                logger.error("Error when creating audit file: {}", auditLogFile, e);
             }
         }
     }

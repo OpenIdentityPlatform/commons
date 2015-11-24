@@ -115,10 +115,7 @@ class SecureCsvWriter implements CsvWriter {
                 try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
                     verifier = new CsvSecureVerifier(reader, secureStorage);
                     if (!verifier.verify()) {
-                        logger.info("The existing secure CSV file was tampered.");
                         throw new IOException("The CSV file was tampered.");
-                    } else {
-                        logger.info("The existing secure CSV file was not tampered.");
                     }
                 }
 
@@ -140,7 +137,6 @@ class SecureCsvWriter implements CsvWriter {
                     throw new IllegalStateException("We are supposed to resume but there is not entry for CurrentKey.");
                 }
                 this.hmacCalculator.setCurrentKey(currentKey.getEncoded());
-                logger.debug("Resuming the writer with the key " + Base64.encode(hmacCalculator.getCurrentKey().getEncoded()));
                 
                 setLastHMAC(verifier.getLastHMAC());
                 setLastSignature(verifier.getLastSignature());
@@ -154,8 +150,6 @@ class SecureCsvWriter implements CsvWriter {
             this.signatureTask = new Runnable() {
                 @Override
                 public void run() {
-                    logger.info("Writing a signature.");
-
                     try {
                         writeSignature();
                     } catch (Exception ex) {
@@ -170,7 +164,6 @@ class SecureCsvWriter implements CsvWriter {
 
     private void initHmacCalculatorWithRandomData() throws SecureStorageException {
         this.hmacCalculator.setCurrentKey(getRandomBytes());
-        logger.debug("Starting the writer with the key " + Base64.encode(hmacCalculator.getCurrentKey().getEncoded()));
         // As we start to work, store the key as the initial one and the current one too
         secureStorage.writeInitialKey(hmacCalculator.getCurrentKey());
         secureStorage.writeCurrentKey(hmacCalculator.getCurrentKey());
@@ -250,7 +243,6 @@ class SecureCsvWriter implements CsvWriter {
         try {
             lastSignature = secureStorage.sign(dataToSign(lastSignature, lastHMAC));
             Map<String, String> values = singletonMap(HEADER_SIGNATURE, Base64.encode(lastSignature));
-            logger.info("Writing signature :" + Base64.encode(lastSignature));
             writeEvent(values);
 
             // Store the current signature into the Keystore
@@ -312,7 +304,7 @@ class SecureCsvWriter implements CsvWriter {
             // Schedule a signature task only if needed.
             if (!values.containsKey(HEADER_SIGNATURE)
                     && (scheduledSignature == null || scheduledSignature.isDone())) {
-                logger.info("Triggering a new signature task to be executed in " + signatureInterval);
+                logger.trace("Triggering a new signature task to be executed in {}", signatureInterval);
                 try {
                     scheduledSignature = scheduler.schedule(signatureTask, signatureInterval.getValue(),
                             signatureInterval.getUnit());

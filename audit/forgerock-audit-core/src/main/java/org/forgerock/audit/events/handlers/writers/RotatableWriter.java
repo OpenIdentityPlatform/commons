@@ -116,10 +116,14 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         try {
             for (RotationPolicy rotationPolicy : rotationPolicies) {
                 if (rotationPolicy.shouldRotateFile(this)) {
-                    logger.info("Must rotate:" + file);
+                    if (logger.isTraceEnabled()) {
+                        logger.trace("Must rotate: {}", file.getAbsolutePath());
+                    }
                     isRotating.set(true);
                     if (rotate()) {
-                        logger.info("Finished rotation for:" + file);
+                        if (logger.isTraceEnabled()) {
+                            logger.trace("Finished rotation for: {}", file.getAbsolutePath());
+                        }
                         break;
                     }
                 }
@@ -145,7 +149,9 @@ public class RotatableWriter implements TextWriter, RotatableObject {
             context.putAttribute("nextName", newFile);
             rotationHooks.preRotationAction(context);
             writer.close();
-            logger.debug("Renaming {} to {}", currentFile.getAbsolutePath(), newFile.getAbsolutePath());
+            if (logger.isTraceEnabled()) {
+                logger.trace("Renaming {} to {}", currentFile.getAbsolutePath(), newFile.getAbsolutePath());
+            }
             if (currentFile.renameTo(newFile)) {
                 rotationHappened = true;
                 if (!currentFile.exists()) {
@@ -182,7 +188,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      */
     @Override
     public long getBytesWritten() {
-        logger.info("bytes written=" + meteredStream.getBytesWritten());
+        logger.trace("bytes written={}", meteredStream.getBytesWritten());
         return meteredStream.getBytesWritten();
     }
 
@@ -240,7 +246,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         ReadLock lock = writerLock.readLock();
         try {
             lock.lock();
-            logger.info("Actually writing to file: " + str);
+            logger.trace("Actually writing to file: {}", str);
             writer.write(str);
         } finally {
             lock.unlock();

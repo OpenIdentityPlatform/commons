@@ -198,7 +198,7 @@ public final class AuditServiceBuilder {
     private Set<AuditEventHandler> buildAuditEventHandlers(final EventTopicsMetaData eventTopicsMetaData) {
         Set<AuditEventHandler> handlers = new LinkedHashSet<>(prebuiltHandlers);
         for (HandlerRegistration handlerRegistration : handlerRegistrations.values()) {
-            logger.info("Registering handler '{}' for {} topics",
+            logger.debug("Registering handler '{}' for {} topics",
                     handlerRegistration.configuration.getName(),
                     handlerRegistration.configuration.getTopics().toString());
             try {
@@ -211,7 +211,7 @@ public final class AuditServiceBuilder {
                 logger.error(e.getMessage(), e);
             }
         }
-        logger.info("Registered {}", handlers.toString());
+        logger.debug("Registered {}", handlers.toString());
         return handlers;
     }
 
