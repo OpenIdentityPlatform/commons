@@ -161,6 +161,7 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
 
         /**
          * Gets the interval to trigger a file rotation. The interval should be set as a {@link Duration}.
+         * <p/>
          * Examples of valid durations are:
          * <pre>
          *      5 seconds
@@ -168,7 +169,9 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
          *      5 hours
          *      disabled
          * </pre>
-         * A zero duration or "disabled" disables time based file rotation.
+         * <p/>
+         * A value of "zero" or "disabled" means that time based file rotation is disabled.
+         *
          * @return The interval duration.
          */
         public String getRotationInterval() {
@@ -176,25 +179,44 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
         }
 
         /**
-         * Sets the interval to trigger a file rotation. A zero duration or "disabled" disables time based file
-         * rotation.
-         * @return The interval in minutes.
+         * Sets the interval to trigger a file rotation. The interval should be set as a {@link Duration}.
+         * <p/>
+         * Examples of valid durations are:
+         * <pre>
+         *      5 seconds
+         *      5 minutes
+         *      5 hours
+         *      disabled
+         * </pre>
+         * <p/>
+         * A value of "zero" or "disabled" disables time based file rotation.
+         *
+         * @param rotationInterval A String that can be parsed as a {@link Duration}, specifying rotation interval.
          */
         public void setRotationInterval(String rotationInterval) {
             this.rotationInterval = rotationInterval;
         }
 
         /**
-         * Gets a list of durations after midnight to rotateIfNeeded log files. For example the list of [10 milliseconds, 20 milliseconds, 30 milliseconds] will
+         * Gets a list of times at which file rotation should be triggered; times should be provided as Strings that can
+         * be parsed by {@link Duration} that each specify an offset from midnight.
+         * <p/>
+         * For example the list of [10 milliseconds, 20 milliseconds, 30 milliseconds] will
          * cause a file rotation to happen 10 milliseconds, 20 milliseconds and 30 milliseconds after midnight.
-         * @return A list of duration strings.
+         *
+         * @return The list of durations after midnight that rotation should happen.
          */
         public List<String> getRotationTimes() {
             return rotationTimes;
         }
 
         /**
-         * Sets the duration times to rotateIfNeeded log files.
+         * Sets a list of times at which file rotation should be triggered; times should be provided as Strings that can
+         * be parsed by {@link Duration} that each specify an offset from midnight.
+         * <p/>
+         * For example the list of [10 milliseconds, 20 milliseconds, 30 milliseconds] will
+         * cause a file rotation to happen 10 milliseconds, 20 milliseconds and 30 milliseconds after midnight.
+         *
          * @param rotationTimes The list of durations after midnight that rotation should happen.
          */
         public void setRotationTimes(List<String> rotationTimes) {
