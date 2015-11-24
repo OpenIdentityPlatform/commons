@@ -25,8 +25,6 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.sql.DataSource;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.events.AuditEvent;
@@ -53,6 +51,9 @@ import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 /**
  * Implements a {@link AuditEventHandler} to write {@link AuditEvent}s to a JDBC repository.
  **/
@@ -64,10 +65,10 @@ public class JdbcAuditEventHandler extends AuditEventHandlerBase {
     public static final String ORACLE = "oracle";
 
     private final JdbcAuditEventHandlerConfiguration configuration;
-    private final DataSource dataSource;
-    private final DatabaseStatementProvider databaseStatementProvider;
-    private final boolean sharedDataSource;
-    private final JdbcAuditEventExecutor jdbcAuditEventExecutor;
+    private DataSource dataSource;
+    private DatabaseStatementProvider databaseStatementProvider;
+    private boolean sharedDataSource;
+    private JdbcAuditEventExecutor jdbcAuditEventExecutor;
 
     /**
      * Create a new JdbcAuditEventHandler instance.
@@ -86,15 +87,22 @@ public class JdbcAuditEventHandler extends AuditEventHandlerBase {
             @Audit final DataSource dataSource) {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = configuration;
+        this.dataSource = dataSource;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void startup() throws ResourceException {
         if (dataSource != null) {
             sharedDataSource = true;
-            this.dataSource = dataSource;
         } else {
             logger.error("No connection pool (DataSource) provided; defaulting to Hikari");
             sharedDataSource = false;
-            this.dataSource = new HikariDataSource(createHikariConfig(configuration.getConnectionPool()));
+            dataSource = new HikariDataSource(createHikariConfig(configuration.getConnectionPool()));
         }
-        this.databaseStatementProvider = getDatabaseStatementProvider(configuration.getDatabaseType());
+        databaseStatementProvider = getDatabaseStatementProvider(configuration.getDatabaseType());
         final JdbcAuditEventExecutor jdbcAuditEventExecutor = new JdbcAuditEventExecutorImpl(this.dataSource);
         final EventBufferingConfiguration bufferConfig = configuration.getBuffering();
         if (bufferConfig.isEnabled()) {
@@ -109,14 +117,6 @@ public class JdbcAuditEventHandler extends AuditEventHandlerBase {
         } else {
             this.jdbcAuditEventExecutor = jdbcAuditEventExecutor;
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void startup() throws ResourceException {
-        // nothing to do here
     }
 
     /**
