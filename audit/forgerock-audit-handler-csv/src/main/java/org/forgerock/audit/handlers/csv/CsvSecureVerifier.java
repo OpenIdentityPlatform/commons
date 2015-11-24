@@ -123,7 +123,18 @@ class CsvSecureVerifier {
                 }
             }
         }
-        return lastRowWasSigned;
+
+        try {
+            SecretKey currentKey = secureStorage.readCurrentKey();
+            if (currentKey != null) {
+                return Arrays.equals(hmacCalculator.getCurrentKey().getEncoded(), currentKey.getEncoded())
+                        && lastRowWasSigned;
+            } else {
+                return false;
+            }
+        } catch (SecureStorageException ex) {
+            throw new IOException(ex);
+        }
     }
 
     private boolean verifyHMAC(Map<String, String> values, String[] header) throws IOException {
