@@ -167,14 +167,13 @@
                 "completed": "Your password has been successfully reset.",
                 "failed": "Unable to reset your password",
                 "tryAgain": "Try Resetting Your Password Again",
-                "return": "Return to Login Page"
+                "answerQuestions": "Answer the security questions below to reset your password."
             },
             "selfRegistration" : {
                 "title": "Register Your Account",
                 "completed": "Your account has been successfully registered.",
                 "failed": "Unable to register your account",
-                "tryAgain": "Try Registering Again",
-                "return": "Return to Login Page"
+                "tryAgain": "Try Registering Again"
             },
             "forgotUsername" : {
                 "title" : "Retrieve Your Username",
@@ -182,10 +181,9 @@
                 "failed": "Unable to retrieve your username",
                 "found": "Username found:",
                 "tryAgain": "Try Finding Your Username Again",
-                "return": "Return to Login Page"
+                "answerQuestions": "Answer the security questions below to retrieve your username."
             },
             "kba" : {
-                "answerQuestions": "Answer security questions below to reset your password.",
                 "description": "Select security question(s) below. These questions will help us verify your identity if you forget your password.",
                 "provideAnother": "Add another question",
                 "selectQuestion": "Select a security question",
@@ -194,6 +192,7 @@
                 "answer": "Security Answer",
                 "securityQuestions": "Security Questions"
             },
+            "returnToLoginPage": "Return to Login Page",
             "emailValidation" : "Enter your email address to proceed. We will send you a link, so you can continue the registration process.",
             "send": "Send",
             "validateCode" : "An email has been sent to your address. Click the link in that email to proceed.",
