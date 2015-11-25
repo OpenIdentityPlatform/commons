@@ -17,7 +17,18 @@
 package org.forgerock.http.apache.async;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.forgerock.http.handler.HttpClientHandler.*;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_CONNECT_TIMEOUT;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_HOSTNAME_VERIFIER;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_KEY_MANAGERS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_MAX_CONNECTIONS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_REUSE_CONNECTIONS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_SO_TIMEOUT;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSLCONTEXT_ALGORITHM;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSL_CIPHER_SUITES;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSL_ENABLED_PROTOCOLS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_TEMPORARY_STORAGE;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_TRUST_MANAGERS;
+import static org.forgerock.http.util.Lists.asArrayOrNull;
 
 import java.security.GeneralSecurityException;
 import java.util.List;
@@ -116,11 +127,8 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
         Registry<SchemeIOSessionStrategy> registry =
                 RegistryBuilder.<SchemeIOSessionStrategy>create()
                         .register("http", NoopIOSessionStrategy.INSTANCE)
-                        .register("https",
-                                   new SSLIOSessionStrategy(sslContext,
-                                                           protocols.toArray(new String[protocols.size()]),
-                                                           ciphers.toArray(new String[ciphers.size()]),
-                                                           verifier))
+                        .register("https", new SSLIOSessionStrategy(sslContext, asArrayOrNull(protocols),
+                                asArrayOrNull(ciphers), verifier))
                         .build();
 
         // Timeouts
