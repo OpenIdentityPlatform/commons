@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc.providers;
+package org.forgerock.audit.handlers.jdbc;
 
 import static org.forgerock.util.Utils.joinAsString;
 
@@ -23,12 +23,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
-import org.forgerock.audit.handlers.jdbc.Parameter;
 import org.forgerock.audit.handlers.jdbc.utils.SqlStatementParser;
 import org.forgerock.audit.handlers.jdbc.query.StringSqlQueryFilterVisitor;
-import org.forgerock.audit.handlers.jdbc.TableMapping;
-import org.forgerock.audit.handlers.jdbc.TableMappingParametersPair;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;

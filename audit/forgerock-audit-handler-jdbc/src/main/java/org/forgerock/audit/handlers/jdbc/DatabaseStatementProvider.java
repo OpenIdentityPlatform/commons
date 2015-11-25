@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.audit.handlers.jdbc.providers;
+package org.forgerock.audit.handlers.jdbc;
 
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;

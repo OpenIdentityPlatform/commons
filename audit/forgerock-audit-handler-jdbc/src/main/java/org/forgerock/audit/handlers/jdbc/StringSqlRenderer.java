@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc.query;
+package org.forgerock.audit.handlers.jdbc;
 
 /**
  * An {@link SqlRenderer} implementation that renders SQL as a String

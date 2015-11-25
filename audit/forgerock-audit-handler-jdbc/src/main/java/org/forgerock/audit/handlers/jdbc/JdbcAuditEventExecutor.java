@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc.publishers;
+package org.forgerock.audit.handlers.jdbc;
 
 import java.util.List;
 import java.util.Map;

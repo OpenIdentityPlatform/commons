@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc.utils;
+package org.forgerock.audit.handlers.jdbc;
 
 import java.util.LinkedList;
 import java.util.List;

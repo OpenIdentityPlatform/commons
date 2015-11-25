@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc.utils;
+package org.forgerock.audit.handlers.jdbc;
 
 import java.sql.Connection;
 import java.sql.SQLException;

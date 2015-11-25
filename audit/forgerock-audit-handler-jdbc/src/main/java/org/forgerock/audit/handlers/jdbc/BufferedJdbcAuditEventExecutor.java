@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc.publishers;
+package org.forgerock.audit.handlers.jdbc;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.forgerock.util.Reject.checkNotNull;
@@ -36,8 +36,6 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
-import org.forgerock.audit.handlers.jdbc.Parameter;
 import org.forgerock.audit.handlers.jdbc.utils.CleanupHelper;
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;

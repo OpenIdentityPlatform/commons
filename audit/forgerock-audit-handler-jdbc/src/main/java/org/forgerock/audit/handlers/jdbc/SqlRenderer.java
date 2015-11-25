@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.jdbc.query;
+package org.forgerock.audit.handlers.jdbc;
 
 /**
  * An object capable of rendering an entire SQL statement or a clause.
