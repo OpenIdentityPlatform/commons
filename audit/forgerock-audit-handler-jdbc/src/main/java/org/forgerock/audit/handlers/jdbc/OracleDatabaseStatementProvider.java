@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.query.StringSqlQueryFilterVisitor;
-import org.forgerock.audit.handlers.jdbc.utils.SqlStatementParser;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
@@ -34,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Provides the query event for an oracle database.
  */
-public class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvider {
+class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvider {
     private static final Logger logger = LoggerFactory.getLogger(OracleDatabaseStatementProvider.class);
 
     private final StringSqlQueryFilterVisitor queryFilterVisitor = new StringSqlQueryFilterVisitor();

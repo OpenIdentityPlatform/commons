@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Cleans up jdbc database objects.
  */
-public class CleanupHelper {
+class CleanupHelper {
     final static Logger logger = LoggerFactory.getLogger(CleanupHelper.class);
 
     /**

@@ -23,7 +23,7 @@ import org.forgerock.json.JsonPointer;
 /**
  * Stores a pair of {@link TableMapping} and a map of parameters.
  */
-public class TableMappingParametersPair {
+class TableMappingParametersPair {
 
     private TableMapping tableMapping;
     private Map<String, Object> parameters;

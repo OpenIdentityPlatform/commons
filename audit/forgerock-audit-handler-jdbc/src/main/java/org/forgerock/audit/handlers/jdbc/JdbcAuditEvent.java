@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * Stores the sql query string and the parameters that correspond to the ?'s in the query string.
  */
-public class JdbcAuditEvent {
+class JdbcAuditEvent {
     private final String sql;
     private final List<Parameter> params;
 

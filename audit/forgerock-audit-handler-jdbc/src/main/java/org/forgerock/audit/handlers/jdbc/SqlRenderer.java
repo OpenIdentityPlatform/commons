@@ -20,7 +20,7 @@ package org.forgerock.audit.handlers.jdbc;
  *
  * @param <S> the type of object to render the SQL
  */
-public interface SqlRenderer<S> {
+interface SqlRenderer<S> {
     /**
      * Render the SQL.
      *

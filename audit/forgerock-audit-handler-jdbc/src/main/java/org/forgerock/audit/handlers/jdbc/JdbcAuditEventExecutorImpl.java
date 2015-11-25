@@ -29,11 +29,10 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.utils.CleanupHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
+class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
     private static final Logger logger = LoggerFactory.getLogger(JdbcAuditEventExecutorImpl.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 

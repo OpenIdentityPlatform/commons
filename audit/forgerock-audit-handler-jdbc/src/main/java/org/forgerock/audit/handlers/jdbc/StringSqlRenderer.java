@@ -18,7 +18,7 @@ package org.forgerock.audit.handlers.jdbc;
 /**
  * An {@link SqlRenderer} implementation that renders SQL as a String
  */
-public class StringSqlRenderer implements SqlRenderer<String> {
+class StringSqlRenderer implements SqlRenderer<String> {
     private final StringBuilder sb = new StringBuilder();
 
     /**

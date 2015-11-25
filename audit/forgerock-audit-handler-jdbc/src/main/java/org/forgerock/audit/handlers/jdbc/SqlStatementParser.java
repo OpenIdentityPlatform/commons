@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 /**
  * Parses an sql statement containing named parameters into a sql string, and a list of named parameters.
  */
-public class SqlStatementParser {
+class SqlStatementParser {
 
     private String sqlStatement;
     private final List<String> namedParameters = new LinkedList<>();

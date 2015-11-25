@@ -15,7 +15,7 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
-public class Parameter {
+class Parameter {
     public enum Type {
         STRING,
         NUMBER,

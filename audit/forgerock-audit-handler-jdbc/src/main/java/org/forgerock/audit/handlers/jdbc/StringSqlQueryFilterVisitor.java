@@ -53,7 +53,7 @@ import org.forgerock.util.query.QueryFilterVisitor;
  * implementing {@link #visitPresentFilter(Object, org.forgerock.json.JsonPointer)} as "field present" can vary
  * by database implementation (though typically "field IS NOT NULL" is chosen).
  */
-public class StringSqlQueryFilterVisitor
+class StringSqlQueryFilterVisitor
         extends AbstractSqlQueryFilterVisitor<StringSqlRenderer, TableMappingParametersPair> {
 
     // key/value number for each key/value placeholder

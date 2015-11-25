@@ -13,19 +13,16 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.jdbc;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
-import org.forgerock.audit.handlers.jdbc.TableMapping;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
 
 /**
  * Provides Create, Read, and Query events for the implementing database.
  */
-public interface DatabaseStatementProvider {
+interface DatabaseStatementProvider {
 
     /**
      * Builds a {@link JdbcAuditEvent} that can be used to create a prepared statement to create an event.

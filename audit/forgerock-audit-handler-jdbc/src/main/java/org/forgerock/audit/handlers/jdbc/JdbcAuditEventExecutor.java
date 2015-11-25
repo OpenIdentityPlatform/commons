@@ -19,12 +19,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.JdbcAuditEvent;
 
 /**
  * Interface that defines the  methods needed to interact with a JDBC database.
  */
-public interface JdbcAuditEventExecutor {
+interface JdbcAuditEventExecutor {
 
     /**
      * Creates a {@link JdbcAuditEvent}

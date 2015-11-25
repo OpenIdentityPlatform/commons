@@ -18,14 +18,11 @@ package org.forgerock.audit.handlers.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.util.query.QueryFilter.*;
 
-import org.forgerock.audit.handlers.jdbc.query.StringSqlQueryFilterVisitor;
-import org.forgerock.audit.handlers.jdbc.query.StringSqlRenderer;
 import org.forgerock.util.query.QueryFilter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import org.forgerock.json.JsonPointer;
-
 
 /**
  * Tests basic QueryFilter-to-SQL-Where-Clause creation using a basic SQL syntax.

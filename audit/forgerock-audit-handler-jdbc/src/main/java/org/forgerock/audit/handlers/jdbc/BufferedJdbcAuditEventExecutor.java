@@ -36,7 +36,6 @@ import javax.sql.DataSource;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
-import org.forgerock.audit.handlers.jdbc.utils.CleanupHelper;
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
@@ -45,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Buffers the create events to a {@link JdbcAuditEventExecutor}.
  */
-public class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
+class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
     private static final Logger logger = LoggerFactory.getLogger(BufferedJdbcAuditEventExecutor.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 

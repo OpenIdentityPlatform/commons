@@ -26,7 +26,6 @@ import java.util.Map;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.events.AuditEventHelper;
 import org.forgerock.audit.handlers.jdbc.Parameter.Type;
-import org.forgerock.audit.handlers.jdbc.utils.SqlStatementParser;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
@@ -38,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Contains builds generic read and create events supported by multiple databases.
  */
-public abstract class BaseDatabaseStatementProvider implements DatabaseStatementProvider {
+abstract class BaseDatabaseStatementProvider implements DatabaseStatementProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(BaseDatabaseStatementProvider.class);
 
