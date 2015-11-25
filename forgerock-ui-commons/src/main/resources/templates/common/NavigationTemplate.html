@@ -44,7 +44,7 @@
                         {{#each urls}}
 
                         {{#if divider}}
-                            <li class="divider"></li>
+                            <li role="separator" class="divider"></li>
                         {{else}}
                             {{#if header}}
                                 <li class="dropdown-header ">{{headerTitle}}</li>
@@ -118,11 +118,11 @@
                             {{/if}}
                         </li>
 
-                        <li class="divider"></li>
+                        <li role="separator" class="divider"></li>
 
                         {{#each userBar}}
                             {{#if divider}}
-                                <li class="divider"></li>
+                                <li role="separator" class="divider"></li>
                             {{else}}
                                 <li>
                                     {{#if href}}
