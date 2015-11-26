@@ -534,7 +534,7 @@
 
       <dependency>
         <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-audit-handler-jbdc</artifactId>
+        <artifactId>forgerock-audit-handler-jdbc</artifactId>
         <version>${forgerock-audit.version}</version>
       </dependency>
 
