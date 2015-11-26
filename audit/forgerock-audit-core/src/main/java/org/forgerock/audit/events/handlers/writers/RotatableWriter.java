@@ -141,12 +141,12 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     private boolean rotate() throws IOException {
         boolean rotationHappened = false;
         RotationContext context = new RotationContext();
-        context.putAttribute("writer", writer);
+        context.setWriter(writer);
         File currentFile = fileNamingPolicy.getInitialName();
-        context.putAttribute("initialName", currentFile);
+        context.setInitialFile(currentFile);
         if (currentFile.exists()) {
             File newFile = fileNamingPolicy.getNextName();
-            context.putAttribute("nextName", newFile);
+            context.setNextFile(newFile);
             rotationHooks.preRotationAction(context);
             writer.close();
             if (logger.isTraceEnabled()) {
@@ -157,7 +157,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                 if (!currentFile.exists()) {
                     currentFile.createNewFile();
                     writer = constructWriter(currentFile, true);
-                    context.putAttribute("writer", writer);
+                    context.setWriter(writer);
                     rotationHooks.postRotationAction(context);
                 }
             } else {

@@ -36,7 +36,7 @@ class CsvRotationHooks implements RotationHooks {
 
     @Override
     public void postRotationAction(RotationContext context) throws IOException {
-        Writer writer = (Writer) context.getAttribute("writer");
+        Writer writer = context.getWriter();
         String headerRow = formatter.formatHeader(headers);
         writer.write(headerRow);
     }

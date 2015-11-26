@@ -372,7 +372,7 @@ class SecureCsvWriter implements CsvWriter {
         public void postRotationAction(RotationContext context) throws IOException {
             // Rename the keystore and create a new one.
             String currentName = keyStoreFile.getName();
-            String nextName = currentName.replaceFirst(((File) context.getAttribute("initialName")).getName(), ((File) context.getAttribute("nextName")).getName());
+            String nextName = currentName.replaceFirst(context.getInitialFile().getName(), context.getNextFile().getName());
             boolean renamed = keyStoreFile.renameTo(new File(keyStoreFile.getParent(), nextName));
             if (!renamed) {
                 // What to do ?
@@ -384,8 +384,7 @@ class SecureCsvWriter implements CsvWriter {
                 throw new IOException(ex);
             }
 
-
-            Writer writer = (Writer) context.getAttribute("writer");
+            Writer writer = context.getWriter();
             // ensure the signature chaining along the files
             writeHeader(writer, headers);
             writeLastSignature(writer);

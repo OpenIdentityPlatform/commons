@@ -15,8 +15,8 @@
  */
 package org.forgerock.audit.rotation;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
+import java.io.Writer;
 
 /**
  * This class holds some information while a file is being rotated. It will be passed as arguments to the
@@ -24,22 +24,31 @@ import java.util.Map;
  */
 public class RotationContext {
 
-    Map<String, Object> attributes = new HashMap<>();
+    private File initialFile;
+    private File nextFile;
+    private Writer writer;
 
-    public Object putAttribute(String name, Object value) {
-        return attributes.put(name, value);
+    public File getInitialFile() {
+        return initialFile;
     }
 
-    public Object removeAttribute(String name) {
-        return attributes.remove(name);
+    public void setInitialFile(File initialFile) {
+        this.initialFile = initialFile;
     }
 
-    public Object getAttribute(String name) {
-        return attributes.get(name);
+    public File getNextFile() {
+        return nextFile;
     }
 
-    public boolean containsAttribute(String name) {
-        return attributes.containsKey(name);
+    public void setNextFile(File nextFile) {
+        this.nextFile = nextFile;
     }
 
+    public Writer getWriter() {
+        return writer;
+    }
+
+    public void setWriter(Writer writer) {
+        this.writer = writer;
+    }
 }
