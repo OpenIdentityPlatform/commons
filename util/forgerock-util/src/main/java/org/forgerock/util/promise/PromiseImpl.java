@@ -485,7 +485,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     private void handleCompletion(final StateListener<V, E> listener, final int completedState) {
         try {
             listener.handleStateChange(completedState, result, exception, runtimeException);
-        } catch (Exception ignored) {
+        } catch (RuntimeException ignored) {
             LOGGER.error("State change listener threw a RuntimeException which cannot be handled!", ignored);
         }
     }
