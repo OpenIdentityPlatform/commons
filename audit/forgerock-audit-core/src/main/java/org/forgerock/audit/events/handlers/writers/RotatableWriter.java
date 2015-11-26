@@ -75,7 +75,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     private MeteredStream meteredStream;
     /** The underlying buffered writer using the output stream. */
     private BufferedWriter writer;
-    private final ReentrantReadWriteLock writerLock = new ReentrantReadWriteLock();
+    private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
     /**
      * Constructs a {@link RotatableWriter} given an initial file to manage rotation/retention, and
@@ -112,7 +112,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         if (!rotationEnabled || isRotating.get()) {
             return;
         }
-        writerLock.writeLock().lock();
+        readWriteLock.writeLock().lock();
         try {
             for (RotationPolicy rotationPolicy : rotationPolicies) {
                 if (rotationPolicy.shouldRotateFile(this)) {
@@ -134,7 +134,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
             }
         } finally {
             isRotating.set(false);
-            writerLock.writeLock().unlock();
+            readWriteLock.writeLock().unlock();
         }
     }
 
@@ -243,7 +243,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
 
     @Override
     public void write(String str) throws IOException {
-        ReadLock lock = writerLock.readLock();
+        ReadLock lock = readWriteLock.readLock();
         try {
             lock.lock();
             logger.trace("Actually writing to file: {}", str);
@@ -262,14 +262,14 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      *          If an error occurs
      */
     public boolean forceRotation() throws IOException {
-        writerLock.writeLock().lock();
+        readWriteLock.writeLock().lock();
         try {
             isRotating.set(true);
             return rotate();
         }
         finally {
             isRotating.set(false);
-            writerLock.writeLock().unlock();
+            readWriteLock.writeLock().unlock();
         }
     }
 
