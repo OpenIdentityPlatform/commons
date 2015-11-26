@@ -373,9 +373,10 @@ class SecureCsvWriter implements CsvWriter {
             // Rename the keystore and create a new one.
             String currentName = keyStoreFile.getName();
             String nextName = currentName.replaceFirst(context.getInitialFile().getName(), context.getNextFile().getName());
-            boolean renamed = keyStoreFile.renameTo(new File(keyStoreFile.getParent(), nextName));
+            final File nextFile = new File(keyStoreFile.getParent(), nextName);
+            boolean renamed = keyStoreFile.renameTo(nextFile);
             if (!renamed) {
-                // What to do ?
+                logger.error("Unable to rename {} to {}", keyStoreFile.getAbsolutePath(), nextFile.getAbsolutePath());
             }
             try {
                 secureStorage.setKeyStoreHandler(new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(), keyStorePassword));
