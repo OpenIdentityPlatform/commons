@@ -389,6 +389,16 @@ If-Match: <replaceable>_rev</replaceable>
 { <replaceable>JSON resource</replaceable> }
   </programlisting>
 
+  <para>
+   When updating a resource, include all the attributes to be retained.
+   Omitting an attribute in the resource amounts to deleting the attribute
+   unless it is not under the control of your application.
+   Attributes not under the control of your application include
+   private and read-only attributes.
+   In addition, virtual attributes and relationship references
+   might not be under the control of your application.
+  </para>
+
   <variablelist>
    <title>Parameters</title>
 
