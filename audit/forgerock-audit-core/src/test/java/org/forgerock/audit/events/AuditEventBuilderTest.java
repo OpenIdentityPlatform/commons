@@ -24,7 +24,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.services.TransactionId;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.services.context.TransactionIdContext;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -118,9 +121,10 @@ public class AuditEventBuilderTest {
     }
 
     @Test
-    public void canPopulateTransactionIdFromRootContext() {
+    public void canPopulateTransactionIdFromTransactionIdContext() {
         // Given
-        RootContext context = new RootContext();
+        TransactionId transactionId = new TransactionId();
+        Context context = new TransactionIdContext(new RootContext(), transactionId);
 
         // When
         AuditEvent event = productEvent()
@@ -130,7 +134,7 @@ public class AuditEventBuilderTest {
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo(context.getId());
+        assertThat(value.get(TRANSACTION_ID).asString()).isEqualTo(transactionId.getValue());
     }
 
     private void assertEvent(AuditEvent event) {

@@ -20,7 +20,7 @@ import static org.forgerock.json.JsonValue.*;
 import org.forgerock.audit.util.DateUtil;
 import org.forgerock.json.JsonValue;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
+import org.forgerock.services.context.TransactionIdContext;
 import org.forgerock.util.Reject;
 
 import java.util.LinkedHashSet;
@@ -210,16 +210,16 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
     }
 
     /**
-     * Sets transactionId from ID of {@link RootContext}, if the provided
-     * <code>Context</code> contains a <code>RootContext</code>.
+     * Sets transactionId from ID of {@link TransactionIdContext}, if the provided
+     * <code>Context</code> contains a <code>TransactionIdContext</code>.
      *
      * @param context The CREST context.
      * @return this builder
      */
     public final T transactionIdFromContext(Context context) {
-        if (context.containsContext(RootContext.class)) {
-            RootContext rootContext = context.asContext(RootContext.class);
-            transactionId(rootContext.getId());
+        if (context.containsContext(TransactionIdContext.class)) {
+            TransactionIdContext transactionIdContext = context.asContext(TransactionIdContext.class);
+            transactionId(transactionIdContext.getTransactionId().getValue());
         }
         return self();
     }
