@@ -23,7 +23,6 @@ import static org.forgerock.http.header.HeaderFactory.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -361,7 +360,7 @@ public class Headers implements Map<String, Object> {
      * @return a copy of these headers as a multi-valued map of strings.
      */
     public Map<String, List<String>> copyAsMultiMapOfStrings() {
-        Map<String, List<String>> result = new LinkedHashMap<>(headers.size());
+        Map<String, List<String>> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         for (Header header : headers.values()) {
             result.put(header.getName(), new ArrayList<>(header.getValues()));
         }
