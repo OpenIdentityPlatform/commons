@@ -24,6 +24,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility methods for creating and composing {@link Promise}s.
@@ -50,6 +52,9 @@ public final class Promises {
      * @param <E> {@inheritDoc}
      */
     private static abstract class CompletedPromise<V, E extends Exception> implements Promise<V, E> {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(CompletedPromise.class);
+
         @Override
         public final boolean cancel(final boolean mayInterruptIfRunning) {
             return false;
@@ -110,7 +115,11 @@ public final class Promises {
         @Override
         public final Promise<V, E> thenOnException(final ExceptionHandler<? super E> onException) {
             if (hasException()) {
-                onException.handleException(getException());
+                try {
+                    onException.handleException(getException());
+                } catch (RuntimeException e) {
+                    LOGGER.error("Ignored unexpected exception thrown by ExceptionHandler", e);
+                }
             }
             return this;
         }
@@ -118,7 +127,11 @@ public final class Promises {
         @Override
         public final Promise<V, E> thenOnResult(final ResultHandler<? super V> onResult) {
             if (hasResult()) {
-                onResult.handleResult(getResult());
+                try {
+                    onResult.handleResult(getResult());
+                } catch (RuntimeException e) {
+                    LOGGER.error("Ignored unexpected exception thrown by ResultHandler", e);
+                }
             }
             return this;
         }
@@ -132,7 +145,11 @@ public final class Promises {
         @Override
         public final Promise<V, E> thenOnResultOrException(final Runnable onResultOrException) {
             if (hasResult() || hasException()) {
-                onResultOrException.run();
+                try {
+                    onResultOrException.run();
+                } catch (RuntimeException e) {
+                    LOGGER.error("Ignored unexpected exception thrown by Runnable", e);
+                }
             }
             return this;
         }
@@ -174,7 +191,11 @@ public final class Promises {
 
         @Override
         public Promise<V, E> thenFinally(Runnable onResultOrException) {
-            onResultOrException.run();
+            try {
+                onResultOrException.run();
+            } catch (RuntimeException e) {
+                LOGGER.error("Ignored unexpected exception thrown by Runnable", e);
+            }
             return this;
         }
 
@@ -213,7 +234,11 @@ public final class Promises {
         @Override
         public Promise<V, E> thenOnRuntimeException(RuntimeExceptionHandler onRuntimeException) {
             if (getRuntimeException() != null) {
-                onRuntimeException.handleRuntimeException(getRuntimeException());
+                try {
+                    onRuntimeException.handleRuntimeException(getRuntimeException());
+                } catch (RuntimeException e) {
+                    LOGGER.error("Ignored unexpected exception thrown by RuntimeExceptionHandler", e);
+                }
             }
             return this;
         }

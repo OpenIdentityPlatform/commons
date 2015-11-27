@@ -1,0 +1,205 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015 ForgeRock AS.
+ */
+package org.forgerock.util.promise;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.mockito.Mockito.mock;
+
+import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.Function;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+/**
+ * This class aims to be like a TCK for every implementations of Promise, that'll ensure the Promise's contract is
+ * honored.
+ */
+public class PromiseContractTest {
+
+    @Test(dataProvider = "completedPromisesWithResult")
+    public void completedPromiseWithResultWithListenerThrowingRuntimeException(String label, 
+            Promise<String, Exception> promise) throws Exception {
+        promise.thenOnResult(onResultThrowingRuntimeException(label));
+
+        assertThat(promise.get()).as(label).isEqualTo("completed");
+    }
+
+    @DataProvider
+    private Object[][] completedPromisesWithResult() {
+        final String result = "completed";
+        // Async promise, completed immediately
+        PromiseImpl<String, Exception> promise = PromiseImpl.create();
+        promise.handleResult(result);
+
+        return new Object[][] {
+            { "PromiseImpl", promise },
+            { "CompletedPromise", newResultPromise(result) }
+        };
+    }
+
+    private static ResultHandler<String> onResultThrowingRuntimeException(final String label) {
+        return new ResultHandler<String>() {
+            @Override
+            public void handleResult(String result) {
+                throw new RuntimeException("Boom " + label);
+            }
+        };
+    }
+
+    @Test(dataProvider = "completedPromisesWithException")
+    public void completedPromiseWithExceptionWithListenerThrowingRuntimeException(Promise<String, Exception> promise,
+            Exception exception) throws Exception {
+
+        promise.thenOnException(onExceptionThrowingRuntimeException(promise.getClass().getName()));
+
+        try {
+            promise.getOrThrow();
+            failBecauseExceptionWasNotThrown(exception.getClass());
+        } catch (Exception e) {
+            assertThat(e).isSameAs(exception);
+        }
+    }
+
+    @DataProvider
+    private Object[][] completedPromisesWithException() {
+        Object[][] result = new Object[2][];
+
+        final Exception exception = new Exception("completed");
+        // Async promise, completed immediately
+        PromiseImpl<String, Exception> promise = PromiseImpl.create();
+        promise.handleException(exception);
+
+        return new Object[][] {
+            { promise, exception },
+            { newExceptionPromise(exception), exception }
+        };
+    }
+
+    private static ExceptionHandler<Exception> onExceptionThrowingRuntimeException(final String label) {
+        return new ExceptionHandler<Exception>() {
+            @Override
+            public void handleException(Exception exception) {
+                throw new RuntimeException("Boom " + label);
+            }
+        };
+    }
+
+    @Test(dataProvider = "completedPromisesWithResult")
+    public void completedPromiseWithResultWithAlwaysListenerThrowingRuntimeException(String label,
+            Promise<String, Exception> promise) {
+        promise.thenAlways(runnableThrowingRuntimeException(promise.getClass().getName()));
+    }
+
+    private static Runnable runnableThrowingRuntimeException(final String label) {
+        return new Runnable() {
+            @Override
+            public void run() {
+                throw new RuntimeException("Boom " + label);
+            }
+        };
+    }
+
+    // ----------------------------------------------------------------
+    // Ensure that promise are returning themselves or a new instance depending on the called then*** method
+    // ----------------------------------------------------------------
+
+
+    @Test(dataProvider = "providePromises")
+    @SuppressWarnings("unchecked")
+    public void shouldReturnNewPromiseUsingThenWithFunction(Promise<?, Exception> rootPromise) throws Exception {
+        Promise<?, Exception> leafPromise;
+
+        leafPromise = rootPromise.then(mock(Function.class));
+        assertThat(leafPromise).isNotSameAs(rootPromise);
+
+        leafPromise = rootPromise.then(mock(Function.class), mock(Function.class));
+        assertThat(leafPromise).isNotSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenAsync(mock(AsyncFunction.class));
+        assertThat(leafPromise).isNotSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenAsync(mock(AsyncFunction.class), mock(AsyncFunction.class));
+        assertThat(leafPromise).isNotSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenCatch(mock(Function.class));
+        assertThat(leafPromise).isNotSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenCatchAsync(mock(AsyncFunction.class));
+        assertThat(leafPromise).isNotSameAs(rootPromise);
+    }
+
+    @Test(dataProvider = "completePromises")
+    @SuppressWarnings("unchecked")
+    public void shouldReturnSamePromiseUsingThenWithListener(Promise<?, Exception> rootPromise) throws Exception {
+        Promise<?, Exception> leafPromise;
+
+        leafPromise = rootPromise.thenOnRuntimeException(mock(RuntimeExceptionHandler.class));
+        assertThat(leafPromise).isSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenOnResult(mock(ResultHandler.class));
+        assertThat(leafPromise).isSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenOnException(mock(ExceptionHandler.class));
+        assertThat(leafPromise).isSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenOnResultOrException(mock(ResultHandler.class), mock(ExceptionHandler.class));
+        assertThat(leafPromise).isSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenOnResultOrException(mock(Runnable.class));
+        assertThat(leafPromise).isSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenAlways(mock(Runnable.class));
+        assertThat(leafPromise).isSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenFinally(mock(Runnable.class));
+        assertThat(leafPromise).isSameAs(rootPromise);
+    }
+
+    @DataProvider
+    private Object[][] completePromises() {
+        PromiseImpl<String, Exception> promiseImplResult = PromiseImpl.create();
+        promiseImplResult.handleResult(null);
+
+        PromiseImpl<String, Exception> promiseImplException = PromiseImpl.create();
+        promiseImplResult.handleException(null);
+
+        PromiseImpl<String, Exception> promiseImplRuntimeException = PromiseImpl.create();
+        promiseImplResult.handleRuntimeException(null);
+
+        return new Object[][] {
+            { Promises.<String, Exception>newResultPromise(null) },
+            { Promises.<String, Exception>newExceptionPromise(null) },
+            { createCompletedRuntimePromise(null) },
+            { promiseImplResult },
+            { promiseImplException },
+            { promiseImplRuntimeException }
+        };
+    }
+
+    private Promise<String, Exception> createCompletedRuntimePromise(String value) {
+        // Cannot create a RuntimeExceptionPromise in another way
+        return Promises.<String, Exception>newResultPromise(value)
+                .then(new Function<String, String, Exception>() {
+            @Override
+            public String apply(String value) throws Exception {
+                throw new RuntimeException("Boom");
+            }
+        });
+    }
+}
