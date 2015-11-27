@@ -192,9 +192,9 @@ public class AccessAuditEventBuilderTest {
     }
 
     @Test
-    public void canPopulateClientFromHttpContext() throws Exception {
+    public void canPopulateClientFromClientContext() throws Exception {
         // Given
-        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"),
+        Context context = new HttpContext(jsonFromFile("/httpContextAndClientContext.json"),
                 Thread.currentThread().getContextClassLoader());
 
         // When
@@ -202,19 +202,41 @@ public class AccessAuditEventBuilderTest {
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .userId("someone@forgerock.com")
-                .clientFromHttpContext(httpContext)
+                .clientFromContext(context)
                 .toEvent();
 
         // Then
         JsonValue value = event.getValue();
         assertThat(value.get(CLIENT).get(IP).asString()).isEqualTo("168.0.0.10");
+        assertThat(value.get(CLIENT).get(PORT).asInteger()).isEqualTo(55646);
         assertThat(value.get(CLIENT).get(HOST).asString()).isNull();
+    }
+
+    @Test
+    public void canPopulateServerFromClientContext() throws Exception {
+        // Given
+        Context context = new HttpContext(jsonFromFile("/httpContextAndClientContext.json"),
+                Thread.currentThread().getContextClassLoader());
+
+        // When
+        AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
+                .transactionId("transactionId")
+                .userId("someone@forgerock.com")
+                .serverFromContext(context)
+                .toEvent();
+
+        // Then
+        JsonValue value = event.getValue();
+        assertThat(value.get(SERVER).get(IP).asString()).isEqualTo("127.0.0.1");
+        assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(8080);
+        assertThat(value.get(SERVER).get(HOST).asString()).isEqualTo("localhost");
     }
 
     @Test
     public void canPopulateHttpFromHttpContext() throws Exception {
         // Given
-        HttpContext httpContext = new HttpContext(jsonFromFile("/httpContext.json"),
+        Context context = new HttpContext(jsonFromFile("/httpContextAndClientContext.json"),
                 Thread.currentThread().getContextClassLoader());
 
         Map<String, Object> expectedHeaders = new LinkedHashMap<>();
@@ -231,7 +253,7 @@ public class AccessAuditEventBuilderTest {
                 .eventName("IDM-sync-10")
                 .transactionId("transactionId")
                 .userId("someone@forgerock.com")
-                .httpFromHttpContext(httpContext)
+                .httpFromContext(context)
                 .toEvent();
 
         // Then
@@ -285,7 +307,7 @@ public class AccessAuditEventBuilderTest {
     @Test
     public void canPopulateServerFromContext() throws Exception {
         // Given
-        Context context = new HttpContext(jsonFromFile("/httpContext.json"),
+        Context context = new HttpContext(jsonFromFile("/httpContextAndClientContext.json"),
                 Thread.currentThread().getContextClassLoader());
 
         // When
@@ -298,7 +320,7 @@ public class AccessAuditEventBuilderTest {
 
         // Then
         JsonValue value = event.getValue();
-        assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(-1);
+        assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(8080);
         assertThat(value.get(SERVER).get(HOST).asString()).isEqualTo("localhost");
         assertThat(value.get(SERVER).get(IP).asString()).isEqualTo("127.0.0.1");
     }

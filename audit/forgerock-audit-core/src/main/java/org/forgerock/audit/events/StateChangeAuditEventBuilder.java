@@ -161,7 +161,7 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
      * @param request The CREST request.
      * @return this builder
      */
-    public final T objectIdFromRequest(Request request) {
+    public final T objectIdFromCrestRequest(Request request) {
         objectId(request.getResourcePath());
         return self();
     }
@@ -172,7 +172,7 @@ abstract class StateChangeAuditEventBuilder<T extends StateChangeAuditEventBuild
      * @param request The CREST request.
      * @return this builder
      */
-    public final T operationFromRequest(Request request) {
+    public final T operationFromCrestRequest(Request request) {
         if (request instanceof ActionRequest) {
             String action = ((ActionRequest) request).getAction();
             operation(action);

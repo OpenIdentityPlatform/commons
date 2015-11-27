@@ -125,7 +125,7 @@ public class AuditEventBuilderTest {
         // When
         AuditEvent event = productEvent()
                 .eventName("AM-CREST-SUCCESSFUL")
-                .transactionIdFromRootContext(context)
+                .transactionIdFromContext(context)
                 .toEvent();
 
         // Then

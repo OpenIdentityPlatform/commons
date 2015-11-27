@@ -1,4 +1,5 @@
 {
+  "name" : "http",
   "class": "org.forgerock.json.resource.servlet.HttpContext",
   "method": "GET",
   "path": "http://product.example.com:8080/path",
@@ -11,22 +12,20 @@
     "h2": [ "h2_v1", "h2_v2" ],
     "Host" : ["product.example.com:8080"]
   },
-  "remoteAddress": "168.0.0.10",
-  "name" : "http",
   "parent": {
     "class": "org.forgerock.services.context.ClientContext",
     "name": "client",
     "remoteUser": "",
-    "remoteAddress": "",
+    "remoteAddress": "168.0.0.10",
     "remoteHost": "",
-    "remotePort": -1,
+    "remotePort": 55646,
     "certificates": "",
     "userAgent": "",
     "isExternal": false,
     "isSecure": true,
     "localAddress": "127.0.0.1",
     "localName": "localhost",
-    "localPort": -1,
+    "localPort": 8080,
     "parent": {
       "class": "org.forgerock.services.context.RootContext",
       "id": "6a958c81-2ec4-4b8d-8a11-73519d30b6d7-0",

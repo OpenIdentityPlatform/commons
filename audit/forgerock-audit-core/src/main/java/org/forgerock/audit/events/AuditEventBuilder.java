@@ -179,7 +179,6 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * @return this builder
      */
     public final T userId(String id) {
-        Reject.ifNull(id);
         jsonValue.put(USER_ID, id);
         return self();
     }
@@ -217,7 +216,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
      * @param context The CREST context.
      * @return this builder
      */
-    public final T transactionIdFromRootContext(Context context) {
+    public final T transactionIdFromContext(Context context) {
         if (context.containsContext(RootContext.class)) {
             RootContext rootContext = context.asContext(RootContext.class);
             transactionId(rootContext.getId());

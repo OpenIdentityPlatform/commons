@@ -91,8 +91,8 @@ public class ActivityAuditEventBuilderTest {
                 .timestamp(1427293286239L)
                 .eventName("AM-REALM-CREATE")
                 .userId("someone@forgerock.com")
-                .objectIdFromRequest(request)
-                .operationFromRequest(request)
+                .objectIdFromCrestRequest(request)
+                .operationFromCrestRequest(request)
                 .toEvent();
 
         assertThat(event.getValue().get(OBJECT_ID).asString().equals("some/resource"));

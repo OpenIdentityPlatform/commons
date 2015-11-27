@@ -96,11 +96,9 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
     public static final String CREST_PROTOCOL = "CREST";
 
-    private static final String HOST_HEADER = "Host";
     private static final String COOKIE_HEADER = "Cookie";
     private static final String HTTP_CONTEXT_NAME = "http";
     private static final String CLIENT_CONTEXT_NAME = "client";
-    private static final String HTTP_CONTEXT_REMOTE_ADDRESS = "remoteAddress";
 
     private static final Logger logger = LoggerFactory.getLogger(AccessAuditEventBuilder.class);
 
@@ -161,21 +159,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
                 field(IP, ip),
                 field(PORT, port));
         jsonValue.put(SERVER, server);
-        return self();
-    }
-
-    /**
-     * Sets the server fields for the event, if the provided
-     * <code>Context</code> contains a <code>HttpContext</code>..
-     *
-     * @param context the CREST context
-     * @return this builder
-     */
-    public final T serverFromContext(Context context) {
-        if (context.containsContext(ClientContext.class)) {
-            ClientContext clientContext = context.asContext(ClientContext.class);
-            server(clientContext.getLocalAddress(), clientContext.getLocalPort(), clientContext.getLocalName());
-        }
         return self();
     }
 
@@ -411,17 +394,42 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * Sets client ip, port and host from <code>HttpContext</code>, if the provided
-     * <code>Context</code> contains a <code>HttpContext</code>.
+     * Sets client ip, port and host from <code>ClientContext</code>, if the provided
+     * <code>Context</code> contains a <code>ClientContext</code>.
      *
-     * @param context The CREST context.
+     * @param context The root CHF context.
      * @return this builder
      */
-    public final T clientFromHttpContext(Context context) {
-        if (context.containsContext(HTTP_CONTEXT_NAME)) {
-            JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
-            String ipAddress = httpContext.get(HTTP_CONTEXT_REMOTE_ADDRESS).asString();
-            client(ipAddress);
+    public final T clientFromContext(Context context) {
+        if (context.containsContext(ClientContext.class)) {
+            ClientContext clientContext = context.asContext(ClientContext.class);
+            String remoteAddress = clientContext.getRemoteAddress();
+            int remotePort = clientContext.getRemotePort();
+            String remoteHost = null;
+            if (performReverseDnsLookup) {
+                try {
+                    InetAddress ipAddr = InetAddress.getByName(remoteAddress);
+                    remoteHost = ipAddr.getHostName();
+                } catch (UnknownHostException e) {
+                    logger.debug("Unable to lookup client host name for {}.", remoteAddress);
+                }
+            }
+            client(remoteAddress, remotePort, remoteHost);
+        }
+        return self();
+    }
+
+    /**
+     * Sets the server fields for the event, if the provided
+     * <code>Context</code> contains a <code>ClientContext</code>..
+     *
+     * @param context the CREST context
+     * @return this builder
+     */
+    public final T serverFromContext(Context context) {
+        if (context.containsContext(ClientContext.class)) {
+            ClientContext clientContext = context.asContext(ClientContext.class);
+            server(clientContext.getLocalAddress(), clientContext.getLocalPort(), clientContext.getLocalName());
         }
         return self();
     }
@@ -446,7 +454,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @param context The CREST context.
      * @return this builder
      */
-    public final T httpFromHttpContext(Context context) {
+    public final T httpFromContext(Context context) {
         if (context.containsContext(HTTP_CONTEXT_NAME)) {
             final JsonValue httpContext = context.getContext(HTTP_CONTEXT_NAME).toJsonValue();
             final JsonValue clientContext = context.getContext(CLIENT_CONTEXT_NAME).toJsonValue();
@@ -478,22 +486,41 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
+     * Sets common fields from services contexts.
+     *
+     * @param context The services context.
+     *
+     * @see #transactionIdFromContext(Context)
+     * @see #clientFromContext(Context)
+     * @see #serverFromContext(Context)
+     * @see #httpFromContext(Context)
+     *
+     * @return this builder
+     */
+    public final T forContext(Context context) {
+        transactionIdFromContext(context);
+        clientFromContext(context);
+        serverFromContext(context);
+        httpFromContext(context);
+        return self();
+    }
+
+    /**
      * Sets common fields from CREST contexts and request.
      *
      * @param context The CREST context.
      * @param request The CREST request.
      *
-     * @see #transactionIdFromRootContext(Context)
-     * @see #clientFromHttpContext(Context)
-     * @see #httpFromHttpContext(Context)
+     * @see #transactionIdFromContext(Context)
+     * @see #clientFromContext(Context)
+     * @see #serverFromContext(Context)
+     * @see #httpFromContext(Context)
      * @see #requestFromCrestRequest(Request)
      *
      * @return this builder
      */
-    public final T forHttpCrestRequest(Context context, Request request) {
-        transactionIdFromRootContext(context);
-        clientFromHttpContext(context);
-        httpFromHttpContext(context);
+    public final T forHttpRequest(Context context, Request request) {
+        forContext(context);
         requestFromCrestRequest(request);
         return self();
     }
