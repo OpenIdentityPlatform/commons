@@ -303,6 +303,11 @@ public class AccessAuditEventBuilderTest {
         assertThat(httpRequest.get(PATH).asString()).isEqualTo("http://product.example.com:8080/path");
         assertThat(httpRequest.get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(expectedParameters);
         assertThat(httpRequest.get(HEADERS).asMap()).isEqualTo(expectedHeaders);
+        Map<String, String> cookies = event.getValue().get(HTTP).get(REQUEST).get(COOKIES).asMap(String.class);
+        assertThat(cookies).isNotEmpty().hasSize(3);
+        assertThat(cookies).containsEntry("cookie1", "01");
+        assertThat(cookies).containsEntry("cookie2", "02");
+        assertThat(cookies).containsEntry("cookie3", "03");
     }
 
     @Test

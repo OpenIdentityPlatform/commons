@@ -26,6 +26,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
 import org.forgerock.http.header.CookieHeader;
@@ -464,9 +465,15 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
                     httpContext.get("method").asString(),
                     httpContext.get("path").asString(),
                     httpContext.get("parameters").asMapOfList(String.class),
-                    httpContext.get("headers").asMapOfList(String.class));
+                    asCaseInsensitiveMap(httpContext.get("headers").asMapOfList(String.class)));
         }
         return self();
+    }
+
+    private <E> Map<String, List<E>> asCaseInsensitiveMap(Map<String, List<E>> map) {
+        TreeMap<String, List<E>> caseInsensitiveMap = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+        caseInsensitiveMap.putAll(map);
+        return caseInsensitiveMap;
     }
 
     /**

@@ -10,7 +10,8 @@
   "headers": {
     "h1": [ "h1_v1", "h1_v2" ],
     "h2": [ "h2_v1", "h2_v2" ],
-    "Host" : ["product.example.com:8080"]
+    "Host" : ["product.example.com:8080"],
+    "cookie" : ["cookie1=01; cookie2=02; cookie3=03"]
   },
   "parent": {
     "class": "org.forgerock.services.context.ClientContext",
