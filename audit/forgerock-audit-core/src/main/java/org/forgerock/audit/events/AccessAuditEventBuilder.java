@@ -96,7 +96,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
     public static final String CREST_PROTOCOL = "CREST";
 
-    private static final String COOKIE_HEADER = "Cookie";
     private static final String HTTP_CONTEXT_NAME = "http";
     private static final String CLIENT_CONTEXT_NAME = "client";
 
@@ -274,7 +273,10 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      */
     public final T httpRequest(boolean secure, String method, String path, Map<String, List<String>> queryParameters,
             Map<String, List<String>> headers) {
-        final List<String> cookiesHeader = headers.remove(COOKIE_HEADER);
+        List<String> cookiesHeader = headers.remove("Cookie");
+        if (cookiesHeader == null || cookiesHeader.isEmpty()) {
+            cookiesHeader = headers.remove("cookie");
+        }
         final List<Cookie> listOfCookies = new LinkedList<>();
         if (cookiesHeader != null && !cookiesHeader.isEmpty()) {
             listOfCookies.addAll(CookieHeader.valueOf(cookiesHeader.get(0)).getCookies());

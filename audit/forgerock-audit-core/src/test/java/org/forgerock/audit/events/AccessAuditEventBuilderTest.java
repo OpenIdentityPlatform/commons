@@ -192,6 +192,46 @@ public class AccessAuditEventBuilderTest {
     }
 
     @Test
+    public void canPopulateCookiesFromProperCaseHttpHeader() {
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("Cookie", Collections.singletonList("cookie1=01; cookie2=02; cookie3=03"));
+
+        AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
+                .transactionId("transactionId")
+                .userId("someone@forgerock.com")
+                .timestamp(1427293286239L)
+                .httpRequest(false, "GET", "/some/path", Collections.<String, List<String>>emptyMap(), headers)
+                .toEvent();
+
+        Map<String, String> cookies = event.getValue().get(HTTP).get(REQUEST).get(COOKIES).asMap(String.class);
+        assertThat(cookies).isNotEmpty().hasSize(3);
+        assertThat(cookies).containsEntry("cookie1", "01");
+        assertThat(cookies).containsEntry("cookie2", "02");
+        assertThat(cookies).containsEntry("cookie3", "03");
+    }
+
+    @Test
+    public void canPopulateCookiesFromLowerCaseHttpHeader() {
+        Map<String, List<String>> headers = new HashMap<>();
+        headers.put("cookie", Collections.singletonList("cookie1=01; cookie2=02; cookie3=03"));
+
+        AuditEvent event = productAccessEvent()
+                .eventName("IDM-sync-10")
+                .transactionId("transactionId")
+                .userId("someone@forgerock.com")
+                .timestamp(1427293286239L)
+                .httpRequest(false, "GET", "/some/path", Collections.<String, List<String>>emptyMap(), headers)
+                .toEvent();
+
+        Map<String, String> cookies = event.getValue().get(HTTP).get(REQUEST).get(COOKIES).asMap(String.class);
+        assertThat(cookies).isNotEmpty().hasSize(3);
+        assertThat(cookies).containsEntry("cookie1", "01");
+        assertThat(cookies).containsEntry("cookie2", "02");
+        assertThat(cookies).containsEntry("cookie3", "03");
+    }
+
+    @Test
     public void canPopulateClientFromClientContext() throws Exception {
         // Given
         Context context = new HttpContext(jsonFromFile("/httpContextAndClientContext.json"),
