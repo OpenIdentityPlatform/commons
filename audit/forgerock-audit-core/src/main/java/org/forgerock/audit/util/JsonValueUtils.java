@@ -134,19 +134,19 @@ public final class JsonValueUtils {
      */
     public static String extractValueAsString(final JsonValue json, final String fieldName) {
         JsonValue value = json.get(new JsonPointer(fieldName));
-        String rawStr = null;
-        if (value == null) {
-            rawStr = "";
+        if (value == null || value.isNull()) {
+            return null;
         } else if (value.isString()) {
-            rawStr = value.asString();
+            return value.asString();
         } else {
+            String rawStr = null;
             try {
                 rawStr = mapper.writeValueAsString(value.getObject());
             } catch (JsonProcessingException e) {
                 logger.error("Unable to write the value for field {} as a string.", fieldName);
             }
+            return rawStr;
         }
-        return rawStr;
     }
 
     private static JsonValue buildObject(Map<String, Object> objectSet) {

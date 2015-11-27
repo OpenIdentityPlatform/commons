@@ -32,6 +32,13 @@ import java.util.Map;
 public class JsonValueUtilsTest {
 
     @Test
+    public void extractValueAsStringCanExtractNull() {
+        JsonValue jsonValue = json(object(field("field", null)));
+        String value = JsonValueUtils.extractValueAsString(jsonValue, "field");
+        assertThat(value).isNull();
+    }
+
+    @Test
     public void testJsonValueExpander() {
         //given
         Map<String, Object> flatObject = new HashMap<String, Object>();
