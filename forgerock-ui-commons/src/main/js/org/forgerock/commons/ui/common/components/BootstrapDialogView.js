@@ -41,7 +41,7 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialogView", [
         show: function(callback) {
             var self = this;
             self.setButtons();
-            $.when(ModuleLoader.load("bootstrap-dialog"), self.loadContent()).then(_.bind(
+            $.when(ModuleLoader.load("org/forgerock/commons/ui/common/components/BootstrapDialog"), self.loadContent()).then(_.bind(
                 function (BootstrapDialog, content) {
                     self.type = self.type || BootstrapDialog.TYPE_DEFAULT;
                     self.size = self.size || BootstrapDialog.SIZE_NORMAL;

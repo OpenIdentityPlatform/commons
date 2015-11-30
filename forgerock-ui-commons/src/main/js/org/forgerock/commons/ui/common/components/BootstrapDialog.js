@@ -20,8 +20,22 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialog", [
     "jquery",
     "bootstrap-dialog"
 ], function (_, $, BootstrapDialog) {
-    function forceFocus (event) {
-        event.data.dialog.$modalContent.find("[autofocus]").focus();
+
+    function forceFocus (dialog) {
+        dialog.$modalContent.find("[autofocus]").focus();
+    }
+
+    function setButtonStates (dialog) {
+        _.each(dialog.options.buttons, function(button) {
+            if (button.disabled === true) {
+                dialog.getButton(button.id).disable();
+            }
+        });
+    }
+
+    function onShown (event) {
+        forceFocus(event.data.dialog);
+        setButtonStates(event.data.dialog);
     }
 
     /**
@@ -56,7 +70,7 @@ define("org/forgerock/commons/ui/common/components/BootstrapDialog", [
              * Workaround for autofocus having no effect in Bootstrap modals
              * @see http://getbootstrap.com/javascript/#modals
              */
-            dialog.getModal().on("shown.bs.modal", { dialog: dialog }, forceFocus);
+            dialog.getModal().on("shown.bs.modal", { dialog: dialog }, onShown);
 
             return dialog;
         };

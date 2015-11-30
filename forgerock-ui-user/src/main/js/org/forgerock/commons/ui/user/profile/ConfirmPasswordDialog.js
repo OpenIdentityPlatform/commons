@@ -33,7 +33,9 @@ define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
         contentTemplate: "templates/user/ConfirmPasswordDialogTemplate.html",
         events: {
             "onValidate": "onValidate",
-            "submit #confirmPasswordForm": "submitForm"
+            "submit #confirmPasswordForm": "submitForm",
+            "change #currentPassword": "validateForm",
+            "keyup #currentPassword": "validateForm"
         },
         submitForm: function (e) {
             if (e) {
@@ -62,13 +64,20 @@ define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
             this.dialog = dialog;
             this.element = dialog.$modal;
             this.rebind();
-            dialog.$modal.find(".modal-body :input:first").val("").focus();
+            dialog.$modal.find(".modal-body :input:first").val("");
             ValidatorsManager.bindValidators(dialog.$modal);
         },
         render: function(changedProtected, completedCallback) {
             this.data.changedProtected = changedProtected;
             this.completedCallback = completedCallback;
             this.show();
+        },
+        validateForm: function(){
+            if (this.$el.find("#currentPassword").val().length === 0) {
+                this.$el.find("#btnUpdate").prop("disabled", true).addClass("disabled");
+            } else {
+                this.$el.find("#btnUpdate").prop("disabled", false).removeClass("disabled");
+            }
         }
     });
 
