@@ -34,7 +34,11 @@ import org.forgerock.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.Annotated;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 
@@ -58,6 +62,10 @@ public class AuditJsonConfig {
     //checkstyle:off
     private static final ObjectMapper mapper = new ObjectMapper();
     // checkstyle:on
+
+    private static final AnnotationIntrospector defaultAnnotationIntrospector = new JacksonAnnotationIntrospector();
+    private static final AnnotationIntrospector helpAppenderAnnotationIntrospector =
+            new HelpAppenderAnnotationIntrospector();
 
     private AuditJsonConfig() {
         // prevent instantiation of the class
@@ -279,15 +287,30 @@ public class AuditJsonConfig {
                                 classLoader),
                         classLoader);
         try {
+            mapper.setAnnotationIntrospector(helpAppenderAnnotationIntrospector);
             SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
             mapper.acceptJsonFormatVisitor(mapper.constructType(eventHandlerConfiguration), visitor);
             JsonSchema jsonSchema = visitor.finalSchema();
-            return new JsonValue(mapper.readValue(mapper.writeValueAsString(jsonSchema), Map.class));
+            final JsonValue schema = json(mapper.readValue(mapper.writeValueAsString(jsonSchema), Map.class));
+            mapper.setAnnotationIntrospector(defaultAnnotationIntrospector);
+            return schema;
         } catch (IOException e) {
             final String error = String.format("Unable to parse configuration class schema for configuration class %s",
                     eventHandlerConfiguration.getName());
             logger.error(error, e);
             throw new AuditException(error, e);
+        }
+    }
+
+    /**
+     * Extends the default {@link JacksonAnnotationIntrospector} and overrides the {@link JsonPropertyDescription}
+     * annotation inorder to append ".help" to the description.
+     */
+    private static class HelpAppenderAnnotationIntrospector extends JacksonAnnotationIntrospector {
+        @Override
+        public String findPropertyDescription(Annotated ann) {
+            JsonPropertyDescription desc = _findAnnotation(ann, JsonPropertyDescription.class);
+            return (desc == null) ? null : desc.value().concat(".help");
         }
     }
 
