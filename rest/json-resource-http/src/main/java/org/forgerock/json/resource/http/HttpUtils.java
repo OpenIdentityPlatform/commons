@@ -348,27 +348,36 @@ public final class HttpUtils {
         final String ifNoneMatch = getIfNoneMatch(request);
         final String ifMatch = getIfMatch(request, protocolVersion);
 
-        // For protocol version 1:
-        //
-        //  - "If-None-Match: *" is present; this is a create which will fail if the object already exists.
-        //  - "If-None-Match: *" is not present:
-        //          This is an update which will fail if the object does not exist.  There are two ways to
-        //          perform the update, using the value of the If-Match header:
-        //           - "If-Match: <rev>" : update the object if its revision matches the header value
-        //           - "If-Match: * : update the object regardless of the object's revision
-        //           - "If-Match:" header is not present : same as "If-Match: *"; update regardless of object revision
-        //
-        // For protocol version 2 onward:
-        //
-        // Two methods of create are implied by PUT:
-        //
-        //  - "If-None-Match: *" is present, this is a create which will fail if the object already exists.
-        //  - "If-Match" is present; this is an update only:
-        //           - "If-Match: <rev>" : update the object if its revision matches the header value
-        //           - "If-Match: * : update the object regardless of the object's revision
-        //  - Neither "If-None-Match" nor "If-Match" are present, this is either a create or an update ("upsert"):
-        //          Attempt a create; if it fails, attempt an update.  If the update fails, return an error
-        //          (the record could have been deleted between the create-failure and the update, for example).
+        /* CREST-100
+         * For protocol version 1:
+         *
+         *  - "If-None-Match: x" is present, where 'x' is any non-* value: this is a bad request
+         *  - "If-None-Match: *" is present: this is a create which will fail if the object already exists.
+         *  - "If-None-Match: *" is not present:
+         *          This is an update which will fail if the object does not exist.  There are two ways to
+         *          perform the update, using the value of the If-Match header:
+         *           - "If-Match: <rev>" : update the object if its revision matches the header value
+         *           - "If-Match: * : update the object regardless of the object's revision
+         *           - "If-Match:" header is not present : same as "If-Match: *"; update regardless of object revision
+         *
+         * For protocol version 2 onward:
+         *
+         * Two methods of create are implied by PUT:
+         *
+         *  - "If-None-Match: x" is present, where 'x' is any non-* value: this is a bad request
+         *  - "If-None-Match: *" is present, this is a create which will fail if the object already exists.
+         *  - "If-Match" is present; this is an update only:
+         *           - "If-Match: <rev>" : update the object if its revision matches the header value
+         *           - "If-Match: * : update the object regardless of the object's revision
+         *  - Neither "If-None-Match" nor "If-Match" are present, this is either a create or an update ("upsert"):
+         *          Attempt a create; if it fails, attempt an update.  If the update fails, return an error
+         *          (the record could have been deleted between the create-failure and the update, for example).
+         */
+
+        /* CREST-346 */
+        if (ifNoneMatch != null && !ETAG_ANY.equals(ifNoneMatch)) {
+            throw new BadRequestException("\"" + ifNoneMatch + "\" is not a supported value for If-None-Match on PUT");
+        }
 
         if (ETAG_ANY.equals(ifNoneMatch)) {
             return RequestType.CREATE;

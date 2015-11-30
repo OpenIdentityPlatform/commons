@@ -394,6 +394,27 @@ public class HttpUtilsTest {
         }
     }
 
+    /* Test cases for PUT with If-None-Match: 1 - should generate BadRequestException */
+    @DataProvider
+    public Object[][] requestToException() {
+        return new Object[][] {
+            { putRequest("1.0", "1", null) },
+            { putRequest("2.0", "1", null) },
+            { putRequest(null, "1", null) }
+        };
+    }
+
+    /**
+     * CREST-346: Supplying an If-None-Match: 1 (non-null, non-ETAG_ANY) should result in a BadRequestException.
+     *
+     * @param request the request
+     * @throws ResourceException on illegal request
+     */
+    @Test(dataProvider = "requestToException", expectedExceptions = BadRequestException.class)
+    public void testDetermineRequestType(Request request) throws ResourceException {
+        determineRequestType(request);
+    }
+
     @DataProvider
     public Object[][] requestToRequestType() {
         return new Object[][] {
