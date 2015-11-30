@@ -48,6 +48,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+@SuppressWarnings("javadoc")
 public class RotatableWriterTest {
 
     private static final String ONE_SECOND = "1 second";
@@ -228,11 +229,11 @@ public class RotatableWriterTest {
         final File file = getTempFile();
         final String prefix = "testRotationForSizeBasedRotationPolicy";
         final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("1 hour"); // ensure asynchronous check is inactive
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationFilePrefix(prefix);
         configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
         configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
-        configuration.getFileRetention().setMaxNumberOfHistoryFiles(1);
         rotatableWriter = new RotatableWriter(file, configuration, true);
 
         // when
@@ -240,8 +241,8 @@ public class RotatableWriterTest {
         writeThenFlushBytes(rotatableWriter, 1); // need to let the policies see the flushed bytes
 
         // then
-        assertRetainedHistoricalFiles(file, prefix, 1);
-        assertThat(rotatableWriter.getBytesWritten()).isEqualTo(0L);
+        // the extra byte may or may not have been written due to buffer
+        assertThat(rotatableWriter.getBytesWritten()).isBetween(0L, 1L);
     }
 
     @Test
@@ -296,11 +297,11 @@ public class RotatableWriterTest {
         final String prefix = "testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified";
         setLastModifiedToOneSecondAgo(file);
         final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("100 ms");
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationFilePrefix(prefix);
         configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
         configuration.getFileRotation().setRotationInterval("1 second");
-        configuration.getFileRotation().setRotationCheckInterval("100 ms");
         configuration.getFileRetention().setMaxNumberOfHistoryFiles(1);
         rotatableWriter = new RotatableWriter(file, configuration, true);
 
@@ -318,6 +319,7 @@ public class RotatableWriterTest {
         final File file = getTempFile();
         final String prefix = "testRetentionWithMaxNumberOfFiles";
         final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("10ms");
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
         configuration.getFileRetention().setMaxNumberOfHistoryFiles(MAX_NUMBER_OF_HISTORY_FILES);
@@ -336,7 +338,20 @@ public class RotatableWriterTest {
 
         // then
         assertThat(allHistoricalFiles).isNotEmpty().hasSize(MAX_NUMBER_OF_HISTORY_FILES + 1);
+        waitForExpectedNumberOfHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
         assertRetainedHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
+    }
+
+    private void waitForExpectedNumberOfHistoricalFiles(final File file, final String prefix,
+            final int expectedNumberOfFiles) throws InterruptedException {
+        int count = 0;
+        int numberOfHistFiles = 0;
+        Set<File> emptySet = Collections.emptySet();
+        while (numberOfHistFiles != expectedNumberOfFiles && count <= 20) {
+            Thread.sleep(50);
+            numberOfHistFiles = getAllHistoricalFiles(file, prefix, expectedNumberOfFiles, emptySet).size();
+            count++;
+        }
     }
 
     @Test
@@ -345,6 +360,7 @@ public class RotatableWriterTest {
         final File file = getTempFile();
         final String prefix = "testRetentionWithMaxSizeOfFile";
         final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        configuration.setRotationRetentionCheckInterval("10ms");
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
         configuration.getFileRetention().setMaxDiskSpaceToUse(MAX_BYTES_TO_WRITE * MAX_NUMBER_OF_HISTORY_FILES);
@@ -363,6 +379,7 @@ public class RotatableWriterTest {
 
         // then
         assertThat(allHistoricalFiles).isNotEmpty().hasSize(MAX_NUMBER_OF_HISTORY_FILES + 1);
+        waitForExpectedNumberOfHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
         assertRetainedHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
     }
 

@@ -65,6 +65,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
 
     private static final Logger logger = LoggerFactory.getLogger(RotatableWriter.class);
     private static final Duration ZERO = Duration.duration("zero");
+    private static final Duration FIVE_SECONDS = Duration.duration("5s");
 
     private final List<RotationPolicy> rotationPolicies = new LinkedList<>();
     private final List<RetentionPolicy> retentionPolicies = new LinkedList<>();
@@ -111,6 +112,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         this.writer = constructWriter(file, append);
         addRetentionPolicies(configuration.getFileRetention());
         addRotationPolicies(configuration.getFileRotation());
+        scheduleRotationAndRetentionChecks(configuration);
     }
 
     /**
@@ -139,12 +141,21 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                     break;
                 }
             }
+        } finally {
+            readWriteLock.writeLock().unlock();
+            isRotating.set(false);
+        }
+    }
+
+    /** Delete files if they need to be deleted as per enabled retention policies. */
+    private void deleteFilesIfNeeded() throws IOException {
+        readWriteLock.writeLock().lock();
+        try {
             Set<File> filesToDelete = checkRetention(); // return the files to delete, but do not delete them
             if (!filesToDelete.isEmpty()) {
                 deleteFiles(filesToDelete);
             }
         } finally {
-            isRotating.set(false);
             readWriteLock.writeLock().unlock();
         }
     }
@@ -308,8 +319,6 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     }
 
     private void addRotationPolicies(final FileRotation fileRotation) {
-        final Duration rotationCheckInterval =
-                parseDuration("rotation check interval", fileRotation.getRotationCheckInterval(), ZERO);
         final Duration rotationInterval = parseDuration("rotation interval", fileRotation.getRotationInterval(), ZERO);
         final List<Duration> dailyRotationTimes = new LinkedList<>();
         for (final String rotationTime : fileRotation.getRotationTimes()) {
@@ -334,12 +343,23 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         if (!(rotationInterval.isZero() || rotationInterval.isUnlimited())) {
             rotationPolicies.add(new TimeLimitRotationPolicy(rotationInterval));
         }
+    }
 
-        if (!rotationPolicies.isEmpty()) {
+    /**
+     * Schedule checks for rotations and retention policies.
+     * <p>
+     * The check interval is provided by the RotationRetentionCheckInterval property, which must have
+     * a non-zero value if at least one policy is enabled.
+     */
+    private void scheduleRotationAndRetentionChecks(FileBasedEventHandlerConfiguration configuration)
+            throws IOException {
+        final Duration rotationCheckInterval = parseDuration("rotation and retention check interval",
+                configuration.getRotationRetentionCheckInterval(), FIVE_SECONDS);
+
+        if (!rotationPolicies.isEmpty() || !retentionPolicies.isEmpty()) {
             if (rotationCheckInterval.isUnlimited() || rotationCheckInterval.isZero()) {
-                logger.warn("No rotation check interval set; " +
-                        "rotation policies will only be evaluated when writing to files.");
-                return;
+                throw new IOException("Rotation and retention check interval set to an invalid value: "
+                        + rotationCheckInterval);
             }
             rotator = Executors.newScheduledThreadPool(1);
             rotator.scheduleAtFixedRate(
@@ -349,7 +369,14 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                             try {
                                 rotateIfNeeded();
                             } catch (Exception e) {
-                                logger.error("Failed to rotate file: {}", fileNamingPolicy.getInitialName(), e);
+                                logger.error("Failure when applying a rotation policy to file {}",
+                                        fileNamingPolicy.getInitialName(), e);
+                            }
+                            try {
+                                deleteFilesIfNeeded();
+                            } catch (Exception e) {
+                                logger.error("Failure when applying a retention policy to file {}",
+                                        fileNamingPolicy.getInitialName(), e);
                             }
                         }
                     },

@@ -20,6 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
+import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
 
 /**
@@ -31,6 +33,8 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
     private FileRotation fileRotation = new FileRotation();
     @JsonPropertyDescription("audit.handlers.file.fileRetention")
     private FileRetention fileRetention = new FileRetention();
+    @JsonPropertyDescription("audit.handlers.file.rotationRetentionCheckInterval")
+    private String rotationRetentionCheckInterval = "5s";
 
     /**
      * Gets the {@link FileRotation}.
@@ -42,9 +46,11 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
 
     /**
      * Sets the {@link FileRotation}.
-     * @return Not-null, The {@link FileRotation}.
+     *
+     * @param fileRotation Not-null, The {@link FileRotation}.
      */
     public void setFileRotation(final FileRotation fileRotation) {
+        Reject.ifNull(fileRotation);
         this.fileRotation = fileRotation;
     }
 
@@ -58,10 +64,48 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
 
     /**
      * Sets the {@link FileRetention}.
-     * @return Not-null, The {@link FileRetention}.
+     *
+     * @param fileRetention Not-null, The {@link FileRetention}.
      */
     public void setFileRetention(final FileRetention fileRetention) {
+        Reject.ifNull(fileRetention);
         this.fileRetention = fileRetention;
+    }
+
+    /**
+     * Gets the interval to check time-based file rotation policies. The interval should be set as a {@link Duration}.
+     * <p/>
+     * Examples of valid durations are:
+     * <pre>
+     *      5 seconds
+     *      5 minutes
+     *      5 hours
+     * </pre>
+     * <p/>
+     * Value of "zero" or "disabled" are not acceptable.
+     *
+     * @return The interval duration.
+     */
+    public String getRotationRetentionCheckInterval() {
+        return rotationRetentionCheckInterval;
+    }
+
+    /**
+     * Sets the interval to check time-based file rotation policies. The interval should be set as a {@link Duration}.
+     * <p/>
+     * Examples of valid durations are:
+     * <pre>
+     *      5 seconds
+     *      5 minutes
+     *      5 hours
+     * </pre>
+     * <p/>
+     * Value of "zero" or "disabled" are not acceptable.
+     *
+     * @param rotationRetentionCheckInterval The interval duration.
+     */
+    public void setRotationRetentionCheckInterval(String rotationRetentionCheckInterval) {
+        this.rotationRetentionCheckInterval = rotationRetentionCheckInterval;
     }
 
     /**
@@ -92,9 +136,6 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
 
         @JsonPropertyDescription("audit.handlers.file.rotationInterval")
         private String rotationInterval = "disabled";
-
-        @JsonPropertyDescription("audit.handlers.file.rotationCheckInterval")
-        private String rotationCheckInterval = "disabled";
 
         /**
          * Gets log rotation enabled state. By default log rotation is disabled.
@@ -228,44 +269,6 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
          */
         public void setRotationTimes(List<String> rotationTimes) {
             this.rotationTimes.addAll(rotationTimes);
-        }
-
-        /**
-         * Gets the interval to check time-based file rotation policies. The interval should be set as a {@link Duration}.
-         * <p/>
-         * Examples of valid durations are:
-         * <pre>
-         *      5 seconds
-         *      5 minutes
-         *      5 hours
-         *      disabled
-         * </pre>
-         * <p/>
-         * A value of "zero" or "disabled" means that time-based file rotation is disabled.
-         *
-         * @return The interval duration.
-         */
-        public String getRotationCheckInterval() {
-            return rotationCheckInterval;
-        }
-
-        /**
-         * Sets the interval to check time-based file rotation policies. The interval should be set as a {@link Duration}.
-         * <p/>
-         * Examples of valid durations are:
-         * <pre>
-         *      5 seconds
-         *      5 minutes
-         *      5 hours
-         *      disabled
-         * </pre>
-         * <p/>
-         * A value of "zero" or "disabled" means that time-based file rotation is disabled.
-         *
-         * @param rotationCheckInterval The interval duration.
-         */
-        public void setRotationCheckInterval(String rotationCheckInterval) {
-            this.rotationCheckInterval = rotationCheckInterval;
         }
     }
 
