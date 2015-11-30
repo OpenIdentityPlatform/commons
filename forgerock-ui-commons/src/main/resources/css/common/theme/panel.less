@@ -35,8 +35,6 @@
     text-decoration: none;
 }
 
-
-
 .panel .nav-list>li:last-child>a {
     border-bottom: none;
 }
@@ -55,4 +53,12 @@
 
 .fr-panel-with-border.panel-collapse:last-child  {
     border: 1px solid #ddd;
+}
+
+.fr-panel-heading-with-button .button-group .btn-link, .fr-panel-heading-with-button .dropdown .btn-link {
+    color: @navbar-toggle-color;
+
+    &:hover, &:focus{
+      color: darken(@base-theme-color, 5%);
+    }
 }
