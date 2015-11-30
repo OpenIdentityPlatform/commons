@@ -35,6 +35,7 @@ require.config({
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
             "RegisterView": "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
             "NavigationFilter" : "org/forgerock/commons/ui/common/components/navigation/filters/RoleFilter",
+            "KBADelegate": "org/forgerock/commons/ui/user/delegates/KBADelegate",
             // TODO: Remove this when there are no longer any references to the "underscore" dependency
             "underscore": "lodash"
         }

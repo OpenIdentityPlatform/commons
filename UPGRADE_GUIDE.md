@@ -23,3 +23,9 @@ For reference, OpenAM is using `org/forgerock/openam/ui/common/components/naviga
 * Introduction of new user role `ui-self-service-user`
 
 Applications will need to add this role to any users that should be able to access the self-service (profile) pages.
+
+## 9.x -> 10.x
+
+* Ability to provide project-specific `KBADelegate`
+
+Both OpenAM and OpenIDM need to provide a path to a `KBADelegate`, which can be either a project-specific or the commons one.
