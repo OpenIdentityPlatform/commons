@@ -297,6 +297,19 @@ If-None-Match: *
    as the value of the <literal>Location</literal> header.
   </para>
 
+  <para>
+   If you include the <literal>If-None-Match</literal> header, its value must be
+   <literal>*</literal>. In this case, the request creates the object if it
+   does not exist, and fails if the object does exist. If you include the
+   <literal>If-None-Match</literal> header with any value other than
+   <literal>*</literal>, the server returns an HTTP 400 Bad Request error. For
+   example, creating an object with
+   <literal>If-None-Match: <replaceable>revision</replaceable></literal> returns
+   a bad request error. If you do not include <literal>If-None-Match: *</literal>,
+   the request creates the object if it does not exist, and
+   <emphasis>updates</emphasis> the object if it does exist.
+  </para>
+
   <variablelist>
    <title>Parameters</title>
 
