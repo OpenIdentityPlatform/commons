@@ -16,7 +16,6 @@
 package org.forgerock.util.promise;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.fail;
 
@@ -25,6 +24,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
+import org.mockito.InOrder;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class PromiseImplTest {
@@ -39,9 +40,9 @@ public class PromiseImplTest {
         RuntimeException runtimeException = new RuntimeException();
 
         PromiseImpl<Void, NeverThrowsException> rootPromise = new PromiseImpl<>();
-        Promise<Void, NeverThrowsException> leafPromise = rootPromise.then(promiseFunction);
-
-        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+        rootPromise
+                .then(promiseFunction)
+                .thenOnRuntimeException(runtimeExceptionHandler);
 
         //When
         rootPromise.handleRuntimeException(runtimeException);
@@ -60,15 +61,14 @@ public class PromiseImplTest {
 
         PromiseImpl<Void, NeverThrowsException> rootPromise = new PromiseImpl<>();
         final PromiseImpl<Void, NeverThrowsException> badPromise = new PromiseImpl<>();
-        Promise<Void, NeverThrowsException> leafPromise = rootPromise
+        rootPromise
                 .thenAsync(new AsyncFunction<Void, Void, NeverThrowsException>() {
                     @Override
                     public Promise<Void, NeverThrowsException> apply(Void value) {
                         return badPromise;
                     }
-                });
-
-        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+                })
+                .thenOnRuntimeException(runtimeExceptionHandler);
 
         //When
         rootPromise.handleResult(null);
@@ -86,15 +86,14 @@ public class PromiseImplTest {
         final RuntimeException runtimeException = new RuntimeException();
 
         PromiseImpl<Void, NeverThrowsException> rootPromise = new PromiseImpl<>();
-        Promise<Void, NeverThrowsException> leafPromise = rootPromise
+        rootPromise
                 .then(new Function<Void, Void, NeverThrowsException>() {
                     @Override
                     public Void apply(Void value) {
                         throw runtimeException;
                     }
-                });
-
-        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+                })
+                .thenOnRuntimeException(runtimeExceptionHandler);
 
         //When
         rootPromise.handleResult(null);
@@ -111,94 +110,17 @@ public class PromiseImplTest {
         final RuntimeException runtimeException = new RuntimeException();
 
         PromiseImpl<Void, NeverThrowsException> rootPromise = new PromiseImpl<>();
-        Promise<Void, NeverThrowsException> leafPromise = rootPromise
+        rootPromise
                 .thenAsync(new AsyncFunction<Void, Void, NeverThrowsException>() {
                     @Override
                     public Promise<Void, NeverThrowsException> apply(Void value) {
                         throw runtimeException;
                     }
-                });
-
-        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
-
-        //When
-        rootPromise.handleResult(null);
-
-        //Then
-        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
-    }
-
-
-    @Test
-    public void promiseThrowingRuntimeExceptionShouldPropagateThroughAChainedThenAlways() {
-
-        //Given
-        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
-        final RuntimeException runtimeException = new RuntimeException();
-
-        PromiseImpl<Void, NeverThrowsException> rootPromise = new PromiseImpl<>();
-        Promise<Void, NeverThrowsException> leafPromise = rootPromise
-                .thenAlways(new Runnable() {
-                    @Override
-                    public void run() {
-                        throw runtimeException;
-                    }
-                });
-
-        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
+                })
+                .thenOnRuntimeException(runtimeExceptionHandler);
 
         //When
         rootPromise.handleResult(null);
-
-        //Then
-        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
-    }
-
-    @Test
-    public void promiseThrowingRuntimeExceptionShouldPropagateThroughAChainedThenOnResult() {
-
-        //Given
-        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
-        final RuntimeException runtimeException = new RuntimeException();
-
-        PromiseImpl<Void, NeverThrowsException> rootPromise = new PromiseImpl<>();
-        Promise<Void, NeverThrowsException> leafPromise = rootPromise
-                .thenOnResult(new ResultHandler<Void>() {
-                    @Override
-                    public void handleResult(Void result) {
-                        throw runtimeException;
-                    }
-                });
-
-        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
-
-        //When
-        rootPromise.handleResult(null);
-
-        //Then
-        verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
-    }
-
-    @Test
-    public void promiseThrowingRuntimeExceptionShouldPropagateThroughAChainedThenOnException() {
-
-        //Given
-        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
-        final RuntimeException runtimeException = new RuntimeException();
-
-        PromiseImpl<Void, Exception> rootPromise = new PromiseImpl<>();
-        Promise<Void, Exception> leafPromise = rootPromise
-                .thenOnException(new ExceptionHandler<Exception>() {
-                    @Override
-                    public void handleException(Exception exception) {
-                        throw runtimeException;
-                    }
-                });
-
-        leafPromise.thenOnRuntimeException(runtimeExceptionHandler);
-
-        //When
-        rootPromise.handleException(new Exception());
 
         //Then
         verify(runtimeExceptionHandler).handleRuntimeException(runtimeException);
@@ -225,7 +147,7 @@ public class PromiseImplTest {
     }
 
     @Test
-    public void promiseBrokenWithRuntimeExceptionShouldThrowOnGetOrThrow() {
+    public void promiseBrokenWithRuntimeExceptionShouldThrowOnGetOrThrow() throws Exception {
 
         //Given
         final RuntimeException runtimeException = new RuntimeException();
@@ -237,7 +159,7 @@ public class PromiseImplTest {
         try {
             promise.getOrThrow();
             fail();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             //Then
             assertThat(e).isSameAs(runtimeException);
         }
@@ -280,6 +202,201 @@ public class PromiseImplTest {
         } catch (Exception e) {
             assertThat(e).isInstanceOf(RuntimeException.class);
         }
+    }
+
+    /**
+     * This test aims to verify that we have the same behavior if the promise is completed before or after having
+     * registered the listeners.
+     * We want all the appropriate listeners to be executed even if one throws a RuntimeException. The
+     * RuntimeExceptionHandler must *not* be triggered because of a listener threw a RuntimeException
+     *
+     * @param completeBefore complete the promise before or after registering the listeners
+     */
+    @Test(dataProvider = "completeBeforeAfter")
+    @SuppressWarnings("unchecked")
+    public void completeResultPromiseBeforeRegisteringListener(boolean completeBefore) throws Exception {
+        final String result = "completed";
+        // Setup mocks behavior
+        ResultHandler<String> resultHandler1 = mock(ResultHandler.class);
+        doThrow(new RuntimeException("ResultHandler #1"))
+                .when(resultHandler1).handleResult(result);
+
+        ResultHandler<String> resultHandler2 = mock(ResultHandler.class);
+        doThrow(new RuntimeException("ResultHandler #2"))
+                .when(resultHandler2).handleResult(result);
+
+        Runnable alwaysListener = mock(Runnable.class);
+        doThrow(new RuntimeException("Always listener"))
+                .when(alwaysListener).run();
+
+        Runnable onResultOrException = mock(Runnable.class);
+        doThrow(new RuntimeException("On result or exception"))
+                .when(onResultOrException).run();
+
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+
+        // Given
+        PromiseImpl<String, Exception> promise = PromiseImpl.create();
+
+        if (completeBefore) {
+            // When
+            promise.handleResult(result);
+        }
+
+        // Given again...
+        promise
+                .thenOnResult(resultHandler1)
+                .thenAlways(alwaysListener)
+                .thenOnResult(resultHandler2)
+                .thenOnRuntimeException(runtimeExceptionHandler)
+                .thenOnResultOrException(onResultOrException);
+
+        if (!completeBefore) {
+            // When
+            promise.handleResult(result);
+        }
+
+        // Then
+        assertThat(promise.get()).isSameAs(result);
+        InOrder inOrder = inOrder(resultHandler1, resultHandler2, alwaysListener, onResultOrException);
+        inOrder.verify(resultHandler1).handleResult(result);
+        inOrder.verify(alwaysListener).run();
+        inOrder.verify(resultHandler2).handleResult(result);
+        inOrder.verify(onResultOrException).run();
+        verifyZeroInteractions(runtimeExceptionHandler);
+    }
+
+    /**
+     * This test aims to verify that we have the same behavior if the promise is completed before or after having
+     * registered the listeners.
+     * We want all the appropriate listeners to be executed even if one throws a RuntimeException. The
+     * RuntimeExceptionHandler must *not* be triggered because of a listener threw a RuntimeException
+     *
+     * @param completeBefore complete the promise before or after registering the listeners
+     */
+    @Test(dataProvider = "completeBeforeAfter")
+    @SuppressWarnings("unchecked")
+    public void completeExceptionPromiseBeforeRegisteringListener(boolean completeBefore) throws Exception {
+        final Exception result = new Exception("completed");
+        // Setup mocks behavior
+        ExceptionHandler<Exception> exceptionHandler1 = mock(ExceptionHandler.class);
+        doThrow(new RuntimeException("ExceptionHandler #1"))
+                .when(exceptionHandler1).handleException(result);
+
+        ExceptionHandler<Exception> exceptionHandler2 = mock(ExceptionHandler.class);
+        doThrow(new RuntimeException("ResultHandler #2"))
+                .when(exceptionHandler2).handleException(result);
+
+        Runnable alwaysListener = mock(Runnable.class);
+        doThrow(new RuntimeException("Always listener"))
+                .when(alwaysListener).run();
+
+        Runnable onResultOrException = mock(Runnable.class);
+        doThrow(new RuntimeException("On result or exception"))
+                .when(onResultOrException).run();
+
+        RuntimeExceptionHandler runtimeExceptionHandler = mock(RuntimeExceptionHandler.class);
+
+        // Given
+        PromiseImpl<String, Exception> promise = PromiseImpl.create();
+
+        if (completeBefore) {
+            // When
+            promise.handleException(result);
+        }
+
+        // Given again...
+        promise
+                .thenOnException(exceptionHandler1)
+                .thenAlways(alwaysListener)
+                .thenOnException(exceptionHandler2)
+                .thenOnRuntimeException(runtimeExceptionHandler)
+                .thenOnResultOrException(onResultOrException);
+
+        if (!completeBefore) {
+            // When
+            promise.handleException(result);
+        }
+
+        // Then
+        try {
+            promise.getOrThrow();
+            fail("The promise should have thrown the completed Exception.");
+        } catch (Exception e) {
+            assertThat(e).isSameAs(e);
+        }
+        InOrder inOrder = inOrder(exceptionHandler1, exceptionHandler2, alwaysListener, onResultOrException);
+        inOrder.verify(exceptionHandler1).handleException(result);
+        inOrder.verify(alwaysListener).run();
+        inOrder.verify(exceptionHandler2).handleException(result);
+        inOrder.verify(onResultOrException).run();
+        verifyZeroInteractions(runtimeExceptionHandler);
+    }
+
+    /**
+     * This test aims to verify that we have the same behavior if the promise is completed before or after having
+     * registered the listeners.
+     * We want all the appropriate listeners to be executed even if one throws a RuntimeException. The
+     * RuntimeExceptionHandler must *not* be triggered because of a listener threw a RuntimeException
+     *
+     * @param completeBefore complete the promise before or after registering the listeners
+     */
+    @Test(dataProvider = "completeBeforeAfter")
+    @SuppressWarnings("unchecked")
+    public void completeRuntimeExceptionPromiseBeforeRegisteringListener(boolean completeBefore) throws Exception {
+        final RuntimeException result = new RuntimeException("completed");
+        // Setup mocks behavior
+        RuntimeExceptionHandler runtimeExceptionHandler1 = mock(RuntimeExceptionHandler.class);
+        doThrow(new RuntimeException("RuntimeExceptionHandler #1"))
+                .when(runtimeExceptionHandler1).handleRuntimeException(result);
+
+        RuntimeExceptionHandler runtimeExceptionHandler2 = mock(RuntimeExceptionHandler.class);
+        doThrow(new RuntimeException("RuntimeExceptionHandler #2"))
+                .when(runtimeExceptionHandler2).handleRuntimeException(result);
+
+        Runnable alwaysListener = mock(Runnable.class);
+        doThrow(new RuntimeException("Always listener"))
+                .when(alwaysListener).run();
+
+        Runnable onResultOrException = mock(Runnable.class);
+
+        // Given
+        PromiseImpl<String, Exception> promise = PromiseImpl.create();
+
+        if (completeBefore) {
+            // When
+            promise.handleRuntimeException(result);
+        }
+
+        // Given again...
+        promise
+                .thenOnRuntimeException(runtimeExceptionHandler1)
+                .thenOnRuntimeException(runtimeExceptionHandler2)
+                .thenAlways(alwaysListener)
+                .thenOnResultOrException(onResultOrException);
+
+        if (!completeBefore) {
+            // When
+            promise.handleRuntimeException(result);
+        }
+
+        // Then
+        try {
+            promise.getOrThrow();
+            fail("The promise should have thrown the completed RuntimeException.");
+        } catch (RuntimeException e) {
+            assertThat(e).isSameAs(e);
+        }
+        InOrder inOrder = inOrder(runtimeExceptionHandler1, runtimeExceptionHandler2, alwaysListener);
+        inOrder.verify(runtimeExceptionHandler1).handleRuntimeException(result);
+        inOrder.verify(runtimeExceptionHandler2).handleRuntimeException(result);
+        inOrder.verify(alwaysListener).run();
+        verifyZeroInteractions(onResultOrException);
+    }
+
+    @DataProvider
+    private Object[][] completeBeforeAfter() {
+        return new Object[][] { { Boolean.TRUE }, { Boolean.FALSE } };
     }
 
     private Promise<Void, ? extends Exception> throwException(boolean wantRuntimeException) {

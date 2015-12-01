@@ -282,7 +282,11 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             public void handleStateChange(final int newState, final V result, final E exception,
                     final RuntimeException runtimeException) {
                 if (newState == HAS_EXCEPTION || newState == CANCELLED) {
-                    onException.handleException(exception);
+                    try {
+                        onException.handleException(exception);
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Ignored unexpected exception thrown by ExceptionHandler", e);
+                    }
                 }
             }
         });
@@ -296,7 +300,11 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             public void handleStateChange(final int newState, final V result, final E exception,
                     final RuntimeException runtimeException) {
                 if (newState == HAS_RESULT) {
-                    onResult.handleResult(result);
+                    try {
+                        onResult.handleResult(result);
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Ignored unexpected exception thrown by ResultHandler", e);
+                    }
                 }
             }
         });
@@ -305,15 +313,23 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
 
     @Override
     public final Promise<V, E> thenOnResultOrException(final ResultHandler<? super V> onResult,
-                                                   final ExceptionHandler<? super E> onException) {
+            final ExceptionHandler<? super E> onException) {
         addOrFireListener(new StateListener<V, E>() {
             @Override
             public void handleStateChange(final int newState, final V result, final E exception,
                     final RuntimeException runtimeException) {
                 if (newState == HAS_RESULT) {
-                    onResult.handleResult(result);
+                    try {
+                        onResult.handleResult(result);
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Ignored unexpected exception thrown by ResultHandler", e);
+                    }
                 } else if (newState == HAS_EXCEPTION || newState == CANCELLED) {
-                    onException.handleException(exception);
+                    try {
+                        onException.handleException(exception);
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Ignored unexpected exception thrown by ExceptionHandler", e);
+                    }
                 }
             }
         });
@@ -327,7 +343,11 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             public void handleStateChange(final int newState, final V result, final E exception,
                     final RuntimeException runtimeException) {
                 if (newState != HAS_RUNTIME_EXCEPTION) {
-                    onResultOrException.run();
+                    try {
+                        onResultOrException.run();
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Ignored unexpected exception thrown by Runnable", e);
+                    }
                 }
             }
         });
@@ -350,7 +370,6 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
         final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<>();
         addOrFireListener(new StateListener<V, E>() {
             @Override
-            @SuppressWarnings("unchecked")
             public void handleStateChange(final int newState, final V result, final E exception,
                     final RuntimeException runtimeException) {
                 try {
@@ -381,13 +400,24 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     }
 
     @Override
-    public final Promise<V, E> thenAlways(final Runnable onResultOrException) {
-        return thenOnResultOrException(onResultOrException);
+    public final Promise<V, E> thenAlways(final Runnable always) {
+        addOrFireListener(new StateListener<V, E>() {
+            @Override
+            public void handleStateChange(final int newState, final V result, final E exception,
+                    final RuntimeException runtimeException) {
+                try {
+                    always.run();
+                } catch (RuntimeException e) {
+                    LOGGER.error("Ignored unexpected exception thrown by Runnable", e);
+                }
+            }
+        });
+        return this;
     }
 
     @Override
-    public final Promise<V, E> thenFinally(final Runnable onResultOrException) {
-        return thenOnResultOrException(onResultOrException);
+    public final Promise<V, E> thenFinally(final Runnable onFinally) {
+        return thenAlways(onFinally);
     }
 
     @Override
@@ -441,7 +471,11 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             @Override
             public void handleStateChange(int newState, V result, E exception, RuntimeException runtimeException) {
                 if (newState == HAS_RUNTIME_EXCEPTION) {
-                    onRuntimeException.handleRuntimeException(runtimeException);
+                    try {
+                        onRuntimeException.handleRuntimeException(runtimeException);
+                    } catch (RuntimeException e) {
+                        LOGGER.error("Ignored unexpected exception thrown by RuntimeExceptionHandler", e);
+                    }
                 }
             }
         });
@@ -524,15 +558,8 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             notifyAll(); // Wake up any blocked threads.
         }
         StateListener<V, E> listener;
-        try {
-            while ((listener = listeners.poll()) != null) {
-                listener.handleStateChange(newState, result, exception, runtimeException);
-            }
-        } catch (RuntimeException e) {
-            synchronized (this) {
-                state = PENDING;
-            }
-            handleRuntimeException(e);
+        while ((listener = listeners.poll()) != null) {
+            handleCompletion(listener, newState);
         }
         return true;
     }

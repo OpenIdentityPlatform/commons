@@ -185,18 +185,18 @@ public final class Promises {
         }
 
         @Override
-        public final Promise<V, E> thenAlways(final Runnable onResultOrException) {
-            return thenFinally(onResultOrException);
-        }
-
-        @Override
-        public Promise<V, E> thenFinally(Runnable onResultOrException) {
+        public final Promise<V, E> thenAlways(final Runnable always) {
             try {
-                onResultOrException.run();
+                always.run();
             } catch (RuntimeException e) {
                 LOGGER.error("Ignored unexpected exception thrown by Runnable", e);
             }
             return this;
+        }
+
+        @Override
+        public Promise<V, E> thenFinally(Runnable onFinally) {
+            return thenAlways(onFinally);
         }
 
         @Override
