@@ -20,10 +20,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 import org.forgerock.util.Reject;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
  * Configures the JDBC mapping and connection pool.
@@ -42,7 +43,7 @@ public class JdbcAuditEventHandlerConfiguration extends EventHandlerConfiguratio
     private String databaseType;
 
     @JsonPropertyDescription("audit.handlers.jdbc.buffering")
-    private EventBufferingConfiguration buffering;
+    private EventBufferingConfiguration buffering = new EventBufferingConfiguration();
 
     /**
      * Gets the table mappings for the audit events.
@@ -334,7 +335,7 @@ public class JdbcAuditEventHandlerConfiguration extends EventHandlerConfiguratio
     public static class EventBufferingConfiguration {
 
         @JsonPropertyDescription("audit.handlers.jdbc.buffering.enabled")
-        private boolean enabled;
+        private boolean enabled = false;
 
         @JsonPropertyDescription("audit.handlers.jdbc.buffering.autoFlush")
         private boolean autoFlush = true;
