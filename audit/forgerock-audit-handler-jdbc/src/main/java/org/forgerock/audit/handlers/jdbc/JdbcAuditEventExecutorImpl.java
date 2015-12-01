@@ -60,6 +60,7 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
                 logger.debug("Executing prepared statement");
                 preparedStatement.execute();
                 results = convertResultSetToList(preparedStatement.getResultSet());
+                CleanupHelper.commit(connection);
             }
             return results;
         } catch (SQLException | AuditException | JsonProcessingException e) {
