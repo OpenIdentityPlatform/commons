@@ -17,16 +17,11 @@ package org.forgerock.audit.handlers.csv;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.FileReader;
-import java.io.Reader;
-import java.io.StringReader;
+import java.io.File;
 
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
-import org.supercsv.io.CsvMapReader;
-import org.supercsv.io.ICsvMapReader;
-import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -38,38 +33,35 @@ public class CsvSecureVerifierTest {
 
     @Test
     public void shouldVerifyValidFile() throws Exception {
-        Reader reader = new FileReader("src/test/resources/shouldGeneratePeriodicallySignature-expected.txt");
-        ICsvMapReader csvMapReader = new CsvMapReader(reader, CsvPreference.EXCEL_PREFERENCE);
+        File csvFile = new File("src/test/resources/shouldGeneratePeriodicallySignature-expected.txt");
         KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
                 new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD));
-        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvMapReader, new KeyStoreSecureStorage(keyStoreHandler, 
+        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvFile, new KeyStoreSecureStorage(keyStoreHandler,
                 keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
-        assertThat(csvVerifier.verify()).isTrue();
+        assertThat(csvVerifier.verify().hasPassedVerification()).isTrue();
     }
 
     @Test(dataProvider = "invalidContent")
-    public void shouldNotVerify(String content) throws Exception {
-        StringReader reader = new StringReader(content);
-        ICsvMapReader csvMapReader = new CsvMapReader(reader, CsvPreference.EXCEL_PREFERENCE);
-
+    public void shouldNotVerify(String filename) throws Exception {
+        File csvFile = new File(filename);
         KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
                 new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD));
-        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvMapReader, new KeyStoreSecureStorage(keyStoreHandler,
+        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvFile, new KeyStoreSecureStorage(keyStoreHandler,
                 keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
-        assertThat(csvVerifier.verify()).isFalse();
+        assertThat(csvVerifier.verify().hasPassedVerification()).isFalse();
     }
 
     @DataProvider
     public Object[][] invalidContent() {
         return new Object[][] {
             // Invalid header
-            { "foo,bar" },
+            { "src/test/resources/secureCsvInvalidHeader.csv" },
             // Invalid HMAC
-            { "foo,HMAC,SIGNATURE\nbar,quix," },
+            { "src/test/resources/secureCsvInvalidHMAC.csv" },
             // Invalid signature
-            {"foo,HMAC,SIGNATURE\nbar,quix,\n,,blabla" },
+            { "src/test/resources/secureCsvInvalidSignature.csv" },
             // No signature at end of file
-            { "foo,HMAC,SIGNATURE\nbar,uLkBIiPY0+yyseXNACJX5SBwqV4RDSN8Ab8Jz7c3cYI=," }
+            { "src/test/resources/secureCsvInvalidMissingFinalSignature.csv" }
         };
     }
 }

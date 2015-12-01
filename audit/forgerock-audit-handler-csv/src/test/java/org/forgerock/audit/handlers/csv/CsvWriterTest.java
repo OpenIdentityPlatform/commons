@@ -85,14 +85,12 @@ public class CsvWriterTest {
             writer.writeEvent(values);
         }
 
-        try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
-            String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
-            KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, csvFile.getPath() + ".keystore", password);
-            SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
-                    keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
-            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, secureStorage);
-            assertThat(verifier.verify()).isTrue();
-        }
+        String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, csvFile.getPath() + ".keystore", password);
+        SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
+                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
+        CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, secureStorage);
+        assertThat(verifier.verify().hasPassedVerification()).isTrue();
     }
 
     @Test
@@ -130,15 +128,13 @@ public class CsvWriterTest {
             writer.writeEvent(values);
         }
 
-        try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
-            String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
-            KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
-                    csvFile.getPath() + ".keystore", password);
-            SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
-                    keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
-            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, secureStorage);
-            assertThat(verifier.verify()).isTrue().as("File " + csvFile.getPath());
-        }
+        String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                csvFile.getPath() + ".keystore", password);
+        SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
+                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
+        CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, secureStorage);
+        assertThat(verifier.verify().hasPassedVerification()).isTrue().as("File " + csvFile.getPath());
 
         // Expecting to fail
         try {
@@ -206,15 +202,13 @@ public class CsvWriterTest {
                 new TimestampFilenameFilter(csvFile, PREFIX, DateTimeFormat.forPattern(TIME_STAMP_FORMAT));
         final File[] files = csvFile.getParentFile().listFiles(timestampFilenameFilter);
         assertThat(files).isNotEmpty();
-        try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(files[0])), csvPreference)) {
-            String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
-            KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
-                    files[0].getPath() + ".keystore", password);
-            SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
-                    keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
-            CsvSecureVerifier verifier = new CsvSecureVerifier(reader, secureStorage); // should be updated to new CsvSecureVerifier(files[0], keyStoreHandler)
-            assertThat(verifier.verify()).as("File " + csvFile.getPath()).isTrue();
-        }
+        String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                files[0].getPath() + ".keystore", password);
+        SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
+                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
+        CsvSecureVerifier verifier = new CsvSecureVerifier(files[0], secureStorage);
+        assertThat(verifier.verify().hasPassedVerification()).as("File " + csvFile.getPath()).isTrue();
     }
 
     private Map<String, String> getValues(String[] header, String val1, String val2, String val3) {

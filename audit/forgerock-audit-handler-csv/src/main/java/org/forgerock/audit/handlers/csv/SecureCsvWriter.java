@@ -23,14 +23,11 @@ import static org.forgerock.audit.handlers.csv.CsvSecureConstants.SIGNATURE_ALGO
 import static org.forgerock.audit.handlers.csv.CsvSecureUtils.dataToSign;
 import static org.forgerock.util.Reject.checkNotNull;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Writer;
 import java.security.SignatureException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -59,8 +56,6 @@ import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.supercsv.io.CsvMapReader;
-import org.supercsv.io.ICsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 
 /**
@@ -111,12 +106,10 @@ class SecureCsvWriter implements CsvWriter {
             final CsvAuditEventHandlerConfiguration.CsvSecurity securityConfiguration = config.getSecurity();
             if (fileAlreadyInitialized) {
                 // Run the CsvVerifier to check that the file was not tampered.
-                CsvSecureVerifier verifier;
-                try (ICsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference)) {
-                    verifier = new CsvSecureVerifier(reader, secureStorage);
-                    if (!verifier.verify()) {
-                        throw new IOException("The CSV file was tampered.");
-                    }
+                CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, secureStorage);
+                CsvSecureVerifier.VerificationResult verificationResult = verifier.verify();
+                if (!verificationResult.hasPassedVerification()) {
+                    throw new IOException("The CSV file was tampered: " + verificationResult.getFailureReason());
                 }
 
                 // Assert that the 2 headers are equal.

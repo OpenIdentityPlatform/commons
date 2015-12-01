@@ -18,22 +18,28 @@ package org.forgerock.audit.handlers.csv;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.KEYSTORE_TYPE;
 import static org.forgerock.util.time.Duration.duration;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FilenameFilter;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyStore;
-import java.util.Arrays;
+import java.security.PublicKey;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
+import javax.crypto.SecretKey;
+
+import org.forgerock.audit.handlers.csv.CsvSecureVerifier.VerificationResult;
+import org.forgerock.audit.retention.FileNamingPolicy;
+import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
-import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
@@ -41,7 +47,6 @@ import org.forgerock.util.encode.Base64;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeMethod;
@@ -51,6 +56,7 @@ import org.testng.annotations.Test;
 public class SecureCsvWriterTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SecureCsvWriterTest.class);
+    private static final String NEW_LINE = System.lineSeparator();
 
     static final String KEYSTORE_FILENAME = "target/test-classes/keystore-signature.jks";
     static final String KEYSTORE_PASSWORD = "password";
@@ -81,7 +87,7 @@ public class SecureCsvWriterTest {
         // Then list the keystore's content to ensure what is inside.
         // keytool -list -keystore src/test/resources/keystore-signature.jks -storepass password -storetype JCEKS
         keyStoreHandler = new KeyStoreHandlerDecorator(
-                new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
+                new JcaKeyStoreHandler(KEYSTORE_TYPE, KEYSTORE_FILENAME, KEYSTORE_PASSWORD));
 
         final KeyStoreHandlerDecorator memoryKeyStoreHandler = new KeyStoreHandlerDecorator(
                 new MemoryKeyStoreHandler());
@@ -217,7 +223,7 @@ public class SecureCsvWriterTest {
         config.getSecurity().setEnabled(true);
         config.getSecurity().setSignatureInterval("5 minutes"); // ensure no periodically added signatures during test
         config.getFileRotation().setRotationEnabled(true);
-        config.getFileRotation().setRotationFileSuffix("-MM.dd.yy-kk.mm.ss.SSS");
+        config.getFileRotation().setRotationFileSuffix("-yyyy.MM.dd-kk.mm.ss.SSS");
         config.getFileRotation().setMaxFileSize(20);
 
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
@@ -230,39 +236,89 @@ public class SecureCsvWriterTest {
             secureCsvWriter.writeEvent(singletonMap(header, "six"));
         }
 
-        File[] csvFiles = actual.getParentFile().listFiles(new FilenameFilter() {
-            @Override
-            public boolean accept(File dir, String name) {
-                return name.startsWith(filename) && !name.endsWith(".keystore");
-            }
-        });
-        assertThat(csvFiles).hasSize(7);
-        Arrays.sort(csvFiles);
-        // Confirm that the first file is the current file
-        // (this file is not verifiable currently as it doesn't end with a signature)
-        assertThat(csvFiles[0].getName()).isEqualTo(filename);
-        // Verify all of the archived files except the final one
-        for (int i = 1; i < csvFiles.length - 1; i++) {
-            File csvFile = csvFiles[i];
-            if (csvFile.getName().equals(filename)) {
-                logger.trace("Skipping verification of {} as won't end with signature", csvFile);
-                continue;
-            }
-            logger.trace("Verifying file {}", csvFile);
-            try (CsvMapReader reader = new CsvMapReader(new BufferedReader(new FileReader(csvFile)), CsvPreference.EXCEL_PREFERENCE)) {
-                String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
-                KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, csvFile.getPath() + ".keystore", password);
-                CsvSecureVerifier verifier = new CsvSecureVerifier(reader, new KeyStoreSecureStorage(csvKeyStoreHandler,
-                        keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
-                assertThat(verifier.verify()).as("File " + csvFile.getName()).isTrue();
-            }
+        final SecretKey keystorePasswordKey = keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD);
+        final String keystorePassword = Base64.encode(keystorePasswordKey.getEncoded());
+        final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
+        final FileNamingPolicy fileNamingPolicy =
+                new TimeStampFileNamingPolicyWithNamedBasedOrdering(actual, "-yyyy.MM.dd-kk.mm.ss.SSS", "");
+        final CsvSecureArchiveVerifier archiveVerifier =
+                new CsvSecureArchiveVerifier(fileNamingPolicy, keystorePassword, publicKey);
+
+        // Verify the expected files were created
+        assertThat(actual).exists();
+        assertThat(fileNamingPolicy.listFiles()).isNotEmpty().hasSize(6);
+
+        // Verify the contents of the files
+        List<VerificationResult> verificationResults = archiveVerifier.verify();
+        VerificationResult finalVerificationResult = verificationResults.remove(5);
+        for (final VerificationResult verificationResult : verificationResults) {
+            assertThat(verificationResult.hasPassedVerification())
+                    .as("File " + verificationResult.getArchiveFile())
+                    .isTrue();
         }
         // The final file is not verifiable currently as it doesn't contain any audit events (so no HMAC entry).
         // This means lastHMAC will be null when running CsvSecureVerifier.verifySignature and verification fails
         // See CAUD-225.
         logger.trace("Skipping verification of {} as it doesn't contain a HMAC and" +
-                "verification of the closing signature will fail", csvFiles[6].getName());
+                "verification of the closing signature will fail", finalVerificationResult.getArchiveFile().getName());
+        assertThat(finalVerificationResult.hasPassedVerification())
+                .as("File " + finalVerificationResult.getArchiveFile() + " cannot be verified as it contains no HMAC")
+                .isFalse(); // TODO: Fix this
 
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        ByteArrayOutputStream err = new ByteArrayOutputStream();
+        CsvSecureArchiveVerifierCli.out = new PrintStream(out);
+        CsvSecureArchiveVerifierCli.err = new PrintStream(err);
+
+        String[] args = {
+                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_ARCHIVE_DIRECTORY, logDirectory.toString(),
+                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_TOPIC, "shouldRotateCsvAndKeyStoreFile",
+                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_PREFIX, "",
+                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_SUFFIX, "-yyyy.MM.dd-kk.mm.ss.SSS",
+                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_FILE, KEYSTORE_FILENAME,
+                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_PASSWORD, KEYSTORE_PASSWORD
+        };
+        CsvSecureArchiveVerifierCli.fileNamingPolicyFactory = new CsvSecureArchiveVerifierCli.FileNamingPolicyFactory() {
+            @Override
+            public FileNamingPolicy newFileNamingPolicy(final File liveFile, final String suffix, final String prefix) {
+                return new TimeStampFileNamingPolicyWithNamedBasedOrdering(liveFile, suffix, prefix);
+            }
+        };
+        CsvSecureArchiveVerifierCli.main(args);
+
+        String expectedOutput = "";
+        List<File> files = fileNamingPolicy.listFiles();
+        for (int i = 0; i < files.size(); i++) {
+            File file = files.get(i);
+            if (i < files.size() - 1) {
+                expectedOutput += "PASS    " + file.getName() + NEW_LINE;
+            } else {
+                // last file cannot be verified as it doesn't contain any hmac entries
+                expectedOutput += "FAIL    " + file.getName() + "    The signature at row 3 is not correct." + NEW_LINE;
+            }
+        }
+        assertThat(out.toString()).isEqualTo(expectedOutput);
+        assertThat(err.toString()).isEqualTo("");
+    }
+
+    static class TimeStampFileNamingPolicyWithNamedBasedOrdering extends TimeStampFileNamingPolicy {
+
+        public TimeStampFileNamingPolicyWithNamedBasedOrdering(
+                final File initialFile, final String timeStampFormat, final String prefix) {
+            super(initialFile, timeStampFormat, prefix);
+        }
+
+        /**
+         * List the files in the initial file directory that match the prefix, name and suffix format.
+         * {@inheritDoc}
+         */
+        @Override
+        public List<File> listFiles() {
+            List<File> fileList = super.listFiles();
+            // make sure the files are sorted from oldest to newest by filename - timestamps won't be accurate enough.
+            Collections.sort(fileList);
+            return fileList;
+        }
     }
 
 }

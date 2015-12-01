@@ -18,6 +18,10 @@ package org.forgerock.audit.handlers.csv;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.*;
 import static org.forgerock.audit.handlers.csv.CsvSecureUtils.*;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.security.SignatureException;
 import java.util.Arrays;
@@ -30,7 +34,9 @@ import org.forgerock.audit.secure.SecureStorageException;
 import org.forgerock.util.encode.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.supercsv.io.CsvMapReader;
 import org.supercsv.io.ICsvMapReader;
+import org.supercsv.prefs.CsvPreference;
 
 /**
  * This class aims to verify a secure CSV file.
@@ -39,7 +45,7 @@ class CsvSecureVerifier {
 
     private static final Logger logger = LoggerFactory.getLogger(CsvSecureVerifier.class);
 
-    private ICsvMapReader csvReader;
+    private File csvFile;
     private final HmacCalculator hmacCalculator;
     private final SecureStorage secureStorage;
     private String lastHMAC;
@@ -49,13 +55,13 @@ class CsvSecureVerifier {
     /**
      * Constructs a new verifier
      *
-     * @param csvReader
-     *            the underlying reader to read the CSV file
+     * @param csvFile
+     *            the CSV file to verify
      * @param secureStorage
      *            the secure storage containing keys
      */
-    public CsvSecureVerifier(ICsvMapReader csvReader, SecureStorage secureStorage) {
-        this.csvReader = csvReader;
+    public CsvSecureVerifier(File csvFile, SecureStorage secureStorage) {
+        this.csvFile= csvFile;
         this.secureStorage = secureStorage;
 
         try {
@@ -71,54 +77,59 @@ class CsvSecureVerifier {
         }
     }
 
-    public boolean verify() throws IOException {
-        final String[] header = csvReader.getHeader(true);
-
-        // Ensure header contains HEADER_HMAC and HEADER_SIGNATURE
-        int checkCount = 0;
-        for (String string : header) {
-            if (HEADER_HMAC.equals(string) || HEADER_SIGNATURE.equals(string)) {
-                checkCount++;
-            }
-        }
-
-        if (!(HEADER_HMAC.equals(header[header.length - 2]) && HEADER_SIGNATURE.equals(header[header.length - 1]))) {
-            logger.debug("Found only {} checked headers from : {}", checkCount, Arrays.toString(header));
-            return false;
-        }
-        this.headers = new String[header.length - 2];
-        System.arraycopy(header, 0, this.headers, 0, this.headers.length);
-
-        // Check the row one after the other
+    public VerificationResult verify() throws IOException {
         boolean lastRowWasSigned = false;
-        Map<String, String> values;
-        while ((values = csvReader.read(header)) != null) {
-            logger.trace("Verifying row {}", csvReader.getRowNumber());
-            lastRowWasSigned = false;
-            final String encodedSign = values.get(HEADER_SIGNATURE);
-            // The field HEADER_SIGNATURE is filled so let's check that special row
-            if (encodedSign != null) {
-                if (csvReader.getRowNumber() == 2) {
-                    // Special case : this is a rotated file, do not verify the signature but store it.
-                    lastSignature = Base64.decode(encodedSign);
-                } else if (!verifySignature(encodedSign)) {
-                    logger.trace("The signature at row {} is not correct.", csvReader.getRowNumber());
-                    return false;
-                } else {
-                    logger.trace("The signature at row {} is correct.", csvReader.getRowNumber());
-                    lastRowWasSigned = true;
-                    // The signature is OK : let's continue to the next row
-                    continue;
+        try (ICsvMapReader csvReader = newBufferedCsvMapReader()) {
+            final String[] header = csvReader.getHeader(true);
+
+            // Ensure header contains HEADER_HMAC and HEADER_SIGNATURE
+            int checkCount = 0;
+            for (String string : header) {
+                if (HEADER_HMAC.equals(string) || HEADER_SIGNATURE.equals(string)) {
+                    checkCount++;
                 }
-            } else {
-                // Otherwise every row must contain a valid HEADER_HMAC
-                if (!verifyHMAC(values, header)) {
-                    logger.trace("The HMac at row {} is not correct.", csvReader.getRowNumber());
-                    return false;
+            }
+
+            if (!(HEADER_HMAC.equals(header[header.length - 2]) && HEADER_SIGNATURE.equals(header[header.length - 1]))) {
+                String msg = "Found only " + checkCount + " checked headers from : " + Arrays.toString(header);
+                logger.debug(msg);
+                return newVerificationFailureResult(msg);
+            }
+            this.headers = new String[header.length - 2];
+            System.arraycopy(header, 0, this.headers, 0, this.headers.length);
+
+            // Check the row one after the other
+            Map<String, String> values;
+            while ((values = csvReader.read(header)) != null) {
+                logger.trace("Verifying row {}", csvReader.getRowNumber());
+                lastRowWasSigned = false;
+                final String encodedSign = values.get(HEADER_SIGNATURE);
+                // The field HEADER_SIGNATURE is filled so let's check that special row
+                if (encodedSign != null) {
+                    if (csvReader.getRowNumber() == 2) {
+                        // Special case : this is a rotated file, do not verify the signature but store it.
+                        lastSignature = Base64.decode(encodedSign);
+                    } else if (!verifySignature(encodedSign)) {
+                        String msg = "The signature at row " + csvReader.getRowNumber() + " is not correct.";
+                        logger.trace(msg);
+                        return newVerificationFailureResult(msg);
+                    } else {
+                        logger.trace("The signature at row {} is correct.", csvReader.getRowNumber());
+                        lastRowWasSigned = true;
+                        // The signature is OK : let's continue to the next row
+                        continue;
+                    }
                 } else {
-                    logger.trace("The HMac at row {} is correct.", csvReader.getRowNumber());
-                    // The HMAC is OK : let's continue to the next row
-                    continue;
+                    // Otherwise every row must contain a valid HEADER_HMAC
+                    if (!verifyHMAC(values, header)) {
+                        String msg = "The HMac at row " + csvReader.getRowNumber() + " is not correct.";
+                        logger.trace(msg);
+                        return newVerificationFailureResult(msg);
+                    } else {
+                        logger.trace("The HMac at row {} is correct.", csvReader.getRowNumber());
+                        // The HMAC is OK : let's continue to the next row
+                        continue;
+                    }
                 }
             }
         }
@@ -128,14 +139,32 @@ class CsvSecureVerifier {
             if (currentKey != null) {
                 boolean keysMatch = Arrays.equals(hmacCalculator.getCurrentKey().getEncoded(), currentKey.getEncoded());
                 logger.trace("keysMatch={}, lastRowWasSigned={}", keysMatch, lastRowWasSigned);
-                return keysMatch && lastRowWasSigned;
+                if (!keysMatch) {
+                    return newVerificationFailureResult("Final HMAC key doesn't match expected value");
+                } else if (!lastRowWasSigned) {
+                    return newVerificationFailureResult("Missing final signature");
+                } else {
+                    return newVerificationSuccessResult();
+                }
             } else {
                 logger.trace("currentKey is null");
-                return false;
+                return newVerificationFailureResult("Final HMAC key is null");
             }
         } catch (SecureStorageException ex) {
             throw new IOException(ex);
         }
+    }
+
+    private CsvMapReader newBufferedCsvMapReader() throws FileNotFoundException {
+        return new CsvMapReader(new BufferedReader(new FileReader(csvFile)), CsvPreference.EXCEL_PREFERENCE);
+    }
+
+    private VerificationResult newVerificationFailureResult(String msg) {
+        return new VerificationResult(csvFile, false, msg);
+    }
+
+    private VerificationResult newVerificationSuccessResult() {
+        return new VerificationResult(csvFile, true, "");
     }
 
     private boolean verifyHMAC(Map<String, String> values, String[] header) throws IOException {
@@ -202,5 +231,30 @@ class CsvSecureVerifier {
      */
     public byte[] getLastSignature() {
         return lastSignature;
+    }
+
+    static final class VerificationResult {
+
+        private final File archiveFile;
+        private final boolean passedVerification;
+        private final String failureReason;
+
+        VerificationResult(final File archiveFile, final boolean passedVerification, final String message) {
+            this.archiveFile = archiveFile;
+            this.passedVerification = passedVerification;
+            this.failureReason = message;
+        }
+
+        public File getArchiveFile() {
+            return archiveFile;
+        }
+
+        public boolean hasPassedVerification() {
+            return passedVerification;
+        }
+
+        public String getFailureReason() {
+            return failureReason;
+        }
     }
 }

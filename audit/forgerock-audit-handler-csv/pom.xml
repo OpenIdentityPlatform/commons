@@ -94,6 +94,16 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                        </manifest>
+                    </archive>
+                    <instructions>
+                        <Main-Class>org.forgerock.audit.handlers.csv.CsvSecureArchiveVerifierCli</Main-Class>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
