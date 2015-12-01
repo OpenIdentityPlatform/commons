@@ -10,15 +10,15 @@ USE `audit` ;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `audit`.`auditauthentication` (
   `id` VARCHAR(56) NOT NULL ,
-  `transactionid` VARCHAR(255) NULL ,
   `timestamp_` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
-  `userid` VARCHAR(255) NULL ,
+  `transactionid` VARCHAR(255) NULL ,
   `eventname` VARCHAR(50) NULL ,
+  `userid` VARCHAR(255) NULL ,
+  `trackingids` MEDIUMTEXT,
   `result` VARCHAR(255) NULL ,
   `principals` MEDIUMTEXT ,
   `context` MEDIUMTEXT ,
   `entries` MEDIUMTEXT ,
-  `trackingids` MEDIUMTEXT,
   PRIMARY KEY (`id`)
 )
   ENGINE = InnoDB;
@@ -54,6 +54,8 @@ CREATE  TABLE IF NOT EXISTS `audit`.`auditaccess` (
   `timestamp_` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
   `transactionid` VARCHAR(255) NULL ,
   `eventname` VARCHAR(255) ,
+  `userid` VARCHAR(255) NULL ,
+  `trackingids` MEDIUMTEXT,
   `server_ip` VARCHAR(40) ,
   `server_port` VARCHAR(5) ,
   `client_host` VARCHAR(255) ,
@@ -74,8 +76,8 @@ CREATE  TABLE IF NOT EXISTS `audit`.`auditaccess` (
   `response_elapsedtime` VARCHAR(255) NULL ,
   `response_elapsedtimeunits` VARCHAR(255) NULL ,
   PRIMARY KEY (`id`),
-  INDEX `idx_auditaccess_status` (`status` ASC),
-  INDEX `idx_auditaccess_authorizationid_id` (`authorizationid_id`(28) ASC) )
+  INDEX `idx_auditaccess_status` (`response_status` ASC),
+  INDEX `idx_auditaccess_userid` (`userid` ASC) )
 ENGINE = InnoDB;
 
 -- -----------------------------------------------------

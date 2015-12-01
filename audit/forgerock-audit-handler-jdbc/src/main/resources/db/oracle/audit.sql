@@ -49,15 +49,15 @@ ENABLE
 PROMPT Creating TABLE auditauthentication ...
 CREATE TABLE auditauthentication (
   id VARCHAR2(56 CHAR) NOT NULL,
-  transactionid VARCHAR2(255 CHAR) NOT NULL,
   timestamp_ VARCHAR2(29 CHAR) NOT NULL,
+  transactionid VARCHAR2(255 CHAR) NOT NULL,
+  eventname VARCHAR2(255 CHAR),
   userid VARCHAR2(255 CHAR),
-  eventname VARCHAR2(50 CHAR),
+  trackingids CLOB,
   result VARCHAR2(255 CHAR),
   principals CLOB,
   context CLOB,
-  entries CLOB,
-  trackingids CLOB
+  entries CLOB
 );
 
 COMMENT ON COLUMN auditauthentication.timestamp IS 'Date format: 2011-09-09T14:58:17.654+02:00'
