@@ -262,6 +262,9 @@ public class JdbcAuditEventHandler extends AuditEventHandlerBase {
         if (!isBlank(connectionPool.getPoolName())) {
             hikariConfig.setPoolName(connectionPool.getPoolName());
         }
+        if (!isBlank(connectionPool.getDriverClassName())) {
+            hikariConfig.setDriverClassName(connectionPool.getDriverClassName());
+        }
         return hikariConfig;
     }
 

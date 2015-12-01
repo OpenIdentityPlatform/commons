@@ -132,6 +132,24 @@ public class JdbcAuditEventHandlerConfiguration extends EventHandlerConfiguratio
         @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.poolName")
         private String poolName;
 
+        @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.driverClassName")
+        private String driverClassName;
+
+        /**
+         * Gets the class name of the driver to use for the jdbc connection.
+         * @return The class name.
+         */
+        public String getDriverClassName() {
+            return driverClassName;
+        }
+
+        /**
+         * Sets the class name of the driver to use for the jdbc connection.
+         * @param driverClassName The driver class name.
+         */
+        public void setDriverClassName(String driverClassName) {
+            this.driverClassName = driverClassName;
+        }
 
         /**
          * Gets the datasource class name for the JDBC database.
