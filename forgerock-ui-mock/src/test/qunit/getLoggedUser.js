@@ -25,23 +25,12 @@
 /*global define */
 
 
-define(["org/forgerock/mock/ui/user/UserModel"], function (UserModel) {
+define([
+    "org/forgerock/mock/ui/common/main/LocalStorage",
+    "org/forgerock/mock/ui/user/UserModel"
+], function (LocalStorage, UserModel) {
     return function () {
-        UserModel.set({
-            "_id": "test",
-            "_rev": "1",
-            "component": "mock/repo/internal/user",
-            "roles": [
-                "ui-user"
-            ],
-            "uid": "test",
-            "userName": "test",
-            "password": "test",
-            "telephoneNumber": "12345",
-            "givenName": "Jack",
-            "sn": "White",
-            "mail": "white@test.com"
-        });
+        UserModel.set(LocalStorage.get('mock/repo/internal/user/test'));
         UserModel.hideAttribute("password");
         return UserModel;
     };

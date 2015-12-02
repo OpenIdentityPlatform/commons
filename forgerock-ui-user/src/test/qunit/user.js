@@ -107,7 +107,7 @@ define([
                             $("#userPasswordTab #input-confirmPassword", userProfileView.$el).val("newPassw0rd").trigger('change');
 
                             $("body").one("shown.bs.modal", function () {
-                                QUnit.ok(/Password/.test($("#confirmPasswordFormExplanation em").text()), "Password change triggers confirm password dialog");
+                                QUnit.ok(/Password/.test($("#confirmPasswordFormExplanation code").text()), "Password change triggers confirm password dialog");
 
                                 $("#confirmPasswordForm #currentPassword").val("bad").trigger("change");
                                 $(".modal.in #btnUpdate").trigger("click");
@@ -129,7 +129,7 @@ define([
                             });
                             _.delay(function () { // push this to the bottom of the event loop, so the validation logic can apply
                                 $('#userPasswordTab input[type=submit]', userProfileView.$el).trigger('click');
-                            });
+                            }, 200);
                         });
 
                     });

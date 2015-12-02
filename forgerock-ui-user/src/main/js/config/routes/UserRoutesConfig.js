@@ -59,11 +59,6 @@ define("config/routes/UserRoutesConfig", [
             pattern: "register??",
             argumentNames: ["realm", "additionalParameters"],
             defaults: ["/",""]
-        },
-        "examplesPage" : {
-            view: "org/forgerock/mock/ui/examples/ExamplesView",
-            role: "ui-user",
-            url: "examples/"
         }
     };
 

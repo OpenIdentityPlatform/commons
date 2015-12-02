@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,16 +23,17 @@
  */
 
 /*global define*/
+/*jslint regexp:false */
 
-define("config/main", [
-    "./routes/CommonRoutesConfig",
-    "./routes/UserRoutesConfig",
-    "./routes/MockRoutesConfig",
-    "./messages/CommonMessages",
-    "./messages/UserMessages",
-    "./validators/CommonValidators",
-    "./AppConfiguration",
-    "./process/CommonConfig",
-    "./process/MockConfig",
-    "./errorhandlers/CommonErrorHandlers"
-]);
+define("config/routes/MockRoutesConfig", [
+], function() {
+    var obj = {
+        "examplesPage" : {
+            view: "org/forgerock/mock/ui/examples/ExamplesView",
+            role: "ui-user",
+            url: "examples/"
+        }
+    };
+
+    return obj;
+});
