@@ -1,4 +1,28 @@
-# 3.0.1
+# 3.0.0
+
+## Changes
+
+### Upgraded dependency versions
+| Dependency | Previous Version | New Version |
+| ---------- | ---------------- | ----------- |
+| forgerock-util | 3.0.0 | 3.0.1 |
+| forgerock-http-framework (CHF) | 2.1.0 | 2.2.0 |
+| forgerock-rest (CREST) | 4.0.1 | 4.0.2 |
+| forgerock-auth-filters (CAF) | 3.1.0 | 3.1.3 |
+| forgerock-audit (CAUD) | 2.0.0 | 3.0.0 |
+| json-crypto | 3.0.1 | 3.0.2 |
+| json-patch | 3.0.1 | 3.0.2 |
+| json-ref | 3.0.1 | 3.0.2 |
+| json-scehma | 3.0.1 | 3.0.2 |
+| json-web-token | 3.0.1 | 3.0.2 |
+
+### New dependencies
+| Dependency | Version |
+| ---------- | ------- |
+| forgerock-selfservice (CUSS) | 1.0.0 |
+
+
+# 2.0.1
 
 ## Changes
 
@@ -12,14 +36,14 @@
 | json-web-token | 3.0.0 | 3.0.1 |
 
 
-# 3.0.0
+# 2.0.0
 
 ## Changes
 
 ### Upgraded dependency versions
 | Dependency | Previous Version | New Version |
 | ---------- | ---------------- | ----------- |
-| forgerock-http-framework (CAF) | 2.0.0 | 2.1.0 |
+| forgerock-http-framework (CHF) | 2.0.0 | 2.1.0 |
 | forgerock-rest (CREST) | 4.0.0 | 4.0.1 |
 | forgerock-auth-filters (CAF) | 3.0.0 | 3.1.0 |
 
