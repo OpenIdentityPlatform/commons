@@ -1,3 +1,14 @@
+# 2.2.0
+
+## Changes
+
+### Minor
+* Allow SSL protocols and cipher suites to be set on requests 
+
+### Bug fixes
+* Headers.copyAsMultiMapOfStrings will now return a case-innsensitive map
+
+
 # 2.1.0
 
 ## Changes
