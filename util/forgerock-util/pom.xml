@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-utilities</artifactId>
-        <version>3.0.1</version>
+        <version>3.0.2-SNAPSHOT</version>
     </parent>
     <artifactId>forgerock-util</artifactId>
     <name>ForgeRock Utility Classes</name>

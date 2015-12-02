@@ -21,7 +21,7 @@
         <version>2.0.4</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
-    <version>3.0.1</version>
+    <version>3.0.2-SNAPSHOT</version>
     <artifactId>forgerock-utilities</artifactId>
     <name>ForgeRock Utility Classes Parent</name>
     <description>Miscellaneous utility classes used within ForgeRock projects.</description>
@@ -35,7 +35,7 @@
         <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-util.git</connection>
         <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-util.git</developerConnection>
         <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-util/browse</url>
-      <tag>3.0.1</tag>
+      <tag>HEAD</tag>
   </scm>
     <ciManagement>
         <system>jenkins</system>
