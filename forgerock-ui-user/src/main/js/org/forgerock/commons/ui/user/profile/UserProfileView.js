@@ -154,8 +154,9 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
                 _.each(this.$el.find("form"), function (form) {
 
-                    ValidatorsManager.bindValidators($(form));
-                    ValidatorsManager.validateAllFields($(form));
+                    ValidatorsManager.bindValidators($(form), Configuration.loggedUser.baseEntity, function () {
+                        ValidatorsManager.validateAllFields($(form));
+                    });
 
                     this.changesPendingWidgets[$(form).attr('id')] = ChangesPending.watchChanges({
                         element: $(".changes-pending", form),

@@ -287,6 +287,10 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
 
             }, this));
 
+        } else {
+            if (callback) {
+                callback();
+            }
         }
 
     };

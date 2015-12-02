@@ -23,11 +23,13 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
     "js2form",
     "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/commons/ui/common/main/Configuration",
     "KBADelegate",
     "org/forgerock/commons/ui/user/profile/UserProfileView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
 ], function($, _, form2js, js2form, Handlebars,
     AbstractView,
+    Configuration,
     KBADelegate,
     UserProfileView,
     ValidatorsManager) {
@@ -99,8 +101,9 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
                 answer.attr("placeholder", "");
             }
 
-            ValidatorsManager.bindValidators(form);
-            ValidatorsManager.validateAllFields(form);
+            ValidatorsManager.bindValidators(form, Configuration.loggedUser.baseEntity, function () {
+                ValidatorsManager.validateAllFields(form);
+            });
         },
         submit: function (formId, formData) {
             if (formId === "KBA") {
