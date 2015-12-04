@@ -19,8 +19,6 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -75,7 +73,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
     public static final String SERVER = "server";
     public static final String CLIENT = "client";
-    public static final String HOST = "host";
     public static final String IP = "ip";
     public static final String PORT = "port";
     public static final String REQUEST = "request";
@@ -151,33 +148,13 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
     /**
      * Sets the provided client ip and port for the event.
-     * <p/>
-     * If reverse DNS lookup is enabled, this builder will attempt to lookup the
-     * client hostname from the provided IP address.
      *
      * @param ip the ip of the client.
      * @param port the port of the client.
      * @return this builder
      */
     public final T client(String ip, int port) {
-        return client(ip, port, getHostNameIfReverseDnsLookupEnabled(ip));
-    }
-
-    /**
-     * Sets the provided client hostname, ip and port for the event.
-     * <p/>
-     * If host is null, even if reverse DNS lookup is enabled, no attempt is made to lookup the
-     * client hostname from the provided IP address.
-     *
-     * @param ip the ip of the client.
-     * @param port the port of the client.
-     * @param host the hostname of the client.
-     *
-     * @return this builder
-     */
-    public final T client(String ip, int port, String host) {
         final Object client = object(
-                field(HOST, host),
                 field(IP, ip),
                 field(PORT, port));
         jsonValue.put(CLIENT, client);
@@ -186,31 +163,12 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
 
     /**
      * Sets the provided client ip for the event.
-     * <p/>
-     * If reverse DNS lookup is enabled, this builder will attempt to lookup the
-     * client hostname from the provided IP address.
      *
      * @param ip the ip of the client.
      * @return this builder
      */
     public final T client(String ip) {
-        return client(ip, getHostNameIfReverseDnsLookupEnabled(ip));
-    }
-
-    /**
-     * Sets the provided client hostname and ip for the event.
-     * <p/>
-     * If host is null, even if reverse DNS lookup is enabled, no attempt is made to lookup the
-     * client hostname from the provided IP address.
-     *
-     * @param ip the ip of the client.
-     * @param host the hostname of the client.
-     *
-     * @return this builder
-     */
-    public final T client(String ip, String host) {
         final Object client = object(
-                field(HOST, host),
                 field(IP, ip));
         jsonValue.put(CLIENT, client);
         return self();
@@ -393,18 +351,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public final T clientFromContext(Context context) {
         if (context.containsContext(ClientContext.class)) {
             ClientContext clientContext = context.asContext(ClientContext.class);
-            String remoteAddress = clientContext.getRemoteAddress();
-            int remotePort = clientContext.getRemotePort();
-            String remoteHost = null;
-            if (performReverseDnsLookup) {
-                try {
-                    InetAddress ipAddr = InetAddress.getByName(remoteAddress);
-                    remoteHost = ipAddr.getHostName();
-                } catch (UnknownHostException e) {
-                    logger.debug("Unable to lookup client host name for {}.", remoteAddress);
-                }
-            }
-            client(remoteAddress, remotePort, remoteHost);
+            client(clientContext.getRemoteAddress(), clientContext.getRemotePort());
         }
         return self();
     }
@@ -422,19 +369,6 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
             server(clientContext.getLocalAddress(), clientContext.getLocalPort());
         }
         return self();
-    }
-
-    private String getHostNameIfReverseDnsLookupEnabled(String ipAddress) {
-        String hostName = null;
-        if (performReverseDnsLookup) {
-            try {
-                InetAddress ipAddr = InetAddress.getByName(ipAddress);
-                hostName = ipAddr.getHostName();
-            } catch (UnknownHostException e) {
-                logger.debug("Unable to lookup client host name for {}.", ipAddress);
-            }
-        }
-        return hostName;
     }
 
     /**

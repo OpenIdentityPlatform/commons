@@ -249,7 +249,6 @@ public class AccessAuditEventBuilderTest {
         JsonValue value = event.getValue();
         assertThat(value.get(CLIENT).get(IP).asString()).isEqualTo("168.0.0.10");
         assertThat(value.get(CLIENT).get(PORT).asInteger()).isEqualTo(55646);
-        assertThat(value.get(CLIENT).get(HOST).asString()).isNull();
     }
 
     @Test

@@ -49,10 +49,6 @@
         "client": {
           "type": "object",
           "properties": {
-            "host": {
-              "description": "org.forgerock.audit.events.access.client.host",
-              "type": "string"
-            },
             "ip": {
               "description": "org.forgerock.audit.events.access.client.ip",
               "type": "string"
