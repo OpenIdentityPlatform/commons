@@ -35,7 +35,7 @@ import org.forgerock.util.encode.Base64;
  * Client context gives easy access to client-related information that are available into the request.
  * Supported data includes:
  * <ul>
- *     <li>Remote IP address or hostname</li>
+ *     <li>Remote IP address</li>
  *     <li>Remote port</li>
  *     <li>Username</li>
  *     <li>Client provided certificates</li>
@@ -51,7 +51,6 @@ public final class ClientContext extends AbstractContext {
     // Persisted attribute names
     private static final String ATTR_REMOTE_USER = "remoteUser";
     private static final String ATTR_REMOTE_ADDRESS = "remoteAddress";
-    private static final String ATTR_REMOTE_HOST = "remoteHost";
     private static final String ATTR_REMOTE_PORT = "remotePort";
     private static final String ATTR_CERTIFICATES = "certificates";
 
@@ -71,7 +70,6 @@ public final class ClientContext extends AbstractContext {
         private final Context parent;
         private String remoteUser = "";
         private String remoteAddress = "";
-        private String remoteHost = "";
         private int remotePort = -1;
         private List<? extends Certificate> certificates = Collections.emptyList();
         private String userAgent = "";
@@ -102,17 +100,6 @@ public final class ClientContext extends AbstractContext {
          */
         public Builder remoteAddress(String remoteAddress) {
             this.remoteAddress = remoteAddress;
-            return this;
-        }
-
-        /**
-         * Sets the client's remote host.
-         *
-         * @param remoteHost The remote host.
-         * @return The builder instance.
-         */
-        public Builder remoteHost(String remoteHost) {
-            this.remoteHost = remoteHost;
             return this;
         }
 
@@ -206,8 +193,8 @@ public final class ClientContext extends AbstractContext {
             if (certificates == null) {
                 certificates = Collections.<Certificate>emptyList();
             }
-            return new ClientContext(parent, remoteUser, remoteAddress, remoteHost, remotePort,
-                certificates, userAgent, true, isSecure, localAddress, localPort);
+            return new ClientContext(parent, remoteUser, remoteAddress, remotePort, certificates, userAgent, true,
+                    isSecure, localAddress, localPort);
         }
 
     }
@@ -233,7 +220,7 @@ public final class ClientContext extends AbstractContext {
      * @return An internal {@link ClientContext} instance.
      */
     public static ClientContext newInternalClientContext(Context parent) {
-        return new ClientContext(parent, "", "", "", -1, Collections.<Certificate>emptyList(), "", false, true, "", -1);
+        return new ClientContext(parent, "", "", -1, Collections.<Certificate>emptyList(), "", false, true, "", -1);
     }
 
     private final Collection<? extends Certificate> certificates;
@@ -262,7 +249,6 @@ public final class ClientContext extends AbstractContext {
     private ClientContext(Context parent,
                           String remoteUser,
                           String remoteAddress,
-                          String remoteHost,
                           int remotePort,
                           List<? extends Certificate> certificates,
                           String userAgent,
@@ -276,7 +262,6 @@ public final class ClientContext extends AbstractContext {
 
         data.put(ATTR_REMOTE_USER, remoteUser);
         data.put(ATTR_REMOTE_ADDRESS, remoteAddress);
-        data.put(ATTR_REMOTE_HOST, remoteHost);
         data.put(ATTR_REMOTE_PORT, remotePort);
         data.put(ATTR_CERTIFICATES, serializeCertificates(certificates));
         data.put(ATTR_USER_AGENT, userAgent);
@@ -319,17 +304,6 @@ public final class ClientContext extends AbstractContext {
      */
     public String getRemoteAddress() {
         return data.get(ATTR_REMOTE_ADDRESS).asString();
-    }
-
-    /**
-     * Returns the fully qualified name of the client (or last proxy) that sent the request
-     * or an empty string if the client is internal.
-     *
-     * @return the fully qualified name of the client (or last proxy) that sent the request
-     * or an empty string if the client is internal.
-     */
-    public String getRemoteHost() {
-        return data.get(ATTR_REMOTE_HOST).asString();
     }
 
     /**

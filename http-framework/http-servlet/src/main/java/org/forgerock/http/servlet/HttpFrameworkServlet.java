@@ -291,7 +291,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
         return ClientContext.buildExternalClientContext(parent)
                 .remoteUser(req.getRemoteUser())
                 .remoteAddress(req.getRemoteAddr())
-                .remoteHost(req.getRemoteHost())
                 .remotePort(req.getRemotePort())
                 .certificates((X509Certificate[]) req.getAttribute(SERVLET_REQUEST_X509_ATTRIBUTE))
                 .userAgent(req.getHeader("User-Agent"))
