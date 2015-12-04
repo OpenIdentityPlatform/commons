@@ -270,7 +270,6 @@ public class AccessAuditEventBuilderTest {
         JsonValue value = event.getValue();
         assertThat(value.get(SERVER).get(IP).asString()).isEqualTo("127.0.0.1");
         assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(8080);
-        assertThat(value.get(SERVER).get(HOST).asString()).isEqualTo("localhost");
     }
 
     @Test
@@ -366,7 +365,6 @@ public class AccessAuditEventBuilderTest {
         // Then
         JsonValue value = event.getValue();
         assertThat(value.get(SERVER).get(PORT).asInteger()).isEqualTo(8080);
-        assertThat(value.get(SERVER).get(HOST).asString()).isEqualTo("localhost");
         assertThat(value.get(SERVER).get(IP).asString()).isEqualTo("127.0.0.1");
     }
 

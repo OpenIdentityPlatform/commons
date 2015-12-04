@@ -142,20 +142,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
      * @return this builder
      */
     public final T server(String ip, int port) {
-        return server(ip, port, null);
-    }
-
-    /**
-     * Sets the provided server hostname, ip and port for the event.
-     * @param ip the ip of the server.
-     * @param port the port of the server.
-     * @param host the hostname of the server.
-     *
-     * @return this builder
-     */
-    public final T server(String ip, int port, String host) {
         final Object server = object(
-                field(HOST, host),
                 field(IP, ip),
                 field(PORT, port));
         jsonValue.put(SERVER, server);
@@ -432,7 +419,7 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     public final T serverFromContext(Context context) {
         if (context.containsContext(ClientContext.class)) {
             ClientContext clientContext = context.asContext(ClientContext.class);
-            server(clientContext.getLocalAddress(), clientContext.getLocalPort(), clientContext.getLocalName());
+            server(clientContext.getLocalAddress(), clientContext.getLocalPort());
         }
         return self();
     }

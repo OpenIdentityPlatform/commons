@@ -25,7 +25,6 @@
     "isExternal": false,
     "isSecure": true,
     "localAddress": "127.0.0.1",
-    "localName": "localhost",
     "localPort": 8080,
     "parent": {
       "class": "org.forgerock.services.context.RootContext",
