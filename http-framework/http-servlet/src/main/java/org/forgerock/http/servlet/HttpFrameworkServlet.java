@@ -297,7 +297,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 .userAgent(req.getHeader("User-Agent"))
                 .secure("https".equalsIgnoreCase(req.getScheme()))
                 .localAddress(req.getLocalAddr())
-                .localName(req.getLocalName())
                 .localPort(req.getLocalPort())
                 .build();
     }
