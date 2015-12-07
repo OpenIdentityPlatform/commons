@@ -218,11 +218,11 @@
         },
         "before": {
           "description": "org.forgerock.audit.events.activity.before",
-          "type": "string"
+          "type": "object"
         },
         "after": {
           "description": "org.forgerock.audit.events.activity.after",
-          "type": "string"
+          "type": "object"
         },
         "changedFields": {
           "description": "org.forgerock.audit.events.activity.changedFields",
@@ -362,11 +362,11 @@
         },
         "before": {
           "description": "org.forgerock.audit.events.config.before",
-          "type": "string"
+          "type": "object"
         },
         "after": {
           "description": "org.forgerock.audit.events.config.after",
-          "type": "string"
+          "type": "object"
         },
         "changedFields": {
           "description": "org.forgerock.audit.events.config.changedFields",
