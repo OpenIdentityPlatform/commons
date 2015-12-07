@@ -54,6 +54,7 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
                 logger.error("Unable to get a datasource connection");
                 throw new AuditException("Unable to get a datasource connection");
             }
+            connection.setAutoCommit(false);
 
             try (final PreparedStatement preparedStatement = connection.prepareStatement(event.getSql())) {
                 initializePreparedStatement(preparedStatement, event.getParams());
