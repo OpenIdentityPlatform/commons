@@ -382,9 +382,10 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/ViewManager"
             ],
             processDescription: function(event, Configuration, ModuleLoader, Router, SessionManager, ViewManager) {
-                var promise = $.Deferred();
+                var promise = $.Deferred(),
+                    submitContent = event.submitContent || event;
 
-                SessionManager.login(event, function(user) {
+                SessionManager.login(submitContent, function(user) {
                     Configuration.setProperty('loggedUser', user);
 
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
@@ -420,14 +421,23 @@ define("config/process/CommonConfig", [
                     }
 
                     promise.resolve(user);
+
                 }, function (reason) {
+
                     if (Configuration.globalData.auth.urlParams && Configuration.globalData.auth.urlParams.gotoOnFail) {
                         window.location.href = Configuration.globalData.auth.urlParams.gotoOnFail;
                         return false;
                     }
+
                     reason = reason ? reason : "authenticationFailed";
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, reason);
+
+                    if (event.failureCallback) {
+                        event.failureCallback(reason);
+                    }
+                    
                     promise.reject(reason);
+
                 });
 
                 return promise;
