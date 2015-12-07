@@ -15,6 +15,7 @@
  */
 package org.forgerock.audit.handlers.jdbc;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -96,15 +97,33 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
             throws AuditException, SQLException, JsonProcessingException {
         int i = 1;
         for (final Parameter parameter : params) {
+            final Object parameterValue = parameter.getParameter();
             switch (parameter.getParameterType()) {
                 case STRING:
                     preparedStatement.setString(i, (String) parameter.getParameter());
                     break;
                 case NUMBER:
-                    preparedStatement.setFloat(i, (Float) parameter.getParameter());
-                    break;
+                    if (parameterValue instanceof Float) {
+                        preparedStatement.setFloat(i, (Float) parameter.getParameter());
+                    } else if (parameterValue instanceof Double) {
+                        preparedStatement.setDouble(i, (Double) parameter.getParameter());
+                    } else if (parameterValue instanceof BigDecimal) {
+                        preparedStatement.setBigDecimal(i, (BigDecimal) parameter.getParameter());
+                    }
+                    // falls through intentionally from number, so that number can support the json integer type subset as well
                 case INTEGER:
-                    preparedStatement.setInt(i, (Integer) parameter.getParameter());
+                    if (parameterValue instanceof Long) {
+                        preparedStatement.setLong(i, (Long) parameter.getParameter());
+                    } else if (parameterValue instanceof Integer) {
+                        preparedStatement.setInt(i, (Integer) parameter.getParameter());
+                    } else {
+                        final String error = String.format("Unknown class type for NUMBER or INTEGER mapping: %s",
+                                parameterValue != null
+                                        ? parameterValue.getClass().getCanonicalName()
+                                        : "null parameter value");
+                        logger.error(error);
+                        throw new AuditException(error);
+                    }
                     break;
                 case BOOLEAN:
                     preparedStatement.setBoolean(i, (Boolean) parameter.getParameter());
@@ -114,8 +133,12 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
                     preparedStatement.setString(i, mapper.writeValueAsString(parameter.getParameter()));
                     break;
                 default:
-                    logger.error("Unknown class type");
-                    throw new AuditException("Unknown class type");
+                    final String error = String.format("Unable to map class type: %s",
+                            parameterValue != null
+                                    ?  parameterValue.getClass().getCanonicalName()
+                                    : "null parameter value");
+                    logger.error(error);
+                    throw new AuditException(error);
             }
             i++;
         }
