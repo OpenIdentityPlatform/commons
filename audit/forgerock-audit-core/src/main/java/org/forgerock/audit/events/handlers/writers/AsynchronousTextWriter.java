@@ -140,12 +140,14 @@ public class AsynchronousTextWriter implements TextWriter {
      *            the log record to write.
      */
     @Override
-    public void write(String record) {
+    public void write(String record) throws IOException {
         boolean interrupted = false;
+        boolean enqueued = false;
         while (!stopRequested) {
             // Put request on queue for writer
             try {
                 queue.put(record);
+                enqueued = true;
                 break;
             } catch (InterruptedException e) {
                 // We expect this to happen. Just ignore it and hopefully
@@ -155,6 +157,10 @@ public class AsynchronousTextWriter implements TextWriter {
         }
         if (interrupted) {
             Thread.currentThread().interrupt();
+        }
+        // Inform caller if this writer has been shutdown
+        if (!enqueued) {
+            throw new IOException("Writer closed");
         }
     }
 

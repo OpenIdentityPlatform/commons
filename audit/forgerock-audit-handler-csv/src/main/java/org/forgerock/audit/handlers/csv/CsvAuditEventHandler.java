@@ -40,6 +40,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -48,6 +49,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.inject.Inject;
 
@@ -115,12 +118,12 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     private final CsvAuditEventHandlerConfiguration configuration;
     private final CsvPreference csvPreference;
-    private final Map<String, CsvWriter> writers = new HashMap<>();
-    private final Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
+    private final ConcurrentMap<String, CsvWriter> writers = new ConcurrentHashMap<>();
+    private final Map<String, Set<String>> fieldOrderByTopic;
     /** Caches a JSON pointer for each field. */
-    private final Map<String, JsonPointer> jsonPointerByField = new HashMap<>();
+    private final Map<String, JsonPointer> jsonPointerByField;
     /** Caches the dot notation for each field. */
-    private final Map<String, String> fieldDotNotationByField = new HashMap<>();
+    private final Map<String, String> fieldDotNotationByField;
     private KeyStoreHandler keyStoreHandler;
 
     /**
@@ -160,15 +163,27 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 }
             }
         }
+
+        Map<String, Set<String>> fieldOrderByTopic = new HashMap<>();
+        Map<String, JsonPointer> jsonPointerByField = new HashMap<>();
+        Map<String, String> fieldDotNotationByField = new HashMap<>();
         for (String topic : this.eventTopicsMetaData.getTopics()) {
             try {
                 Set<String> fieldOrder = getFieldOrder(topic, this.eventTopicsMetaData);
-                cacheFieldsInformation(fieldOrder);
-                fieldOrderByTopic.put(topic, fieldOrder);
+                for (String field : fieldOrder) {
+                    if (!jsonPointerByField.containsKey(field)) {
+                        jsonPointerByField.put(field, new JsonPointer(field));
+                        fieldDotNotationByField.put(field, jsonPointerToDotNotation(field));
+                    }
+                }
+                fieldOrderByTopic.put(topic, Collections.unmodifiableSet(fieldOrder));
             } catch (ResourceException e) {
                 logger.error(topic + " topic schema meta-data misconfigured.");
             }
         }
+        this.fieldOrderByTopic = Collections.unmodifiableMap(fieldOrderByTopic);
+        this.jsonPointerByField = Collections.unmodifiableMap(jsonPointerByField);
+        this.fieldDotNotationByField = Collections.unmodifiableMap(fieldDotNotationByField);
     }
 
     private CsvPreference createCsvPreference(final CsvAuditEventHandlerConfiguration config) {
@@ -202,16 +217,6 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 openWriter(topic, auditLogFile);
             } catch (IOException e) {
                 logger.error("Error when creating audit file: {}", auditLogFile, e);
-            }
-        }
-    }
-
-    /** Pre-compute field related information to be used for each event publishing. */
-    private void cacheFieldsInformation(Set<String> fieldOrder) {
-        for (String field : fieldOrder) {
-            if (!jsonPointerByField.containsKey(field)) {
-                jsonPointerByField.put(field, new JsonPointer(field));
-                fieldDotNotationByField.put(field, jsonPointerToDotNotation(field));
             }
         }
     }
@@ -250,19 +255,56 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
      */
     private void publishEventWithRetry(final String topic, final JsonValue event)
                     throws ResourceException {
-        CsvWriter csvWriter = writers.get(topic);
+        final CsvWriter csvWriter = getWriter(topic);
         try {
             writeEvent(topic, csvWriter, event);
         } catch (IOException ex) {
             // Re-try once in case the writer stream became closed for some reason
-            logger.debug("IOException during entry write, reset writer and re-try {}", ex.getMessage());
-            resetAndReopenWriter(topic, csvWriter, false);
+            logger.debug("IOException while writing ({})", ex.getMessage());
+            CsvWriter newCsvWriter;
+            // An IOException may be thrown if the csvWriter reference we have above was reset by another thread.
+            // Synchronize to ensure that we wait for any reset to complete before proceeding - Otherwise, we may
+            // lose multiple events or have multiple threads attempting to reset the writer.
+            synchronized (this) {
+                // Lookup the current writer directly from the map so we can check if another thread has reset it.
+                newCsvWriter = writers.get(topic);
+                if (newCsvWriter == csvWriter) {
+                    // If both references are the same, the writer hasn't been reset.
+                    newCsvWriter = resetAndReopenWriter(topic, false);
+                    logger.debug("Resetting writer");
+                } else {
+                    logger.debug("Writer reset by another thread");
+                }
+            }
             try {
-                writeEvent(topic, csvWriter, event);
+                writeEvent(topic, newCsvWriter, event);
             } catch (IOException e) {
                 throw new BadRequestException(e);
             }
         }
+    }
+
+    /**
+     * Lookup CsvWriter for specified topic.
+     * <br/>
+     * Uses lazy synchronization in case another thread may be resetting the writer. If the writer is still null
+     * after synchronizing then the writer is reset.
+     * <br/>
+     * This method is only intended for use by {@link #publishEventWithRetry(String, JsonValue)}.
+     */
+    private CsvWriter getWriter(String topic) throws BadRequestException {
+        CsvWriter csvWriter = writers.get(topic);
+        if (csvWriter == null) {
+            logger.debug("CSV file writer for {} topic is null; checking for reset by another thread", topic);
+            synchronized (this) {
+                csvWriter = writers.get(topic);
+                if (csvWriter == null) {
+                    logger.debug("CSV file writer for {} topic not reset by another thread; resetting", topic);
+                    csvWriter = resetAndReopenWriter(topic, false);
+                }
+            }
+        }
+        return csvWriter;
     }
 
     private CsvWriter writeEvent(final String topic, CsvWriter csvWriter, final JsonValue event)
@@ -282,9 +324,10 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         return fieldOrder;
     }
 
-    private void openWriter(final String topic, File auditFile) throws IOException {
+    private synchronized CsvWriter openWriter(final String topic, final File auditFile) throws IOException {
         final CsvWriter writer = createCsvWriter(auditFile, topic);
         writers.put(topic, writer);
+        return writer;
     }
 
     private synchronized CsvWriter createCsvWriter(final File auditFile, String topic) throws IOException {
@@ -364,7 +407,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 return new BadRequestException(format("Topic is required for action %s", action)).asPromise();
             }
             if (action.equals(ROTATE_FILE_ACTION_NAME)) {
-                return handleRotateAction(topic);
+                return handleRotateAction(topic).asPromise();
             }
             final String error = format("This action is unknown for the CSV handler: %s", action);
             return new BadRequestException(error).asPromise();
@@ -373,13 +416,17 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         }
     }
 
-    private Promise<ActionResponse, ResourceException> handleRotateAction(String topic)
+    private ActionResponse handleRotateAction(String topic)
             throws BadRequestException {
         CsvWriter csvWriter = writers.get(topic);
+        if (csvWriter == null) {
+            logger.debug("Unable to rotate file for topic: {}", topic);
+            throw new BadRequestException("Unable to rotate file for topic: " + topic);
+        }
         if (configuration.getFileRotation().isRotationEnabled()) {
             try {
                 if (!csvWriter.forceRotation()) {
-                    throw new BadRequestException(format("Unable to rotate file for topic: ", topic));
+                    throw new BadRequestException("Unable to rotate file for topic: " + topic);
                 }
             } catch (IOException e) {
                 throw new BadRequestException("Error when rotating file for topic: " + topic, e);
@@ -387,9 +434,9 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         }
         else {
             // use a default rotation instead
-            resetAndReopenWriter(topic, csvWriter, true);
+            resetAndReopenWriter(topic, true);
         }
-        return Responses.newActionResponse(json(object(field("rotated", "true")))).asPromise();
+        return Responses.newActionResponse(json(object(field("rotated", "true"))));
     }
 
     private File getAuditLogFile(final String type) {
@@ -408,39 +455,34 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         csvWriter.writeEvent(cells);
     }
 
-    private void resetAndReopenWriter(final String topic, CsvWriter csvWriter, boolean forceRotation)
+    private synchronized CsvWriter resetAndReopenWriter(final String topic, boolean forceRotation)
             throws BadRequestException {
-        synchronized (this) {
-            resetWriter(topic, csvWriter);
-            try {
-                File auditLogFile = getAuditLogFile(topic);
-                if (forceRotation) {
-                    TimeStampFileNamingPolicy namingPolicy = new TimeStampFileNamingPolicy(auditLogFile, null, null);
-                    File rotatedFile = namingPolicy.getNextName();
-                    if (!auditLogFile.renameTo(rotatedFile)) {
-                        throw new BadRequestException(
-                                format("Unable to rename file %s to %s when rotating", auditLogFile, rotatedFile));
-                    }
+        closeWriter(topic);
+        try {
+            File auditLogFile = getAuditLogFile(topic);
+            if (forceRotation) {
+                TimeStampFileNamingPolicy namingPolicy = new TimeStampFileNamingPolicy(auditLogFile, null, null);
+                File rotatedFile = namingPolicy.getNextName();
+                if (!auditLogFile.renameTo(rotatedFile)) {
+                    throw new BadRequestException(
+                            format("Unable to rename file %s to %s when rotating", auditLogFile, rotatedFile));
                 }
-                openWriter(topic, auditLogFile);
-            } catch (IOException e) {
-                throw new BadRequestException(e);
             }
+            return openWriter(topic, auditLogFile);
+        } catch (IOException e) {
+            throw new BadRequestException(e);
         }
     }
 
-    private void resetWriter(final String auditEventType, final CsvWriter writerToReset) {
-        synchronized (writers) {
-            final CsvWriter existingWriter = writers.get(auditEventType);
-            if (existingWriter != null && writerToReset != null && existingWriter == writerToReset) {
-                writers.remove(auditEventType);
-                // attempt clean-up close
-                try {
-                    existingWriter.close();
-                } catch (Exception ex) {
-                    // Debug level as the writer is expected to potentially be invalid
-                    logger.debug("File writer close in resetWriter reported failure ", ex);
-                }
+    private synchronized void closeWriter(final String topic) {
+        CsvWriter writerToClose = writers.remove(topic);
+        if (writerToClose != null) {
+            // attempt clean-up close
+            try {
+                writerToClose.close();
+            } catch (Exception ex) {
+                // Debug level as the writer is expected to potentially be invalid
+                logger.debug("File writer close in closeWriter reported failure ", ex);
             }
         }
     }
@@ -526,7 +568,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     }
 
-    private void cleanup() throws ResourceException {
+    private synchronized void cleanup() throws ResourceException {
         try {
             for (CsvWriter csvWriter : writers.values()) {
                 if (csvWriter != null) {
