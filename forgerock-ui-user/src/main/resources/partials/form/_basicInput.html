@@ -9,6 +9,7 @@
                 value="{{value}}"
         {{#if readonly}}readonly{{/if}}
         {{#if required}}required data-validator="required"{{/if}}
+        {{#if extraAttributes}}{{{extraAttributes}}}{{/if}}
         />
         {{#unless noValidation}}
         <div role="status" class="validation-message"></div>
