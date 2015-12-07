@@ -46,7 +46,7 @@ define("config/validators/CommonValidators", [
             "dependencies": [ ],
             "validator": function(el, input, callback) {
                 var confirmValue = input.val(),
-                    mainInput = el.find("input[data-validation-dependents=passwordConfirm]");
+                    mainInput = el.find(":input#" + input.attr("passwordField"));
 
                 if (mainInput.val() !== confirmValue || mainInput.attr("data-validation-status") === "error") {
                     callback([$.t("common.form.validation.confirmationMatchesPassword")]);

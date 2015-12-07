@@ -59,8 +59,8 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                     input
                         .closest("form")
                         .find(':input')
-                        .filter(function () { return $.inArray($(this).attr("name"), input.attr("data-validation-dependents").split(",")) !== -1; })
-                        .trigger("change");
+                        .filter(function () { return $.inArray($(this).attr("id"), input.attr("data-validation-dependents").split(",")) !== -1; })
+                        .trigger("blur");
                 }
             },
             postValidation = function  (policyFailures) {
