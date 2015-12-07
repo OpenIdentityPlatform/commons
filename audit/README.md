@@ -1,88 +1,43 @@
-CSV AuditEventHandler
-=====================
+# Commons Audit
+The purpose of the commons audit (CAUD) project is to provide a common framework and approach to audit logging.
 
-The `CSVAuditEventHandler` writes audit events to CSV files.
-It supports plain CSV files and tamper-evident CSV files.
-Tamper-evident CSV files allow you to detect tampering afterwards.
+More information can be found here: https://wikis.forgerock.org/confluence/display/COMPLAN/CAUD+-+Commons+Audit
 
-## How CSV Files Become Tamper-Evident
+## Commons Audit Topics
+Commons audit includes the following common audit events: access, authentication, activity, and config.
 
-To make CSV files tamper-evident, you create an initial `JCEKS` keystore,
-and supply the keystore path and password
-through the audit event handler configuration.
+### Access
+The access audit topic logs system boundary events. For example, the initial request and final response for a given 
+request to the system being audited.
 
-This initial keystore must contain the following entries:
-* `SIGNATURE`: a pair of keys used to sign CSV files periodically
-* `PASSWORD`: a SecretKey (HmacSHA256) used as the password for another keystore
-    that the audit event handler creates alongside CSV files.
-    These additional keystores are read-only.
+### Activity
+The activity audit topic logs audit event on resources. For example, if the system being audited had a user resource, 
+operations on that user resource would be audited.
 
-The keystore password and the private key passwords must be the same.
+### Authentication
+The authentication audit topic logs authentication attempts and their success or failure. This event can also log 
+logout events.
 
-Tamper-evident CSV files have two additional columns: `HMAC` and `SIGNATURE`.
+#### CAF Authentication Logging
+The product that implements the commons audit framework [AuditApi](https://stash.forgerock.org/projects/COMMONS/repos/forgerock-auth-filters/browse/forgerock-authn-filter/forgerock-jaspi-runtime/src/main/java/org/forgerock/caf/authentication/framework/AuditApi.java)
+must direct log data to the commons audit authentication endpoint.
 
-Before writing to a CSV file, the audit event handler creates another keystore
-named *csv-file-name*`.keystore`.
-The keystore password is the `PASSWORD` secret key from the initial keystore.
+### Configuration
+The config audit topic logs operations on the systems configuration.
 
-This new `JCEKS`-type keystore is initialized with an `InitialKey` entry.
-The `InitialKey` is a randomly computed secret key seed used for HMAC chaining
-when signing the corresponding CSV file.
-The same secret key is stored under the alias `CurrentKey`.
+##Deploying the demo application
+First make sure it is built:
 
-For each row written to the CSV file,
-the audit event handler fills Base64-encoded HMAC cell for each entry,
-where the value is calculated from the `InitialKey` for the first row,
-and from the `CurrentKey` and the row's data for subsequent rows.
-Then the audit event handler computes a SHA256 checksum of the `CurrentKey` value,
-and writes it to the keystore as the new `CurrentKey` value.
+    mvn clean install
 
-In addition, the audit event handler periodically inserts special "signature rows".
-Signature rows' cells are all empty, except for the signature row.
-The signature cell value is a Base64-encoded signature
-composed of the latest HMAC and the latest signature
-(unless this is the first signature row).
-The signature is then stored in the keystore under the alias `CurrentSignature`.
-This makes is possible to verify that the file has not been truncated.
+Then to get it running:
 
-Furthermore, the signatures play a key role when the rotation is enabled.
-On rotation, and before the file is rotated, the audit event handler checks
-that the last row of the rotated file is a signature row.
-To ensure that no previously rotated files have been tampered with,
-the last signature row from the rotated file
-is inserted as the second row of the new file.
-(The first row is the header row.)
+    mvn jetty:run -f forgerock-audit-servlet/pom.xml
 
-## To Create the Initial Keystore
+Examples audit call invocations are currently listed on the wiki page above 
 
-Use the following keytool commands to create the initial keystore
-used when configuring the  `CsvAuditEventHandler`:
+To query all records of a specific topic such as access call:
 
-    $ keytool \
-      -genkeypair \
-      -alias "Signature" \
-      -dname CN=a \
-      -keystore src/test/resources/keystore-signature.jks \
-      -storepass password \
-      -storetype JCEKS \
-      -keypass password \
-      -keyalg RSA \
-      -sigalg SHA256withRSA
-    $ keytool \
-      -genseckey \
-      -alias "Password" \
-      -keystore src/test/resources/keystore-signature.jks \
-      -storepass password \
-      -storetype JCEKS \
-      -keypass password \
-      -keyalg HmacSHA256 \
-      -keysize 256
-
-List the keystore's content to make sure it contains the `Signature` key pair
-and the `Password` secret key:
-
-    $ keytool \
-      -list \
-      -keystore src/test/resources/keystore-signature.jks \
-      -storepass password \
-      -storetype JCEKS
+    curl --request GET \
+      --url 'http://localhost:8080/audit/access?_queryFilter=true' \
+      --header 'content-type: application/json'
