@@ -32,20 +32,19 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
     "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
 ], function($, _, form2js, Handlebars, AnonymousProcessView, ValidatorsManager) {
+
     var SelfRegistrationView = AnonymousProcessView.extend({
         partials: [
             "partials/process/_kbaItem.html"
         ],
         events: _.extend({
             "click #kbaStage #provideAnother": "addKBAQuestion",
+            "click .delete-KBA-question": "deleteKBAQuestion",
             "change #kbaStage .kba-questions": "toggleCustomQuestion"
         }, AnonymousProcessView.prototype.events),
         processType: "registration",
         i18nBase: "common.user.selfRegistration",
-        addKBAQuestion: function (e) {
-            if (e) {
-                e.preventDefault();
-            }
+        renderQuestion: function () {
             var nextIndex = this.$el.find("#kbaItems li").length,
                 newQuestion = $("<li>").html(
                 Handlebars.compile("{{> process/_kbaItem}}")({
@@ -54,9 +53,42 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
                 })
             );
             this.$el.find("#kbaItems").append(newQuestion);
+        },
+        validateForm: function () {
             ValidatorsManager.bindValidators(this.$el, this.baseEntity, _.bind(function () {
                 ValidatorsManager.validateAllFields(this.$el);
             }, this));
+        },
+        toggleMissingQuestionsAlert: function (shown) {
+            this.$el.find("#missingKBAQuestions").toggle(shown);
+        },
+        toggleSaveButtonDisabledProperty: function (disabled) {
+            this.$el.find("input[type=submit]").prop("disabled", disabled);
+        },
+        isNumberOfQuestionsInsufficient: function () {
+            return this.stateData.requirements.properties.kba.minItems > this.$el.find("#kbaItems li").length;
+        },
+        checkQuestionsNumberSufficiency: function () {
+            var numberOfQuestionsInsufficient = this.isNumberOfQuestionsInsufficient();
+
+            this.toggleMissingQuestionsAlert(numberOfQuestionsInsufficient);
+            this.toggleSaveButtonDisabledProperty(numberOfQuestionsInsufficient);
+
+            if (!numberOfQuestionsInsufficient) {
+                this.validateForm();
+            }
+        },
+        addKBAQuestion: function (e) {
+            if (e) { e.preventDefault(); }
+
+            this.renderQuestion();
+            this.checkQuestionsNumberSufficiency();
+        },
+        deleteKBAQuestion: function (e) {
+            e.preventDefault();
+
+            $(e.target).closest("li").remove();
+            this.checkQuestionsNumberSufficiency();
         },
         toggleCustomQuestion: function (e) {
             var questionValue = $(e.target).val(),
@@ -87,14 +119,12 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
             AnonymousProcessView.prototype
                 .renderProcessState.call(this, response)
                 .then(_.bind(function () {
-                    if (response.type === "kbaSecurityAnswerDefinitionStage" &&
-                        response.tag === "initial") {
+                    if (response.type === "kbaSecurityAnswerDefinitionStage" && response.tag === "initial") {
+                        this.$el.find("#kbaStageDescription").text($.t("common.user.kba.description",
+                            { numberOfQuestions: response.requirements.properties.kba.minItems }));
                         // initialize the stage with at least 1 (but up to minItems) kba pairs
                         _.times(response.requirements.properties.kba.minItems || 1,
-                                function () {
-                                    this.addKBAQuestion();
-                                },
-                                this);
+                                function () { this.addKBAQuestion(); }, this);
                     }
                 }, this));
         }
