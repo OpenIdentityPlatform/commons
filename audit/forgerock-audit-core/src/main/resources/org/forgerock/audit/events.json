@@ -42,7 +42,7 @@
             },
             "port": {
               "description": "org.forgerock.audit.events.access.server.port",
-              "type": "string"
+              "type": "integer"
             }
           }
         },
@@ -55,7 +55,7 @@
             },
             "port": {
               "description": "org.forgerock.audit.events.access.client.port",
-              "type": "string"
+              "type": "integer"
             }
           }
         },
