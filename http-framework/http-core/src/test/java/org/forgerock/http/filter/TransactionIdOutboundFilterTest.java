@@ -17,19 +17,17 @@
 package org.forgerock.http.filter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import org.forgerock.http.Handler;
 import org.forgerock.http.header.TransactionIdHeader;
 import org.forgerock.http.protocol.Request;
+import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
-import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.TransactionIdContext;
-import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
 public class TransactionIdOutboundFilterTest {
@@ -39,11 +37,12 @@ public class TransactionIdOutboundFilterTest {
         TransactionIdOutboundFilter filter = new TransactionIdOutboundFilter();
 
         Handler handler = mock(Handler.class);
-        Request request = new Request();
+        final Request request = new Request();
+        final Context context = new RootContext();
 
-        filter.filter(new RootContext(), request, handler);
+        filter.filter(context, request, handler);
 
-        verify(handler).handle(any(Context.class), eq(request));
+        verify(handler).handle(same(context), same(request));
         assertThat(request.getHeaders()).isEmpty();
     }
 
@@ -57,10 +56,8 @@ public class TransactionIdOutboundFilterTest {
 
         filter.filter(context, request, handler);
 
-        ArgumentCaptor<TransactionIdContext> contextCaptor = ArgumentCaptor.forClass(TransactionIdContext.class);
-        verify(handler).handle(contextCaptor.capture(), eq(request));
+        verify(handler).handle(same(context), same(request));
         assertThat(request.getHeaders().getFirst(TransactionIdHeader.class)).isEqualTo("txId/0");
-        assertThat(contextCaptor.getValue()).isSameAs(context);
     }
 
     @Test
@@ -74,11 +71,9 @@ public class TransactionIdOutboundFilterTest {
 
         filter.filter(context, request, handler);
 
-        ArgumentCaptor<TransactionIdContext> contextCaptor = ArgumentCaptor.forClass(TransactionIdContext.class);
-        verify(handler).handle(contextCaptor.capture(), eq(request));
+        verify(handler).handle(same(context), same(request));
         final TransactionIdHeader header = request.getHeaders().get(TransactionIdHeader.class);
         assertThat(header.getValues()).hasSize(1).containsExactly("txId/0");
-        assertThat(contextCaptor.getValue()).isSameAs(context);
     }
 
 }
