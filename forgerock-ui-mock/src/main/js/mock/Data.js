@@ -249,7 +249,7 @@
                                             ],
                                             "properties": {
                                                 "answer1": {
-                                                    "systemQuestion": kbaQuestions[0].question,
+                                                    "systemQuestion": kbaQuestions["1"],
                                                     "type": "string"
                                                 },
                                                 "answer2": {
@@ -498,7 +498,12 @@
                                         }
                                       ]
                                     },
-                                    "questions": kbaQuestions
+                                    "questions": _.map(kbaQuestions, function (value, key) {
+                                        return {
+                                            "id" : key,
+                                            "question" : value
+                                        };
+                                    })
                                   }
                                 },
                                 "definitions": {

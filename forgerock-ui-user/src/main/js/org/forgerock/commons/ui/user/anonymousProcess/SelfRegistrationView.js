@@ -54,9 +54,9 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
                 })
             );
             this.$el.find("#kbaItems").append(newQuestion);
-            ValidatorsManager.bindValidators(this.$el, this.baseEntity, function () {
+            ValidatorsManager.bindValidators(this.$el, this.baseEntity, _.bind(function () {
                 ValidatorsManager.validateAllFields(this.$el);
-            });
+            }, this));
         },
         toggleCustomQuestion: function (e) {
             var questionValue = $(e.target).val(),

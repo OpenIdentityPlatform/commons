@@ -18,13 +18,12 @@
     <div class="form-group">
         <label class="sr-only" for="input-password">{{t 'common.user.password'}}</label>
         <input type="password" placeholder="{{t 'common.user.password'}}" id="input-password" name="user.password" class="form-control input-lg"
-            data-validation-dependents="passwordConfirm" data-validator-event="keyup"
-            data-validator="required" />
+            data-validation-dependents="input-confirmPassword" data-validator-event="keyup" data-validator="required" />
     </div>
 
     <div class="form-group">
         <label class="sr-only" for="input-confirmPassword">{{t 'common.user.confirmPassword'}}</label>
-        <input type="password" placeholder="{{t 'common.user.confirmPassword'}}" id="input-confirmPassword" class="form-control input-lg" data-validator="passwordConfirm" data-validator-event="keyup" required />
+        <input type="password" placeholder="{{t 'common.user.confirmPassword'}}" id="input-confirmPassword" class="form-control input-lg" data-validator="passwordConfirm" passwordField="input-password" data-validator-event="keyup" required />
     </div>
 
     <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.form.save'}}" />

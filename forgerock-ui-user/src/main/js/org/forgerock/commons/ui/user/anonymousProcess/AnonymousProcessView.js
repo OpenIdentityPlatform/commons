@@ -213,9 +213,9 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
 
             return processStatePromise.then(_.bind(function (content) {
                 this.$el.find("#processContent").html(content);
-                ValidatorsManager.bindValidators(this.$el, this.baseEntity, function () {
+                ValidatorsManager.bindValidators(this.$el, this.baseEntity, _.bind(function () {
                     ValidatorsManager.validateAllFields(this.$el);
-                });
+                }, this));
                 this.$el.find(":input:visible:first").focus();
             }, this));
 
