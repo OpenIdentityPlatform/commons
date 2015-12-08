@@ -63,4 +63,22 @@ public class TransactionIdOutboundFilterTest {
         assertThat(contextCaptor.getValue()).isSameAs(context);
     }
 
+    @Test
+    public void shouldReplaceRequestHeaderWhenTransactionIdContext() throws Exception {
+        TransactionIdOutboundFilter filter = new TransactionIdOutboundFilter();
+
+        Handler handler = mock(Handler.class);
+        Request request = new Request();
+        request.getHeaders().put(new TransactionIdHeader("foo-bar-quix"));
+        TransactionIdContext context = new TransactionIdContext(new RootContext(), new TransactionId("txId"));
+
+        filter.filter(context, request, handler);
+
+        ArgumentCaptor<TransactionIdContext> contextCaptor = ArgumentCaptor.forClass(TransactionIdContext.class);
+        verify(handler).handle(contextCaptor.capture(), eq(request));
+        final TransactionIdHeader header = request.getHeaders().get(TransactionIdHeader.class);
+        assertThat(header.getValues()).hasSize(1).containsExactly("txId/0");
+        assertThat(contextCaptor.getValue()).isSameAs(context);
+    }
+
 }

@@ -49,7 +49,7 @@ public class TransactionIdOutboundFilter implements Filter {
             TransactionIdContext txContext = context.asContext(TransactionIdContext.class);
             final String subTxId = txContext.getTransactionId().createSubTransactionId().getValue();
             try {
-                request.getHeaders().add(new TransactionIdHeader(subTxId));
+                request.getHeaders().put(new TransactionIdHeader(subTxId));
             } catch (MalformedHeaderException ex) {
                 // Should not happen as the value is always valid.
                 logger.error("An error occured while building the TransactionIdHeader", ex);
