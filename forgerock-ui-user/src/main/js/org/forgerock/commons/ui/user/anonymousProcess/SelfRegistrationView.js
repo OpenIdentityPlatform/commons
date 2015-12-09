@@ -59,36 +59,25 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
                 ValidatorsManager.validateAllFields(this.$el);
             }, this));
         },
-        toggleMissingQuestionsAlert: function (shown) {
-            this.$el.find("#missingKBAQuestions").toggle(shown);
+        isNumberOfQuestionsSufficient: function () {
+            return this.stateData.requirements.properties.kba.minItems < this.$el.find("#kbaItems li").length;
         },
-        toggleSaveButtonDisabledProperty: function (disabled) {
-            this.$el.find("input[type=submit]").prop("disabled", disabled);
-        },
-        isNumberOfQuestionsInsufficient: function () {
-            return this.stateData.requirements.properties.kba.minItems > this.$el.find("#kbaItems li").length;
-        },
-        checkQuestionsNumberSufficiency: function () {
-            var numberOfQuestionsInsufficient = this.isNumberOfQuestionsInsufficient();
-
-            this.toggleMissingQuestionsAlert(numberOfQuestionsInsufficient);
-            this.toggleSaveButtonDisabledProperty(numberOfQuestionsInsufficient);
-
-            if (!numberOfQuestionsInsufficient) {
-                this.validateForm();
-            }
+        toggleDeleteButtons: function () {
+            this.$el.find("[data-delete]").toggle(this.isNumberOfQuestionsSufficient());
         },
         addKBAQuestion: function (e) {
             if (e) { e.preventDefault(); }
 
             this.renderQuestion();
-            this.checkQuestionsNumberSufficiency();
+            this.validateForm();
+            this.toggleDeleteButtons();
         },
         deleteKBAQuestion: function (e) {
             e.preventDefault();
 
             $(e.target).closest("li").remove();
-            this.checkQuestionsNumberSufficiency();
+            ValidatorsManager.validateAllFields(this.$el);
+            this.toggleDeleteButtons();
         },
         toggleCustomQuestion: function (e) {
             var questionValue = $(e.target).val(),
@@ -98,7 +87,9 @@ define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
             } else {
                 customQuestion.toggleClass("hidden", true).find(":input").val("");
             }
+
             ValidatorsManager.validateAllFields(this.$el);
+            this.toggleDeleteButtons();
         },
         getFormContent: function () {
             var $form = $(this.element).find("form");

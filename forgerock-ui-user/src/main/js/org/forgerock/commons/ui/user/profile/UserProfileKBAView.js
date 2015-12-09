@@ -193,7 +193,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
             if (form.id === "KBA") {
                 form = this.$el.find(".tab-content #userKBATab form")[0];
                 newContent = Handlebars.compile("{{> profile/_kbaTab}}")(this.data);
-                $("#kbaItems", form).empty().append($(newContent).find("#kbaItems"));
+                $("#kbaItems", form).empty().append($(newContent).find("#kbaItems").children());
                 js2form(form,
                     // use the form structure to find out which fields are defined for the kba form...
                     _(form2js(form, ".", false))
