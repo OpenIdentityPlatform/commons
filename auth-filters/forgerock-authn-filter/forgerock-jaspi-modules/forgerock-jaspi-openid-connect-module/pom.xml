@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-jaspi-modules</artifactId>
-        <version>3.1.4</version>
+        <version>3.1.5-SNAPSHOT</version>
     </parent>
 
     <artifactId>forgerock-jaspi-openid-connect-module</artifactId>
