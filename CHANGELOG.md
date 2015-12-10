@@ -1,3 +1,17 @@
+# 4.0.0
+
+## Changes
+
+### Upgraded dependency versions
+| Dependency | Previous Version | New Version |
+| ---------- | ---------------- | ----------- |
+| forgerock-http-framework (CHF) | 2.2.0 | 3.0.0 |
+| forgerock-rest (CREST) | 4.0.2 | 4.0.3 |
+| forgerock-auth-filters (CAF) | 3.1.3 | 3.1.4 |
+| forgerock-audit (CAUD) | 3.0.0 | 4.0.0 |
+| forgerock-audit (CUSS) | 3.0.0 | 4.0.0 |
+
+
 # 3.0.0
 
 ## Changes
