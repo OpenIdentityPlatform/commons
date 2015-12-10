@@ -20,32 +20,40 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.supercsv.io.CsvMapWriter;
 import org.supercsv.prefs.CsvPreference;
 
 /**
  * Responsible for formatting audit events and column headers as CSV strings.
- * <p/>
- * Objects are assumed to be used from a single thread and are therefore not thread-safe.
+ * <br/>
+ * Objects of this type are threadsafe.
  */
 class CsvFormatter {
 
-    final StringBuilderWriter writer;
-    final CsvMapWriter csvWriter;
+    private static final Logger logger = LoggerFactory.getLogger(CsvFormatter.class);
 
-    public CsvFormatter(CsvPreference csvPreference) {
-        writer = new StringBuilderWriter();
-        csvWriter = new CsvMapWriter(writer, csvPreference, false);
+    private final CsvPreference csvPreference;
+
+    public CsvFormatter(final CsvPreference csvPreference) {
+        this.csvPreference = csvPreference;
     }
 
     public String formatHeader(String[] headers) throws IOException {
-        csvWriter.writeHeader(headers);
-        return writer.takeBufferContents();
+        final StringBuilderWriter buffer = new StringBuilderWriter();
+        final CsvMapWriter writer = new CsvMapWriter(buffer, csvPreference, false);
+        writer.writeHeader(headers);
+        return buffer.takeBufferContents();
     }
 
     public String formatEvent(Map<String, String> values, String[] headers) throws IOException {
-        csvWriter.write(values, headers);
-        return writer.takeBufferContents();
+        final StringBuilderWriter buffer = new StringBuilderWriter();
+        final CsvMapWriter writer = new CsvMapWriter(buffer, csvPreference, false);
+        writer.write(values, headers);
+        String line = buffer.takeBufferContents();
+        logger.trace("Formatted event: {}", line);
+        return line;
     }
 
     /**
