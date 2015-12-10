@@ -1,3 +1,14 @@
+# 3.0.0
+
+## Changes
+
+### Major
+* Removed ClientContext localName and remoteHost to prevent DNS lookups
+
+### Bug fixes
+* Ensure only one value for the Transaction Id header
+
+
 # 2.2.0
 
 ## Changes
