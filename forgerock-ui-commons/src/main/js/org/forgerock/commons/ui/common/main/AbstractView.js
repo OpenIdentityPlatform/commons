@@ -94,6 +94,14 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
                         return true;
                     } else if (!self.route.url.length && Router.getCurrentHash().replace(/^#/, '') === "") {
                         return true;
+                    } else if (self.route === Router.configuration.routes.login) {
+                        /**
+                        * Determines if the current route is a login route, in which case allow the route  to execute.
+                        * This is due to OpenAM's requirement for two views rendering being rendered at the same time (an
+                        * arbitrary view and a session expiry login dialog view layered above) where the route and the hash
+                        * don't match.
+                        */
+                        return true;
                     } else {
                         return Router.getCurrentHash().replace(/^#/, '').match(self.route.url);
                     }
