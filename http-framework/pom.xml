@@ -24,7 +24,7 @@
   </parent>
   <groupId>org.forgerock.http</groupId>
   <artifactId>forgerock-http-framework</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>3.0.0</version>
   <packaging>pom</packaging>
   <name>Commons HTTP Framework</name>
   <description>
@@ -109,7 +109,7 @@
     <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-http-framework.git</connection>
     <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-http-framework.git</developerConnection>
     <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-http-framework/browse</url>
-    <tag>HEAD</tag>
+    <tag>3.0.0</tag>
   </scm>
   <distributionManagement>
     <site>
