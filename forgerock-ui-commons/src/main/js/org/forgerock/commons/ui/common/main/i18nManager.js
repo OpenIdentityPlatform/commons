@@ -18,12 +18,14 @@
 
 define( "org/forgerock/commons/ui/common/main/i18nManager", [
     "jquery",
-    "underscore",
+    "lodash",
     "require",
     "handlebars",
     "i18next",
-    "module"
-], function($, _, require, Handlebars, i18next, Module) {
+    "module",
+    "org/forgerock/commons/ui/common/util/CookieHelper",
+    "org/forgerock/commons/ui/common/main/Configuration"
+], function($, _, require, Handlebars, i18next, Module, CookieHelper, Configuration) {
 
     var obj = {};
 
@@ -49,6 +51,48 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
      * @param {string} [options.nameSpace] The nameSpace is optional and will default to "translation"
      */
     obj.init = function(options) {
+
+        var locales = [],
+            opts = {},
+            overrideLang = {},
+            nameSpace = options.nameSpace ? options.nameSpace : "translation";
+
+        // The requirements for a logged in and out user are different.
+        if (Configuration.loggedUser) {
+            // A logged in user will have no overriding "locale" query parameter and so the cookie is checked.
+            overrideLang.locale = CookieHelper.getCookie("i18next");
+        } else {
+            // A logged out user may have an overriding "locale" query parameter.
+            overrideLang.locale = options.paramLang.locale;
+        }
+
+        if (overrideLang.locale) {
+            locales = overrideLang.locale.split(" ");
+            options.serverLang = locales.shift();
+        }
+        if (options.defaultLang) {
+            locales.push(options.defaultLang);
+        }
+
+        // return if the stored lang matches the new one.
+        if (obj.lang && obj.lang === options.serverLang) {
+           return;
+        }
+        obj.lang = options.serverLang;
+
+        opts = {
+            fallbackLng: locales,
+            detectLngQS: "locale",
+            getAsync: false,
+            useCookie : true,
+            lng: options.serverLang,
+            load: Module.config().i18nLoad || "current",
+            ns: nameSpace,
+            nsseparator: ":::",
+            resGetPath: require.toUrl("locales/__lng__/__ns__.json")
+        };
+
+        $.i18n.init(opts);
 
         Handlebars.registerHelper("t", function(key) {
             var params = {
@@ -81,40 +125,6 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
                 return new Handlebars.SafeString(map[fallback]);
             }
         });
-
-        var locales = [],
-            opts = {},
-            nameSpace = options.nameSpace ? options.nameSpace : "translation",
-            loadMode;
-        if (options.paramLang && options.paramLang.locale) {
-            locales = options.paramLang.locale.split(" ");
-            options.serverLang = locales.shift();
-        }
-        if (options.defaultLang) {
-            locales.push(options.defaultLang);
-        }
-
-        // return if the stored lang matches the new one.
-        if (obj.lang !== undefined && obj.lang === options.serverLang) {
-           return;
-        }
-        obj.lang = options.serverLang;
-
-        loadMode = Module.config().i18nLoad || "current";
-
-        opts = {
-            fallbackLng: locales,
-            detectLngQS: "locale",
-            useCookie: false,
-            getAsync: false,
-            lng: options.serverLang,
-            load: loadMode,
-            ns: nameSpace,
-            nsseparator: ":::",
-            resGetPath: require.toUrl("locales/__lng__/__ns__.json")
-        };
-
-        $.i18n.init(opts);
 
     };
 

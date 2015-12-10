@@ -23,10 +23,9 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/i18nManager",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/Router"
-], function($, _, AbstractConfigurationAware, constants, eventManager, conf, i18nManager, ModuleLoader, Router) {
+], function($, _, AbstractConfigurationAware, constants, eventManager, conf, ModuleLoader, Router) {
     var obj = new AbstractConfigurationAware();
 
     obj.initialized = false;
@@ -81,13 +80,6 @@ define("org/forgerock/commons/ui/common/SiteConfigurator", [
 
         conf.globalData.auth.cookieName = config.cookieName;
         conf.globalData.auth.cookieDomains = config.domains;
-
-        i18nManager.init({
-            serverLang: config.lang,
-            paramLang: Router.convertCurrentUrlToJSON().params,
-            defaultLang: constants.DEFAULT_LANGUAGE
-        });
-
     };
 
     obj.configurePage = function (route, params) {

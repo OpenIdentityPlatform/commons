@@ -30,21 +30,31 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/util/UIUtils",
                 "org/forgerock/commons/ui/common/util/CookieHelper",
-                "org/forgerock/commons/ui/common/main/SessionManager"
+                "org/forgerock/commons/ui/common/main/SessionManager",
+                "org/forgerock/commons/ui/common/main/i18nManager"
             ],
-            processDescription: function(event, Router, Configuration, UIUtils, CookieHelper, SessionManager) {
+            processDescription: function(event, Router, Configuration, UIUtils, CookieHelper, SessionManager, i18nManager) {
                 var postSessionCheck = function () {
-                    UIUtils.preloadInitialTemplates();
-                    UIUtils.preloadInitialPartials();
-                    Router.init();
-                };
+                        UIUtils.preloadInitialTemplates();
+                        UIUtils.preloadInitialPartials();
+                        Router.init();
+                    },
+                    initLocalization = function () {
+                        i18nManager.init({
+                            serverLang: Configuration.globalData.lang,
+                            paramLang: Router.convertCurrentUrlToJSON().params,
+                            defaultLang: Constants.DEFAULT_LANGUAGE
+                        });
+                    };
 
                 SessionManager.getLoggedUser(function(user) {
                     Configuration.setProperty('loggedUser', user);
+                    initLocalization();
                     // WARNING - do not use the promise returned from sendEvent as an example for using this system
                     // TODO - replace with simplified event system as per CUI-110
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false}).then(postSessionCheck);
                 }, function() {
+                    initLocalization();
                     if (!CookieHelper.cookiesEnabled()) {
                         location.href = "#enableCookies/";
                     }
@@ -435,7 +445,7 @@ define("config/process/CommonConfig", [
                     if (event.failureCallback) {
                         event.failureCallback(reason);
                     }
-                    
+
                     promise.reject(reason);
 
                 });

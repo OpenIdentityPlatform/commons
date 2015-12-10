@@ -17,7 +17,7 @@
 /*global define, unescape*/
 
 define("org/forgerock/commons/ui/common/util/CookieHelper", [
-    "underscore"
+    "lodash"
 ], function(_) {
 
     /**
