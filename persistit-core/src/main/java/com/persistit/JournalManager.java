@@ -109,6 +109,8 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
     private final Map<TreeDescriptor, Integer> _treeToHandleMap = new HashMap<TreeDescriptor, Integer>();
 
     private final Map<Integer, TreeDescriptor> _handleToTreeMap = new HashMap<Integer, TreeDescriptor>();
+    
+    /** Maintain list of running transactions keyed by their start time-stamp. */  
     private final Map<Long, TransactionMapItem> _liveTransactionMap = new HashMap<Long, TransactionMapItem>();
 
     private final Persistit _persistit;
@@ -1743,7 +1745,6 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
                 final TransactionMapItem item = iterator.next();
                 if (item.isCommitted()) {
                     if (item.getCommitTimestamp() < timestamp) {
-                        iterator.remove();
                         toPruneCommited.add(item);
                     } else if (item.getStartTimestamp() < earliestCommitted) {
                         earliestCommitted = item.getStartTimestamp();
@@ -1772,14 +1773,20 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
             _earliestAbortedTimestamp = earliestAborted;
         }
         Collections.sort(toPruneCommited, TransactionMapItem.TRANSACTION_MAP_ITEM_COMPARATOR);
+        final List<Long> startTimestamps = new ArrayList<>(toPruneCommited.size());
         for (final TransactionMapItem item : toPruneCommited) {
             try {
                 synchronized (_player) {
                   _player.applyTransaction(item, _pruneCommited);
                 }
+                startTimestamps.add(item.getStartTimestamp());
             } catch (final PersistitException e) {
                 _persistit.getLogBase().pruneException.log(e, item);
             }
+        }
+        synchronized (this)
+        {
+          _liveTransactionMap.keySet().removeAll(startTimestamps);
         }
 
         /*
