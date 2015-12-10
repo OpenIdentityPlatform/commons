@@ -24,16 +24,14 @@ define("org/forgerock/commons/ui/common/main/Router", [
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/URIUtils"
-], function(_, eventManager, constants, conf, AbstractConfigurationAware, URIUtils) {
+], function(_, EventManager, constants, conf, AbstractConfigurationAware, URIUtils) {
     /**
      * @exports org/forgerock/commons/ui/common/main/Router
      */
 
     var obj = new AbstractConfigurationAware();
 
-    obj.bindedRoutes = {};
     obj.currentRoute = {};
-
 
     /**
      * @deprecated
@@ -171,14 +169,14 @@ define("org/forgerock/commons/ui/common/main/Router", [
             if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
                 return conf.loggedUser.uiroles.indexOf(role) !== -1;
             })) {
-                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, { fromRouter: true });
+                EventManager.sendEvent(constants.EVENT_UNAUTHORIZED, { fromRouter: true });
                 return false;
             }
         }
 
         if (route.excludedRole) {
             if(conf.loggedUser && conf.loggedUser.uiroles.indexOf(route.excludedRole) !== -1) {
-                eventManager.sendEvent(constants.EVENT_UNAUTHORIZED, { fromRouter: true });
+                EventManager.sendEvent(constants.EVENT_UNAUTHORIZED, { fromRouter: true });
                 return false;
             }
         }
@@ -188,36 +186,30 @@ define("org/forgerock/commons/ui/common/main/Router", [
     obj.init = function() {
         var Router = Backbone.Router.extend({
             initialize: function(routes) {
-                var route, url;
-
-                for(route in routes) {
-                    url = routes[route].url;
-                    this.route(url, route, _.bind(this.processRoute, {key: route}));
-                    obj.bindedRoutes[route] = _.bind(this.processRoute, {key: route});
-                }
+                _.each(routes, function(route, key) {
+                    this.route(route.url, key, _.partial(this.routeCallback, route));
+                }, this);
             },
-            processRoute : function() {
-                var route = obj.configuration.routes[this.key], baseView, i, args;
+            routeCallback : function(route) {
+                if (!obj.checkRole(route)) { return; }
 
-                // we don't actually use any of the backbone-provided arguments to this function,
-                // as they are decoded and that results in the loss of important context.
-                // instead we parse the parameters out of the hash ourselves:
-                args = obj.applyDefaultParameters(route, obj.extractParameters(route, obj.getURIFragment()));
-
-                if (!obj.checkRole(route)) {
-                    return;
-                }
+                /**
+                 * we don't actually use any of the backbone-provided arguments to this function,
+                 * as they are decoded and that results in the loss of important context.
+                 * instead we parse the parameters out of the hash ourselves:
+                 */
+                var args = obj.applyDefaultParameters(route, obj.extractParameters(route, obj.getURIFragment()));
 
                 obj.currentRoute = route;
 
                 if(route.event) {
-                    eventManager.sendEvent(route.event, {route: route, args: args});
+                    EventManager.sendEvent(route.event, {route: route, args: args});
                 } else if(route.dialog) {
                     route.baseView = obj.configuration.routes[route.base];
 
-                    eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, {route: route, args: args, base: route.base});
+                    EventManager.sendEvent(constants.EVENT_SHOW_DIALOG, {route: route, args: args, base: route.base});
                 } else if(route.view) {
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: route, args: args, fromRouter: true});
+                    EventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: route, args: args, fromRouter: true});
                 }
             }
         });
@@ -240,10 +232,6 @@ define("org/forgerock/commons/ui/common/main/Router", [
         params.replace = false;
         obj.currentRoute = route;
         obj.router.navigate(link, params);
-    };
-
-    obj.execRouteHandler = function(routeName) {
-        obj.bindedRoutes[routeName]();
     };
 
     obj.navigate = function(link, params) {
