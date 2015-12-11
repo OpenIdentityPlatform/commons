@@ -15,11 +15,11 @@
  */
 package org.forgerock.audit.rotation;
 
+import java.util.concurrent.TimeUnit;
+
 import org.forgerock.util.time.Duration;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Creates a rotation policy based on a time duration. Once the duration has passed the policy will indicate a
@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class TimeLimitRotationPolicy implements RotationPolicy {
     private final Duration rotationInterval;
+    private final long rotationIntervalInMillis;
 
     /**
      * Constructs a TimeLimitRotationPolicy with a given {@link Duration}
@@ -34,6 +35,7 @@ public class TimeLimitRotationPolicy implements RotationPolicy {
      */
     public TimeLimitRotationPolicy(final Duration rotationInterval) {
         this.rotationInterval = rotationInterval;
+        this.rotationIntervalInMillis = rotationInterval.convertTo(TimeUnit.MILLISECONDS).getValue();
     }
 
     /**
@@ -47,9 +49,10 @@ public class TimeLimitRotationPolicy implements RotationPolicy {
         if (rotationInterval.isZero() || rotationInterval.isUnlimited()) {
             return false;
         } else {
-            final org.joda.time.Duration timeSinceLastRotation =
-                    new org.joda.time.Duration(rotatable.getLastRotationTime(), DateTime.now(DateTimeZone.UTC));
-            return timeSinceLastRotation.getMillis() >= rotationInterval.convertTo(TimeUnit.MILLISECONDS).getValue();
+            final DateTime now = DateTime.now(DateTimeZone.UTC);
+            final DateTime lastRotationTime = rotatable.getLastRotationTime();
+            final org.joda.time.Duration timeSinceLastRotation = new org.joda.time.Duration(lastRotationTime, now);
+            return timeSinceLastRotation.getMillis() >= rotationIntervalInMillis;
         }
     }
 
