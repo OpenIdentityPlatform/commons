@@ -252,6 +252,10 @@ define("config/process/CommonConfig", [
                     return;
                 }
 
+                if (Configuration.backgroundLogin) {
+                    return;
+                }
+
                 return ModuleLoader.load(route.view).then(function (view) {
                     view.route = route;
 
