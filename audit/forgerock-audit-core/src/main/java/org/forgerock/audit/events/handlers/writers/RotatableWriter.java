@@ -383,7 +383,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                             }
                         }
                     },
-                    0,
+                    rotationCheckInterval.to(TimeUnit.MILLISECONDS),
                     rotationCheckInterval.to(TimeUnit.MILLISECONDS),
                     TimeUnit.MILLISECONDS);
         }
