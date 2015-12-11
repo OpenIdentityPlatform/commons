@@ -46,7 +46,7 @@ class StandardCsvWriter implements CsvWriter {
 
     private final CsvFormatter csvFormatter;
     private final String[] headers;
-    private Writer csvWriter;
+    private final Writer csvWriter;
     private RotatableWriter rotatableWriter;
 
     StandardCsvWriter(File csvFile, String[] headers, CsvPreference csvPreference,
@@ -112,6 +112,7 @@ class StandardCsvWriter implements CsvWriter {
      * @throws IOException
      *          If an error occurs
      */
+    @Override
     public boolean forceRotation() throws IOException {
         return rotatableWriter != null ? rotatableWriter.forceRotation() : false;
     }
@@ -125,6 +126,7 @@ class StandardCsvWriter implements CsvWriter {
      * @param values The keys of the {@link Map} have to match the column's header.
      * @throws IOException
      */
+    @Override
     public void writeEvent(Map<String, String> values) throws IOException {
         csvWriter.write(csvFormatter.formatEvent(values, headers));
     }

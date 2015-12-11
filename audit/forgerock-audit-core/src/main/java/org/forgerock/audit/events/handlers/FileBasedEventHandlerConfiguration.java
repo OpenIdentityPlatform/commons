@@ -129,7 +129,7 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
 
         // fixed time based rotation config parameters
         @JsonPropertyDescription("audit.handlers.file.rotationTimes")
-        private List<String> rotationTimes = new LinkedList<>();
+        private final List<String> rotationTimes = new LinkedList<>();
 
         @JsonPropertyDescription("audit.handlers.file.rotationFileSuffix")
         private String rotationFileSuffix = DEFAULT_ROTATION_FILE_SUFFIX;
@@ -181,7 +181,7 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
 
         /**
          * Sets the prefix to add to a log file on rotation. This is only used when time based rotation is enabled.
-         * @return The prefix to add to the file.
+         * @param rotationFilePrefix The prefix to add to the file.
          */
         public void setRotationFilePrefix(String rotationFilePrefix) {
             this.rotationFilePrefix = rotationFilePrefix;
@@ -190,7 +190,7 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
         /**
          * Gets the suffix to add to a log file on rotation. This is only used when time based rotation is enabled.
          * The suffix allows use of Date and Time patterns defined in {@link SimpleDateFormat}. The default suffix is
-         * "-MM.dd.yy-kk.mm".
+         * "-yyyy.MM.dd-kk.mm.ss".
          * @return The suffix to add to the file.
          */
         public String getRotationFileSuffix() {
@@ -200,8 +200,8 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
         /**
          * Sets the suffix to add to a log file on rotation. This is only used when time based rotation is enabled.
          * The suffix allows use of Date and Time patterns defined in {@link SimpleDateFormat}. The default suffix is
-         * "-MM.dd.yy-kk.mm".
-         * @return The suffix to add to the file.
+         * "-yyyy.MM.dd-kk.mm.ss".
+         * @param rotationFileSuffix The suffix to add to the file.
          */
         public void setRotationFileSuffix(String rotationFileSuffix) {
             this.rotationFileSuffix = rotationFileSuffix;

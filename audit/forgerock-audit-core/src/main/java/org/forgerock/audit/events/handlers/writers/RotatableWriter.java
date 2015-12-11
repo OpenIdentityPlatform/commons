@@ -88,6 +88,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      * @param file The initial file to manage rotation/retention.
      * @param configuration The configuration of the rotation and retention policies.
      * @param append Whether to append to the rotatable file or not.
+     * @throws java.io.IOException
      */
     public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
             final boolean append) throws IOException {
@@ -103,7 +104,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      * for deletion by their last modified timestamps but these timestamps are only accurate to the nearest second.
      */
     @VisibleForTesting
-    public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
+    RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
                            final boolean append, final FileNamingPolicy fileNamingPolicy) throws IOException {
         this.file = file;
         this.fileNamingPolicy = fileNamingPolicy;
@@ -322,15 +323,6 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     }
 
     private void addRotationPolicies(final FileRotation fileRotation) {
-        final Duration rotationInterval = parseDuration("rotation interval", fileRotation.getRotationInterval(), ZERO);
-        final List<Duration> dailyRotationTimes = new LinkedList<>();
-        for (final String rotationTime : fileRotation.getRotationTimes()) {
-            Duration duration = parseDuration("rotation time", rotationTime, null);
-            if (duration != null && !duration.isUnlimited()) {
-                dailyRotationTimes.add(duration);
-            }
-        }
-
         // add SizeBasedRotationPolicy if a non zero size is supplied
         final long maxFileSize = fileRotation.getMaxFileSize();
         if (maxFileSize > 0) {
@@ -338,11 +330,19 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         }
 
         // add FixedTimeRotationPolicy
+        final List<Duration> dailyRotationTimes = new LinkedList<>();
+        for (final String rotationTime : fileRotation.getRotationTimes()) {
+            Duration duration = parseDuration("rotation time", rotationTime, null);
+            if (duration != null && !duration.isUnlimited()) {
+                dailyRotationTimes.add(duration);
+            }
+        }
         if (!dailyRotationTimes.isEmpty()) {
             rotationPolicies.add(new FixedTimeRotationPolicy(dailyRotationTimes));
         }
 
         // add TimeLimitRotationPolicy if enabled
+        final Duration rotationInterval = parseDuration("rotation interval", fileRotation.getRotationInterval(), ZERO);
         if (!(rotationInterval.isZero() || rotationInterval.isUnlimited())) {
             rotationPolicies.add(new TimeLimitRotationPolicy(rotationInterval));
         }
