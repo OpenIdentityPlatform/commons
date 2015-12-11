@@ -386,9 +386,10 @@ class SecureCsvWriter implements CsvWriter {
             }
 
             Writer writer = context.getWriter();
-            // ensure the signature chaining along the files
             writeHeader(writer, headers);
+            // ensure the signature chaining along the files
             writeLastSignature(writer);
+            // In case of low traffic we still want the headers to be written into the file
             writer.flush();
         }
     }
