@@ -76,12 +76,22 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
     private static final String JSON_SESSIONS_RELATIVE_URI = JSON_REST_ROOT_ENDPOINT + "/sessions/";
     private static final String JSON_USERS_ENDPOINT = "users/";
 
+    private final Options httpClientOptions;
+
     private Client httpClient;
 
     private CallbackHandler handler;
     private String openamDeploymentUrl;
     private String openamSSOTokenCookieName;
     private String openamUserAttribute;
+
+    public OpenAMSessionModule() {
+        this.httpClientOptions = Options.defaultOptions();
+    }
+
+    public OpenAMSessionModule(Options httpClientOptions) {
+        this.httpClientOptions = httpClientOptions;
+    }
 
     @Override
     public String getModuleId() {
@@ -147,7 +157,6 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
 
         LOG.debug("Using SSL? {}", useSSL);
         try {
-            Options httpClientOptions = Options.defaultOptions();
             if (useSSL) {
                 configureSsl(options, httpClientOptions);
             }
