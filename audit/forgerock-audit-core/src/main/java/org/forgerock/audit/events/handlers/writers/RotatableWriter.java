@@ -108,7 +108,10 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         this.file = file;
         this.fileNamingPolicy = fileNamingPolicy;
         this.rotationEnabled = configuration.getFileRotation().isRotationEnabled();
-        this.lastRotationTime = new DateTime(file.lastModified(), DateTimeZone.UTC);
+        final long lastModified = file.lastModified();
+        this.lastRotationTime = lastModified > 0
+                ? new DateTime(file.lastModified(), DateTimeZone.UTC)
+                : DateTime.now(DateTimeZone.UTC);
         this.writer = constructWriter(file, append);
         addRetentionPolicies(configuration.getFileRetention());
         addRotationPolicies(configuration.getFileRotation());
