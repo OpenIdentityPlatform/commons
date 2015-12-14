@@ -199,7 +199,7 @@ final class AuditServiceImpl implements AuditService {
     public Promise<ResourceResponse, ResourceException> handleCreate(
             final Context context, final CreateRequest request) {
         try {
-            logger.debug("Audit create called for {} with {}", request.getResourcePath(), request.getContent().asMap());
+            logger.trace("Audit create called for {}", request.getResourcePath());
             checkLifecycleStateIsRunning();
 
             if (context.containsContext(AuditingContext.class)) {
