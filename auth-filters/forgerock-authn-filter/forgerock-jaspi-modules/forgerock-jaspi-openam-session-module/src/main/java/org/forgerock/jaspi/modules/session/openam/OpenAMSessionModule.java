@@ -284,6 +284,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
         }
 
         Request validateRequest = new Request()
+                .setMethod("POST")
                 .setUri(URI.create(openamDeploymentUrl + JSON_SESSIONS_RELATIVE_URI + tokenId
                         + "?_action=validate"));
         return httpClient.send(validateRequest)
@@ -309,6 +310,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
                         final String realm = validationResponse.get("realm").asString();
 
                         Request usersRequest = new Request()
+                                .setMethod("GET")
                                 .setUri(URI.create(openamDeploymentUrl + JSON_REST_ROOT_ENDPOINT
                                         + normalizeRealm(realm) + JSON_USERS_ENDPOINT + uid + "?_fields="
                                         + openamUserAttribute));
