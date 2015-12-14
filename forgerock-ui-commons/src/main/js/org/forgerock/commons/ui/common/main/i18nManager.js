@@ -94,14 +94,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
         $.i18n.init(opts);
 
-        Handlebars.registerHelper("t", function(key) {
-            var params = {
-                    postProcess: "sprintf",
-                    sprintf: _.map(_.toArray(arguments).slice(1, -1),
-                    Handlebars.Utils.escapeExpression)
-                },
-                result = $.i18n.t(key, params);
-            return new Handlebars.SafeString(result);
+        Handlebars.registerHelper("t", function(key, options) {
+            return new Handlebars.SafeString($.i18n.t(key, options.hash));
         });
 
         /**

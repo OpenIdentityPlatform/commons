@@ -244,5 +244,8 @@
             "SKYPE" : "SKYPE",
             "googlePlus" : "Google+"
         }
+    },
+    "test" : {
+        "sayHello" : "Hello __name__"
     }
 }

@@ -424,6 +424,11 @@ define([
                 QUnit.equal(patchDef.length, 3, "Expected operation count for removal of one attribute and addition of two others");
             });
 
+            QUnit.test("translate helper handles parameters", function () {
+                var translate = handlebars.compile("{{t 'test.sayHello' name=\"bob\" }}");
+                QUnit.equal(translate(), "Hello bob", "translate accepts input parameters");
+            });
+
             QUnit.asyncTest("Loading a module asynchronously (CUI-62)", function () {
                 var moduleLoader = require("org/forgerock/commons/ui/common/util/ModuleLoader");
 
