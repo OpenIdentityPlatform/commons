@@ -306,7 +306,7 @@ public class RotatableWriterTest {
         rotatableWriter = new RotatableWriter(file, configuration, true);
 
         // when
-        Thread.sleep(1200);
+        Thread.sleep(3000);
 
         // then
         assertRetainedHistoricalFiles(file, prefix, 1);
