@@ -147,6 +147,8 @@ class TransactionPlayer {
         final int start = bb.position();
         int end = start + recordSize;
         int position = start + TX.OVERHEAD;
+        
+        final Tree directoryTree = _support.getPersistit().getSystemVolume().getDirectoryTree();
 
         while (position < end) {
             bb.position(position);
@@ -191,12 +193,9 @@ class TransactionPlayer {
                         }
 
                         listener.store(address, startTimestamp, exchange);
-                        /*
-                         * Don't keep exchanges with enlarged value - let them
-                         * be GC'd
-                         */
-                        if (exchange.getValue().getMaximumSize() < Value.DEFAULT_MAXIMUM_SIZE) {
-                            releaseExchange(exchange);
+                        // Don't keep exchanges with enlarged value - let them be GC'd
+                        if (exchange.getValue().getEncodedBytes().length < Value.DEFAULT_MAXIMUM_SIZE) {
+                            releaseExchange(exchange, directoryTree);
                         }
                     }
                     appliedUpdates.incrementAndGet();
@@ -219,7 +218,7 @@ class TransactionPlayer {
                                 elisionCount, key2Size);
                         key2.setEncodedSize(key2Size + elisionCount);
                         listener.removeKeyRange(address, startTimestamp, exchange, key1, key2);
-                        releaseExchange(exchange);
+                        releaseExchange(exchange, directoryTree);
                     }
                     appliedUpdates.incrementAndGet();
                     break;
@@ -229,7 +228,7 @@ class TransactionPlayer {
                     final Exchange exchange = getExchange(DT.getTreeHandle(bb), address, startTimestamp, listener);
                     if (exchange != null) {
                         listener.removeTree(address, startTimestamp, exchange);
-                        releaseExchange(exchange);
+                        releaseExchange(exchange, directoryTree);
                     }
                     appliedUpdates.incrementAndGet();
                     break;
@@ -341,8 +340,10 @@ class TransactionPlayer {
         }
     }
 
-    private void releaseExchange(final Exchange exchange) {
-        _support.getPersistit().releaseExchange(exchange);
+    private void releaseExchange(final Exchange exchange, final Tree directoryTree) {
+        if (!exchange.getTree().equals(directoryTree)) {
+            _support.getPersistit().releaseExchange(exchange);
+        }
     }
 
     long getAppliedUpdates() {
