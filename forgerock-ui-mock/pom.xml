@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.forgerock.commons.ui</groupId>
         <artifactId>forgerock-ui</artifactId>
-        <version>10.0.5-SNAPSHOT</version>
+        <version>10.0.5</version>
     </parent>
 
     <artifactId>forgerock-ui-mock</artifactId>
