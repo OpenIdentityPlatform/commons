@@ -1,3 +1,25 @@
+# 4.0.2
+
+## Changes
+
+### Upgraded dependency versions
+
+| Dependency | Previous Version | New Version |
+| ---------- | ---------------- | ----------- |
+| forgerock-auth-filters (CAF) | 3.1.4 | 3.1.5 |
+
+
+# 4.0.1
+
+## Changes
+
+### Upgraded dependency versions
+
+| Dependency | Previous Version | New Version |
+| ---------- | ---------------- | ----------- |
+| forgerock-selfservice (CUSS) | 1.0.0 | 1.0.1 |
+
+
 # 4.0.0
 
 ## Changes
@@ -9,7 +31,6 @@
 | forgerock-rest (CREST) | 4.0.2 | 4.0.3 |
 | forgerock-auth-filters (CAF) | 3.1.3 | 3.1.4 |
 | forgerock-audit (CAUD) | 3.0.0 | 4.0.0 |
-| forgerock-audit (CUSS) | 3.0.0 | 4.0.0 |
 
 
 # 3.0.0
@@ -33,7 +54,7 @@
 ### New dependencies
 | Dependency | Version |
 | ---------- | ------- |
-| forgerock-selfservice (CUSS) | 1.0.0 |
+| forgerock-selfservice (USS) | 1.0.0 |
 
 
 # 2.0.1

@@ -112,7 +112,7 @@
     <json-web-token.version>3.0.2</json-web-token.version>
     <forgerock-http-framework.version>3.0.0</forgerock-http-framework.version>
     <forgerock-rest.version>4.0.3</forgerock-rest.version>
-    <forgerock-auth-filters.version>3.1.4</forgerock-auth-filters.version>
+    <forgerock-auth-filters.version>3.1.5</forgerock-auth-filters.version>
     <forgerock-audit.version>4.0.0</forgerock-audit.version>
     <forgerock-selfservice.version>1.0.1</forgerock-selfservice.version>
   </properties>
