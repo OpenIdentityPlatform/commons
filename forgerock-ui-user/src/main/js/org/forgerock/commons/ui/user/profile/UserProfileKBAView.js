@@ -107,7 +107,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
         },
         submit: function (formId, formData) {
             if (formId === "KBA") {
-                KBADelegate.saveKBAInfo(formData).then(
+                KBADelegate.saveInfo(formData).then(
                     _.bind(function () {
                         this.submitSuccess(formId);
                     }, this),
@@ -164,11 +164,22 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
             }
         },
         render: function(args, callback) {
-            KBADelegate.getQuestions()
-                .then(_.bind(function (questions) {
-                    this.data.predefinedQuestions = questions;
-                    UserProfileView.render.call(this, args, callback);
-                }, this));
+            var self = this;
+
+            KBADelegate.getInfo().then(function (response) {
+                self.data.predefinedQuestions = _.map(response.questions, function (value, key) {
+                    return { "id" : key, "question" : value };
+                });
+
+                UserProfileView.render.call(self, args, function () {
+                    self.$el.find("#kbaDescription").text($.t("common.user.kba.description",
+                        { numberOfQuestions: response.minimumAnswersToDefine }));
+
+                    if (callback) {
+                        callback();
+                    }
+                });
+            });
         },
 
         /**

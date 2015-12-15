@@ -36,20 +36,11 @@ define("org/forgerock/commons/ui/user/delegates/KBADelegate", [
 
     var KBADelegate = new AbstractDelegate("/" + Constants.context + "/" + Constants.SELF_SERVICE_CONTEXT);
 
-    KBADelegate.getQuestions = function () {
-        return this.serviceCall({
-            "url" : "kba"
-        }).then(function (response) {
-            return _.map(response.questions, function (value, key) {
-                return {
-                    "id" : key,
-                    "question" : value
-                };
-            });
-        });
+    KBADelegate.getInfo = function () {
+        return this.serviceCall({ "url" : "kba" });
     };
 
-    KBADelegate.saveKBAInfo = function (user) {
+    KBADelegate.saveInfo = function (user) {
         return this.serviceCall({
             "type": "PATCH",
             "url": "user/" + Configuration.loggedUser.id,
