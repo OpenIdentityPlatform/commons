@@ -116,6 +116,9 @@ public class AuditJsonConfig {
      *          If any error occurs.
      */
     public static AuditServiceConfiguration parseAuditServiceConfiguration(String json) throws AuditException {
+        if (json == null) {
+            return new AuditServiceConfiguration();
+        }
         try {
             return mapper.readValue(json, AuditServiceConfiguration.class);
         } catch (IOException e) {
