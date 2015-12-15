@@ -360,7 +360,7 @@ public class RotatableWriterTest {
         final File file = getTempFile();
         final String prefix = "testRetentionWithMaxSizeOfFile";
         final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
-        configuration.setRotationRetentionCheckInterval("10ms");
+        configuration.setRotationRetentionCheckInterval("100 ms");
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
         configuration.getFileRetention().setMaxDiskSpaceToUse(MAX_BYTES_TO_WRITE * MAX_NUMBER_OF_HISTORY_FILES);

@@ -81,6 +81,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     /** The underlying buffered writer using the output stream. */
     private BufferedWriter writer;
     private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+    private final RolloverLifecycleHook rolloverLifecycleHook;
 
     /**
      * Constructs a {@link RotatableWriter} given an initial file to manage rotation/retention, and
@@ -88,15 +89,26 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      * @param file The initial file to manage rotation/retention.
      * @param configuration The configuration of the rotation and retention policies.
      * @param append Whether to append to the rotatable file or not.
-     * @throws java.io.IOException
+     * @throws IOException If a problem occurs.
      */
     public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
             final boolean append) throws IOException {
-        this(file, configuration, append,
-                new TimeStampFileNamingPolicy(
-                        file,
-                        configuration.getFileRotation().getRotationFileSuffix(),
-                        configuration.getFileRotation().getRotationFilePrefix()));
+        this(file, configuration, append, getTimeStampFileNamingPolicy(file, configuration));
+    }
+
+    /**
+     * Constructs a {@link RotatableWriter} given an initial file to manage rotation/retention, a
+     * a {@link FileBasedEventHandlerConfiguration} and a {@link RolloverLifecycleHook}
+     *
+     * @param file The initial file to manage rotation/retention.
+     * @param configuration The configuration of the rotation and retention policies.
+     * @param append Whether to append to the rotatable file or not.
+     * @param rolloverLifecycleHook Hook to use before and after rotation/retention checks.
+     * @throws IOException If a problem occurs.
+     */
+    public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
+            final boolean append, final RolloverLifecycleHook rolloverLifecycleHook) throws IOException {
+        this(file, configuration, append, getTimeStampFileNamingPolicy(file, configuration), rolloverLifecycleHook);
     }
 
     /**
@@ -106,6 +118,13 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     @VisibleForTesting
     RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
                            final boolean append, final FileNamingPolicy fileNamingPolicy) throws IOException {
+        this(file, configuration, append, fileNamingPolicy, NOOP_ROLLOVER_LIFECYCLE_HOOK);
+    }
+
+    /** Constructor with all possible parameters. */
+    private RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
+            final boolean append, final FileNamingPolicy fileNamingPolicy,
+            final RolloverLifecycleHook rolloverLifecycleHook) throws IOException {
         this.file = file;
         this.fileNamingPolicy = fileNamingPolicy;
         this.rotationEnabled = configuration.getFileRotation().isRotationEnabled();
@@ -113,10 +132,19 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         this.lastRotationTime = lastModified > 0
                 ? new DateTime(file.lastModified(), DateTimeZone.UTC)
                 : DateTime.now(DateTimeZone.UTC);
+        this.rolloverLifecycleHook = rolloverLifecycleHook;
         this.writer = constructWriter(file, append);
         addRetentionPolicies(configuration.getFileRetention());
         addRotationPolicies(configuration.getFileRotation());
         scheduleRotationAndRetentionChecks(configuration);
+    }
+
+    private static TimeStampFileNamingPolicy getTimeStampFileNamingPolicy(final File file,
+            final FileBasedEventHandlerConfiguration configuration) {
+        return new TimeStampFileNamingPolicy(
+                file,
+                configuration.getFileRotation().getRotationFileSuffix(),
+                configuration.getFileRotation().getRotationFilePrefix());
     }
 
     /**
@@ -369,17 +397,22 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                     new Runnable() {
                         @Override
                         public void run() {
+                            rolloverLifecycleHook.beforeRollingOver();
                             try {
-                                rotateIfNeeded();
-                            } catch (Exception e) {
-                                logger.error("Failure when applying a rotation policy to file {}",
-                                        fileNamingPolicy.getInitialName(), e);
-                            }
-                            try {
-                                deleteFilesIfNeeded();
-                            } catch (Exception e) {
-                                logger.error("Failure when applying a retention policy to file {}",
-                                        fileNamingPolicy.getInitialName(), e);
+                                try {
+                                    rotateIfNeeded();
+                                } catch (Exception e) {
+                                    logger.error("Failure when applying a rotation policy to file {}",
+                                            fileNamingPolicy.getInitialName(), e);
+                                }
+                                try {
+                                    deleteFilesIfNeeded();
+                                } catch (Exception e) {
+                                    logger.error("Failure when applying a retention policy to file {}",
+                                            fileNamingPolicy.getInitialName(), e);
+                                }
+                            } finally {
+                              rolloverLifecycleHook.afterRollingOver();
                             }
                         }
                     },
@@ -421,6 +454,39 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         if (minimumFreeDiskSpace > 0) {
             retentionPolicies.add(new FreeDiskSpaceRetentionPolicy(minimumFreeDiskSpace));
         }
+    }
+
+    /**
+     * A RotationRetentionCheckHook that does nothing.
+     */
+    public static final RolloverLifecycleHook NOOP_ROLLOVER_LIFECYCLE_HOOK =
+        new RolloverLifecycleHook() {
+            @Override
+            public void beforeRollingOver() {
+                // nothing to do
+            }
+
+            @Override
+            public void afterRollingOver() {
+                // nothing to do
+            }
+    };
+
+    /**
+     * Callback hooks to allow custom action to be taken before and after the checks for rotation and
+     * retention is performed.
+     */
+    public interface RolloverLifecycleHook {
+
+        /**
+         * This method is called before the rotation and retention checks are done.
+         */
+        void beforeRollingOver();
+
+        /**
+         * This method is called after the rotation and retention checks are done.
+         */
+        void afterRollingOver();
     }
 
 }

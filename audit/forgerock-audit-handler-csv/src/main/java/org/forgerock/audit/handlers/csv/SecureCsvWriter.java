@@ -43,6 +43,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.forgerock.audit.events.handlers.writers.RotatableWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriter;
 import org.forgerock.audit.events.handlers.writers.TextWriterAdapter;
+import org.forgerock.audit.events.handlers.writers.RotatableWriter.RolloverLifecycleHook;
 import org.forgerock.audit.rotation.RotationContext;
 import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
@@ -63,7 +64,7 @@ import org.supercsv.prefs.CsvPreference;
  * The column HMAC is filled with the HMAC calculation of the current row and a key.
  * The column SIGNATURE is filled with the signature calculation of the last HMAC and the last signature if any.
  */
-class SecureCsvWriter implements CsvWriter {
+class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
     private static final Logger logger = LoggerFactory.getLogger(SecureCsvWriter.class);
 
@@ -130,7 +131,7 @@ class SecureCsvWriter implements CsvWriter {
                     throw new IllegalStateException("We are supposed to resume but there is not entry for CurrentKey.");
                 }
                 this.hmacCalculator.setCurrentKey(currentKey.getEncoded());
-                
+
                 setLastHMAC(verifier.getLastHMAC());
                 setLastSignature(verifier.getLastSignature());
                 this.headerWritten = true;
@@ -155,6 +156,19 @@ class SecureCsvWriter implements CsvWriter {
         }
     }
 
+    @Override
+    public void beforeRollingOver() {
+        // Prevent deadlock in case rotation/retention is enabled.
+        // Rotation will trigger pre and post rotation actions which write to the file,
+        // so no concurrent write must be performed during this time.
+        signatureLock.lock();
+    }
+
+    @Override
+    public void afterRollingOver() {
+        signatureLock.unlock();
+    }
+
     private void initHmacCalculatorWithRandomData() throws SecureStorageException {
         this.hmacCalculator.setCurrentKey(getRandomBytes());
         // As we start to work, store the key as the initial one and the current one too
@@ -172,7 +186,7 @@ class SecureCsvWriter implements CsvWriter {
             throws IOException {
         TextWriter textWriter;
         if (config.getFileRotation().isRotationEnabled()) {
-            rotatableWriter = new RotatableWriter(csvFile, config, append);
+            rotatableWriter = new RotatableWriter(csvFile, config, append, this);
             rotatableWriter.registerRotationHooks(new SecureCsvWriterRotationHooks());
             textWriter = rotatableWriter;
         } else {
@@ -262,6 +276,7 @@ class SecureCsvWriter implements CsvWriter {
      * @throws IOException
      *          If an error occurs
      */
+    @Override
     public boolean forceRotation() throws IOException {
         return rotatableWriter != null ? rotatableWriter.forceRotation() : false;
     }
@@ -271,6 +286,7 @@ class SecureCsvWriter implements CsvWriter {
      * @param values The keys of the {@link Map} have to match the column's header.
      * @throws IOException
      */
+    @Override
     public void writeEvent(Map<String, String> values) throws IOException {
         writeEvent(csvWriter, values);
     }
