@@ -74,7 +74,7 @@ public class CsvSecureArchiveVerifierCli {
         final Path archiveDirectory = options.get(ARCHIVE_DIRECTORY);
         final String topic = options.get(TOPIC);
         final File liveFile = new File(archiveDirectory.toFile(), topic + ".csv");
-        final String prefix = options.get(PREFIX);
+        final String prefix = options.get(PREFIX) + CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX;
         final String suffix = options.get(SUFFIX);
         final FileNamingPolicy fileNamingPolicy = fileNamingPolicyFactory.newFileNamingPolicy(liveFile, suffix, prefix);
         final Path keystoreFile = options.get(KEYSTORE_FILE);

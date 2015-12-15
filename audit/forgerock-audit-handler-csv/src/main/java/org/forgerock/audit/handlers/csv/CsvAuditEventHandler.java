@@ -105,6 +105,8 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     /** Name of action to force file rotation. */
     public static final String ROTATE_FILE_ACTION_NAME = "rotate";
 
+    static final String SECURE_CSV_FILENAME_PREFIX = "tamper-evident-";
+
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final Random random;
 
@@ -440,7 +442,8 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     }
 
     private File getAuditLogFile(final String type) {
-        return new File(configuration.getLogDirectory(), type + ".csv");
+        final String prefix = configuration.getSecurity().isEnabled() ? SECURE_CSV_FILENAME_PREFIX : "";
+        return new File(configuration.getLogDirectory(), prefix + type + ".csv");
     }
 
     private void writeEntry(final String topic, final CsvWriter csvWriter, final JsonValue obj) throws IOException {

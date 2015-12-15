@@ -216,7 +216,7 @@ public class SecureCsvWriterTest {
     @Test
     public void shouldRotateCsvAndKeyStoreFile() throws Exception {
         final Path logDirectory = Files.createTempDirectory("SecureCsvWriterTest");
-        final String filename = "shouldRotateCsvAndKeyStoreFile.csv";
+        final String filename = CsvAuditEventHandler.SECURE_CSV_FILENAME_PREFIX + "shouldRotateCsvAndKeyStoreFile.csv";
         final File actual = new File(logDirectory.toFile(), filename);
         final String header = "FOO";
         CsvAuditEventHandlerConfiguration config = new CsvAuditEventHandlerConfiguration();
