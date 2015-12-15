@@ -22,13 +22,13 @@ import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 
 /**
- * A {@link QueryFilterVisitor} that validates the fields present in the query filter against the given set of
- * JsonPointers. Methods in this visitor class returns false when the query filter field is not present in the
- * white-list of JsonPointers.
+ * A {@link QueryFilterVisitor} that validates a query filter. Methods in this visitor class returns false when
+ * the query filter field is not present in the white-list of JsonPointers OR the query filter contains
+ * operators co, sw, le, ge, lt, gt, pr and regex.
  *
  * @since 0.5.0
  */
-final class FieldValidator implements QueryFilterVisitor<Boolean, Set<JsonPointer>, JsonPointer> {
+final class QueryFilterValidator implements QueryFilterVisitor<Boolean, Set<JsonPointer>, JsonPointer> {
 
     @Override
     public Boolean visitAndFilter(Set<JsonPointer> whiteList, List<QueryFilter<JsonPointer>> subFilters) {
@@ -37,12 +37,12 @@ final class FieldValidator implements QueryFilterVisitor<Boolean, Set<JsonPointe
 
     @Override
     public Boolean visitBooleanLiteralFilter(Set<JsonPointer> whiteList, boolean booleanLiteral) {
-        return true;
+        return false;
     }
 
     @Override
     public Boolean visitContainsFilter(Set<JsonPointer> whiteList, JsonPointer field, Object valueAssertion) {
-        return validateField(whiteList, field);
+        return false;
     }
 
     @Override
@@ -53,28 +53,28 @@ final class FieldValidator implements QueryFilterVisitor<Boolean, Set<JsonPointe
     @Override
     public Boolean visitExtendedMatchFilter(Set<JsonPointer> whiteList, JsonPointer field, String operator,
                 Object valueAssertion) {
-        return validateField(whiteList, field);
+        return false;
     }
 
     @Override
     public Boolean visitGreaterThanFilter(Set<JsonPointer> whiteList, JsonPointer field, Object valueAssertion) {
-        return validateField(whiteList, field);
+        return false;
     }
 
     @Override
     public Boolean visitGreaterThanOrEqualToFilter(Set<JsonPointer> whiteList, JsonPointer field,
                 Object valueAssertion) {
-        return validateField(whiteList, field);
+        return false;
     }
 
     @Override
     public Boolean visitLessThanFilter(Set<JsonPointer> whiteList, JsonPointer field, Object valueAssertion) {
-        return validateField(whiteList, field);
+        return false;
     }
 
     @Override
     public Boolean visitLessThanOrEqualToFilter(Set<JsonPointer> whiteList, JsonPointer field, Object valueAssertion) {
-        return validateField(whiteList, field);
+        return false;
     }
 
     @Override
@@ -89,12 +89,12 @@ final class FieldValidator implements QueryFilterVisitor<Boolean, Set<JsonPointe
 
     @Override
     public Boolean visitPresentFilter(Set<JsonPointer> whiteList, JsonPointer field) {
-        return validateField(whiteList, field);
+        return false;
     }
 
     @Override
     public Boolean visitStartsWithFilter(Set<JsonPointer> whiteList, JsonPointer field, Object valueAssertion) {
-        return validateField(whiteList, field);
+        return false;
     }
 
     private Boolean validateFields(Set<JsonPointer> whiteList, List<QueryFilter<JsonPointer>> subFilters) {

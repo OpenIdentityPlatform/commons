@@ -28,15 +28,15 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * Unit test for {@link FieldValidator}.
+ * Unit test for {@link QueryFilterValidator}.
  *
  * @since 0.5.0
  *
  */
-public final class FieldValidatorTest {
+public final class QueryFilterValidatorTest {
 
     private static final QueryFilterVisitor<Boolean, Set<JsonPointer>,
-            JsonPointer> MAP_FILTER_VISITOR = new FieldValidator();
+            JsonPointer> MAP_FILTER_VISITOR = new QueryFilterValidator();
 
     private static final Set<JsonPointer> WHITE_LIST = new HashSet<>(
             Arrays.asList(
@@ -50,8 +50,8 @@ public final class FieldValidatorTest {
     public Object[][] getTestData() {
         return new Object[][] {
                 // @Checkstyle:off
-                { "true", true },
-                { "false", true },
+                { "true", false },
+                { "false", false },
                 { "/name eq 'alice'", true },
                 { "name eq 'alice'", true },
                 { "/x/0/name eq 'alice'", false },
@@ -59,22 +59,22 @@ public final class FieldValidatorTest {
                 { "admin/0 eq 'alice'", true },
                 { "/age eq 1234", true },
                 { "/balance eq 3.14159", true },
-                { "/age lt 20", true },
-                { "/age le 20", true },
-                { "/name co 'al'", true },
-                { "/name sw 'al'", true },
+                { "/age lt 20", false },
+                { "/age le 20", false },
+                { "/name co 'al'", false },
+                { "/name sw 'al'", false },
                 { "/name_Invalid sw 'al'", false },
-                { "/name pr", true },
-                { "(/age lt 18 or /age gt 30)", true },
+                { "/name pr", false },
+                { "(/age lt 18 or /age gt 30)", false },
                 { "(/age lt 18 or /age_Invalid gt 30)", false },
-                { "(/age lt 18 and /age gt 30)", true },
+                { "(/age lt 18 and /age gt 30)", false },
                 { "(/age lt 18 and /age_Invalid gt 30)", false },
                 { "(/role eq 'a' and (/role eq 'b' or /role eq 'c'))", true },
                 { "(/role_Invalid eq 'a' and (/role eq 'b' or /role eq 'c'))", false },
                 { "! (/age eq 1234)", true },
                 { "! (age eq 1234)", true },
                 { "! (/age_Invalid eq 1234)", false },
-                { "/name regex 'al.*'", true },
+                { "/name regex 'al.*'", false },
                 { "/name_Invalid regex 'al.*'", false }
                 // @Checkstyle:on
         };

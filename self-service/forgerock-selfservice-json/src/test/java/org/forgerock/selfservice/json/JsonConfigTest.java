@@ -76,9 +76,9 @@ public final class JsonConfigTest {
         new JsonConfig(getClass().getClassLoader()).buildProcessInstanceConfig(json);
     }
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private JsonValue readConfig(String configResource) throws IOException {
-        return new JsonValue(mapper.readValue(getClass().getResource(configResource), Map.class));
+        return new JsonValue(OBJECT_MAPPER.readValue(getClass().getResource(configResource), Map.class));
     }
 }

@@ -56,7 +56,7 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
 
     private final ConnectionFactory connectionFactory;
 
-    private final QueryFilterVisitor<Boolean, Set<JsonPointer>, JsonPointer> fieldValidator;
+    private final QueryFilterVisitor<Boolean, Set<JsonPointer>, JsonPointer> queryFilterValidator;
 
     /**
      * Constructs a new user query stage.
@@ -67,7 +67,7 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
     @Inject
     public UserQueryStage(@SelfService ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
-        this.fieldValidator = new FieldValidator();
+        this.queryFilterValidator = new QueryFilterValidator();
     }
 
     @Override
@@ -104,7 +104,7 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
 
     private Boolean isValidQueryFilter(UserQueryConfig config, JsonValue queryFilter) {
         QueryFilter<JsonPointer> filter = QueryFilters.parse(queryFilter.asString());
-        return filter.accept(fieldValidator, getQueryFieldsAsJsonPointers(config.getValidQueryFields()));
+        return filter.accept(queryFilterValidator, getQueryFieldsAsJsonPointers(config.getValidQueryFields()));
     }
 
     private Set<JsonPointer> getQueryFieldsAsJsonPointers(Set<String> queryFields) {

@@ -87,7 +87,8 @@ public final class UserUpdateService implements CollectionResourceProvider {
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
+            ActionRequest request) {
         return new NotSupportedException().asPromise();
     }
 
@@ -97,12 +98,14 @@ public final class UserUpdateService implements CollectionResourceProvider {
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId, DeleteRequest request) {
+    public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId,
+            DeleteRequest request) {
         return new NotSupportedException().asPromise();
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId,
+            PatchRequest request) {
         if (request.getPatchOperations().isEmpty() || request.getPatchOperations().size() > 1) {
             return new BadRequestException("Patch expects one operation").asPromise();
         }
@@ -148,17 +151,20 @@ public final class UserUpdateService implements CollectionResourceProvider {
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest request, QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest request,
+            QueryResourceHandler handler) {
         return new NotSupportedException().asPromise();
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId,
+            ReadRequest request) {
         return new NotSupportedException().asPromise();
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId,
+            UpdateRequest request) {
         return new NotSupportedException().asPromise();
     }
 }

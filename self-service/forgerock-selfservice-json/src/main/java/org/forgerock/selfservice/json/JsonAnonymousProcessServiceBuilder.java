@@ -26,7 +26,7 @@ import org.forgerock.util.Reject;
 /**
  * Builder for {@link AnonymousProcessService} from JSON config and AnonymousProcessService requirements.
  */
-public class JsonAnonymousProcessServiceBuilder {
+public final class JsonAnonymousProcessServiceBuilder {
 
     private ClassLoader classLoader = getClass().getClassLoader(); // assume this ClassLoader if not supplied
     private JsonValue jsonConfig;
@@ -103,7 +103,7 @@ public class JsonAnonymousProcessServiceBuilder {
     }
 
     /**
-     * Build an {@link AnonymousProcessService} from the JSON config and the other elements
+     * Build an {@link AnonymousProcessService} from the JSON config and the other elements.
      *
      * @return the {@link AnonymousProcessService}
      */
@@ -112,6 +112,7 @@ public class JsonAnonymousProcessServiceBuilder {
         ProcessInstanceConfig config = new JsonConfig(classLoader).buildProcessInstanceConfig(jsonConfig);
         Reject.ifNull(config.getStageConfigs(), config.getSnapshotTokenConfig(), config.getStorageType());
         Reject.ifTrue(config.getStageConfigs().isEmpty());
-        return new AnonymousProcessService(config, progressStageProvider, tokenHandlerFactory, processStore, classLoader);
+        return new AnonymousProcessService(config, progressStageProvider, tokenHandlerFactory, processStore,
+                classLoader);
     }
 }

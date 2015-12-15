@@ -41,6 +41,8 @@ public final class Answers {
      * @param answer
      *            the value to be hashed.
      * @return the hashed string value.
+     * @throws InternalServerErrorException
+     *            if the provided answer is not a String or cannot be hashed
      */
     public static JsonValue hashAnswer(CryptoService cryptoService, JsonValue answer)
             throws InternalServerErrorException {

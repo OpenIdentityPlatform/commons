@@ -57,8 +57,8 @@ final class ExampleProgressStageProvider implements ProgressStageProvider {
             Object[] parameters = getParameters(constructor);
             return constructor.newInstance(parameters);
 
-        } catch (NoSuchMethodException | InvocationTargetException |
-                IllegalAccessException | InstantiationException e) {
+        } catch (NoSuchMethodException | InvocationTargetException
+                | IllegalAccessException | InstantiationException e) {
             throw new StageConfigException("Unable to instantiate the configured progress stage", e);
         }
     }

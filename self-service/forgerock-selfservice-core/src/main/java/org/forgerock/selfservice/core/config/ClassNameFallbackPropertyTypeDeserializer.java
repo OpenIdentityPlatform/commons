@@ -28,7 +28,6 @@ import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.impl.AsPropertyTypeDeserializer;
 import com.fasterxml.jackson.databind.node.TreeTraversingParser;
-import com.fasterxml.jackson.databind.type.SimpleType;
 import com.fasterxml.jackson.databind.util.TokenBuffer;
 
 /**
@@ -43,16 +42,10 @@ class ClassNameFallbackPropertyTypeDeserializer extends AsPropertyTypeDeserializ
         super(bt, idRes, typePropertyName, typeIdVisible, defaultImpl);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     public ClassNameFallbackPropertyTypeDeserializer(AsPropertyTypeDeserializer src, BeanProperty property) {
         super(src, property);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public TypeDeserializer forProperty(final BeanProperty prop) {
         return (prop == _property) ? this : new ClassNameFallbackPropertyTypeDeserializer(this, prop);
