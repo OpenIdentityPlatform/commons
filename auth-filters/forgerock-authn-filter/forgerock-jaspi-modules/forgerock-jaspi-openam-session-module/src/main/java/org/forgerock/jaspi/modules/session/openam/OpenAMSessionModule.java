@@ -85,10 +85,19 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
     private String openamSSOTokenCookieName;
     private String openamUserAttribute;
 
+    /**
+     * Construct OpenAMSessionModule - use default options.
+     */
     public OpenAMSessionModule() {
         this.httpClientOptions = Options.defaultOptions();
     }
 
+    /**
+     * Cosntruct OpenAMSessionModule - use provide options for loading the HttpClientProvider.
+     *
+     * @param httpClientOptions
+     *            The options which will be used to configure the HTTP client.
+     */
     public OpenAMSessionModule(Options httpClientOptions) {
         this.httpClientOptions = httpClientOptions;
     }
