@@ -223,7 +223,7 @@ public class SecureCsvWriterTest {
         config.getSecurity().setEnabled(true);
         config.getSecurity().setSignatureInterval("5 minutes"); // ensure no periodically added signatures during test
         config.getFileRotation().setRotationEnabled(true);
-        config.getFileRotation().setRotationFileSuffix("-yyyy.MM.dd-kk.mm.ss.SSS");
+        config.getFileRotation().setRotationFileSuffix("-yyyy.MM.dd-HH.mm.ss.SSS");
         config.getFileRotation().setMaxFileSize(20);
 
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
@@ -240,7 +240,7 @@ public class SecureCsvWriterTest {
         final String keystorePassword = Base64.encode(keystorePasswordKey.getEncoded());
         final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
         final FileNamingPolicy fileNamingPolicy =
-                new TimeStampFileNamingPolicyWithNamedBasedOrdering(actual, "-yyyy.MM.dd-kk.mm.ss.SSS", "");
+                new TimeStampFileNamingPolicyWithNamedBasedOrdering(actual, "-yyyy.MM.dd-HH.mm.ss.SSS", "");
         final CsvSecureArchiveVerifier archiveVerifier =
                 new CsvSecureArchiveVerifier(fileNamingPolicy, keystorePassword, publicKey);
 
@@ -274,7 +274,7 @@ public class SecureCsvWriterTest {
                 CsvSecureArchiveVerifierCli.OptionsParser.FLAG_ARCHIVE_DIRECTORY, logDirectory.toString(),
                 CsvSecureArchiveVerifierCli.OptionsParser.FLAG_TOPIC, "shouldRotateCsvAndKeyStoreFile",
                 CsvSecureArchiveVerifierCli.OptionsParser.FLAG_PREFIX, "",
-                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_SUFFIX, "-yyyy.MM.dd-kk.mm.ss.SSS",
+                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_SUFFIX, "-yyyy.MM.dd-HH.mm.ss.SSS",
                 CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_FILE, KEYSTORE_FILENAME,
                 CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_PASSWORD, KEYSTORE_PASSWORD
         };

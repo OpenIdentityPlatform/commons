@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 
 public class TimeStampFileNamingPolicyTest {
 
-    public static final String TIME_STAMP_DATE_FORMAT = "-MM.dd.yy-kk.mm.ss";
+    public static final String TIME_STAMP_DATE_FORMAT = "-MM.dd.yy-HH.mm.ss";
     public static final String PREFIX = "prefix-";
 
     @Test

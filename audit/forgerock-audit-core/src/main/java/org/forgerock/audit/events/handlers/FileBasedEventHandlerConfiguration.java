@@ -114,7 +114,7 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
     public static class FileRotation {
 
         public static final long NO_MAX_FILE_SIZE = -1;
-        public static final String DEFAULT_ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-kk.mm.ss";
+        public static final String DEFAULT_ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-HH.mm.ss";
 
         @JsonPropertyDescription("audit.handlers.file.rotationEnabled")
         private boolean rotationEnabled = false;
@@ -190,7 +190,7 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
         /**
          * Gets the suffix to add to a log file on rotation. This is only used when time based rotation is enabled.
          * The suffix allows use of Date and Time patterns defined in {@link SimpleDateFormat}. The default suffix is
-         * "-yyyy.MM.dd-kk.mm.ss".
+         * "-yyyy.MM.dd-HH.mm.ss".
          * @return The suffix to add to the file.
          */
         public String getRotationFileSuffix() {
@@ -200,7 +200,7 @@ public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguratio
         /**
          * Sets the suffix to add to a log file on rotation. This is only used when time based rotation is enabled.
          * The suffix allows use of Date and Time patterns defined in {@link SimpleDateFormat}. The default suffix is
-         * "-yyyy.MM.dd-kk.mm.ss".
+         * "-yyyy.MM.dd-HH.mm.ss".
          * @param rotationFileSuffix The suffix to add to the file.
          */
         public void setRotationFileSuffix(String rotationFileSuffix) {

@@ -54,7 +54,7 @@ public class RotatableWriterTest {
     private static final String ONE_SECOND = "1 second";
     private static final int MAX_NUMBER_OF_HISTORY_FILES = 3;
     private static final int MAX_BYTES_TO_WRITE = 100;
-    private static final String ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-kk.mm.ss.SSS";
+    private static final String ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-HH.mm.ss.SSS";
 
     private RotatableWriter rotatableWriter;
 

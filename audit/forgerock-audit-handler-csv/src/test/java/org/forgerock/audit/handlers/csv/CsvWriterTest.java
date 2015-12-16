@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
 @SuppressWarnings("javadoc")
 public class CsvWriterTest {
 
-    public static final String TIME_STAMP_FORMAT = "-MM.dd.yy-kk.mm.ss.SSS";
+    public static final String TIME_STAMP_FORMAT = "-MM.dd.yy-HH.mm.ss.SSS";
     public static final String PREFIX = "Prefix-";
 
     private KeyStoreHandlerDecorator keyStoreHandler;
