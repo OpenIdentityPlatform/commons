@@ -1,3 +1,14 @@
+# 4.1.0
+
+## Changes
+
+### Upgraded dependency versions
+
+| Dependency | Previous Version | New Version |
+| ---------- | ---------------- | ----------- |
+| forgerock-audit (CAUD) | 4.0.1 | 4.1.0 |
+| forgerock-selfservice (CUSS) | 1.0.1 | 1.0.2 |
+
 # 4.0.3
 
 ## Changes

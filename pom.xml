@@ -18,7 +18,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.forgerock.commons</groupId>
   <artifactId>forgerock-bom</artifactId>
-  <version>4.0.4-SNAPSHOT</version>
+  <version>4.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>ForgeRock Bill Of Materials</name>
   <description>Common BOM for ForgeRock projects.
@@ -114,8 +114,8 @@
     <forgerock-http-framework.version>3.0.0</forgerock-http-framework.version>
     <forgerock-rest.version>4.0.3</forgerock-rest.version>
     <forgerock-auth-filters.version>3.1.5</forgerock-auth-filters.version>
-    <forgerock-audit.version>4.0.0</forgerock-audit.version>
-    <forgerock-selfservice.version>1.0.1</forgerock-selfservice.version>
+    <forgerock-audit.version>4.1.0</forgerock-audit.version>
+    <forgerock-selfservice.version>1.0.2</forgerock-selfservice.version>
   </properties>
 
   <prerequisites>
