@@ -5,7 +5,7 @@
   <parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-persistit</artifactId>
-    <version>4.3.1-SNAPSHOT</version>
+    <version>4.3.1</version>
   </parent>
 
   <artifactId>forgerock-persistit-core</artifactId>
