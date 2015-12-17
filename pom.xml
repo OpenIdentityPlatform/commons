@@ -541,7 +541,7 @@
                         <useMissingFile>true</useMissingFile>
                         <fileTemplate>/org/codehaus/mojo/license/third-party-file-groupByLicense.ftl</fileTemplate>
                         <failIfWarning>true</failIfWarning>
-                        <excludedScopes>test</excludedScopes>
+                        <excludedScopes>test,provided</excludedScopes>
                         <licenseMerges>
                             <licenseMerge>
                                 Apache Software License, Version 2.0|
