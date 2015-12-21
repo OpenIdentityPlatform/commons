@@ -417,7 +417,8 @@ define([
             });
 
             QUnit.test("translate helper handles parameters", function () {
-                var translate = handlebars.compile("{{t 'test.sayHello' name=\"bob\" }}");
+                var Handlebars = require("handlebars"),
+                    translate = Handlebars.compile("{{t 'test.sayHello' name=\"bob\" }}");
                 QUnit.equal(translate(), "Hello bob", "translate accepts input parameters");
             });
 

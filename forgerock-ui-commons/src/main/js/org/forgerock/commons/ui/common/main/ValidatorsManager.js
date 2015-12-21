@@ -52,7 +52,7 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                         .closest("form")
                         .find(':input')
                         .filter(function () { return $.inArray($(this).attr("id"), input.attr("data-validation-dependents").split(",")) !== -1; })
-                        .trigger("blur");
+                        .trigger("validate");
                 }
             },
             postValidation = function  (policyFailures) {
@@ -87,9 +87,9 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
             input.attr("data-validation-status", "error");
 
             if(input.attr('data-validator-event')) {
-                event = input.attr('data-validator-event') + " change blur paste";
+                event = input.attr('data-validator-event') + " change blur paste validate";
             } else {
-                event = "change blur paste";
+                event = "change blur paste validate";
             }
 
             input.on(event, function (e) {
@@ -129,9 +129,9 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
                         input.attr("data-validation-status", "error");
 
                         if (input.attr('data-validator-event')) {
-                            event = input.attr('data-validator-event') + " keyup change blur paste";
+                            event = input.attr('data-validator-event') + " keyup change blur paste validate";
                         } else {
-                            event = "keyup change blur paste";
+                            event = "keyup change blur paste validate";
                         }
 
                         _.each(property.policyRequirements, function (req) {
@@ -288,10 +288,10 @@ define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     };
 
     obj.validateAllFields = function(el) {
-        // we bind "blur" as a validation event to all input fields, to this is enough to trigger the event.
+        // we bind the custom "validate" event to all input fields.
         // Also has the nice effect of not changing the state of the input, as was sometimes happening for different
-        // input types (notably, checkboxes with change events).
-        el.find(":input").trigger("blur");
+        // input types (notably, checkboxes with change events and loss of focus with blur events).
+        el.find(":input").trigger("validate");
     };
 
     obj.formValidated = function(el) {
