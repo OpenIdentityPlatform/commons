@@ -107,7 +107,8 @@ public final class AnonymousProcessService extends AbstractRequestHandler {
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             JsonValue clientResponse = initiateProcess(new SelfServiceContext(context), request);
-            return newResourceResponse("1", "1.0", clientResponse).asPromise();
+            String revision = String.valueOf(clientResponse.getObject().hashCode());
+            return newResourceResponse("1", revision, clientResponse).asPromise();
         } catch (ResourceException | RuntimeException e) {
             return logAndAdaptException(e).asPromise();
         }
