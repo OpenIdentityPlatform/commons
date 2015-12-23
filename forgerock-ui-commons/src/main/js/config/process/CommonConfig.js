@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define, window, _*/
@@ -482,6 +482,26 @@ define("config/process/CommonConfig", [
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                     return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
                 });
+            }
+        },
+        {
+            startEvent: Constants.EVENT_SELECT_KBA_QUESTION,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/user/anonymousProcess/KBAView"
+            ],
+            processDescription: function(event, KBAView) {
+                KBAView.changeQuestion();
+            }
+        },
+        {
+            startEvent: Constants.EVENT_DELETE_KBA_QUESTION,
+            description: "",
+            dependencies: [
+                "org/forgerock/commons/ui/user/anonymousProcess/KBAView"
+            ],
+            processDescription: function(event, KBAView) {
+                KBAView.deleteQuestion(event.viewId);
             }
         }
 

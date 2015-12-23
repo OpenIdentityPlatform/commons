@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define*/
@@ -106,6 +106,9 @@ define("org/forgerock/commons/ui/common/util/Constants", [
     obj.HEADER_PARAM_NO_SESSION = "X-NoSession";
 
     obj.SELF_SERVICE_CONTEXT = "selfservice/";
+
+    obj.EVENT_SELECT_KBA_QUESTION = "user.selfservice.kba.EVENT_SELECT_KBA_QUESTION";
+    obj.EVENT_DELETE_KBA_QUESTION = "user.selfservice.kba.EVENT_DELETE_KBA_QUESTION";
 
     return obj;
 });
