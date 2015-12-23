@@ -370,11 +370,11 @@ public final class Promises {
                 }
             };
 
-    private static final AsyncFunction<Exception, Object, Exception> RESULT_IDEM_ASYNC_FUNC =
-            new AsyncFunction<Exception, Object, Exception>() {
+    private static final AsyncFunction<Object, Object, Exception> RESULT_IDEM_ASYNC_FUNC =
+            new AsyncFunction<Object, Object, Exception>() {
                 @Override
-                public Promise<Object, Exception> apply(final Exception exception) throws Exception {
-                    throw exception;
+                public Promise<Object, Exception> apply(final Object object) throws Exception {
+                    return newResultPromise(object);
                 }
             };
 

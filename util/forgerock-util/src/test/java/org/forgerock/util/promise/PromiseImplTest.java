@@ -16,6 +16,8 @@
 package org.forgerock.util.promise;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.fail;
 
@@ -180,11 +182,11 @@ public class PromiseImplTest {
     }
 
     private Promise<Double, NeverThrowsException> supplyDouble() {
-        return Promises.newResultPromise(1.23);
+        return newResultPromise(1.23);
     }
 
     private Promise<Long, NeverThrowsException> supplyLong() {
-        return Promises.newResultPromise(123L);
+        return newResultPromise(123L);
     }
 
     @Test
@@ -408,11 +410,11 @@ public class PromiseImplTest {
     }
 
     private Promise<Void, RuntimeException> throwRuntimeException() {
-        return Promises.newExceptionPromise(new RuntimeException());
+        return newExceptionPromise(new RuntimeException());
     }
 
     private Promise<Void, IOException> throwIOException() {
-        return Promises.newExceptionPromise(new IOException());
+        return newExceptionPromise(new IOException());
     }
 
 }

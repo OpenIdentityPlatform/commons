@@ -15,11 +15,19 @@
 package org.forgerock.util.promise;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -31,6 +39,10 @@ import org.testng.annotations.Test;
  * honored.
  */
 public class PromiseContractTest {
+
+    private static final String PROMISE_RESULT = "result";
+    private static final Exception PROMISE_EXCEPTION = new Exception();
+    private static final RuntimeException PROMISE_RUNTIME_EXCEPTION = new RuntimeException("Boom");
 
     @Test(dataProvider = "completedPromisesWithResult")
     public void completedPromiseWithResultWithListenerThrowingRuntimeException(String label, 
@@ -120,7 +132,7 @@ public class PromiseContractTest {
     // ----------------------------------------------------------------
 
 
-    @Test(dataProvider = "providePromises")
+    @Test(dataProvider = "completePromises")
     @SuppressWarnings("unchecked")
     public void shouldReturnNewPromiseUsingThenWithFunction(Promise<?, Exception> rootPromise) throws Exception {
         Promise<?, Exception> leafPromise;
@@ -171,34 +183,109 @@ public class PromiseContractTest {
         assertThat(leafPromise).isSameAs(rootPromise);
     }
 
+    @Test(dataProvider = "resultPromises")
+    public void promiseReturningValueShouldIgnoreAChainedThenCatchAsync(Promise<String, Exception> rootPromise)
+            throws Exception {
+        //Given
+        AsyncFunction catchException = mock(AsyncFunction.class);
+
+        //When
+        Promise resultPromise = rootPromise.thenCatchAsync(catchException);
+
+        //Then
+        verifyZeroInteractions(catchException);
+        assertThat(resultPromise.getOrThrowUninterruptibly()).isEqualTo(PROMISE_RESULT);
+    }
+
+    @Test(dataProvider = "exceptionPromises")
+    public void promiseReturningExceptionShouldHitAChainedThenCatchAsync(Promise<String, Exception> rootPromise)
+            throws Exception {
+        //Given
+        Exception e2 = new Exception();
+        AsyncFunction catchException = mock(AsyncFunction.class);
+        when(catchException.apply(any())).thenThrow(e2);
+
+        // When
+        Promise resultPromise = rootPromise.thenCatchAsync(catchException);
+
+        // Then
+        try {
+            resultPromise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(e2.getClass());
+        } catch (Exception e) {
+            assertThat(e).isSameAs(e2);
+            verify(catchException).apply(PROMISE_EXCEPTION);
+        }
+    }
+
+    @Test(dataProvider = "runtimeExceptionPromises")
+    public void promiseThrowingRuntimeExceptionShouldIgnoreAChainedThenCatchAsync
+            (Promise<String, Exception> rootPromise) throws Exception {
+        //Given
+        AsyncFunction catchException = mock(AsyncFunction.class);
+
+        //When
+        Promise resultPromise = rootPromise.thenCatchAsync(catchException);
+
+        //Then
+        verifyZeroInteractions(catchException);
+        try {
+            resultPromise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(PROMISE_RUNTIME_EXCEPTION.getClass());
+        } catch (Exception e) {
+            assertThat(e).isSameAs(PROMISE_RUNTIME_EXCEPTION);
+        }
+    }
+
     @DataProvider
-    private Object[][] completePromises() {
+    private Iterator<Object[]> completePromises() {
+        List<Object[]> promises = new ArrayList<>();
+        Collections.addAll(promises, resultPromises());
+        Collections.addAll(promises, exceptionPromises());
+        Collections.addAll(promises, runtimeExceptionPromises());
+        return promises.iterator();
+    }
+
+    @DataProvider
+    private Object[][] resultPromises() {
         PromiseImpl<String, Exception> promiseImplResult = PromiseImpl.create();
-        promiseImplResult.handleResult(null);
-
-        PromiseImpl<String, Exception> promiseImplException = PromiseImpl.create();
-        promiseImplResult.handleException(null);
-
-        PromiseImpl<String, Exception> promiseImplRuntimeException = PromiseImpl.create();
-        promiseImplResult.handleRuntimeException(null);
+        promiseImplResult.handleResult(PROMISE_RESULT);
 
         return new Object[][] {
-            { Promises.<String, Exception>newResultPromise(null) },
-            { Promises.<String, Exception>newExceptionPromise(null) },
-            { createCompletedRuntimePromise(null) },
-            { promiseImplResult },
-            { promiseImplException },
+            { Promises.newResultPromise(PROMISE_RESULT) },
+            { promiseImplResult }
+        };
+    }
+
+    @DataProvider
+    private Object[][] exceptionPromises() {
+        PromiseImpl<String, Exception> promiseImplException = PromiseImpl.create();
+        promiseImplException.handleException(PROMISE_EXCEPTION);
+
+        return new Object[][] {
+            { Promises.<String, Exception>newExceptionPromise(PROMISE_EXCEPTION) },
+            { promiseImplException }
+        };
+    }
+
+    @DataProvider
+    private Object[][] runtimeExceptionPromises() {
+        PromiseImpl<String, Exception> promiseImplRuntimeException = PromiseImpl.create();
+        promiseImplRuntimeException.handleRuntimeException(PROMISE_RUNTIME_EXCEPTION);
+
+        return new Object[][] {
+            { createCompletedRuntimePromise() },
             { promiseImplRuntimeException }
         };
     }
 
-    private Promise<String, Exception> createCompletedRuntimePromise(String value) {
+    private Promise<String, Exception> createCompletedRuntimePromise() {
         // Cannot create a RuntimeExceptionPromise in another way
-        return Promises.<String, Exception>newResultPromise(value)
+        return Promises.newResultPromise(PROMISE_RESULT)
                 .then(new Function<String, String, Exception>() {
             @Override
             public String apply(String value) throws Exception {
-                throw new RuntimeException("Boom");
+                throw PROMISE_RUNTIME_EXCEPTION;
             }
         });
     }
