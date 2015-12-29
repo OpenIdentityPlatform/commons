@@ -11,10 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.forgerock.audit.handlers.csv.CsvSecureConstants.HEADER_HMAC;
@@ -27,6 +28,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.Writer;
+import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.SignatureException;
 import java.util.HashMap;
 import java.util.Map;
@@ -101,9 +104,25 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
 
         try {
             KeyStoreHandlerDecorator keyStoreHandlerDecorated = new KeyStoreHandlerDecorator(keyStoreHandler);
-            this.keyStorePassword = Base64.encode(keyStoreHandlerDecorated.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
-            KeyStoreHandler hmacKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(), keyStorePassword);
-            this.secureStorage = new KeyStoreSecureStorage(hmacKeyStoreHandler, keyStoreHandlerDecorated.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE), keyStoreHandlerDecorated.readPrivateKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE));
+            SecretKey password = keyStoreHandlerDecorated.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD);
+            if (password == null) {
+                throw new IllegalArgumentException(format(
+                        "No '%s' symmetric key found in the provided keystore: %s. This key must be provided.",
+                        CsvSecureConstants.ENTRY_PASSWORD, keyStoreHandlerDecorated.getLocation()));
+            }
+            this.keyStorePassword = Base64.encode(password.getEncoded());
+            KeyStoreHandler hmacKeyStoreHandler =
+                    new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(), keyStorePassword);
+            PublicKey publicSignatureKey =
+                    keyStoreHandlerDecorated.readPublicKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE);
+            PrivateKey privateSignatureKey =
+                    keyStoreHandlerDecorated.readPrivateKeyFromKeyStore(CsvSecureConstants.ENTRY_SIGNATURE);
+            if (publicSignatureKey == null || privateSignatureKey == null) {
+                throw new IllegalArgumentException(format(
+                        "No '%s' signing key found in the provided keystore: %s. This key must be provided.",
+                        CsvSecureConstants.ENTRY_SIGNATURE, keyStoreHandlerDecorated.getLocation()));
+            }
+            this.secureStorage = new KeyStoreSecureStorage(hmacKeyStoreHandler, publicSignatureKey, privateSignatureKey);
             final CsvAuditEventHandlerConfiguration.CsvSecurity securityConfiguration = config.getSecurity();
             if (fileAlreadyInitialized) {
                 // Run the CsvVerifier to check that the file was not tampered.
@@ -152,7 +171,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 }
             };
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error when initializing a secure CSV writer", e);
         }
     }
 
