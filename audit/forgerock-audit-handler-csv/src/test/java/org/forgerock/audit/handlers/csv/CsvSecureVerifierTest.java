@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -22,6 +22,7 @@ import java.io.File;
 import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandlerDecorator;
 import org.forgerock.audit.secure.KeyStoreSecureStorage;
+import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -36,8 +37,9 @@ public class CsvSecureVerifierTest {
         File csvFile = new File("src/test/resources/shouldGeneratePeriodicallySignature-expected.txt");
         KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
                 new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD));
-        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvFile, new KeyStoreSecureStorage(keyStoreHandler,
-                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
+        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvFile, CsvPreference.EXCEL_PREFERENCE,
+                new KeyStoreSecureStorage(keyStoreHandler,
+                        keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
         assertThat(csvVerifier.verify().hasPassedVerification()).isTrue();
     }
 
@@ -46,8 +48,9 @@ public class CsvSecureVerifierTest {
         File csvFile = new File(filename);
         KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
                 new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, TRUSTSTORE_FILENAME, TRUSTSTORE_PASSWORD));
-        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvFile, new KeyStoreSecureStorage(keyStoreHandler,
-                keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
+        CsvSecureVerifier csvVerifier = new CsvSecureVerifier(csvFile, CsvPreference.EXCEL_PREFERENCE,
+                new KeyStoreSecureStorage(keyStoreHandler,
+                        keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE)));
         assertThat(csvVerifier.verify().hasPassedVerification()).isFalse();
     }
 

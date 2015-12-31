@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -46,6 +46,7 @@ class CsvSecureVerifier {
     private static final Logger logger = LoggerFactory.getLogger(CsvSecureVerifier.class);
 
     private File csvFile;
+    private final CsvPreference csvPreference;
     private final HmacCalculator hmacCalculator;
     private final SecureStorage secureStorage;
     private String lastHMAC;
@@ -57,11 +58,14 @@ class CsvSecureVerifier {
      *
      * @param csvFile
      *            the CSV file to verify
+     * @param csvPreference
+     *            the CSV preference to use
      * @param secureStorage
      *            the secure storage containing keys
      */
-    public CsvSecureVerifier(File csvFile, SecureStorage secureStorage) {
+    public CsvSecureVerifier(File csvFile, CsvPreference csvPreference, SecureStorage secureStorage) {
         this.csvFile= csvFile;
+        this.csvPreference = csvPreference;
         this.secureStorage = secureStorage;
 
         try {
@@ -156,7 +160,7 @@ class CsvSecureVerifier {
     }
 
     private CsvMapReader newBufferedCsvMapReader() throws FileNotFoundException {
-        return new CsvMapReader(new BufferedReader(new FileReader(csvFile)), CsvPreference.EXCEL_PREFERENCE);
+        return new CsvMapReader(new BufferedReader(new FileReader(csvFile)), csvPreference);
     }
 
     private VerificationResult newVerificationFailureResult(String msg) {

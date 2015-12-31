@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -241,8 +241,8 @@ public class SecureCsvWriterTest {
         final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
         final FileNamingPolicy fileNamingPolicy =
                 new TimeStampFileNamingPolicyWithNamedBasedOrdering(actual, "-yyyy.MM.dd-HH.mm.ss.SSS", "");
-        final CsvSecureArchiveVerifier archiveVerifier =
-                new CsvSecureArchiveVerifier(fileNamingPolicy, keystorePassword, publicKey);
+        final CsvSecureArchiveVerifier archiveVerifier = new CsvSecureArchiveVerifier(
+                fileNamingPolicy, keystorePassword, publicKey, CsvPreference.EXCEL_PREFERENCE);
 
         // Verify the expected files were created
         assertThat(actual).exists();

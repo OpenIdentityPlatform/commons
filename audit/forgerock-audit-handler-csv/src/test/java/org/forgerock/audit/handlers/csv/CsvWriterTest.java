@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -20,9 +20,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.KEYSTORE_FILENAME;
 import static org.forgerock.audit.handlers.csv.SecureCsvWriterTest.KEYSTORE_PASSWORD;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -42,7 +40,6 @@ import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
 import org.forgerock.util.encode.Base64;
 import org.joda.time.format.DateTimeFormat;
-import org.supercsv.io.CsvMapReader;
 import org.supercsv.prefs.CsvPreference;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -89,7 +86,7 @@ public class CsvWriterTest {
         KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, csvFile.getPath() + ".keystore", password);
         SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
                 keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
-        CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, secureStorage);
+        CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, CsvPreference.EXCEL_PREFERENCE, secureStorage);
         assertThat(verifier.verify().hasPassedVerification()).isTrue();
     }
 
@@ -133,7 +130,7 @@ public class CsvWriterTest {
                 csvFile.getPath() + ".keystore", password);
         SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
                 keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
-        CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, secureStorage);
+        CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, CsvPreference.EXCEL_PREFERENCE, secureStorage);
         assertThat(verifier.verify().hasPassedVerification()).isTrue().as("File " + csvFile.getPath());
 
         // Expecting to fail
@@ -207,7 +204,7 @@ public class CsvWriterTest {
                 files[0].getPath() + ".keystore", password);
         SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
                 keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
-        CsvSecureVerifier verifier = new CsvSecureVerifier(files[0], secureStorage);
+        CsvSecureVerifier verifier = new CsvSecureVerifier(files[0], CsvPreference.EXCEL_PREFERENCE, secureStorage);
         assertThat(verifier.verify().hasPassedVerification()).as("File " + csvFile.getPath()).isTrue();
     }
 

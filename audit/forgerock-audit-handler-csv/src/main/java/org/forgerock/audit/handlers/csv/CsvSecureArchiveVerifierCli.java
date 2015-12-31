@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -39,6 +39,7 @@ import org.forgerock.util.Option;
 import org.forgerock.util.Options;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.encode.Base64;
+import org.supercsv.prefs.CsvPreference;
 
 /**
  * Command line interface for verifying an archived set of tamper evident CSV audit log files for a particular topic.
@@ -96,7 +97,7 @@ public class CsvSecureArchiveVerifierCli {
         }
 
         final CsvSecureArchiveVerifier archiveVerifier =
-                new CsvSecureArchiveVerifier(fileNamingPolicy, password, publicKey);
+                new CsvSecureArchiveVerifier(fileNamingPolicy, password, publicKey, CsvPreference.EXCEL_PREFERENCE);
         final List<CsvSecureVerifier.VerificationResult> verificationResults = archiveVerifier.verify();
 
         printVerificationResults(verificationResults, out);

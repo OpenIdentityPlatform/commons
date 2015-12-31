@@ -126,7 +126,7 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
             final CsvAuditEventHandlerConfiguration.CsvSecurity securityConfiguration = config.getSecurity();
             if (fileAlreadyInitialized) {
                 // Run the CsvVerifier to check that the file was not tampered.
-                CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, secureStorage);
+                CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, csvPreference, secureStorage);
                 CsvSecureVerifier.VerificationResult verificationResult = verifier.verify();
                 if (!verificationResult.hasPassedVerification()) {
                     throw new IOException("The CSV file was tampered: " + verificationResult.getFailureReason());

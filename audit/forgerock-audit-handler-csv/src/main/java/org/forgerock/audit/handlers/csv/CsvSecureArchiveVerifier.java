@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -30,6 +30,7 @@ import org.forgerock.audit.secure.KeyStoreSecureStorage;
 import org.forgerock.audit.secure.SecureStorage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.supercsv.prefs.CsvPreference;
 
 /**
  * Responsible for locating and verifying an archived set of tamper evident CSV audit log files for a particular topic.
@@ -41,12 +42,14 @@ class CsvSecureArchiveVerifier {
     private final FileNamingPolicy fileNamingPolicy;
     private final String keystorePassword;
     private final PublicKey publicKey;
+    private final CsvPreference csvPreference;
 
     CsvSecureArchiveVerifier(final FileNamingPolicy fileNamingPolicy, final String keystorePassword,
-            final PublicKey publicKey) {
+            final PublicKey publicKey, CsvPreference csvPreference) {
         this.keystorePassword = keystorePassword;
         this.publicKey = publicKey;
         this.fileNamingPolicy = fileNamingPolicy;
+        this.csvPreference = csvPreference;
     }
 
     List<VerificationResult> verify() {
@@ -67,7 +70,7 @@ class CsvSecureArchiveVerifier {
 
     private VerificationResult verifyArchiveFile(File archiveFile, String keystorePassword, PublicKey publicKey) throws Exception {
         SecureStorage secureStorage = openSecureStorageForCsvFile(archiveFile, keystorePassword, publicKey);
-        CsvSecureVerifier verifier = new CsvSecureVerifier(archiveFile, secureStorage);
+        CsvSecureVerifier verifier = new CsvSecureVerifier(archiveFile, csvPreference, secureStorage);
         return verifier.verify();
     }
 
