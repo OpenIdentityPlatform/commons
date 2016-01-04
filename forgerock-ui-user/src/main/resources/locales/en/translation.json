@@ -26,7 +26,6 @@
             },
             "UserMessages" : {
                 "changedPassword" : "Password has been changed",
-                "profileUpdateFailed" : "Problem during profile update",
                 "profileUpdateSuccessful" : "Profile has been updated",
                 "userNameUpdated" : "Username has been modified succesfully.",
                 "afterRegistration" : "User has been registered successfully",

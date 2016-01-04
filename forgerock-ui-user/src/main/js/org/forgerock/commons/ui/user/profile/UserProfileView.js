@@ -72,8 +72,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             Configuration.loggedUser.save(formData, {patch: true}).then(
                 _.bind(function () {
                     this.submitSuccess(formId);
-                }, this),
-                _.bind(this.submitFailure, this)
+                }, this)
             );
         },
 
@@ -82,10 +81,6 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             this.data.user = Configuration.loggedUser.toJSON();
             this.reloadFormData(document.getElementById(formId));
             EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
-        },
-
-        submitFailure: function() {
-            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateFailed");
         },
 
         checkChanges: function(e) {

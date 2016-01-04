@@ -44,10 +44,6 @@ define("config/messages/UserMessages", [
                 msg: "config.messages.UserMessages.changedPassword",
                 type: "info"
             },
-            "profileUpdateFailed": {
-                msg: "config.messages.UserMessages.profileUpdateFailed",
-                type: "error"
-            },
             "userProfileIncorrectPassword": {
                 msg: "config.messages.UserMessages.userProfileIncorrectPassword",
                 type: "error"
