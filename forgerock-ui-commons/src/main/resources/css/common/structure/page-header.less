@@ -73,8 +73,8 @@
         border-bottom: none;
     }
 
-    .page-header-link-with-border {
-        border-left: 1px solid #ccc;
+    .page-header-detail {
+        margin-left: 5px;
         padding-left: 10px;
     }
 }
@@ -96,4 +96,13 @@
     margin-bottom: 20px;
     padding: 10px 15px;
     border-radius: 4px;
+
+    a:not(:first-child) {
+        margin-left: 5px;
+
+        &:before {
+            content: "»";
+            margin-right: 10px;
+        }
+    }
 }
