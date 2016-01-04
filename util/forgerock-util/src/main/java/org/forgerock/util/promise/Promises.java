@@ -366,7 +366,7 @@ public final class Promises {
             new Function<Exception, Object, Exception>() {
                 @Override
                 public Object apply(final Exception exception) throws Exception {
-                    throw exception;
+                    return newExceptionPromise(exception);
                 }
             };
 

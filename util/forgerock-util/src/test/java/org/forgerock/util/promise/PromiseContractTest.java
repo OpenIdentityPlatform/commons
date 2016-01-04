@@ -184,6 +184,7 @@ public class PromiseContractTest {
     }
 
     @Test(dataProvider = "resultPromises")
+    @SuppressWarnings("unchecked")
     public void promiseReturningValueShouldIgnoreAChainedThenCatchAsync(Promise<String, Exception> rootPromise)
             throws Exception {
         //Given
@@ -198,6 +199,7 @@ public class PromiseContractTest {
     }
 
     @Test(dataProvider = "exceptionPromises")
+    @SuppressWarnings("unchecked")
     public void promiseReturningExceptionShouldHitAChainedThenCatchAsync(Promise<String, Exception> rootPromise)
             throws Exception {
         //Given
@@ -219,6 +221,7 @@ public class PromiseContractTest {
     }
 
     @Test(dataProvider = "runtimeExceptionPromises")
+    @SuppressWarnings("unchecked")
     public void promiseThrowingRuntimeExceptionShouldIgnoreAChainedThenCatchAsync
             (Promise<String, Exception> rootPromise) throws Exception {
         //Given
@@ -234,6 +237,26 @@ public class PromiseContractTest {
             failBecauseExceptionWasNotThrown(PROMISE_RUNTIME_EXCEPTION.getClass());
         } catch (Exception e) {
             assertThat(e).isSameAs(PROMISE_RUNTIME_EXCEPTION);
+        }
+    }
+
+    @Test(dataProvider = "exceptionPromises")
+    @SuppressWarnings("unchecked")
+    public void promiseReturningExceptionShouldIgnoreAChainedThenAsync(Promise<String, Exception> rootPromise)
+            throws Exception {
+        //Given
+        AsyncFunction ignoreException = mock(AsyncFunction.class);
+
+        // When
+        Promise resultPromise = rootPromise.thenAsync(ignoreException);
+
+        // Then
+        verifyZeroInteractions(ignoreException);
+        try {
+            resultPromise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(PROMISE_EXCEPTION.getClass());
+        } catch (Exception e) {
+            assertThat(e).isSameAs(PROMISE_EXCEPTION);
         }
     }
 
