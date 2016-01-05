@@ -204,11 +204,11 @@ public class PromiseContractTest {
             throws Exception {
         //Given
         Exception e2 = new Exception();
-        AsyncFunction catchException = mock(AsyncFunction.class);
-        when(catchException.apply(any())).thenThrow(e2);
+        AsyncFunction throwsExceptionAsyncFunction = mock(AsyncFunction.class);
+        when(throwsExceptionAsyncFunction.apply(any())).thenThrow(e2);
 
         // When
-        Promise resultPromise = rootPromise.thenCatchAsync(catchException);
+        Promise resultPromise = rootPromise.thenCatchAsync(throwsExceptionAsyncFunction);
 
         // Then
         try {
@@ -216,7 +216,7 @@ public class PromiseContractTest {
             failBecauseExceptionWasNotThrown(e2.getClass());
         } catch (Exception e) {
             assertThat(e).isSameAs(e2);
-            verify(catchException).apply(PROMISE_EXCEPTION);
+            verify(throwsExceptionAsyncFunction).apply(PROMISE_EXCEPTION);
         }
     }
 
@@ -225,13 +225,13 @@ public class PromiseContractTest {
     public void promiseThrowingRuntimeExceptionShouldIgnoreAChainedThenCatchAsync
             (Promise<String, Exception> rootPromise) throws Exception {
         //Given
-        AsyncFunction catchException = mock(AsyncFunction.class);
+        AsyncFunction ignoredAsyncFunction = mock(AsyncFunction.class);
 
         //When
-        Promise resultPromise = rootPromise.thenCatchAsync(catchException);
+        Promise resultPromise = rootPromise.thenCatchAsync(ignoredAsyncFunction);
 
         //Then
-        verifyZeroInteractions(catchException);
+        verifyZeroInteractions(ignoredAsyncFunction);
         try {
             resultPromise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(PROMISE_RUNTIME_EXCEPTION.getClass());
@@ -245,13 +245,33 @@ public class PromiseContractTest {
     public void promiseReturningExceptionShouldIgnoreAChainedThenAsync(Promise<String, Exception> rootPromise)
             throws Exception {
         //Given
-        AsyncFunction ignoreException = mock(AsyncFunction.class);
+        AsyncFunction ignoredAsyncFunction = mock(AsyncFunction.class);
 
         // When
-        Promise resultPromise = rootPromise.thenAsync(ignoreException);
+        Promise resultPromise = rootPromise.thenAsync(ignoredAsyncFunction);
 
         // Then
-        verifyZeroInteractions(ignoreException);
+        verifyZeroInteractions(ignoredAsyncFunction);
+        try {
+            resultPromise.getOrThrowUninterruptibly();
+            failBecauseExceptionWasNotThrown(PROMISE_EXCEPTION.getClass());
+        } catch (Exception e) {
+            assertThat(e).isSameAs(PROMISE_EXCEPTION);
+        }
+    }
+
+    @Test(dataProvider = "exceptionPromises")
+    @SuppressWarnings("unchecked")
+    public void promiseReturningExceptionShouldIgnoreAChainedThen(Promise<String, Exception> rootPromise)
+            throws Exception {
+        //Given
+        Function ignoredThenFunction = mock(Function.class);
+
+        // When
+        Promise resultPromise = rootPromise.then(ignoredThenFunction);
+
+        // Then
+        verifyZeroInteractions(ignoredThenFunction);
         try {
             resultPromise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(PROMISE_EXCEPTION.getClass());

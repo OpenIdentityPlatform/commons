@@ -358,7 +358,7 @@ public final class Promises {
             new AsyncFunction<Exception, Object, Exception>() {
                 @Override
                 public Promise<Object, Exception> apply(final Exception exception) throws Exception {
-                    throw exception;
+                    return newExceptionPromise(exception);
                 }
             };
 
@@ -366,7 +366,7 @@ public final class Promises {
             new Function<Exception, Object, Exception>() {
                 @Override
                 public Object apply(final Exception exception) throws Exception {
-                    return newExceptionPromise(exception);
+                    throw exception;
                 }
             };
 
