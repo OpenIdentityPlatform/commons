@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -21,8 +21,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.forgerock.util.Factory;
 import org.testng.annotations.AfterMethod;
@@ -306,4 +311,64 @@ public class BranchingStreamWrapperTest {
         }
         // purposely leave branches open to let trunk close them recursively
     }
+
+    @Test(invocationCount = 100)
+    public void testConsumingStreamUnderLoad() throws Exception {
+        AtomicBoolean caughtException = new AtomicBoolean(false);
+        final byte[] bytes = "A long time ago in a galaxy far far away...".getBytes(StandardCharsets.US_ASCII);
+
+        BranchingStreamWrapper bsw = new BranchingStreamWrapper(new ByteArrayInputStream(bytes), STORAGE);
+
+        final ExecutorService executorService = Executors.newFixedThreadPool(10);
+        try {
+            for (int i = 0; i < 80; i++) {
+                executorService.submit(new StreamConsumer(caughtException, bsw));
+            }
+        } finally {
+            executorService.shutdown();
+            while (!executorService.awaitTermination(300, TimeUnit.MILLISECONDS)) {
+                // Try another one
+            }
+        }
+        bsw.close();
+        assertThat(caughtException.get()).isFalse();
+
+//        Before the synchronization around the trunk we catch this Exception :
+//        java.lang.NullPointerException
+//           at org.forgerock.http.io.BranchingStreamWrapper.closeBranches(BranchingStreamWrapper.java:167)
+//           at org.forgerock.http.io.BranchingStreamWrapper.close(BranchingStreamWrapper.java:147)
+//           at org.forgerock.http.io.BranchingStreamWrapperTest$StreamConsumer.run(BranchingStreamWrapperTest.java:365)
+//
+//        or this one :
+//        java.util.ConcurrentModificationException
+//           at java.util.ArrayList$Itr.checkForComodification(ArrayList.java:901)
+//           at java.util.ArrayList$Itr.next(ArrayList.java:851)
+//           at org.forgerock.http.io.BranchingStreamWrapper.reviewBuffer(BranchingStreamWrapper.java:204)
+//           at org.forgerock.http.io.BranchingStreamWrapper.readBuffer(BranchingStreamWrapper.java:231)
+//           at org.forgerock.http.io.BranchingStreamWrapper.read(BranchingStreamWrapper.java:96)
+//           at org.forgerock.http.io.IO.stream(IO.java:254)
+//           at org.forgerock.http.io.BranchingStreamWrapperTest$StreamConsumer.run(BranchingStreamWrapperTest.java:365)
+    }
+
+    private static class StreamConsumer implements Runnable {
+
+        private final AtomicBoolean caughtException;
+        private final BranchingStreamWrapper trunk;
+
+        public StreamConsumer(AtomicBoolean caughtException, BranchingStreamWrapper trunk) {
+            this.caughtException = caughtException;
+            this.trunk = trunk;
+        }
+
+        @Override
+        public void run() {
+            try (BranchingStreamWrapper branch = trunk.branch()) {
+                IO.stream(branch, IO.nullOutputStream());
+            } catch (Exception e) {
+                e.printStackTrace();
+                caughtException.set(true);
+            }
+        }
+    }
+
 }
