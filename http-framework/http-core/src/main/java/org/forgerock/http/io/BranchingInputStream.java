@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -28,12 +28,23 @@ public abstract class BranchingInputStream extends InputStream {
 
     /**
      * Creates a new branch at this stream's current position.
+     * The returned stream will have this stream as its parent.
      *
      * @return a new branching stream, in the same position as this branch.
      * @throws IOException
      *             if an I/O exception occurs.
      */
     public abstract BranchingInputStream branch() throws IOException;
+
+    /**
+     * Creates a twin of this stream at this stream's current position.
+     * The returned stream will have the same parent as this stream.
+     *
+     * @return a new twin stream, in the same position as this branch.
+     * @throws IOException
+     *             if an I/O exception occurs.
+     */
+    public abstract BranchingInputStream copy() throws IOException;
 
     /**
      * Closes this branching stream and all of the branches created from it.

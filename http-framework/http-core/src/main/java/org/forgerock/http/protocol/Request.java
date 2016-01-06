@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -43,6 +43,20 @@ public final class Request extends MessageImpl<Request> {
      */
     public Request() {
         // Nothing to do.
+    }
+
+    /**
+     * Creates a defensive copy of the given {@code request} message.
+     *
+     * @param request
+     *         request to be copied
+     * @throws IOException
+     *         when entity cannot be cloned
+     */
+    public Request(final Request request) throws IOException {
+        super(request);
+        method = request.method;
+        uri = new MutableUri(request.uri.asURI());
     }
 
     /**

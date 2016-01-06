@@ -13,10 +13,12 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
+
+import java.io.IOException;
 
 import org.forgerock.http.io.BranchingInputStream;
 
@@ -29,16 +31,27 @@ import org.forgerock.http.io.BranchingInputStream;
 public abstract class MessageImpl<T extends MessageImpl<T>> implements Message {
 
     /** Message entity body. */
-    private final Entity entity = new Entity(this);
+    private final Entity entity;
 
     /** Message header fields. */
-    private final Headers headers = new Headers();
+    private final Headers headers;
 
     /** Protocol version. Default: {@code HTTP/1.1}. */
     private String version = "HTTP/1.1";
 
     MessageImpl() {
         // Hidden constructor.
+        entity = new Entity(this);
+        headers = new Headers();
+    }
+
+    /**
+     * Defensive copy constructor.
+     */
+    MessageImpl(MessageImpl<T> message) throws IOException {
+        headers = new Headers(message.headers);
+        entity = new Entity(this, message.entity);
+        setVersion0(message.version);
     }
 
     @Override

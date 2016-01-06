@@ -11,15 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.http.protocol.Entity.*;
-import static org.mockito.AdditionalAnswers.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.forgerock.http.io.IO.nullOutputStream;
+import static org.forgerock.http.protocol.Entity.APPLICATION_JSON_CHARSET_UTF_8;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -285,6 +289,61 @@ public class EntityTest {
         }
     }
 
+    @Test
+    public void testDefensiveCopyIsNotAffectedWhenOriginalEntityIsConsumed() throws Exception {
+        entity.setString("Hello");
+        Entity copy = new Entity(new Request(), entity);
+
+        entity.copyDecodedContentTo(nullOutputStream());
+
+        assertThat(copy.getString()).isEqualTo("Hello");
+    }
+
+    @Test
+    public void testDefensiveCopyIsNotAffectedWhenOriginalEntityIsChanged() throws Exception {
+        entity.setString("Hello");
+        Entity copy = new Entity(new Request(), entity);
+
+        entity.setString("Bonjour");
+
+        assertThat(copy.getString()).isEqualTo("Hello");
+    }
+
+    @Test
+    public void testDefensiveCopyIsNotAffectedWhenOriginalEntityIsChanged2() throws Exception {
+        // ByteArrayBranchingStream is not affected by close(), for a real use case we must wrap a real stream
+        entity.setRawContentInputStream(branchingStream(bytes("Hello")));
+        Entity copy = new Entity(new Request(), entity);
+
+        entity.close();
+
+        assertThat(copy.getString()).isEqualTo("Hello");
+    }
+
+    @Test
+    public void testReadingFromDefensiveCopyDoesNotAffectOriginalEntity() throws Exception {
+        entity.setString("Hello");
+        Entity copy = new Entity(new Request(), entity);
+
+        copy.copyDecodedContentTo(nullOutputStream());
+
+        assertThat(entity.getString()).isEqualTo("Hello");
+    }
+
+    @Test
+    public void testClosingDefensiveCopyDoesNotAffectOriginalEntity() throws Exception {
+        entity.setRawContentInputStream(branchingStream(bytes("Hello")));
+        Entity copy = new Entity(new Request(), entity);
+
+        copy.close();
+
+        assertThat(entity.getString()).isEqualTo("Hello");
+    }
+
+    private static BranchingInputStream branchingStream(final byte[] bytes) throws UnsupportedEncodingException {
+        return IO.newBranchingInputStream(new ByteArrayInputStream(bytes), IO.newTemporaryStorage());
+    }
+
     @SuppressWarnings("unchecked")
     private void assertThatContentIsJsonContent1() throws IOException {
         assertThat(entity.getString()).isEqualTo(JSON_CONTENT1);
@@ -337,9 +396,8 @@ public class EntityTest {
         return s.getBytes("UTF-8");
     }
 
-    private BranchingInputStream mockContent(final byte[] bytes) {
-        return mock(BranchingInputStream.class, delegatesTo(
-                IO.newBranchingInputStream(new ByteArrayInputStream(bytes), IO.newTemporaryStorage())));
+    private BranchingInputStream mockContent(final byte[] bytes) throws UnsupportedEncodingException {
+        return mock(BranchingInputStream.class, delegatesTo(branchingStream(bytes)));
     }
 
     /**

@@ -13,10 +13,12 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
+
+import java.io.IOException;
 
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -68,6 +70,20 @@ public final class Response extends MessageImpl<Response> {
      */
     public Response() {
         // Nothing to do.
+    }
+
+    /**
+     * Creates a defensive copy of the given {@code response} message.
+     *
+     * @param response
+     *         response to be copied
+     * @throws IOException
+     *         when entity cannot be cloned
+     */
+    public Response(final Response response) throws IOException {
+        super(response);
+        status = response.status;
+        cause = response.cause;
     }
 
     /**

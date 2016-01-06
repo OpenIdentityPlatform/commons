@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -20,6 +20,7 @@ import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +30,7 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
 import org.forgerock.http.header.ConnectionHeader;
+import org.forgerock.http.header.ContentLengthHeader;
 import org.forgerock.http.header.CookieHeader;
 import org.forgerock.http.header.GenericHeader;
 import org.forgerock.http.io.IO;
@@ -378,4 +380,39 @@ public class HeadersTest {
         return Arrays.asList(values);
     }
 
+    @Test
+    public void testDefensiveCopyHeadersAreDetached() throws Exception {
+        Headers headers = new Headers();
+        headers.put(new MutableHeader("Hello World"));
+
+        Headers copy = new Headers(headers);
+
+        // Update the original
+        headers.get(MutableHeader.NAME).getValues().add("Bonjour");
+        headers.put(new ContentLengthHeader(42));
+
+        // Check that defensive copy has not changed
+        assertThat(copy.get(MutableHeader.NAME).getValues()).containsExactly("Hello World");
+    }
+
+    private static class MutableHeader extends Header {
+
+        public static final String NAME = "MutableHeader";
+
+        private List<String> values = new ArrayList<>();
+
+        MutableHeader(String initialValue) {
+            values.add(initialValue);
+        }
+
+        @Override
+        public String getName() {
+            return NAME;
+        }
+
+        @Override
+        public List<String> getValues() {
+            return values;
+        }
+    }
 }

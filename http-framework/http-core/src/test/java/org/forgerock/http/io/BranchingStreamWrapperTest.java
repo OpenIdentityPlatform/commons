@@ -18,6 +18,7 @@
 package org.forgerock.http.io;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -371,4 +372,50 @@ public class BranchingStreamWrapperTest {
         }
     }
 
+
+    @Test
+    public void testTwinFromTrunk() throws Exception {
+        // trunk *--------->
+        // copy  *--------->
+        BranchingStreamWrapper copy = trunk.copy();
+        // close trunk
+        trunk.close();
+
+        // we can still read from the copy
+        assertThat(copy.read(BUFFERS[1])).isEqualTo(BUFSIZE); // correct read length
+        assertThat(BUFFERS[1]).isEqualTo(BYTES); // identical content
+        assertThat(copy.read(BUFFERS[1])).isEqualTo(-1); // end of stream
+
+        // house-cleaning: manually close the copy
+        copy.close();
+    }
+
+    /**
+     * This test mainly shows that copying BSW mostly make sense on a trunk, not on a branch:
+     * A twin only has the insurance that it can continue to read the stream shared with its sibling:
+     * if their shared parent is closed, then the 2 siblings are also closed.
+     */
+    @Test(expectedExceptions = IOException.class)
+    public void testBranchedTrunkClosing() throws Exception {
+        // trunk   *--------->
+        // branch   `--------->
+        // copy      *--------->
+        BranchingStreamWrapper branch = trunk.branch();
+        BranchingStreamWrapper copy = branch.copy();
+
+        // close the copied branch
+        branch.close();
+
+        // we can still read from the copy
+        assertThat(copy.read(BUFFERS[1])).isEqualTo(BUFSIZE); // correct read length
+        assertThat(BUFFERS[1]).isEqualTo(BYTES); // identical content
+        assertThat(copy.read(BUFFERS[1])).isEqualTo(-1); // end of stream
+
+        // close the trunk (will close all sub-branches, including copies)
+        trunk.close();
+
+        // underlying stream has been closed
+        copy.read();
+        failBecauseExceptionWasNotThrown(IOException.class);
+    }
 }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -33,5 +33,39 @@ public class ResponseTest {
     public void testConstructor() {
         Response response = new Response(Status.TEAPOT);
         assertThat(response.getStatus()).isEqualTo(Status.TEAPOT);
+    }
+
+    @Test
+    public void testDefensiveCopyIsEquivalent() throws Exception {
+        Response response = new Response()
+                .setVersion("1.0")
+                .setEntity("Hello");
+        response.getHeaders().put("X-Test", "Hello World");
+
+        Response copy = new Response(response);
+
+        assertThat(copy.getVersion()).isEqualTo(response.getVersion());
+        assertThat(copy.getEntity().getString()).isEqualTo(response.getEntity().getString());
+        assertThat(copy.getHeaders().keySet()).containsAll(response.getHeaders().keySet());
+    }
+
+    @Test
+    public void testDefensiveCopyIsDetached() throws Exception {
+        Response response = new Response()
+                .setVersion("1.0")
+                .setEntity("Hello");
+        response.getHeaders().put("X-Test", "Hello World");
+
+        Response copy = new Response(response);
+
+        // Mutate the copied object
+        response.setVersion("1.1")
+                .setEntity("Bonjour");
+        response.getHeaders().put("X-Test", "Bonjour");
+
+        // Check that defensive copy has not changed
+        assertThat(copy.getVersion()).isEqualTo("1.0");
+        assertThat(copy.getEntity().getString()).isEqualTo("Hello");
+        assertThat(copy.getHeaders().keySet()).contains("X-Test", "Content-Length");
     }
 }

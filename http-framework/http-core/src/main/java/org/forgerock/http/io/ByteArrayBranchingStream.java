@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -44,6 +44,14 @@ final class ByteArrayBranchingStream extends BranchingInputStream {
         ByteArrayBranchingStream branch = new ByteArrayBranchingStream(data);
         branch.position = this.position;
         branch.parent = this;
+        return branch;
+    }
+
+    @Override
+    public ByteArrayBranchingStream copy() throws IOException {
+        ByteArrayBranchingStream branch = new ByteArrayBranchingStream(data);
+        branch.position = this.position;
+        branch.parent = this.parent;
         return branch;
     }
 

@@ -57,11 +57,29 @@ final class BranchingStreamWrapper extends BranchingInputStream {
         }
     }
 
+    /**
+     * Creates a twin of the given stream.
+     */
+    private BranchingStreamWrapper(final BranchingStreamWrapper bsw) {
+        // branch off of existing trunk
+        parent = bsw.parent; // twins have the same parent
+        trunk = bsw.trunk;
+        position = bsw.position;
+        synchronized (trunk) {
+            trunk.branches.add(this);
+        }
+    }
+
     @Override
     public BranchingStreamWrapper branch() throws IOException {
         notClosed();
         // constructor will branch
         return new BranchingStreamWrapper(this, null);
+    }
+
+    public BranchingStreamWrapper copy() throws IOException {
+        notClosed();
+        return new BranchingStreamWrapper(this);
     }
 
     boolean isClosed() {

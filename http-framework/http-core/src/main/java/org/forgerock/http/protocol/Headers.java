@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -37,13 +37,21 @@ import org.forgerock.http.header.MalformedHeaderException;
  */
 public class Headers implements Map<String, Object> {
 
-    private final Map<String, Header> headers;
+    private final Map<String, Header> headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
     /**
      * Constructs a {@code Headers} object that is case-insensitive for header names.
      */
-    public Headers() {
-        headers = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    public Headers() { }
+
+    /**
+     * Defensive copy constructor.
+     */
+    Headers(final Headers headers) {
+        // Force header re-creation
+        for (Map.Entry<String, Header> entry : headers.asMapOfHeaders().entrySet()) {
+            add(entry.getKey(), entry.getValue().getValues());
+        }
     }
 
     /**

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -77,7 +77,7 @@ public final class Entity implements Closeable {
     /** The encapsulating Message which may have content encoding headers. */
     private final Message message;
 
-    /** The input stream from which all all branches are created. */
+    /** The input stream from which all branches are created. */
     private BranchingInputStream trunk;
 
     /** The most recently created branch. */
@@ -92,6 +92,14 @@ public final class Entity implements Closeable {
     Entity(final Message message) {
         this.message = message;
         setEmpty();
+    }
+
+    /**
+     * Defensive copy constructor.
+     */
+    Entity(final Message message, final Entity entity) throws IOException {
+        this.message = message;
+        setRawContentInputStream(entity.trunk.copy());
     }
 
     /**
