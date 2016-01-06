@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define, document */
@@ -105,7 +105,15 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
                 changedProtected = _.chain(Configuration.loggedUser.getProtectedAttributes())
                     .filter(function(attr) {
-                        return _.has(formData, attr) && !_.isEqual(Configuration.loggedUser.get(attr),formData[attr]);
+                        if (_.has(formData, attr)) {
+                            if (_.isEmpty(Configuration.loggedUser.get(attr)) && _.isEmpty(formData[attr])) {
+                                return false;
+                            } else {
+                                return !_.isEqual(Configuration.loggedUser.get(attr),formData[attr]);
+                            }
+                        } else {
+                            return false;
+                        }
                     }, this)
                     .map(function (attr) {
                         return this.$el.find("label[for=input-"+attr+"]").text();
