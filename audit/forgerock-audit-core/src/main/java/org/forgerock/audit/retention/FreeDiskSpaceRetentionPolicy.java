@@ -44,8 +44,11 @@ public class FreeDiskSpaceRetentionPolicy implements RetentionPolicy {
     @Override
     public List<File> deleteFiles(FileNamingPolicy fileNamingPolicy) {
         final List<File> archivedFiles = fileNamingPolicy.listFiles();
-        final long freeSpace = archivedFiles.get(0).getFreeSpace();
+        if (archivedFiles.isEmpty()) {
+            return Collections.emptyList();
+        }
 
+        final long freeSpace = archivedFiles.get(0).getFreeSpace();
         if (freeSpace >= minFreeSpaceRequired) {
             return Collections.emptyList();
         }

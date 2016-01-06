@@ -63,4 +63,18 @@ public class FreeDiskSpaceRetentionPolicyTest {
         // then
         assertThat(filesToDelete).isEmpty();
     }
+
+    @Test
+    public void testGettingFilesToDeleteWhenNoArchivedFiles() {
+        // given
+        final FreeDiskSpaceRetentionPolicy retentionPolicy = new FreeDiskSpaceRetentionPolicy(MIN_FREE_DISK_SPACE);
+        final FileNamingPolicy fileNamingPolicy = mock(FileNamingPolicy.class);
+        when(fileNamingPolicy.listFiles()).thenReturn(Collections.<File>emptyList());
+
+        // when
+        List<File> filesToDelete = retentionPolicy.deleteFiles(fileNamingPolicy);
+
+        // then
+        assertThat(filesToDelete).isEmpty();
+    }
 }
