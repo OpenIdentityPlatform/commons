@@ -178,6 +178,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             var form = this.$el.find(e.target).closest("form");
             this.reloadFormData(form[0]);
             this.checkChanges(e);
+            ValidatorsManager.validateAllFields(form);
         },
         loadAllFormData: function() {
             _.each(this.$el.find("form"), this.reloadFormData, this);
