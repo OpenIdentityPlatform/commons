@@ -11,11 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,11 +32,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
     private static final Logger logger = LoggerFactory.getLogger(JdbcAuditEventExecutorImpl.class);
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     private final DataSource dataSource;
 
@@ -58,7 +55,7 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
             connection.setAutoCommit(false);
 
             try (final PreparedStatement preparedStatement = connection.prepareStatement(event.getSql())) {
-                initializePreparedStatement(preparedStatement, event.getParams());
+                JdbcUtils.initializePreparedStatement(preparedStatement, event.getParams());
                 logger.debug("Executing prepared statement");
                 preparedStatement.execute();
                 results = convertResultSetToList(preparedStatement.getResultSet());
@@ -91,57 +88,6 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
             list.add(row);
         }
         return list;
-    }
-
-    private void initializePreparedStatement(final PreparedStatement preparedStatement, final List<Parameter> params)
-            throws AuditException, SQLException, JsonProcessingException {
-        int i = 1;
-        for (final Parameter parameter : params) {
-            final Object parameterValue = parameter.getParameter();
-            switch (parameter.getParameterType()) {
-                case STRING:
-                    preparedStatement.setString(i, (String) parameter.getParameter());
-                    break;
-                case NUMBER:
-                    if (parameterValue instanceof Float) {
-                        preparedStatement.setFloat(i, (Float) parameter.getParameter());
-                    } else if (parameterValue instanceof Double) {
-                        preparedStatement.setDouble(i, (Double) parameter.getParameter());
-                    } else if (parameterValue instanceof BigDecimal) {
-                        preparedStatement.setBigDecimal(i, (BigDecimal) parameter.getParameter());
-                    }
-                    // falls through intentionally from number, so that number can support the json integer type subset as well
-                case INTEGER:
-                    if (parameterValue instanceof Long) {
-                        preparedStatement.setLong(i, (Long) parameter.getParameter());
-                    } else if (parameterValue instanceof Integer) {
-                        preparedStatement.setInt(i, (Integer) parameter.getParameter());
-                    } else {
-                        final String error = String.format("Unknown class type for NUMBER or INTEGER mapping: %s",
-                                parameterValue != null
-                                        ? parameterValue.getClass().getCanonicalName()
-                                        : "null parameter value");
-                        logger.error(error);
-                        throw new AuditException(error);
-                    }
-                    break;
-                case BOOLEAN:
-                    preparedStatement.setBoolean(i, (Boolean) parameter.getParameter());
-                    break;
-                case OBJECT:
-                case ARRAY:
-                    preparedStatement.setString(i, mapper.writeValueAsString(parameter.getParameter()));
-                    break;
-                default:
-                    final String error = String.format("Unable to map class type: %s",
-                            parameterValue != null
-                                    ?  parameterValue.getClass().getCanonicalName()
-                                    : "null parameter value");
-                    logger.error(error);
-                    throw new AuditException(error);
-            }
-            i++;
-        }
     }
 
     private Object getResultSetObject(final ResultSet resultSet, final int type, int column)

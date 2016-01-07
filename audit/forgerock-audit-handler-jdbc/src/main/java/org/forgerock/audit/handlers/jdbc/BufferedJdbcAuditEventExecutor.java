@@ -11,14 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static org.forgerock.util.Reject.checkNotNull;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -40,15 +39,11 @@ import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Buffers the create events to a {@link JdbcAuditEventExecutor}.
  */
 class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
     private static final Logger logger = LoggerFactory.getLogger(BufferedJdbcAuditEventExecutor.class);
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     /** The wrapped {@link JdbcAuditEventExecutor}. */
     private final JdbcAuditEventExecutor delegate;
@@ -188,11 +183,11 @@ class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
                 connection.setAutoCommit(false);
 
                 // Use a PreparedStatement batch to insert the events into the DB
-                try  (final PreparedStatement preparedStatement = connection.prepareStatement(events.iterator().next().getSql())) {
+                try (final PreparedStatement preparedStatement = connection.prepareStatement(events.iterator().next().getSql())) {
                     for (JdbcAuditEvent event : events) {
                         preparedStatement.clearParameters();
                         try {
-                            initializePreparedStatement(preparedStatement, event.getParams());
+                            JdbcUtils.initializePreparedStatement(preparedStatement, event.getParams());
                             preparedStatement.addBatch();
                         } catch (Exception e) {
                             logger.error("Unable to create event in the queue", e);
@@ -208,58 +203,6 @@ class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
                 CleanupHelper.close(connection);
             }
         }
-
-        private void initializePreparedStatement(final PreparedStatement preparedStatement, final List<Parameter> params)
-                throws AuditException, SQLException, JsonProcessingException {
-            int i = 1;
-            for (final Parameter parameter : params) {
-                final Object parameterValue = parameter.getParameter();
-                switch (parameter.getParameterType()) {
-                    case STRING:
-                        preparedStatement.setString(i, (String) parameter.getParameter());
-                        break;
-                    case NUMBER:
-                        if (parameterValue instanceof Float) {
-                            preparedStatement.setFloat(i, (Float) parameter.getParameter());
-                        } else if (parameterValue instanceof Double) {
-                            preparedStatement.setDouble(i, (Double) parameter.getParameter());
-                        } else if (parameterValue instanceof BigDecimal) {
-                            preparedStatement.setBigDecimal(i, (BigDecimal) parameter.getParameter());
-                        }
-                        // falls through intentionally from number, so that number can support the json integer type subset as well
-                    case INTEGER:
-                        if (parameterValue instanceof Long) {
-                            preparedStatement.setLong(i, (Long) parameter.getParameter());
-                        } else if (parameterValue instanceof Integer) {
-                            preparedStatement.setInt(i, (Integer) parameter.getParameter());
-                        } else {
-                            final String error = String.format("Unknown class type for NUMBER or INTEGER mapping: %s",
-                                    parameterValue != null
-                                            ?  parameterValue.getClass().getCanonicalName()
-                                            : "null parameter value");
-                            logger.error(error);
-                            throw new AuditException(error);
-                        }
-                        break;
-                    case BOOLEAN:
-                        preparedStatement.setBoolean(i, (Boolean) parameter.getParameter());
-                        break;
-                    case OBJECT:
-                    case ARRAY:
-                        preparedStatement.setString(i, mapper.writeValueAsString(parameter.getParameter()));
-                        break;
-                    default:
-                        final String error = String.format("Unable to map class type: %s",
-                                parameterValue != null
-                                        ?  parameterValue.getClass().getCanonicalName()
-                                        : "null parameter value");
-                        logger.error(error);
-                        throw new AuditException(error);
-                }
-                i++;
-            }
-        }
-
     }
 
     private void shutdownPool(final ExecutorService executorService) {
