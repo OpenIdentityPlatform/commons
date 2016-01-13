@@ -110,8 +110,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
                 KBADelegate.saveInfo(formData).then(
                     _.bind(function () {
                         this.submitSuccess(formId);
-                    }, this),
-                    _.bind(this.submitFailure, this)
+                    }, this)
                 );
             } else {
                 UserProfileView.submit.call(this, formId, formData);
