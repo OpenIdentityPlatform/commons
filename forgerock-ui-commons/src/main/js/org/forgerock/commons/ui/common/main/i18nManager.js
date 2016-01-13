@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 /*global define */
@@ -95,6 +95,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
         $.i18n.init(opts);
 
         Handlebars.registerHelper("t", function(key, options) {
+            options = options || {};
             return new Handlebars.SafeString($.i18n.t(key, options.hash));
         });
 
