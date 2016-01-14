@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.utils.IntDate;
 import org.forgerock.json.jose.utils.StringOrURI;
 
@@ -95,7 +96,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
     /**
      * Gets the unique ID of the JWT.
      *
-     * @return The JWT's ID.
+     * @return The JWT's ID or {@code null} if claim not present.
      */
     public String getJwtId() {
         return get(JTI.value()).asString();
@@ -127,7 +128,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
      *
      * Gets the issuer this JWT was issued by.
      *
-     * @return The JWT's issuer.
+     * @return The JWT's issuer or {@code null} if claim not present.
      */
     public String getIssuer() {
         return get(ISS.value()).asString();
@@ -160,7 +161,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
     /**
      * Gets the subject this JWT is issued to.
      *
-     * @return The JWT's principal.
+     * @return The JWT's principal or {@code null} if claim not present.
      */
     public String getSubject() {
         return get(SUB.value()).asString();
@@ -209,7 +210,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
     /**
      * Gets the intended audience for the JWT from the Claims Set.
      *
-     * @return The JWT's intended audience.
+     * @return The JWT's intended audience or {@code null} if claim not present.
      */
     public List<String> getAudience() {
         return get(AUD.value()).asList(String.class);
@@ -241,10 +242,10 @@ public class JwtClaimsSet extends JWObject implements Payload {
     /**
      * Gets the time the JWT was issued at, from the Claims Set.
      *
-     * @return The JWT's issued at time.
+     * @return The JWT's issued at time or {@code null} if claim not present.
      */
     public Date getIssuedAtTime() {
-        return IntDate.fromIntDate(get(IAT.value()).asLong());
+        return getDate(IAT.value());
     }
 
     /**
@@ -273,10 +274,10 @@ public class JwtClaimsSet extends JWObject implements Payload {
     /**
      * Gets the time the JWT is not allowed to be processed before, from the Claims Set.
      *
-     * @return The JWT's not before time.
+     * @return The JWT's not before time or {@code null} if claim not present.
      */
     public Date getNotBeforeTime() {
-        return IntDate.fromIntDate(get(NBF.value()).asLong());
+        return getDate(NBF.value());
     }
 
     /**
@@ -305,10 +306,10 @@ public class JwtClaimsSet extends JWObject implements Payload {
     /**
      * Gets the expiration time of the JWT from the Claims Set.
      *
-     * @return The JWT's expiration time.
+     * @return The JWT's expiration time or {@code null} if claim not present.
      */
     public Date getExpirationTime() {
-        return IntDate.fromIntDate(get(EXP.value()).asLong());
+        return getDate(EXP.value());
     }
 
     /**
@@ -494,5 +495,17 @@ public class JwtClaimsSet extends JWObject implements Payload {
      */
     public String build() {
         return toString();
+    }
+
+    /**
+     * Returns the specified item value as a {@link Date}. If no such member value exists, then a JSON value containing
+     * {@code null} is returned.
+     *
+     * @param key the {@code Map} key identifying the item to return.
+     * @return a {@link Date} representing the value or {@code null}.
+     */
+    private Date getDate(final String key) {
+        final JsonValue value = get(key);
+        return value.isNull() ? null : IntDate.fromIntDate(value.asLong());
     }
 }

@@ -11,15 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
 
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.testng.annotations.Test;
@@ -46,8 +43,8 @@ public class JwtClaimsSetTest {
         claimsSet.setType("TYPE");
 
         //Then
-        assertTrue(claimsSet.get("typ").required().isString());
-        assertEquals(claimsSet.get("typ").asString(), "TYPE");
+        assertThat(claimsSet.get("typ").required().isString()).isTrue();
+        assertThat(claimsSet.get("typ").asString()).isEqualTo("TYPE");
     }
 
     @Test
@@ -60,8 +57,8 @@ public class JwtClaimsSetTest {
         claimsSet.setJwtId("JWT_ID");
 
         //Then
-        assertTrue(claimsSet.get("jti").required().isString());
-        assertEquals(claimsSet.get("jti").asString(), "JWT_ID");
+        assertThat(claimsSet.get("jti").required().isString()).isTrue();
+        assertThat(claimsSet.get("jti").asString()).isEqualTo("JWT_ID");
     }
 
     @Test
@@ -74,8 +71,8 @@ public class JwtClaimsSetTest {
         claimsSet.setIssuer("ISSUER");
 
         //Then
-        assertTrue(claimsSet.get("iss").required().isString());
-        assertEquals(claimsSet.get("iss").asString(), "ISSUER");
+        assertThat(claimsSet.get("iss").required().isString()).isTrue();
+        assertThat(claimsSet.get("iss").asString()).isEqualTo("ISSUER");
     }
 
     @Test
@@ -89,9 +86,9 @@ public class JwtClaimsSetTest {
         claimsSet.setIssuer(issuer);
 
         //Then
-        assertTrue(claimsSet.get("iss").required().isString());
-        assertEquals(claimsSet.get("iss").asString(), "urn:example:animal:ferret:nose");
-        assertEquals(new URI(claimsSet.get("iss").asString()), issuer);
+        assertThat(claimsSet.get("iss").required().isString()).isTrue();
+        assertThat(claimsSet.get("iss").asString()).isEqualTo("urn:example:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("iss").asString())).isEqualTo(issuer);
     }
 
     @Test
@@ -104,8 +101,8 @@ public class JwtClaimsSetTest {
         claimsSet.setSubject("SUBJECT");
 
         //Then
-        assertTrue(claimsSet.get("sub").required().isString());
-        assertEquals(claimsSet.get("sub").asString(), "SUBJECT");
+        assertThat(claimsSet.get("sub").required().isString()).isTrue();
+        assertThat(claimsSet.get("sub").asString()).isEqualTo("SUBJECT");
     }
 
     @Test
@@ -119,9 +116,9 @@ public class JwtClaimsSetTest {
         claimsSet.setSubject(subject);
 
         //Then
-        assertTrue(claimsSet.get("sub").required().isString());
-        assertEquals(claimsSet.get("sub").asString(), "urn:example:animal:ferret:nose");
-        assertEquals(new URI(claimsSet.get("sub").asString()), subject);
+        assertThat(claimsSet.get("sub").required().isString()).isTrue();
+        assertThat(claimsSet.get("sub").asString()).isEqualTo("urn:example:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("sub").asString())).isEqualTo(subject);
     }
 
     @Test
@@ -134,9 +131,9 @@ public class JwtClaimsSetTest {
         claimsSet.addAudience("AUDIENCE");
 
         //Then
-        assertTrue(claimsSet.get("aud").required().isList());
-        assertEquals(claimsSet.get("aud").asList(String.class).size(), 1);
-        assertTrue(claimsSet.get("aud").asList(String.class).contains("AUDIENCE"));
+        assertThat(claimsSet.get("aud").required().isList()).isTrue();
+        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(1);
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("AUDIENCE");
     }
 
     @Test
@@ -150,10 +147,10 @@ public class JwtClaimsSetTest {
         claimsSet.addAudience(audience);
 
         //Then
-        assertTrue(claimsSet.get("aud").required().isList());
-        assertEquals(claimsSet.get("aud").asList(String.class).size(), 1);
-        assertTrue(claimsSet.get("aud").asList(String.class).contains("urn:example:animal:ferret:nose"));
-        assertEquals(new URI(claimsSet.get("aud").asList(String.class).get(0)), audience);
+        assertThat(claimsSet.get("aud").required().isList()).isTrue();
+        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(1);
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("urn:example:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("aud").asList(String.class).get(0))).isEqualTo(audience);
     }
 
     @Test
@@ -167,8 +164,8 @@ public class JwtClaimsSetTest {
         claimsSet.setIssuedAtTime(issuedAtTime);
 
         //Then
-        assertTrue(claimsSet.get("iat").required().isNumber());
-        assertEquals(claimsSet.get("iat").asLong(), (Long) (issuedAtTime.getTime() / 1000));
+        assertThat(claimsSet.get("iat").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("iat").asLong()).isEqualTo(timeInSeconds(issuedAtTime));
     }
 
     @Test
@@ -182,8 +179,8 @@ public class JwtClaimsSetTest {
         claimsSet.setNotBeforeTime(notBeforeTime);
 
         //Then
-        assertTrue(claimsSet.get("nbf").required().isNumber());
-        assertEquals(claimsSet.get("nbf").asLong(), (Long) (notBeforeTime.getTime() / 1000));
+        assertThat(claimsSet.get("nbf").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("nbf").asLong()).isEqualTo(timeInSeconds(notBeforeTime));
     }
 
     @Test
@@ -197,8 +194,8 @@ public class JwtClaimsSetTest {
         claimsSet.setExpirationTime(expirationTime);
 
         //Then
-        assertTrue(claimsSet.get("exp").required().isNumber());
-        assertEquals(claimsSet.get("exp").asLong(), (Long) (expirationTime.getTime() / 1000));
+        assertThat(claimsSet.get("exp").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("exp").asLong()).isEqualTo(timeInSeconds(expirationTime));
     }
 
     @Test
@@ -211,9 +208,9 @@ public class JwtClaimsSetTest {
         claimsSet.setClaim("KEY", "VALUE");
 
         //Then
-        assertTrue(claimsSet.isDefined("KEY"));
-        assertTrue(claimsSet.get("KEY").required().isString());
-        assertEquals(claimsSet.get("KEY").asString(), "VALUE");
+        assertThat(claimsSet.isDefined("KEY")).isTrue();
+        assertThat(claimsSet.get("KEY").required().isString()).isTrue();
+        assertThat(claimsSet.get("KEY").asString()).isEqualTo("VALUE");
     }
 
     @Test
@@ -231,21 +228,21 @@ public class JwtClaimsSetTest {
         claimsSet.setClaims(claims);
 
         //Then
-        assertTrue(claimsSet.isDefined("KEY1"));
-        assertTrue(claimsSet.get("KEY1").required().isString());
-        assertEquals(claimsSet.get("KEY1").asString(), "CLAIM1");
+        assertThat(claimsSet.isDefined("KEY1")).isTrue();
+        assertThat(claimsSet.get("KEY1").required().isString()).isTrue();
+        assertThat(claimsSet.get("KEY1").asString()).isEqualTo("CLAIM1");
 
-        assertTrue(claimsSet.isDefined("KEY2"));
-        assertTrue(claimsSet.get("KEY2").required().isBoolean());
-        assertEquals(claimsSet.get("KEY2").asBoolean(), (Boolean) true);
+        assertThat(claimsSet.isDefined("KEY2")).isTrue();
+        assertThat(claimsSet.get("KEY2").required().isBoolean()).isTrue();
+        assertThat(claimsSet.get("KEY2").asBoolean()).isEqualTo(true);
 
-        assertTrue(claimsSet.isDefined("KEY3"));
-        assertTrue(claimsSet.get("KEY3").required().isNumber());
-        assertEquals(claimsSet.get("KEY3").asLong(), (Long) 1234L);
+        assertThat(claimsSet.isDefined("KEY3")).isTrue();
+        assertThat(claimsSet.get("KEY3").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("KEY3").asLong()).isEqualTo(1234L);
 
-        assertTrue(claimsSet.isDefined("KEY4"));
-        assertTrue(claimsSet.get("KEY4").required().isNumber());
-        assertEquals(claimsSet.get("KEY4").asInteger(), (Integer) 1234);
+        assertThat(claimsSet.isDefined("KEY4")).isTrue();
+        assertThat(claimsSet.get("KEY4").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("KEY4").asInteger()).isEqualTo(1234);
     }
 
     @Test
@@ -259,7 +256,9 @@ public class JwtClaimsSetTest {
         String type = claimsSet.getType();
 
         //Then
-        assertEquals(type, "TYPE");
+        assertThat(type)
+                .isEqualTo("TYPE")
+                .isEqualTo(claimsSet.getClaim("typ"));
     }
 
     @Test
@@ -273,7 +272,9 @@ public class JwtClaimsSetTest {
         String jwtId = claimsSet.getJwtId();
 
         //Then
-        assertEquals(jwtId, "JWT_ID");
+        assertThat(jwtId)
+                .isEqualTo("JWT_ID")
+                .isEqualTo(claimsSet.getClaim("jti"));
     }
 
     @Test
@@ -287,7 +288,9 @@ public class JwtClaimsSetTest {
         String issuer = claimsSet.getIssuer();
 
         //Then
-        assertEquals(issuer, "ISSUER");
+        assertThat(issuer)
+                .isEqualTo("ISSUER")
+                .isEqualTo(claimsSet.getClaim("iss"));
     }
 
     @Test
@@ -301,7 +304,9 @@ public class JwtClaimsSetTest {
         String subject = claimsSet.getSubject();
 
         //Then
-        assertEquals(subject, "SUBJECT");
+        assertThat(subject)
+                .isEqualTo("SUBJECT")
+                .isEqualTo(claimsSet.getClaim("sub"));
     }
 
     @Test
@@ -320,11 +325,13 @@ public class JwtClaimsSetTest {
         List<String> audience = claimsSet.getAudience();
 
         //Then
-        assertEquals(audience, audienceList);
+        assertThat(audience)
+                .isEqualTo(audienceList)
+                .isEqualTo(claimsSet.getClaim("aud"));
     }
 
     @Test
-    public void shouldGetIssuedAtTime() {
+    public void shouldGetIssuedAtTimeGivenDate() {
 
         //Given
         JwtClaimsSet claimsSet = new JwtClaimsSet();
@@ -338,11 +345,28 @@ public class JwtClaimsSetTest {
         Date actualIssuedAtTime = claimsSet.getIssuedAtTime();
 
         //Then
-        assertEquals(actualIssuedAtTime, calendar.getTime());
+        assertThat(actualIssuedAtTime)
+                .isEqualTo(calendar.getTime())
+                .isEqualTo(claimsSet.getClaim("iat"));
     }
 
     @Test
-    public void shouldGetNotBeforeTime() {
+    public void shouldGetIssuedAtTimeGivenLong() {
+
+        //Given
+        JwtClaimsSet claimsSet = new JwtClaimsSet();
+        Long issuedAtTime = currentTimeInSeconds();
+        claimsSet.setClaim("iat", issuedAtTime);
+
+        //When
+        Date actualIssuedAtTime = claimsSet.getIssuedAtTime();
+
+        //Then
+        assertThat(actualIssuedAtTime).isEqualTo(new Date(issuedAtTime * 1000L));
+    }
+
+    @Test
+    public void shouldGetNotBeforeTimeGivenDate() {
 
         //Given
         JwtClaimsSet claimsSet = new JwtClaimsSet();
@@ -356,11 +380,28 @@ public class JwtClaimsSetTest {
         Date actualNotBeforeTime = claimsSet.getNotBeforeTime();
 
         //Then
-        assertEquals(actualNotBeforeTime, calendar.getTime());
+        assertThat(actualNotBeforeTime)
+                .isEqualTo(calendar.getTime())
+                .isEqualTo(claimsSet.getClaim("nbf"));
     }
 
     @Test
-    public void shouldGetExpirationTime() {
+    public void shouldGetNotBeforeTimeGivenLong() {
+
+        //Given
+        JwtClaimsSet claimsSet = new JwtClaimsSet();
+        Long notBeforeTime = currentTimeInSeconds();
+        claimsSet.setClaim("nbf", notBeforeTime);
+
+        //When
+        Date actualNotBeforeTime = claimsSet.getNotBeforeTime();
+
+        //Then
+        assertThat(actualNotBeforeTime).isEqualTo(new Date(notBeforeTime * 1000L));
+    }
+
+    @Test
+    public void shouldGetExpirationTimeGivenDate() {
 
         //Given
         JwtClaimsSet claimsSet = new JwtClaimsSet();
@@ -374,7 +415,24 @@ public class JwtClaimsSetTest {
         Date actualExpirationTime = claimsSet.getExpirationTime();
 
         //Then
-        assertEquals(actualExpirationTime, calendar.getTime());
+        assertThat(actualExpirationTime)
+                .isEqualTo(calendar.getTime())
+                .isEqualTo(claimsSet.getClaim("exp"));
+    }
+
+    @Test
+    public void shouldGetExpirationTimeGivenLong() {
+
+        //Given
+        JwtClaimsSet claimsSet = new JwtClaimsSet();
+        Long expirationTime = currentTimeInSeconds();
+        claimsSet.setClaim("exp", expirationTime);
+
+        //When
+        Date actualExpirationTime = claimsSet.getExpirationTime();
+
+        //Then
+        assertThat(actualExpirationTime).isEqualTo(new Date(expirationTime * 1000L));
     }
 
     @Test
@@ -394,10 +452,10 @@ public class JwtClaimsSetTest {
         Object key4 = claimsSet.getClaim("KEY4");
 
         //Then
-        assertEquals(key1, "CLAIM1");
-        assertEquals(key2, true);
-        assertEquals(key3, 1234L);
-        assertEquals(key4, 1234);
+        assertThat(key1).isEqualTo("CLAIM1");
+        assertThat(key2).isEqualTo(true);
+        assertThat(key3).isEqualTo(1234L);
+        assertThat(key4).isEqualTo(1234);
     }
 
     @Test
@@ -417,10 +475,10 @@ public class JwtClaimsSetTest {
         int key4 = claimsSet.getClaim("KEY4", Integer.class);
 
         //Then
-        assertEquals(key1, "CLAIM1");
-        assertEquals(key2, true);
-        assertEquals(key3, 1234L);
-        assertEquals(key4, 1234);
+        assertThat(key1).isEqualTo("CLAIM1");
+        assertThat(key2).isEqualTo(true);
+        assertThat(key3).isEqualTo(1234L);
+        assertThat(key4).isEqualTo(1234);
     }
 
     @Test
@@ -467,47 +525,47 @@ public class JwtClaimsSetTest {
         JwtClaimsSet claimsSet = new JwtClaimsSet(claims);
 
         //Then
-        assertTrue(claimsSet.get("typ").required().isString());
-        assertEquals(claimsSet.get("typ").asString(), "TYPE");
+        assertThat(claimsSet.get("typ").required().isString()).isTrue();
+        assertThat(claimsSet.get("typ").asString()).isEqualTo("TYPE");
 
-        assertTrue(claimsSet.get("jti").required().isString());
-        assertEquals(claimsSet.get("jti").asString(), "JWT_ID");
+        assertThat(claimsSet.get("jti").required().isString()).isTrue();
+        assertThat(claimsSet.get("jti").asString()).isEqualTo("JWT_ID");
 
-        assertTrue(claimsSet.get("iss").required().isString());
-        assertEquals(claimsSet.get("iss").asString(), "ISSUER");
+        assertThat(claimsSet.get("iss").required().isString()).isTrue();
+        assertThat(claimsSet.get("iss").asString()).isEqualTo("ISSUER");
 
-        assertTrue(claimsSet.get("sub").required().isString());
-        assertEquals(claimsSet.get("sub").asString(), "SUBJECT");
+        assertThat(claimsSet.get("sub").required().isString()).isTrue();
+        assertThat(claimsSet.get("sub").asString()).isEqualTo("SUBJECT");
 
-        assertTrue(claimsSet.get("aud").required().isList());
-        assertEquals(claimsSet.get("aud").asList(String.class).size(), 2);
-        assertTrue(claimsSet.get("aud").asList(String.class).contains("AUDIENCE1"));
-        assertTrue(claimsSet.get("aud").asList(String.class).contains("AUDIENCE2"));
+        assertThat(claimsSet.get("aud").required().isList()).isTrue();
+        assertThat(claimsSet.get("aud").asList(String.class).size()).isEqualTo(2);
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("AUDIENCE1");
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("AUDIENCE2");
 
-        assertTrue(claimsSet.get("iat").required().isNumber());
-        assertEquals(claimsSet.get("iat").asLong(), (Long) (issuedAtTime.getTime() / 1000));
+        assertThat(claimsSet.get("iat").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("iat").asLong()).isEqualTo(timeInSeconds(issuedAtTime));
 
-        assertTrue(claimsSet.get("nbf").required().isNumber());
-        assertEquals(claimsSet.get("nbf").asLong(), (Long) (notBeforeTime.getTime() / 1000));
+        assertThat(claimsSet.get("nbf").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("nbf").asLong()).isEqualTo(timeInSeconds(notBeforeTime));
 
-        assertTrue(claimsSet.get("exp").required().isNumber());
-        assertEquals(claimsSet.get("exp").asLong(), (Long) (expirationTime.getTime() / 1000));
+        assertThat(claimsSet.get("exp").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("exp").asLong()).isEqualTo(timeInSeconds(expirationTime));
 
-        assertTrue(claimsSet.isDefined("KEY1"));
-        assertTrue(claimsSet.get("KEY1").required().isString());
-        assertEquals(claimsSet.get("KEY1").asString(), "CLAIM1");
+        assertThat(claimsSet.isDefined("KEY1")).isTrue();
+        assertThat(claimsSet.get("KEY1").required().isString()).isTrue();
+        assertThat(claimsSet.get("KEY1").asString()).isEqualTo("CLAIM1");
 
-        assertTrue(claimsSet.isDefined("KEY2"));
-        assertTrue(claimsSet.get("KEY2").required().isBoolean());
-        assertEquals(claimsSet.get("KEY2").asBoolean(), (Boolean) true);
+        assertThat(claimsSet.isDefined("KEY2")).isTrue();
+        assertThat(claimsSet.get("KEY2").required().isBoolean()).isTrue();
+        assertThat(claimsSet.get("KEY2").asBoolean()).isEqualTo(true);
 
-        assertTrue(claimsSet.isDefined("KEY3"));
-        assertTrue(claimsSet.get("KEY3").required().isNumber());
-        assertEquals(claimsSet.get("KEY3").asLong(), (Long) 1234L);
+        assertThat(claimsSet.isDefined("KEY3")).isTrue();
+        assertThat(claimsSet.get("KEY3").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("KEY3").asLong()).isEqualTo(1234L);
 
-        assertTrue(claimsSet.isDefined("KEY4"));
-        assertTrue(claimsSet.get("KEY4").required().isNumber());
-        assertEquals(claimsSet.get("KEY4").asInteger(), (Integer) 1234);
+        assertThat(claimsSet.isDefined("KEY4")).isTrue();
+        assertThat(claimsSet.get("KEY4").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("KEY4").asInteger()).isEqualTo(1234);
     }
 
     @Test
@@ -542,51 +600,51 @@ public class JwtClaimsSetTest {
         JwtClaimsSet claimsSet = new JwtClaimsSet(claims);
 
         //Then
-        assertTrue(claimsSet.get("typ").required().isString());
-        assertEquals(claimsSet.get("typ").asString(), "TYPE");
+        assertThat(claimsSet.get("typ").required().isString()).isTrue();
+        assertThat(claimsSet.get("typ").asString()).isEqualTo("TYPE");
 
-        assertTrue(claimsSet.get("jti").required().isString());
-        assertEquals(claimsSet.get("jti").asString(), "JWT_ID");
+        assertThat(claimsSet.get("jti").required().isString()).isTrue();
+        assertThat(claimsSet.get("jti").asString()).isEqualTo("JWT_ID");
 
-        assertTrue(claimsSet.get("iss").required().isString());
-        assertEquals(claimsSet.get("iss").asString(), "urn:issuer:animal:ferret:nose");
-        assertEquals(new URI(claimsSet.get("iss").asString()), issuer);
+        assertThat(claimsSet.get("iss").required().isString()).isTrue();
+        assertThat(claimsSet.get("iss").asString()).isEqualTo("urn:issuer:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("iss").asString())).isEqualTo(issuer);
 
-        assertTrue(claimsSet.get("sub").required().isString());
-        assertEquals(claimsSet.get("sub").asString(), "urn:subject:animal:ferret:nose");
-        assertEquals(new URI(claimsSet.get("sub").asString()), subject);
+        assertThat(claimsSet.get("sub").required().isString()).isTrue();
+        assertThat(claimsSet.get("sub").asString()).isEqualTo("urn:subject:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("sub").asString())).isEqualTo(subject);
 
-        assertTrue(claimsSet.get("aud").required().isList());
-        assertEquals(claimsSet.get("aud").asList(String.class).size(), 2);
-        assertTrue(claimsSet.get("aud").asList(String.class).contains("urn:audience1:animal:ferret:nose"));
-        assertTrue(claimsSet.get("aud").asList(String.class).contains("urn:audience2:animal:ferret:nose"));
-        assertEquals(new URI(claimsSet.get("aud").asList(String.class).get(0)), audience1);
-        assertEquals(new URI(claimsSet.get("aud").asList(String.class).get(1)), audience2);
+        assertThat(claimsSet.get("aud").required().isList()).isTrue();
+        assertThat(claimsSet.get("aud").asList(String.class).size()).isEqualTo(2);
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("urn:audience1:animal:ferret:nose");
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("urn:audience2:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("aud").asList(String.class).get(0))).isEqualTo(audience1);
+        assertThat(new URI(claimsSet.get("aud").asList(String.class).get(1))).isEqualTo(audience2);
 
-        assertTrue(claimsSet.get("iat").required().isNumber());
-        assertEquals(claimsSet.get("iat").asLong(), (Long) (issuedAtTime.getTime() / 1000));
+        assertThat(claimsSet.get("iat").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("iat").asLong()).isEqualTo(timeInSeconds(issuedAtTime));
 
-        assertTrue(claimsSet.get("nbf").required().isNumber());
-        assertEquals(claimsSet.get("nbf").asLong(), (Long) (notBeforeTime.getTime() / 1000));
+        assertThat(claimsSet.get("nbf").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("nbf").asLong()).isEqualTo(timeInSeconds(notBeforeTime));
 
-        assertTrue(claimsSet.get("exp").required().isNumber());
-        assertEquals(claimsSet.get("exp").asLong(), (Long) (expirationTime.getTime() / 1000));
+        assertThat(claimsSet.get("exp").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("exp").asLong()).isEqualTo(timeInSeconds(expirationTime));
 
-        assertTrue(claimsSet.isDefined("KEY1"));
-        assertTrue(claimsSet.get("KEY1").required().isString());
-        assertEquals(claimsSet.get("KEY1").asString(), "CLAIM1");
+        assertThat(claimsSet.isDefined("KEY1")).isTrue();
+        assertThat(claimsSet.get("KEY1").required().isString()).isTrue();
+        assertThat(claimsSet.get("KEY1").asString()).isEqualTo("CLAIM1");
 
-        assertTrue(claimsSet.isDefined("KEY2"));
-        assertTrue(claimsSet.get("KEY2").required().isBoolean());
-        assertEquals(claimsSet.get("KEY2").asBoolean(), (Boolean) true);
+        assertThat(claimsSet.isDefined("KEY2")).isTrue();
+        assertThat(claimsSet.get("KEY2").required().isBoolean()).isTrue();
+        assertThat(claimsSet.get("KEY2").asBoolean()).isEqualTo(true);
 
-        assertTrue(claimsSet.isDefined("KEY3"));
-        assertTrue(claimsSet.get("KEY3").required().isNumber());
-        assertEquals(claimsSet.get("KEY3").asLong(), (Long) 1234L);
+        assertThat(claimsSet.isDefined("KEY3")).isTrue();
+        assertThat(claimsSet.get("KEY3").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("KEY3").asLong()).isEqualTo(1234L);
 
-        assertTrue(claimsSet.isDefined("KEY4"));
-        assertTrue(claimsSet.get("KEY4").required().isNumber());
-        assertEquals(claimsSet.get("KEY4").asInteger(), (Integer) 1234);
+        assertThat(claimsSet.isDefined("KEY4")).isTrue();
+        assertThat(claimsSet.get("KEY4").required().isNumber()).isTrue();
+        assertThat(claimsSet.get("KEY4").asInteger()).isEqualTo(1234);
     }
 
     @Test
@@ -601,10 +659,10 @@ public class JwtClaimsSetTest {
         JwtClaimsSet claimsSet = new JwtClaimsSet(claims);
 
         //Then
-        assertTrue(claimsSet.get("aud").required().isList());
-        assertEquals(claimsSet.get("aud").asList(String.class).size(), 1);
-        assertTrue(claimsSet.get("aud").asList(String.class).contains("urn:audience1:animal:ferret:nose"));
-        assertEquals(new URI(claimsSet.get("aud").asList(String.class).get(0)), audience);
+        assertThat(claimsSet.get("aud").required().isList()).isTrue();
+        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(1);
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("urn:audience1:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("aud").asList(String.class).get(0))).isEqualTo(audience);
     }
 
     @Test
@@ -618,12 +676,12 @@ public class JwtClaimsSetTest {
         JwtClaimsSet claimsSet = new JwtClaimsSet(claims);
 
         //Then
-        assertTrue(claimsSet.get("aud").required().isList());
-        assertEquals(claimsSet.get("aud").asList(String.class).size(), 1);
-        assertTrue(claimsSet.get("aud").asList(String.class).contains("AUDIENCE"));
+        assertThat(claimsSet.get("aud").required().isList()).isTrue();
+        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(1);
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("AUDIENCE");
     }
 
-    @Test (expectedExceptions = JwtRuntimeException.class)
+    @Test(expectedExceptions = JwtRuntimeException.class)
     public void shouldThrowJwtRuntimeExceptionWhenValueIsOfWrongType() {
 
         //Given
@@ -634,8 +692,29 @@ public class JwtClaimsSetTest {
 
         //When
         new JwtClaimsSet(claims);
+    }
+
+    @Test
+    public void shouldBeOptionalClaims() {
+
+        //Given
+        JwtClaimsSet claimsSet = new JwtClaimsSet();
 
         //Then
-        fail("Should have thrown exception!");
+        assertThat(claimsSet.getIssuer()).isNull();
+        assertThat(claimsSet.getSubject()).isNull();
+        assertThat(claimsSet.getAudience()).isNull();
+        assertThat(claimsSet.getExpirationTime()).isNull();
+        assertThat(claimsSet.getNotBeforeTime()).isNull();
+        assertThat(claimsSet.getIssuedAtTime()).isNull();
+        assertThat(claimsSet.getJwtId()).isNull();
+    }
+
+    private Long timeInSeconds(final Date date) {
+        return date.getTime() / 1000L;
+    }
+
+    private Long currentTimeInSeconds() {
+        return System.currentTimeMillis() / 1000L;
     }
 }
