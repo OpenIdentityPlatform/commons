@@ -69,7 +69,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
 
         submit: function(formId, formData) {
-            Configuration.loggedUser.save(formData, {patch: true, wait: true}).then(
+            Configuration.loggedUser.save(formData, {patch: true}).then(
                 _.bind(function () {
                     this.submitSuccess(formId);
                 }, this)
