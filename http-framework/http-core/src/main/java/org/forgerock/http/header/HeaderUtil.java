@@ -12,17 +12,23 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 import org.forgerock.http.protocol.Message;
 import org.forgerock.http.util.CaseInsensitiveMap;
@@ -31,6 +37,31 @@ import org.forgerock.http.util.CaseInsensitiveMap;
  * Utility class for processing values in HTTP header fields.
  */
 public final class HeaderUtil {
+
+    /**
+     * RFC 1123 {@code HTTP-date} format from <a href="https://tools.ietf.org/html/rfc2616#page-20">RFC 2616</a>
+     * section 3.3, which is the preferred standard format.
+     */
+    private static final String HTTP_DATE_RFC_1123_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+    /**
+     * Legacy RFC 850 date format from <a href="https://tools.ietf.org/html/rfc2616#page-20">RFC 2616</a> section 3.3,
+     * which should be supported for parsing only.
+     */
+    private static final String LEGACY_RFC_850_DATE_FORMAT = "E, dd-MMM-yy HH:mm:ss zzz";
+
+    /**
+     * Legacy ANSI C {@code asctime()} date format from
+     * <a href="https://tools.ietf.org/html/rfc2616#page-20">RFC 2616</a>
+     * section 3.3, which should be supported for parsing only.
+     */
+    private static final String LEGACY_ANSI_C_DATE_FORMAT = "EEE MMM d HH:mm:ss yyyy";
+
+    /**
+     * Regex that matches escaped backslash and double-quote characters, into two matching groups where group 1
+     * contains the escape character (which we will discard) and group 2 contains the character we want to retain.
+     */
+    private static final Pattern UNQUOTE_PATTERN = Pattern.compile("(\\\\)(\\\\|[\"])");
 
     /** Static methods only. */
     private HeaderUtil() {
@@ -262,6 +293,23 @@ public final class HeaderUtil {
     }
 
     /**
+     * Unquotes a string following the logic of {@link #quote(String)}.
+     *
+     * @param value Value to unquote
+     * @return Unquoted value
+     */
+    public static String unquote(final String value) {
+        if (value == null) {
+            return null;
+        }
+        final int n = value.length();
+        if (n < 2 || value.charAt(0) != '"' || value.charAt(n - 1) != '"') {
+            throw new IllegalArgumentException("value is not quoted");
+        }
+        return UNQUOTE_PATTERN.matcher(value.substring(1, n - 1)).replaceAll("$2");
+    }
+
+    /**
      * Parses the named header from the message as a multi-valued comma
      * separated value. If there are multiple headers present then they are
      * first merged and then {@link #split(String, char) split}.
@@ -310,5 +358,65 @@ public final class HeaderUtil {
         final String header = iterator.hasNext()
                 ? iterator.next() : null;
         return header != null ? header : null;
+    }
+
+    /**
+     * Formats a {@code HTTP-date} using RFC 1123 format as specified in
+     * <a href="https://tools.ietf.org/html/rfc2616#page-20">RFC 2616</a>.
+     *
+     * @param date {@link Date} to format
+     * @return Formatted {@code HTTP-date}
+     */
+    public static String formatDate(final Date date) {
+        return getDateFormatter(HTTP_DATE_RFC_1123_DATE_FORMAT).format(date);
+    }
+
+    /**
+     * Parses the supported {@code HTTP-date} formats as specified in
+     * <a href="https://tools.ietf.org/html/rfc2616#page-20">RFC 2616</a>.
+     *
+     * @param s Date {@link String}
+     * @return {@link Date} instance, or {@code null} if unable to parse the date or {@code s} is {@code null}
+     */
+    public static Date parseDate(final String s) {
+        if (s == null) {
+            return null;
+        }
+        Date date = parseDate(s, HTTP_DATE_RFC_1123_DATE_FORMAT);
+        if (date != null) {
+            return date;
+        }
+        date = parseDate(s, LEGACY_RFC_850_DATE_FORMAT);
+        if (date != null) {
+            return date;
+        }
+        return parseDate(s, LEGACY_ANSI_C_DATE_FORMAT);
+    }
+
+    /**
+     * Parses a date {@link String} using the provided date format.
+     *
+     * @param s      Date {@link String}
+     * @param format Date format
+     * @return {@link Date} instance, or {@code null} if unable to parse the date
+     */
+    private static Date parseDate(final String s, final String format) {
+        try {
+            return getDateFormatter(format).parse(s);
+        } catch (ParseException eee) {
+            return null;
+        }
+    }
+
+    /**
+     * Builds a date formatter, configured to use GMT time zone, which is not thread-safe.
+     *
+     * @param format Date format
+     * @return Date formatter using GMT time zone
+     */
+    private static SimpleDateFormat getDateFormatter(final String format) {
+        final SimpleDateFormat formatter = new SimpleDateFormat(format, Locale.ROOT);
+        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return formatter;
     }
 }

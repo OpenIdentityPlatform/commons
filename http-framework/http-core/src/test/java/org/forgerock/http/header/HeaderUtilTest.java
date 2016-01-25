@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
@@ -19,6 +19,7 @@ package org.forgerock.http.header;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.testng.annotations.DataProvider;
@@ -32,6 +33,7 @@ public class HeaderUtilTest {
 
     private static final String ACCEPT_CHARSET_SAMPLE = "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7";
     private static final String ESCAPING_TYPE_SAMPLE = "Etag: \"\\pub1259380237;gz\\\"";
+    private static final String ESCAPING_TYPE_SAMPLE_QUOTED = "\"Etag: \\\"\\\\pub1259380237;gz\\\\\\\"\"";
 
     @DataProvider
     private Object[][] invalidSeparatorProvider() {
@@ -104,6 +106,66 @@ public class HeaderUtilTest {
     @Test
     public void testQuoteAlreadyQuotedChainSucceed() {
         final String result = HeaderUtil.quote(ESCAPING_TYPE_SAMPLE);
-        assertThat(result).contains("\\\\");
+        assertThat(result).isEqualTo(ESCAPING_TYPE_SAMPLE_QUOTED);
+    }
+
+    @Test
+    public void testUnquote() {
+        final String result = HeaderUtil.unquote(ESCAPING_TYPE_SAMPLE_QUOTED);
+        assertThat(result).isEqualTo(ESCAPING_TYPE_SAMPLE);
+    }
+
+    @Test
+    public void testUnquoteOnNull() {
+        final String result = HeaderUtil.unquote(null);
+        assertThat(result).isNull();
+    }
+
+    @Test
+    public void testUnquoteOnEmptyQuoted() {
+        final String result = HeaderUtil.unquote("\"\"");
+        assertThat(result).isEmpty();
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testUnquoteOnUnquotedException() {
+        HeaderUtil.unquote("not quoted");
+    }
+
+    @Test
+    public void testFormatDate() {
+        final String result = HeaderUtil.formatDate(new Date(0));
+        assertThat(result).isEqualTo("Thu, 01 Jan 1970 00:00:00 GMT");
+    }
+
+    @Test
+    public void testParseRfc1123Date() {
+        final Date result = HeaderUtil.parseDate("Sun, 06 Nov 1994 08:49:37 GMT");
+        final String formattedDate = HeaderUtil.formatDate(result);
+        assertThat(formattedDate).isEqualTo("Sun, 06 Nov 1994 08:49:37 GMT");
+    }
+
+    @Test
+    public void testParseRfc850Date() {
+        final Date result = HeaderUtil.parseDate("Sunday, 06-Nov-94 08:49:37 GMT");
+        final String formattedDate = HeaderUtil.formatDate(result);
+        assertThat(formattedDate).isEqualTo("Sun, 06 Nov 1994 08:49:37 GMT");
+    }
+
+    @Test
+    public void testParseAnsiCDate() {
+        final Date result = HeaderUtil.parseDate("Sun Nov  6 08:49:37 1994");
+        final String formattedDate = HeaderUtil.formatDate(result);
+        assertThat(formattedDate).isEqualTo("Sun, 06 Nov 1994 08:49:37 GMT");
+    }
+
+    @Test
+    public void testParseDateUnsupportedArguments() {
+        assertThat(HeaderUtil.parseDate(null)).isNull();
+
+        assertThat(HeaderUtil.parseDate("")).isNull();
+
+        final Date iso8601FormattedDate = HeaderUtil.parseDate("1994-11-06T08:49:37Z");
+        assertThat(iso8601FormattedDate).isNull();
     }
 }

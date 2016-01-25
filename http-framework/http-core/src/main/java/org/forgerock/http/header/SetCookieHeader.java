@@ -11,21 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
 
 import static java.util.Collections.*;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import org.forgerock.http.protocol.Cookie;
 import org.forgerock.http.protocol.Header;
@@ -61,7 +56,7 @@ public class SetCookieHeader extends Header {
         for (String part : parts) {
             String[] nvp = part.split("=");
             if ("Expires".equalsIgnoreCase(nvp[0].trim())) {
-                cookie.setExpires(parseDate(nvp[1].trim()));
+                cookie.setExpires(HeaderUtil.parseDate(nvp[1].trim()));
             } else if ("Max-Age".equalsIgnoreCase(nvp[0].trim())) {
                 cookie.setMaxAge(parseInteger(nvp[1].trim()));
             } else if ("Path".equalsIgnoreCase(nvp[0].trim())) {
@@ -123,22 +118,6 @@ public class SetCookieHeader extends Header {
         }
     }
 
-    private static final String EXPIRES_DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss z";
-
-    private static SimpleDateFormat getDateFormatter() {
-        SimpleDateFormat formatter = new SimpleDateFormat(EXPIRES_DATE_FORMAT, Locale.ROOT);
-        formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return formatter;
-    }
-
-    private static Date parseDate(String s) {
-        try {
-            return getDateFormatter().parse(s);
-        } catch (ParseException e) {
-            return null;
-        }
-    }
-
     private final List<Cookie> cookies;
     private final List<String> values;
 
@@ -183,7 +162,7 @@ public class SetCookieHeader extends Header {
         if (cookie.getName() != null) {
             sb.append(cookie.getName()).append("=").append(cookie.getValue());
             if (cookie.getExpires() != null) {
-                sb.append("; ").append("Expires").append("=").append(getDateFormatter().format(cookie.getExpires()));
+                sb.append("; ").append("Expires").append("=").append(HeaderUtil.formatDate(cookie.getExpires()));
             }
             if (cookie.getMaxAge() != null && cookie.getMaxAge() > 0) {
                 sb.append("; ").append("Max-Age").append("=").append(cookie.getMaxAge());

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
@@ -19,16 +19,18 @@ package org.forgerock.http.header;
 import static org.forgerock.http.header.HeaderUtil.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.forgerock.http.protocol.Header;
 import org.forgerock.http.protocol.Message;
 import org.forgerock.util.Reject;
 
 /**
- * Processes the <strong>{@code Warning}</strong> message header. For more
- * information, see <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a>
- * 14.46.
+ * Processes the {@link Warning} message header. For more information, see
+ * <a href="http://www.ietf.org/rfc/rfc2616.txt">RFC 2616</a> 14.46.  This class is immutable and thread-safe.
  */
 public final class WarningHeader extends Header {
 
@@ -38,26 +40,32 @@ public final class WarningHeader extends Header {
      * @param message The message to initialize the header from.
      * @return The parsed header.
      */
-    public static WarningHeader valueOf(Message message) {
+    public static WarningHeader valueOf(final Message message) {
         return new WarningHeader(toWarnings(parseMultiValuedHeader(message, NAME)));
     }
 
     /**
      * Constructs a new header, initialized from the specified string value.
      *
-     * @param string The value to initialize the header from.
+     * @param header The value to initialize the header from.
      * @return The parsed header.
      */
-    public static WarningHeader valueOf(String string) {
-        return new WarningHeader(toWarnings(parseMultiValuedHeader(string)));
+    public static WarningHeader valueOf(final String header) {
+        return new WarningHeader(Warning.valueOf(header));
     }
 
-    private static List<Warning> toWarnings(List<String> header) {
-        List<Warning> warnings = new ArrayList<>();
-        for (String entry : header) {
-            String[] parts = entry.split(" ");
-            if (parts.length >= 3) {
-                warnings.add(new Warning(Integer.parseInt(parts[0]), parts[1], parts[2]));
+    /**
+     * Matches warning-headers from a {@link List} of header-values.
+     *
+     * @param headers Array of header values
+     * @return All items in {@code headers} that are a valid warning-header
+     */
+    protected static List<Warning> toWarnings(final List<String> headers) {
+        final List<Warning> warnings = new ArrayList<>(headers.size());
+        for (final String entry : headers) {
+            final Warning warning = Warning.valueOf(entry);
+            if (warning != null) {
+                warnings.add(warning);
             }
         }
         return warnings;
@@ -75,8 +83,8 @@ public final class WarningHeader extends Header {
      * @return A newly constructed {@code WarningHeader} indicating the
      * expected key was not found in the request.
      */
-    public static WarningHeader newWarning(String agentName, String fmt, Object... args) {
-        return new WarningHeader(NOT_PRESENT, agentName, String.format(fmt, args));
+    public static WarningHeader newWarning(final String agentName, final String fmt, final Object... args) {
+        return new WarningHeader(new Warning(NOT_PRESENT, agentName, String.format(fmt, args)));
     }
 
     /** The name of this header. */
@@ -140,39 +148,29 @@ public final class WarningHeader extends Header {
      */
     public static final int MISCELLANEOUS_PERSISTENT_WARNING = 299;
 
-    private final List<Warning> warnings = new ArrayList<>();
+    /**
+     * Unmodifiable {@link List} of {@link Warning}s.
+     */
+    private final List<Warning> warnings;
 
-    private static final class Warning {
-        private final int code;
-        private final String agent;
-        private final String text;
-
-        private Warning(int code, String agent, String text) {
-            this.code = code;
-            this.agent = agent;
-            this.text = text;
-        }
-
-        @Override
-        public String toString() {
-            return String.valueOf(code) + " " + agent + " " + text;
-        }
-    }
-
-    private WarningHeader(List<Warning> warnings) {
-        this.warnings.addAll(warnings);
+    /**
+     * Constructor for single {@link Warning}.
+     *
+     * @param warning Single {@link Warning}
+     */
+    public WarningHeader(final Warning warning) {
+        final List<Warning> warnings = new ArrayList<>(1);
+        warnings.add(Reject.checkNotNull(warning));
+        this.warnings = Collections.unmodifiableList(warnings);
     }
 
     /**
-     * Constructs a new header with the provided warning.
+     * Constructor for multiple {@link Warning}s.
      *
-     * @param code The warning code.
-     * @param agent Name of the component responsible for issuing the warning.
-     * @param text The warning text.
+     * @param warnings Multiple {@link Warning}s
      */
-    public WarningHeader(int code, String agent, String text) {
-        Reject.ifNull(agent, text);
-        warnings.add(new Warning(code, agent, text));
+    public WarningHeader(final List<Warning> warnings) {
+        this.warnings = Collections.unmodifiableList(new ArrayList<>(Reject.checkNotNull(warnings)));
     }
 
     @Override
@@ -189,30 +187,83 @@ public final class WarningHeader extends Header {
      * @param text The warning text.
      * @return A new {@code WarningHeader} instance.
      */
-    public WarningHeader add(int code, String agent, String text) {
-        WarningHeader header = new WarningHeader(warnings);
-        header.warnings.add(new Warning(code, agent, text));
-        return header;
+    public WarningHeader add(final int code, final String agent, final String text) {
+        return add(code, agent, text, null);
+    }
+
+    /**
+     * Constructs a new header with the warnings defined in {@literal this}
+     * {@code WarningHeader} in addition to the provided warning.
+     *
+     * @param code The warning code.
+     * @param agent Name of the component responsible for issuing the warning.
+     * @param text The warning text.
+     * @param date The warning date or {@code null}.
+     * @return A new {@code WarningHeader} instance.
+     */
+    public WarningHeader add(final int code, final String agent, final String text, final Date date) {
+        return add(new Warning(code, agent, text, date));
+    }
+
+    /**
+     * Constructs a new header with the warnings defined in {@literal this}
+     * {@code WarningHeader} in addition to the provided warning.
+     *
+     * @param warning The warning.
+     * @return A new {@code WarningHeader} instance.
+     */
+    public WarningHeader add(final Warning warning) {
+        Reject.ifNull(warning);
+        final List<Warning> list = new ArrayList<>(warnings.size() + 1);
+        list.addAll(warnings);
+        list.add(warning);
+        return new WarningHeader(list);
+    }
+
+    /**
+     * Gets all {@link Warning}s.
+     *
+     * @return All {@link Warning}s
+     */
+    public List<Warning> getWarnings() {
+        return warnings;
     }
 
     @Override
     public List<String> getValues() {
-        List<String> headerValues = new ArrayList<>();
-        for (Warning warning : warnings) {
-            headerValues.add(warning.toString().trim());
+        final List<String> headerValues = new ArrayList<>(warnings.size());
+        for (final Warning warning : warnings) {
+            headerValues.add(warning.toString());
         }
-        return headerValues;
+        return Collections.unmodifiableList(headerValues);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final WarningHeader that = (WarningHeader) o;
+        return Objects.equals(warnings, that.warnings);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), warnings);
     }
 
     static class Factory extends HeaderFactory<WarningHeader> {
 
         @Override
-        public WarningHeader parse(String value) {
+        public WarningHeader parse(final String value) {
             return valueOf(value);
         }
 
         @Override
-        public WarningHeader parse(List<String> values) {
+        public WarningHeader parse(final List<String> values) {
             return new WarningHeader(toWarnings(values));
         }
     }
