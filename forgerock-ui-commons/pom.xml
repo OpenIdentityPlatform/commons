@@ -114,7 +114,6 @@
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>jquery.ba-dotimeout</artifactId>
@@ -299,6 +298,20 @@
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>font-awesome</artifactId>
             <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>react</artifactId>
+            <version>15.2.1</version>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>react-dom</artifactId>
+            <version>15.2.1</version>
+            <classifier>min</classifier>
+            <type>js</type>
         </dependency>
     </dependencies>
 </project>

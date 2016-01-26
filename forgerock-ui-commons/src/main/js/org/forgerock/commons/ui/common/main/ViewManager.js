@@ -17,16 +17,18 @@
 define([
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/components/Messages",
+    "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function($, _, uiUtils, msg, ModuleLoader) {
+], function($, _, msg, AbstractView, ModuleLoader) {
     var obj = {},
         decodeArgs = function (args) {
             return _.map(args, function (a) {
                 return (a && decodeURIComponent(a)) || "";
             });
-        };
+        },
+        isBackboneView = function(view) { return view.render && !_.isFunction(view); },
+        isReactView = function(view) { return !view.render && _.isFunction(view); };
 
     obj.currentView = null;
     obj.currentDialog = null;
@@ -60,10 +62,21 @@ define([
                 if (view.__esModule) {
                     view = view.default;
                 }
-                if(view.init) {
+
+                // TODO: Investigate whether this is required anymore
+                if (view.init) {
                     view.init();
-                } else {
+                }
+
+                if (isBackboneView(view)) {
                     view.render(decodedArgs, callback);
+                } else if (isReactView(view)) {
+                    // ReactAdapterView (and thus React and React-DOM) are only loaded when a React view is encountered
+                    require(["org/forgerock/commons/ui/common/main/ReactAdapterView"], function(ReactAdapterView) {
+                        (new ReactAdapterView(view)).render();
+                    });
+                } else {
+                    throw new Error("[ViewManager] Unable to determine view type (Backbone or React).");
                 }
             });
 

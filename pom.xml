@@ -199,6 +199,20 @@
                 <type>js</type>
                 <classifier>min</classifier>
             </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>react</artifactId>
+                <version>15.2.1</version>
+                <classifier>min</classifier>
+                <type>js</type>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>react-dom</artifactId>
+                <version>15.2.1</version>
+                <classifier>min</classifier>
+                <type>js</type>
+            </dependency>
 
 
             <!-- Bootstrap, widgets and related theming -->
