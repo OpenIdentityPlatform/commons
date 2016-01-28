@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.apache.async;
@@ -105,6 +105,18 @@ public class AsyncClientTest {
 
         // Verify the response (block until reception)
         assertThat(promise.get().getStatus()).isEqualTo(Status.OK);
+    }
+
+    @Test
+    public void shouldFailToObtainResponse() throws Exception {
+        final Client client = new Client(new HttpClientHandler());
+        final Request invalidRequest = new Request();
+        invalidRequest.setUri(format("http://localhost:%d/shouldFail", server.getPort()));
+        final Response response = client.send(invalidRequest).get();
+
+        assertThat(response.getStatus()).isEqualTo(Status.BAD_GATEWAY);
+        assertThat(response.getEntity().getString()).isEmpty();
+        assertThat(response.getCause()).isNotNull();
     }
 
     private static class WaitForLatch implements Applicable {

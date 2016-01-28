@@ -11,12 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.apache.async;
-
-import static java.lang.String.format;
 
 import java.io.IOException;
 
@@ -33,11 +31,15 @@ import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.PromiseImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Apache HTTP Async Client based implementation.
  */
 public class AsyncHttpClient extends AbstractHttpClient {
+
+    private static final Logger logger = LoggerFactory.getLogger(AsyncHttpClient.class);
 
     private final CloseableHttpAsyncClient client;
 
@@ -64,8 +66,8 @@ public class AsyncHttpClient extends AbstractHttpClient {
 
             @Override
             public void failed(final Exception ex) {
+                logger.error("Failed to obtain response for {}", request.getUri());
                 Response response = new Response(Status.BAD_GATEWAY);
-                response.setEntity(format("Failed to obtain response for %s", request.getUri()));
                 response.setCause(ex);
                 promise.handleResult(response);
             }
