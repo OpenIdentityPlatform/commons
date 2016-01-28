@@ -18,8 +18,10 @@ package org.forgerock.audit.handlers.elasticsearch;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
+import org.forgerock.http.Client;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -33,9 +35,11 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase {
 
     public ElasticsearchAuditEventHandler(
             final ElasticsearchAuditEventHandlerConfiguration configuration,
-            final EventTopicsMetaData eventTopicsMetaData
+            final EventTopicsMetaData eventTopicsMetaData,
+            @Audit final Client client
     ) {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
+
     }
 
     @Override
