@@ -104,7 +104,14 @@ class ResponseHandler {
                 acceptedTypes.add(MediaType.parse(acceptHeader.substring(m.start(), m.start(1))));
                 lastGroup = m.end(1);
             }
-            acceptedTypes.add(MediaType.parse(acceptHeader.substring(lastGroup)));
+
+            try {
+                acceptedTypes.add(MediaType.parse(acceptHeader.substring(lastGroup)));
+            }
+            catch(IllegalArgumentException e) {
+                // The Accept header has invalid content, ignore, and just select the default handler
+                return defaultHandler;
+            }
 
             for (MediaType type : acceptedTypes) {
                 MediaType forComparison = type.withoutParameters();
