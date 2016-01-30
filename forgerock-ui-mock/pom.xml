@@ -54,11 +54,15 @@
 
         <plugins>
             <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>2.6</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>resources</goal>
                         </goals>
@@ -72,7 +76,7 @@
                 <executions>
                     <execution>
                         <id>unpack</id>
-                        <phase>prepare-package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -91,7 +95,7 @@
                     </execution>
                     <execution>
                         <id>copy-dependencies-js</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
@@ -107,7 +111,7 @@
                     </execution>
                     <execution>
                         <id>copy-dependencies-css</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
@@ -123,7 +127,7 @@
                     </execution>
                     <execution>
                         <id>copy-dependencies-less</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
@@ -138,7 +142,7 @@
                     </execution>
                     <execution>
                         <id>copy-dependencies-r</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
@@ -153,7 +157,7 @@
                     </execution>
                     <execution>
                         <id>copy-dependencies-qunit</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
                         </goals>
@@ -167,7 +171,7 @@
                     </execution>
                     <execution>
                         <id>unpack-codemirror</id>
-                        <phase>package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -184,124 +188,8 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jslint-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>**/libs/*.js</exclude>
-                        <exclude>**/*Test.js</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jslint</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compile-structure-less-to-css</id>
-                        <phase>package</phase>
-
-                        <configuration>
-                            <target name="compileLess">
-
-                                <java classname="org.mozilla.javascript.tools.shell.Main" fork="true">
-                                    <classpath refid="maven.compile.classpath" />
-                                    <arg value="${project.build.directory}/less/less-1.5.1-rhino.js" />
-                                    <arg value="${project.build.directory}/www/css/structure.less" />
-                                    <arg value="${project.build.directory}/www/css/structure.css" />
-                                </java>
-
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>compile-theme-less-to-css</id>
-                        <phase>package</phase>
-
-                        <configuration>
-                            <target name="compileLess">
-
-                                <java classname="org.mozilla.javascript.tools.shell.Main" fork="true">
-                                    <classpath refid="maven.compile.classpath" />
-                                    <arg value="${project.build.directory}/less/less-1.5.1-rhino.js" />
-                                    <arg value="${project.build.directory}/www/css/theme.less" />
-                                    <arg value="${project.build.directory}/www/css/theme.css" />
-                                </java>
-
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>production</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>js/css optimization</id>
-                                <phase>package</phase>
-
-                                <configuration>
-                                    <target name="optimizeJS">
-
-                                        <property name="requirejs.dir" value="${project.build.directory}/optimization" />
-
-                                        <java classname="org.mozilla.javascript.tools.shell.Main">
-                                            <classpath refid="maven.compile.classpath" />
-                                            <arg value="${requirejs.dir}/r-2.1.10.js" />
-                                            <arg value="-o" />
-                                            <arg value="${basedir}/src/main/optimization/mock.build.js" />
-                                        </java>
-
-                                        <java classname="org.mozilla.javascript.tools.shell.Main">
-                                            <classpath refid="maven.compile.classpath" />
-                                            <arg value="${requirejs.dir}/r-2.1.10.js" />
-                                            <arg value="-o" />
-                                            <arg value="cssIn=${project.build.directory}/www/css/styles.css" />
-                                            <arg value="out=${project.build.directory}/www/css/styles_min.css" />
-                                            <arg value="optimizeCss=standard" />
-                                            <arg value="cssImportIgnore=bootstrap-3.3.5-custom.css" />
-                                        </java>
-
-                                        <move file="${project.build.directory}/www/css/styles_min.css" tofile="${project.build.directory}/www/css/styles.css" />
-
-                                    </target>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <repositories>
         <repository>
@@ -352,30 +240,6 @@
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>qunit</artifactId>
             <type>css</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>less</artifactId>
-            <version>1.5.1</version>
-            <classifier>rhino</classifier>
-            <type>js</type>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>r</artifactId>
-            <version>2.1.10</version>
-            <type>js</type>
-        </dependency>
-        <dependency>
-            <groupId>de.matrixweb.osgi.wrapped</groupId>
-            <artifactId>osgi-wrapped-rhino</artifactId>
-            <version>1.7R4</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.mozilla</groupId>
-                    <artifactId>rhino</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 </project>

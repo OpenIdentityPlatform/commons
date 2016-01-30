@@ -68,7 +68,7 @@ define("org/forgerock/commons/ui/common/util/DateUtil", [
     };
 
     obj.getDateFromEpochString = function(stringWithMilisFromEpoch) {
-        return new XDate(parseInt(stringWithMilisFromEpoch, "10")).toDate();
+        return new XDate(parseInt(stringWithMilisFromEpoch, 10)).toDate();
     };
 
     obj.currentDate = function() {

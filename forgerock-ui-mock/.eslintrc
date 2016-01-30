@@ -40,11 +40,6 @@
          *
          * var fruit·=·"apples" # good
          */
-        "no-multi-spaces": 1,
-
-        /**
-         * Allow the use of eval!
-         */
-        "no-eval": 1
+        "no-multi-spaces": 1
     }
 }
