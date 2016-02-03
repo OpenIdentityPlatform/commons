@@ -535,9 +535,11 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                 title: $.t('common.form.confirm'),
                 type: "type-" +type,
                 message: message,
+                id: "frConfirmationDialog",
                 buttons: [
                     {
                         label: $.t('common.form.cancel'),
+                        id: "frConfirmationDialogBtnClose",
                         action: function(dialog){
                             dialog.close();
                         }
@@ -545,6 +547,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
                     {
                         label: $.t('common.form.ok'),
                         cssClass: btnType,
+                        id: "frConfirmationDialogBtnOk",
                         action: function(dialog) {
                             if(confirmCallback) {
                                 confirmCallback();
