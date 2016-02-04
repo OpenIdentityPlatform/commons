@@ -34,7 +34,11 @@ import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
  *      "indexName" : "audit"
  *    },
  *    "buffering" : {
- *      "enabled" : "true"
+ *      "enabled" : true,
+ *      "autoFlush" : true,
+ *      "maxSize" : 20000,
+ *      "writeInterval" : "10 millis",
+ *      "maxBatchedEvents" : 100
  *    }
  *  }
  * </pre>
@@ -191,6 +195,18 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
         @JsonPropertyDescription("audit.handlers.elasticsearch.buffering.enabled")
         private boolean enabled;
 
+        @JsonPropertyDescription("audit.handlers.elasticsearch.buffering.autoFlush")
+        private boolean autoFlush;
+
+        @JsonPropertyDescription("audit.handlers.elasticsearch.buffering.maxSize")
+        private int maxSize;
+
+        @JsonPropertyDescription("audit.handlers.elasticsearch.buffering.writeInterval")
+        private String writeInterval;
+
+        @JsonPropertyDescription("audit.handlers.elasticsearch.buffering.maxBatchedEvents")
+        private int maxBatchedEvents;
+
         /**
          * Indicates if event buffering is enabled.
          *
@@ -207,6 +223,78 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
          */
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
+        }
+
+        /**
+         * Indicates if events in the buffer will be flushed on shutdown or configuration change.
+         *
+         * @return {@code true} if events should be flushed or {@code false} if events may be dropped
+         */
+        public boolean isAutoFlush() {
+            return autoFlush;
+        }
+
+        /**
+         * Sets if events in the buffer will be flushed on shutdown or configuration change.
+         *
+         * @param autoFlush {@code true} if events should be flushed or {@code false} if events may be dropped
+         */
+        public void setAutoFlush(boolean autoFlush) {
+            this.autoFlush = autoFlush;
+        }
+
+        /**
+         * Gets the buffer capacity, which are the maximum number of events that can be buffered.
+         *
+         * @return buffer capacity
+         */
+        public int getMaxSize() {
+            return maxSize;
+        }
+
+        /**
+         * Sets the buffer capacity, which are the maximum number of events that can be buffered.
+         *
+         * @param maxSize buffer capacity
+         */
+        public void setMaxSize(int maxSize) {
+            this.maxSize = maxSize;
+        }
+
+        /**
+         * Gets the interval for reading events from the buffer to transmit to Elasticsearch.
+         *
+         * @return Interval (e.g., "20 millis")
+         */
+        public String getWriteInterval() {
+            return writeInterval;
+        }
+
+        /**
+         * Sets the interval for reading events from the buffer to transmit to Elasticsearch.
+         *
+         * @param writeInterval Interval (e.g., "20 millis")
+         */
+        public void setWriteInterval(String writeInterval) {
+            this.writeInterval = writeInterval;
+        }
+
+        /**
+         * Gets the maximum number of events to read from the buffer on each {@link #getWriteInterval() interval}.
+         *
+         * @return Batch size
+         */
+        public int getMaxBatchedEvents() {
+            return maxBatchedEvents;
+        }
+
+        /**
+         * Sets the maximum number of events to read from the buffer on each {@link #getWriteInterval() interval}.
+         *
+         * @param maxBatchedEvents Batch size
+         */
+        public void setMaxBatchedEvents(int maxBatchedEvents) {
+            this.maxBatchedEvents = maxBatchedEvents;
         }
     }
 }

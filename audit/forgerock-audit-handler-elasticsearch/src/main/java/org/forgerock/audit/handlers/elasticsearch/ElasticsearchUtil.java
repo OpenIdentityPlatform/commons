@@ -24,7 +24,7 @@ import org.forgerock.util.annotations.VisibleForTesting;
 /**
  * Utilities for working with Elasticsearch.
  */
-public class ElasticsearchUtil {
+class ElasticsearchUtil {
 
     private ElasticsearchUtil() {
         // hidden

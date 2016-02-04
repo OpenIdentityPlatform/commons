@@ -39,9 +39,11 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,13 +52,22 @@ import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEvent
 /**
  * {@link AuditEventHandler} for Elasticsearch.
  */
-public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase {
+public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implements
+        ElasticsearchBatchAuditEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+    /**
+     * Average number of characters, per event, for batch indexing via Elasticsearch Bulk API. This value
+     * is used to initialize the size of buffers, but if the value is too low, the buffers will automatically resize
+     * as needed.
+     */
+    private static final int BATCH_INDEX_AVERAGE_PER_EVENT_PAYLOAD_SIZE = 1280;
+
     private final ElasticsearchAuditEventHandlerConfiguration configuration;
     private final Client client;
+    private final ElasticsearchBatchIndexer batchIndexer;
 
     /**
      * Create a new {@code ElasticsearchAuditEventHandler} instance.
@@ -73,16 +84,32 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = Reject.checkNotNull(configuration);
         this.client = Reject.checkNotNull(client);
+
+        final EventBufferingConfiguration bufferConfig = configuration.getBuffering();
+        if (bufferConfig.isEnabled()) {
+            final Duration writeInterval =
+                    bufferConfig.getWriteInterval() == null || bufferConfig.getWriteInterval().isEmpty() ?
+                            null : Duration.duration(bufferConfig.getWriteInterval());
+            batchIndexer = new ElasticsearchBatchIndexer(bufferConfig.getMaxSize(),
+                    writeInterval, bufferConfig.getMaxBatchedEvents(),
+                    BATCH_INDEX_AVERAGE_PER_EVENT_PAYLOAD_SIZE, bufferConfig.isAutoFlush(), this);
+        } else {
+            batchIndexer = null;
+        }
     }
 
     @Override
     public void startup() throws ResourceException {
-        // do nothing
+        if (batchIndexer != null) {
+            batchIndexer.startup();
+        }
     }
 
     @Override
     public void shutdown() throws ResourceException {
-        // do nothing
+        if (batchIndexer != null) {
+            batchIndexer.shutdown();
+        }
     }
 
     @Override
@@ -120,12 +147,36 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase {
     @Override
     public Promise<ResourceResponse, ResourceException> publishEvent(final Context context, final String topic,
             final JsonValue event) {
+        if (batchIndexer == null) {
+            return publishSingleEvent(topic, event);
+        } else {
+            if (!batchIndexer.offer(topic, event)) {
+                return new ServiceUnavailableException("Elasticsearch batch indexer full, so dropping audit event " +
+                        "audit/" + topic + "/" + event.get("_id").asString()).asPromise();
+            }
+            return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
+                    event).asPromise();
+        }
+    }
+
+    /**
+     * Publishes a single event to the provided topic.
+     *
+     * @param topic The topic where to publish the event.
+     * @param event The event to publish.
+     * @return a promise with either a response or an exception
+     */
+    protected Promise<ResourceResponse, ResourceException> publishSingleEvent(final String topic,
+            final JsonValue event) {
         String resourceId = null;
         try {
-            // _id is a protected Elasticsearch field, so read it and remove it
+            // _id is a protected Elasticsearch field
             resourceId = event.get("_id").asString();
             event.remove("_id");
+
+            // normalize JSON and put _id back for call to newResourceResponse below
             final String jsonPayload = ElasticsearchUtil.normalizeJson(event);
+            event.put("_id", resourceId);
 
             final Request request = new Request();
             request.setMethod("PUT");
@@ -139,12 +190,54 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase {
             if (!response.getStatus().isSuccessful()) {
                 return getResourceExceptionPromise(topic, resourceId, response);
             }
+            return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
+                    event).asPromise();
         } catch (Exception e) {
-            final String error = String.format("Unable to create audit entry for topic=%s, _id=%s", topic, resourceId);
+            final String error = String.format("Unable to create audit entry for topic=%s, _id=%s", topic,
+                    resourceId);
             LOGGER.error(error, e);
             return new InternalServerErrorException(error, e).asPromise();
         }
-        return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null, event).asPromise();
+    }
+
+    @Override
+    public void addToBatch(final String topic, final JsonValue event, final StringBuilder payload) {
+        try {
+            // _id is a protected Elasticsearch field
+            final String resourceId = event.get("_id").asString();
+            event.remove("_id");
+            final String jsonPayload = ElasticsearchUtil.normalizeJson(event);
+
+            // newlines have special significance in the Bulk API
+            // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
+            payload.append("{ \"index\" : { \"_type\" : ")
+                    .append(OBJECT_MAPPER.writeValueAsString(topic))
+                    .append(", \"_id\" : ")
+                    .append(OBJECT_MAPPER.writeValueAsString(resourceId))
+                    .append(" } }\n")
+                    .append(jsonPayload)
+                    .append('\n');
+        } catch (Exception e) {
+            LOGGER.error("Elasticsearch batch creation failed", e);
+        }
+    }
+
+    @Override
+    public void publishBatch(final String payload) {
+        try {
+            final Request request = new Request();
+            request.setMethod("POST");
+            request.setUri(buildBulkUri());
+            request.getHeaders().put(ContentTypeHeader.NAME, "application/json; charset=UTF-8");
+            request.getEntity().setBytes(payload.getBytes(StandardCharsets.UTF_8));
+
+            final Response response = client.send(request).get();
+            if (!response.getStatus().isSuccessful()) {
+                LOGGER.warn("Elasticsearch batch index failed: " + response.getEntity());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Elasticsearch batch index failed unexpectedly", e);
+        }
     }
 
     /**
@@ -159,6 +252,18 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase {
         final ConnectionConfiguration connection = configuration.getConnection();
         return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + "/" +
                 indexMapping.getIndexName() + "/" + topic + "/" + eventId;
+    }
+
+    /**
+     * Builds an Elasticsearch API URI for Bulk API.
+     *
+     * @return URI
+     */
+    protected String buildBulkUri() {
+        final IndexMappingConfiguration indexMapping = configuration.getIndexMapping();
+        final ConnectionConfiguration connection = configuration.getConnection();
+        return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + "/" +
+                indexMapping.getIndexName() + "/_bulk";
     }
 
     /**
