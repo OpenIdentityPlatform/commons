@@ -11,19 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.util.time;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.util.time.Duration.duration;
-
-import org.assertj.core.api.Assertions;
-import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.Fail;
-import org.testng.annotations.Test;
+import static org.forgerock.util.time.DurationAssert.assertThat;
 
 import java.util.concurrent.TimeUnit;
+
+import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class DurationTest {
@@ -129,6 +128,8 @@ public class DurationTest {
         assertThat(duration("1 nanos")).isEqualTo(1L, TimeUnit.NANOSECONDS);
         assertThat(duration("1 nano")).isEqualTo(1L, TimeUnit.NANOSECONDS);
         assertThat(duration("1 ns")).isEqualTo(1L, TimeUnit.NANOSECONDS);
+
+        assertThat(duration(1L, TimeUnit.NANOSECONDS)).isEqualTo(1L, TimeUnit.NANOSECONDS);
     }
 
     @Test
@@ -139,6 +140,10 @@ public class DurationTest {
 
         assertThat(duration("zero")).isZero();
         assertThat(duration("disabled")).isZero();
+
+        assertThat(Duration.ZERO.toString()).isEqualTo("ZERO");
+
+        assertThat(Duration.duration(0L, TimeUnit.NANOSECONDS)).isZero();
     }
 
     @Test
@@ -147,56 +152,33 @@ public class DurationTest {
         assertThat(duration("indefinite")).isUnlimited();
         assertThat(duration("infinity")).isUnlimited();
         assertThat(duration("undefined")).isUnlimited();
+        assertThat(duration("none")).isUnlimited();
     }
 
     @Test
     public void shouldConvertValue() throws Exception {
         assertThat(duration("1 hour").convertTo(TimeUnit.SECONDS))
                 .isEqualTo(3600L, TimeUnit.SECONDS);
-        Assertions.assertThat(duration("1 hour").to(TimeUnit.SECONDS))
-                  .isEqualTo(3600L);
+        assertThat(duration("1 hour").to(TimeUnit.SECONDS))
+                .isEqualTo(3600L);
     }
 
-    public DurationAssert assertThat(final Duration duration) {
-        return new DurationAssert(duration);
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void negativeDurationNotSupported() {
+        Duration.duration(-1, TimeUnit.DAYS);
     }
 
-    /**
-     * Provide a better assertion method.
-     */
-    private static class DurationAssert extends AbstractAssert<DurationAssert, Duration> {
+    @Test
+    public void testUnlimited() {
+        assertThat(Duration.UNLIMITED.getUnit()).isEqualTo(TimeUnit.DAYS);
+        assertThat(Duration.UNLIMITED.getValue()).isEqualTo(Long.MAX_VALUE);
+        assertThat(Duration.UNLIMITED.to(TimeUnit.DAYS)).isEqualTo(Long.MAX_VALUE);
+        assertThat(Duration.UNLIMITED.convertTo(TimeUnit.DAYS)).isEqualTo(Duration.UNLIMITED);
+        assertThat(Duration.UNLIMITED.toString()).isEqualTo("UNLIMITED");
+    }
 
-        protected DurationAssert(final Duration actual) {
-            super(actual, DurationAssert.class);
-        }
-
-        public DurationAssert isEqualTo(long n, TimeUnit unit) {
-            isNotNull();
-            if (actual.getValue() != n) {
-                Fail.fail(String.format("Duration value does not match: was:%d expected:%d", actual.getValue(), n));
-            }
-            if (!actual.getUnit().equals(unit)) {
-                Fail.fail(String.format("Duration TimeUnit does not match: was:%s expected:%s",
-                        actual.getUnit().name(), unit.name()));
-            }
-            return this;
-        }
-
-        public DurationAssert isUnlimited() {
-            isNotNull();
-            if (!actual.isUnlimited()) {
-                Fail.fail(String.format("Duration is not unlimited current values: %d %s",
-                        actual.getValue(), actual.getUnit()));
-            }
-            return this;
-        }
-
-        public DurationAssert isZero() {
-            isNotNull();
-            if (!actual.isZero()) {
-                Fail.fail(String.format("Duration is not zero-length: %d %s", actual.getValue(), actual.getUnit()));
-            }
-            return this;
-        }
+    @Test
+    public void testToString() {
+        assertThat(duration("1 minute").toString()).isEqualTo("1 MINUTES");
     }
 }

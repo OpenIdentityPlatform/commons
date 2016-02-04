@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.util.time;
@@ -44,17 +44,17 @@ import static org.forgerock.util.Reject.checkNotNull;
  *     zero
  * </code>
  */
-public class Duration {
+public final class Duration {
 
     /**
      * Special duration that represents an unlimited duration (or indefinite).
      */
-    private static final Duration UNLIMITED = new Duration(Long.MAX_VALUE, DAYS);
+    public static final Duration UNLIMITED = new Duration();
 
     /**
      * Special duration that represents a zero-length duration.
      */
-    private static final Duration ZERO = new Duration(0L, SECONDS);
+    public static final Duration ZERO = new Duration(0L, SECONDS);
 
     /**
      * Tokens that represents the unlimited duration.
@@ -62,7 +62,7 @@ public class Duration {
     private static final Set<String> UNLIMITED_TOKENS = new TreeSet<>(
             String.CASE_INSENSITIVE_ORDER);
     static {
-        UNLIMITED_TOKENS.addAll(asList("unlimited", "indefinite", "infinity", "undefined"));
+        UNLIMITED_TOKENS.addAll(asList("unlimited", "indefinite", "infinity", "undefined", "none"));
     }
 
     /**
@@ -74,25 +74,54 @@ public class Duration {
         ZERO_TOKENS.addAll(asList("zero", "disabled"));
     }
 
-    private Long number;
+    private long number;
     private TimeUnit unit;
 
     /**
-     * Builds a new Duration.
-     * @param number number of time unit (cannot be {@literal null}).
-     * @param unit TimeUnit to express the duration in (cannot be {@literal null}).
+     * Hidden constructor that creates an unlimited duration. The intention is that the only instance representing
+     * unlimited is {@link #UNLIMITED}.
      */
-    public Duration(final Long number, final TimeUnit unit) {
-        this.number = checkNotNull(number);
+    private Duration() {
+        this.number = Long.MAX_VALUE;
+        this.unit = null;
+    }
+
+    /**
+     * Builds a new {@code Duration}.
+     *
+     * @param number number of time unit.
+     * @param unit TimeUnit to express the duration in (cannot be {@literal null}).
+     * @deprecated Prefer the use of {@link #duration(long, TimeUnit)}.
+     */
+    @Deprecated
+    public Duration(final long number, final TimeUnit unit) {
+        if (number < 0) {
+            throw new IllegalArgumentException("Negative durations are not supported");
+        }
+        this.number = number;
         this.unit = checkNotNull(unit);
     }
 
     /**
-     * Builds a new {@link Duration} that will represents the given duration expressed in english.
+     * Provides a {@code Duration}, given a number and time unit.
+     *
+     * @param number number of time unit.
+     * @param unit TimeUnit to express the duration in (cannot be {@literal null}).
+     * @return {@code Duration} instance
+     */
+    public static Duration duration(final long number, final TimeUnit unit) {
+        if (number == 0) {
+            return ZERO;
+        }
+        return new Duration(number, unit);
+    }
+
+    /**
+     * Provides a {@code Duration} that represents the given duration expressed in english.
      *
      * @param value
      *         natural speech duration
-     * @return a new {@link Duration}
+     * @return {@code Duration} instance
      * @throws IllegalArgumentException
      *         if the input string is incorrectly formatted.
      */
@@ -168,15 +197,17 @@ public class Duration {
      *         other Duration
      */
     private void merge(final Duration duration) {
-        // find littlest unit
-        // conversion will happen on the littlest unit otherwise we loose details
-        if (unit.ordinal() > duration.unit.ordinal()) {
-            // Other duration is smaller than me
-            number = duration.unit.convert(number, unit) + duration.number;
-            unit = duration.unit;
-        } else {
-            // Other duration is greater than me
-            number = unit.convert(duration.number, duration.unit) + number;
+        if (!isUnlimited() && !duration.isUnlimited()) {
+            // find littlest unit
+            // conversion will happen on the littlest unit otherwise we loose details
+            if (unit.ordinal() > duration.unit.ordinal()) {
+                // Other duration is smaller than me
+                number = duration.unit.convert(number, unit) + duration.number;
+                unit = duration.unit;
+            } else {
+                // Other duration is greater than me
+                number = unit.convert(duration.number, duration.unit) + number;
+            }
         }
     }
 
@@ -232,6 +263,10 @@ public class Duration {
      * @return the {@link TimeUnit} this duration is expressed in.
      */
     public TimeUnit getUnit() {
+        if (isUnlimited()) {
+            // UNLIMITED originally had TimeUnit.DAYS, so preserve API semantics
+            return TimeUnit.DAYS;
+        }
         return unit;
     }
 
@@ -245,6 +280,9 @@ public class Duration {
      * @see TimeUnit#convert(long, TimeUnit)
      */
     public Duration convertTo(TimeUnit targetUnit) {
+        if (isUnlimited() || isZero()) {
+            return this;
+        }
         return new Duration(targetUnit.convert(number, unit), targetUnit);
     }
 
@@ -262,7 +300,7 @@ public class Duration {
     }
 
     /**
-     * Returns {@literal true} if this Duration represents an unlimited duration.
+     * Returns {@literal true} if this Duration represents an unlimited (or indefinite) duration.
      *
      * @return {@literal true} if this Duration represents an unlimited duration.
      */
@@ -276,12 +314,17 @@ public class Duration {
      * @return {@literal true} if this Duration represents a zero-length duration.
      */
     public boolean isZero() {
-        return this == ZERO;
+        return number == 0;
     }
 
     @Override
     public String toString() {
+        if (isUnlimited()) {
+            return "UNLIMITED";
+        }
+        if (isZero()) {
+            return "ZERO";
+        }
         return number + " " + unit;
     }
-
 }
