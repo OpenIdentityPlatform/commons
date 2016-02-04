@@ -28,7 +28,6 @@ class ElasticsearchBatchIndexer {
     private final ScheduledExecutorService scheduler;
     private final QueueConsumer queueConsumer;
     private final Duration writeInterval;
-    private final boolean autoFlush;
 
     /**
      * Creates a {@link ElasticsearchBatchIndexer}. For arguments with minimum values, the minimum will be used
@@ -39,18 +38,19 @@ class ElasticsearchBatchIndexer {
      * or {@code null} (default 1 second)
      * @param maxBatchedEvents Batch size (min. is 500)
      * @param averagePerEventPayloadSize Average number of characters, per event, in a batch payload (min. is 32)
+     * @param autoFlush {@code true} when data in queue should always be flushed on shutdown and {@code false} when
+     * it is acceptable to drop events in the queue
      * @param eventHandler Batch audit event handler
      */
     public ElasticsearchBatchIndexer(final int capacity, final Duration writeInterval, final int maxBatchedEvents,
             final int averagePerEventPayloadSize, final boolean autoFlush,
             final ElasticsearchBatchAuditEventHandler eventHandler) {
-        this.autoFlush = autoFlush;
         queue = new ArrayBlockingQueue<>(max(capacity, MIN_QUEUE_SIZE));
         scheduler = Executors.newScheduledThreadPool(1);
         queueConsumer = new QueueConsumer(
                 max(maxBatchedEvents, MIN_BATCH_SIZE),
                 max(averagePerEventPayloadSize, MIN_PER_EVENT_PAYLOAD_SIZE),
-                queue, scheduler, Reject.checkNotNull(eventHandler));
+                autoFlush, queue, scheduler, Reject.checkNotNull(eventHandler));
         this.writeInterval = writeInterval == null || writeInterval.getValue() <= 0 ?
                 DEFAULT_WRITE_INTERVAL : writeInterval;
     }
@@ -68,7 +68,7 @@ class ElasticsearchBatchIndexer {
      */
     public void shutdown() {
         if (!scheduler.isShutdown()) {
-            queueConsumer.shutdown(autoFlush);
+            queueConsumer.shutdown();
         }
     }
 
@@ -129,13 +129,13 @@ class ElasticsearchBatchIndexer {
     private static class QueueConsumer implements Runnable {
 
         private final int maxBatchedEvents;
+        private final boolean flushOnShutdown;
         private final BlockingQueue<BatchEntry> queue;
         private final List<BatchEntry> batch;
         private final StringBuilder payload;
         private final ElasticsearchBatchAuditEventHandler eventHandler;
         private final ScheduledExecutorService scheduler;
 
-        private volatile boolean flush;
         private volatile boolean shutdown;
 
         /**
@@ -143,14 +143,17 @@ class ElasticsearchBatchIndexer {
          *
          * @param maxBatchedEvents Batch size
          * @param averagePerEventPayloadSize Average number of characters, per event, in a batch payload
+         * @param flushOnShutdown When {@code true}, the queue will be flushed on shutdown and when {@code false},
+         * items in the queue will be dropped
          * @param queue Audit-event queue
          * @param scheduler This runnable's scheduler
          * @param eventHandler Batch audit event handler
          */
         public QueueConsumer(final int maxBatchedEvents, final int averagePerEventPayloadSize,
-                final BlockingQueue<BatchEntry> queue, final ScheduledExecutorService scheduler,
-                final ElasticsearchBatchAuditEventHandler eventHandler) {
+                final boolean flushOnShutdown, final BlockingQueue<BatchEntry> queue,
+                final ScheduledExecutorService scheduler, final ElasticsearchBatchAuditEventHandler eventHandler) {
             this.queue = queue;
+            this.flushOnShutdown = flushOnShutdown;
             this.scheduler = scheduler;
             this.eventHandler = eventHandler;
             this.maxBatchedEvents = maxBatchedEvents;
@@ -159,20 +162,14 @@ class ElasticsearchBatchIndexer {
         }
 
         /**
-         * Informs queue consumer that shutdown has been triggered, and to optionally flush all events in queue
-         * and block until flush is complete.
-         *
-         * @param flush {@code true} to flush all events in queue, and {@code false} otherwise
+         * Informs queue consumer that shutdown has been triggered, and when {@code flushOnShutdown} is enabled,
+         * blocks until all events have been flushed from the queue.
          */
-        public void shutdown(final boolean flush) {
+        public void shutdown() {
             if (!shutdown) {
-                if (flush) {
-                    this.flush = true;
-                }
-                // must set `shutdown` last so that shutdown will be fully configured
                 shutdown = true;
 
-                if (flush) {
+                if (flushOnShutdown) {
                     // flush requested, so block in an non-cancelable way
                     boolean interrupted = false;
                     while (!scheduler.isTerminated()) {
@@ -215,7 +212,7 @@ class ElasticsearchBatchIndexer {
             if (shutdown) {
                 // we shutdown this runnable's scheduler here, so that we can guarantee that flush will proceed
                 scheduler.shutdown();
-                if (flush) {
+                if (flushOnShutdown) {
                     // flush queue
                     while (!queue.isEmpty()) {
                         batch();

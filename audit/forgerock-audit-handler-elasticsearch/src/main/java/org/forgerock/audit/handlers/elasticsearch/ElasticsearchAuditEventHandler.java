@@ -65,6 +65,12 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      */
     private static final int BATCH_INDEX_AVERAGE_PER_EVENT_PAYLOAD_SIZE = 1280;
 
+    /**
+     * The Elasticsearch {@link AuditEventHandler} <b>always</b> flushes events in the batch queue on shutdown or
+     * configuration change.
+     */
+    private static final boolean ALWAYS_FLUSH_BATCH_QUEUE = true;
+
     private final ElasticsearchAuditEventHandlerConfiguration configuration;
     private final Client client;
     private final ElasticsearchBatchIndexer batchIndexer;
@@ -92,7 +98,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                             null : Duration.duration(bufferConfig.getWriteInterval());
             batchIndexer = new ElasticsearchBatchIndexer(bufferConfig.getMaxSize(),
                     writeInterval, bufferConfig.getMaxBatchedEvents(),
-                    BATCH_INDEX_AVERAGE_PER_EVENT_PAYLOAD_SIZE, bufferConfig.isAutoFlush(), this);
+                    BATCH_INDEX_AVERAGE_PER_EVENT_PAYLOAD_SIZE, ALWAYS_FLUSH_BATCH_QUEUE, this);
         } else {
             batchIndexer = null;
         }
@@ -248,10 +254,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * @return URI
      */
     protected String buildEventUri(final String topic, final String eventId) {
-        final IndexMappingConfiguration indexMapping = configuration.getIndexMapping();
-        final ConnectionConfiguration connection = configuration.getConnection();
-        return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + "/" +
-                indexMapping.getIndexName() + "/" + topic + "/" + eventId;
+        return buildBaseUri() + "/" + topic + "/" + eventId;
     }
 
     /**
@@ -260,10 +263,20 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * @return URI
      */
     protected String buildBulkUri() {
+        return buildBaseUri() + "/_bulk";
+    }
+
+    /**
+     * Builds an Elasticsearch API base URI. The format is,
+     * <pre>http[s]://host:port/indexName</pre>
+     *
+     * @return Base URI
+     */
+    protected String buildBaseUri() {
         final IndexMappingConfiguration indexMapping = configuration.getIndexMapping();
         final ConnectionConfiguration connection = configuration.getConnection();
-        return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + "/" +
-                indexMapping.getIndexName() + "/_bulk";
+        return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + ":" + connection.getPort() +
+                "/" + indexMapping.getIndexName();
     }
 
     /**

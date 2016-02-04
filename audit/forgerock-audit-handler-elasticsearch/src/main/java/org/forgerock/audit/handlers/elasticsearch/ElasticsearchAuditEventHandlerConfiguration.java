@@ -28,14 +28,14 @@ import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
  *    "topics": [ "access", "activity", "config", "authentication" ],
  *    "connection" : {
  *      "useSSL" : true,
- *      "host" : "localhost:9200"
+ *      "host" : "localhost",
+ *      "port" : 9200
  *    },
  *    "indexMapping" : {
  *      "indexName" : "audit"
  *    },
  *    "buffering" : {
  *      "enabled" : true,
- *      "autoFlush" : true,
  *      "maxSize" : 20000,
  *      "writeInterval" : "10 millis",
  *      "maxBatchedEvents" : 100
@@ -113,13 +113,24 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
      */
     public static class ConnectionConfiguration {
 
-        private static final String DEFAULT_HOST = "localhost:9200";
+        /**
+         * Elasticsearch default host ({@code localhost}) in a development environment
+         */
+        private static final String DEFAULT_HOST = "localhost";
+
+        /**
+         * Elasticsearch default port ({@code 9200}) in a development environment
+         */
+        private static final int DEFAULT_PORT = 9200;
 
         @JsonPropertyDescription("audit.handlers.elasticsearch.connection.useSSL")
         private boolean useSSL;
 
         @JsonPropertyDescription("audit.handlers.elasticsearch.connection.host")
         private String host;
+
+        @JsonPropertyDescription("audit.handlers.elasticsearch.connection.port")
+        private int port;
 
         /**
          * Indicates if the connection uses SSL.
@@ -140,21 +151,39 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
         }
 
         /**
-         * Gets the {@code host[:port]} for the connection (default {@code localhost:9200}).
+         * Gets the {@code host} for the connection (default {@code localhost}).
          *
-         * @return The {@code host[:port]} for the connection.
+         * @return The {@code host} for the connection.
          */
         public String getHost() {
             return host != null && !host.isEmpty() ? host : DEFAULT_HOST;
         }
 
         /**
-         * Sets the {@code host[:port]} for the connection.
+         * Sets the {@code host} for the connection.
          *
-         * @param host The {@code host[:port]} for the connection.
+         * @param host The {@code host} for the connection.
          */
         public void setHost(String host) {
             this.host = host;
+        }
+
+        /**
+         * Gets the {@code port} for the connection (default {@code 9200}).
+         *
+         * @return The {@code port} for the connection.
+         */
+        public int getPort() {
+            return port > 0 ? port : DEFAULT_PORT;
+        }
+
+        /**
+         * Sets the {@code host} for the connection.
+         *
+         * @param port The {@code port} for the connection.
+         */
+        public void setPort(int port) {
+            this.port = port;
         }
     }
 
@@ -195,9 +224,6 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
         @JsonPropertyDescription("audit.handlers.elasticsearch.buffering.enabled")
         private boolean enabled;
 
-        @JsonPropertyDescription("audit.handlers.elasticsearch.buffering.autoFlush")
-        private boolean autoFlush;
-
         @JsonPropertyDescription("audit.handlers.elasticsearch.buffering.maxSize")
         private int maxSize;
 
@@ -223,24 +249,6 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
          */
         public void setEnabled(boolean enabled) {
             this.enabled = enabled;
-        }
-
-        /**
-         * Indicates if events in the buffer will be flushed on shutdown or configuration change.
-         *
-         * @return {@code true} if events should be flushed or {@code false} if events may be dropped
-         */
-        public boolean isAutoFlush() {
-            return autoFlush;
-        }
-
-        /**
-         * Sets if events in the buffer will be flushed on shutdown or configuration change.
-         *
-         * @param autoFlush {@code true} if events should be flushed or {@code false} if events may be dropped
-         */
-        public void setAutoFlush(boolean autoFlush) {
-            this.autoFlush = autoFlush;
         }
 
         /**
