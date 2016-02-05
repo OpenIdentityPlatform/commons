@@ -15,23 +15,31 @@
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
+import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.ConnectionConfiguration;
+import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.IndexMappingConfiguration;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
+import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration
+        .EventBufferingConfiguration;
 import org.forgerock.http.Client;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryRequest;
@@ -48,7 +56,7 @@ import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * {@link AuditEventHandler} for Elasticsearch.
@@ -58,6 +66,17 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final String QUERY = "query";
+    private static final String GET = "GET";
+    private static final String SEARCH = "/_search";
+    private static final String HITS = "hits";
+    private static final String SOURCE = "_source";
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final String TOTAL = "total";
+    private static final String PUT = "PUT";
+
+    private static final ElasticsearchQueryFilterVisitor elasticsearchQueryFilterVisitor =
+            new ElasticsearchQueryFilterVisitor();
 
     /**
      * Average number of characters, per event, for batch indexing via Elasticsearch Bulk API. This value
@@ -128,8 +147,47 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     @Override
     public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String topic,
             final QueryRequest query, final QueryResourceHandler handler) {
-        // TODO
-        return newQueryResponse().asPromise();
+        try {
+            final int pageSize = query.getPageSize() == 0 ? DEFAULT_PAGE_SIZE : query.getPageSize();
+            // set the offset to either first the offset provided, or second the paged result cookie value, or finally 0
+            final int offset =
+                    query.getPagedResultsOffset() != 0
+                            ? query.getPagedResultsOffset()
+                            : (query.getPagedResultsCookie() == null
+                                    ? 0
+                                    : Integer.valueOf(query.getPagedResultsCookie()));
+            final JsonValue payload =
+                    json(object(
+                            field(
+                                    QUERY,
+                                    query.getQueryFilter().accept(elasticsearchQueryFilterVisitor, null).getObject())
+                    ));
+            final Request request = new Request();
+            request.setMethod(GET);
+            request.setUri(buildEventUri(topic, SEARCH) + "?size=" + pageSize + "&from=" + offset);
+            request.setEntity(payload.getObject());
+            final Response response = client.send(request).get();
+            if (!response.getStatus().isSuccessful()) {
+                final String message = "Elasticsearch response (audit/" + topic + "/" + SEARCH + "): "
+                        + response.getEntity();
+                return ResourceException.newResourceException(response.getStatus().getCode(), message).asPromise();
+            }
+            JsonValue events = json(response.getEntity().getJson());
+            for (JsonValue event : events.get(HITS).get(HITS)) {
+                handler.handleResource(
+                        newResourceResponse(
+                                event.get(FIELD_CONTENT_ID).asString(),
+                                null,
+                                event.get(SOURCE)));
+            }
+            final int totalResults = events.get(HITS).get(TOTAL).asInteger();
+            final String pagedResultsCookie = (pageSize + offset) >= totalResults
+                    ? null
+                    : Integer.toString(pageSize + offset);
+            return newQueryResponse(pagedResultsCookie, CountPolicy.EXACT, totalResults).asPromise();
+        } catch (Exception e ) {
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        }
     }
 
     @Override
@@ -137,7 +195,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             final String resourceId) {
         try {
             final Request request = new Request();
-            request.setMethod("GET");
+            request.setMethod(GET);
             request.setUri(buildEventUri(topic, resourceId));
             if (basicAuthHeaderValue != null) {
                 request.getHeaders().put("Authorization", basicAuthHeaderValue);
@@ -150,8 +208,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
             // the original audit JSON is under _source, and we also add back the _id
             JsonValue jsonValue = toJsonValue(response.getEntity().toString());
-            jsonValue = jsonValue.get("_source");
-            jsonValue.put("_id", resourceId);
+            jsonValue = jsonValue.get(SOURCE);
+            jsonValue.put(FIELD_CONTENT_ID, resourceId);
             return newResourceResponse(resourceId, null, jsonValue).asPromise();
         } catch (Exception e) {
             final String error = String.format("Unable to read audit entry for topic=%s, _id=%s", topic, resourceId);
@@ -186,16 +244,14 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             final JsonValue event) {
         String resourceId = null;
         try {
-            // _id is a protected Elasticsearch field
-            resourceId = event.get("_id").asString();
-            event.remove("_id");
-
-            // normalize JSON and put _id back for call to newResourceResponse below
+            // _id is a protected Elasticsearch field, so read it and remove it
+            resourceId = event.get(FIELD_CONTENT_ID).asString();
+            event.remove(FIELD_CONTENT_ID);
             final String jsonPayload = ElasticsearchUtil.normalizeJson(event);
             event.put("_id", resourceId);
 
             final Request request = new Request();
-            request.setMethod("PUT");
+            request.setMethod(PUT);
             request.setUri(buildEventUri(topic, resourceId));
             if (basicAuthHeaderValue != null) {
                 request.getHeaders().put("Authorization", basicAuthHeaderValue);
