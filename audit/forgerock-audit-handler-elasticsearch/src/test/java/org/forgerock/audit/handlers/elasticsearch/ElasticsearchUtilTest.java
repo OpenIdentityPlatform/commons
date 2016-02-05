@@ -20,40 +20,33 @@ import org.testng.annotations.Test;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.*;
 
+import java.io.InputStream;
+import java.util.Scanner;
+
 public class ElasticsearchUtilTest {
 
-    private static final String AUTH_JSON_BEFORE_NORMALIZATION = "{ \"context\": { \"component\": " +
-            "\"repo/internal/user\", \"roles\": [ \"openidm-admin\", \"openidm-authorized\" ], \"ipAddress\": " +
-            "\"0:0:0:0:0:0:0:1\", \"id\": \"openidm-admin\" }, \"entries\": [ { \"moduleId\": \"JwtSession\", " +
-            "\"result\": \"FAILED\", \"reason\": {  }, \"info\": {  } }, { \"moduleId\": \"STATIC_USER\", \"result\":" +
-            " \"FAILED\", \"reason\": {  }, \"info\": { \"org.forgerock.authentication.principal\": \"openidm-admin\"" +
-            " } }, { \"moduleId\": \"MANAGED_USER\", \"result\": \"FAILED\", \"reason\": {  }, \"info\": { \"org" +
-            ".forgerock.authentication.principal\": \"openidm-admin\" } }, { \"moduleId\": \"INTERNAL_USER\", " +
-            "\"result\": \"SUCCESSFUL\", \"info\": { \"org.forgerock.authentication.principal\": \"openidm-admin\" } " +
-            "} ], \"principal\": [ \"openidm-admin\" ], \"result\": \"SUCCESSFUL\", \"userId\": \"openidm-admin\", " +
-            "\"transactionId\": \"177c080f-5f21-467e-bf1a-26c54d62f355-207\", \"timestamp\": \"2016-01-28T23:09:57" +
-            ".225Z\", \"eventName\": \"authentication\", \"trackingIds\": [ \"4043c668-57c2-4cd4-a48e-3de49db68e7a\" " +
-            "], \"_id\": \"177c080f-5f21-467e-bf1a-26c54d62f355-215\" }";
-
-    private static final String AUTH_JSON_AFTER_NORMALIZATION = "{ \"context\": { \"component\": " +
-            "\"repo/internal/user\", \"roles\": [ \"openidm-admin\", \"openidm-authorized\" ], \"ipAddress\": " +
-            "\"0:0:0:0:0:0:0:1\", \"id\": \"openidm-admin\" }, \"entries\": [ { \"moduleId\": \"JwtSession\", " +
-            "\"result\": \"FAILED\", \"reason\": {  }, \"info\": {  } }, { \"moduleId\": \"STATIC_USER\", \"result\":" +
-            " \"FAILED\", \"reason\": {  }, \"info\": { \"org_forgerock_authentication_principal\": \"openidm-admin\"" +
-            " } }, { \"moduleId\": \"MANAGED_USER\", \"result\": \"FAILED\", \"reason\": {  }, \"info\": { " +
-            "\"org_forgerock_authentication_principal\": \"openidm-admin\" } }, { \"moduleId\": \"INTERNAL_USER\", " +
-            "\"result\": \"SUCCESSFUL\", \"info\": { \"org_forgerock_authentication_principal\": \"openidm-admin\" } " +
-            "} ], \"principal\": [ \"openidm-admin\" ], \"result\": \"SUCCESSFUL\", \"userId\": \"openidm-admin\", " +
-            "\"transactionId\": \"177c080f-5f21-467e-bf1a-26c54d62f355-207\", \"timestamp\": \"2016-01-28T23:09:57" +
-            ".225Z\", \"eventName\": \"authentication\", \"trackingIds\": [ \"4043c668-57c2-4cd4-a48e-3de49db68e7a\" " +
-            "], \"_id\": \"177c080f-5f21-467e-bf1a-26c54d62f355-215\" }";
+    private static final String RESOURCE_PATH = "/org/forgerock/audit/handlers/elasticsearch/";
 
     /**
      * Test that all periods in JSON keys will be replaced by underscores, as required by Elasticsearch.
      */
     @Test
-    public void normalizeJsonWithPeriodsInKeysTest() {
-        final String result = replaceKeyPeriodsWithUnderscores(AUTH_JSON_BEFORE_NORMALIZATION);
-        assertThat(result).isEqualTo(AUTH_JSON_AFTER_NORMALIZATION);
+    public void normalizeJsonWithPeriodsInKeysTest() throws Exception {
+        // given
+        final String beforeNormalization = resourceAsString(RESOURCE_PATH + "authEventBeforeNormalization.json");
+        final String afterNormalization = resourceAsString(RESOURCE_PATH + "authEventAfterNormalization.json");
+        assertThat(beforeNormalization).isNotEqualTo(afterNormalization);
+
+        // when
+        final String result = replaceKeyPeriodsWithUnderscores(beforeNormalization);
+
+        // then
+        assertThat(result).isEqualTo(afterNormalization);
+    }
+
+    private String resourceAsString(final String resourcePath) throws Exception {
+        try (final InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
+            return new Scanner(inputStream, "UTF-8").useDelimiter("\\A").next();
+        }
     }
 }

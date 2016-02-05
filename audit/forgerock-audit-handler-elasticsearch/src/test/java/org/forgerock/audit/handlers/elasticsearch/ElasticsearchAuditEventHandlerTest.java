@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.http.Client;
@@ -55,14 +56,25 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ElasticsearchAuditEventHandlerTest {
 
+    private static final String RESOURCE_PATH = "/org/forgerock/audit/handlers/elasticsearch/";
     public static final int TOTAL_RESULTS = 1;
     public static final String ID = "id";
+
+    private String authEventBeforeNormalization;
+    private String authEventAfterNormalization;
+
+    @BeforeTest
+    public void beforeTest() throws Exception {
+        authEventBeforeNormalization = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json").toString();
+        authEventAfterNormalization = resourceAsJsonValue(RESOURCE_PATH + "authEventAfterNormalization.json").toString();
+    }
 
     @Test
     public void testSuccessfulQuery() throws Exception {
@@ -134,7 +146,6 @@ public class ElasticsearchAuditEventHandlerTest {
         final AuditEventHandler handler = createElasticSearchAuditEventHandler(client);
         final QueryRequest queryRequest = Requests.newQueryRequest("access");
         final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
-        final List<ResourceResponse> responses = new LinkedList<>();
         final Response clientResponse = createClientResponse(Status.INTERNAL_SERVER_ERROR, json(object()));
 
         queryRequest.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
@@ -147,6 +158,54 @@ public class ElasticsearchAuditEventHandlerTest {
 
         // then
         assertThat(result).failedWithException().isInstanceOf(InternalServerErrorException.class);
+    }
+
+    @Test
+    public void testRead() throws Exception {
+
+        // given
+        final JsonValue event = resourceAsJsonValue(RESOURCE_PATH + "authEventReadFromElasticsearch.json");
+        final String resourceId = event.get(new JsonPointer("_id")).asString();
+        final Response response = createClientResponse(Status.OK, event.toString());
+
+        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
+        when(promise.get()).thenReturn(response);
+
+        final AuditEventHandler handler = createElasticSearchAuditEventHandler(createClient(promise));
+        final Context context = mock(Context.class);
+
+        // when
+        final Promise<ResourceResponse, ResourceException> responsePromise =
+                handler.readEvent(context, "authentication", resourceId);
+        final ResourceResponse resourceResponse = responsePromise.get();
+
+        // then
+        Assertions.assertThat(resourceResponse.getId()).isEqualTo(event.get("_id").asString());
+        Assertions.assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventAfterNormalization);
+    }
+
+    @Test
+    public void testSinglePublish() throws Exception {
+
+        // given
+        final Response response = new Response(Status.OK);
+
+        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
+        when(promise.get()).thenReturn(response);
+
+        final AuditEventHandler handler = createElasticSearchAuditEventHandler(createClient(promise));
+        final JsonValue event = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json");
+        final String resourceId = event.get("_id").asString();
+        final Context context = mock(Context.class);
+
+        // when
+        final Promise<ResourceResponse, ResourceException> responsePromise =
+                handler.publishEvent(context, "authentication", event);
+        final ResourceResponse resourceResponse = responsePromise.get();
+
+        // then
+        Assertions.assertThat(resourceResponse.getId()).isEqualTo(resourceId);
+        Assertions.assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
     }
 
     private AuditEventHandler createElasticSearchAuditEventHandler(final Client client) throws Exception {
@@ -175,20 +234,24 @@ public class ElasticsearchAuditEventHandlerTest {
     }
 
     private EventTopicsMetaData getEventTopicsMetaData() throws Exception {
-        Map<String, JsonValue> events = new LinkedHashMap<>();
-        try (final InputStream configStream = getClass().getResourceAsStream("/org/forgerock/audit/events.json")) {
-            final JsonValue predefinedEventTypes = new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
-            for (String eventTypeName : predefinedEventTypes.keys()) {
-                events.put(eventTypeName, predefinedEventTypes.get(eventTypeName));
-            }
+        final JsonValue predefinedEventTypes = resourceAsJsonValue(RESOURCE_PATH + "events.json");
+        final Map<String, JsonValue> events = new LinkedHashMap<>();
+        for (final String eventTypeName : predefinedEventTypes.keys()) {
+            events.put(eventTypeName, predefinedEventTypes.get(eventTypeName));
         }
         return new EventTopicsMetaData(events);
     }
 
-    private Response createClientResponse(final Status status, final JsonValue payload) {
+    private Response createClientResponse(final Status status, final Object payload) {
         final Response response = new Response();
         response.setStatus(status);
         response.setEntity(payload);
         return response;
+    }
+
+    private JsonValue resourceAsJsonValue(final String resourcePath) throws Exception {
+        try (final InputStream configStream = getClass().getResourceAsStream(resourcePath)) {
+            return new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
+        }
     }
 }
