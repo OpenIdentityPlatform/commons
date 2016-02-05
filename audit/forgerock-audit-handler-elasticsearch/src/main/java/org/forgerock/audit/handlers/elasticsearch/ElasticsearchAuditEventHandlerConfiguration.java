@@ -29,16 +29,18 @@ import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
  *    "connection" : {
  *      "useSSL" : true,
  *      "host" : "localhost",
- *      "port" : 9200
+ *      "port" : 9200,
+ *      "username" : "myUsername",
+ *      "password" : "myPassword"
  *    },
  *    "indexMapping" : {
  *      "indexName" : "audit"
  *    },
  *    "buffering" : {
  *      "enabled" : true,
- *      "maxSize" : 20000,
- *      "writeInterval" : "10 millis",
- *      "maxBatchedEvents" : 100
+ *      "maxSize" : 10000,
+ *      "writeInterval" : "250 millis",
+ *      "maxBatchedEvents" : 500
  *    }
  *  }
  * </pre>
@@ -132,6 +134,12 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
         @JsonPropertyDescription("audit.handlers.elasticsearch.connection.port")
         private int port;
 
+        @JsonPropertyDescription("audit.handlers.elasticsearch.connection.username")
+        private String username;
+
+        @JsonPropertyDescription("audit.handlers.elasticsearch.connection.password")
+        private String password;
+
         /**
          * Indicates if the connection uses SSL.
          *
@@ -184,6 +192,42 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
          */
         public void setPort(int port) {
             this.port = port;
+        }
+
+        /**
+         * Gets Elasticsearch password for HTTP basic authentication.
+         *
+         * @return The password.
+         */
+        public String getPassword() {
+            return password;
+        }
+
+        /**
+         * Sets Elasticsearch password for HTTP basic authentication.
+         *
+         * @param password The password.
+         */
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        /**
+         * Gets Elasticsearch username for HTTP basic authentication.
+         *
+         * @return The username.
+         */
+        public String getUsername() {
+            return username;
+        }
+
+        /**
+         * Sets Elasticsearch username for HTTP basic authentication.
+         *
+         * @param username The username.
+         */
+        public void setUsername(String username) {
+            this.username = username;
         }
     }
 

@@ -42,6 +42,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
+import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
@@ -71,6 +72,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      */
     private static final boolean ALWAYS_FLUSH_BATCH_QUEUE = true;
 
+    private final String basicAuthHeaderValue;
+    private final String baseUri;
+    private final String bulkUri;
     private final ElasticsearchAuditEventHandlerConfiguration configuration;
     private final Client client;
     private final ElasticsearchBatchIndexer batchIndexer;
@@ -90,6 +94,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = Reject.checkNotNull(configuration);
         this.client = Reject.checkNotNull(client);
+        basicAuthHeaderValue = buildBasicAuthHeaderValue();
+        baseUri = buildBaseUri();
+        bulkUri = buildBulkUri();
 
         final EventBufferingConfiguration bufferConfig = configuration.getBuffering();
         if (bufferConfig.isEnabled()) {
@@ -132,6 +139,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             final Request request = new Request();
             request.setMethod("GET");
             request.setUri(buildEventUri(topic, resourceId));
+            if (basicAuthHeaderValue != null) {
+                request.getHeaders().put("Authorization", basicAuthHeaderValue);
+            }
 
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
@@ -187,6 +197,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             final Request request = new Request();
             request.setMethod("PUT");
             request.setUri(buildEventUri(topic, resourceId));
+            if (basicAuthHeaderValue != null) {
+                request.getHeaders().put("Authorization", basicAuthHeaderValue);
+            }
             if (jsonPayload != null) {
                 request.getHeaders().put(ContentTypeHeader.NAME, "application/json; charset=UTF-8");
                 request.getEntity().setBytes(jsonPayload.getBytes(StandardCharsets.UTF_8));
@@ -234,6 +247,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             final Request request = new Request();
             request.setMethod("POST");
             request.setUri(buildBulkUri());
+            if (basicAuthHeaderValue != null) {
+                request.getHeaders().put("Authorization", basicAuthHeaderValue);
+            }
             request.getHeaders().put(ContentTypeHeader.NAME, "application/json; charset=UTF-8");
             request.getEntity().setBytes(payload.getBytes(StandardCharsets.UTF_8));
 
@@ -244,6 +260,24 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         } catch (Exception e) {
             LOGGER.error("Elasticsearch batch index failed unexpectedly", e);
         }
+    }
+
+    /**
+     * Builds a basic authentication header-value, if username and password are provided in configuration.
+     *
+     * @return Basic authentication header-value or {@code null} if not configured
+     */
+    protected String buildBasicAuthHeaderValue() {
+        if (basicAuthHeaderValue != null) {
+            return basicAuthHeaderValue;
+        }
+        final ConnectionConfiguration connection = configuration.getConnection();
+        if (connection.getUsername() == null || connection.getUsername().isEmpty() ||
+                connection.getPassword() == null || connection.getPassword().isEmpty()) {
+            return null;
+        }
+        final String credentials = connection.getUsername() + ":" + connection.getPassword();
+        return "Basic " + Base64.encode(credentials.getBytes());
     }
 
     /**
@@ -263,6 +297,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * @return URI
      */
     protected String buildBulkUri() {
+        if (bulkUri != null) {
+            return bulkUri;
+        }
         return buildBaseUri() + "/_bulk";
     }
 
@@ -273,6 +310,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * @return Base URI
      */
     protected String buildBaseUri() {
+        if (baseUri != null) {
+            return baseUri;
+        }
         final IndexMappingConfiguration indexMapping = configuration.getIndexMapping();
         final ConnectionConfiguration connection = configuration.getConnection();
         return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + ":" + connection.getPort() +
