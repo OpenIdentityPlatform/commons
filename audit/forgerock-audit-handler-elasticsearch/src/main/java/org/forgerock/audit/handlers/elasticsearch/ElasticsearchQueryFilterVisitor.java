@@ -33,11 +33,25 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * Implements a {@link QueryFilterVisitor} for <a href="https://www.elastic.co/">Elasticsearch</a> that returns a
+ * JsonValue mapping for each visitor operation to the corresponding Elasticsearch query operation in the
+ * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl.html">Elasticsearch Query DSL.</a>
+ */
 public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, Void, JsonPointer> {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticsearchQueryFilterVisitor.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-all-query.html">match_all</a>
+     * query for literal true. Literal false will return an {@link UnsupportedOperationException}.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param value The booolean true or false literal.
+     * @return A {@link JsonValue} match_all query.
+     * @throws UnsupportedOperationException If literal false is used.
+     */
     @Override
     public JsonValue visitBooleanLiteralFilter(Void aVoid, boolean value) {
         // "match_all": { }
@@ -47,9 +61,18 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         return json(object(field("match_all", object())));
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-wildcard-query.html">wildcard</a>
+     * query to support contains. The field for this operation must be declared as not_analyzed.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param field The field that contains a value.
+     * @param valueAssertion The value to contain.
+     * @return A {@link JsonValue} wildcard query.
+     */
     @Override
     public JsonValue visitContainsFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
-        // "term" : { "wildcard" : { "field" : "*contains*" } }
+        // "wildcard" : { "field" : "*contains*" }
         try {
             return json(
                     object(field(
@@ -66,17 +89,41 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         }
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-term-query.html">term</a>
+     * query to test equality. The field for this operation must be declared as not_analyzed.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param field The field being tested for equality.
+     * @param valueAssertion The equality value.
+     * @return A {@link JsonValue} representing a term query.
+     */
     @Override
     public JsonValue visitEqualsFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "term" : { "field" : "value" }
         return json(object(field("term", object(field(jsonPointerToDotNotation(field.toString()), valueAssertion)))));
     }
 
+    /**
+     * Not a supported operation.
+     *
+     * {@inheritDoc}
+     *
+     * @throws UnsupportedOperationException Always throws this exception.
+     */
     @Override
     public JsonValue visitExtendedMatchFilter(Void aVoid, JsonPointer field, String operator, Object valueAssertion) {
         throw new UnsupportedOperationException("Extended match filter not supported on this endpoint");
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-range-query.html">range</a> query.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param field The field being range tested.
+     * @param valueAssertion The value used in the range.
+     * @return A {@link JsonValue} representing a range query.
+     */
     @Override
     public JsonValue visitGreaterThanFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "range" : { "field" : {"gt" : 5 } }
@@ -87,6 +134,14 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         )));
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-range-query.html">range</a> query.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param field The field being range tested.
+     * @param valueAssertion The value used in the range.
+     * @return A {@link JsonValue} representing a range query.
+     */
     @Override
     public JsonValue visitGreaterThanOrEqualToFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "range" : { "field" : {"gte" : 5 } }
@@ -97,6 +152,14 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         )));
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-range-query.html">range</a> query.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param field The field being range tested.
+     * @param valueAssertion The value used in the range.
+     * @return A {@link JsonValue} representing a range query.
+     */
     @Override
     public JsonValue visitLessThanFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "range" : { "field" : {"lt" : 5 } }
@@ -107,6 +170,14 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         )));
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-range-query.html">range</a> query.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param field The field being range tested.
+     * @param valueAssertion The value used in the range.
+     * @return A {@link JsonValue} representing a range query.
+     */
     @Override
     public JsonValue visitLessThanOrEqualToFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "range" : { "field" : {"lte" : 5 } }
@@ -117,6 +188,13 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         )));
     }
 
+    /**
+     * Creates a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-bool-query.html">bool</a>
+     * query that populates the "must_not" field.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param subFilter The subFilters for the not operation.
+     * @return A {@link JsonValue} representing a bool query that populates the "must_not" field.
+     */
     @Override
     public JsonValue visitNotFilter(Void aVoid, QueryFilter<JsonPointer> subFilter) {
         // "bool" : { "must_not" : { subFilter... } }
@@ -125,6 +203,13 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         )));
     }
 
+    /**
+     * Creates a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-bool-query.html">bool</a>
+     * query that populates the "should" field.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param subFilters The subFilters for the or operation.
+     * @return A {@link JsonValue} representing a bool query that populates the "should" field.
+     */
     @Override
     public JsonValue visitOrFilter(Void aVoid, List<QueryFilter<JsonPointer>> subFilters) {
         // "bool" : { "should" : { subFilters... } }
@@ -137,6 +222,14 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         )));
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-bool-query.html">bool</a>
+     * query that populates the "must" field.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param subFilters The subFilters for the and operation.
+     * @return A {@link JsonValue} representing a bool query that populates the "must" field.
+     */
     @Override
     public JsonValue visitAndFilter(Void aVoid, List<QueryFilter<JsonPointer>> subFilters) {
         // "bool" : { "must" : { subFilters... } }
@@ -149,12 +242,29 @@ public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonV
         )));
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-exists-query.html">exists</a>
+     * query.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param field The field to test for existence.
+     * @return A {@link JsonValue} representing a exists query.
+     */
     @Override
     public JsonValue visitPresentFilter(Void aVoid, JsonPointer field) {
         // "exists" : { "field" : "fieldValue" }
         return json(object(field("exists", object(field("field", jsonPointerToDotNotation(field.toString()))))));
     }
 
+    /**
+     * Creates a
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-prefix-query.html">prefix</a>
+     * query. The field for this operation must be declared as not_analyzed.
+     * @param aVoid A unused {@link Void} parameter.
+     * @param field The field to test for a prefix.
+     * @param valueAssertion The prefix value.
+     * @return A {@link JsonValue} representing a prefix query.
+     */
     @Override
     public JsonValue visitStartsWithFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "prefix" : { "field" : "prefixValue" }

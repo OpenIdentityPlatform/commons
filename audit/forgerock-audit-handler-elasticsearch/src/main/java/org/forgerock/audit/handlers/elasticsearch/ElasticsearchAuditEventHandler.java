@@ -144,6 +144,13 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         }
     }
 
+    /**
+     * Queries the elastic search
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search.html">Search API</a> for
+     * audit events.
+     *
+     * {@inheritDoc}
+     */
     @Override
     public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String topic,
             final QueryRequest query, final QueryResourceHandler handler) {
