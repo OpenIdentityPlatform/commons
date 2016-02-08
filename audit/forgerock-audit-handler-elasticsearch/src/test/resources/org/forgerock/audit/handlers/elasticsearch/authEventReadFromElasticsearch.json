@@ -63,6 +63,11 @@
         "eventName":"authentication",
         "trackingIds":[
             "4043c668-57c2-4cd4-a48e-3de49db68e7a"
-        ]
+        ],
+        "_normalized":{
+            "fieldNames":{
+                "org_forgerock_authentication_principal":"org.forgerock.authentication.principal"
+            }
+        }
     }
 }

@@ -24,8 +24,6 @@ import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import java.io.IOException;
-
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
@@ -35,7 +33,6 @@ import org.forgerock.http.Client;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -54,8 +51,6 @@ import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * {@link AuditEventHandler} for Elasticsearch.
  */
@@ -63,7 +58,6 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         ElasticsearchBatchAuditEventHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final String QUERY = "query";
     private static final String GET = "GET";
     private static final String SEARCH = "/_search";
@@ -181,7 +175,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             JsonValue events = json(response.getEntity().getJson());
             for (JsonValue event : events.get(HITS).get(HITS)) {
                 handler.handleResource(
-                        newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null, event.get(SOURCE)));
+                        newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null,
+                                ElasticsearchUtil.denormalizeJson(event.get(SOURCE))));
             }
             final int totalResults = events.get(HITS).get(TOTAL).asInteger();
             final String pagedResultsCookie = (pageSize + offset) >= totalResults
@@ -205,8 +200,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             }
 
             // the original audit JSON is under _source, and we also add back the _id
-            JsonValue jsonValue = toJsonValue(response.getEntity().toString());
-            jsonValue = jsonValue.get(SOURCE);
+            JsonValue jsonValue = ElasticsearchUtil.toJsonValue(response.getEntity().toString());
+            jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
             jsonValue.put(FIELD_CONTENT_ID, resourceId);
             return newResourceResponse(resourceId, null, jsonValue).asPromise();
         } catch (Exception e) {
@@ -245,7 +240,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             // _id is a protected Elasticsearch field, so read it and remove it
             resourceId = event.get(FIELD_CONTENT_ID).asString();
             event.remove(FIELD_CONTENT_ID);
-            final String jsonPayload = ElasticsearchUtil.normalizeJson(event);
+            final String jsonPayload = ElasticsearchUtil.normalizeJson(event).toString();
             event.put(FIELD_CONTENT_ID, resourceId);
 
             final Request request = createRequest(PUT, buildEventUri(topic, resourceId), jsonPayload);
@@ -270,14 +265,14 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             // _id is a protected Elasticsearch field
             final String resourceId = event.get(FIELD_CONTENT_ID).asString();
             event.remove(FIELD_CONTENT_ID);
-            final String jsonPayload = ElasticsearchUtil.normalizeJson(event);
+            final String jsonPayload = ElasticsearchUtil.normalizeJson(event).toString();
 
             // newlines have special significance in the Bulk API
             // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
             payload.append("{ \"index\" : { \"_type\" : ")
-                    .append(OBJECT_MAPPER.writeValueAsString(topic))
+                    .append(ElasticsearchUtil.OBJECT_MAPPER.writeValueAsString(topic))
                     .append(", \"_id\" : ")
-                    .append(OBJECT_MAPPER.writeValueAsString(resourceId))
+                    .append(ElasticsearchUtil.OBJECT_MAPPER.writeValueAsString(resourceId))
                     .append(" } }\n")
                     .append(jsonPayload)
                     .append('\n');
@@ -381,21 +376,6 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         final String message = "Elasticsearch response (audit/" + topic + "/" + resourceId + "): "
                 + response.getEntity();
         return ResourceException.newResourceException(response.getStatus().getCode(), message).asPromise();
-    }
-
-    /**
-     * Parses a JSON string into a {@link JsonValue}.
-     *
-     * @param json JSON string
-     * @return {@link JsonValue}
-     */
-    protected static JsonValue toJsonValue(final String json) {
-        try {
-            final Object parsedValue = OBJECT_MAPPER.readValue(json, Object.class);
-            return new JsonValue(parsedValue);
-        } catch (IOException ex) {
-            throw new JsonException("String is not valid JSON", ex);
-        }
     }
 
     private Request createRequest(final String method, final String uri, final Object payload) throws Exception {

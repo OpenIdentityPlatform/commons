@@ -181,7 +181,7 @@ public class ElasticsearchAuditEventHandlerTest {
 
         // then
         Assertions.assertThat(resourceResponse.getId()).isEqualTo(event.get("_id").asString());
-        Assertions.assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventAfterNormalization);
+        Assertions.assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
     }
 
     @Test

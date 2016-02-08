@@ -15,17 +15,25 @@
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.data.MapEntry;
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.Test;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.*;
 
 import java.io.InputStream;
-import java.util.Scanner;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class ElasticsearchUtilTest {
 
     private static final String RESOURCE_PATH = "/org/forgerock/audit/handlers/elasticsearch/";
+
+    private static final MapEntry<String, String> FIELD_NAME_PAIR =
+            MapEntry.entry("org_forgerock_authentication_principal", "org.forgerock.authentication.principal");
 
     /**
      * Test that all periods in JSON keys will be replaced by underscores, as required by Elasticsearch.
@@ -33,20 +41,42 @@ public class ElasticsearchUtilTest {
     @Test
     public void normalizeJsonWithPeriodsInKeysTest() throws Exception {
         // given
-        final String beforeNormalization = resourceAsString(RESOURCE_PATH + "authEventBeforeNormalization.json");
-        final String afterNormalization = resourceAsString(RESOURCE_PATH + "authEventAfterNormalization.json");
+        final JsonValue beforeNormalization = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json");
+        final JsonValue afterNormalization = resourceAsJsonValue(RESOURCE_PATH + "authEventAfterNormalization.json");
         assertThat(beforeNormalization).isNotEqualTo(afterNormalization);
 
         // when
-        final String result = replaceKeyPeriodsWithUnderscores(beforeNormalization);
+        final Map<String, Object> normalized = new LinkedHashMap<>(1);
+        final JsonValue result = replaceKeyPeriodsWithUnderscores(beforeNormalization, normalized);
 
         // then
-        assertThat(result).isEqualTo(afterNormalization);
+        assertThat(result.toString()).isEqualTo(afterNormalization.toString());
+        assertThat(normalized).containsKey(ElasticsearchUtil.FIELD_NAMES_FIELD);
+        assertThat((Map<String, Object>) normalized.get(ElasticsearchUtil.FIELD_NAMES_FIELD))
+                .containsExactly(FIELD_NAME_PAIR);
     }
 
-    private String resourceAsString(final String resourcePath) throws Exception {
-        try (final InputStream inputStream = getClass().getResourceAsStream(resourcePath)) {
-            return new Scanner(inputStream, "UTF-8").useDelimiter("\\A").next();
+    @Test
+    public void denormalizeJsonWithPeriodsInKeysTest() throws Exception {
+        // given
+        final JsonValue beforeNormalization = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json");
+        final JsonValue afterNormalization = resourceAsJsonValue(RESOURCE_PATH + "authEventAfterNormalization.json");
+        assertThat(beforeNormalization).isNotEqualTo(afterNormalization);
+
+        final Map<String, Object> normalized = new LinkedHashMap<>(1);
+        normalized.put(ElasticsearchUtil.FIELD_NAMES_FIELD,
+                Collections.singletonMap(FIELD_NAME_PAIR.key, FIELD_NAME_PAIR.value));
+
+        // when
+        final JsonValue result = restoreKeyPeriods(afterNormalization, JsonValue.json(normalized));
+
+        // then
+        assertThat(result.toString()).isEqualTo(beforeNormalization.toString());
+    }
+
+    private JsonValue resourceAsJsonValue(final String resourcePath) throws Exception {
+        try (final InputStream configStream = getClass().getResourceAsStream(resourcePath)) {
+            return new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
         }
     }
 }
