@@ -62,6 +62,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-audit-handler-elasticsearch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-audit-json</artifactId>
             <version>${project.version}</version>
         </dependency>
