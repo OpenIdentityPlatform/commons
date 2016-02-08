@@ -25,14 +25,12 @@ import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration
-        .EventBufferingConfiguration;
+import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.http.Client;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
@@ -69,11 +67,13 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     private static final String QUERY = "query";
     private static final String GET = "GET";
     private static final String SEARCH = "/_search";
+    private static final String BULK = "/_bulk";
     private static final String HITS = "hits";
     private static final String SOURCE = "_source";
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final String TOTAL = "total";
     private static final String PUT = "PUT";
+    private static final String POST = "POST";
 
     private static final ElasticsearchQueryFilterVisitor elasticsearchQueryFilterVisitor =
             new ElasticsearchQueryFilterVisitor();
@@ -169,10 +169,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                                     QUERY,
                                     query.getQueryFilter().accept(elasticsearchQueryFilterVisitor, null).getObject())
                     ));
-            final Request request = new Request();
-            request.setMethod(GET);
-            request.setUri(buildEventUri(topic, SEARCH) + "?size=" + pageSize + "&from=" + offset);
-            request.setEntity(payload.getObject());
+            final Request request =
+                    createRequest(
+                            GET, buildSearchUri(topic) + "?size=" + pageSize + "&from=" + offset, payload.getObject());
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
                 final String message = "Elasticsearch response (audit/" + topic + "/" + SEARCH + "): "
@@ -182,10 +181,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             JsonValue events = json(response.getEntity().getJson());
             for (JsonValue event : events.get(HITS).get(HITS)) {
                 handler.handleResource(
-                        newResourceResponse(
-                                event.get(FIELD_CONTENT_ID).asString(),
-                                null,
-                                event.get(SOURCE)));
+                        newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null, event.get(SOURCE)));
             }
             final int totalResults = events.get(HITS).get(TOTAL).asInteger();
             final String pagedResultsCookie = (pageSize + offset) >= totalResults
@@ -201,12 +197,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     public Promise<ResourceResponse, ResourceException> readEvent(final Context context, final String topic,
             final String resourceId) {
         try {
-            final Request request = new Request();
-            request.setMethod(GET);
-            request.setUri(buildEventUri(topic, resourceId));
-            if (basicAuthHeaderValue != null) {
-                request.getHeaders().put("Authorization", basicAuthHeaderValue);
-            }
+            final Request request = createRequest(GET, buildEventUri(topic, resourceId), null);
 
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
@@ -255,18 +246,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             resourceId = event.get(FIELD_CONTENT_ID).asString();
             event.remove(FIELD_CONTENT_ID);
             final String jsonPayload = ElasticsearchUtil.normalizeJson(event);
-            event.put("_id", resourceId);
+            event.put(FIELD_CONTENT_ID, resourceId);
 
-            final Request request = new Request();
-            request.setMethod(PUT);
-            request.setUri(buildEventUri(topic, resourceId));
-            if (basicAuthHeaderValue != null) {
-                request.getHeaders().put("Authorization", basicAuthHeaderValue);
-            }
-            if (jsonPayload != null) {
-                request.getHeaders().put(ContentTypeHeader.NAME, "application/json; charset=UTF-8");
-                request.getEntity().setBytes(jsonPayload.getBytes(StandardCharsets.UTF_8));
-            }
+            final Request request = createRequest(PUT, buildEventUri(topic, resourceId), jsonPayload);
 
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
@@ -286,8 +268,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     public void addToBatch(final String topic, final JsonValue event, final StringBuilder payload) {
         try {
             // _id is a protected Elasticsearch field
-            final String resourceId = event.get("_id").asString();
-            event.remove("_id");
+            final String resourceId = event.get(FIELD_CONTENT_ID).asString();
+            event.remove(FIELD_CONTENT_ID);
             final String jsonPayload = ElasticsearchUtil.normalizeJson(event);
 
             // newlines have special significance in the Bulk API
@@ -307,14 +289,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     @Override
     public void publishBatch(final String payload) {
         try {
-            final Request request = new Request();
-            request.setMethod("POST");
-            request.setUri(buildBulkUri());
-            if (basicAuthHeaderValue != null) {
-                request.getHeaders().put("Authorization", basicAuthHeaderValue);
-            }
-            request.getHeaders().put(ContentTypeHeader.NAME, "application/json; charset=UTF-8");
-            request.getEntity().setBytes(payload.getBytes(StandardCharsets.UTF_8));
+            final Request request = createRequest(POST, buildBulkUri(), payload);
 
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
@@ -363,7 +338,17 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         if (bulkUri != null) {
             return bulkUri;
         }
-        return buildBaseUri() + "/_bulk";
+        return buildBaseUri() + BULK;
+    }
+
+    /**
+     * Builds an Elasticsearch API URI for Search API.
+     *
+     * @param topic The audit topic to search.
+     * @return URI
+     */
+    protected String buildSearchUri(final String topic) {
+        return buildBaseUri() + "/" + topic + SEARCH;
     }
 
     /**
@@ -411,5 +396,19 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         } catch (IOException ex) {
             throw new JsonException("String is not valid JSON", ex);
         }
+    }
+
+    private Request createRequest(final String method, final String uri, final Object payload) throws Exception {
+        final Request request = new Request();
+        request.setMethod(method);
+        request.setUri(uri);
+        if (payload != null) {
+            request.getHeaders().put(ContentTypeHeader.NAME, "application/json; charset=UTF-8");
+            request.setEntity(payload);
+        }
+        if (basicAuthHeaderValue != null) {
+            request.getHeaders().put("Authorization", basicAuthHeaderValue);
+        }
+        return request;
     }
 }

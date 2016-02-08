@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * JsonValue mapping for each visitor operation to the corresponding Elasticsearch query operation in the
  * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl.html">Elasticsearch Query DSL.</a>
  */
-public class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, Void, JsonPointer> {
+class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, Void, JsonPointer> {
 
     private static final Logger logger = LoggerFactory.getLogger(ElasticsearchQueryFilterVisitor.class);
     private static final ObjectMapper mapper = new ObjectMapper();
