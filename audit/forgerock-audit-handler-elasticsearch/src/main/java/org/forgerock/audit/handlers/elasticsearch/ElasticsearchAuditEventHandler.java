@@ -63,7 +63,10 @@ import org.slf4j.LoggerFactory;
 public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implements
         ElasticsearchBatchAuditEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
+    private static final ElasticsearchQueryFilterVisitor elasticsearchQueryFilterVisitor =
+            new ElasticsearchQueryFilterVisitor();
+
     private static final String QUERY = "query";
     private static final String GET = "GET";
     private static final String SEARCH = "/_search";
@@ -74,9 +77,6 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     private static final String TOTAL = "total";
     private static final String PUT = "PUT";
     private static final String POST = "POST";
-
-    private static final ElasticsearchQueryFilterVisitor elasticsearchQueryFilterVisitor =
-            new ElasticsearchQueryFilterVisitor();
 
     /**
      * Average number of characters, per event, for batch indexing via Elasticsearch Bulk API. This value
@@ -210,7 +210,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             return newResourceResponse(resourceId, null, jsonValue).asPromise();
         } catch (Exception e) {
             final String error = String.format("Unable to read audit entry for topic=%s, _id=%s", topic, resourceId);
-            LOGGER.error(error, e);
+            logger.error(error, e);
             return new InternalServerErrorException(error, e).asPromise();
         }
     }
@@ -258,7 +258,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         } catch (Exception e) {
             final String error = String.format("Unable to create audit entry for topic=%s, _id=%s", topic,
                     resourceId);
-            LOGGER.error(error, e);
+            logger.error(error, e);
             return new InternalServerErrorException(error, e).asPromise();
         }
     }
@@ -274,14 +274,14 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             // newlines have special significance in the Bulk API
             // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
             payload.append("{ \"index\" : { \"_type\" : ")
-                    .append(ElasticsearchUtil.OBJECT_MAPPER.writeValueAsString(topic))
+                    .append(ElasticsearchUtil.objectMapper.writeValueAsString(topic))
                     .append(", \"_id\" : ")
-                    .append(ElasticsearchUtil.OBJECT_MAPPER.writeValueAsString(resourceId))
+                    .append(ElasticsearchUtil.objectMapper.writeValueAsString(resourceId))
                     .append(" } }\n")
                     .append(jsonPayload)
                     .append('\n');
         } catch (Exception e) {
-            LOGGER.error("Elasticsearch batch creation failed", e);
+            logger.error("Elasticsearch batch creation failed", e);
         }
     }
 
@@ -292,10 +292,10 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
-                LOGGER.warn("Elasticsearch batch index failed: " + response.getEntity());
+                logger.warn("Elasticsearch batch index failed: " + response.getEntity());
             }
         } catch (Exception e) {
-            LOGGER.error("Elasticsearch batch index failed unexpectedly", e);
+            logger.error("Elasticsearch batch index failed unexpectedly", e);
         }
     }
 

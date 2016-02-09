@@ -27,12 +27,13 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Scanner;
 
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
@@ -49,6 +50,7 @@ import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
@@ -73,12 +75,13 @@ public class ElasticsearchAuditEventHandlerTest {
     public static final String ID = "id";
 
     private String authEventBeforeNormalization;
-    private String authEventAfterNormalization;
+    private String authEventBatchPayload;
 
     @BeforeTest
     public void beforeTest() throws Exception {
-        authEventBeforeNormalization = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json").toString();
-        authEventAfterNormalization = resourceAsJsonValue(RESOURCE_PATH + "authEventAfterNormalization.json").toString();
+        authEventBeforeNormalization = resourceAsJsonValue(
+                RESOURCE_PATH + "authEventBeforeNormalization.json").toString();
+        authEventBatchPayload = resourceAsString(RESOURCE_PATH + "authEventBatchPayload.txt");
     }
 
     @Test
@@ -190,6 +193,26 @@ public class ElasticsearchAuditEventHandlerTest {
     }
 
     @Test
+    public void testFailedRead() throws Exception {
+
+        // given
+        final Response response = createClientResponse(Status.NOT_FOUND, null);
+
+        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
+        when(promise.get()).thenReturn(response);
+
+        final AuditEventHandler handler = createElasticSearchAuditEventHandler(createClient(promise));
+        final Context context = mock(Context.class);
+
+        // when
+        final Promise<ResourceResponse, ResourceException> responsePromise =
+                handler.readEvent(context, "authentication", "fake-id-that-does-not-exist");
+
+        // then
+        assertThat(responsePromise).failedWithException().isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
     public void testSinglePublish() throws Exception {
 
         // given
@@ -211,6 +234,57 @@ public class ElasticsearchAuditEventHandlerTest {
         // then
         assertThat(resourceResponse.getId()).isEqualTo(resourceId);
         assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
+    }
+
+    @Test
+    public void testBatchPublish() throws Exception {
+
+        // given
+        final Response response = new Response(Status.OK);
+
+        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
+        when(promise.get()).thenReturn(response);
+
+        final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
+        config.getBuffering().setEnabled(true);
+
+        final AuditEventHandler handler = createElasticSearchAuditEventHandler(createClient(promise), config);
+        final JsonValue event = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json");
+        final String resourceId = event.get("_id").asString();
+        final Context context = mock(Context.class);
+
+        // when
+        final Promise<ResourceResponse, ResourceException> responsePromise =
+                handler.publishEvent(context, "authentication", event);
+        final ResourceResponse resourceResponse = responsePromise.get();
+
+        // then
+        assertThat(resourceResponse.getId()).isEqualTo(resourceId);
+        assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
+    }
+
+    @Test
+    public void testAddToBatch() throws Exception {
+
+        // given
+        final Response response = new Response(Status.OK);
+
+        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
+        when(promise.get()).thenReturn(response);
+
+        final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
+        config.getBuffering().setEnabled(true);
+
+        final ElasticsearchBatchAuditEventHandler batchHandler =
+                createElasticSearchAuditEventHandler(createClient(promise), config);
+        final JsonValue event = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json");
+        final StringBuilder builder = new StringBuilder();
+
+        // when
+        batchHandler.addToBatch("authentication", event, builder);
+
+        // then
+        assertThat(builder.toString()).isEqualTo(authEventBatchPayload);
     }
 
     /**
@@ -242,22 +316,15 @@ public class ElasticsearchAuditEventHandlerTest {
             auditService.shutdown();
         }
     }
+
     private AuditEventHandler createElasticSearchAuditEventHandler(final Client client) throws Exception {
-        final ElasticsearchAuditEventHandlerConfiguration configuration =
-                new ElasticsearchAuditEventHandlerConfiguration();
-        final Set<String> topics = new HashSet<>();
-        topics.add("authentication");
-        topics.add("access");
-        topics.add("activity");
-        topics.add("config");
-        configuration.setTopics(topics);
-        // setup config
-        final ElasticsearchAuditEventHandler handler =
-                new ElasticsearchAuditEventHandler(
-                        configuration,
-                        getEventTopicsMetaData(),
-                        client);
-        return handler;
+        return createElasticSearchAuditEventHandler(client, new ElasticsearchAuditEventHandlerConfiguration());
+    }
+
+    private ElasticsearchAuditEventHandler createElasticSearchAuditEventHandler(
+            final Client client, final ElasticsearchAuditEventHandlerConfiguration configuration) throws Exception {
+        configuration.setTopics(new HashSet<>(Arrays.asList("authentication", "access", "activity", "config")));
+        return new ElasticsearchAuditEventHandler(configuration, getEventTopicsMetaData(), client);
     }
 
     private Client createClient(final Promise<Response, NeverThrowsException> promise) {
@@ -277,15 +344,22 @@ public class ElasticsearchAuditEventHandlerTest {
     }
 
     private Response createClientResponse(final Status status, final Object payload) {
-        final Response response = new Response();
-        response.setStatus(status);
-        response.setEntity(payload);
+        final Response response = new Response(status);
+        if (payload != null) {
+            response.setEntity(payload);
+        }
         return response;
     }
 
     private JsonValue resourceAsJsonValue(final String resourcePath) throws Exception {
         try (final InputStream configStream = getClass().getResourceAsStream(resourcePath)) {
             return new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
+        }
+    }
+
+    private String resourceAsString(final String resourcePath) throws Exception {
+        try (final InputStream inputStream = getResource(resourcePath)) {
+            return new Scanner(inputStream, "UTF-8").useDelimiter("\\A").next();
         }
     }
 
