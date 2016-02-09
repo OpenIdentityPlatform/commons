@@ -1,13 +1,13 @@
 Elasticsearch AuditEventHandler
 ===============================
 
-The `ElasticsearchAuditEventHandler` writes audit events to elasticsearch. It supports basic authentication and 
-ssl/tls through the elasticsearch shield plugin. The handler supports Elasticsearch 2.x. The handler uses the 
+The `ElasticsearchAuditEventHandler` writes audit events to Elasticsearch. It supports Basic Authentication and
+SSL/TLS through the Elasticsearch Shield plugin. The handler supports Elasticsearch 2.x. The handler uses the
 Elasticsearch [Index Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/docs-index_.html), 
 [Get Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/docs-get.html), 
 and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/search.html).
 
-## How Configure Elasticsearch
+## How to Configure Elasticsearch
 1. Download and install Elasticsearch.
 
 2. Create the audit index.
@@ -303,13 +303,13 @@ and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/sea
             }
         }' "http://localhost:9200/audit"
         
-The Elasticsearch is now setup to receive audit data.
+Elasticsearch is now setup to receive audit data.
 
-## How Configure ElasticsearchAuditEventHandler
+## How to Configure ElasticsearchAuditEventHandler
 
-To configure the `ElasticsearchAuditEventHandler` in the demo servlet project the configuration stored in the file 
-forgerock-audit-servlet/src/main/resources/conf/audit-event-handlers.json will need to be edited based off the 
-Elasticsearch environment. This is the example configuration stored in that file.
+To configure the `ElasticsearchAuditEventHandler` in the demo servlet project, edit the configuration in the file
+forgerock-audit-servlet/src/main/resources/conf/audit-event-handlers.json, based on your
+Elasticsearch environment. The example configuration in that file is as follows:
 
         {
               "class" : "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
@@ -335,8 +335,8 @@ Elasticsearch environment. This is the example configuration stored in that file
               }
         }
         
-## Index/Create Audit Event
-Audit Events can be indexed or created in Elasticsearch using the following command.
+## Create or Index Audit Events
+Audit Events can be indexed or created in Elasticsearch using the following command:
 
         curl -X POST -H "Content-Type: application/json" -d '{
             "timestamp": "2016-01-27T17:04:18+00:00",
@@ -389,28 +389,27 @@ Audit Events can be indexed or created in Elasticsearch using the following comm
             }
         }' "http://localhost:8080/audit/access/id"
         
-That command will index/create an access event with the id "id" in the configured Elasticsearch index.
+This command indexes and creates an access event with the id "id" in the configured Elasticsearch index.
 
-## Read an Audit Event
+## To Read an Audit Event
 
 Audit events can be read from the Elasticsearch audit event handler with the following command.
 
         curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit/access/id"
         
-That command will read the access audit event with the id "id".
+This command reads the access audit event with the id "id".
 
-## Query Audit Events
+## To Query Audit Events
 
 Audit events can be queried from Elasticsearch with the following command.
         
         curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit/access?_queryFilter=true"
         
-That command will retrieve the first 10 access audit events from elastic search.
+This command retrieves the first 10 access audit events from elastic search.
 
 Some notes when using query with Elasticsearch.
 
-* Elasticsearch by default only returns the first 10 results when doing a query. To retrieve each record it is 
-necessary to use pagination by setting the _pageOffset and _pageSize parameters get more than the first 10 results.
-* For the contains, starts with or equals query operations to work on strings the string parameter much be declared as 
-not_analyzed.
-
+* Elasticsearch only returns the first 10 results by default when doing a query. To retrieve all records, you must use
+pagination by setting the _pageOffset and _pageSize parameters to get more than the first 10 results.
+* For the "contains", "starts with" or "equals" query operations to work on strings, the string parameter must be
+declared as not_analyzed.
