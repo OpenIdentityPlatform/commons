@@ -15,16 +15,19 @@
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
+import static org.forgerock.http.util.Json.readJson;
+import static org.forgerock.json.JsonValue.json;
+
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.annotations.VisibleForTesting;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Utilities for working with Elasticsearch.
@@ -98,8 +101,9 @@ class ElasticsearchUtil {
      *
      * @param value JSON value
      * @return Resulting JSON, with {@code _normalized} field if any normalization was necessary
+     * @throws IOException If unable to parse the json.
      */
-    public static JsonValue normalizeJson(final JsonValue value) {
+    public static JsonValue normalizeJson(final JsonValue value) throws IOException {
         if (value != null) {
             if (value.get(NORMALIZED_FIELD).isNotNull()) {
                 throw new IllegalStateException(NORMALIZED_FIELD + " is a reserved JsonValue field");
@@ -120,8 +124,9 @@ class ElasticsearchUtil {
      *
      * @param value JSON value
      * @return Original, de-normalized JSON
+     * @throws IOException If unable to parse the json.
      */
-    public static JsonValue denormalizeJson(final JsonValue value) {
+    public static JsonValue denormalizeJson(final JsonValue value) throws IOException {
         if (value != null) {
             final JsonValue nomalized = value.get(NORMALIZED_FIELD);
             if (nomalized.isNotNull()) {
@@ -143,10 +148,11 @@ class ElasticsearchUtil {
      * @param value JSON input
      * @param normalized De-normalization metadata, which this method may add to
      * @return Resulting JSON
+     * @throws IOException If unable to parse the json.
      */
     @VisibleForTesting
     protected static JsonValue replaceKeyPeriodsWithUnderscores(final JsonValue value,
-            final Map<String, Object> normalized) {
+            final Map<String, Object> normalized) throws IOException {
         final String s = value.toString();
         final Matcher m = JSON_KEY_WITH_PERIOD_CHAR_PATTERN.matcher(s);
         if (m.find()) {
@@ -179,14 +185,14 @@ class ElasticsearchUtil {
             if (index != n) {
                 builder.append(s.substring(index));
             }
-            return toJsonValue(builder.toString());
+            return json(readJson(builder.toString()));
         }
         // no normalization required
         return value;
     }
 
     @VisibleForTesting
-    protected static JsonValue restoreKeyPeriods(final JsonValue value, final JsonValue nomalized) {
+    protected static JsonValue restoreKeyPeriods(final JsonValue value, final JsonValue nomalized) throws IOException {
         final JsonValue fieldNames = nomalized.get(FIELD_NAMES_FIELD);
         if (fieldNames.isNotNull()) {
             final String s = value.toString();
@@ -209,7 +215,7 @@ class ElasticsearchUtil {
                 if (index != n) {
                     builder.append(s.substring(index));
                 }
-                return toJsonValue(builder.toString());
+                return json(readJson(builder.toString()));
             }
         }
         // no normalization required
@@ -238,20 +244,5 @@ class ElasticsearchUtil {
     private static String replace(final String s, final String fieldName, final JsonValue fieldNames) {
         final JsonValue value = fieldNames.get(fieldName);
         return value.isNull() ? s : s.replace(fieldName, fieldNames.get(fieldName).asString());
-    }
-
-    /**
-     * Parses a JSON string into a {@link JsonValue}.
-     *
-     * @param json JSON string
-     * @return {@link JsonValue}
-     */
-    public static JsonValue toJsonValue(final String json) {
-        try {
-            final Object parsedValue = OBJECT_MAPPER.readValue(json, Object.class);
-            return new JsonValue(parsedValue);
-        } catch (IOException ex) {
-            throw new JsonException("String is not valid JSON", ex);
-        }
     }
 }

@@ -12,7 +12,7 @@ and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/sea
 
 2. Create the audit index.
 
-        curl -X POST -H "Content-Type: application/json" -H "Cache-Control: no-cache" -H "Postman-Token: 23bc18a1-e839-5a17-b3c0-5880ac6fc13d" -d '{
+        curl -X POST -H "Content-Type: application/json" -d '{
             "settings" : {},
             "mappings" : {
                 "access" : {
@@ -327,7 +327,7 @@ Elasticsearch environment. This is the example configuration stored in that file
                   "indexName" : "audit"
                 },
                 "buffering" : {
-                  "enabled" : false,
+                  "enabled" : true,
                   "maxSize" : 10000,
                   "writeInterval" : "250 millis",
                   "maxBatchedEvents" : 500
@@ -395,7 +395,7 @@ That command will index/create an access event with the id "id" in the configure
 
 Audit events can be read from the Elasticsearch audit event handler with the following command.
 
-        curl -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" "http://localhost:8080/audit/access/id"
+        curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit/access/id"
         
 That command will read the access audit event with the id "id".
 

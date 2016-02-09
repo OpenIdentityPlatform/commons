@@ -172,7 +172,7 @@
           "indexName" : "audit"
         },
         "buffering" : {
-          "enabled" : false,
+          "enabled" : true,
           "maxSize" : 10000,
           "writeInterval" : "250 millis",
           "maxBatchedEvents" : 500

@@ -15,6 +15,8 @@
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -32,9 +34,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.assertj.core.api.Assertions;
+import org.forgerock.audit.AuditService;
+import org.forgerock.audit.AuditServiceBuilder;
+import org.forgerock.audit.DependencyProviderBase;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
+import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.http.Client;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
@@ -123,13 +128,13 @@ public class ElasticsearchAuditEventHandlerTest {
 
         // then
         final QueryResponse queryResponse = result.get();
-        org.assertj.core.api.Assertions.assertThat(queryResponse.getPagedResultsCookie()).isEqualTo(null);
-        org.assertj.core.api.Assertions.assertThat(queryResponse.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.EXACT);
-        org.assertj.core.api.Assertions.assertThat(queryResponse.getTotalPagedResults()).isEqualTo(TOTAL_RESULTS);
-        org.assertj.core.api.Assertions.assertThat(responses.size()).isEqualTo(TOTAL_RESULTS);
+        assertThat(queryResponse.getPagedResultsCookie()).isEqualTo(null);
+        assertThat(queryResponse.getTotalPagedResultsPolicy()).isEqualTo(CountPolicy.EXACT);
+        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(TOTAL_RESULTS);
+        assertThat(responses.size()).isEqualTo(TOTAL_RESULTS);
         final ResourceResponse resourceResponse = responses.get(0);
-        org.assertj.core.api.Assertions.assertThat(resourceResponse.getId()).isEqualTo(ID);
-        org.assertj.core.api.Assertions.assertThat(resourceResponse.getContent().asMap()).isEqualTo(
+        assertThat(resourceResponse.getId()).isEqualTo(ID);
+        assertThat(resourceResponse.getContent().asMap()).isEqualTo(
                 json(object(
                     field("transactionId", "transactionId"),
                     field("timestamp", "timestamp")
@@ -180,8 +185,8 @@ public class ElasticsearchAuditEventHandlerTest {
         final ResourceResponse resourceResponse = responsePromise.get();
 
         // then
-        Assertions.assertThat(resourceResponse.getId()).isEqualTo(event.get("_id").asString());
-        Assertions.assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
+        assertThat(resourceResponse.getId()).isEqualTo(event.get("_id").asString());
+        assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
     }
 
     @Test
@@ -204,10 +209,39 @@ public class ElasticsearchAuditEventHandlerTest {
         final ResourceResponse resourceResponse = responsePromise.get();
 
         // then
-        Assertions.assertThat(resourceResponse.getId()).isEqualTo(resourceId);
-        Assertions.assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
+        assertThat(resourceResponse.getId()).isEqualTo(resourceId);
+        assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
     }
 
+    /**
+     * Integration test.
+     */
+    @Test
+    public void canConfigureCsvHandlerFromJsonAndRegisterWithAuditService() throws Exception {
+        // given
+        final AuditServiceBuilder auditServiceBuilder = newAuditService();
+
+        final Client client = new Client(mock(Handler.class));
+        DependencyProviderBase dependencyProvider = new DependencyProviderBase();
+        dependencyProvider.register(Client.class, client);
+
+        auditServiceBuilder.withDependencyProvider(dependencyProvider);
+        final JsonValue config = AuditJsonConfig.getJson(
+                getResource("/org/forgerock/audit/handlers/elasticsearch/event-handler-config.json"));
+
+        // when
+        AuditJsonConfig.registerHandlerToService(config, auditServiceBuilder);
+
+        // then
+        AuditService auditService = auditServiceBuilder.build();
+        auditService.startup();
+        try {
+            AuditEventHandler registeredHandler = auditService.getRegisteredHandler("elasticsearch");
+            assertThat(registeredHandler).isNotNull();
+        } finally {
+            auditService.shutdown();
+        }
+    }
     private AuditEventHandler createElasticSearchAuditEventHandler(final Client client) throws Exception {
         final ElasticsearchAuditEventHandlerConfiguration configuration =
                 new ElasticsearchAuditEventHandlerConfiguration();
@@ -253,5 +287,9 @@ public class ElasticsearchAuditEventHandlerTest {
         try (final InputStream configStream = getClass().getResourceAsStream(resourcePath)) {
             return new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
         }
+    }
+
+    private InputStream getResource(String resourceName) {
+        return getClass().getResourceAsStream(resourceName);
     }
 }

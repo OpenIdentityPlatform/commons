@@ -15,8 +15,9 @@
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
  * A configuration for Elasticsearch audit event handler.
@@ -186,7 +187,7 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
         }
 
         /**
-         * Sets the {@code host} for the connection.
+         * Sets the {@code port} for the connection.
          *
          * @param port The {@code port} for the connection.
          */

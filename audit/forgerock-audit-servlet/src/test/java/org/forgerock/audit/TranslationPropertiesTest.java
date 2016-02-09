@@ -16,17 +16,7 @@
 
 package org.forgerock.audit;
 
-import static org.assertj.core.api.Assertions.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
-import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration;
-import org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandlerConfiguration;
-import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration;
-import org.forgerock.json.JsonValue;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +24,18 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
+import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration;
+import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration;
+import org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandlerConfiguration;
+import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration;
+import org.forgerock.json.JsonValue;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 
 @SuppressWarnings("javadoc")
 public class TranslationPropertiesTest {
@@ -72,6 +74,12 @@ public class TranslationPropertiesTest {
     public void translationsExistForAllSyslogAuditEventHandlerConfigurationProperties() throws Exception {
         assertThat(translationKeys).containsAll(
                 propertyTranslationKeysOf(jsonSchemaForPojo(SyslogAuditEventHandlerConfiguration.class)));
+    }
+
+    @Test
+    public void translationsExistForAllElasticsearchAuditEventHandlerConfigurationProperties() throws Exception {
+        assertThat(translationKeys).containsAll(
+                propertyTranslationKeysOf(jsonSchemaForPojo(ElasticsearchAuditEventHandlerConfiguration.class)));
     }
 
     private Properties loadTranslations() throws IOException {

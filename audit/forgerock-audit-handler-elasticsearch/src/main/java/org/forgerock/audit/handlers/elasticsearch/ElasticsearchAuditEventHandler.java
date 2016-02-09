@@ -17,12 +17,18 @@ package org.forgerock.audit.handlers.elasticsearch;
 
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.ConnectionConfiguration;
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.IndexMappingConfiguration;
+import static org.forgerock.http.util.Json.readJson;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.concurrent.ExecutionException;
 
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
@@ -84,6 +90,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * configuration change.
      */
     private static final boolean ALWAYS_FLUSH_BATCH_QUEUE = true;
+    private static final int DEFAULT_OFFSET = 0;
 
     private final String basicAuthHeaderValue;
     private final String baseUri;
@@ -102,8 +109,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     public ElasticsearchAuditEventHandler(
             final ElasticsearchAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData,
-            @Audit final Client client
-    ) {
+            @Audit final Client client) {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = Reject.checkNotNull(configuration);
         this.client = Reject.checkNotNull(client);
@@ -114,8 +120,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         final EventBufferingConfiguration bufferConfig = configuration.getBuffering();
         if (bufferConfig.isEnabled()) {
             final Duration writeInterval =
-                    bufferConfig.getWriteInterval() == null || bufferConfig.getWriteInterval().isEmpty() ?
-                            null : Duration.duration(bufferConfig.getWriteInterval());
+                    bufferConfig.getWriteInterval() == null || bufferConfig.getWriteInterval().isEmpty()
+                            ? null
+                            : Duration.duration(bufferConfig.getWriteInterval());
             batchIndexer = new ElasticsearchBatchIndexer(bufferConfig.getMaxSize(),
                     writeInterval, bufferConfig.getMaxBatchedEvents(),
                     BATCH_INDEX_AVERAGE_PER_EVENT_PAYLOAD_SIZE, ALWAYS_FLUSH_BATCH_QUEUE, this);
@@ -149,28 +156,25 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String topic,
             final QueryRequest query, final QueryResourceHandler handler) {
         try {
-            final int pageSize = query.getPageSize() == 0 ? DEFAULT_PAGE_SIZE : query.getPageSize();
+            final int pageSize = query.getPageSize() <= 0 ? DEFAULT_PAGE_SIZE : query.getPageSize();
             // set the offset to either first the offset provided, or second the paged result cookie value, or finally 0
-            final int offset =
-                    query.getPagedResultsOffset() != 0
-                            ? query.getPagedResultsOffset()
-                            : (query.getPagedResultsCookie() == null
-                                    ? 0
-                                    : Integer.valueOf(query.getPagedResultsCookie()));
+            final int offset;
+            if (query.getPagedResultsOffset() != 0) {
+                offset = query.getPagedResultsOffset();
+            } else if (query.getPagedResultsCookie() != null) {
+                offset = Integer.valueOf(query.getPagedResultsCookie());
+            } else {
+                offset = DEFAULT_OFFSET;
+            }
+
             final JsonValue payload =
-                    json(object(
-                            field(
-                                    QUERY,
-                                    query.getQueryFilter().accept(elasticsearchQueryFilterVisitor, null).getObject())
-                    ));
-            final Request request =
-                    createRequest(
-                            GET, buildSearchUri(topic) + "?size=" + pageSize + "&from=" + offset, payload.getObject());
+                    json(object(field(
+                            QUERY, query.getQueryFilter().accept(elasticsearchQueryFilterVisitor, null).getObject())));
+            final Request request = createRequest(GET, buildSearchUri(topic, pageSize, offset), payload.getObject());
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
-                final String message = "Elasticsearch response (audit/" + topic + "/" + SEARCH + "): "
-                        + response.getEntity();
-                return ResourceException.newResourceException(response.getStatus().getCode(), message).asPromise();
+                final String message = "Elasticsearch response (audit/" + topic + SEARCH + "): " + response.getEntity();
+                return newResourceException(response.getStatus().getCode(), message).asPromise();
             }
             JsonValue events = json(response.getEntity().getJson());
             for (JsonValue event : events.get(HITS).get(HITS)) {
@@ -183,7 +187,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                     ? null
                     : Integer.toString(pageSize + offset);
             return newQueryResponse(pagedResultsCookie, CountPolicy.EXACT, totalResults).asPromise();
-        } catch (Exception e ) {
+        } catch (URISyntaxException | ExecutionException | InterruptedException | IOException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
@@ -200,7 +204,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             }
 
             // the original audit JSON is under _source, and we also add back the _id
-            JsonValue jsonValue = ElasticsearchUtil.toJsonValue(response.getEntity().toString());
+            JsonValue jsonValue = json(readJson(response.getEntity().toString()));
             jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
             jsonValue.put(FIELD_CONTENT_ID, resourceId);
             return newResourceResponse(resourceId, null, jsonValue).asPromise();
@@ -340,10 +344,12 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * Builds an Elasticsearch API URI for Search API.
      *
      * @param topic The audit topic to search.
-     * @return URI
+     * @param pageSize The number of results to return.
+     * @param offset The number of results to skip.
+     * @return The search uri.
      */
-    protected String buildSearchUri(final String topic) {
-        return buildBaseUri() + "/" + topic + SEARCH;
+    protected String buildSearchUri(final String topic, final int pageSize, final int offset) {
+        return buildBaseUri() + "/" + topic + SEARCH + "?size=" + pageSize + "&from=" + offset;
     }
 
     /**
@@ -375,10 +381,11 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         }
         final String message = "Elasticsearch response (audit/" + topic + "/" + resourceId + "): "
                 + response.getEntity();
-        return ResourceException.newResourceException(response.getStatus().getCode(), message).asPromise();
+        return newResourceException(response.getStatus().getCode(), message).asPromise();
     }
 
-    private Request createRequest(final String method, final String uri, final Object payload) throws Exception {
+    private Request createRequest(final String method, final String uri, final Object payload)
+            throws URISyntaxException {
         final Request request = new Request();
         request.setMethod(method);
         request.setUri(uri);
