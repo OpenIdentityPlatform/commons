@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
@@ -74,11 +75,13 @@ public class ElasticsearchAuditEventHandlerTest {
     public static final String ID = "id";
 
     private String authEventBeforeNormalization;
+    private String authEventBatchPayload;
 
     @BeforeTest
     public void beforeTest() throws Exception {
         authEventBeforeNormalization = resourceAsJsonValue(
                 RESOURCE_PATH + "authEventBeforeNormalization.json").toString();
+        authEventBatchPayload = resourceAsString(RESOURCE_PATH + "authEventBatchPayload.txt");
     }
 
     @Test
@@ -260,6 +263,30 @@ public class ElasticsearchAuditEventHandlerTest {
         assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
     }
 
+    @Test
+    public void testAddToBatch() throws Exception {
+
+        // given
+        final Response response = new Response(Status.OK);
+
+        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
+        when(promise.get()).thenReturn(response);
+
+        final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
+        config.getBuffering().setEnabled(true);
+
+        final ElasticsearchBatchAuditEventHandler batchHandler =
+                createElasticSearchAuditEventHandler(createClient(promise), config);
+        final JsonValue event = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json");
+        final StringBuilder builder = new StringBuilder();
+
+        // when
+        batchHandler.addToBatch("authentication", event, builder);
+
+        // then
+        assertThat(builder.toString()).isEqualTo(authEventBatchPayload);
+    }
+
     /**
      * Integration test.
      */
@@ -294,7 +321,7 @@ public class ElasticsearchAuditEventHandlerTest {
         return createElasticSearchAuditEventHandler(client, new ElasticsearchAuditEventHandlerConfiguration());
     }
 
-    private AuditEventHandler createElasticSearchAuditEventHandler(
+    private ElasticsearchAuditEventHandler createElasticSearchAuditEventHandler(
             final Client client, final ElasticsearchAuditEventHandlerConfiguration configuration) throws Exception {
         configuration.setTopics(new HashSet<>(Arrays.asList("authentication", "access", "activity", "config")));
         return new ElasticsearchAuditEventHandler(configuration, getEventTopicsMetaData(), client);
@@ -327,6 +354,12 @@ public class ElasticsearchAuditEventHandlerTest {
     private JsonValue resourceAsJsonValue(final String resourcePath) throws Exception {
         try (final InputStream configStream = getClass().getResourceAsStream(resourcePath)) {
             return new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
+        }
+    }
+
+    private String resourceAsString(final String resourcePath) throws Exception {
+        try (final InputStream inputStream = getResource(resourcePath)) {
+            return new Scanner(inputStream, "UTF-8").useDelimiter("\\A").next();
         }
     }
 
