@@ -16,6 +16,7 @@
 package org.forgerock.audit.handlers.elasticsearch;
 
 import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotation;
+import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.normalizeJsonPointer;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -78,7 +79,7 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
                     object(field(
                             "wildcard",
                             object(field(
-                                    jsonPointerToDotNotation(field.toString()),
+                                    jsonPointerToDotNotation(normalizeJsonPointer(field).toString()),
                                     "*" + mapper.writeValueAsString(valueAssertion) + "*"
                             ))
                     ))
@@ -101,7 +102,8 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     @Override
     public JsonValue visitEqualsFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "term" : { "field" : "value" }
-        return json(object(field("term", object(field(jsonPointerToDotNotation(field.toString()), valueAssertion)))));
+        return json(object(field("term",
+                object(field(jsonPointerToDotNotation(normalizeJsonPointer(field).toString()), valueAssertion)))));
     }
 
     /**
@@ -128,7 +130,7 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     public JsonValue visitGreaterThanFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "range" : { "field" : {"gt" : 5 } }
         return json(object(field("range",
-                object(field(jsonPointerToDotNotation(field.toString()),
+                object(field(jsonPointerToDotNotation(normalizeJsonPointer(field).toString()),
                         object(field("gt", valueAssertion))
                 ))
         )));
@@ -146,7 +148,7 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     public JsonValue visitGreaterThanOrEqualToFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "range" : { "field" : {"gte" : 5 } }
         return json(object(field("range",
-                object(field(jsonPointerToDotNotation(field.toString()),
+                object(field(jsonPointerToDotNotation(normalizeJsonPointer(field).toString()),
                         object(field("gte", valueAssertion))
                 ))
         )));
@@ -164,7 +166,7 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     public JsonValue visitLessThanFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "range" : { "field" : {"lt" : 5 } }
         return json(object(field("range",
-                object(field(jsonPointerToDotNotation(field.toString()),
+                object(field(jsonPointerToDotNotation(normalizeJsonPointer(field).toString()),
                         object(field("lt", valueAssertion))
                 ))
         )));
@@ -182,7 +184,7 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     public JsonValue visitLessThanOrEqualToFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "range" : { "field" : {"lte" : 5 } }
         return json(object(field("range",
-                object(field(jsonPointerToDotNotation(field.toString()),
+                object(field(jsonPointerToDotNotation(normalizeJsonPointer(field).toString()),
                         object(field("lte", valueAssertion))
                 ))
         )));
@@ -253,7 +255,8 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     @Override
     public JsonValue visitPresentFilter(Void aVoid, JsonPointer field) {
         // "exists" : { "field" : "fieldValue" }
-        return json(object(field("exists", object(field("field", jsonPointerToDotNotation(field.toString()))))));
+        return json(object(field("exists",
+                object(field("field", jsonPointerToDotNotation(normalizeJsonPointer(field).toString()))))));
     }
 
     /**
@@ -268,6 +271,7 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     @Override
     public JsonValue visitStartsWithFilter(Void aVoid, JsonPointer field, Object valueAssertion) {
         // "prefix" : { "field" : "prefixValue" }
-        return json(object(field("prefix", object(field(jsonPointerToDotNotation(field.toString()), valueAssertion)))));
+        return json(object(field("prefix",
+                object(field(jsonPointerToDotNotation(normalizeJsonPointer(field).toString()), valueAssertion)))));
     }
 }

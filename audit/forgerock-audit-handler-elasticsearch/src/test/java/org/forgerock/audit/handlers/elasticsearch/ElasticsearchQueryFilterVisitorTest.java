@@ -49,6 +49,7 @@ public class ElasticsearchQueryFilterVisitorTest {
 
     private static final JsonPointer FIELD_1 = new JsonPointer("field1");
     private static final JsonPointer FIELD_2 = new JsonPointer("field2");
+    private static final JsonPointer NORMAILZED_FIELD_1 = new JsonPointer("/field1.stuff");
 
     private static final String VALUE_1 = "value1";
     private static final String VALUE_2 = "value2";
@@ -170,6 +171,19 @@ public class ElasticsearchQueryFilterVisitorTest {
                                         array(
                                                 object(field("term", object(
                                                         field(jsonPointerToDotNotation(FIELD_1.toString()), VALUE_1)))),
+                                                object(field("term", object(
+                                                        field(jsonPointerToDotNotation(FIELD_2.toString()), VALUE_2))))
+                                        )
+                                ))
+                        )))
+                },
+                {
+                        and(equalTo(NORMAILZED_FIELD_1, VALUE_1), equalTo(FIELD_2, VALUE_2)),
+                        json(object(field("bool",
+                                object(field("must",
+                                        array(
+                                                object(field("term", object(
+                                                        field("field1_stuff", VALUE_1)))),
                                                 object(field("term", object(
                                                         field(jsonPointerToDotNotation(FIELD_2.toString()), VALUE_2))))
                                         )

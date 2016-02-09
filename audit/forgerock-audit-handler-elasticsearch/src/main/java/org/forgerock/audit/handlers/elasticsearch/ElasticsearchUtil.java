@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.annotations.VisibleForTesting;
 
@@ -244,5 +245,21 @@ class ElasticsearchUtil {
     private static String replace(final String s, final String fieldName, final JsonValue fieldNames) {
         final JsonValue value = fieldNames.get(fieldName);
         return value.isNull() ? s : s.replace(fieldName, fieldNames.get(fieldName).asString());
+    }
+
+    /**
+     * Replaces periods in {@link JsonPointer} keys with underscore.
+     * @param ptr The {@link JsonPointer} to normalize.
+     * @return A normalized {@link JsonPointer}.
+     */
+    public static JsonPointer normalizeJsonPointer(final JsonPointer ptr) {
+        if (ptr != null) {
+            final String jsonPointer = ptr.toString();
+            final Matcher matcher = PERIOD_CHAR_PATTERN.matcher(jsonPointer);
+            if (matcher.find()) {
+                return new JsonPointer(matcher.replaceAll("_"));
+            }
+        }
+        return ptr;
     }
 }
