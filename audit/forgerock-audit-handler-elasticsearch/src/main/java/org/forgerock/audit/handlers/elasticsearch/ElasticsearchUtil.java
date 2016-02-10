@@ -83,6 +83,9 @@ class ElasticsearchUtil {
     private final static Pattern JSON_KEY_WITH_UNDERSCORE_CHAR_PATTERN =
             Pattern.compile("[{,]\\s*\"((?=[^\"]*[_][^\"]*)[^\"]+)\"\\s*:");
 
+    /**
+     * Regex pattern to find period characters.
+     */
     private final static Pattern PERIOD_CHAR_PATTERN = Pattern.compile("[.]");
 
     /**
@@ -129,14 +132,14 @@ class ElasticsearchUtil {
      */
     public static JsonValue denormalizeJson(final JsonValue value) throws IOException {
         if (value != null) {
-            final JsonValue nomalized = value.get(NORMALIZED_FIELD);
-            if (nomalized.isNotNull()) {
+            final JsonValue normalized = value.get(NORMALIZED_FIELD);
+            if (normalized.isNotNull()) {
                 value.remove(NORMALIZED_FIELD);
             } else {
                 // nothing needs to be de-normalized, because there is no de-normalization metadata
                 return value;
             }
-            return restoreKeyPeriods(value, nomalized);
+            return restoreKeyPeriods(value, normalized);
         }
         return null;
     }
@@ -192,9 +195,17 @@ class ElasticsearchUtil {
         return value;
     }
 
+    /**
+     * Reverses the normalization steps preformed by {@link #replaceKeyPeriodsWithUnderscores(JsonValue, Map)}.
+     *
+     * @param value JSON input
+     * @param normalized De-normalization metadata, which this method may add to
+     * @return Resulting JSON
+     * @throws IOException If unable to parse the json.
+     */
     @VisibleForTesting
-    protected static JsonValue restoreKeyPeriods(final JsonValue value, final JsonValue nomalized) throws IOException {
-        final JsonValue fieldNames = nomalized.get(FIELD_NAMES_FIELD);
+    protected static JsonValue restoreKeyPeriods(final JsonValue value, final JsonValue normalized) throws IOException {
+        final JsonValue fieldNames = normalized.get(FIELD_NAMES_FIELD);
         if (fieldNames.isNotNull()) {
             final String s = objectMapper.writeValueAsString(value.getObject());
             final Matcher m = JSON_KEY_WITH_UNDERSCORE_CHAR_PATTERN.matcher(s);
@@ -249,6 +260,7 @@ class ElasticsearchUtil {
 
     /**
      * Replaces periods in {@link JsonPointer} keys with underscore.
+     *
      * @param ptr The {@link JsonPointer} to normalize.
      * @return A normalized {@link JsonPointer}.
      */

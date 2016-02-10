@@ -92,6 +92,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     private static final boolean ALWAYS_FLUSH_BATCH_QUEUE = true;
     private static final int DEFAULT_OFFSET = 0;
 
+    private final String indexName;
     private final String basicAuthHeaderValue;
     private final String baseUri;
     private final String bulkUri;
@@ -113,6 +114,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = Reject.checkNotNull(configuration);
         this.client = Reject.checkNotNull(client);
+        indexName = configuration.getIndexMapping().getIndexName();
         basicAuthHeaderValue = buildBasicAuthHeaderValue();
         baseUri = buildBaseUri();
         bulkUri = buildBulkUri();
@@ -146,7 +148,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     }
 
     /**
-     * Queries the elastic search
+     * Queries the Elasticsearch
      * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search.html">Search API</a> for
      * audit events.
      *
@@ -173,7 +175,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             final Request request = createRequest(GET, buildSearchUri(topic, pageSize, offset), payload.getObject());
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
-                final String message = "Elasticsearch response (audit/" + topic + SEARCH + "): " + response.getEntity();
+                final String message = "Elasticsearch response (" + indexName + "/" + topic + SEARCH + "): " +
+                        response.getEntity();
                 return newResourceException(response.getStatus().getCode(), message).asPromise();
             }
             JsonValue events = json(response.getEntity().getJson());
@@ -200,7 +203,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
-                return getResourceExceptionPromise(topic, resourceId, response);
+                return getResourceExceptionPromise(indexName, topic, resourceId, response);
             }
 
             // the original audit JSON is under _source, and we also add back the _id
@@ -223,7 +226,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         } else {
             if (!batchIndexer.offer(topic, event)) {
                 return new ServiceUnavailableException("Elasticsearch batch indexer full, so dropping audit event " +
-                        "audit/" + topic + "/" + event.get("_id").asString()).asPromise();
+                        indexName + "/" + topic + "/" + event.get("_id").asString()).asPromise();
             }
             return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
                     event).asPromise();
@@ -253,7 +256,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
-                return getResourceExceptionPromise(topic, resourceId, response);
+                return getResourceExceptionPromise(indexName, topic, resourceId, response);
             }
             return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
                     event).asPromise();
@@ -365,24 +368,26 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         if (baseUri != null) {
             return baseUri;
         }
-        final IndexMappingConfiguration indexMapping = configuration.getIndexMapping();
         final ConnectionConfiguration connection = configuration.getConnection();
         return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + ":" + connection.getPort() +
-                "/" + indexMapping.getIndexName();
+                "/" + indexName;
     }
 
     /**
      * Gets an {@code Exception} {@link Promise} containing an Elasticsearch HTTP response status and payload.
      *
+     * @param indexName Index name
+     * @param topic Event topic
+     * @param resourceId Event ID
      * @param response HTTP response
      * @return {@code Exception} {@link Promise}
      */
     protected static Promise<ResourceResponse, ResourceException> getResourceExceptionPromise(
-            final String topic, final String resourceId, final Response response) {
+            final String indexName, final String topic, final String resourceId, final Response response) {
         if (response.getStatus().getCode() == ResourceException.NOT_FOUND) {
-            return new NotFoundException("Object " + resourceId + " not found in audit/" + topic).asPromise();
+            return new NotFoundException("Object " + resourceId + " not found in " + indexName + "/" + topic).asPromise();
         }
-        final String message = "Elasticsearch response (audit/" + topic + "/" + resourceId + "): "
+        final String message = "Elasticsearch response (" + indexName +"/" + topic + "/" + resourceId + "): "
                 + response.getEntity();
         return newResourceException(response.getStatus().getCode(), message).asPromise();
     }
