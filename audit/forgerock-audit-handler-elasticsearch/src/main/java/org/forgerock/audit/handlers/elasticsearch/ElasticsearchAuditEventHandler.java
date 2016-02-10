@@ -17,7 +17,7 @@ package org.forgerock.audit.handlers.elasticsearch;
 
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.ConnectionConfiguration;
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.IndexMappingConfiguration;
-import static org.forgerock.http.util.Json.readJson;
+import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.objectMapper;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -204,7 +204,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             }
 
             // the original audit JSON is under _source, and we also add back the _id
-            JsonValue jsonValue = json(readJson(response.getEntity().toString()));
+            JsonValue jsonValue = json(response.getEntity().getJson());
             jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
             jsonValue.put(FIELD_CONTENT_ID, resourceId);
             return newResourceResponse(resourceId, null, jsonValue).asPromise();
@@ -244,7 +244,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             // _id is a protected Elasticsearch field, so read it and remove it
             resourceId = event.get(FIELD_CONTENT_ID).asString();
             event.remove(FIELD_CONTENT_ID);
-            final String jsonPayload = ElasticsearchUtil.normalizeJson(event).toString();
+
+            final JsonValue normalizedEvent = ElasticsearchUtil.normalizeJson(event);
+            final String jsonPayload = objectMapper.writeValueAsString(normalizedEvent.getObject());
             event.put(FIELD_CONTENT_ID, resourceId);
 
             final Request request = createRequest(PUT, buildEventUri(topic, resourceId), jsonPayload);
@@ -269,14 +271,15 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             // _id is a protected Elasticsearch field
             final String resourceId = event.get(FIELD_CONTENT_ID).asString();
             event.remove(FIELD_CONTENT_ID);
-            final String jsonPayload = ElasticsearchUtil.normalizeJson(event).toString();
+            final JsonValue normalizedEvent = ElasticsearchUtil.normalizeJson(event);
+            final String jsonPayload = objectMapper.writeValueAsString(normalizedEvent.getObject());
 
             // newlines have special significance in the Bulk API
             // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
             payload.append("{ \"index\" : { \"_type\" : ")
-                    .append(ElasticsearchUtil.objectMapper.writeValueAsString(topic))
+                    .append(objectMapper.writeValueAsString(topic))
                     .append(", \"_id\" : ")
-                    .append(ElasticsearchUtil.objectMapper.writeValueAsString(resourceId))
+                    .append(objectMapper.writeValueAsString(resourceId))
                     .append(" } }\n")
                     .append(jsonPayload)
                     .append('\n');

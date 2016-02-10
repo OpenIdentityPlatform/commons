@@ -154,7 +154,7 @@ class ElasticsearchUtil {
     @VisibleForTesting
     protected static JsonValue replaceKeyPeriodsWithUnderscores(final JsonValue value,
             final Map<String, Object> normalized) throws IOException {
-        final String s = value.toString();
+        final String s = objectMapper.writeValueAsString(value.getObject());
         final Matcher m = JSON_KEY_WITH_PERIOD_CHAR_PATTERN.matcher(s);
         if (m.find()) {
             // fieldNames contains metadata for de-normalization
@@ -196,7 +196,7 @@ class ElasticsearchUtil {
     protected static JsonValue restoreKeyPeriods(final JsonValue value, final JsonValue nomalized) throws IOException {
         final JsonValue fieldNames = nomalized.get(FIELD_NAMES_FIELD);
         if (fieldNames.isNotNull()) {
-            final String s = value.toString();
+            final String s = objectMapper.writeValueAsString(value.getObject());
             final Matcher m = JSON_KEY_WITH_UNDERSCORE_CHAR_PATTERN.matcher(s);
             if (m.find()) {
                 final int n = s.length();

@@ -74,13 +74,15 @@ public class ElasticsearchAuditEventHandlerTest {
     public static final int TOTAL_RESULTS = 1;
     public static final String ID = "id";
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     private String authEventBeforeNormalization;
     private String authEventBatchPayload;
 
     @BeforeTest
     public void beforeTest() throws Exception {
-        authEventBeforeNormalization = resourceAsJsonValue(
-                RESOURCE_PATH + "authEventBeforeNormalization.json").toString();
+        authEventBeforeNormalization = objectMapper.writeValueAsString(
+                resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json").getObject());
         authEventBatchPayload = resourceAsString(RESOURCE_PATH + "authEventBatchPayload.txt");
     }
 
@@ -174,7 +176,7 @@ public class ElasticsearchAuditEventHandlerTest {
         // given
         final JsonValue event = resourceAsJsonValue(RESOURCE_PATH + "authEventReadFromElasticsearch.json");
         final String resourceId = event.get(new JsonPointer("_id")).asString();
-        final Response response = createClientResponse(Status.OK, event.toString());
+        final Response response = createClientResponse(Status.OK, objectMapper.writeValueAsString(event.getObject()));
 
         final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
         when(promise.get()).thenReturn(response);
@@ -189,7 +191,8 @@ public class ElasticsearchAuditEventHandlerTest {
 
         // then
         assertThat(resourceResponse.getId()).isEqualTo(event.get("_id").asString());
-        assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
+        assertThat(objectMapper.writeValueAsString(resourceResponse.getContent().getObject()))
+                .isEqualTo(authEventBeforeNormalization);
     }
 
     @Test
@@ -233,7 +236,8 @@ public class ElasticsearchAuditEventHandlerTest {
 
         // then
         assertThat(resourceResponse.getId()).isEqualTo(resourceId);
-        assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
+        assertThat(objectMapper.writeValueAsString(resourceResponse.getContent().getObject()))
+                .isEqualTo(authEventBeforeNormalization);
     }
 
     @Test
@@ -260,7 +264,8 @@ public class ElasticsearchAuditEventHandlerTest {
 
         // then
         assertThat(resourceResponse.getId()).isEqualTo(resourceId);
-        assertThat(resourceResponse.getContent().toString()).isEqualTo(authEventBeforeNormalization);
+        assertThat(objectMapper.writeValueAsString(resourceResponse.getContent().getObject()))
+                .isEqualTo(authEventBeforeNormalization);
     }
 
     @Test
@@ -353,7 +358,7 @@ public class ElasticsearchAuditEventHandlerTest {
 
     private JsonValue resourceAsJsonValue(final String resourcePath) throws Exception {
         try (final InputStream configStream = getClass().getResourceAsStream(resourcePath)) {
-            return new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
+            return new JsonValue(objectMapper.readValue(configStream, Map.class));
         }
     }
 

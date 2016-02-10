@@ -35,6 +35,8 @@ public class ElasticsearchUtilTest {
     private static final MapEntry<String, String> FIELD_NAME_PAIR =
             MapEntry.entry("org_forgerock_authentication_principal", "org.forgerock.authentication.principal");
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     /**
      * Test that all periods in JSON keys will be replaced by underscores, as required by Elasticsearch.
      */
@@ -50,7 +52,8 @@ public class ElasticsearchUtilTest {
         final JsonValue result = replaceKeyPeriodsWithUnderscores(beforeNormalization, normalized);
 
         // then
-        assertThat(result.toString()).isEqualTo(afterNormalization.toString());
+        assertThat(objectMapper.writeValueAsString(result.getObject()))
+                .isEqualTo(objectMapper.writeValueAsString(afterNormalization.getObject()));
         assertThat(normalized).containsKey(ElasticsearchUtil.FIELD_NAMES_FIELD);
         assertThat((Map<String, Object>) normalized.get(ElasticsearchUtil.FIELD_NAMES_FIELD))
                 .containsExactly(FIELD_NAME_PAIR);
@@ -71,12 +74,13 @@ public class ElasticsearchUtilTest {
         final JsonValue result = restoreKeyPeriods(afterNormalization, JsonValue.json(normalized));
 
         // then
-        assertThat(result.toString()).isEqualTo(beforeNormalization.toString());
+        assertThat(objectMapper.writeValueAsString(result.getObject()))
+                .isEqualTo(objectMapper.writeValueAsString(beforeNormalization.getObject()));
     }
 
     private JsonValue resourceAsJsonValue(final String resourcePath) throws Exception {
         try (final InputStream configStream = getClass().getResourceAsStream(resourcePath)) {
-            return new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
+            return new JsonValue(objectMapper.readValue(configStream, Map.class));
         }
     }
 }
