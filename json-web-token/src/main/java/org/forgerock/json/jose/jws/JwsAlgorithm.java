@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -36,7 +36,13 @@ public enum JwsAlgorithm implements Algorithm {
     /** HMAC using SHA-512 hash algorithm. */
     HS512("HmacSHA512", "SHA-512", JwsAlgorithmType.HMAC),
     /** RSA using SHA-256 hash algorithm. **/
-    RS256("SHA256withRSA", "SHA-256", JwsAlgorithmType.RSA);
+    RS256("SHA256withRSA", "SHA-256", JwsAlgorithmType.RSA),
+    /** ECDSA using SHA-256 hash algorithm. */
+    ES256("SHA256WithECDSA", "SHA-256", JwsAlgorithmType.ECDSA),
+    /** ECDSA using SHA-384 hash algorithm. */
+    ES384("SHA384WithECDSA", "SHA-384", JwsAlgorithmType.ECDSA),
+    /** ECDSA using SHA-512 hash algorithm. */
+    ES512("SHA512WithECDSA", "SHA-512", JwsAlgorithmType.ECDSA);
 
     private final String algorithm;
     private final String mdAlgorithm;
@@ -50,7 +56,7 @@ public enum JwsAlgorithm implements Algorithm {
      * @param mdAlgorithm The MessageDigest algorithm.
      * @param algorithmType The JwsAlgorithmType of the JwsAlgorithm.
      */
-    private JwsAlgorithm(String algorithm, String mdAlgorithm, JwsAlgorithmType algorithmType) {
+    JwsAlgorithm(String algorithm, String mdAlgorithm, JwsAlgorithmType algorithmType) {
         this.algorithm = algorithm;
         this.mdAlgorithm = mdAlgorithm;
         this.algorithmType = algorithmType;
@@ -76,6 +82,24 @@ public enum JwsAlgorithm implements Algorithm {
      */
     public String getMdAlgorithm() {
         return mdAlgorithm;
+    }
+
+    /**
+     * Return the standard name of the elliptic curve definition. Only applicable for ECDSA algorithms.
+     *
+     * @return the curve name or null if not applicable.
+     */
+    public String getEllipticCurveName() {
+        switch (this) {
+        case ES256:
+            return "P-256";
+        case ES384:
+            return "P-384";
+        case ES512:
+            return "P-521"; // Not a typo!
+        default:
+            return null;
+        }
     }
 
     /**

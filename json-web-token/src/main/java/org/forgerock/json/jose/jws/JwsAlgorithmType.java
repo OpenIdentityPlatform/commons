@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -29,7 +29,9 @@ public enum JwsAlgorithmType {
     /** HMAC signing algorithm. */
     HMAC,
     /** RSA signing algorithm. */
-    RSA;
+    RSA,
+    /** Elliptic Curve DSA signing algorithm. */
+    ECDSA;
 
     /**
      * Turns the JwsAlgorithmType constant into a JSON value string.

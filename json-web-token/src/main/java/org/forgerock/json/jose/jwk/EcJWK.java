@@ -11,19 +11,27 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwk;
 
+import java.math.BigInteger;
+import java.security.GeneralSecurityException;
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECPoint;
+import java.security.spec.ECPrivateKeySpec;
+import java.security.spec.ECPublicKeySpec;
 import java.util.List;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.jose.jws.SupportedEllipticCurve;
 import org.forgerock.util.encode.Base64;
+import org.forgerock.util.encode.Base64url;
 
 /**
  * This class implements an Elliptical Curve Json Web Key storage and manipulation class.
@@ -193,19 +201,16 @@ public class EcJWK extends JWK {
      * @return an ECPublicKey
      */
     public ECPublicKey toECPublicKey() {
-        /*
         try {
-            ECParameterSpec spec = NamedCurve.getECParameterSpec(getCurve());
+            final SupportedEllipticCurve curve = SupportedEllipticCurve.forName(getCurve());
+
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
             ECPoint point = new ECPoint(new BigInteger(Base64url.decode(getX())),
-                                        new BigInteger(Base64url.decode(getY())));
-            ECPublicKeySpec pubspec = new ECPublicKeySpec(point, spec);
-            ECPublicKey pub = (ECPublicKey) ECKeyFactory.INSTANCE.generatePublic(pubspec);
-            return pub;
-        } catch (Exception e) {
-            throw new JsonException("Unable to create public EC key.", e);
+                    new BigInteger(Base64url.decode(getY())));
+            return (ECPublicKey) keyFactory.generatePublic(new ECPublicKeySpec(point, curve.getParameters()));
+        } catch (GeneralSecurityException e) {
+            throw new JsonException("Unable to create EC Public Key", e);
         }
-        */
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -213,17 +218,15 @@ public class EcJWK extends JWK {
      * @return an ECPrivateKey
      */
     public ECPrivateKey toECPrivateKey() {
-        /*
         try {
-            ECParameterSpec spec = NamedCurve.getECParameterSpec(getCurve());
-            ECPrivateKeySpec privspec = new ECPrivateKeySpec(new BigInteger(Base64url.decode(getD())), spec);
-            ECPrivateKey priv = (ECPrivateKey) ECKeyFactory.INSTANCE.generatePrivate(privspec);
-            return priv;
-        } catch (Exception e) {
-            throw new JsonException("Unable to create private EC key.", e);
+            final SupportedEllipticCurve curve = SupportedEllipticCurve.forName(getCurve());
+
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
+            final BigInteger s = new BigInteger(Base64url.decode(getD()));
+            return (ECPrivateKey) keyFactory.generatePrivate(new ECPrivateKeySpec(s, curve.getParameters()));
+        } catch (GeneralSecurityException e) {
+            throw new JsonException("Unable to create EC Private Key", e);
         }
-        */
-        throw new UnsupportedOperationException();
     }
 
     /**

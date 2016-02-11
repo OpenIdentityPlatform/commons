@@ -11,18 +11,21 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
 
+import java.security.Key;
+import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
+
+import org.forgerock.json.jose.jws.handlers.ECDSASigningHandler;
 import org.forgerock.json.jose.jws.handlers.HmacSigningHandler;
 import org.forgerock.json.jose.jws.handlers.NOPSigningHandler;
 import org.forgerock.json.jose.jws.handlers.RSASigningHandler;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.util.SignatureUtil;
-
-import java.security.Key;
 
 /**
  * A service to get the appropriate SigningHandler for a specific Java Cryptographic signing algorithm.
@@ -69,4 +72,26 @@ public class SigningManager {
     public SigningHandler newRsaSigningHandler(Key key) {
         return new RSASigningHandler(key, signatureUtil);
     }
+
+    /**
+     * Constructs a new handler for signing ES256 signatures.
+     *
+     * @param key the elliptic curve private key. Should use the required curve for the given signing algorithm
+     *            (P-256 for ES256).
+     * @return the signing handler.
+     */
+    public SigningHandler newEcdsaSigningHandler(ECPrivateKey key) {
+        return new ECDSASigningHandler(key);
+    }
+
+    /**
+     * Constructs a new handler for verifying ES256 signatures.
+     * @param key the elliptic curve public key. Should use the required curve for the given signing algorithm (P-256
+     *            for ES256).
+     * @return the signing handler configured for verification.
+     */
+    public SigningHandler newEcdsaVerificationHandler(ECPublicKey key) {
+        return new ECDSASigningHandler(key);
+    }
+
 }
