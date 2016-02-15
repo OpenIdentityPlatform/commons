@@ -11,7 +11,7 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014-2015 ForgeRock AS.
+* Copyright 2014-2016 ForgeRock AS.
 */
 
 package org.forgerock.jaspi.modules.openid.resolvers;
@@ -154,7 +154,7 @@ public class JWKOpenIdResolverImpl extends BaseOpenIdResolver {
         }
 
         key = keyMap.get(idClaim.getHeader().getKeyId());
-        if (key == null || !idClaim.verify(signingManager.newRsaSigningHandler(key))) {
+        if (key == null || !idClaim.verify(createSigningHandlerForKey(signingManager, key))) {
             LOG.debug("JWS unable to be verified");
             throw new InvalidSignatureException("JWS unable to be verified");
         }

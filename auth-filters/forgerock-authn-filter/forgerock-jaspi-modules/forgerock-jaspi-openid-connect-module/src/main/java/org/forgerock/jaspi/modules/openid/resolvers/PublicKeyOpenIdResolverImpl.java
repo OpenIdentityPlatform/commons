@@ -11,7 +11,7 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014-2015 ForgeRock AS.
+* Copyright 2014-2016 ForgeRock AS.
 */
 
 package org.forgerock.jaspi.modules.openid.resolvers;
@@ -67,7 +67,7 @@ public class PublicKeyOpenIdResolverImpl extends BaseOpenIdResolver {
      * @throws InvalidSignatureException If the JWS supplied does not match the key for this resolver
      */
     public void verifySignature(final SignedJwt idClaim) throws InvalidSignatureException {
-        if (!idClaim.verify(signingManager.newRsaSigningHandler(key))) {
+        if (!idClaim.verify(createSigningHandlerForKey(signingManager, key))) {
             LOG.debug("JWS signature not signed with supplied key");
             throw new InvalidSignatureException("JWS signature not signed with supplied key");
         }

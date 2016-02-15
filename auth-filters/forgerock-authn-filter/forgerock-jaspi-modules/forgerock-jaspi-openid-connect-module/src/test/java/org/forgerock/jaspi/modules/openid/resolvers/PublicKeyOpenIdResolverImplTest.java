@@ -11,7 +11,7 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2016 ForgeRock AS.
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
@@ -24,6 +24,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.security.PublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
 
 import static org.mockito.BDDMockito.given;
@@ -37,7 +38,7 @@ public class PublicKeyOpenIdResolverImplTest {
     @BeforeMethod
     public void setUp() {
         signingHandler = mock(SigningHandler.class);
-        PublicKey mockKey = mock(PublicKey.class);
+        PublicKey mockKey = mock(RSAPublicKey.class);
         testResolver = new PublicKeyOpenIdResolverImpl("Test", mockKey);
     }
 

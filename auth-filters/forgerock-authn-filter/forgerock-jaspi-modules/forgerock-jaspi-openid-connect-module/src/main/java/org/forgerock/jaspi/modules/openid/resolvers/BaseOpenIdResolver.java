@@ -11,15 +11,22 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2016 ForgeRock AS.
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
+import java.security.Key;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
 import java.util.Date;
+import javax.crypto.SecretKey;
+
 import org.forgerock.jaspi.modules.openid.exceptions.InvalidIssException;
 import org.forgerock.jaspi.modules.openid.exceptions.JwtExpiredException;
 import org.forgerock.jaspi.modules.openid.exceptions.OpenIdConnectVerificationException;
 import org.forgerock.json.jose.jws.SignedJwt;
+import org.forgerock.json.jose.jws.SigningManager;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 
 /**
  * Implementation of the OpenIdResolver interface. Comments in the specific verify methods
@@ -84,6 +91,25 @@ public abstract class BaseOpenIdResolver implements OpenIdResolver {
         verifyExpiration(idClaim.getClaimsSet().getExpirationTime());
     }
 
+    /**
+     * Determine an appropriate signing handler to use for verifying signatures using the given verification key.
+     *
+     * @param signingManager the signing manager.
+     * @param key the verification key.
+     * @return the appropriate signing handler.
+     * @throws IllegalArgumentException if no handler can be determined for the given key.
+     */
+    protected SigningHandler createSigningHandlerForKey(final SigningManager signingManager, final Key key) {
+        if (key instanceof ECPublicKey) {
+            return signingManager.newEcdsaVerificationHandler(((ECPublicKey) key));
+        } else if (key instanceof RSAPublicKey) {
+            return signingManager.newRsaSigningHandler(key);
+        } else if (key instanceof SecretKey) {
+            return signingManager.newHmacSigningHandler(key.getEncoded());
+        } else {
+            throw new IllegalArgumentException("Unable to determine signing algorithm");
+        }
+    }
 
     /**
      * {@inheritDoc}
