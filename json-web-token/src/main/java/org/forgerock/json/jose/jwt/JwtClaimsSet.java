@@ -16,18 +16,12 @@
 
 package org.forgerock.json.jose.jwt;
 
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.AUD;
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.EXP;
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.IAT;
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.ISS;
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.JTI;
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.NBF;
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.SUB;
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.TYP;
-import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.getClaimSetKey;
+import static java.util.Collections.*;
+import static org.forgerock.json.jose.jwt.JwtClaimsSetKey.*;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -178,7 +172,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
      */
     public void addAudience(String audience) {
         StringOrURI.validateStringOrURI(audience);
-        getAudienceNullCheck().add(audience);
+        addAudienceWithTypeCheck(audience);
     }
 
     /**
@@ -188,23 +182,22 @@ public class JwtClaimsSet extends JWObject implements Payload {
      * @see #addAudience(String)
      */
     public void addAudience(URI audience) {
-        getAudienceNullCheck().add(audience.toString());
+        addAudienceWithTypeCheck(audience.toString());
     }
 
-    /**
-     * Gets the JWT's intended audience list from the Claims Set.
-     * <p>If audience claim has not been set before, the method will create the list to contain the audience
-     * claim and set it in the Claims Set.
-     *
-     * @return The list of the JWT's intended audience.
-     */
-    private List<String> getAudienceNullCheck() {
-        List<String> audienceList = getAudience();
-        if (audienceList == null) {
-            audienceList = new ArrayList<>();
+    private void addAudienceWithTypeCheck(String audience) {
+        JsonValue audienceClaim = get(AUD.value());
+
+        if (audienceClaim.isNull()) {
+            put(AUD.value(), audience);
+        } else if (audienceClaim.isList()) {
+            audienceClaim.asList().add(audience);
+        } else {
+            List<String> audienceList = new ArrayList<>();
+            audienceList.add(audienceClaim.asString());
+            audienceList.add(audience);
             put(AUD.value(), audienceList);
         }
-        return audienceList;
     }
 
     /**
@@ -213,7 +206,14 @@ public class JwtClaimsSet extends JWObject implements Payload {
      * @return The JWT's intended audience or {@code null} if claim not present.
      */
     public List<String> getAudience() {
-        return get(AUD.value()).asList(String.class);
+        JsonValue audience = get(AUD.value());
+        if (audience.isNull()) {
+            return null;
+        } else if (audience.isList()) {
+            return audience.asList(String.class);
+        } else {
+            return singletonList(audience.asString());
+        }
     }
 
     /**

@@ -131,9 +131,24 @@ public class JwtClaimsSetTest {
         claimsSet.addAudience("AUDIENCE");
 
         //Then
+        assertThat(claimsSet.get("aud").required().isString()).isTrue();
+        assertThat(claimsSet.get("aud").asString()).isEqualTo("AUDIENCE");
+    }
+
+    @Test
+    public void addingSecondAudienceShouldConvertAudienceToList() {
+
+        //Given
+        JwtClaimsSet claimsSet = new JwtClaimsSet();
+        claimsSet.addAudience("AUDIENCE1");
+
+        //When
+        claimsSet.addAudience("AUDIENCE2");
+
+        //Then
         assertThat(claimsSet.get("aud").required().isList()).isTrue();
-        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(1);
-        assertThat(claimsSet.get("aud").asList(String.class)).contains("AUDIENCE");
+        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(2);
+        assertThat(claimsSet.get("aud").asList(String.class)).contains("AUDIENCE1", "AUDIENCE2");
     }
 
     @Test
@@ -147,10 +162,9 @@ public class JwtClaimsSetTest {
         claimsSet.addAudience(audience);
 
         //Then
-        assertThat(claimsSet.get("aud").required().isList()).isTrue();
-        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(1);
-        assertThat(claimsSet.get("aud").asList(String.class)).contains("urn:example:animal:ferret:nose");
-        assertThat(new URI(claimsSet.get("aud").asList(String.class).get(0))).isEqualTo(audience);
+        assertThat(claimsSet.get("aud").required().isString()).isTrue();
+        assertThat(claimsSet.get("aud").asString()).isEqualTo("urn:example:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("aud").asString())).isEqualTo(audience);
     }
 
     @Test
@@ -652,17 +666,16 @@ public class JwtClaimsSetTest {
 
         //Given
         Map<String, Object> claims = new HashMap<>();
-        URI audience = new URI("urn:audience1:animal:ferret:nose");
+        URI audience = new URI("urn:example:animal:ferret:nose");
         claims.put("aud", audience);
 
         //When
         JwtClaimsSet claimsSet = new JwtClaimsSet(claims);
 
         //Then
-        assertThat(claimsSet.get("aud").required().isList()).isTrue();
-        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(1);
-        assertThat(claimsSet.get("aud").asList(String.class)).contains("urn:audience1:animal:ferret:nose");
-        assertThat(new URI(claimsSet.get("aud").asList(String.class).get(0))).isEqualTo(audience);
+        assertThat(claimsSet.get("aud").required().isString()).isTrue();
+        assertThat(claimsSet.get("aud").asString()).isEqualTo("urn:example:animal:ferret:nose");
+        assertThat(new URI(claimsSet.get("aud").asString())).isEqualTo(audience);
     }
 
     @Test
@@ -676,9 +689,8 @@ public class JwtClaimsSetTest {
         JwtClaimsSet claimsSet = new JwtClaimsSet(claims);
 
         //Then
-        assertThat(claimsSet.get("aud").required().isList()).isTrue();
-        assertThat(claimsSet.get("aud").asList(String.class)).hasSize(1);
-        assertThat(claimsSet.get("aud").asList(String.class)).contains("AUDIENCE");
+        assertThat(claimsSet.get("aud").required().isString()).isTrue();
+        assertThat(claimsSet.get("aud").asString()).isEqualTo("AUDIENCE");
     }
 
     @Test(expectedExceptions = JwtRuntimeException.class)

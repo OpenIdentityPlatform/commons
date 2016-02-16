@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.spec;
@@ -380,7 +380,7 @@ public class JwtImplementationSpecTest {
         String[] jwtParts = jwtString.split("\\.", -1);
         String claimsSetString = new String(Base64url.decode(jwtParts[1]));
         Map<String, Object> jwtMap = JwtTestHelper.jsonToMap(claimsSetString);
-        assertTrue(((List<?>) jwtMap.get("aud")).get(0) instanceof String);
+        assertTrue((jwtMap.get("aud")) instanceof String);
     }
 
     @Test
