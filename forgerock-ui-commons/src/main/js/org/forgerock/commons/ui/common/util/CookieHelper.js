@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define, unescape*/
@@ -57,7 +57,7 @@ define("org/forgerock/commons/ui/common/util/CookieHelper", [
      * @param {String} [value] - cookie value.
      * @param {Date} [expirationDate] - cookie expiration date.
      * @param {String} [path] - cookie path.
-     * @param {String|String[]} [domain] - cookie domain(s).
+     * @param {String|String[]} [domain] - cookie domain(s). Use empty array for creating host-only cookies.
      * @param {Boolean} [secure] - is cookie secure.
      */
     obj.setCookie = function (name, value, expirationDate, path, domains, secure) {
@@ -65,9 +65,13 @@ define("org/forgerock/commons/ui/common/util/CookieHelper", [
             domains = [domains];
         }
 
-        _.each(domains, function(domain) {
-            document.cookie = obj.createCookie(name, value, expirationDate, path, domain, secure);
-        });
+        if (domains.length === 0) {
+            document.cookie = obj.createCookie(name, value, expirationDate, path, undefined, secure);
+        } else {
+            _.each(domains, function(domain) {
+                document.cookie = obj.createCookie(name, value, expirationDate, path, domain, secure);
+            });
+        }
     };
 
     /**
