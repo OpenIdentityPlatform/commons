@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -104,7 +104,7 @@ public class RoutingTest {
 
         //Then
         if (expectedContentResourceApiVersion != null) {
-            assertThat(response.getHeaders().getFirst(ContentApiVersionHeader.NAME)).isEqualTo("protocol=2.0,resource="
+            assertThat(response.getHeaders().getFirst(ContentApiVersionHeader.NAME)).isEqualTo("protocol=2.1,resource="
                     + expectedContentResourceApiVersion);
         } else {
             assertThat(response.getHeaders().getFirst(ContentApiVersionHeader.NAME)).isNull();

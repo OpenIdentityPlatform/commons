@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
+import static org.forgerock.http.routing.Version.version;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 
 import java.io.ByteArrayOutputStream;
@@ -400,7 +401,8 @@ public class HttpUtilsTest {
         return new Object[][] {
             { putRequest("1.0", "1", null) },
             { putRequest("2.0", "1", null) },
-            { putRequest(null, "1", null) }
+            { putRequest(null, "1", null) },
+            { postRequestNoActionParamDefactoCreateUnsupportedVersion() }
         };
     }
 
@@ -424,6 +426,8 @@ public class HttpUtilsTest {
             { RequestType.PATCH, patchRequest() },
             { RequestType.ACTION, postRequestNonCreateActionParam() },
             { RequestType.CREATE, postRequestCreateActionParam() },
+            { RequestType.CREATE, postRequestNoActionParamDefactoCreateSupportedVersion() },
+            { RequestType.CREATE, postRequestNoActionParamDefaultVersion() },
 
             // Protocol 1.0 PUT tests
             { RequestType.CREATE, putRequest("1.0", HttpUtils.ETAG_ANY, null) },
@@ -482,6 +486,23 @@ public class HttpUtilsTest {
         Request request = newRequest()
                 .setMethod(HttpUtils.METHOD_POST);
         request.setUri(URI.create("?" + HttpUtils.PARAM_ACTION + "=test"));
+        return request;
+    }
+
+    private Request postRequestNoActionParamDefactoCreateSupportedVersion() {
+        Request request = newRequest().setMethod(HttpUtils.METHOD_POST);
+        request.getHeaders().add(new AcceptApiVersionHeader(version(2, 1), version(1)));
+        return request;
+    }
+
+    private Request postRequestNoActionParamDefactoCreateUnsupportedVersion() {
+        Request request = newRequest().setMethod(HttpUtils.METHOD_POST);
+        request.getHeaders().add(new AcceptApiVersionHeader(version(2, 0), version(1)));
+        return request;
+    }
+
+    private Request postRequestNoActionParamDefaultVersion() {
+        Request request = newRequest().setMethod(HttpUtils.METHOD_POST);
         return request;
     }
 

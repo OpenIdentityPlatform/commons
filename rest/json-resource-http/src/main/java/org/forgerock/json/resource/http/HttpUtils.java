@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -148,8 +148,14 @@ public final class HttpUtils {
     public static final Version PROTOCOL_VERSION_1 = version(1);
     /** Protocol Version 2 - supports upsert on PUT. */
     public static final Version PROTOCOL_VERSION_2 = version(2);
+    /**
+     * Protocol Version 2.1 - supports defacto standard for create requests when the ID of the created resource is
+     * to be allocated by the server, which are represented as a POST to the collection endpoint without an
+     * {@code _action} query parameter.
+     */
+    public static final Version PROTOCOL_VERSION_2_1 = version(2, 1);
     /** The default version of the named protocol. */
-    public static final Version DEFAULT_PROTOCOL_VERSION = PROTOCOL_VERSION_2;
+    public static final Version DEFAULT_PROTOCOL_VERSION = PROTOCOL_VERSION_2_1;
     static final String FIELDS_DELIMITER = ",";
     static final String SORT_KEYS_DELIMITER = ",";
 
@@ -320,18 +326,25 @@ public final class HttpUtils {
         } else if (METHOD_PATCH.equals(method)) {
             return RequestType.PATCH;
         } else if (METHOD_POST.equals(method)) {
-            final String action = asSingleValue(PARAM_ACTION, getParameter(request, PARAM_ACTION));
-            if (action.equalsIgnoreCase(ACTION_ID_CREATE)) {
-                return RequestType.CREATE;
-            } else {
-                return RequestType.ACTION;
-            }
+            return determinePostRequestType(request);
         } else if (METHOD_PUT.equals(method)) {
             return determinePutRequestType(request);
         } else {
             // TODO: i18n
             throw new NotSupportedException("Method " + method + " not supported");
         }
+    }
+
+    private static RequestType determinePostRequestType(org.forgerock.http.protocol.Request request)
+            throws ResourceException {
+        List<String> parameter = getParameter(request, PARAM_ACTION);
+
+        boolean defactoCreate = getRequestedProtocolVersion(request).compareTo(PROTOCOL_VERSION_2_1) >= 0
+                && (parameter == null || parameter.isEmpty());
+
+        return defactoCreate || asSingleValue(PARAM_ACTION, parameter).equalsIgnoreCase(ACTION_ID_CREATE)
+                ? RequestType.CREATE
+                : RequestType.ACTION;
     }
 
     /**
