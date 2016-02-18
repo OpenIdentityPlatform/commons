@@ -20,8 +20,9 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/ErrorsHandler",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function($, _, AbstractConfigurationAware, Constants, EventManager) {
+], function($, _, AbstractConfigurationAware, Constants, ErrorsHandler, EventManager) {
     /**
      * @exports org/forgerock/commons/ui/common/main/ServiceInvoker
      */
@@ -49,7 +50,44 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
         var successCallback = options.success,
             errorCallback = options.error,
             hasDataType = options.hasOwnProperty("dataType"),
-            isJSONRequest = hasDataType && options.dataType === "json";
+            isJSONRequest = hasDataType && options.dataType === "json",
+            promise = $.Deferred(),
+            resolveHandler,
+            rejectHandler;
+
+        resolveHandler = function () {
+            promise.resolve.apply(promise, arguments);
+        };
+
+        rejectHandler = function (jqXHR, textStatus, errorThrown) {
+            if (!options.suppressEvents) {
+                // attempt to handle session timeout errors (indicated by a 401)
+                // gracefully, by deferring the failure until after the user has
+                // had a chance to reauthenticate. After they have successfully
+                // logged-in, resubmit their original request. Only do this if there
+                // isn't an errorsHandler for 401 included in the request.
+                if (jqXHR.status === 401 && !ErrorsHandler.matchError({status:401},options.errorsHandlers)) {
+                    EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG, {
+                        authenticatedCallback : function () {
+                            $.ajax(options).then(resolveHandler,rejectHandler);
+                        }
+                    });
+                } else {
+                    EventManager.sendEvent(Constants.EVENT_REST_CALL_ERROR, {
+                        data: $.extend({}, jqXHR, { type: this.type }),
+                        textStatus: textStatus,
+                        errorThrown: errorThrown,
+                        errorsHandlers: options.errorsHandlers
+                    });
+                    if(errorCallback) { errorCallback(jqXHR); }
+                    promise.reject.apply(promise, arguments);
+                }
+            } else {
+                if(errorCallback) { errorCallback(jqXHR); }
+                promise.reject.apply(promise, arguments);
+            }
+
+        };
 
         /**
          * Logic to cover two scenarios:
@@ -93,19 +131,12 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
                 if(successCallback) { successCallback(data, jqXHR); }
             }
         };
-        options.error = function (jqXHR, textStatus, errorThrown ) {
-            // TODO: Try to handle error
-            if (!options.suppressEvents) {
-                EventManager.sendEvent(Constants.EVENT_REST_CALL_ERROR, {
-                    data: $.extend({}, jqXHR, { type: this.type }),
-                    textStatus: textStatus,
-                    errorThrown: errorThrown,
-                    errorsHandlers: options.errorsHandlers
-                });
-            }
 
-            if(errorCallback) { errorCallback(jqXHR); }
-        };
+        // The error handling function passed into restCall will be executed
+        // (if defined) as part of the rejectHandler above. A provided success
+        // handler will execute as normal, because there is no special logic
+        // needed around handling successful requests.
+        delete options.error;
 
         options.xhrFields = {
             /**
@@ -128,7 +159,9 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
             options.headers["Cache-Control"] = "no-cache";
         }
 
-        return $.ajax(options);
+        $.ajax(options).then(resolveHandler,rejectHandler);
+
+        return promise;
     };
 
     /**

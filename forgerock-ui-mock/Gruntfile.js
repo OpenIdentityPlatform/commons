@@ -161,7 +161,7 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask("build", ["eslint", "less", "requirejs"]);
-    grunt.registerTask("build-dev", ["less", "sync", "qunit"]);
+    grunt.registerTask("build-dev", ["less", "sync"]); //, "qunit"
     grunt.registerTask("dev", ["build-dev", "watch"]);
     grunt.registerTask("default", "dev");
 };

@@ -32,9 +32,10 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
         template: "templates/common/LoginDialog.html",
         element: "#dialogs",
 
-        render: function () {
-
-            var dialogBody = $('<div id="loginDialog"></div>');
+        render: function (options) {
+            var dialogBody = $('<div id="loginDialog"></div>'),
+                authenticatedCallback = options.authenticatedCallback,
+                _this = this;
 
             this.$el.find('#dialogs').append(dialogBody);
             // attaching BootstrapDialog via '#dialogs' so that it is encapsulated withing the qunit-fixture for testing
@@ -53,25 +54,25 @@ define("org/forgerock/commons/ui/common/LoginDialog", [
                     "replace");
                 }, this),
                 buttons: [{
+                    id: "loginDialogSubmitButton",
                     label: $.t("common.user.login"),
                     cssClass: "btn-primary",
                     hotkey: 13,
                     action: function(dialog) {
                         var userName,
-                            password,
-                            refreshOnLogin;
+                            password;
 
                         userName = dialog.$modalBody.find("input[name=login]").val();
                         password = dialog.$modalBody.find("input[name=password]").val();
-                        refreshOnLogin = dialog.$modalBody.find("input[name=refreshOnLogin]:checked").val();
 
                         SessionManager.login({"userName":userName, "password":password}, function(user) {
                             Configuration.setProperty('loggedUser', user);
                             EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
                             EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
                             dialog.close();
-                            if (refreshOnLogin) {
-                                ViewManager.refresh();
+
+                            if (authenticatedCallback) {
+                                authenticatedCallback();
                             }
                         }, function() {
                             EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authenticationFailed");

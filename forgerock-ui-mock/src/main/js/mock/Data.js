@@ -50,6 +50,26 @@
         );
 
         server.respondWith(
+            "POST",
+            /\/mock\/loginCheck/,
+            function (request) {
+                if (!Configuration.loggedUser) {
+                    request.respond(
+                        401,
+                        {},
+                        JSON.stringify({"code":401,"reason":"Unauthorized","message":"Access Denied"})
+                    );
+                } else {
+                    request.respond(
+                        200,
+                        {},
+                        JSON.stringify({"code":200,details:Configuration.loggedUser})
+                    );
+                }
+            }
+        );
+
+        server.respondWith(
             "PATCH",
             /\/mock\/selfservice\/user\/.*/,
             function (request) {

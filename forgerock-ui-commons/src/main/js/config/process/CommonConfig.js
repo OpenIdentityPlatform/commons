@@ -115,64 +115,22 @@ define("config/process/CommonConfig", [
                 "org/forgerock/commons/ui/common/main/SessionManager"
             ],
             processDescription: function(error, Router, Configuration, SessionManager) {
-                var setGoToUrlProperty = function () {
-                    var hash = Router.getCurrentHash();
-                    if (!Configuration.gotoURL && !hash.match(Router.configuration.routes.login.url)) {
-                        Configuration.setProperty("gotoURL", "#" + hash);
-                    }
-                };
-
-                // Multiple rest calls that all return authz failures will cause this event to be called multiple times
-                if (Configuration.globalData.authorizationFailurePending !== undefined) {
-                    return;
+                var hash = Router.getCurrentHash();
+                if (!Configuration.gotoURL && !hash.match(Router.configuration.routes.login.url)) {
+                    Configuration.setProperty("gotoURL", "#" + hash);
                 }
 
-                Configuration.globalData.authorizationFailurePending = true;
-
-                if (!Configuration.loggedUser) {
-                    setGoToUrlProperty();
-
-                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
-                        anonymousMode: true
-                    });
-                    return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
-                        route: Router.configuration.routes.login
-                    });
+                if (Configuration.loggedUser) {
+                    SessionManager.logout();
+                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
                 }
 
-                function logout (callback) {
-                    setGoToUrlProperty();
-
-                    return SessionManager.logout().then(function() {
-                        EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
-                            anonymousMode: true
-                        });
-                        EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                        return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
-                            route: Router.configuration.routes.login
-                        });
-                    });
-
-                }
-
-                if (typeof error !== "object" || error === null ||
-                    typeof error.error !== "object" || error.error === null) {
-                    return logout();
-                } else {
-                    // Special case for GET requests, behavior should be different based on the error code returned
-                    if (error.error.type === "GET") {
-                        if (error.error.status === 403) {
-                            // 403 Forbidden. Log out and redirect to the login view
-                            return logout();
-                        } else if (error.error.status === 401) {
-                            // 401 Unauthorized. Unauthorized in-app GET requests, just show the login dialog
-                            return EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
-                        }
-                    } else {
-                        // Session expired, just show the login dialog
-                        return EventManager.sendEvent(Constants.EVENT_SHOW_LOGIN_DIALOG);
-                    }
-                }
+                EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
+                    anonymousMode: true
+                });
+                EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                    route: Router.configuration.routes.login
+                });
             }
         },
         {
@@ -461,10 +419,30 @@ define("config/process/CommonConfig", [
             startEvent: Constants.EVENT_SHOW_LOGIN_DIALOG,
             description: "",
             dependencies: [
-                "LoginDialog"
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "LoginDialog",
+                "org/forgerock/commons/ui/common/util/Queue"
             ],
-            processDescription: function(event, LoginDialog) {
-                LoginDialog.render(event);
+            processDescription: function(event, Configuration, LoginDialog, Queue) {
+                var queueName = "loginDialogAuthCallbacks";
+                if (!Configuration.globalData[queueName]) {
+                    Configuration.globalData[queueName] = new Queue();
+                }
+                // only render the LoginDialog if it has an empty callback queue
+                if (!Configuration.globalData[queueName].peek()) {
+                    LoginDialog.render({
+                        authenticatedCallback: function () {
+                            var callback = Configuration.globalData[queueName].remove();
+                            while (callback) {
+                                callback();
+                                callback = Configuration.globalData[queueName].remove();
+                            }
+                        }
+                    });
+                }
+                if (event.authenticatedCallback) {
+                    Configuration.globalData[queueName].add(event.authenticatedCallback);
+                }
             }
         },
         {
