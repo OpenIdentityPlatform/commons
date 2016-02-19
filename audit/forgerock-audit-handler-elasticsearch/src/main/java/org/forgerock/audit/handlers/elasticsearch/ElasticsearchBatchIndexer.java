@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static java.lang.Math.max;
 
@@ -33,6 +35,8 @@ import static java.lang.Math.max;
  * Uses Elasticsearch Bulk API to index audit events in batches.
  */
 class ElasticsearchBatchIndexer {
+
+    private static final Logger logger = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
 
     private static final int MIN_QUEUE_SIZE = 10000;
     private static final int MIN_BATCH_SIZE = 500;
@@ -210,10 +214,21 @@ class ElasticsearchBatchIndexer {
                 try {
                     // add to batch
                     for (final BatchEntry entry : batch) {
-                        eventHandler.addToBatch(entry.getTopic(), entry.getEvent(), payload);
+                        try {
+                            eventHandler.addToBatch(entry.getTopic(), entry.getEvent(), payload);
+                        } catch (Exception e) {
+                            logger.error("addToBatch failed", e);
+                        }
                     }
+
                     // send batch
-                    eventHandler.publishBatch(payload.toString());
+                    if (payload.length() != 0) {
+                        try {
+                            eventHandler.publishBatch(payload.toString());
+                        } catch (Exception e) {
+                            logger.error("publishBatch failed", e);
+                        }
+                    }
                 } finally {
                     // clear buffers to prepare for next batch
                     batch.clear();

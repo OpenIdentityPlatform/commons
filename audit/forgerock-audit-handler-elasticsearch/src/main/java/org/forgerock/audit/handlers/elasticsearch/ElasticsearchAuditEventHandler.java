@@ -16,7 +16,6 @@
 package org.forgerock.audit.handlers.elasticsearch;
 
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.ConnectionConfiguration;
-import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.IndexMappingConfiguration;
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.objectMapper;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -28,6 +27,8 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import org.forgerock.audit.Audit;
@@ -268,8 +269,17 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         }
     }
 
+    /**
+     * Adds an audit event to an Elasticsearch Bulk API payload.
+     *
+     * @param topic Event topic
+     * @param event Event JSON payload
+     * @param payload Elasticsearch Bulk API payload
+     * @throws BatchException indicates failure to add-to-batch
+     */
     @Override
-    public void addToBatch(final String topic, final JsonValue event, final StringBuilder payload) {
+    public void addToBatch(final String topic, final JsonValue event, final StringBuilder payload)
+            throws BatchException {
         try {
             // _id is a protected Elasticsearch field
             final String resourceId = event.get(FIELD_CONTENT_ID).asString();
@@ -286,22 +296,47 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                     .append(" } }\n")
                     .append(jsonPayload)
                     .append('\n');
-        } catch (Exception e) {
-            logger.error("Elasticsearch batch creation failed", e);
+        } catch (IOException e) {
+            throw new BatchException("Unexpected error while adding to batch", e);
         }
     }
 
+    /**
+     * Publishes a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html">Bulk API</a>
+     * payload to Elasticsearch.
+     *
+     * @param payload Elasticsearch Bulk API payload
+     * @throws BatchException indicates (full or partial) failure to publish batch
+     */
     @Override
-    public void publishBatch(final String payload) {
+    public void publishBatch(final String payload) throws BatchException {
         try {
             final Request request = createRequest(POST, buildBulkUri(), payload);
 
             final Response response = client.send(request).get();
             if (!response.getStatus().isSuccessful()) {
-                logger.warn("Elasticsearch batch index failed: " + response.getEntity());
+                throw new BatchException("Elasticsearch batch index failed: " + response.getEntity());
+            } else {
+                final JsonValue responseJson = json(response.getEntity().getJson());
+                if (responseJson.get("errors").asBoolean()) {
+                    // one or more batch index operations failed, so log failures
+                    final JsonValue items = responseJson.get("items");
+                    final int n = items.size();
+                    final List<Object> failureItems = new ArrayList<>(n);
+                    for (int i = 0; i < n; ++i) {
+                        final JsonValue item = items.get(i).get("index");
+                        final Integer status = item.get("status").asInteger();
+                        if (status >= 400) {
+                            failureItems.add(item);
+                        }
+                    }
+                    final String message = "One or more Elasticsearch batch index entries failed: " +
+                            objectMapper.writeValueAsString(failureItems);
+                    throw new BatchException(message);
+                }
             }
-        } catch (Exception e) {
-            logger.error("Elasticsearch batch index failed unexpectedly", e);
+        } catch (IOException | URISyntaxException | ExecutionException | InterruptedException e) {
+            throw new BatchException("Unexpected error while publishing batch", e);
         }
     }
 

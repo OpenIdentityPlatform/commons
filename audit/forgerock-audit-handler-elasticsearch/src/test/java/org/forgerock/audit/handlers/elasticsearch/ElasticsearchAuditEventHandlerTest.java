@@ -78,12 +78,14 @@ public class ElasticsearchAuditEventHandlerTest {
 
     private String authEventBeforeNormalization;
     private String authEventBatchPayload;
+    private String invalidAuthEventBatchPayload;
 
     @BeforeTest
     public void beforeTest() throws Exception {
         authEventBeforeNormalization = objectMapper.writeValueAsString(
                 resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json").getObject());
         authEventBatchPayload = resourceAsString(RESOURCE_PATH + "authEventBatchPayload.txt");
+        invalidAuthEventBatchPayload = resourceAsString(RESOURCE_PATH + "invalidAuthEventBatchPayload.txt");
     }
 
     @Test
@@ -241,7 +243,7 @@ public class ElasticsearchAuditEventHandlerTest {
     }
 
     @Test
-    public void testBatchPublish() throws Exception {
+    public void testBufferedPublish() throws Exception {
 
         // given
         final Response response = new Response(Status.OK);
@@ -290,6 +292,46 @@ public class ElasticsearchAuditEventHandlerTest {
 
         // then
         assertThat(builder.toString()).isEqualTo(authEventBatchPayload);
+    }
+
+    @Test
+    public void testPublishBatchSuccess() throws Exception {
+
+        // given
+        final JsonValue responseJson = resourceAsJsonValue(RESOURCE_PATH + "authEventBatchPayloadResponse.json");
+        final Response response = createClientResponse(Status.OK, responseJson);
+
+        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
+        when(promise.get()).thenReturn(response);
+
+        final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
+        config.getBuffering().setEnabled(true);
+
+        final ElasticsearchBatchAuditEventHandler batchHandler =
+                createElasticSearchAuditEventHandler(createClient(promise), config);
+
+        // when (we expect no exception be thrown)
+        batchHandler.publishBatch(authEventBatchPayload);
+    }
+
+    @Test(expectedExceptions = BatchException.class)
+    public void testPublishBatchFailure() throws Exception {
+
+        // given
+        final JsonValue responseJson = resourceAsJsonValue(RESOURCE_PATH + "invalidAuthEventBatchPayloadResponse.json");
+        final Response response = createClientResponse(Status.OK, responseJson);
+
+        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
+        when(promise.get()).thenReturn(response);
+
+        final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
+        config.getBuffering().setEnabled(true);
+
+        final ElasticsearchBatchAuditEventHandler batchHandler =
+                createElasticSearchAuditEventHandler(createClient(promise), config);
+
+        // when
+        batchHandler.publishBatch(invalidAuthEventBatchPayload);
     }
 
     /**

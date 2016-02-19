@@ -15,29 +15,27 @@
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
-import org.forgerock.json.JsonValue;
-
 /**
- * Elasticsearch batch audit event handler.
+ * Indicates failure during a batch operation.
  */
-interface ElasticsearchBatchAuditEventHandler {
+class BatchException extends Exception {
 
     /**
-     * Adds an audit event to an Elasticsearch Bulk API payload.
+     * Constructs a new {@code BatchException} with given message.
      *
-     * @param topic Event topic
-     * @param event Event JSON payload
-     * @param payload Elasticsearch Bulk API payload
-     * @throws BatchException indicates failure to add-to-batch
+     * @param message Message
      */
-    void addToBatch(String topic, JsonValue event, StringBuilder payload) throws BatchException;
+    public BatchException(String message) {
+        super(message);
+    }
 
     /**
-     * Publishes a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html">Bulk API</a>
-     * payload to Elasticsearch.
+     * Constructs a new {@code BatchException} with given message and cause.
      *
-     * @param payload Elasticsearch Bulk API payload
-     * @throws BatchException indicates (full or partial) failure to publish batch
+     * @param message Message
+     * @param cause Cause of this {@code BatchException}
      */
-    void publishBatch(String payload) throws BatchException;
+    public BatchException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
