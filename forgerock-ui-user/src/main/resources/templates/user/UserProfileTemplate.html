@@ -12,7 +12,7 @@
     </div>
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane active panel panel-default fr-panel-tab" id="userDetailsTab">
-            <form class="form-horizontal" id="details">
+            <form class="form-horizontal" id="details" data-form-validate="true">
                 <div class="panel-body">
 
                     {{!-- Edit the below template to align with your actual user model. --}}
@@ -66,7 +66,7 @@
         <div role="tabpanel" class="tab-pane panel panel-default fr-panel-tab" id="userPasswordTab">
             <form class="form-horizontal" id="password">
                 <div class="panel-body">
-                    <div class="form-group">
+                    <div class="form-group" data-form-group>
                         <label class="col-sm-3 control-label" for="input-password">{{t "common.user.newPassword"}}</label>
                         <div class="col-sm-6">
                             <input class="form-control" type="password" id="input-password" name="password" value=""
@@ -75,7 +75,7 @@
                             <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" data-form-group>
                         <label class="col-sm-3 control-label" for="input-confirmPassword">{{t 'common.user.confirmNewPassword'}}</label>
                         <div class="col-sm-6">
                             <input class="form-control" type="password" id="input-confirmPassword" value=""

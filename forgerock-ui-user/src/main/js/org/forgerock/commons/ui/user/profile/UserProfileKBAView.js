@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 /*global define, document */
@@ -36,7 +36,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
 
     var UserProfileKBAView = AbstractView.extend({
         events: _.extend({
-            "change .kba-pair :input": "checkKBAChanges",
+            "change .kba-pair :input": "checkChanges",
             "click #provideAnother": "addKBAQuestion",
             "click .delete-KBA-question": "deleteKBAQuestion"
         }, UserProfileView.events),
@@ -69,41 +69,50 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
             } else {
                 kbaPair.hide();
             }
-            ValidatorsManager.validateAllFields(form);
             this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: this.getFormContent(form[0]) });
         },
-        checkKBAChanges: function (e) {
+        checkChanges: function (e) {
             var target = $(e.target),
-                attributeName = _.keys(form2js(e.target))[0],
-                kbaPair = target.closest(".kba-pair"),
                 form = target.closest("form"),
-                currentKbaInfo = this.changesPendingWidgets[form.attr("id")].data.watchedObj.subform[attributeName],
-                predefinedQuestion = kbaPair.find(".kba-questions"),
-                customQuestionContainer = kbaPair.find(".custom-question"),
-                answer = kbaPair.find(".answer :input"),
+                attributeName, kbaPair, currentKbaInfo, predefinedQuestion, customQuestionContainer, answer,
+                answerRequired, isKbaQuestion;
+
+            if (form.attr("id") === "KBA") {
+                attributeName = _.keys(form2js(e.target))[0];
+                kbaPair = target.closest(".kba-pair");
+                currentKbaInfo = this.changesPendingWidgets[form.attr("id")].data.watchedObj.subform[attributeName];
+                predefinedQuestion = kbaPair.find(".kba-questions");
+                customQuestionContainer = kbaPair.find(".custom-question");
+                answer = kbaPair.find(".answer :input");
                 answerRequired = false;
+                isKbaQuestion = target.hasClass("kba-questions");
+                customQuestionContainer.toggleClass("hidden", predefinedQuestion.val() !== "custom");
 
-            customQuestionContainer.toggleClass("hidden", predefinedQuestion.val() !== "custom");
-
-            // below conditions check to see if a new KBA answer needs to be provided, or whether it can stay unchanged
-            if (currentKbaInfo && currentKbaInfo[kbaPair.attr('index')]) {
-                if (predefinedQuestion.val() === "custom") {
-                    answerRequired = (currentKbaInfo[kbaPair.attr('index')].customQuestion !== customQuestionContainer.find(":input").val());
+                // below conditions check to see if a new KBA answer needs to be provided, or whether it can stay unchanged
+                if (currentKbaInfo && currentKbaInfo[kbaPair.attr('index')]) {
+                    if (predefinedQuestion.val() === "custom") {
+                        answerRequired = (currentKbaInfo[kbaPair.attr('index')].customQuestion !== customQuestionContainer.find(":input").val());
+                    } else {
+                        answerRequired = (currentKbaInfo[kbaPair.attr('index')].questionId !== predefinedQuestion.val());
+                    }
                 } else {
-                    answerRequired = (currentKbaInfo[kbaPair.attr('index')].questionId !== predefinedQuestion.val());
+                    answerRequired = true;
+                }
+
+                if (answerRequired) {
+                    answer.attr("data-validator", "required");
+                    answer.attr("placeholder", "");
+                }
+
+                // validate form only in case security question was selected
+                if (!isKbaQuestion || (isKbaQuestion && (target.val() !== ""))) {
+                    ValidatorsManager.bindValidators(form, Configuration.loggedUser.baseEntity, function () {
+                        ValidatorsManager.validateAllFields(form);
+                    });
                 }
             } else {
-                answerRequired = true;
+                UserProfileView.checkChanges.call(this, e);
             }
-
-            if (answerRequired) {
-                answer.attr("data-validator", "required");
-                answer.attr("placeholder", "");
-            }
-
-            ValidatorsManager.bindValidators(form, Configuration.loggedUser.baseEntity, function () {
-                ValidatorsManager.validateAllFields(form);
-            });
         },
         submit: function (formId, formData) {
             if (formId === "KBA") {
@@ -162,7 +171,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
                 return UserProfileView.getFormContent.call(this, form);
             }
         },
-        render: function(args, callback) {
+        render: function (args, callback) {
             var self = this;
 
             KBADelegate.getInfo().then(function (response) {
@@ -245,3 +254,4 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
 
     return new UserProfileKBAView();
 });
+

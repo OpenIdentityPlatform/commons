@@ -55,20 +55,19 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             "change :input": "checkChanges"
         },
 
-        focusInput: function (e) {
-            ValidatorsManager.validateAllFields($($(e.target).attr("href")).find("form"));
-            $($(e.target).attr("href")).find(":input:not([readonly]):first").focus();
+        focusInput: function (event) {
+            $($(event.target).attr("href")).find(":input:not([readonly]):first").focus();
         },
 
-        updateRoute: function (e) {
-            var tabPane = $($(e.target).attr("href")),
+        updateRoute: function (event) {
+            var tabPane = $($(event.target).attr("href")),
                 form = tabPane.find("form"),
                 tabRoute = form.attr("id");
 
             EventManager.sendEvent(Constants.ROUTE_REQUEST, {routeName: "profile", args: [tabRoute], trigger: false});
         },
 
-        submit: function(formId, formData) {
+        submit: function (formId, formData) {
             Configuration.loggedUser.save(formData, {patch: true}).then(
                 _.bind(function () {
                     this.submitSuccess(formId);
@@ -76,15 +75,22 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             );
         },
 
-        submitSuccess: function(formId) {
+        submitSuccess: function (formId) {
+            var form = document.getElementById(formId);
+
             this.changesPendingWidgets[formId].saveChanges();
             this.data.user = Configuration.loggedUser.toJSON();
-            this.reloadFormData(document.getElementById(formId));
+            this.reloadFormData(form);
             EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
         },
 
-        checkChanges: function(e) {
-            var form = $(e.target).closest("form");
+        checkChanges: function (event) {
+            var form = $(event.target).closest("form");
+
+            ValidatorsManager.bindValidators($(form), Configuration.loggedUser.baseEntity, function () {
+                ValidatorsManager.validateAllFields($(form));
+            });
+
             this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: this.getFormContent(form[0]) });
         },
 
@@ -92,7 +98,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             return form2js(form, ".", false);
         },
 
-        formSubmit: function(event) {
+        formSubmit: function (event) {
 
             event.preventDefault();
             event.stopPropagation();
@@ -132,16 +138,16 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             }
         },
 
-        render: function(args, callback) {
+        render: function (args, callback) {
             var tabName = args[0] || "details";
 
             this.data.user = Configuration.loggedUser.toJSON();
 
-            this.parentRender(function() {
+            this.parentRender(function () {
                 var selectedTabId = this.$el.find('form#'+tabName).closest(".tab-pane").attr("id"),
                     selectedTab = this.$el.find("ul.nav-tabs a[href='#"+selectedTabId+"']");
 
-                this.loadAllFormData();
+                _.each(this.$el.find("form"), this.reloadFormData, this);
 
                 selectedTab.tab('show');
 
@@ -149,9 +155,9 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
                 _.each(this.$el.find("form"), function (form) {
 
-                    ValidatorsManager.bindValidators($(form), Configuration.loggedUser.baseEntity, function () {
-                        ValidatorsManager.validateAllFields($(form));
-                    });
+                    if ($(form).attr("data-form-validate")) {
+                        ValidatorsManager.bindValidators($(form), Configuration.loggedUser.baseEntity);
+                    }
 
                     this.changesPendingWidgets[$(form).attr('id')] = ChangesPending.watchChanges({
                         element: $(".changes-pending", form),
@@ -171,19 +177,22 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
         reloadFormData: function (form) {
             js2form(form, this.data.user);
-            $("input[type=password]", form).val("").attr("placeholder",$.t("common.form.passwordPlaceholder"));
+            $("input[type=password]", form).val("").attr("placeholder", $.t("common.form.passwordPlaceholder"));
+
+            _.each($(form).find("div[data-form-group]"), function (group) {
+                $(group).removeClass("has-error");
+                $(group).find("input").off().popover('destroy');
+            }, this);
         },
-        resetForm: function (e) {
-            e.preventDefault();
-            var form = this.$el.find(e.target).closest("form");
+
+        resetForm: function (event) {
+            event.preventDefault();
+            var form = this.$el.find(event.target).closest("form");
+
             this.reloadFormData(form[0]);
-            this.checkChanges(e);
-            ValidatorsManager.validateAllFields(form);
-        },
-        loadAllFormData: function() {
-            _.each(this.$el.find("form"), this.reloadFormData, this);
         }
     });
 
     return new UserProfileView();
 });
+
