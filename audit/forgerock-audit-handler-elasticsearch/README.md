@@ -18,10 +18,6 @@ and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/sea
                 "access" : {
                     "_source" : { "enabled" : true },
                     "properties" : {
-                        "_id": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
                         "timestamp": {
                             "type": "date"
                         },
@@ -141,10 +137,6 @@ and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/sea
                 "activity" : {
                     "_source" : { "enabled" : true},
                     "properties" : {
-                        "_id": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
                         "timestamp": {
                             "type": "date"
                         },
@@ -195,10 +187,6 @@ and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/sea
                 "authentication" : {
                     "_source" : { "enabled" : true},
                     "properties" : {
-                        "_id": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
                         "timestamp": {
                             "type": "date"
                         },
@@ -249,10 +237,6 @@ and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/sea
                 "config" : {
                     "_source" : { "enabled" : true},
                     "properties" : {
-                        "_id": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
                         "timestamp": {
                             "type": "date"
                         },
@@ -387,17 +371,17 @@ Audit Events can be indexed or created in Elasticsearch using the following comm
                 "elapsedTime": 100,
                 "elapsedTimeUnits": "MS"
             }
-        }' "http://localhost:8080/audit/access/id"
+        }' "http://localhost:8080/audit/access?_action=create"
         
-This command indexes and creates an access event with the id "id" in the configured Elasticsearch index.
+This command indexes and creates an access event in the configured Elasticsearch index.
 
 ## To Read an Audit Event
 
 Audit events can be read from the Elasticsearch audit event handler with the following command.
 
-        curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit/access/id"
+        curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit/access/{some_ID}"
         
-This command reads the access audit event with the id "id".
+This command reads the access audit event with some ID.
 
 ## To Query Audit Events
 
