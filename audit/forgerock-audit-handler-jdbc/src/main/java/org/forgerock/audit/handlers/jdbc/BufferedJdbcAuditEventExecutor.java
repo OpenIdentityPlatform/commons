@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyright 2016 Nomura Research Institute, Ltd.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -23,8 +24,10 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -182,20 +185,24 @@ class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
 
-                // Use a PreparedStatement batch to insert the events into the DB
-                try (final PreparedStatement preparedStatement = connection.prepareStatement(events.iterator().next().getSql())) {
-                    for (JdbcAuditEvent event : events) {
-                        preparedStatement.clearParameters();
-                        try {
-                            JdbcUtils.initializePreparedStatement(preparedStatement, event.getParams());
-                            preparedStatement.addBatch();
-                        } catch (Exception e) {
-                            logger.error("Unable to create event in the queue", e);
+                Map<String, Collection<JdbcAuditEvent>> sqlTemplatesToEvents = groupSqlTemplatesToEvents(events);
+                for (Entry<String, Collection<JdbcAuditEvent>> sqlTemplate : sqlTemplatesToEvents.entrySet()) {
+                    // Use a PreparedStatement batch to insert the events into the DB
+                    try (final PreparedStatement preparedStatement = connection.prepareStatement(sqlTemplate.getKey())) {
+                        for (JdbcAuditEvent event : sqlTemplate.getValue()) {
+                            preparedStatement.clearParameters();
+                            try {
+                                JdbcUtils.initializePreparedStatement(preparedStatement, event.getParams());
+                                preparedStatement.addBatch();
+                            } catch (Exception e) {
+                                logger.error("Unable to create event in the queue", e);
+                            }
                         }
+                        preparedStatement.executeBatch();
                     }
-                    preparedStatement.executeBatch();
+                    CleanupHelper.commit(connection);
                 }
-                CleanupHelper.commit(connection);
+
             } catch (SQLException e) {
                 logger.error("Unable to create events in the queue.", e);
                 CleanupHelper.rollback(connection);
@@ -205,6 +212,22 @@ class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
         }
     }
 
+    private Map<String, Collection<JdbcAuditEvent>> groupSqlTemplatesToEvents(Collection<JdbcAuditEvent> events) {
+        Map<String, Collection<JdbcAuditEvent>> sqlTemplatesToEvents = new HashMap<>();
+        for (JdbcAuditEvent event : events) {
+            String sql = event.getSql();
+            if (sqlTemplatesToEvents.containsKey(sql)) {
+                Collection<JdbcAuditEvent> jdbcAuditEvents = sqlTemplatesToEvents.get(sql);
+                jdbcAuditEvents.add(event);
+            } else {
+                Collection<JdbcAuditEvent> jdbcAuditEvents = new ArrayList<>();
+                jdbcAuditEvents.add(event);
+                sqlTemplatesToEvents.put(event.getSql(), jdbcAuditEvents);
+            }
+        }
+        return sqlTemplatesToEvents;
+    }
+    
     private void shutdownPool(final ExecutorService executorService) {
         try {
             executorService.shutdown();
