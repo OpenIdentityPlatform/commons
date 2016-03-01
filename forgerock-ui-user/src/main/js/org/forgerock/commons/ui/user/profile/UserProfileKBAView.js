@@ -61,7 +61,8 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
         deleteKBAQuestion: function (e) {
             var target = $(e.target),
                 form = target.closest("form"),
-                kbaPair = target.closest(".kba-pair");
+                kbaPair = target.closest(".kba-pair"),
+                changesPending;
 
             e.preventDefault();
             if (kbaPair.attr("isNew") === "true") {
@@ -70,6 +71,10 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
                 kbaPair.hide();
             }
             this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: this.getFormContent(form[0]) });
+            changesPending = this.changesPendingWidgets[form.attr("id")].isChanged();
+
+            $(form).find("input[type='reset']").prop("disabled", changesPending);
+            $(form).find("input[type='submit']").prop("disabled", changesPending);
         },
         checkChanges: function (e) {
             var target = $(e.target),
@@ -110,6 +115,8 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
                         ValidatorsManager.validateAllFields(form);
                     });
                 }
+
+                $(form).find("input[type='reset']").prop("disabled", false);
             } else {
                 UserProfileView.checkChanges.call(this, e);
             }
@@ -242,8 +249,10 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
                     } else {
                         customQuestionContainer.toggleClass("hidden", true);
                     }
-
                 });
+
+                $(form).find("input[type='reset']").prop("disabled", true);
+                $(form).find("input[type='submit']").prop("disabled", true);
             } else {
                 UserProfileView.reloadFormData.call(this, form);
             }

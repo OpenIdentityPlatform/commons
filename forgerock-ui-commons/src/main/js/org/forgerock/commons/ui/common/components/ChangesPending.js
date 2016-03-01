@@ -124,6 +124,17 @@ define("org/forgerock/commons/ui/common/components/ChangesPending", [
             },
 
             /**
+             * Called to check if changes were done
+             */
+            isChanged: function () {
+                var isChanged =   _.some(this.data.watchedProperties, function (prop) {
+                    return this.compareObjects(prop, this.data.watchedObj, this.data.changes);
+                }, this);
+
+                return isChanged;
+            },
+
+            /**
              * Compares two objects for equality on a given property.
              *
              * @param {string} property
@@ -178,3 +189,4 @@ define("org/forgerock/commons/ui/common/components/ChangesPending", [
 
     return changesPendingInstance;
 });
+

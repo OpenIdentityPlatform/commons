@@ -81,6 +81,12 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             this.changesPendingWidgets[formId].saveChanges();
             this.data.user = Configuration.loggedUser.toJSON();
             this.reloadFormData(form);
+            this.changesPendingWidgets[formId] = ChangesPending.watchChanges({
+                element: $(".changes-pending", form),
+                watchedObj: { subform: this.getFormContent(form) },
+                watchedProperties: ["subform"],
+                alertClass: "alert-warning alert-sm"
+            });
             EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "profileUpdateSuccessful");
         },
 
@@ -92,6 +98,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             });
 
             this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: this.getFormContent(form[0]) });
+            $(form).find("input[type='reset']").prop("disabled", false);
         },
 
         getFormContent: function (form) {
@@ -183,6 +190,9 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 $(group).removeClass("has-error");
                 $(group).find("input").off().popover('destroy');
             }, this);
+
+            $(form).find("input[type='reset']").prop("disabled", true);
+            $(form).find("input[type='submit']").prop("disabled", true);
         },
 
         resetForm: function (event) {
