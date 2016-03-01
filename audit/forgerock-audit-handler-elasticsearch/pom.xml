@@ -46,6 +46,10 @@
             <artifactId>forgerock-audit-core</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-client-apache-async</artifactId>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>

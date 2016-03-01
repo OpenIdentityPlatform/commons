@@ -334,6 +334,35 @@ public class ElasticsearchAuditEventHandlerTest {
         batchHandler.publishBatch(invalidAuthEventBatchPayload);
     }
 
+    @Test
+    public void testDefaultClientPassThroughArg() throws Exception {
+
+        // given
+        final Client expectedClient = new Client(mock(Handler.class));
+        final ElasticsearchAuditEventHandler handler =
+                createElasticSearchAuditEventHandler(expectedClient, new ElasticsearchAuditEventHandlerConfiguration());
+
+        // when
+        final Client actualClient = handler.defaultClient(expectedClient);
+
+        // then
+        assertThat(actualClient).isSameAs(expectedClient);
+    }
+
+    @Test
+    public void testDefaultClientNullArg() throws Exception {
+
+        // given
+        final ElasticsearchAuditEventHandler handler =
+                createElasticSearchAuditEventHandler(null, new ElasticsearchAuditEventHandlerConfiguration());
+
+        // when
+        final Client actualClient = handler.defaultClient(null);
+
+        // then
+        assertThat(actualClient).isNotNull();
+    }
+
     /**
      * Integration test.
      */

@@ -17,6 +17,7 @@ package org.forgerock.audit.handlers.elasticsearch;
 
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.ConnectionConfiguration;
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.objectMapper;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -37,9 +38,13 @@ import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.http.Client;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.apache.async.AsyncHttpClientProvider;
+import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.spi.Loader;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -51,6 +56,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
 import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
@@ -106,7 +112,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      *
      * @param configuration Configuration parameters that can be adjusted by system administrators.
      * @param eventTopicsMetaData Meta-data for all audit event topics.
-     * @param client HTTP client.
+     * @param client HTTP client or {@code null} to use default client.
      */
     public ElasticsearchAuditEventHandler(
             final ElasticsearchAuditEventHandlerConfiguration configuration,
@@ -114,7 +120,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             @Audit final Client client) {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = Reject.checkNotNull(configuration);
-        this.client = Reject.checkNotNull(client);
+        this.client = defaultClient(client);
         indexName = configuration.getIndexMapping().getIndexName();
         basicAuthHeaderValue = buildBasicAuthHeaderValue();
         baseUri = buildBaseUri();
@@ -441,4 +447,30 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         }
         return request;
     }
+
+    /**
+     * Provides a default {@link Client} instance if {@code client} argument is {@code null}.
+     *
+     * @param client HTTP client or {@code null}
+     * @return Given {@link Client} or constructs a new {@link AsyncHttpClientProvider Async-Client}
+     */
+    protected Client defaultClient(final Client client) {
+        if (client != null) {
+            return client;
+        }
+        try {
+            return new Client(
+                    new HttpClientHandler(
+                            Options.defaultOptions()
+                                    .set(OPTION_LOADER, new Loader() {
+                                        @Override
+                                        public <S> S load(Class<S> service, Options options) {
+                                            return service.cast(new AsyncHttpClientProvider());
+                                        }
+                                    })));
+        } catch (HttpApplicationException e) {
+            throw new RuntimeException("Error while building default HTTP Client", e);
+        }
+    }
+
 }
