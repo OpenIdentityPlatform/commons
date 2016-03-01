@@ -1,3 +1,8 @@
+# 3.0.3
+
+## Changes
+* Update to BOM version 4.2.0
+
 # 3.0.2
 
 ## Changes
