@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -58,6 +59,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
@@ -92,12 +94,6 @@ public class ElasticsearchAuditEventHandlerTest {
     public void testSuccessfulQuery() throws Exception {
 
         // given
-        final Promise<Response, NeverThrowsException> responsePromise = mock(Promise.class);
-        final Client client = createClient(responsePromise);
-        final AuditEventHandler handler = createElasticSearchAuditEventHandler(client);
-        final QueryRequest queryRequest = Requests.newQueryRequest("access");
-        final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
-        final List<ResourceResponse> responses = new LinkedList<>();
         final JsonValue clientResponsePayload = json(object(
                 field("hits", object(
                         field("total", TOTAL_RESULTS),
@@ -113,6 +109,12 @@ public class ElasticsearchAuditEventHandlerTest {
                 ))
         ));
         final Response clientResponse = createClientResponse(Status.OK, clientResponsePayload);
+        final Promise<Response, NeverThrowsException> responsePromise = newResultPromise(clientResponse);
+        final Client client = createClient(responsePromise);
+        final AuditEventHandler handler = createElasticSearchAuditEventHandler(client);
+        final QueryRequest queryRequest = Requests.newQueryRequest("access");
+        final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
+        final List<ResourceResponse> responses = new LinkedList<>();
 
         queryRequest.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
 
@@ -127,7 +129,6 @@ public class ElasticsearchAuditEventHandlerTest {
                 }
             }
         });
-        when(responsePromise.get()).thenReturn(clientResponse);
 
         // when
         Promise<QueryResponse, ResourceException> result =
@@ -153,16 +154,15 @@ public class ElasticsearchAuditEventHandlerTest {
     public void testFailedQuery() throws Exception {
 
         // given
-        final Promise<Response, NeverThrowsException> responsePromise = mock(Promise.class);
+        final Response clientResponse = createClientResponse(Status.INTERNAL_SERVER_ERROR, json(object()));
+        final Promise<Response, NeverThrowsException> responsePromise = newResultPromise(clientResponse);
         final Client client = createClient(responsePromise);
         final AuditEventHandler handler = createElasticSearchAuditEventHandler(client);
         final QueryRequest queryRequest = Requests.newQueryRequest("access");
         final QueryResourceHandler queryResourceHandler = mock(QueryResourceHandler.class);
-        final Response clientResponse = createClientResponse(Status.INTERNAL_SERVER_ERROR, json(object()));
 
         queryRequest.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
 
-        when(responsePromise.get()).thenReturn(clientResponse);
 
         // when
         Promise<QueryResponse, ResourceException> result =
@@ -180,8 +180,7 @@ public class ElasticsearchAuditEventHandlerTest {
         final String resourceId = event.get(new JsonPointer("_id")).asString();
         final Response response = createClientResponse(Status.OK, objectMapper.writeValueAsString(event.getObject()));
 
-        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
-        when(promise.get()).thenReturn(response);
+        final Promise<Response, NeverThrowsException> promise = newResultPromise(response);
 
         final AuditEventHandler handler = createElasticSearchAuditEventHandler(createClient(promise));
         final Context context = mock(Context.class);
@@ -203,11 +202,10 @@ public class ElasticsearchAuditEventHandlerTest {
         // given
         final Response response = createClientResponse(Status.NOT_FOUND, null);
 
-        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
-        when(promise.get()).thenReturn(response);
+        final Promise<Response, NeverThrowsException> promise = newResultPromise(response);
 
         final AuditEventHandler handler = createElasticSearchAuditEventHandler(createClient(promise));
-        final Context context = mock(Context.class);
+        final Context context = new RootContext();
 
         // when
         final Promise<ResourceResponse, ResourceException> responsePromise =
@@ -223,8 +221,7 @@ public class ElasticsearchAuditEventHandlerTest {
         // given
         final Response response = new Response(Status.OK);
 
-        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
-        when(promise.get()).thenReturn(response);
+        final Promise<Response, NeverThrowsException> promise = newResultPromise(response);
 
         final AuditEventHandler handler = createElasticSearchAuditEventHandler(createClient(promise));
         final JsonValue event = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json");
@@ -248,8 +245,7 @@ public class ElasticsearchAuditEventHandlerTest {
         // given
         final Response response = new Response(Status.OK);
 
-        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
-        when(promise.get()).thenReturn(response);
+        final Promise<Response, NeverThrowsException> promise = newResultPromise(response);
 
         final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
         config.getBuffering().setEnabled(true);
@@ -276,8 +272,7 @@ public class ElasticsearchAuditEventHandlerTest {
         // given
         final Response response = new Response(Status.OK);
 
-        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
-        when(promise.get()).thenReturn(response);
+        final Promise<Response, NeverThrowsException> promise = newResultPromise(response);
 
         final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
         config.getBuffering().setEnabled(true);
@@ -301,8 +296,7 @@ public class ElasticsearchAuditEventHandlerTest {
         final JsonValue responseJson = resourceAsJsonValue(RESOURCE_PATH + "authEventBatchPayloadResponse.json");
         final Response response = createClientResponse(Status.OK, responseJson);
 
-        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
-        when(promise.get()).thenReturn(response);
+        final Promise<Response, NeverThrowsException> promise = newResultPromise(response);
 
         final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
         config.getBuffering().setEnabled(true);
@@ -321,8 +315,7 @@ public class ElasticsearchAuditEventHandlerTest {
         final JsonValue responseJson = resourceAsJsonValue(RESOURCE_PATH + "invalidAuthEventBatchPayloadResponse.json");
         final Response response = createClientResponse(Status.OK, responseJson);
 
-        final Promise<Response, NeverThrowsException> promise = mock(Promise.class);
-        when(promise.get()).thenReturn(response);
+        final Promise<Response, NeverThrowsException> promise = newResultPromise(response);
 
         final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
         config.getBuffering().setEnabled(true);
