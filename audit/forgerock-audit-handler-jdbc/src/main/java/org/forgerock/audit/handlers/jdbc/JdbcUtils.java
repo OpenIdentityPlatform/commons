@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2016 Nomura Research Institute, Ltd.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -79,7 +80,11 @@ final class JdbcUtils {
                     }
                     break;
                 case BOOLEAN:
-                    preparedStatement.setBoolean(i, (Boolean) parameterValue);
+                    if (parameterValue == null) {
+                        preparedStatement.setNull(i, Types.BOOLEAN);
+                    } else {
+                        preparedStatement.setBoolean(i, (Boolean) parameterValue);
+                    }
                     break;
                 case OBJECT:
                 case ARRAY:

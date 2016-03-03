@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyright 2016 Nomura Research Institute, Ltd.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -90,6 +91,19 @@ public class JdbcUtilsTest {
 
         // then
         verify(mockPreparedStatement).setString(1, null);
+    }
+
+    @Test
+    public void canInitialisePreparedStatementBooleanFieldsWithNullValues() throws Exception {
+        // given
+        final PreparedStatement mockPreparedStatement = mock(PreparedStatement.class);
+        final List<Parameter> params = Collections.singletonList(new Parameter(Parameter.Type.BOOLEAN, null));
+
+        // when
+        JdbcUtils.initializePreparedStatement(mockPreparedStatement, params);
+
+        // then
+        verify(mockPreparedStatement).setNull(1, Types.BOOLEAN);
     }
 
 }
