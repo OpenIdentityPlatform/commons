@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define*/
@@ -34,6 +34,36 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractView
      */
+
+     /**
+       Internal helper method shared by the default implementations of
+       validationSuccessful and validationFailed
+     */
+    function validationStarted (event) {
+        if (!event || !event.target) {
+            return $.Deferred().reject();
+        }
+        // necessary to load bootstrap for popover support
+        // (which isn't always necessary for AbstractView)
+        return ModuleLoader.load("bootstrap").then(function () {
+            return $(event.target);
+        });
+    }
+
+    /**
+      Sets the enabled state of the submit button based on the validation status of the provided form
+    */
+    function validationCompleted (formElement) {
+        var button = formElement.find("input[type=submit]");
+
+        if (!button.length) {
+            button = formElement.find("#submit");
+        }
+        if (button.length) {
+            button.prop('disabled', !ValidatorsManager.formValidated(formElement));
+        }
+    }
+
     return Backbone.View.extend({
 
         /**
@@ -48,11 +78,15 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
          * View mode: replace or append
          */
         mode: "replace",
-
-        formLock: false,
-
+        defaultEvents: {
+            "validationSuccessful :input": "validationSuccessful",
+            "validationReset :input": "validationSuccessful",
+            "validationFailed :input": "validationFailed"
+        },
         initialize: function () {
             this.data = this.data || {};
+            _.extend(this.events, this.defaultEvents);
+            this.delegateEvents();
         },
 
         /**
@@ -138,85 +172,59 @@ define("org/forgerock/commons/ui/common/main/AbstractView", [
             this.parentRender(callback);
         },
 
-        reload: function() {},
 
         /**
-         * Perform only view changes: displays tick, message and
-         * change color of submit button.
-         */
+            This is the default implementation of the function used to reflect that
+            a given field has passed validation. It is invoked via a the event system,
+            and can be overridden per-view as needed.
+        */
+        validationSuccessful: function (event) {
+            validationStarted(event)
+            .then(function (input) {
+                if (input.data()["bs.popover"]) {
+                    input.popover('destroy');
+                }
+                input.parents(".form-group").removeClass('has-feedback has-error');
+                return input.closest("form");
+            })
+            .then(validationCompleted);
+        },
+
+        /**
+            This is the default implementation of the function used to reflect that
+            a given field has failed validation. It is invoked via a the event system,
+            and can be overridden per-view as needed.
+
+            @param {object} details - "failures" entry lists all messages (localized) associated with this validation failure
+        */
+        validationFailed: function (event, details) {
+            validationStarted(event)
+            .then(function (input) {
+                input.parents(".form-group").addClass('has-feedback has-error');
+                if (input.data()["bs.popover"]) {
+                    input.data('bs.popover').options.content = '<i class="fa fa-exclamation-circle"></i> ' + details.failures.join('<br><i class="fa fa-exclamation-circle"></i> ');
+                } else {
+                    input.popover({
+                        validationMessage: details.failures,
+                        animation: false,
+                        content: '<i class="fa fa-exclamation-circle"></i> ' + details.failures.join('<br><i class="fa fa-exclamation-circle"></i> '),
+                        trigger:'focus hover',
+                        placement:'top',
+                        html: 'true',
+                        template: '<div class="popover popover-error help-block" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+                    });
+                }
+                if (input.is(":focus")) {
+                    input.popover("show");
+                }
+                return input.closest("form");
+            })
+            .then(validationCompleted);
+        },
+
+        // legacy; needed here to prevent breakage of views which have an event registered for this function
         onValidate: function(event, input, msg, validatorType) {
-            var $input = $(input, this.$el),
-                $form = $input.closest("form"),
-                $button = $form.find("input[type=submit]"),
-                validationMessage = (msg && !_.isArray(msg)) ? msg.split("<br>") : [];
-
-            // necessary to load bootstrap for popover support (which isn't always necessary for AbstractView)
-            ModuleLoader.load("bootstrap").then(_.bind(function () {
-
-                //clean up existing popover if no message is present
-                if (!msg && $input.data()["bs.popover"]) {
-                    $input.popover('destroy');
-                }
-                $input.parents(".form-group").removeClass('has-feedback has-error');
-
-                if(msg && _.isArray(msg)){
-                    validationMessage = msg;
-                }
-
-                if(msg === "inProgress") {
-                    return;
-                }
-                if (!$button.length) {
-                    $button = $form.find("#submit");
-                }
-                if (ValidatorsManager.formValidated($form)) {
-                    $button.prop('disabled', false);
-                    $form.find(".input-validation-message").hide();
-                } else {
-                    $button.prop('disabled', true);
-                    $form.find(".input-validation-message").show();
-                }
-
-                if (msg === "disabled") {
-                    ValidatorsUtils.hideValidation($input, $form);
-                    return;
-                } else {
-                    ValidatorsUtils.showValidation($input, $form);
-                    if(validationMessage.length){
-                        $input.parents(".form-group").addClass('has-feedback has-error');
-                        $input.popover({
-                            validationMessage: validationMessage,
-                            content: '<i class="fa fa-exclamation-circle"></i> ' + validationMessage.join('<br><i class="fa fa-exclamation-circle"></i> '),
-                            trigger:'hover',
-                            placement:'top',
-                            html: 'true',
-                            template: '<div class="popover popover-error help-block" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
-                        });
-                    }
-                }
-
-                $form.find("div.validation-message[for='" + $input.attr('name') + "']").html(msg ? msg : '');
-
-                if (validatorType) {
-                    ValidatorsUtils.setErrors($form, validatorType, msg);
-                }
-
-                $form.trigger("customValidate", [$input, msg, validatorType]);
-
-            }, this));
-
-        },
-
-        lock: function() {
-            this.formLock = true;
-        },
-
-        unlock: function() {
-            this.formLock = false;
-        },
-
-        isFormLocked: function() {
-            return this.formLock;
+            console.warn("Deprecated use of onValidate method; Change to validationSuccessful / validationFailed");
         }
     });
 });

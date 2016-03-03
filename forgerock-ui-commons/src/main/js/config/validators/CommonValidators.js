@@ -23,7 +23,7 @@ define("config/validators/CommonValidators", [
         "required": {
             "name": "Required field",
             "dependencies": [ ],
-            "validator": function(el, input, callback, Base64) {
+            "validator": function(el, input, callback) {
                 var v = input.val();
                 if (!v || v === "") {
                     callback([$.t("common.form.validation.required")]);

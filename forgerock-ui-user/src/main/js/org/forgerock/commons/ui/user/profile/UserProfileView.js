@@ -51,7 +51,6 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             "click input[type=reset]": "resetForm",
             "click a[role=tab]": "updateRoute",
             "shown.bs.tab": "focusInput",
-            "onValidate": "onValidate",
             "change :input": "checkChanges"
         },
 
@@ -98,6 +97,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 ValidatorsManager.validateAllFields($(form));
             });
 
+            $(event.target).trigger("validate");
             if (!target.attr("data-validation-dependents")) {
                 this.changesPendingWidgets[form.attr("id")].makeChanges({subform: this.getFormContent(form[0])});
             }
@@ -160,7 +160,6 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                 this.changesPendingWidgets = {};
 
                 _.each(this.$el.find("form"), this.reloadFormData, this);
-                ValidatorsManager.bindValidators($("form[data-form-validate]"), Configuration.loggedUser.baseEntity);
 
                 _.each(this.$el.find("form"), function (form) {
                     this.changesPendingWidgets[$(form).attr('id')] = ChangesPending.watchChanges({
@@ -184,13 +183,11 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             js2form(form, this.data.user);
             $("input[type=password]", form).val("").attr("placeholder", $.t("common.form.passwordPlaceholder"));
 
-            _.each($(form).find("div[data-form-group]"), function (group) {
-                $(group).removeClass("has-error");
-                $(group).find("input").off().popover('destroy');
-            }, this);
-
-            $(form).find("input[type='reset']").prop("disabled", true);
-            $(form).find("input[type='submit']").prop("disabled", true);
+            ValidatorsManager.clearValidators($(form));
+            ValidatorsManager.bindValidators($(form), Configuration.loggedUser.baseEntity, function () {
+                $(form).find("input[type='reset']").prop("disabled", true);
+                $(form).find("input[type='submit']").prop("disabled", true);
+            });
         },
 
         resetForm: function (event) {
@@ -204,4 +201,3 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
 
     return new UserProfileView();
 });
-
