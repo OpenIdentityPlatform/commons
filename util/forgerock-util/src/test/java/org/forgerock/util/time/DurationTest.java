@@ -168,6 +168,11 @@ public class DurationTest {
         Duration.duration(-1, TimeUnit.DAYS);
     }
 
+    @Test(expectedExceptions = NullPointerException.class)
+    public void nullDurationNotSupported() {
+        Duration.duration((Long) null, TimeUnit.DAYS);
+    }
+
     @Test
     public void testUnlimited() {
         assertThat(Duration.UNLIMITED.getUnit()).isEqualTo(TimeUnit.DAYS);

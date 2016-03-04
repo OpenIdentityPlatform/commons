@@ -16,6 +16,17 @@
 
 package org.forgerock.util.time;
 
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.HOURS;
+import static java.util.concurrent.TimeUnit.MICROSECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.forgerock.util.Reject.checkNotNull;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,10 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.*;
-import static org.forgerock.util.Reject.checkNotNull;
+import org.forgerock.util.Reject;
 
 /**
  * Represents a duration in english. Cases is not important, plurals units are accepted.
@@ -89,15 +97,13 @@ public final class Duration {
     /**
      * Builds a new {@code Duration}.
      *
-     * @param number number of time unit.
+     * @param number number of time unit (cannot be {@literal null}).
      * @param unit TimeUnit to express the duration in (cannot be {@literal null}).
      * @deprecated Prefer the use of {@link #duration(long, TimeUnit)}.
      */
     @Deprecated
-    public Duration(final long number, final TimeUnit unit) {
-        if (number < 0) {
-            throw new IllegalArgumentException("Negative durations are not supported");
-        }
+    public Duration(final Long number, final TimeUnit unit) {
+        Reject.ifTrue(number < 0, "Negative durations are not supported");
         this.number = number;
         this.unit = checkNotNull(unit);
     }
