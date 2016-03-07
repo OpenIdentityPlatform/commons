@@ -316,6 +316,44 @@ public interface Promise<V, E extends Exception> extends Future<V> {
     <EOUT extends Exception> Promise<V, EOUT> thenCatch(Function<? super E, V, EOUT> onException);
 
     /**
+     * Submits the provided function for execution once this {@code Promise} has
+     * not completed with a result nor with an exception but with a {@link RuntimeException}, and returns
+     * a new {@code Promise} representing the outcome of the function.
+     * If this {@code Promise} completes with a result or an exception then the function will not
+     * be invoked and the result notification will be forwarded to the returned
+     * {@code Promise}.
+     * <p>
+     * This method can be used for transforming the result of an asynchronous
+     * task.
+     *
+     * @param onRuntimeException
+     *            The function which will be executed upon failure completion
+     *            of this {@code Promise}.
+     * @return A new {@code Promise} representing the outcome of the
+     *         function.
+     */
+    Promise<V, E> thenCatchRuntimeException(Function<? super RuntimeException, V, E> onRuntimeException);
+
+    /**
+     * Submits the provided asynchronous function for execution once this
+     * {@code Promise} has completed with a {@link RuntimeException}, and returns a new
+     * {@code Promise} representing the outcome of the function. If this
+     * {@code Promise} completes with a result or the typed exception then the
+     * completion asynchronous function will not be called.
+     * <p>
+     * This method may be used for chaining together a series of asynchronous
+     * tasks.
+     *
+     * @param onRuntimeException
+     *            The asynchronous function which will be executed upon failure completion
+     *            with a {@link RuntimeException} of this {@code Promise}.
+     *
+     * @return A new {@code Promise} representing the outcome of the
+     *         function.
+     */
+    Promise<V, E> thenCatchRuntimeExceptionAsync(AsyncFunction<? super RuntimeException, V, E> onRuntimeException);
+
+    /**
      * Submits the provided functions for execution once this {@code Promise}
      * has completed (with a result or an exception), and returns a new
      * {@code Promise} representing the outcome of the invoked function. If
@@ -347,6 +385,44 @@ public interface Promise<V, E extends Exception> extends Future<V> {
      */
     <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
             Function<? super V, VOUT, EOUT> onResult, Function<? super E, VOUT, EOUT> onException);
+
+    /**
+     * Submits the provided functions for execution once this {@code Promise}
+     * has completed (with a result or an exception or a {@link RuntimeException}), and returns a new
+     * {@code Promise} representing the outcome of the invoked function. If
+     * this {@code Promise} completes with a result then {@code onResult}
+     * will be invoked with the result, with a {@link RuntimeException} then {@code onRuntimeException}
+     * will be invoked with the runtime exception that occurred, otherwise {@code onException} will
+     * be invoked with the exception that occurred.
+     * <p>
+     * This method can be used for transforming the outcome of an
+     * asynchronous task.
+     *
+     * @param <VOUT>
+     *            The type of the functions' result, or {@link Void} if the
+     *            functions do not return anything (i.e. they only have
+     *            side-effects). Note that the type may be different to the type
+     *            of this {@code Promise}.
+     * @param <EOUT>
+     *            The type of the exception thrown by the functions if they
+     *            fail, or {@link NeverThrowsException} if they cannot fail.
+     *            Note that the type may be different to the type of this
+     *            {@code Promise}.
+     * @param onResult
+     *            The function which will be executed upon successful completion
+     *            of this {@code Promise}.
+     * @param onException
+     *            The function which will be executed upon failure of this
+     *            {@code Promise}.
+     * @param onRuntimeException
+     *            The function which will be executed upon failure with
+     *            {@link RuntimeException} of this {@code Promise}.
+     * @return A new {@code Promise} representing the outcome of the
+     *         invoked function.
+     */
+    <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
+            Function<? super V, VOUT, EOUT> onResult, Function<? super E, VOUT, EOUT> onException,
+            Function<? super RuntimeException, VOUT, EOUT> onRuntimeException);
 
 
     /**
@@ -467,6 +543,45 @@ public interface Promise<V, E extends Exception> extends Future<V> {
     <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
             AsyncFunction<? super V, VOUT, EOUT> onResult,
             AsyncFunction<? super E, VOUT, EOUT> onException);
+
+    /**
+     * Submits the provided asynchronous functions for execution once this
+     * {@code Promise} has completed, and returns a new {@code Promise}
+     * representing the outcome of the invoked function. If this
+     * {@code Promise} completes with a result then {@code onResult} will be
+     * invoked with the result, otherwise {@code onException} will be invoked with
+     * the exception that occurred, or {@code onRuntimeException} will be invoked with
+     * the runtime exception that occurred.
+     * <p>
+     * This method may be used for chaining together a series of asynchronous
+     * tasks.
+     *
+     * @param <VOUT>
+     *            The type of the functions' result, or {@link Void} if the
+     *            functions do not return anything (i.e. they only have
+     *            side-effects). Note that the type may be different to the type
+     *            of this {@code Promise}.
+     * @param <EOUT>
+     *            The type of the exception thrown by the functions if they
+     *            fail, or {@link NeverThrowsException} if they cannot fail.
+     *            Note that the type may be different to the type of this
+     *            {@code Promise}.
+     * @param onResult
+     *            The asynchronous function which will be executed upon
+     *            successful completion of this {@code Promise}.
+     * @param onException
+     *            The asynchronous function which will be executed upon failure
+     *            of this {@code Promise}.
+     * @param onRuntimeException
+     *            The asynchronous function which will be executed upon failure
+     *            with {@link RuntimeException} of this {@code Promise}.
+     * @return A new {@code Promise} representing the outcome of the
+     *         invoked function.
+     */
+    <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
+            AsyncFunction<? super V, VOUT, EOUT> onResult,
+            AsyncFunction<? super E, VOUT, EOUT> onException,
+            AsyncFunction<? super RuntimeException, VOUT, EOUT> onRuntimeException);
 
     /**
      * Registers the provided completion handler for notification if this

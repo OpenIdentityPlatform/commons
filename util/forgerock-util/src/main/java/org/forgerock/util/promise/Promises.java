@@ -165,17 +165,34 @@ public final class Promises {
         }
 
         @Override
+        public Promise<V, E> thenCatchRuntimeException(
+                Function<? super RuntimeException, V, E> onRuntimeException) {
+            return then(Promises.<V, E>resultIdempotentFunction(), Promises.<V, E>exceptionIdempotentFunction(),
+                    onRuntimeException);
+        }
+
+        @Override
         @SuppressWarnings("unchecked")
         public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
                 final Function<? super V, VOUT, EOUT> onResult,
                 final Function<? super E, VOUT, EOUT> onException) {
+            return then(onResult, onException, Promises.<VOUT, EOUT>runtimeExceptionIdempotentFunction());
+        }
+
+        @Override
+        public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
+                final Function<? super V, VOUT, EOUT> onResult,
+                final Function<? super E, VOUT, EOUT> onException,
+                final Function<? super RuntimeException, VOUT, EOUT> onRuntimeException) {
             try {
                 if (hasResult()) {
                     return newResultPromise(onResult.apply(getResult()));
                 } else if (hasException()) {
                     return newResultPromise(onException.apply(getException()));
+                } else if (hasRuntimeException()) {
+                    return newResultPromise(onRuntimeException.apply(getRuntimeException()));
                 } else {
-                    return new RuntimeExceptionPromise<>(getRuntimeException());
+                    throw new IllegalStateException("Unexpected state");
                 }
             } catch (final RuntimeException e) {
                 return new RuntimeExceptionPromise<>(e);
@@ -212,17 +229,36 @@ public final class Promises {
         }
 
         @Override
+        public Promise<V, E> thenCatchRuntimeExceptionAsync(
+                AsyncFunction<? super RuntimeException, V, E> onRuntimeException) {
+            return thenAsync(Promises.<V, E>resultIdempotentAsyncFunction(),
+                    Promises.<V, E>exceptionIdempotentAsyncFunction(),
+                    onRuntimeException);
+        }
+
+        @Override
         @SuppressWarnings("unchecked")
         public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
                 final AsyncFunction<? super V, VOUT, EOUT> onResult,
                 final AsyncFunction<? super E, VOUT, EOUT> onException) {
+            return thenAsync(onResult, onException, Promises.<VOUT, EOUT>runtimeExceptionIdempotentAsyncFunction());
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
+                final AsyncFunction<? super V, VOUT, EOUT> onResult,
+                final AsyncFunction<? super E, VOUT, EOUT> onException,
+                final AsyncFunction<? super RuntimeException, VOUT, EOUT> onRuntimeException) {
             try {
                 if (hasResult()) {
                     return (Promise<VOUT, EOUT>) onResult.apply(getResult());
                 } else if (hasException()) {
                     return (Promise<VOUT, EOUT>) onException.apply(getException());
+                } else if (hasRuntimeException()) {
+                    return (Promise<VOUT, EOUT>) onRuntimeException.apply(getRuntimeException());
                 } else {
-                    return new RuntimeExceptionPromise<>(getRuntimeException());
+                    throw new IllegalStateException("Unexpected state");
                 }
             } catch (final RuntimeException e) {
                 return new RuntimeExceptionPromise<>(e);
@@ -249,6 +285,8 @@ public final class Promises {
 
         abstract V getResult();
 
+        abstract boolean hasRuntimeException();
+
         abstract boolean hasException();
 
         abstract boolean hasResult();
@@ -274,6 +312,11 @@ public final class Promises {
         @Override
         V getResult() {
             return null;
+        }
+
+        @Override
+        boolean hasRuntimeException() {
+            return true;
         }
 
         @Override
@@ -307,6 +350,11 @@ public final class Promises {
         @Override
         V getResult() {
             throw new IllegalStateException();
+        }
+
+        @Override
+        boolean hasRuntimeException() {
+            return false;
         }
 
         @Override
@@ -344,6 +392,11 @@ public final class Promises {
         }
 
         @Override
+        boolean hasRuntimeException() {
+            return false;
+        }
+
+        @Override
         boolean hasException() {
             return false;
         }
@@ -370,6 +423,22 @@ public final class Promises {
                 }
             };
 
+    private static final AsyncFunction<RuntimeException, Object, Exception> RUNTIME_EXCEPTION_IDEM_ASYNC_FUNC =
+            new AsyncFunction<RuntimeException, Object, Exception>() {
+                @Override
+                public Promise<Object, Exception> apply(final RuntimeException runtimeException) throws Exception {
+                    return newRuntimeExceptionPromise(runtimeException);
+                }
+            };
+
+    private static final Function<RuntimeException, Object, Exception> RUNTIME_EXCEPTION_IDEM_FUNC =
+            new Function<RuntimeException, Object, Exception>() {
+                @Override
+                public Object apply(final RuntimeException runtimeException) {
+                    throw runtimeException;
+                }
+            };
+
     private static final AsyncFunction<Object, Object, Exception> RESULT_IDEM_ASYNC_FUNC =
             new AsyncFunction<Object, Object, Exception>() {
                 @Override
@@ -385,6 +454,27 @@ public final class Promises {
                     return value;
                 }
             };
+
+    /**
+     * Returns a {@link Promise} representing an asynchronous task which has
+     * already failed with the provided runtime exception. Attempts to get the result will
+     * immediately fail, and any listeners registered against the returned
+     * promise will be immediately invoked in the same thread as the caller.
+     *
+     * @param <V>
+     *            The type of the task's result, or {@link Void} if the task
+     *            does not return anything (i.e. it only has side-effects).
+     * @param <E>
+     *            The type of the exception thrown by the task if it fails, or
+     *            {@link NeverThrowsException} if the task cannot fail.
+     * @param exception
+     *            The exception indicating why the asynchronous task has failed.
+     * @return A {@link Promise} representing an asynchronous task which has
+     *         already failed with the provided exception.
+     */
+    static <V, E extends Exception> Promise<V, E> newRuntimeExceptionPromise(final RuntimeException exception) {
+        return new RuntimeExceptionPromise<>(exception);
+    }
 
     /**
      * Returns a {@link Promise} representing an asynchronous task which has
@@ -509,6 +599,16 @@ public final class Promises {
     @SuppressWarnings("unchecked")
     static <VOUT, E extends Exception> Function<E, VOUT, E> exceptionIdempotentFunction() {
         return (Function<E, VOUT, E>) EXCEPTION_IDEM_FUNC;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <VOUT, E extends Exception> AsyncFunction<RuntimeException, VOUT, E> runtimeExceptionIdempotentAsyncFunction() {
+        return (AsyncFunction<RuntimeException, VOUT, E>) RUNTIME_EXCEPTION_IDEM_ASYNC_FUNC;
+    }
+
+    @SuppressWarnings("unchecked")
+    static <VOUT, E extends Exception> Function<RuntimeException, VOUT, E> runtimeExceptionIdempotentFunction() {
+        return (Function<RuntimeException, VOUT, E>) RUNTIME_EXCEPTION_IDEM_FUNC;
     }
 
     @SuppressWarnings("unchecked")

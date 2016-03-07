@@ -154,6 +154,12 @@ public class PromiseContractTest {
 
         leafPromise = rootPromise.thenCatchAsync(mock(AsyncFunction.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenCatchRuntimeException(mock(Function.class));
+        assertThat(leafPromise).isNotSameAs(rootPromise);
+
+        leafPromise = rootPromise.thenCatchRuntimeExceptionAsync(mock(AsyncFunction.class));
+        assertThat(leafPromise).isNotSameAs(rootPromise);
     }
 
     @Test(dataProvider = "completePromises")
@@ -222,8 +228,8 @@ public class PromiseContractTest {
 
     @Test(dataProvider = "runtimeExceptionPromises")
     @SuppressWarnings("unchecked")
-    public void promiseThrowingRuntimeExceptionShouldIgnoreAChainedThenCatchAsync
-            (Promise<String, Exception> rootPromise) throws Exception {
+    public void promiseThrowingRuntimeExceptionShouldIgnoreAChainedThenCatchAsync(
+            Promise<String, Exception> rootPromise) throws Exception {
         //Given
         AsyncFunction ignoredAsyncFunction = mock(AsyncFunction.class);
 
@@ -280,6 +286,66 @@ public class PromiseContractTest {
         }
     }
 
+    @Test(dataProvider = "runtimeExceptionPromises")
+    public void shouldCatchRuntimeExceptionTransformToPromiseResult(Promise<String, Exception> rootPromise)
+            throws Exception {
+        Promise<String, Exception> promise = rootPromise
+                .thenCatchRuntimeException(new Function<RuntimeException, String, Exception>() {
+                    @Override
+                    public String apply(RuntimeException value) throws Exception {
+                        return "foo";
+                    }
+                });
+
+        assertThat(promise.get()).isEqualTo("foo");
+    }
+
+    @Test(dataProvider = "runtimeExceptionPromises", expectedExceptions = Exception.class,
+            expectedExceptionsMessageRegExp = "Exception thrown from function.")
+    public void shouldCatchRuntimeExceptionTransformToPromiseException(Promise<String, Exception> rootPromise)
+            throws Exception {
+        Promise<String, Exception> promise = rootPromise
+                .thenCatchRuntimeException(new Function<RuntimeException, String, Exception>() {
+                    @Override
+                    public String apply(RuntimeException value) throws Exception {
+                        throw new Exception("Exception thrown from function.");
+                    }
+                });
+
+        promise.getOrThrow();
+    }
+
+    @Test(dataProvider = "runtimeExceptionPromises")
+    public void shouldAsynchronouslyCatchRuntimeExceptionTransformToPromiseResult(
+            Promise<String, Exception> rootPromise) throws Exception {
+        Promise<String, Exception> promise = rootPromise
+                .thenCatchRuntimeExceptionAsync(new AsyncFunction<RuntimeException, String, Exception>() {
+                    @Override
+                    public Promise<? extends String, ? extends Exception> apply(RuntimeException value)
+                            throws Exception {
+                        return newResultPromise("foo");
+                    }
+                });
+
+        assertThat(promise.get()).isEqualTo("foo");
+    }
+
+    @Test(dataProvider = "runtimeExceptionPromises", expectedExceptions = Exception.class,
+            expectedExceptionsMessageRegExp = "Exception thrown from function.")
+    public void shouldAsynchronouslyCatchRuntimeExceptionTransformToPromiseException(
+            Promise<String, Exception> rootPromise) throws Exception {
+        Promise<String, Exception> promise = rootPromise
+                .thenCatchRuntimeExceptionAsync(new AsyncFunction<RuntimeException, String, Exception>() {
+                    @Override
+                    public Promise<? extends String, ? extends Exception> apply(RuntimeException value)
+                            throws Exception {
+                        throw new Exception("Exception thrown from function.");
+                    }
+                });
+
+        promise.getOrThrow();
+    }
+
     @DataProvider
     private Iterator<Object[]> completePromises() {
         List<Object[]> promises = new ArrayList<>();
@@ -317,19 +383,9 @@ public class PromiseContractTest {
         promiseImplRuntimeException.handleRuntimeException(PROMISE_RUNTIME_EXCEPTION);
 
         return new Object[][] {
-            { createCompletedRuntimePromise() },
+            { Promises.<String, Exception>newRuntimeExceptionPromise(PROMISE_RUNTIME_EXCEPTION) },
             { promiseImplRuntimeException }
         };
     }
 
-    private Promise<String, Exception> createCompletedRuntimePromise() {
-        // Cannot create a RuntimeExceptionPromise in another way
-        return Promises.newResultPromise(PROMISE_RESULT)
-                .then(new Function<String, String, Exception>() {
-            @Override
-            public String apply(String value) throws Exception {
-                throw PROMISE_RUNTIME_EXCEPTION;
-            }
-        });
-    }
 }

@@ -365,20 +365,41 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     }
 
     @Override
+    public Promise<V, E> thenCatchRuntimeException(
+            Function<? super RuntimeException, V, E> onRuntimeException) {
+        return then(Promises.<V, E>resultIdempotentFunction(), Promises.<V, E>exceptionIdempotentFunction(),
+                onRuntimeException);
+    }
+
+    @Override
     public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
-        final Function<? super V, VOUT, EOUT> onResult, final Function<? super E, VOUT, EOUT> onException) {
+            final Function<? super V, VOUT, EOUT> onResult, final Function<? super E, VOUT, EOUT> onException) {
+        return then(onResult, onException, Promises.<VOUT, EOUT>runtimeExceptionIdempotentFunction());
+    }
+
+    @Override
+    public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
+            final Function<? super V, VOUT, EOUT> onResult, final Function<? super E, VOUT, EOUT> onException,
+            final Function<? super RuntimeException, VOUT, EOUT> onRuntimeException) {
         final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<>();
         addOrFireListener(new StateListener<V, E>() {
             @Override
             public void handleStateChange(final int newState, final V result, final E exception,
-                    final RuntimeException runtimeException) {
+                                          final RuntimeException runtimeException) {
                 try {
-                    if (newState == HAS_RESULT) {
-                        chained.handleResult(onResult.apply(result));
-                    } else if (newState == HAS_EXCEPTION || newState == CANCELLED) {
-                        chained.handleResult(onException.apply(exception));
-                    } else {
-                        tryHandlingRuntimeException(runtimeException, chained);
+                    switch (newState) {
+                        case HAS_RESULT:
+                            chained.handleResult(onResult.apply(result));
+                            break;
+                        case HAS_EXCEPTION:
+                        case CANCELLED:
+                            chained.handleResult(onException.apply(exception));
+                            break;
+                        case HAS_RUNTIME_EXCEPTION:
+                            chained.handleResult(onRuntimeException.apply(runtimeException));
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected state : " + newState);
                     }
                 } catch (final RuntimeException e) {
                     tryHandlingRuntimeException(e, chained);
@@ -426,14 +447,30 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     }
 
     @Override
-    public final <EOUT extends Exception> Promise<V, EOUT> thenCatchAsync(AsyncFunction<? super E, V, EOUT> onException) {
+    public final <EOUT extends Exception> Promise<V, EOUT> thenCatchAsync(
+            AsyncFunction<? super E, V, EOUT> onException) {
         return thenAsync(Promises.<V, EOUT>resultIdempotentAsyncFunction(), onException);
+    }
+
+    @Override
+    public final Promise<V, E> thenCatchRuntimeExceptionAsync(
+            AsyncFunction<? super RuntimeException, V, E> onRuntimeException) {
+        return thenAsync(Promises.<V, E>resultIdempotentAsyncFunction(),
+                Promises.<V, E>exceptionIdempotentAsyncFunction(), onRuntimeException);
     }
 
     @Override
     public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
             final AsyncFunction<? super V, VOUT, EOUT> onResult,
             final AsyncFunction<? super E, VOUT, EOUT> onException) {
+        return thenAsync(onResult, onException, Promises.<VOUT, EOUT>runtimeExceptionIdempotentAsyncFunction());
+    }
+
+    @Override
+    public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
+            final AsyncFunction<? super V, VOUT, EOUT> onResult,
+            final AsyncFunction<? super E, VOUT, EOUT> onException,
+            final AsyncFunction<? super RuntimeException, VOUT, EOUT> onRuntimeException) {
         final PromiseImpl<VOUT, EOUT> chained = new PromiseImpl<>();
         addOrFireListener(new StateListener<V, E>() {
             @Override
@@ -441,12 +478,19 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
             public void handleStateChange(final int newState, final V result, final E exception,
                     final RuntimeException runtimeException) {
                 try {
-                    if (newState == HAS_RESULT) {
-                        callNestedPromise(onResult.apply(result));
-                    } else if (newState == HAS_EXCEPTION || newState == CANCELLED) {
-                        callNestedPromise(onException.apply(exception));
-                    } else {
-                        tryHandlingRuntimeException(runtimeException, chained);
+                    switch (newState) {
+                        case HAS_RESULT:
+                            callNestedPromise(onResult.apply(result));
+                            break;
+                        case HAS_EXCEPTION:
+                        case CANCELLED:
+                            callNestedPromise(onException.apply(exception));
+                            break;
+                        case HAS_RUNTIME_EXCEPTION:
+                            callNestedPromise(onRuntimeException.apply(runtimeException));
+                            break;
+                        default:
+                            throw new IllegalStateException("Unexpected state : " + newState);
                     }
                 } catch (final RuntimeException e) {
                     tryHandlingRuntimeException(e, chained);
