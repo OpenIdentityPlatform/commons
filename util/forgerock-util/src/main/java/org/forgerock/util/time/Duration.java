@@ -52,7 +52,7 @@ import org.forgerock.util.Reject;
  *     zero
  * </code>
  */
-public final class Duration {
+public class Duration {
 
     /**
      * Special duration that represents an unlimited duration (or indefinite).
