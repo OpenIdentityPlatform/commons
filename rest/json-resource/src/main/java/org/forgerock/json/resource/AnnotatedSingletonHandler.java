@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -53,22 +53,22 @@ class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
-        return RequestHandlerUtils.handle(readMethod, context, request);
+        return readMethod.invoke(context, request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return RequestHandlerUtils.handle(updateMethod, context, request);
+        return updateMethod.invoke(context, request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return RequestHandlerUtils.handle(patchMethod, context, request);
+        return patchMethod.invoke(context, request);
     }
 
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
-        return actionMethods.invoke(context, request, null);
+        return actionMethods.invoke(context, request);
     }
 
 }

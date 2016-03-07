@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -29,6 +29,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -217,6 +218,21 @@ public final class Resources {
         } else {
             return new AnnotatedSingletonHandler(provider);
         }
+    }
+
+    /**
+     * Returns a new request handler which will forward requests on to the
+     * provided annotated request handler.
+     *
+     * @param provider
+     *            The POJO annotated with annotations from {@link org.forgerock.json.resource.annotations}.
+     * @return A new request handler which will forward requests on to the provided annotated POJO.
+     */
+    public static RequestHandler newAnnotatedRequestHandler(final Object provider) {
+        Reject.ifTrue(provider instanceof RequestHandler,
+                "Refusing to create an annotated request handler using a provider that implements RequestHandler. "
+                        + "Use the RequestHandler implementation directly instead");
+        return new AnnotatedRequestHandler(provider);
     }
 
     /**

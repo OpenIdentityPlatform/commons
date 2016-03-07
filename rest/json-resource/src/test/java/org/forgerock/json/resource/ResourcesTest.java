@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -36,6 +36,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.forgerock.json.resource.ResourcesTest.HandlerType.*;
 
 import java.util.List;
 import java.util.Map;
@@ -218,34 +219,35 @@ public final class ResourcesTest {
     public Object[][] annotatedRequestHandlerData() {
         // @formatter:off
         return new Object[][]{
-            // Class                    | Collection| Create| Read | Update| Delete| Patch| RAction| CAction| Query|
-            { NoMethods.class,                 false,  false, false,  false,  false, false,   false,   false, false},
-            { NoMethods.class,                  true,  false, false,  false,  false, false,   false,   false, false},
-            { AnnotationCollection.class,       true,   true,  true,   true,   true,  true,    true,    true,  true},
-            { AnnotationSingleton.class,       false,  false,  true,   true,  false,  true,    true,   false, false},
-            { ConventionCollection.class,       true,   true,  true,   true,   true,  true,   false,   false,  true},
-            { ConventionSingleton.class,       false,  false,  true,   true,  false,  true,   false,   false, false},
+            // Class                      |      Type| Create| Read | Update| Delete| Patch| RAction| CAction| Query|
+            { AnnotationSingleton.class,    SINGLETON,  false,  true,   true,  false,  true,    true,   false, false},
+            { ConventionSingleton.class,    SINGLETON,  false,  true,   true,  false,  true,   false,   false, false},
+            { NoMethods.class,              SINGLETON,  false, false,  false,  false, false,   false,   false, false},
+            { NoMethods.class,             COLLECTION,  false, false,  false,  false, false,   false,   false, false},
+            { AnnotationCollection.class,  COLLECTION,   true,  true,   true,   true,  true,    true,    true,  true},
+            { ConventionCollection.class,  COLLECTION,   true,  true,   true,   true,  true,   false,   false,  true},
+            { AnnotationRequestHandler.class, REQUEST,   true,  true,   true,   true,  true,    true,    true,  true},
         };
         // @formatter:on
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testCreateAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+    public void testCreateAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type, boolean create,
             boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         CreateRequest req = Requests.newCreateRequest("/test", json(object(field("dummy", "test"))));
 
         // When
         Promise<ResourceResponse, ResourceException> promise = connection.createAsync(new RootContext(), req);
 
         // Then
-        if (create && collection) {
+        if (create && type != SINGLETON) {
             assertThat(promise).succeeded().withId().isEqualTo("create");
-        } else if (collection) {
+        } else if (type != SINGLETON) {
             assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
@@ -253,22 +255,22 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testReadAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+    public void testReadAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type, boolean create,
             boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         ReadRequest req = Requests.newReadRequest("/test");
 
         // When
         Promise<ResourceResponse, ResourceException> promise = connection.readAsync(new RootContext(), req);
 
         // Then
-        if (read && !collection) {
+        if (read && type != COLLECTION) {
             assertThat(promise).succeeded().withId().isEqualTo("read");
-        } else if (!collection) {
+        } else if (type != COLLECTION) {
             assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
@@ -276,22 +278,24 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testReadCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+    public void testReadCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type,
             boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         ReadRequest req = Requests.newReadRequest("/test/fred");
 
         // When
         Promise<ResourceResponse, ResourceException> promise = connection.readAsync(new RootContext(), req);
 
         // Then
-        if (read && collection) {
+        if (read && type == REQUEST) {
+            assertThat(promise).succeeded().withId().isEqualTo("read");
+        } else if (read && type == COLLECTION) {
             assertThat(promise).succeeded().withId().isEqualTo("read-fred");
-        } else if (collection) {
+        } else if (type != SINGLETON) {
             assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
@@ -299,22 +303,22 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testUpdateAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+    public void testUpdateAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type, boolean create,
             boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         UpdateRequest req = Requests.newUpdateRequest("/test", json(object(field("dummy", "test"))));
 
         // When
         Promise<ResourceResponse, ResourceException> promise = connection.updateAsync(new RootContext(), req);
 
         // Then
-        if (update && !collection) {
+        if (update && type != COLLECTION) {
             assertThat(promise).succeeded().withId().isEqualTo("update");
-        } else if (!collection) {
+        } else if (type != COLLECTION) {
             assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
@@ -322,22 +326,24 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testUpdateCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+    public void testUpdateCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type,
             boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         UpdateRequest req = Requests.newUpdateRequest("/test/fred", json(object(field("dummy", "test"))));
 
         // When
         Promise<ResourceResponse, ResourceException> promise = connection.updateAsync(new RootContext(), req);
 
         // Then
-        if (update && collection) {
+        if (update && type == REQUEST) {
+            assertThat(promise).succeeded().withId().isEqualTo("update");
+        } else if (update && type == COLLECTION) {
             assertThat(promise).succeeded().withId().isEqualTo("update-fred");
-        } else if (collection) {
+        } else if (type != SINGLETON) {
             assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
@@ -345,22 +351,24 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testDeleteCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+    public void testDeleteCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type,
             boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         DeleteRequest req = Requests.newDeleteRequest("/test/fred");
 
         // When
         Promise<ResourceResponse, ResourceException> promise = connection.deleteAsync(new RootContext(), req);
 
         // Then
-        if (delete && collection) {
+        if (delete && type == REQUEST) {
+            assertThat(promise).succeeded().withId().isEqualTo("delete");
+        } else if (delete && type == COLLECTION) {
             assertThat(promise).succeeded().withId().isEqualTo("delete-fred");
-        } else if (collection) {
+        } else if (type != SINGLETON) {
             assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
@@ -368,22 +376,22 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testPatchAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+    public void testPatchAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type, boolean create,
             boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         PatchRequest req = Requests.newPatchRequest("/test");
 
         // When
         Promise<ResourceResponse, ResourceException> promise = connection.patchAsync(new RootContext(), req);
 
         // Then
-        if (patch && !collection) {
+        if (patch && type != COLLECTION) {
             assertThat(promise).succeeded().withId().isEqualTo("patch");
-        } else if (!collection) {
+        } else if (type != COLLECTION) {
             assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
@@ -391,22 +399,24 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testPatchCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+    public void testPatchCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type,
             boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         PatchRequest req = Requests.newPatchRequest("/test/fred");
 
         // When
         Promise<ResourceResponse, ResourceException> promise = connection.patchAsync(new RootContext(), req);
 
         // Then
-        if (patch && collection) {
+        if (patch && type == REQUEST) {
+            assertThat(promise).succeeded().withId().isEqualTo("patch");
+        } else if (patch && type == COLLECTION) {
             assertThat(promise).succeeded().withId().isEqualTo("patch-fred");
-        } else if (collection) {
+        } else if (type != SINGLETON) {
             assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
@@ -414,16 +424,16 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testActionAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+    public void testActionAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type, boolean create,
             boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
-        String actionId1 = collection ? "collectionAction1" : "instanceAction1";
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
+        String actionId1 = type == COLLECTION ? "collectionAction1" : "instanceAction1";
         ActionRequest req1 = Requests.newActionRequest("/test", actionId1);
-        String actionId2 = collection ? "collectionAction2" : "instanceAction2";
+        String actionId2 = type == COLLECTION ? "collectionAction2" : "instanceAction2";
         ActionRequest req2 = Requests.newActionRequest("/test", actionId2);
 
         // When
@@ -431,7 +441,7 @@ public final class ResourcesTest {
         Promise<ActionResponse, ResourceException> promise2 = connection.actionAsync(new RootContext(), req2);
 
         // Then
-        if ((collection && collectionAction) || (!collection && resourceAction)) {
+        if ((type != SINGLETON && collectionAction) || (type != COLLECTION && resourceAction)) {
             assertThat(promise1).succeeded().withContent().stringAt("result").isEqualTo(actionId1);
             assertThat(promise2).succeeded().withContent().stringAt("result").isEqualTo(actionId2);
         } else {
@@ -441,13 +451,13 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testActionCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, boolean collection,
+    public void testActionCollectionItemAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type,
             boolean create, boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         ActionRequest req1 = Requests.newActionRequest("/test/fred", "instanceAction1");
         ActionRequest req2 = Requests.newActionRequest("/test/fred", "instanceAction2");
 
@@ -456,10 +466,13 @@ public final class ResourcesTest {
         Promise<ActionResponse, ResourceException> promise2 = connection.actionAsync(new RootContext(), req2);
 
         // Then
-        if (collectionAction && collection) {
+        if (collectionAction && type == REQUEST) {
+            assertThat(promise1).succeeded().withContent().stringAt("result").isEqualTo("instanceAction1");
+            assertThat(promise2).succeeded().withContent().stringAt("result").isEqualTo("instanceAction2");
+        } else if (collectionAction && type == COLLECTION) {
             assertThat(promise1).succeeded().withContent().stringAt("result").isEqualTo("instanceAction1-fred");
             assertThat(promise2).succeeded().withContent().stringAt("result").isEqualTo("instanceAction2-fred");
-        } else if (collection) {
+        } else if (type != SINGLETON) {
             assertThat(promise1).failedWithException().isInstanceOf(NotSupportedException.class);
             assertThat(promise2).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
@@ -469,13 +482,13 @@ public final class ResourcesTest {
     }
 
     @Test(dataProvider = "annotatedRequestHandlerData")
-    public void testQueryCollectionAnnotatedRequestHandler(Class<?> requestHandler, boolean collection, boolean create,
+    public void testQueryCollectionAnnotatedRequestHandler(Class<?> requestHandler, HandlerType type, boolean create,
             boolean read, boolean update, boolean delete, boolean patch, boolean resourceAction,
             boolean collectionAction, boolean query) throws Exception {
 
         // Given
         Object provider = requestHandler.newInstance();
-        Connection connection = Resources.newInternalConnection(createHandler(collection, provider));
+        Connection connection = Resources.newInternalConnection(createHandler(type, provider));
         QueryRequest req = Requests.newQueryRequest("/test");
 
         // When
@@ -483,11 +496,11 @@ public final class ResourcesTest {
                 mock(QueryResourceHandler.class));
 
         // Then
-        if (query && collection) {
+        if (query && type != SINGLETON) {
             AssertJPromiseAssert.assertThat(promise).succeeded();
             QueryResponse result = promise.get();
             Assertions.assertThat(result.getPagedResultsCookie()).isEqualTo("query");
-        } else if (collection) {
+        } else if (type != SINGLETON) {
             AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
         } else {
             AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
@@ -542,10 +555,10 @@ public final class ResourcesTest {
         return content(object(field("name", "bob"), field("age", 30), field("role", "it")));
     }
 
-    private RequestHandler createHandler(boolean collection, Object provider) {
-        RequestHandler handler = collection ? Resources.newCollection(provider) : Resources.newSingleton(provider);
+    private RequestHandler createHandler(HandlerType type, Object provider) {
+        RequestHandler handler = type.makeHandler(provider);
         Router router = new Router();
-        router.addRoute(requestUriMatcher(collection ? STARTS_WITH : EQUALS, "test"), handler);
+        router.addRoute(requestUriMatcher(type != SINGLETON ? STARTS_WITH : EQUALS, "test"), handler);
         return router;
     }
 
@@ -622,6 +635,42 @@ public final class ResourcesTest {
     }
 
     @org.forgerock.json.resource.annotations.RequestHandler
+    public static final class AnnotationRequestHandler {
+        @Create
+        public Promise<ResourceResponse, ResourceException> myCreate(CreateRequest request) {
+            return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
+        }
+        @Read
+        public Promise<ResourceResponse, ResourceException> myRead() {
+            return newResultPromise(newResourceResponse("read", "1", json(object(field("result", null)))));
+        }
+        @Update
+        public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request) {
+            return newResultPromise(newResourceResponse("update", "1", json(object(field("result", null)))));
+        }
+        @Delete
+        public Promise<ResourceResponse, ResourceException> myDelete() {
+            return newResultPromise(newResourceResponse("delete", "1", json(object(field("result", null)))));
+        }
+        @Patch
+        public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request) {
+            return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
+        }
+        @Action("instanceAction1")
+        public Promise<ActionResponse, ResourceException> action1() {
+            return newResultPromise(newActionResponse(json(object(field("result", "instanceAction1")))));
+        }
+        @Action
+        public Promise<ActionResponse, ResourceException> instanceAction2() {
+            return newResultPromise(newActionResponse(json(object(field("result", "instanceAction2")))));
+        }
+        @Query
+        public Promise<QueryResponse, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
+            return newResultPromise(newQueryResponse("query", CountPolicy.NONE, QueryResponse.NO_COUNT));
+        }
+    }
+
+    @org.forgerock.json.resource.annotations.RequestHandler
     public static final class ConventionCollection {
         public Promise<ResourceResponse, ResourceException> create(CreateRequest request) {
             return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
@@ -654,5 +703,25 @@ public final class ResourcesTest {
         public Promise<ResourceResponse, ResourceException> patch(PatchRequest request) {
             return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
         }
+    }
+
+    enum HandlerType {
+        SINGLETON {
+            public RequestHandler makeHandler(Object provider) {
+                return Resources.newSingleton(provider);
+            }
+        },
+        COLLECTION {
+            public RequestHandler makeHandler(Object provider) {
+                return Resources.newCollection(provider);
+            }
+        },
+        REQUEST {
+            public RequestHandler makeHandler(Object provider) {
+                return Resources.newAnnotatedRequestHandler(provider);
+            }
+        };
+
+        abstract RequestHandler makeHandler(Object provider);
     }
 }

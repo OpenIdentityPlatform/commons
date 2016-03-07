@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -32,6 +32,10 @@ import org.forgerock.util.promise.Promise;
 class AnnotatedActionMethods {
 
     private Map<String, AnnotatedMethod> methods = new HashMap<>();
+
+    Promise<ActionResponse, ResourceException> invoke(Context context, ActionRequest request) {
+        return invoke(context, request, null);
+    }
 
     Promise<ActionResponse, ResourceException> invoke(Context context, ActionRequest request, String id) {
         AnnotatedMethod method = methods.get(request.getAction());

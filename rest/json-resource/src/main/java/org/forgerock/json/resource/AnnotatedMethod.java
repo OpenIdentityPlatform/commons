@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -60,8 +60,17 @@ final class AnnotatedMethod {
         this.numberOfParameters = numberOfParameters;
     }
 
+    <T> Promise<T, ResourceException> invoke(Context context, Request request) {
+        return invoke(context, request, null, null);
+    }
+
     <T> Promise<T, ResourceException> invoke(Context context, Request request, String id) {
         return invoke(context, request, null, id);
+    }
+
+    <T> Promise<T, ResourceException> invoke(Context context, Request request,
+            QueryResourceHandler queryHandler) {
+        return invoke(context, request, queryHandler, null);
     }
 
     @SuppressWarnings("unchecked")
