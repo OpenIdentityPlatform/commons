@@ -58,7 +58,7 @@
         </site>
     </distributionManagement>
     <properties>
-        <clirrComparisonVersion>1.3.0</clirrComparisonVersion>
+        <clirrComparisonVersion>3.0.0</clirrComparisonVersion>
     </properties>
     <modules>
         <module>forgerock-util</module>
