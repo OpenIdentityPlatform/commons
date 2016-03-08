@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
- * Portions Copyrighted 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json;
@@ -45,6 +45,7 @@ import java.util.regex.PatternSyntaxException;
 import org.forgerock.util.Function;
 import org.forgerock.util.RangeSet;
 import org.forgerock.util.Utils;
+import org.forgerock.util.annotations.VisibleForTesting;
 
 /**
  * Represents a value in a JSON object model structure. JSON values are
@@ -199,14 +200,23 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      *            the key to be converted into an list index value.
      * @return the converted index value, or {@code -1} if invalid.
      */
-    private static int toIndex(final String key) {
-        int result;
-        try {
-            result = Integer.parseInt(key);
-        } catch (final NumberFormatException nfe) {
-            result = -1;
+    @VisibleForTesting
+    static int toIndex(final String key) {
+        if (key == null || key.isEmpty()) {
+            return -1;
         }
-        return (result >= 0 ? result : -1);
+
+        // verify that every character is a digit (this also prevents negative values)
+        int result = 0;
+
+        for (int i = 0; i < key.length(); ++i) {
+            final char c = key.charAt(i);
+            if (c < '0' || c > '9') {
+                return -1;
+            }
+            result = result * 10 + (c - '0');
+        }
+        return result;
     }
 
     /** The Java object representing this JSON value. */

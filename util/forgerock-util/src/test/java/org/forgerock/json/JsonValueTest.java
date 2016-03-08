@@ -634,6 +634,30 @@ public class JsonValueTest {
         assertThat(iterator.hasNext()).isFalse();
     }
 
+    @DataProvider
+    private Object[][] testToIndexDataProvider() {
+        return new Object[][] {
+                { null, -1 },
+                { "", -1 },
+                { "-2", -1 },
+                { "+2", -1 },
+                { "0", 0 },
+                { "00", 0 },
+                { "1", 1 },
+                { "11", 11 },
+                { "111", 111 },
+                { String.valueOf(Integer.MAX_VALUE), Integer.MAX_VALUE },
+                // arithmetic overflow occurs as it does in core Java API
+                { String.valueOf(Integer.MAX_VALUE + 1), -1 },
+        };
+    }
+
+    @Test(dataProvider = "testToIndexDataProvider")
+    public void testToIndex(final String input, final int expected) {
+        final int actual = JsonValue.toIndex(input);
+        assertThat(actual).isEqualTo(expected);
+    }
+
     private JsonPointer ptr(final String pointer) {
         return new JsonPointer(pointer);
     }
