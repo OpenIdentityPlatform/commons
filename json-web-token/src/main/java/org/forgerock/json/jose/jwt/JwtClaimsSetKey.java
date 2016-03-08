@@ -11,10 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * An Enum for the JWT Claims Set names.
@@ -79,11 +84,38 @@ public enum JwtClaimsSetKey {
      * Identifies the expiration time on or after which the token MUST NOT be accepted for processing.
      */
     EXP,
-    /** Custom (private) Claim. */
+    /**
+     * Custom (private) Claim.
+     * <p>
+     * Represents any claim not registered in the JWT spec.
+     */
     CUSTOM;
 
     /**
-     * Returns a lowercase String of the JwtClaimsSetKey constant.
+     * Read-only {@code Map} of {@code JwtClaimsSetKey} values as lower-case {@code String}s, for fast lookup.
+     */
+    private static final Map<String, JwtClaimsSetKey> NAME_MAP;
+
+    static {
+        final Map<String, JwtClaimsSetKey> temp = new HashMap<>();
+        for (final JwtClaimsSetKey key : values()) {
+            temp.put(key.lowerCaseName, key);
+        }
+        NAME_MAP = Collections.unmodifiableMap(temp);
+    }
+
+    private final String lowerCaseName;
+
+    /**
+     * Creates a {@code JwtClaimsSetKey} with pre-allocated lower-case {@code String} representation, as a
+     * performance optimization, because this {@code enum} is often converted to a {@code String}.
+     */
+    JwtClaimsSetKey() {
+        this.lowerCaseName = name().toLowerCase(Locale.ROOT);
+    }
+
+    /**
+     * Returns a lowercase String of the {@code JwtClaimsSetKey} constant.
      *
      * @return Lowercase String representation of the constant.
      * @see #toString()
@@ -93,28 +125,28 @@ public enum JwtClaimsSetKey {
     }
 
     /**
-     * Gets the JwtClaimsSetKey constant that matches the given String.
-     * <p>
-     * If the given String does not match any of the constants, then CUSTOM is returned.
+     * Gets the {@code JwtClaimsSetKey} constant that matches the given {@code String} (case-insensitive).
      *
-     * @param claimSetKey The String representation of a JwtClaimsSetKey.
-     * @return The matching JwtClaimsSetKey.
+     * @param claimSetKey The case-insensitive {@code String} representation of a {@code JwtClaimsSetKey}.
+     * @return The matching {@code JwtClaimsSetKey} or {@link #CUSTOM} for keys not in the JWT spec.
      */
-    public static JwtClaimsSetKey getClaimSetKey(String claimSetKey) {
-        try {
-            return JwtClaimsSetKey.valueOf(claimSetKey.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return CUSTOM;
+    public static JwtClaimsSetKey getClaimSetKey(final String claimSetKey) {
+        if (claimSetKey != null && !claimSetKey.isEmpty()) {
+            final JwtClaimsSetKey value = NAME_MAP.get(claimSetKey.toLowerCase(Locale.ROOT));
+            if (value != null) {
+                return value;
+            }
         }
+        return CUSTOM;
     }
 
     /**
-     * Turns the JwtClaimsSetKey constant into a lowercase String.
+     * Turns the {@code JwtClaimsSetKey} constant into a lowercase {@code String}.
      *
      * @return {@inheritDoc}
      */
     @Override
     public String toString() {
-        return super.toString().toLowerCase();
+        return lowerCaseName;
     }
 }

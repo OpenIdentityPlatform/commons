@@ -50,6 +50,9 @@
             <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/json-web-token</url>
         </site>
     </distributionManagement>
+    <properties>
+        <clirrComparisonVersion>3.0.0</clirrComparisonVersion>
+    </properties>
 
     <build>
         <plugins>

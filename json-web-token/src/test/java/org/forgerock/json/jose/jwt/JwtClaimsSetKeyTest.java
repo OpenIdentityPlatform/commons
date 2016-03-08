@@ -11,12 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
 
 import static org.testng.Assert.assertEquals;
+
+import java.util.Locale;
 
 import org.testng.annotations.Test;
 
@@ -27,36 +29,39 @@ public class JwtClaimsSetKeyTest {
     public void shouldGetValue() {
 
         //Given
+        for (final JwtClaimsSetKey item : JwtClaimsSetKey.values()) {
+            //When
+            final String value = item.value();
 
-        //When
-        String value = JwtClaimsSetKey.JTI.value();
-
-        //Then
-        assertEquals(value, "jti");
+            //Then
+            assertEquals(value, item.name().toLowerCase(Locale.ROOT));
+        }
     }
 
     @Test
     public void shouldToString() {
 
         //Given
+        for (final JwtClaimsSetKey item : JwtClaimsSetKey.values()) {
+            //When
+            final String s = item.toString();
 
-        //When
-        String value = JwtClaimsSetKey.IAT.toString();
-
-        //Then
-        assertEquals(value, "iat");
+            //Then
+            assertEquals(s, item.name().toLowerCase(Locale.ROOT));
+        }
     }
 
     @Test
     public void shouldGetClaimSetKey() {
 
         //Given
+        for (final JwtClaimsSetKey item : JwtClaimsSetKey.values()) {
+            //When
+            JwtClaimsSetKey claimsSetKey = JwtClaimsSetKey.getClaimSetKey(item.name());
 
-        //When
-        JwtClaimsSetKey claimsSetKey = JwtClaimsSetKey.getClaimSetKey("SUB");
-
-        //Then
-        assertEquals(claimsSetKey, JwtClaimsSetKey.SUB);
+            //Then
+            assertEquals(claimsSetKey, item);
+        }
     }
 
     @Test
