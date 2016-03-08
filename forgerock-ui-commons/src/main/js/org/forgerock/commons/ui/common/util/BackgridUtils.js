@@ -11,19 +11,28 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define */
 define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     "jquery",
-    "underscore",
+    "lodash",
     "org/forgerock/commons/ui/common/backgrid/Backgrid",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/util/AutoScroll",
     "moment",
+    "dragula",
     "org/forgerock/commons/ui/common/backgrid/extension/ThemeableServerSideFilter"
-], function ($, _, Backgrid, DateUtil, UIUtils, moment) {
+
+], function ($, _,
+             Backgrid,
+             DateUtil,
+             UIUtils,
+             AutoScroll,
+             moment,
+             dragula) {
     /**
      * @exports org/forgerock/commons/ui/common/util/BackgridUtils
      */
@@ -31,88 +40,70 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
 
     /**
      * Makes the provided table drag and droppable
-     * @param {Object} data TODO Add parameter description
-     * @param {Object} data.grid - jQuery ref to a table
+     *
+     * @param {Object} data
+     * @param {array} data.containers - an array of container elements
      * @params {array} data.rows - array of the rows in the table
+     * @params {string} data.handlesClassname - the classname of the handles a use must click on to drag, omit property if the whole element should be selectable
+     * @params {boolean} data.autoScroll [true] - if the grid should auto scroll when a row is dragged out of bounds
      * @param {Object} callback - called on row drop
+     *
+     * @returns {array} rows - The rows array in the new order
+     *
      * @example
      * BackgridUtils.sortable({
-     *   "grid": this.$el.find("#attributesGridHolder table"),
-     *   "rows": _.clone(this.model.mappingProperties, true)
+     *   "containers": [$("#leftContainer")[0], $("#rightContainer")[0]],
+     *   "rows": _.clone(this.model.mappingProperties, true),
+     *   "handlesClassName": "fa fa-arrows"
      * }, _.bind(this.setMappingProperties, this));
+     *
      */
     obj.sortable = function (data, callback) {
-        if (data.grid && data.rows.length > 0) {
-
-            var offset = 0,
-                bottomBounds = 0,
-                topBounds = 0,
-                startIndex = -1,
-                table;
-
-            /*
-             * TODO: when jQuery UI is removed from the stack, we need to go back to using
-             *       the plain "sortable" plugin instead of "nestingSortable"
-             */
-            data.grid.nestingSortable({
-                containerSelector: "table",
-                itemPath: "> tbody",
-                itemSelector: "tr",
-                placeholder: "<tr class='placeholder'/>",
-                onMousedown: function ($item, _super, event) {
-                    table = $item.closest(this.containerSelector);
-                    topBounds = table.offset().top;
-                    bottomBounds = topBounds + table.height();
-
-                    offset = event.offsetY;
-
-                    startIndex = table.find("tbody tr").index($item);
-
-                    // set a fixed width of all cells so that when dragging, our cells width doesn't collapse
-                    $("td, th", "table").each(function () {
-                        var cell = $(this);
-                        cell.width(cell.width());
-                        cell.css("maxWidth", "none");
-                    });
-
-                    if (!event.target.nodeName.match(/^(input|select)$/i)) {
-                        event.preventDefault();
+        var start,
+            dragDropInstance = dragula(data.containers, {
+                moves: function (el, container, handle) {
+                    if (_.has(data, "handlesClassname")) {
+                        return handle.className.indexOf(data.handlesClassname) > -1;
+                    } else {
                         return true;
-                    }
-                },
-
-                onDrag: function ($item, position, _super, event) {
-                    $item.closest("table").find(".placeholder");
-
-                    if (position.top - offset >= topBounds && position.top - offset <= bottomBounds) {
-                        $item.css("top", position.top - offset);
-                    }
-                },
-
-                onDrop: function ($item, container, _super, event) {
-                    var endIndex = table.find("tbody tr").index($item),
-                        tempCopy;
-
-                    if (startIndex >= 0 && endIndex >= 0) {
-                        tempCopy = data.rows[startIndex];
-                        data.rows.splice(startIndex, 1);
-                        data.rows.splice(endIndex, 0, tempCopy);
-                    }
-
-                    // remove fixed width so that if content/table is resized then
-                    $("td, th", "table").each(function () {
-                        var cell = $(this);
-                        cell.css("width", "");
-                    });
-
-                    _super($item, container, _super, event);
-
-                    if (callback) {
-                        callback(data.rows);
                     }
                 }
             });
+
+        if (_.isUndefined(data.autoScroll)) {
+            data.autoScroll = true;
         }
+
+        dragDropInstance.on("cloned", _.bind(function(clone, original) {
+            _.each(original.children, function(child, index) {
+                $(clone).children().eq(index).css("width", $(child).css("width"));
+                $(clone).children().eq(index).css("padding", $(child).css("padding"));
+            });
+        }, this));
+
+        dragDropInstance.on("drag", _.bind(function(el, container) {
+            start = _.indexOf($(container).find("tr"), el);
+
+            if (data.autoScroll) {
+                AutoScroll.startDrag();
+            }
+        }, this));
+
+        dragDropInstance.on("drop", _.bind(function(el, container) {
+            var stop = _.indexOf($(container).find("tr"), el),
+                tempCopy = data.rows[start];
+
+            if (data.autoScroll) {
+                AutoScroll.endDrag();
+            }
+
+            data.rows.splice(start, 1);
+            data.rows.splice(stop, 0, tempCopy);
+
+            if (callback) {
+                callback(data.rows);
+            }
+        }, this));
     };
 
     obj.formatDate = function (date) {
