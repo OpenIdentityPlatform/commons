@@ -91,13 +91,17 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
         },
 
         checkChanges: function (event) {
-            var form = $(event.target).closest("form");
+            var target = $(event.target),
+                form = target.closest("form");
 
             ValidatorsManager.bindValidators($(form), Configuration.loggedUser.baseEntity, function () {
                 ValidatorsManager.validateAllFields($(form));
             });
 
-            this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: this.getFormContent(form[0]) });
+            if (!target.attr("data-validation-dependents")) {
+                this.changesPendingWidgets[form.attr("id")].makeChanges({subform: this.getFormContent(form[0])});
+            }
+
             $(form).find("input[type='reset']").prop("disabled", false);
         },
 
@@ -153,19 +157,12 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             this.parentRender(function () {
                 var selectedTabId = this.$el.find('form#'+tabName).closest(".tab-pane").attr("id"),
                     selectedTab = this.$el.find("ul.nav-tabs a[href='#"+selectedTabId+"']");
-
-                _.each(this.$el.find("form"), this.reloadFormData, this);
-
-                selectedTab.tab('show');
-
                 this.changesPendingWidgets = {};
 
+                _.each(this.$el.find("form"), this.reloadFormData, this);
+                ValidatorsManager.bindValidators($("form[data-form-validate]"), Configuration.loggedUser.baseEntity);
+
                 _.each(this.$el.find("form"), function (form) {
-
-                    if ($(form).attr("data-form-validate")) {
-                        ValidatorsManager.bindValidators($(form), Configuration.loggedUser.baseEntity);
-                    }
-
                     this.changesPendingWidgets[$(form).attr('id')] = ChangesPending.watchChanges({
                         element: $(".changes-pending", form),
                         watchedObj: { subform: this.getFormContent(form) },
@@ -174,6 +171,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
                     });
                 }, this);
 
+                selectedTab.tab('show');
                 this.$el.find("#" + selectedTabId).find(":input:not([readonly]):first").focus();
 
                 if (callback) {
@@ -200,6 +198,7 @@ define("org/forgerock/commons/ui/user/profile/UserProfileView", [
             var form = this.$el.find(event.target).closest("form");
 
             this.reloadFormData(form[0]);
+            this.changesPendingWidgets[form.attr("id")].makeChanges({ subform: this.getFormContent(form[0]) });
         }
     });
 

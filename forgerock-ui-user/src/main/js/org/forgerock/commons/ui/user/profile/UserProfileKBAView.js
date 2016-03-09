@@ -116,6 +116,10 @@ define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
                     });
                 }
 
+                if (!isKbaQuestion) {
+                    this.changesPendingWidgets[form.attr("id")].makeChanges({subform: this.getFormContent(form[0])});
+                }
+
                 $(form).find("input[type='reset']").prop("disabled", false);
             } else {
                 UserProfileView.checkChanges.call(this, e);
