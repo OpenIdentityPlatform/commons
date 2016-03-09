@@ -12,7 +12,7 @@
   ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
   ~ information: "Portions copyright [year] [name of copyright owner]".
   ~
-  ~ Copyright 2015 ForgeRock AS.
+  ~ Copyright 2015-2016 ForgeRock AS.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -24,7 +24,7 @@
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-audit</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>4.3.0-SNAPSHOT</version>
     <name>Commons - ForgeRock Audit Framework</name>
     <description>Implements the commons audit framework.</description>
     <packaging>pom</packaging>
@@ -50,7 +50,7 @@
       <tag>HEAD</tag>
   </scm>
     <properties>
-        <commons.forgerock-bom.version>4.1.1</commons.forgerock-bom.version>
+        <commons.forgerock-bom.version>6.0</commons.forgerock-bom.version>
 
         <jodaTime.version>2.1</jodaTime.version>
         <supercsv.version>2.4.0</supercsv.version>
