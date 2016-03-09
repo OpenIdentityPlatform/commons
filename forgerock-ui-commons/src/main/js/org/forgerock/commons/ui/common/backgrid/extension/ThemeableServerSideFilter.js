@@ -29,10 +29,36 @@
  * new Backgrid.Extension.ThemeableServerSideFilter({ ... });
  */
 define("org/forgerock/commons/ui/common/backgrid/extension/ThemeableServerSideFilter", [
+    "jquery",
+    "underscore",
     "backgrid-filter",
     "org/forgerock/commons/ui/common/backgrid/Backgrid"
-], function (BackgridFilter, Backgrid) {
+], function ($, _, BackgridFilter, Backgrid) {
     Backgrid.Extension.ThemeableServerSideFilter = Backgrid.Extension.ServerSideFilter.extend({
+        /**
+         * Overriding the "keyup input[type=search]" event on ServerSideFilter here
+         * to accommodate the ability to filter as input is typed into the filter field
+         */
+    	  events: _.extend(Backgrid.Extension.ServerSideFilter.prototype.events, {
+    		  "keyup input[type=search]": "keyupSearch"
+    	  }),
+    	  keyupSearch: function (e) {
+    		  e.preventDefault();
+
+          /**
+           * showClearButtonMaybe is the default action of
+           * "keyup input[type=search]" in ServerSideFilter
+           */
+    		  this.showClearButtonMaybe(e);
+          /*
+           * if there is no minimumSearchChars setting stick with the default behavior
+           * of searching only on submit (a.k.a. clicking the enter button)
+           */
+    		  if (this.minimumSearchChars && $(e.target).val().length >= this.minimumSearchChars) {
+    		  	this.search(e);
+    		  }
+    	  },
+
         /**
          * @default
          */

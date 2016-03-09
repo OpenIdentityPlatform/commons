@@ -428,6 +428,12 @@ define("org/forgerock/commons/ui/common/util/BackgridUtils", [
                 collection: this.collection
             });
 
+            /**
+             * this setting tells the ThemeableServerSideFilter both to search on keyup and to only
+             * search if the minimum number of search characters are entered in the filter field
+             */
+            filter.minimumSearchChars = this.column.attributes.minimumSearchChars;
+
             if (this.addClassName) {
                 this.$el.addClass(this.addClassName);
             }
