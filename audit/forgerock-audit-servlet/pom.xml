@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-audit</artifactId>
-        <version>4.3.0</version>
+        <version>4.3.1-SNAPSHOT</version>
     </parent>
     <artifactId>forgerock-audit-servlet</artifactId>
     <packaging>bundle</packaging>
