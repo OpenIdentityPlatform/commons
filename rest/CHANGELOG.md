@@ -1,10 +1,14 @@
-# 4.1.0
+# 4.1.1
 
 ## Changes
 * Support the defacto standard for RESTful create requests over HTTP (POST without query parameter):
 [CREST-380](https://bugster.forgerock.org/jira/browse/CREST-380)
 * Enable annotation-based request handlers to be written, and to be created using the `Resources` class:
 [CREST-383](https://bugster.forgerock.org/jira/browse/CREST-383)
+
+# 4.1.0
+
+Mistaken release - no change from 4.0.3.
 
 # 4.0.3
 
