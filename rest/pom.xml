@@ -50,6 +50,7 @@
         </site>
     </distributionManagement>
     <properties>
+        <commons.forgerock-bom.version>5.0</commons.forgerock-bom.version>
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
     </properties>
     <modules>
@@ -80,7 +81,7 @@
             <dependency>
               <groupId>org.forgerock.commons</groupId>
               <artifactId>forgerock-bom</artifactId>
-              <version>4.0.0</version>
+              <version>${commons.forgerock-bom.version}</version>
               <scope>import</scope>
               <type>pom</type>
             </dependency>
