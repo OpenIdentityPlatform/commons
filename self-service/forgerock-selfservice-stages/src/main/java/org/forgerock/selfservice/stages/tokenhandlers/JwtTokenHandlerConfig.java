@@ -11,18 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.selfservice.stages.tokenhandlers;
-
-import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
+
+import java.util.Objects;
 
 /**
  * Configuration for the {@link JwtTokenHandler}.
@@ -229,15 +229,15 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
                 && Objects.equals(tokenLifeTimeInSeconds, that.tokenLifeTimeInSeconds)
                 && Objects.equals(sharedKey, that.sharedKey)
                 && Objects.equals(keyPairAlgorithm, that.keyPairAlgorithm)
-                && Objects.equals(jweAlgorithm, that.jweAlgorithm)
-                && Objects.equals(encryptionMethod, that.encryptionMethod)
-                && Objects.equals(jwsAlgorithm, that.jwsAlgorithm);
+                && Objects.equals(jweAlgorithm.name(), that.jweAlgorithm.name())
+                && Objects.equals(encryptionMethod.name(), that.encryptionMethod.name())
+                && Objects.equals(jwsAlgorithm.name(), that.jwsAlgorithm.name());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(sharedKey, keyPairAlgorithm, keyPairSize, jweAlgorithm,
-                encryptionMethod, jwsAlgorithm, tokenLifeTimeInSeconds);
+        return Objects.hash(sharedKey, keyPairAlgorithm, keyPairSize, jweAlgorithm.name(),
+                encryptionMethod.name(), jwsAlgorithm.name(), tokenLifeTimeInSeconds);
     }
 
 }

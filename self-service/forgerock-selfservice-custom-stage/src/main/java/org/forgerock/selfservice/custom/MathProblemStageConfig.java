@@ -11,12 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.selfservice.custom;
 
 import org.forgerock.selfservice.core.config.StageConfig;
+
+import java.util.Objects;
 
 /**
  * Represents the config for a simple math problem to be solved.
@@ -84,4 +86,25 @@ public final class MathProblemStageConfig implements StageConfig {
         return NAME;
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(getName(), getProgressStageClassName(), leftValue, rightValue);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof MathProblemStageConfig)) {
+            return false;
+        }
+
+        MathProblemStageConfig that = (MathProblemStageConfig) o;
+        return Objects.equals(getName(), that.getName())
+                && Objects.equals(getProgressStageClassName(), that.getProgressStageClassName())
+                && Objects.equals(leftValue, that.leftValue)
+                && Objects.equals(rightValue, that.rightValue);
+    }
 }
