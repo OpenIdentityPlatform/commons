@@ -34,7 +34,7 @@
   </description>
   <url>http://commons.forgerock.org/forgerock-http-framework</url>
   <issueManagement>
-    <system>Jira</system>
+    <system>JIRA</system>
     <url>https://bugster.forgerock.org/jira/browse/CHF</url>
   </issueManagement>
   <modules>

@@ -33,7 +33,7 @@
     <description>Implements the commons audit framework.</description>
 
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/CAUD</url>
     </issueManagement>
 

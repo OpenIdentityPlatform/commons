@@ -29,7 +29,7 @@
     <name>JSON Patch library</name>
     <description>ForgeRock JSON Patch project</description>
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/CREST</url>
     </issueManagement>
     <dependencies>

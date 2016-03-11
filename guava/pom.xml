@@ -29,7 +29,7 @@
     <name>ForgeRock Guava</name>
     <description>Repackaged version of Guava to avoid dependency collisions.</description>
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/COMMONS</url>
     </issueManagement>
     <modules>

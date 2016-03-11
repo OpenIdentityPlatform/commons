@@ -29,7 +29,7 @@
     <name>JSON Crypto libraries</name>
     <url>http://commons.forgerock.org/json-crypto</url>
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/COMMONS</url>
     </issueManagement>
     <distributionManagement>

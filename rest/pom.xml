@@ -28,7 +28,7 @@
     <description>Common resource-oriented libraries used by ForgeRock projects</description>
     <url>http://commons.forgerock.org/forgerock-rest</url>
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/CREST</url>
     </issueManagement>
     <distributionManagement>

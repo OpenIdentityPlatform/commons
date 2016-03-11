@@ -33,7 +33,7 @@
     <description>ForgeRock Authentication and Authorization common filters</description>
 
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/CAF</url>
     </issueManagement>
 

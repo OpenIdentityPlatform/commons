@@ -29,7 +29,7 @@
     <name>JSON Reference libraries</name>
     <url>http://commons.forgerock.org/json-ref</url>
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/CREST</url>
     </issueManagement>
     <distributionManagement>

@@ -31,7 +31,7 @@
     <packaging>bundle</packaging>
 
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/CREST</url>
     </issueManagement>
 

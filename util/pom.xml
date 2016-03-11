@@ -27,7 +27,7 @@
     <packaging>pom</packaging>
     <url>http://commons.forgerock.org/forgerock-util</url>
     <issueManagement>
-        <system>Jira</system>
+        <system>JIRA</system>
         <url>https://bugster.forgerock.org/jira/browse/COMMONS</url>
     </issueManagement>
     <distributionManagement>
