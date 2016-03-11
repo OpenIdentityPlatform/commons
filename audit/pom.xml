@@ -18,37 +18,24 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock</groupId>
-        <artifactId>forgerock-parent</artifactId>
-        <version>2.0.4</version>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-common-parent</artifactId>
+        <version>4.2.1-SNAPSHOT</version>
     </parent>
+
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-audit</artifactId>
-    <version>6.2.0-SNAPSHOT</version>
+    <version>${forgerock-audit.version}</version>
+    <packaging>pom</packaging>
+
     <name>Commons - ForgeRock Audit Framework</name>
     <description>Implements the commons audit framework.</description>
-    <packaging>pom</packaging>
-    <licenses>
-        <license>
-            <name>CDDL-1.0</name>
-            <url>http://www.opensource.org/licenses/CDDL-1.0</url>
-            <comments>Common Development and Distribution License (CDDL) 1.0.
-                This license applies to OpenAM source code as indicated in the
-                sources themselves.
-            </comments>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+
     <issueManagement>
-       <system>Jira</system>
-       <url>https://bugster.forgerock.org/jira/browse/COMMONS</url>
+        <system>Jira</system>
+        <url>https://bugster.forgerock.org/jira/browse/CAUD</url>
     </issueManagement>
-    <scm>
-        <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-audit.git</connection>
-        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-audit.git</developerConnection>
-        <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-audit/browse</url>
-      <tag>HEAD</tag>
-  </scm>
+
     <properties>
         <commons.forgerock-bom.version>7.0</commons.forgerock-bom.version>
 
@@ -73,13 +60,6 @@
     <dependencyManagement>
         <dependencies>
             <!-- ForgeRock commons dependencies -->
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-bom</artifactId>
-                <version>${commons.forgerock-bom.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
@@ -110,24 +90,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>forgerock-staging-repository</id>
-            <name>ForgeRock Release Repository</name>
-            <url>http://maven.forgerock.org/repo/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-
-        <repository>
-            <id>forgerock-snapshots-repository</id>
-            <name>ForgeRock Snapshot Repository</name>
-            <url>http://maven.forgerock.org/repo/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
 </project>

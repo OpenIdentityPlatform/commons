@@ -18,13 +18,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.forgerock</groupId>
-    <artifactId>forgerock-parent</artifactId>
-    <version>2.0.4</version>
+    <groupId>org.forgerock.commons</groupId>
+    <artifactId>forgerock-common-parent</artifactId>
+    <version>4.2.1-SNAPSHOT</version>
   </parent>
   <groupId>org.forgerock.http</groupId>
   <artifactId>forgerock-http-framework</artifactId>
-  <version>3.0.2-SNAPSHOT</version>
+  <version>${forgerock-http-framework.version}</version>
   <packaging>pom</packaging>
   <name>Commons HTTP Framework</name>
   <description>
@@ -33,6 +33,10 @@
        such as Servlet, Apache HTTP Clients, and Grizzly.
   </description>
   <url>http://commons.forgerock.org/forgerock-http-framework</url>
+  <issueManagement>
+    <system>Jira</system>
+    <url>https://bugster.forgerock.org/jira/browse/CHF</url>
+  </issueManagement>
   <modules>
     <module>http-core</module>
     <module>http-servlet</module>
@@ -59,13 +63,6 @@
   <dependencyManagement>
     <dependencies>
       <dependency>
-        <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-bom</artifactId>
-        <version>4.1.1</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-      <dependency>
         <groupId>com.xebialabs.restito</groupId>
         <artifactId>restito</artifactId>
         <version>0.5.1</version>
@@ -73,44 +70,6 @@
       </dependency>
     </dependencies>
   </dependencyManagement>
-  <repositories>
-    <repository>
-      <id>forgerock-staging-repository</id>
-      <name>ForgeRock Release Repository</name>
-      <url>http://maven.forgerock.org/repo/releases</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-  <issueManagement>
-    <system>jira</system>
-    <url>https://bugster.forgerock.org/jira/browse/CHF</url>
-  </issueManagement>
-  <licenses>
-    <license>
-      <name>CDDL-1.0</name>
-      <url>http://www.opensource.org/licenses/CDDL-1.0</url>
-      <comments>Common Development and Distribution License (CDDL) 1.0.
-            This license applies to OpenIG source code as indicated in the
-            source code.</comments>
-      <distribution>repo</distribution>
-    </license>
-    <license>
-      <name>CC BY-NC-ND 3.0</name>
-      <url>http://creativecommons.org/licenses/by-nc-nd/3.0/</url>
-      <comments>Creative Commons Attribution-NonCommercial-NoDerivs 3.0
-            Unported. This license applies to the site content, and to the
-            documentation as indicated in the documentation source code.</comments>
-      <distribution>repo</distribution>
-    </license>
-  </licenses>
-  <scm>
-    <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-http-framework.git</connection>
-    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-http-framework.git</developerConnection>
-    <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-http-framework/browse</url>
-    <tag>HEAD</tag>
-  </scm>
   <distributionManagement>
     <site>
       <id>forgerock.org</id>
