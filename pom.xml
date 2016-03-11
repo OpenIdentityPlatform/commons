@@ -53,9 +53,9 @@
   </ciManagement>
 
   <scm>
-    <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/*** TO BE UPDATED ***.git</connection>
-    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/*** TO BE UPDATED ***.git</developerConnection>
-    <url>http://stash.forgerock.org/projects/COMMONS/repos/*** TO BE UPDATED ***/browse</url>
+    <connection>scm:git:ssh://git@stash.forgerock.org:7999/san/mono-repo.git</connection>
+    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/san/mono-repo.git</developerConnection>
+    <url>https://stash.forgerock.org/projects/SAN/repos/mono-repo/browse</url>
   </scm>
 
   <distributionManagement>
@@ -77,7 +77,7 @@
     <repository>
       <id>forgerock-staging-repository</id>
       <name>ForgeRock Release Repository</name>
-      <url>${forgerockDistMgmtReleasesUrl}</url>
+      <url>http://maven.forgerock.org/repo/releases</url>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
@@ -89,7 +89,7 @@
     <repository>
       <id>forgerock-snapshots-repository</id>
       <name>ForgeRock Snapshot Repository</name>
-      <url>${forgerockDistMgmtSnapshotsUrl}</url>
+      <url>http://maven.forgerock.org/repo/snapshots</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -101,8 +101,8 @@
 
   <properties>
     <!-- Repository Deployment URLs -->
-    <forgerockDistMgmtSnapshotsUrl>http://maven.forgerock.org/repo/snapshots</forgerockDistMgmtSnapshotsUrl>
-    <forgerockDistMgmtReleasesUrl>http://maven.forgerock.org/repo/releases</forgerockDistMgmtReleasesUrl>
+    <forgerockDistMgmtSnapshotsUrl>http://maven.forgerock.org/repo/internal</forgerockDistMgmtSnapshotsUrl>
+    <forgerockDistMgmtReleasesUrl>http://maven.forgerock.org/repo/internal</forgerockDistMgmtReleasesUrl>
 
     <!-- Third party components versions -->
     <assertj.version>2.1.0</assertj.version>
