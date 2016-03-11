@@ -114,22 +114,22 @@
     <testng.version>6.9.4</testng.version>
 
     <!-- Shared components versions -->
+    <forgerock-audit.version>4.2.1-SNAPSHOT</forgerock-audit.version>
+    <forgerock-auth-filters.version>3.1.7-SNAPSHOT</forgerock-auth-filters.version>
     <forgerock-guava.version>18.0.4-SNAPSHOT</forgerock-guava.version>
+    <forgerock-http-framework.version>3.0.2-SNAPSHOT</forgerock-http-framework.version>
+    <forgerock-rest.version>4.0.4-SNAPSHOT</forgerock-rest.version>
+    <forgerock-selfservice.version>1.0.4-SNAPSHOT</forgerock-selfservice.version>
     <forgerock-util.version>3.0.3-SNAPSHOT</forgerock-util.version>
     <json-crypto.version>3.0.3-SNAPSHOT</json-crypto.version>
     <json-patch.version>3.0.3-SNAPSHOT</json-patch.version>
     <json-ref.version>3.0.3-SNAPSHOT</json-ref.version>
     <json-schema.version>3.0.3-SNAPSHOT</json-schema.version>
     <json-web-token.version>3.0.4-SNAPSHOT</json-web-token.version>
-    <forgerock-http-framework.version>3.0.2-SNAPSHOT</forgerock-http-framework.version>
-    <forgerock-rest.version>4.0.4-SNAPSHOT</forgerock-rest.version>
-    <forgerock-auth-filters.version>3.1.7-SNAPSHOT</forgerock-auth-filters.version>
-    <forgerock-audit.version>4.2.1-SNAPSHOT</forgerock-audit.version>
-    <forgerock-selfservice.version>1.0.4-SNAPSHOT</forgerock-selfservice.version>
   </properties>
 
   <modules>
-    <module>forgerock-common-parent</module>
+    <module>commons-parent</module>
     <module>audit</module>
     <module>auth_filters</module>
     <module>guava</module>
