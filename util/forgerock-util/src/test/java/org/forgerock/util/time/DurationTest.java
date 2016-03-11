@@ -16,12 +16,20 @@
 
 package org.forgerock.util.time;
 
+import static java.lang.Integer.signum;
+import static java.util.concurrent.TimeUnit.DAYS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.util.time.Duration.UNLIMITED;
+import static org.forgerock.util.time.Duration.ZERO;
 import static org.forgerock.util.time.Duration.duration;
 import static org.forgerock.util.time.DurationAssert.assertThat;
 
 import java.util.concurrent.TimeUnit;
 
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -185,5 +193,36 @@ public class DurationTest {
     @Test
     public void testToString() {
         assertThat(duration("1 minute").toString()).isEqualTo("1 MINUTES");
+    }
+
+    @DataProvider
+    private Object[][] durations() {
+        //@formatter:off
+        return new Object[][] {
+            { ZERO,                                       ZERO,                                        0 },
+            { UNLIMITED,                                  UNLIMITED,                                   0 },
+            { ZERO,                                       UNLIMITED,                                  -1 },
+            { UNLIMITED,                                  ZERO,                                        1 },
+            { ZERO,                                       duration(3, SECONDS),                       -1 },
+            { duration(3, SECONDS),                       ZERO,                                        1 },
+            { duration(3, SECONDS),                       duration(3, SECONDS),                        0 },
+            { duration(3, SECONDS),                       duration(5, SECONDS),                       -1 },
+            { duration(3, SECONDS),                       duration(5, DAYS),                          -1 },
+            { duration(5, DAYS),                          duration(3, SECONDS),                        1 },
+            { duration(1, DAYS),                          duration(24 * 60 * 60, SECONDS),             0 },
+            { duration(Long.MAX_VALUE, NANOSECONDS),      duration(1, MILLISECONDS),                   1 },
+            { duration(Long.MAX_VALUE, NANOSECONDS),      duration(Long.MAX_VALUE, DAYS),             -1 },
+            { duration(Long.MAX_VALUE, NANOSECONDS),      duration(Long.MAX_VALUE - 1, DAYS),         -1 },
+            { duration(Long.MAX_VALUE - 1, NANOSECONDS),  duration(Long.MAX_VALUE, DAYS),             -1 },
+            // 9223372036854 ms -> 9223372036854000000 ns. So let's compare with 1 more millisecond (that will
+            // cause an overflow during the conversion from ms to ns)
+            { duration(9223372036854L + 1, MILLISECONDS), duration(9223372036854000000L, NANOSECONDS), 1 }
+        };
+        //@formatter:on
+    }
+
+    @Test(dataProvider = "durations")
+    public void shouldCompare(Duration left, Duration right, int expected) throws Exception {
+        assertThat(signum(left.compareTo(right))).isEqualTo(expected);
     }
 }

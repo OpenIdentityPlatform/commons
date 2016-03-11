@@ -52,7 +52,7 @@ import org.forgerock.util.Reject;
  *     zero
  * </code>
  */
-public class Duration {
+public class Duration implements Comparable<Duration> {
 
     /**
      * Special duration that represents an unlimited duration (or indefinite).
@@ -332,5 +332,59 @@ public class Duration {
             return "ZERO";
         }
         return number + " " + unit;
+    }
+
+    @Override
+    public int compareTo(Duration that) {
+        if (this.isUnlimited()) {
+            if (that.isUnlimited()) {
+                // unlimited == unlimited
+                return 0;
+            } else {
+                // unlimited > any value
+                return 1;
+            }
+        }
+        if (that.isUnlimited()) {
+            // any value > unlimited
+            return -1;
+        }
+        if (this.isZero()) {
+            if (that.isZero()) {
+                // 0 == 0
+                return 0;
+            } else {
+                // 0 > any value
+                return -1;
+            }
+        }
+        if (that.isZero()) {
+            // any value > 0
+            return 1;
+        }
+
+        // No special case so let's convert using the smallest unit and check if the biggest duration overflowed
+        // or not during the conversion.
+        final int unitCompare = this.getUnit().compareTo(that.getUnit());
+        final boolean biggestOverflowed;
+        final long thisConverted, thatConverted;
+        if (unitCompare > 0) {
+            thisConverted = this.convertTo(that.getUnit()).getValue();
+            thatConverted = that.getValue();
+            biggestOverflowed = thisConverted == Long.MAX_VALUE;
+        } else if (unitCompare < 0) {
+            thisConverted = this.getValue();
+            thatConverted = that.convertTo(this.getUnit()).getValue();
+            biggestOverflowed = thatConverted == Long.MAX_VALUE;
+        } else {
+            // unitCompare == 0 : both durations are in the same units
+            // No conversion was done so the biggest can't have been overflowed.
+            biggestOverflowed = false;
+            thisConverted = this.getValue();
+            thatConverted = that.getValue();
+        }
+
+
+        return !biggestOverflowed ? Long.compare(thisConverted, thatConverted) : unitCompare;
     }
 }
