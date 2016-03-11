@@ -19,10 +19,11 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>org.forgerock.http</groupId>
-    <artifactId>forgerock-http-framework</artifactId>
-    <version>3.0.2-SNAPSHOT</version>
+    <artifactId>forgerock-http-framework-parent</artifactId>
+    <version>4.2.1-SNAPSHOT</version>
   </parent>
   <artifactId>chf-http-core</artifactId>
+  <version>${forgerock-http-framework.version}</version>
   <packaging>bundle</packaging>
   <name>HTTP Core library</name>
   <dependencies>

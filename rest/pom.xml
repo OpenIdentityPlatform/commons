@@ -22,9 +22,7 @@
         <version>4.2.1-SNAPSHOT</version>
         <relativePath>../forgerock-common-parent/pom.xml</relativePath>
     </parent>
-    <groupId>org.forgerock.commons</groupId>
-    <artifactId>forgerock-rest</artifactId>
-    <version>${forgerock-rest.version}</version>
+    <artifactId>forgerock-rest-parent</artifactId>
     <packaging>pom</packaging>
     <name>ForgeRock REST libraries</name>
     <description>Common resource-oriented libraries used by ForgeRock projects</description>

@@ -24,8 +24,7 @@
     <relativePath>../forgerock-common-parent/pom.xml</relativePath>
   </parent>
   <groupId>org.forgerock.http</groupId>
-  <artifactId>forgerock-http-framework</artifactId>
-  <version>${forgerock-http-framework.version}</version>
+  <artifactId>forgerock-http-framework-parent</artifactId>
   <packaging>pom</packaging>
   <name>Commons HTTP Framework</name>
   <description>

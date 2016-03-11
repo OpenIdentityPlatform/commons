@@ -15,15 +15,16 @@
   Copyright 2015-2016 ForgeRock AS.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <artifactId>forgerock-rest</artifactId>
-        <groupId>org.forgerock.commons</groupId>
-        <version>4.1.2-SNAPSHOT</version>
-    </parent>
-
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-rest-parent</artifactId>
+        <version>4.2.1-SNAPSHOT</version>
+    </parent>
+
     <artifactId>forgerock-rest-docbook</artifactId>
+    <version>${forgerock-rest.version}</version>
     <name>Common ForgeRock REST DocBook Sources</name>
     <description>Common ForgeRock REST DocBook XML Sources</description>
 </project>

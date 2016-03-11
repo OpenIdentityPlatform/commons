@@ -21,9 +21,7 @@
         <version>4.2.1-SNAPSHOT</version>
         <relativePath>../forgerock-common-parent/pom.xml</relativePath>
     </parent>
-    <groupId>org.forgerock.commons</groupId>
-    <version>${forgerock-util.version}</version>
-    <artifactId>forgerock-utilities</artifactId>
+    <artifactId>forgerock-utilities-parent</artifactId>
     <name>ForgeRock Utility Classes Parent</name>
     <description>Miscellaneous utility classes used within ForgeRock projects.</description>
     <packaging>pom</packaging>
