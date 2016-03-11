@@ -23,10 +23,10 @@
     </parent>
 
     <groupId>org.forgerock.commons</groupId>
-    <artifactId>forgerock-common-parent</artifactId>
+    <artifactId>commons-parent</artifactId>
     <packaging>pom</packaging>
 
-    <name>ForgeRock Bill Of Materials Parent</name>
+    <name>ForgeRock Commons Parent</name>
     <description>Parent module to group all the common modules</description>
     <url>http://www.forgerock.com</url>
 

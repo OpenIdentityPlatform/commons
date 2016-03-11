@@ -19,7 +19,7 @@
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-common-parent</artifactId>
         <version>4.2.1-SNAPSHOT</version>
-        <relativePath>../forgerock-common-parent/pom.xml</relativePath>
+        <relativePath>../commons-parent/pom.xml</relativePath>
     </parent>
     <artifactId>forgerock-utilities-parent</artifactId>
     <name>ForgeRock Utility Classes Parent</name>
