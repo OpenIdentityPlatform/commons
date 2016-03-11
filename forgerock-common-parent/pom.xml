@@ -37,19 +37,4 @@
     <prerequisites>
         <maven>${maven.min.version}</maven>
     </prerequisites>
-
-    <modules>
-        <module>../audit</module>
-        <module>../auth_filters</module>
-        <module>../guava</module>
-        <module>../http-framework</module>
-        <module>../json-crypto</module>
-        <module>../json-patch</module>
-        <module>../json-ref</module>
-        <module>../json-schema</module>
-        <module>../json-web-token</module>
-        <module>../rest</module>
-        <module>../self-service</module>
-        <module>../util</module>
-    </modules>
 </project>
