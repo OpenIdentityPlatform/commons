@@ -42,7 +42,7 @@ a Paths object that describes what paths are available in the application.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| -------------------------------------
-_id         | frURI                       | ✓          | The identifier of the API Descriptor
+id          | frURI                       | ✓          | The identifier of the API Descriptor
 definitions | [Definition](#Definition)[] |            | Schema definitions
 paths       | Paths                       | ✓          | The supported paths for this API.
 
@@ -55,7 +55,7 @@ the structure of each of its requests/responses. This object defines a schema.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-_id         | frURI                       | ✓          | The identifier of the schema
+id          | frURI                       | ✓          | The identifier of the schema
 title       | String                      | ✓          | A human-readable name of the schema
 description | String                      | ✓          | A description of the schema
 schema      | [Schema](#Schema)           | ✓          | The schema for this definition.
