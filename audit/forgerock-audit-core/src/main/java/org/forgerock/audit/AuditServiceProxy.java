@@ -11,10 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit;
+
+import java.util.Collection;
+import java.util.Set;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -34,9 +38,6 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.promise.Promise;
-
-import java.util.Set;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * AuditService proxy that allows products to implement threadsafe hot-swappable configuration updates.
@@ -182,6 +183,16 @@ public class AuditServiceProxy implements AuditService {
         obtainReadLock();
         try {
             return delegate.getRegisteredHandler(handlerName);
+        } finally {
+            releaseReadLock();
+        }
+    }
+
+    @Override
+    public Collection<AuditEventHandler> getRegisteredHandlers() throws ServiceUnavailableException {
+        obtainReadLock();
+        try {
+            return delegate.getRegisteredHandlers();
         } finally {
             releaseReadLock();
         }

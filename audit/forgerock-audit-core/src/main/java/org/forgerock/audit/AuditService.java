@@ -11,18 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit;
 
+import java.util.Collection;
+import java.util.Set;
+
 import org.forgerock.audit.events.handlers.AuditEventHandler;
-import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -33,9 +35,8 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
-
-import java.util.Set;
 
 /**
  * CREST {@link RequestHandler} responsible for storing and retrieving audit events.
@@ -161,6 +162,14 @@ public interface AuditService extends RequestHandler {
      * @throws ServiceUnavailableException if the AuditService has been closed.
      */
     AuditEventHandler getRegisteredHandler(String handlerName) throws ServiceUnavailableException;
+
+    /**
+     * Returns the registered handlers.
+     *
+     * @return the handlers
+     * @throws ServiceUnavailableException if the AuditService has been closed.
+     */
+    Collection<AuditEventHandler> getRegisteredHandlers() throws ServiceUnavailableException;
 
     /**
      * Returns whether or not events of the specified topic will be handled.

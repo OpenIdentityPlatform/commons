@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit.events.handlers.impl;
@@ -79,6 +79,11 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase {
     public Promise<QueryResponse, ResourceException> queryEvents(
             Context context, String topic, QueryRequest query, QueryResourceHandler handler) {
         return newQueryResponse().asPromise();
+    }
+
+    @Override
+    public boolean canBeUsedForQueries() {
+        return true;
     }
 
     /**

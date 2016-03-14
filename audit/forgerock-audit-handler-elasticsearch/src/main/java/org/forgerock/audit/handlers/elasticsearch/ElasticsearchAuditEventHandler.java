@@ -217,6 +217,11 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     }
 
     @Override
+    public boolean canBeUsedForQueries() {
+        return true;
+    }
+
+    @Override
     public Promise<ResourceResponse, ResourceException> readEvent(final Context context, final String topic,
             final String resourceId) {
         final Request request;
