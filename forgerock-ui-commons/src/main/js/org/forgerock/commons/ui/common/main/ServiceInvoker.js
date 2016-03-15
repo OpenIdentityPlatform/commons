@@ -90,7 +90,7 @@ define("org/forgerock/commons/ui/common/main/ServiceInvoker", [
                     });
                 }
 
-                if(successCallback) { successCallback(data); }
+                if(successCallback) { successCallback(data, jqXHR); }
             }
         };
         options.error = function (jqXHR, textStatus, errorThrown ) {
