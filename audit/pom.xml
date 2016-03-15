@@ -65,6 +65,7 @@
         <module>forgerock-audit-servlet</module>
         <module>forgerock-audit-handler-csv</module>
         <module>forgerock-audit-handler-syslog</module>
+        <module>forgerock-audit-handler-jms</module>
         <module>forgerock-audit-handler-jdbc</module>
         <module>forgerock-audit-handler-elasticsearch</module>
     </modules>

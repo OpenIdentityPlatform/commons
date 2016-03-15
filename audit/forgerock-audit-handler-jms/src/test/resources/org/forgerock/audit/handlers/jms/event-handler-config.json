@@ -1,0 +1,12 @@
+{
+  "class" : "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
+  "config" : {
+    "name" : "jms",
+    "topics": [ "access", "activity", "config", "authentication" ],
+    "providerUrl" : "tcp://localhost:61616",
+    "jmsTopic" : "audit",
+    "initialContextFactory" : "org.forgerock.audit.handlers.jms.TestInitialContextFactory",
+    "deliveryMode" : "NON_PERSISTENT",
+    "sessionAcknowledgement" : "AUTO"
+  }
+}

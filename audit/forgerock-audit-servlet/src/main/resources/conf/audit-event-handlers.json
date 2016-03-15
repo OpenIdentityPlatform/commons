@@ -178,6 +178,18 @@
           "maxBatchedEvents" : 500
         }
       }
+    },
+    {
+      "class" : "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
+      "config" : {
+        "name" : "jms",
+        "topics" : [ "access", "activity", "config", "authentication"],
+        "providerUrl" : "tcp://localhost:61616",
+        "jmsTopic" : "audit",
+        "initialContextFactory" : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+        "deliveryMode" : "NON_PERSISTENT",
+        "sessionAcknowledgement" : "AUTO"
+      }
     }
   ]
 }

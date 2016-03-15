@@ -261,7 +261,7 @@ public class AuditJsonConfig {
      * @throws AuditException
      *             If any error occurs while instantiating the configuration from JSON.
      */
-    private static <C extends EventHandlerConfiguration> C parseAuditEventHandlerConfiguration(
+    public static <C extends EventHandlerConfiguration> C parseAuditEventHandlerConfiguration(
             Class<C> clazz, JsonValue jsonConfig) throws AuditException {
         C configuration = null;
         JsonValue conf = jsonConfig.get(CONFIG_FIELD);
