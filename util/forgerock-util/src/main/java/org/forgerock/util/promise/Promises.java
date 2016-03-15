@@ -472,7 +472,7 @@ public final class Promises {
      * @return A {@link Promise} representing an asynchronous task which has
      *         already failed with the provided exception.
      */
-    static <V, E extends Exception> Promise<V, E> newRuntimeExceptionPromise(final RuntimeException exception) {
+    public static <V, E extends Exception> Promise<V, E> newRuntimeExceptionPromise(final RuntimeException exception) {
         return new RuntimeExceptionPromise<>(exception);
     }
 
