@@ -18,11 +18,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-rest-parent</artifactId>
-        <version>4.2.1-SNAPSHOT</version>
+        <artifactId>forgerock-rest</artifactId>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
     <artifactId>json-resource</artifactId>
-    <version>${forgerock-rest.version}</version>
     <name>JSON Resource core library</name>
     <description>JSON resource-oriented core library</description>
     <packaging>bundle</packaging>

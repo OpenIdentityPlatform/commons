@@ -19,13 +19,10 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>commons-parent</artifactId>
-        <version>4.2.1-SNAPSHOT</version>
-        <relativePath>../commons-parent/pom.xml</relativePath>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.forgerock.commons</groupId>
     <artifactId>json-web-token</artifactId>
-    <version>${json-web-token.version}</version>
     <name>JSON Web Token</name>
     <description>ForgeRock JSON Web Token library</description>
     <packaging>bundle</packaging>

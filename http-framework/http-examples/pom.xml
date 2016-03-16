@@ -19,10 +19,9 @@
   <parent>
     <groupId>org.forgerock.http</groupId>
     <artifactId>forgerock-http-framework-parent</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>2016.1-SNAPSHOT</version>
   </parent>
   <artifactId>chf-http-examples</artifactId>
-  <version>${forgerock-http-framework.version}</version>
   <packaging>pom</packaging>
   <name>HTTP Examples</name>
   <modules>

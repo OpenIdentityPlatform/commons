@@ -19,12 +19,9 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>commons-parent</artifactId>
-        <version>4.2.1-SNAPSHOT</version>
-        <relativePath>../commons-parent/pom.xml</relativePath>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
-    <groupId>org.forgerock.commons</groupId>
     <artifactId>json-crypto</artifactId>
-    <version>${json-crypto.version}</version>
     <packaging>pom</packaging>
     <name>JSON Crypto libraries</name>
     <url>http://commons.forgerock.org/json-crypto</url>

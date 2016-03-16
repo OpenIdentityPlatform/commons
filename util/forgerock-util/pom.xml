@@ -17,11 +17,10 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.forgerock.commons</groupId>
-        <artifactId>forgerock-utilities-parent</artifactId>
-        <version>4.2.1-SNAPSHOT</version>
+        <artifactId>forgerock-utilities</artifactId>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
     <artifactId>forgerock-util</artifactId>
-    <version>${forgerock-util.version}</version>
     <name>ForgeRock Utility Classes</name>
     <description>Miscellaneous utility classes used within ForgeRock projects.</description>
     <packaging>bundle</packaging>

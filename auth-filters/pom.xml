@@ -20,13 +20,10 @@
     <parent>
        <groupId>org.forgerock.commons</groupId>
        <artifactId>commons-parent</artifactId>
-       <version>4.2.1-SNAPSHOT</version>
-       <relativePath>../commons-parent/pom.xml</relativePath>
+       <version>2016.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-auth-filters</artifactId>
-    <version>${forgerock-auth-filters.version}</version>
     <packaging>pom</packaging>
 
     <name>ForgeRock Auth Filters</name>
@@ -130,18 +127,18 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>authz-framework-api</artifactId>
-                <version>${project.version}</version>
+                <version>${commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>authz-framework</artifactId>
-                <version>${project.version}</version>
+                <version>${commons.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-jaspi-runtime</artifactId>
-                <version>${project.version}</version>
+                <version>${commons.version}</version>
             </dependency>
 
             <dependency>

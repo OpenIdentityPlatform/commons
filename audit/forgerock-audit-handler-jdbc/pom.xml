@@ -18,7 +18,7 @@
     <parent>
         <artifactId>forgerock-audit</artifactId>
         <groupId>org.forgerock.commons</groupId>
-        <version>6.2.0-SNAPSHOT</version>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -59,14 +59,12 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-audit-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-audit-json</artifactId>
-            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

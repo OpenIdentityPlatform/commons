@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-audit</artifactId>
-        <version>6.2.0-SNAPSHOT</version>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
     <artifactId>forgerock-audit-json</artifactId>
     <packaging>bundle</packaging>
@@ -31,7 +31,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
+
         <!-- Jackson dependencies -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -50,7 +50,6 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-audit-core</artifactId>
-            <version>${project.version}</version>
         </dependency>
 
         <!-- Test Dependencies -->

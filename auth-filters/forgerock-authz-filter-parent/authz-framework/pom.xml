@@ -19,11 +19,10 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-authz-filter-parent</artifactId>
-        <version>3.1.8-SNAPSHOT</version>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>authz-framework</artifactId>
-    <version>3.1.8-SNAPSHOT</version>
 
     <name>Authorization Framework</name>
     <description>Authorization Framework.</description>
@@ -32,6 +31,7 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>authz-framework-api</artifactId>
+            <version>${commons.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>

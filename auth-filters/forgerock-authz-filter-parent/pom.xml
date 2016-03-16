@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-auth-filters</artifactId>
-        <version>3.1.8-SNAPSHOT</version>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>forgerock-authz-filter-parent</artifactId>
@@ -41,12 +41,12 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-authz-filter</artifactId>
-                <version>${project.version}</version>
+                <version>${commons.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-authz-oauth2-module</artifactId>
-                <version>${project.version}</version>
+                <version>${commons.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

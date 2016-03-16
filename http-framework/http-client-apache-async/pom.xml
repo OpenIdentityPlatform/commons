@@ -19,11 +19,10 @@
   <parent>
     <groupId>org.forgerock.http</groupId>
     <artifactId>forgerock-http-framework-parent</artifactId>
-    <version>4.2.1-SNAPSHOT</version>
+    <version>2016.1-SNAPSHOT</version>
   </parent>
 
   <artifactId>chf-client-apache-async</artifactId>
-  <version>${forgerock-http-framework.version}</version>
   <packaging>bundle</packaging>
   <name>HTTP Apache Async HttpClient integration</name>
 
@@ -31,7 +30,6 @@
     <dependency>
       <groupId>org.forgerock.http</groupId>
       <artifactId>chf-http-core</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
@@ -41,7 +39,6 @@
     <dependency>
       <groupId>org.forgerock.http</groupId>
       <artifactId>chf-client-apache-common</artifactId>
-      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>

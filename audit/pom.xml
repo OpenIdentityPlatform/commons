@@ -20,13 +20,10 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>commons-parent</artifactId>
-        <version>4.2.1-SNAPSHOT</version>
-        <relativePath>../commons-parent/pom.xml</relativePath>
+        <version>2016.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-audit</artifactId>
-    <version>${forgerock-audit.version}</version>
     <packaging>pom</packaging>
 
     <name>Commons - ForgeRock Audit Framework</name>
