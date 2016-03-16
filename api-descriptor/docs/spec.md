@@ -28,41 +28,30 @@ In this document the following type names are used:
 
 * frURI - A ForgeRock API Descriptor URI. These start with the `frapi:` scheme, and are
  followed by colon-separated heirarchical component IDs to make a unique identifier. For
- example: `frapi:openam:/:identities`, which could be used in a JSON Reference:
- `frapi:openam:/:identities#/user/xyz`
+ example: `frapi:openam:identities`, which could be used in a JSON Reference:
+ `frapi:openam:/:identities#/definitions/xyz`
 
 ## Specification
 
 ### API Description (top level)
 
 At the top level, the API is described by providing a collection of schema definitions and
-a Paths object that describes what paths are available in the application.
+a Paths object that describes what paths are available in the application. The top-level must contain at least one
+of _definitions_, _errors_, or _paths_.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| -------------------------------------
 id          | frURI                       | ✓          | The identifier of the API Descriptor
-definitions | [Definition](#Definition)[] |            | Schema definitions
-paths       | Paths                       | ✓          | The supported paths for this API.
-
-### Definition
-
-Each API may want one or more identified schemas to be added to the API Descriptor to represent
-the structure of each of its requests/responses. This object defines a schema.
-
-#### Properties
-
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-id          | frURI                       | ✓          | The identifier of the schema
-title       | String                      | ✓          | A human-readable name of the schema
-description | String                      | ✓          | A description of the schema
-schema      | [Schema](#Schema)           | ✓          | The schema for this definition.
+description | String                      |            | Short description of the API Descriptor
+definitions | [Schema](#Schema)           |            | Locally defined schema definitions
+errors      | [Error](#Error)             |            | Locally defined error definitions
+paths       | [Paths](#Paths)             |            | The supported paths for this API.
 
 ### Reference
 
-Refer to something defined elsewhere.
+Use JSON Reference syntax to refer to schemas defined locally or externally.
 
 #### Properties
 
@@ -72,49 +61,48 @@ $ref        | String                      | ✓          | A JSON Reference to t
 
 ### Paths
 
-A path supported by the API being described. As we support multiple versions of handlers this
-specifies the particular handler only with the version number provided in the Path property.
+A path supported by the API being described. Paths may contain the names of Path [Parameter](#Parameter)s, contained
+in curly braces. Paths _must_ contain at least one _VersionedPath_ or _Resource_.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-`*`         | [Path](#Path)               | ✓          | A mapping of path string to Path definition - the path may contain path parameters
+`*`         | [VersionedPath](#VersionedPath) |        | A mapping of path string to VersionedPath definition.
+`*`         | [Resource](#Resource)       |            | Resources mapped to a path, without a version.
 
-### Path
+### VersionedPath
 
-The version of the request handler at the particular path. Request handlers support multiple
-versions therefore at this level we have to specify the version of the handler.
-
-#### Properties
-
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-`[1-9][0-9]*(\.[1-9][0-9]*)*` | [VersionedResource](#VersionedResource)[] | ✓  | The supported versions of the resources at this path.
-
-### VersionedResource
-
-Specifies the descriptor at this path for a particular API version.
+The optional version of the request handler at the top of a particular path. API Descriptors without the need to
+version individual API endpoints may omit this level of the Path hierarchy.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-resourceSchema | [Schema](#Schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, patch are supported.
-title       | String                      | ✓          | The human-readable name of the endpoint.
-description | String                      | ✓          | A description of the endpoint
+`[1-9][0-9]*(\.[1-9][0-9]*)*` | [Resource](#Resource)  | ✓ | The supported versions of the resources at this path.
+
+### Resource
+
+Specifies the descriptor at a given path. At least one _Operation_ (e.g., _create_) is required.
+
+#### Properties
+
+Key         | Type                        | Required?  | Description
+----------- | --------------------------- |:----------:| ------------------------------------
+resourceSchema | [Schema](#Schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, or patch are supported.
+description | String                      |            | A description of the endpoint
 create      | [Create](#Create)           |            | The create operation description, if supported
 read        | [Operation](#Operation)     |            | The read operation description, if supported
 update      | [Update](#Update)           |            | The update operation description, if supported
 delete      | [Delete](#Delete)           |            | The delete operation description, if supported
-patch       | [Patch](#Patch)             |            | The read operation description, if supported
-actions     | [Action](#Action)[]         |            | The update operation description, if supported
-queries     | [Query](#Query)[]           |            | The delete operation description, if supported
-deprecated  | boolean                     |            | Whether this version of the resource path is deprecated.
+patch       | [Patch](#Patch)             |            | The patch operation description, if supported
+actions     | [Action](#Action)[]         |            | The action operation descriptions, if supported
+queries     | [Query](#Query)[]           |            | The query operation descriptions, if supported
 
 ### Context
 
-Some contexts will be supported and/or required for a particular operation.
+Context contains metadata and/or state-data associated with a CREST API request.
 
 #### Properties
 
@@ -129,62 +117,70 @@ required    | boolean                     |            | Whether the context is 
 A basic operation type for operations without any special features. This is the supertype of
 the supported operations in the CREST contract.
 
+_Read_ operations are defined at this level, and are used to read existing resources.
+
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 supportedContexts | [Context](#Context)[] |            | The supported contexts
-supportedLocales | String[]               |            | Locale codes supported by the operation
-fields      | String[]                    |            | The fields that can be selected for returning in the response payload
-errors      | [Error](#Error)[]           |            | What errors may be returned by this operation
+supportedLocales | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation
+fields      | String[]                    |            | Fields selected for inclusion in the response payload. All fields are included by default.
+errors      | [Error](#Error)[]           |            | Errors known be returned by this operation
 parameters  | [Parameter](#Parameter)[]   |            | Extra parameters supported by the operation
+stability   | String                      |            | Stability of the endpoint. One of "internal", "stable" (default), "evolving", "deprecated", or "removed".
 
 ### Error
 
-Defines one of the possible error responses that may be returned by a given
-[Operation](#Operation).
+Defines one of the possible error responses that are known to be returned by a given
+[Operation](#Operation). All standard CREST errors are defined under _frapi:common_, which is an API Descriptor
+that will always be available by default. Endpoints may overload any error _code_ and unique _description_ to define
+custom errors. CREST API clients should be prepared to handle undocumented/unexpected errors. It is a best practice to
+define a minimum Error array definition, with 500 Internal Server Error, as follows,
+
+```
+"errors" : [
+    {"$ref" : "frapi:common#/errors/internalServerError"}
+]
+```
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-name        | String                      | ✓          | The name of the error
-description | String                      | ✓          | Description of what may cause error to occur.
+code        | Number                      | ✓          | Three digit error code, corresponding to HTTP status codes.
+description | String                      | ✓          | Description of what may cause an error to occur.
 schema      | [Schema](#Schema)           |            | Optional definition of a schema for the error.
 
 When a schema is not provided, the default is:
 
 ```
 {
-  “_id”: “frapi:error:default”,
-  “title”: “Resource error”,
-  “schema”: {
-    “type”: “object”,
-    “required”: [ “code”, “message” ],
-    “properties”: {
-      “code”: {
-        “type”: “integer”,
-        “title”: “Code”,
-        “description”: “3-digit error code, corresponding to HTTP status codes.”
-      },
-      “message”: {
-        “type”: “string”,
-        “title”: “Message”,
-        “description”: “Error message.”
-      },
-      “reason”: {
-        “type”: “string”,
-        “title”: “Reason”,
-        “description”: “Short description corresponding to error code.”
-      },
-      “detail”: {
-        “type”: “string”,
-        “title”: “Detail”,
-        “description”: “Detailed error message.”
-      },
-      “cause”: {
-        “$ref”: “frapi:error:default”
-      }
+  "type" : "object",
+  "required" : [ "code", "message" ],
+  "properties" : {
+    "code" : {
+      "type" : "integer",
+      "title" : "Code",
+      "description" : "3-digit error code, corresponding to HTTP status codes."
+    },
+    "message" : {
+      "type" : "string",
+      "title" : "Message",
+      "description" : "Error message."
+    },
+    "reason" : {
+      "type" : "string",
+      "title" : "Reason",
+      "description" : "Short description corresponding to error code."
+    },
+    "detail" : {
+      "type" : "string",
+      "title" : "Detail",
+      "description" : "Detailed error message."
+    },
+    "cause" : {
+      "$ref" : "frapi :error : default"
     }
   }
 }
@@ -192,8 +188,8 @@ When a schema is not provided, the default is:
 
 ### Parameter
 
-Represents an extra parameter for the request, that is specific to the request handler for
-this path.
+Defines an _ADDITIONAL_ parameter for an operation, separate from a _resourceSchema_ request-payload,
+or a _PATH_ parameter, surrounded by curly braces in the Path.
 
 #### Properties
 
@@ -201,10 +197,12 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 name        | String                      | ✓          | The name of the parameter
 type        | String                      | ✓          | The type of the parameter: `string`, `number`, `boolean`, and array variants
-defaultValue | `*`                        |            | If exists, the default value
-description | String                      | ✓          | The description of the parameter
+defaultValue | `*`                        |            | The default value, if applicable
+description | String                      |            | The description of the parameter
 source      | String                      | ✓          | Where the parameter comes from. May be: PATH or ADDITIONAL
-required    | boolean                     | ✓          | Whether the parameter is required
+required    | boolean                     |            | Whether the parameter is required
+enum        | String[]                    |            | One or more values that must match
+options/enum_titles | String[]            |            | String descriptions in the same order as the enum values.
 
 Other appropriate fields as described in the
 [JSON Schema Validation](http://json-schema.org/latest/json-schema-validation.html) spec
@@ -212,17 +210,18 @@ may also be used.
 
 ### Create
 
-Additional fields for create requests. Extends [Operation](#Operation).
+Creates a new resource. Extends [Operation](#Operation).
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-supportedModes | String[]                 | ✓          | Values accepted are: `ASSIGNED_ID`, `PROVIDED_ID`, `PROVIDED_ID_NONE_MATCH`.
+mode        | String                      | ✓          | Values accepted are: `ID_FROM_CLIENT`, `DYNAMIC_ID_FROM_SERVER`, `STATIC_ID_FROM_SERVER`.
+mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
 
 ### Update
 
-Additional fields for update requests. Extends [Operation](#Operation).
+Replaces the contents of an existing resource. Extends [Operation](#Operation).
 
 #### Properties
 
@@ -232,7 +231,7 @@ mvccSupported | boolean                   | ✓          | Whether this resource
 
 ### Delete
 
-Additional fields for delete requests. Extends [Operation](#Operation).
+Deletes a resource. Extends [Operation](#Operation).
 
 #### Properties
 
@@ -242,7 +241,60 @@ mvccSupported | boolean                   | ✓          | Whether this resource
 
 ### Patch
 
-Additional fields for patch requests. Extends [Operation](#Operation).
+Partially modifies the contents of an existing resource. Extends [Operation](#Operation).
+
+The content of the request-payload is a JSON array whose elements are the modifications which should be applied to the
+resource. For example,
+
+```
+[
+  {
+    "operation" : "add",
+    "field" : "roles",
+    "value" : "admin"
+  },
+  {
+    "operation" : "remove",
+    "field" : "field/subfield",
+    "value" : "valueToBeRemoved"
+  }
+]
+```
+The Schema for the Patch request-payload is the following, but note that the semantics differ based on the
+_resourceSchema_ and Patch-operation being performed:
+
+```
+{
+   "type":"array",
+   "items":{
+      "type":"object",
+      "properties":{
+         "operation":{
+            "type":"string",
+            "enum":[
+               "add",
+               "remove",
+               "replace",
+               "increment",
+               "move",
+               "copy",
+               "transform"
+            ],
+            "required":true
+         },
+         "field":{
+            "type":"string"
+         },
+         "from":{
+            "type":"string"
+         },
+         "value":{
+            "type":"string"
+         }
+      }
+   }
+}
+```
 
 #### Properties
 
@@ -252,36 +304,36 @@ mvccSupported | boolean                   | ✓          | Whether this resource
 
 ### Action
 
-Additional fields for action requests. Extends [Operation](#Operation).
+Actions are additional operations provided by a resource container. Extends [Operation](#Operation).
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-id          | String                      | ✓          | The action ID.
+name        | String                      | ✓          | The action name.
 description | String                      |            | Describe this action.
 request     | [Schema](#Schema)           |            | The schema of the request payload for this action.
 response    | [Schema](#Schema)           | ✓          | The schema of the response payload for this action.
 
 ### Query
 
-Additional fields for query requests. Extends [Operation](#Operation).
+Search or list the resources contained within a resource container. Extends [Operation](#Operation).
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 type        | String                      | ✓          | Supported values are `ID`, `FILTER`, `EXPRESSION`.
-pagingMode  | String                      | ✓          | Supported values are `COOKIE`, `OFFSET` or `NOT_SUPPORTED`.
-supportedPagingCountPolicies | String[]   |            | Supported values are `NONE`, `ESTIMATE`, `EXACT`.
-queryId     | String                      |            | Required if `type` is `ID`.
-queryableFields | String[]                |            | Required if `type` is `FILTER`. Lists the fields in the `resourceSchema` that can be queried.
-description | String                      | ✓          | Describes this query.
+pagingMode  | String[]                    |            | Supported values are `COOKIE`, `OFFSET`. Paging is not supported if omitted.
+countPolicy | String[]                    |            | Supported values are `ESTIMATE`, `EXACT`. Counts are not provided if omitted.
+queryId     | String                      | `type:ID`  | Required if `type` is `ID`.
+queryableFields | String[]                | `type:FILTER` | Required if `type` is `FILTER`. Lists the fields in the `resourceSchema` that can be queried. A value of “*” can be used to state that all fields can be queried.
 supportedSortKeys | String[]              |            | The keys that may be used to sort the filter results. A value of “*” can be used to state that all keys are supported.
+description | String                      |            | Describes this query.
 
 ### Schema
 
-Specify the schema for something.
+CREST API Descriptors use schemas to represent request/response-payloads and error responses.
 
 Supports either a [Reference](#Reference) to a defined schema, or
 [OpenAPI-extended JSON schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject)
@@ -307,6 +359,7 @@ To handle complex states we are going to introduce a new schema field.
 Key         | Type                        | Description
 ----------- | --------------------------- | ------------------------------------
 writePolicy | String                      | Relevant only for "properties" definitions where the readOnly flag is false. Supported values are:<br>WRITE_ON_CREATE: the property MAY be set in the create request, but not thereafter.<br>WRITE_ONCE: the property MAY be set only if the current value is NULL.<br>WRITABLE: the property can be set at any time. This is the default value if no value is specified.
+errorOnWritePolicyFailure | boolean       | Whether the application will error (or ignore) when a WRITE_ON_CREATE or WRITE_ONCE field is attempted to be updated erroneously (default: `false`).
 
 #### Enumeration value descriptions
 
@@ -337,8 +390,13 @@ options/enum_titles | String[]            | String descriptions in the same orde
 
 1. [OpenAPI Specification, v2.0](
 https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md)
+1. [JSON Reference, draft-03](
+http://tools.ietf.org/html/draft-pbryan-zyp-json-ref-03)
 1. [JSON Schema: core definitions and terminology, draft-00](
 http://json-schema.org/latest/json-schema-core.html)
 1. [JSON Schema: interactive and non interactive validation, draft-00](
 http://json-schema.org/latest/json-schema-validation.html)
 
+***
+
+Copyright 2016 ForgeRock AS.

@@ -1,0 +1,204 @@
+{
+  "id" : "frapi:openidm:audit",
+  "description" : "Open IDM Audit endpoints",
+  "definitions" : {
+    "changedFieldsRequest" : {
+      "type" : "object",
+      "properties" : {
+        "before" : {"type" : "object"},
+        "after" : {"type" : "object"}
+      }
+    },
+    "changedFieldsResponse" : {
+      "type" : "array",
+      "items" : {"type" : "string"},
+      "uniqueItems" : true
+    },
+    "availableHandlers" : {
+      "type" : "array",
+      "items" : {
+        "type" : "object",
+        "properties" : {
+          "class" : {"type" : "string"},
+          "config" : {"type" : "object"}
+        }
+      },
+      "uniqueItems" : true
+    },
+    "event" : {
+      "type" : "object",
+      "required" : [
+        "eventName",
+        "timestamp",
+        "transactionId"
+      ],
+      "properties" : {
+        "eventName" : {"type" : "string"},
+        "timestamp" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "transactionId" : {"type" : "string"},
+        "userId" : {"type" : "string"},
+        "trackingIds" : {
+          "type" : "array",
+          "items" : {"type" : "string"},
+          "uniqueItems" : true
+        }
+      }
+    }
+  },
+  "paths" : {
+    "/audit" : {
+      "actions" : [
+        {
+          "name" : "getChangedWatchedFields",
+          "request" : {
+            "$ref" : "#/definitions/changedFieldsRequest"
+          },
+          "response" : {
+            "$ref" : "#/definitions/changedFieldsResponse"
+          },
+          "stability" : "internal",
+          "errors" : [
+            {"$ref" : "frapi:common#/errors/internalServerError"}
+          ]
+        },
+        {
+          "name" : "getChangedPasswordFields",
+          "request" : {
+            "$ref" : "#/definitions/changedFieldsRequest"
+          },
+          "response" : {
+            "$ref" : "#/definitions/changedFieldsResponse"
+          },
+          "stability" : "internal",
+          "errors" : [
+            {"$ref" : "frapi:common#/errors/internalServerError"}
+          ]
+        },
+        {
+          "name" : "availableHandlers",
+          "description" : "List all available audit handlers and their configuration schemas.",
+          "response" : {
+            "$ref" : "#/definitions/availableHandlers"
+          },
+          "errors" : [
+            {"$ref" : "frapi:common#/errors/internalServerError"}
+          ]
+        }
+      ]
+    },
+    "/audit/{topic}" : {
+      "resourceSchema" : {
+        "$ref" : "#/definitions/event"
+      },
+      "actions" : [
+        {
+          "name" : "rotate",
+          "description" : "CSV Audit Event Handler action for rotating log files.",
+          "parameters" : [
+            {
+              "name" : "handler",
+              "type" : "string",
+              "source" : "ADDITIONAL",
+              "required" : true,
+              "enum" : [ "csv" ]
+            }
+          ],
+          "response" : {
+            "type" : "object",
+            "properties" : {
+              "rotated" : {"type" : "boolean"}
+            }
+          },
+          "errors" : [
+            {"$ref" : "frapi:common#/errors/badRequest"},
+            {"$ref" : "frapi:common#/errors/internalServerError"}
+          ]
+        }
+      ],
+      "create" : {
+        "description" : "Publish audit event.",
+        "parameters" : [
+          {
+            "name" : "topic",
+            "type" : "string",
+            "source" : "PATH",
+            "required" : true
+          }
+        ],
+        "supportedModes" : [ "DYNAMIC_ID_FROM_SERVER" ],
+        "errors" : [
+          {"$ref" : "frapi:common#/errors/badRequest"},
+          {"$ref" : "frapi:common#/errors/forbidden"},
+          {"$ref" : "frapi:common#/errors/notFound"},
+          {"$ref" : "frapi:common#/errors/conflict"},
+          {"$ref" : "frapi:common#/errors/preconditionFailed"},
+          {"$ref" : "frapi:common#/errors/internalServerError"},
+          {"$ref" : "frapi:common#/errors/unavailable"},
+          {"$ref" : "frapi:common#/errors/gatewayTimeout"}
+        ]
+      },
+      "query" : [
+        {
+          "type" : "FILTER",
+          "description" : "Query audit events via Elasticsearch Audit Event Handler.",
+          "pagingMode" : [ "OFFSET", "COOKIE" ],
+          "countPolicy" : [ "EXACT" ],
+          "queryableFields" : [ "*" ],
+          "parameters" : [
+            {
+              "name" : "topic",
+              "type" : "string",
+              "source" : "PATH",
+              "required" : true
+            }
+          ],
+          "errors" : [
+            {"$ref" : "frapi:common#/errors/badRequest"},
+            {"$ref" : "frapi:common#/errors/forbidden"},
+            {"$ref" : "frapi:common#/errors/notFound"},
+            {"$ref" : "frapi:common#/errors/conflict"},
+            {"$ref" : "frapi:common#/errors/preconditionFailed"},
+            {"$ref" : "frapi:common#/errors/internalServerError"},
+            {"$ref" : "frapi:common#/errors/unavailable"},
+            {"$ref" : "frapi:common#/errors/gatewayTimeout"}
+          ]
+        }
+      ]
+    },
+    "/audit/{topic}/{resourceId}" : {
+      "resourceSchema" : {
+        "$ref" : "#/definitions/event"
+      },
+      "read" : {
+        "description" : "Read audit event by `topic` and `resourceId`.",
+        "parameters" : [
+          {
+            "name" : "topic",
+            "type" : "string",
+            "source" : "PATH",
+            "required" : true
+          },
+          {
+            "name" : "resourceId",
+            "type" : "string",
+            "source" : "PATH",
+            "required" : true
+          }
+        ],
+        "errors" : [
+          {"$ref" : "frapi:common#/errors/badRequest"},
+          {"$ref" : "frapi:common#/errors/forbidden"},
+          {"$ref" : "frapi:common#/errors/notFound"},
+          {"$ref" : "frapi:common#/errors/conflict"},
+          {"$ref" : "frapi:common#/errors/preconditionFailed"},
+          {"$ref" : "frapi:common#/errors/internalServerError"},
+          {"$ref" : "frapi:common#/errors/unavailable"},
+          {"$ref" : "frapi:common#/errors/gatewayTimeout"}
+        ]
+      }
+    }
+  }
+}
