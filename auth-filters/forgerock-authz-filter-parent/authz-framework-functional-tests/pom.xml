@@ -152,7 +152,7 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>authz-framework</artifactId>
-            <version>${commons.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.http</groupId>
@@ -177,7 +177,7 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-authz-oauth2-module</artifactId>
-            <version>${commons.version}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

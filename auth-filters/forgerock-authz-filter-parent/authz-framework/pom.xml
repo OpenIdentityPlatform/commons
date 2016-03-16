@@ -31,7 +31,7 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>authz-framework-api</artifactId>
-            <version>${commons.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>

@@ -94,7 +94,7 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-runtime</artifactId>
-            <version>${commons.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.http</groupId>

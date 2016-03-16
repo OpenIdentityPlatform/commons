@@ -41,12 +41,12 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-authz-filter</artifactId>
-                <version>${commons.version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-authz-oauth2-module</artifactId>
-                <version>${commons.version}</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
