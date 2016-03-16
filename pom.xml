@@ -26,9 +26,9 @@
   <artifactId>commons-parent</artifactId>
   <packaging>pom</packaging>
 
-  <name>ForgeRock Bill Of Materials</name>
+  <name>ForgeRock Commons Parent</name>
   <description>
-    This group modules include the Forgerock Commons components
+    This group modules includes the Forgerock Commons components
   </description>
   <url>http://www.forgerock.com</url>
 

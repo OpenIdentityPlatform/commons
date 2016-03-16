@@ -27,8 +27,8 @@
     <version>2016.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>ForgeRock Commons Parent</name>
-    <description>Parent module to group all the common modules</description>
+    <name>ForgeRock Bill Of Materials</name>
+    <description>Provides a list of Commons dependencies which are known to be compatible with each other.</description>
     <url>http://www.forgerock.com</url>
 
     <properties>
