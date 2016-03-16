@@ -1,1 +1,5 @@
 target/
+
+# Editor generated files
+*.iml
+.idea/
