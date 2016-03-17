@@ -1,0 +1,133 @@
+{
+  "id": "frapi:openig:monitoring",
+  "description": "Route Monitoring Statistics",
+  "definitions": {
+    "statistics": {
+      "type": "objects",
+      "title": "Monitoring Statistics",
+      "description": "This resource and its associated service is defined independently of any routes that expose the service at runtime.",
+      "properties": {
+        "requests": {
+          "type": "object",
+          "description": "Total requests.",
+          "properties": {
+            "total": {
+              "type": "number",
+              "description": "Total requests."
+            },
+            "active": {
+              "type": "number",
+              "description": "Requests being processed."
+            }
+          }
+        },
+        "responses": {
+          "type": "object",
+          "description": "Total responses.",
+          "properties": {
+            "total": {
+              "type": "number",
+              "description": "Total responses"
+            },
+            "info": {
+              "type": "number",
+              "description": "Informational responses (1xx)"
+            },
+            "success": {
+              "type": "number",
+              "description": "Successful responses    (2xx)"
+            },
+            "redirect": {
+              "type": "number",
+              "description": "Redirection responses   (3xx)"
+            },
+            "clientError": {
+              "type": "number",
+              "description": "Client error responses  (4xx)"
+            },
+            "serverError": {
+              "type": "number",
+              "description": "Server error responses  (5xx)"
+            },
+            "other": {
+              "type": "number",
+              "description": "Responses with status code >= 600"
+            },
+            "errors": {
+              "type": "number",
+              "description": "An exception was thrown"
+            },
+            "null": {
+              "type": "number",
+              "description": "Responses not handled by OpenIG"
+            }
+          }
+        },
+        "responseTime": {
+          "type": "object",
+          "description": "Response times in milliseconds.",
+          "properties": {
+            "mean": {
+              "type": "number",
+              "description": "Mean (average) response time"
+            },
+            "median": {
+              "type": "number",
+              "description": "Median response time"
+            },
+            "standardDeviation": {
+              "type": "number",
+              "description": "Std. dev. for response time"
+            },
+            "total": {
+              "type": "number",
+              "description": "Cumulative resp. processing time"
+            },
+            "percentiles": {
+              "type": "object",
+              "description": "Response times in ms after which the proportion of responses were sent",
+              "patternProperties": {
+                "^0.[0-9]+$": {
+                  "type": "number",
+                  "description": "Proportion of responses sent. The properties depend on the route configuration for monitoring."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "throughput": {
+          "type": "object",
+          "description": "Responses per second.",
+          "properties": {
+            "mean": {
+              "type": "number",
+              "description": "Mean (average) since monitoring started"
+            },
+            "lastMinute": {
+              "type": "number",
+              "description": "One-minute moving average rate"
+            },
+            "last5Minutes": {
+              "type": "number",
+              "description": "Five-minute moving average rate"
+            },
+            "last15Minutes": {
+              "type": "number",
+              "description": "15-minute moving average rate"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/openig/api/system/objects/router-name/routes/route-name/monitoring": {
+      "description": "This path as an example. The actual location depends on your configuration.",
+      "resourceSchema": {
+        "$ref": "#/definitions/statistics"
+      },
+      "read": {}
+    }
+  }
+}

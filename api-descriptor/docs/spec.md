@@ -44,10 +44,18 @@ of _definitions_, _errors_, or _paths_.
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| -------------------------------------
 id          | frURI                       | ✓          | The identifier of the API Descriptor
+definitions | [Schema](#Schemas)          |            | Locally defined schema definitions
 description | String                      |            | Short description of the API Descriptor
-definitions | [Schema](#Schema)           |            | Locally defined schema definitions
 errors      | [Error](#Error)             |            | Locally defined error definitions
 paths       | [Paths](#Paths)             |            | The supported paths for this API.
+
+### Schemas
+
+#### Properties
+
+Key         | Type                        | Required?  | Description
+----------- | --------------------------- |:----------:| ------------------------------------
+*           | Schema                      | ✓          | The schema definitions
 
 ### Reference
 
