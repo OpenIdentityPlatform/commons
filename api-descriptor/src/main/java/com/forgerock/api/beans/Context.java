@@ -64,7 +64,7 @@ public class Context {
         return new Builder();
     }
 
-    public static final class Builder {
+    public static class Builder {
         private String name;
         private Schema schema;
         private boolean required;
@@ -72,7 +72,7 @@ public class Context {
         /**
          * Private default constructor
          */
-        private Builder() {}
+        protected Builder() {}
 
         /**
          * Set the name

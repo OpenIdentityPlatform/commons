@@ -15,39 +15,27 @@
  */
 package com.forgerock.api.beans;
 
-import com.forgerock.api.enums.CreateModeEnum;
-
 /**
- * Class that represents the Create Operation type in API descriptor
+ * Class that represents the Delete operation type in API descriptor
  *
  * @since 14.0.0
  */
-public class Create extends Operation{
+public class Delete extends Operation{
 
-    private final CreateModeEnum mode;
     private final Boolean mvccSupported;
 
     /**
-     * Protected contstructor of the Create
+     * Protected contstructor of the Delete
      *
-     * @param builder Operation Builder
+     * @param builder Delete Builder
      */
-    private Create(Builder builder) {
+    private Delete(Builder builder) {
         super(builder);
-        this.mode = builder.mode;
         this.mvccSupported = builder.mvccSupported;
     }
 
     /**
-     * Getter of the mode
-     * @return Mode
-     */
-    public CreateModeEnum getMode() {
-        return mode;
-    }
-
-    /**
-     * Getter of mvcc supported
+     * Getter of the mvcc supported parameter
      * @return true if mvcc is supported
      */
     public Boolean getMvccSupported() {
@@ -55,17 +43,25 @@ public class Create extends Operation{
     }
 
     /**
-     * Creates a new builder for Create
+     * Creates a new builder for Delete
      * @return New builder instance
      */
-    public static final Builder newBuilder() {
-        return new Builder();
+    public static final Builder newBuilder(Boolean mvccSupported) {
+        return new Builder(mvccSupported);
     }
 
     private static final class Builder extends Operation.Builder<Builder> {
 
-        private CreateModeEnum mode;
         private Boolean mvccSupported;
+
+        /**
+         * Private constructor with the required parameter
+         * @param mvccSupported
+         */
+        private Builder(Boolean mvccSupported) {
+            super();
+            this.mvccSupported = mvccSupported;
+        }
 
         @Override
         protected Builder self() {
@@ -73,32 +69,12 @@ public class Create extends Operation{
         }
 
         /**
-         * Set the mode
-         * @param mode
-         * @return Builder
-         */
-        public Builder withMode(CreateModeEnum mode) {
-            this.mode = mode;
-            return this;
-        }
-
-        /**
-         * Set the if mvccSupported
-         * @param mvccSupported
-         * @return Builder
-         */
-        public Builder withMvccSupported(Boolean mvccSupported) {
-            this.mvccSupported = mvccSupported;
-            return this;
-        }
-
-        /**
-         * Builds the Create instace
+         * Builds the Delete instace
          *
-         * @return Create instace
+         * @return Delete instace
          */
-        public Create build() {
-            return new Create(this);
+        public Delete build() {
+            return new Delete(this);
         }
     }
 

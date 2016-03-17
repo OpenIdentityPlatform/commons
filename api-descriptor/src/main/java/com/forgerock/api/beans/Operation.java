@@ -28,6 +28,126 @@ public class Operation {
     private final Error[] errors;
     private final Parameter[] parameters;
 
+    /**
+     * Protected contstructor of the Operation
+     * @param builder Operation Builder
+     */
+    protected Operation(Builder builder) {
+        this.supportedContext = builder.supportedContext;
+        this.supportedLocals = builder.supportedLocals;
+        this.fields = builder.fields;
+        this.errors = builder.errors;
+        this.parameters = builder.parameters;
+    }
 
+    /**
+     * Getter of the supported context
+     * @return Supported context
+     */
+    public Context getSupportedContext() {
+        return supportedContext;
+    }
+
+    /**
+     * Getter of the supported locals array
+     * @return Supported locals
+     */
+    public String[] getSupportedLocals() {
+        return supportedLocals;
+    }
+
+    /**
+     * Getter of the fields array
+     * @return Fields
+     */
+    public String[] getFields() {
+        return fields;
+    }
+
+    /**
+     * Getter of the errors array
+     * @return Errors
+     */
+    public Error[] getErrors() {
+        return errors;
+    }
+
+    /**
+     * Getter of the parameters array
+     * @return Parameters
+     */
+    public Parameter[] getParameters() {
+        return parameters;
+    }
+
+    /**
+     * Builder to help construct the Operation
+     */
+    protected abstract static class Builder<T extends Builder<T>> {
+
+        private Context supportedContext;
+        private String[] supportedLocals;
+        private String[] fields;
+        private Error[] errors;
+        private Parameter[] parameters;
+
+        protected Builder() {
+            //default private constructor
+        }
+
+        protected abstract T self();
+
+        /**
+         * Set the supported context
+         * @param supportedContext
+         * @return Builder
+         */
+        public Builder withSupportedContext(Context supportedContext) {
+            this.supportedContext = supportedContext;
+            return self();
+        }
+
+        /**
+         * Set the supported context
+         * @param supportedLocals
+         * @return Builder
+         */
+        public Builder withSupportedLocals(String[] supportedLocals) {
+            this.supportedLocals = supportedLocals;
+            return self();
+        }
+
+        /**
+         * Set the supported context
+         * @param fields
+         * @return Builder
+         */
+        public Builder withFields(String[] fields) {
+            this.fields = fields;
+            return self();
+        }
+
+        /**
+         * Set the supported context
+         * @param errors
+         * @return Builder
+         */
+        public Builder withErrors(Error[] errors) {
+            this.errors = errors;
+            return self();
+        }
+
+        /**
+         * Set the supported context
+         * @param parameters
+         * @return Builder
+         */
+        public Builder withParameters(Parameter[] parameters) {
+            this.parameters = parameters;
+            return self();
+        }
+
+
+    }
 
 }

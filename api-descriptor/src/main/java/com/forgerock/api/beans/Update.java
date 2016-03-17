@@ -15,47 +15,24 @@
  */
 package com.forgerock.api.beans;
 
-import com.forgerock.api.enums.CreateModeEnum;
-
 /**
  * Class that represents the Create Operation type in API descriptor
  *
  * @since 14.0.0
  */
-public class Create extends Operation{
-
-    private final CreateModeEnum mode;
-    private final Boolean mvccSupported;
+public class Update extends Operation{
 
     /**
-     * Protected contstructor of the Create
+     * Protected contstructor of the Operation
      *
      * @param builder Operation Builder
      */
-    private Create(Builder builder) {
+    private Update(Builder builder) {
         super(builder);
-        this.mode = builder.mode;
-        this.mvccSupported = builder.mvccSupported;
     }
 
     /**
-     * Getter of the mode
-     * @return Mode
-     */
-    public CreateModeEnum getMode() {
-        return mode;
-    }
-
-    /**
-     * Getter of mvcc supported
-     * @return true if mvcc is supported
-     */
-    public Boolean getMvccSupported() {
-        return mvccSupported;
-    }
-
-    /**
-     * Creates a new builder for Create
+     * Creates a new builder for Operation
      * @return New builder instance
      */
     public static final Builder newBuilder() {
@@ -64,31 +41,8 @@ public class Create extends Operation{
 
     private static final class Builder extends Operation.Builder<Builder> {
 
-        private CreateModeEnum mode;
-        private Boolean mvccSupported;
-
         @Override
         protected Builder self() {
-            return this;
-        }
-
-        /**
-         * Set the mode
-         * @param mode
-         * @return Builder
-         */
-        public Builder withMode(CreateModeEnum mode) {
-            this.mode = mode;
-            return this;
-        }
-
-        /**
-         * Set the if mvccSupported
-         * @param mvccSupported
-         * @return Builder
-         */
-        public Builder withMvccSupported(Boolean mvccSupported) {
-            this.mvccSupported = mvccSupported;
             return this;
         }
 
@@ -97,8 +51,8 @@ public class Create extends Operation{
          *
          * @return Create instace
          */
-        public Create build() {
-            return new Create(this);
+        public Update build() {
+            return new Update(this);
         }
     }
 
