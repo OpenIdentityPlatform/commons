@@ -36,12 +36,12 @@
         <!-- Third party components versions -->
         <assertj.version>2.1.0</assertj.version>
         <fest-assert.version>1.4</fest-assert.version>
+        <guava.version>18.0</guava.version>
         <jackson.version>2.6.3</jackson.version>
         <mockito.version>1.10.19</mockito.version>
         <servlet-api.version>3.0.1</servlet-api.version>
         <slf4j.version>1.7.12</slf4j.version>
         <testng.version>6.9.4</testng.version>
-        <guava.version>18.0</guava.version>
     </properties>
 
     <dependencyManagement>
