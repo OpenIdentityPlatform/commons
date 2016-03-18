@@ -18,7 +18,6 @@ package com.forgerock.api.beans;
 /**
  * Class that represents the Read Operation type in API descriptor
  *
- * @since 14.0.0
  */
 public class Read extends Operation{
 

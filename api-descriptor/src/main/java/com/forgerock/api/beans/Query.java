@@ -22,7 +22,6 @@ import com.forgerock.api.enums.SupportedPagingModePolicyEnum;
 /**
  * Class that represents the Create Operation type in API descriptor
  *
- * @since 14.0.0
  */
 public class Query extends Operation{
 

@@ -15,16 +15,17 @@
  */
 package com.forgerock.api.beans;
 
+import org.forgerock.util.Reject;
+
 /**
  * Class that represents the Context type in API descriptor
  *
- * @since 14.0.0
  */
 public class Context {
 
     private String name;
     private Schema schema;
-    private boolean required;
+    private Boolean required;
 
     /**
      *
@@ -67,7 +68,7 @@ public class Context {
     public static class Builder {
         private String name;
         private Schema schema;
-        private boolean required;
+        private Boolean required;
 
         /**
          * Private default constructor
@@ -99,7 +100,8 @@ public class Context {
          * @param required
          * @return Builder
          */
-        public Builder withRequired(boolean required) {
+        public Builder withRequired(Boolean required) {
+            Reject.ifNull(required);
             this.required = required;
             return this;
         }

@@ -15,10 +15,11 @@
  */
 package com.forgerock.api.beans;
 
+import org.forgerock.util.Reject;
+
 /**
  * Class that represents the Delete operation type in API descriptor
  *
- * @since 14.0.0
  */
 public class Delete extends Operation{
 
@@ -47,6 +48,7 @@ public class Delete extends Operation{
      * @return New builder instance
      */
     public static final Builder newBuilder(Boolean mvccSupported) {
+        Reject.ifNull(mvccSupported);
         return new Builder(mvccSupported);
     }
 

@@ -18,13 +18,12 @@ package com.forgerock.api.beans;
 /**
  * Class that represents the Error type in API descriptor
  *
- * @since 14.0.0
  */
 public class Error {
 
     private final String name;
     private final String description;
-    private final Number code;
+    private final Integer code;
     private final Schema schema;
 
     /**
@@ -58,7 +57,7 @@ public class Error {
      * Getter of the error code
      * @return - Code
      */
-    public Number getCode() {
+    public Integer getCode() {
         return code;
     }
 
@@ -76,7 +75,7 @@ public class Error {
      * @param code Error code
      * @return Builder
      */
-    public static Builder newBuilder(String name, Number code) {
+    public static Builder newBuilder(String name, Integer code) {
         return new Builder(name, code);
     }
 
@@ -84,7 +83,7 @@ public class Error {
 
         private String name;
         private String description;
-        private Number code;
+        private Integer code;
         private Schema schema;
 
         /**
@@ -92,7 +91,7 @@ public class Error {
          * @param name - Error name
          * @param code - Error code
          */
-        private Builder(String name, Number code) {
+        private Builder(String name, Integer code) {
             this.name = name;
             this.code = code;
         }

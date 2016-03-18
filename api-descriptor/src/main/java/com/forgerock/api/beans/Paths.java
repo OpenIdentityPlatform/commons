@@ -16,42 +16,51 @@
 package com.forgerock.api.beans;
 
 /**
- * Class that represents the Create Operation type in API descriptor
- *
+ * Class that represents the Paths type in API descriptor
  */
-public class Update extends Operation{
+public class Paths {
+
+    private final Resource[] resources;
+
+    private Paths(Builder builder){
+        this.resources = builder.resources;
+    }
 
     /**
-     * Protected contstructor of the Operation
+     * Getter of the resources
+     * @return Resources
+     */
+    public Resource[] getResources() {
+        return resources;
+    }
+
+    /**
+     * Create a new Builder for Path
      *
-     * @param builder Operation Builder
+     * @return Builder
      */
-    private Update(Builder builder) {
-        super(builder);
+    private static Builder newBuilder(Resource... resources) {
+        return new Builder(resources);
     }
 
-    /**
-     * Creates a new builder for Operation
-     * @return New builder instance
-     */
-    public static final Builder newBuilder() {
-        return new Builder();
-    }
+    public static class Builder {
 
-    private static final class Builder extends Operation.Builder<Builder> {
+        private Resource[] resources;
 
-        @Override
-        protected Builder self() {
-            return this;
+        /**
+         * Private default constructor with the mandatory fields
+         */
+        private Builder(Resource... resources) {
+            this.resources = resources;
         }
 
         /**
-         * Builds the Create instace
+         * Builds the Paths instace
          *
-         * @return Create instace
+         * @return Paths instace
          */
-        public Update build() {
-            return new Update(this);
+        public Paths build() {
+            return new Paths(this);
         }
     }
 

@@ -18,7 +18,6 @@ package com.forgerock.api.enums;
 /**
  * Enum that represents where the {@link com.forgerock.api.beans.Parameter} comes from.
  *
- * @since 14.0.0
  */
 public enum ParameterSource {
     PATH, ADDITIONAL;

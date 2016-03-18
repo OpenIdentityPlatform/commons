@@ -16,11 +16,11 @@
 package com.forgerock.api.beans;
 
 import com.forgerock.api.enums.ParameterSource;
+import org.forgerock.util.Reject;
 
 /**
  * Class that represents the Parameter type in API descriptor
  *
- * @since 14.0.0
  */
 public class Parameter {
 
@@ -29,7 +29,7 @@ public class Parameter {
     private final String defaultValue; //Todo String?
     private final String description;
     private final ParameterSource parameterSource;
-    private final boolean required;
+    private final Boolean required;
 
     /**
      * Private Parameter constructor called by the builder
@@ -88,7 +88,7 @@ public class Parameter {
      * Getter of the required property
      * @return Required
      */
-    public boolean isRequired() {
+    public Boolean isRequired() {
         return required;
     }
 
@@ -112,7 +112,7 @@ public class Parameter {
         private String defaultValue;
         private String description;
         private ParameterSource parameterSource;
-        private boolean required;
+        private Boolean required;
 
         /**
          * Default builder contstructor with 2 mandatory parameters
@@ -159,7 +159,8 @@ public class Parameter {
          * @param required
          * @return builder
          */
-        public Builder withRequired(boolean required) {
+        public Builder withRequired(Boolean required) {
+            Reject.ifNull(required);
             this.required = required;
             return this;
         }

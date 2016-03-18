@@ -16,9 +16,14 @@
 package com.forgerock.api.enums;
 
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Create} modes.
+ * Enum that represents the {@link com.forgerock.api.beans.Schema} write policies.
  *
  */
-public enum CreateModeEnum {
-    ID_FROM_SERVER, DYNAMIC_ID_FROM_SERVER, STATIC_ID_FROM_SERVER;
+public enum WritePolicyEnum {
+    /**the property MAY be set in the create request, but not thereafter*/
+    WRITE_ON_CREATE,
+    /**the property MAY be set only if the current value is NULL*/
+    WRITE_ONCE,
+    /**the property can be set at any time. This is the default value if no value is specified*/
+    WRITABLE;
 }

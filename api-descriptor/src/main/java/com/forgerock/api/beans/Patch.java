@@ -15,10 +15,11 @@
  */
 package com.forgerock.api.beans;
 
+import org.forgerock.util.Reject;
+
 /**
  * Class that represents the Patch operation type in API descriptor
  *
- * @since 14.0.0
  */
 public class Patch extends Operation{
 
@@ -39,6 +40,7 @@ public class Patch extends Operation{
      * @return New builder instance
      */
     public static final Builder newBuilder(Boolean mvccSupported) {
+        Reject.ifNull(mvccSupported);
         return new Builder(mvccSupported);
     }
 

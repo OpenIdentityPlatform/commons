@@ -16,11 +16,11 @@
 package com.forgerock.api.beans;
 
 import com.forgerock.api.enums.CreateModeEnum;
+import org.forgerock.util.Reject;
 
 /**
  * Class that represents the Create Operation type in API descriptor
  *
- * @since 14.0.0
  */
 public class Create extends Operation{
 
@@ -88,6 +88,7 @@ public class Create extends Operation{
          * @return Builder
          */
         public Builder withMvccSupported(Boolean mvccSupported) {
+            Reject.ifNull(mvccSupported);
             this.mvccSupported = mvccSupported;
             return this;
         }
