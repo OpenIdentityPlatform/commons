@@ -155,7 +155,7 @@
             },
             "detail": {
               "description": "org.forgerock.audit.events.access.response.detail",
-              "type": "string"
+              "type": "object"
             },
             "elapsedTime": {
               "description": "org.forgerock.audit.events.access.response.elapsedTime",
