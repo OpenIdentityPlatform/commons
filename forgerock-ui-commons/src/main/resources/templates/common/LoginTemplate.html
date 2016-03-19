@@ -24,14 +24,14 @@
                         <ul>
 
                             {{#if forgotUsername}}
-                            <li><a href="{{url 'forgotUsername'}}">{{t "templates.user.LoginTemplate.forgotUsername"}}</a></li>
+                            <li><a href="{{urlTo 'forgotUsername'}}">{{t "templates.user.LoginTemplate.forgotUsername"}}</a></li>
                             {{/if}}
 
                             {{#if passwordResetLink}}
                             <li><a href="{{passwordResetLink}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></li>
                             {{else}}
                             {{#if passwordReset}}
-                            <li><a href="{{url 'passwordReset'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></li>
+                            <li><a href="{{urlTo 'passwordReset'}}">{{t "templates.user.LoginTemplate.resetPassword"}}</a></li>
                             {{/if}}
                             {{/if}}
 
@@ -41,7 +41,7 @@
                     {{#if selfRegistration}}
                     <div class="toggle-login-register">
                         <hr>
-                        {{t "templates.user.LoginTemplate.noAccountQuestion"}} <a href="{{url 'selfRegistration'}}">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
+                        {{t "templates.user.LoginTemplate.noAccountQuestion"}} <a href="{{urlTo 'selfRegistration'}}">{{t "templates.user.LoginTemplate.registerAccount"}}</a>
                     </div>
                     {{/if}}
                 </div>

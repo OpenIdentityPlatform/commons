@@ -244,18 +244,6 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         }
     };
 
-    Handlebars.registerHelper("url", function(routeKey) {
-        var result;
-        if (_.isArray(arguments[1])) {
-            result = "#" + Router.getLink(Router.configuration.routes[routeKey], arguments[1]);
-        } else {
-            result = "#" + Router.getLink(Router.configuration.routes[routeKey], _.toArray([arguments[1]]));
-        }
-
-        //Don't return a safe string to prevent XSS.
-        return result;
-    });
-
     //map should have format key : value
     Handlebars.registerHelper("selectm", function(map, elementName, selectedKey, selectedValue, multiple, height) {
         var result, prePart, postPart, content = "", isSelected, entityName;
@@ -453,6 +441,18 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
         } else {
             return options.inverse(this);
         }
+    });
+
+    Handlebars.registerHelper("urlTo", function(routeKey) {
+        var result;
+        if (_.isArray(arguments[1])) {
+            result = "#" + Router.getLink(Router.configuration.routes[routeKey], arguments[1]);
+        } else {
+            result = "#" + Router.getLink(Router.configuration.routes[routeKey], _.toArray([arguments[1]]));
+        }
+
+        //Don't return a safe string to prevent XSS.
+        return result;
     });
 
     /**
