@@ -16,6 +16,8 @@
 
 package org.forgerock.audit.handlers.jms;
 
+import javax.jms.JMSContext;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
@@ -33,7 +35,7 @@ import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
  *     "jmsTopic" : "audit",
  *     "initialContextFactory" : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
  *     "deliveryMode" : "NON_PERSISTENT",
- *     "sessionAcknowledgement" : "AUTO"
+ *     "sessionMode" : "AUTO"
  * }
  * </pre>
  */
@@ -56,8 +58,14 @@ public class JmsAuditEventHandlerConfiguration extends EventHandlerConfiguration
     private DeliveryModeConfig deliveryMode;
 
     @JsonProperty(required = true)
-    @JsonPropertyDescription("audit.handlers.jms.sessionAcknowledgement")
-    private SessionAcknowledgementConfig sessionAcknowledgement;
+    @JsonPropertyDescription("audit.handlers.jms.sessionMode")
+    private SessionModeConfig sessionMode;
+
+    @JsonPropertyDescription("audit.handlers.jms.batchEnabled")
+    private boolean batchEnabled;
+
+    @JsonPropertyDescription("audit.handlers.jms.batchConfiguration")
+    private BatchPublisherConfiguration batchConfiguration;
 
     /**
      * Returns the JMS provider connection url utilized to connect to the JMS broker.
@@ -132,20 +140,58 @@ public class JmsAuditEventHandlerConfiguration extends EventHandlerConfiguration
     }
 
     /**
-     * Returns the acknowledgement mode that the JMS session should use when publishing the JMS messages.
+     * Returns the mode that the JMS session should use when publishing the JMS messages.
      *
-     * @return the session's acknowledgement mode.
+     * @return the session's mode.
+     * @see JMSContext#getSessionMode()
      */
-    public SessionAcknowledgementConfig getSessionAcknowledgement() {
-        return sessionAcknowledgement;
+    public SessionModeConfig getSessionMode() {
+        return sessionMode;
     }
 
     /**
-     * Sets  the acknowledgement mode that the JMS session should use when publishing the JMS messages.
+     * Sets the session mode that the JMS session should use when publishing the JMS messages.
      *
-     * @param sessionAcknowledgement the session's acknowledgement mode.
+     * @param sessionMode the session's acknowledgement mode.
+     * @see JMSContext#getSessionMode()
      */
-    public void setSessionAcknowledgement(SessionAcknowledgementConfig sessionAcknowledgement) {
-        this.sessionAcknowledgement = sessionAcknowledgement;
+    public void setSessionMode(SessionModeConfig sessionMode) {
+        this.sessionMode = sessionMode;
+    }
+
+    /**
+     * Returns true if handling of audit events should be done in batches.
+     *
+     * @return true if handling of audit events should be done in batches.
+     */
+    public boolean isBatchEnabled() {
+        return batchEnabled;
+    }
+
+    /**
+     * sets if handling of audit events should be done in batches.
+     *
+     * @param batchEnabled true if handling of audit events should be done in batches.
+     */
+    public void setBatchEnabled(boolean batchEnabled) {
+        this.batchEnabled = batchEnabled;
+    }
+
+    /**
+     * Returns the configuration used to initialize the batch publisher.
+     *
+     * @return the configuration used to initialize the batch publisher.
+     */
+    public BatchPublisherConfiguration getBatchConfiguration() {
+        return batchConfiguration;
+    }
+
+    /**
+     * Sets the configuration used to initialize the batch publisher.
+     *
+     * @param batchConfiguration the configuration used to initialize the batch publisher.
+     */
+    public void setBatchConfiguration(BatchPublisherConfiguration batchConfiguration) {
+        this.batchConfiguration = batchConfiguration;
     }
 }

@@ -188,7 +188,13 @@
         "jmsTopic" : "audit",
         "initialContextFactory" : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
         "deliveryMode" : "NON_PERSISTENT",
-        "sessionAcknowledgement" : "AUTO"
+        "sessionMode" : "AUTO",
+        "batchEnabled" : true,
+        "batchConfiguration" : {
+          "capacity" : 1000,
+          "threadCount" : 3,
+          "maxBatchedEvents" : 100
+        }
       }
     }
   ]

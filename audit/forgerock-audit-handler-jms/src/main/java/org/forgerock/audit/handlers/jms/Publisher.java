@@ -13,38 +13,36 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-
 package org.forgerock.audit.handlers.jms;
 
-import javax.jms.Session;
+import org.forgerock.json.resource.ResourceException;
 
 /**
- * Configuration wrapper for JMS {@link Session} Acknowledge setting.
+ * Defines a generic interface for audit event publishers.
+ *
+ * @param <T> The type of object that this publisher will publish as a representive of the audit event.
  */
-public enum SessionAcknowledgementConfig {
-    AUTO(Session.AUTO_ACKNOWLEDGE),
-    CLIENT(Session.CLIENT_ACKNOWLEDGE),
-    DUPS_OK(Session.DUPS_OK_ACKNOWLEDGE);
-
-    private int acknowledge;
+public interface Publisher<T> {
 
     /**
-     * Creates the config instance with the passed in 'acknowledge' setting.
+     * Initialize services that are reused by individual publish calls.
      *
-     * @param acknowledge the acknowledge setting fpr this instance.
-     * @see Session#getAcknowledgeMode()
+     * @throws ResourceException
      */
-    SessionAcknowledgementConfig(int acknowledge) {
-        this.acknowledge = acknowledge;
-    }
+    void startup() throws ResourceException;
 
     /**
-     * Returns the acknowledge setting for this configuration.
+     * Cleanup services that were initialized with {@link #startup()}
      *
-     * @return the acknowledge setting for this configuration.
-     * @see Session#getAcknowledgeMode()
+     * @throws ResourceException
      */
-    public int getAcknowledge() {
-        return acknowledge;
-    }
+    void shutdown() throws ResourceException;
+
+    /**
+     * implement this to deliver the audit event representation to the service.
+     *
+     * @param message representative object of the audit event
+     * @throws ResourceException
+     */
+    void publish(T message) throws ResourceException;
 }

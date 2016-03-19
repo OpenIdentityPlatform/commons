@@ -7,6 +7,12 @@
         "jmsTopic" : "audit",
         "initialContextFactory" : "org.forgerock.audit.handlers.jms.TestInitialContextFactory",
         "deliveryMode" : "NON_PERSISTENT",
-        "sessionMode" : "AUTO"
+        "sessionMode" : "AUTO",
+        "batchEnabled": true,
+        "batchConfiguration" : {
+            "capacity": 10,
+            "threadCount": 1,
+            "maxBatchedEvents" : 3
+        }
     }
 }

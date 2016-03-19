@@ -20,7 +20,10 @@ import static org.forgerock.audit.handlers.jms.JmsAuditEventHandlerTest.getAudit
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
+import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
+import javax.jms.JMSContext;
+import javax.jms.Session;
 import javax.jms.Topic;
 import javax.jms.TopicConnection;
 import javax.naming.Context;
@@ -29,6 +32,10 @@ import javax.naming.spi.InitialContextFactory;
 import java.util.Hashtable;
 
 import org.forgerock.json.JsonPointer;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This ContextFactory is instantiated by the JmsAuditEventHandlerTest through the JNDI JMS config it uses.
@@ -40,23 +47,17 @@ public class TestInitialContextFactory implements InitialContextFactory {
     @Override
     public Context getInitialContext(Hashtable<?, ?> environment) throws NamingException {
         try {
-            String testTopic = getAuditConfig().get(TOPIC_CONFIG_POINTER).asString();
-
+            String testTopic = getAuditConfig("event-handler-config.json").get(TOPIC_CONFIG_POINTER).asString();
             Context context = mock(Context.class);
-            when(context.lookup(eq(JndiContextManager.TOPIC_JNDI_CONFIG_PREFIX + testTopic)))
-                    .thenReturn(mock(Topic.class));
-
             ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
-            when(context.lookup(eq("ConnectionFactory"))).thenReturn(connectionFactory);
 
-            TopicConnection testConnection = mock(TopicConnection.class);
-            when(connectionFactory.createConnection()).thenReturn(testConnection);
-            when(connectionFactory.createConnection(any(String.class), any(String.class))).thenReturn(testConnection);
+            when(context.lookup(eq("ConnectionFactory"))).thenReturn(connectionFactory);
+            when(context.lookup(eq(testTopic))).thenReturn(mock(Topic.class));
+            when(connectionFactory.createConnection()).thenReturn(mock(Connection.class));
 
             return context;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
     }
-
 }
