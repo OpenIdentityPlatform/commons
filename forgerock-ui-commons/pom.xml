@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.forgerock.commons.ui</groupId>
         <artifactId>forgerock-ui</artifactId>
-        <version>11.0.17</version>
+        <version>11.0.18-SNAPSHOT</version>
     </parent>
 
     <artifactId>forgerock-ui-commons</artifactId>
