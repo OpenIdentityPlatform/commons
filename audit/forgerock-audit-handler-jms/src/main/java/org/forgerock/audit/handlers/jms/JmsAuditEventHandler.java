@@ -25,7 +25,6 @@ import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.jms.Topic;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +54,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
     private static final Logger logger = LoggerFactory.getLogger(JmsAuditEventHandler.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private JmsContextManager jmsContextManager;
+    private final JmsContextManager jmsContextManager;
     private final Publisher<JsonValue> publisher;
 
     /**
@@ -78,13 +77,36 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
         Reject.ifNull(configuration.getJmsTopic(), "JMS publish topic is required");
         Reject.ifNull(configuration.getInitialContextFactory(), "JMS provider connection context factory is required.");
 
-        publisher = configuration.isBatchEnabled()
-                ? new JmsBatchPublisher(configuration.getBatchConfiguration())
-                : new JmsPublisher();
-
-        this.jmsContextManager = new JmsContextManager(configuration, connectionFactory, topic);
+        publisher = buildPublisher(configuration);
+        jmsContextManager = buildContextManager(configuration, connectionFactory, topic);
 
         logger.debug("Successfully configured JMS audit event handler.");
+    }
+
+    /**
+     * Factory method for the JMS Context Manager.
+     *
+     * @param configuration the configuration of the handler.
+     * @param connectionFactory connection factory for the context manager to manage, if not null.
+     * @param topic the jms topic for the context manager to manage, if not null.
+     * @return the constructed JmsContextManager.
+     * @throws ResourceException if there is trouble constructing the JMS ContextManager.
+     */
+    JmsContextManager buildContextManager(JmsAuditEventHandlerConfiguration configuration,
+            ConnectionFactory connectionFactory, Topic topic) throws ResourceException {
+        return new JmsContextManager(configuration, connectionFactory, topic);
+    }
+
+    /**
+     * Factory method for publisher.
+     *
+     * @param configuration used to determine if a batched publisher is needed or not.
+     * @return the constructed publisher.
+     */
+    Publisher<JsonValue> buildPublisher(JmsAuditEventHandlerConfiguration configuration) {
+        return configuration.isBatchEnabled()
+                ? new JmsBatchPublisher(configuration.getBatchConfiguration())
+                : new JmsPublisher();
     }
 
     /**
