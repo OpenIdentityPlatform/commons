@@ -168,9 +168,8 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>handlebars</artifactId>
-                <version>3.0.3</version>
+                <version>4.0.5</version>
                 <type>js</type>
-                <classifier>min</classifier>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
