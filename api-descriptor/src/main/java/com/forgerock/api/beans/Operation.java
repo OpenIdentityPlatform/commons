@@ -82,7 +82,7 @@ public class Operation {
     /**
      * Builder to help construct the Operation
      */
-    protected abstract static class Builder<T extends Builder<T>> {
+    public abstract static class Builder<T extends Builder<T>> {
 
         private Context supportedContext;
         private String[] supportedLocals;

@@ -38,7 +38,7 @@ public class Update extends Operation{
         return new Builder();
     }
 
-    private static final class Builder extends Operation.Builder<Builder> {
+    public static final class Builder extends Operation.Builder<Builder> {
 
         @Override
         protected Builder self() {

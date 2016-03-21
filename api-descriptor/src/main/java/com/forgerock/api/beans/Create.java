@@ -62,7 +62,7 @@ public class Create extends Operation{
         return new Builder();
     }
 
-    private static final class Builder extends Operation.Builder<Builder> {
+    public static final class Builder extends Operation.Builder<Builder> {
 
         private CreateModeEnum mode;
         private Boolean mvccSupported;

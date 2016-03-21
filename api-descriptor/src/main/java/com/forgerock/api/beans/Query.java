@@ -113,7 +113,7 @@ public class Query extends Operation{
         return new Builder();
     }
 
-    private static final class Builder extends Operation.Builder<Builder> {
+    public static final class Builder extends Operation.Builder<Builder> {
 
         private QueryTypeEnum queryType;
         private PagingModeEnum pagingMode;

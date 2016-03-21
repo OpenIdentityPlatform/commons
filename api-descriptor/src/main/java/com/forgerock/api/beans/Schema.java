@@ -91,7 +91,7 @@ public class Schema {
      *
      * @return Builder
      */
-    private static Builder newBuilder(Reference reference) {
+    public static Builder newBuilder(Reference reference) {
         return new Builder(reference);
     }
 
@@ -100,7 +100,7 @@ public class Schema {
      *
      * @return Builder
      */
-    private static Builder newBuilder() {
+    public static Builder newBuilder() {
         return new Builder();
     }
 

@@ -49,7 +49,7 @@ public class VersionedPath {
      *
      * @return Builder
      */
-    private static Builder newBuilder(String version, Resource... resources) {
+    public static Builder newBuilder(String version, Resource... resources) {
         return new Builder(version, resources);
     }
 

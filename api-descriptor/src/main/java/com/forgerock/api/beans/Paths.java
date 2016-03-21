@@ -39,7 +39,7 @@ public class Paths {
      *
      * @return Builder
      */
-    private static Builder newBuilder(Resource... resources) {
+    public static Builder newBuilder(Resource... resources) {
         return new Builder(resources);
     }
 

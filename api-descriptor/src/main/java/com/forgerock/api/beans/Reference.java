@@ -49,7 +49,7 @@ public class Reference {
      *
      * @return Builder
      */
-    private static Builder newBuilder(Resource... resources) {
+    public static Builder newBuilder(Resource... resources) {
         return new Builder(resources);
     }
 
@@ -58,7 +58,7 @@ public class Reference {
      *
      * @return Builder
      */
-    private static Builder newBuilder(VersionedPath versionedPath) {
+    public static Builder newBuilder(VersionedPath versionedPath) {
         return new Builder(versionedPath);
     }
 

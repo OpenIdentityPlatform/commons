@@ -52,7 +52,7 @@ public class Delete extends Operation{
         return new Builder(mvccSupported);
     }
 
-    private static final class Builder extends Operation.Builder<Builder> {
+    public static final class Builder extends Operation.Builder<Builder> {
 
         private Boolean mvccSupported;
 
