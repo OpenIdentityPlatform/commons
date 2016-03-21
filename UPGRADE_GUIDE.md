@@ -30,7 +30,10 @@ Applications will need to add this role to any users that should be able to acce
 
 Both OpenAM and OpenIDM need to provide a path to a `KBADelegate`, which can be either a project-specific or the commons one.
 
-
 ## 11.x -> 12.x
 
-* There is a new parameter attached to the event for EVENT_SHOW_LOGIN_DIALOG : "authenticatedCallback". This is a function which is expected to be called when the inline login dialog has successfully re-authenticated the user. Since there is an expectation that the EVENT_SHOW_LOGIN_DIALOG could be invoked multiple times, it is recommended that each callback function be stored in a queue (such as the new org/forgerock/commons/ui/common/util/Queue facility) so that they all get called and in the order received. If the implementing product is making use of the default EVENT_SHOW_LOGIN_DIALOG implementation, then nothing needs to be changed in the product to work properly. 
+* There is a new parameter attached to the event for EVENT_SHOW_LOGIN_DIALOG : "authenticatedCallback". This is a function which is expected to be called when the inline login dialog has successfully re-authenticated the user. Since there is an expectation that the EVENT_SHOW_LOGIN_DIALOG could be invoked multiple times, it is recommended that each callback function be stored in a queue (such as the new org/forgerock/commons/ui/common/util/Queue facility) so that they all get called and in the order received. If the implementing product is making use of the default EVENT_SHOW_LOGIN_DIALOG implementation, then nothing needs to be changed in the product to work properly.
+
+* Updating to Handlebars 4
+
+The path to the new version of handlebars (4.0.5) will need to be adjusted in the root main.js.
