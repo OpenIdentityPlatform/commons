@@ -74,7 +74,7 @@ public final class Pair<F, S> {
     }
 
     /**
-     * Creates a new {@code Pair}
+     * Creates a new {@code Pair}.
      *
      * @param first
      *            the first element of the constructed pair
