@@ -111,10 +111,10 @@ public class RangeSet extends AbstractSet<Integer> implements Cloneable, Seriali
     public boolean contains(Object o) {
         boolean result = false;
         if (o != null && o instanceof Integer && size() != 0) {
-            int contains = ((Number)o).intValue();
+            int contains = ((Number) o).intValue();
             if ((step > 0 && contains >= start && contains < stop)
-             || (step < 0 && contains >= start && contains > stop)) {
-                 result = ((contains - start) % step == 0);
+                    || (step < 0 && contains >= start && contains > stop)) {
+                result = ((contains - start) % step == 0);
             }
         }
         return result;

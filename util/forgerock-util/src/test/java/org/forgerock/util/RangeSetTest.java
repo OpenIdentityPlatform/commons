@@ -66,7 +66,7 @@ public class RangeSetTest {
         assertThat(range.size()).isEqualTo(0);
     }
 
-    @Test(expectedExceptions=IllegalArgumentException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void illegalStep() {
         new RangeSet(0, 100, 0); // meet infinity
     }

@@ -86,8 +86,8 @@ public final class XMLUtils {
             dbf.setAttribute("http://apache.org/xml/properties/security-manager", SECURITY_MANAGER);
         }
         try {
-           dbf.setAttribute("http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", ENTITY_EXP_LIMIT);
-        } catch (IllegalArgumentException ie) {}
+            dbf.setAttribute("http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", ENTITY_EXP_LIMIT);
+        } catch (IllegalArgumentException ie) { }
         DocumentBuilder db = dbf.newDocumentBuilder();
         db.setEntityResolver(new XMLHandler());
         return db;
@@ -117,8 +117,8 @@ public final class XMLUtils {
             sp.setProperty("http://apache.org/xml/properties/security-manager", SECURITY_MANAGER);
         }
         try {
-           sp.setProperty("http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", ENTITY_EXP_LIMIT);
-        } catch (Exception ex) {}
+            sp.setProperty("http://www.oracle.com/xml/jaxp/properties/entityExpansionLimit", ENTITY_EXP_LIMIT);
+        } catch (Exception ex) { }
         sp.getXMLReader().setEntityResolver(new XMLHandler());
         return sp;
     }
