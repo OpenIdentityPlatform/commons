@@ -15,33 +15,59 @@
  */
 package com.forgerock.api.beans;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
+import com.forgerock.api.ApiValidationException;
+import org.forgerock.util.Reject;
+
 /**
- * Class that represents the VersionedPath type in API descriptor.
+ * Class that represents versioned {@link Resource}s on an API descriptor path.
  */
-public class VersionedPath {
+public class VersionedPath implements PathNode {
 
-    private final String version;
-    private final Resource resource;
+    private final Map<String, Resource> paths;
 
-    private VersionedPath(Builder builder){
-        this.version = builder.version;
-        this.resource = builder.resource;
+    private VersionedPath(Builder builder) {
+        this.paths = builder.paths;
+
+        if (paths.isEmpty()) {
+            throw new ApiValidationException("Must have at least one versioned resource");
+        }
     }
 
     /**
-     * Getter of the resources version
-     * @return Version
+     * Gets a {@code Map} of versions to {@link Resource}s. This method is currently only used for JSON serialization.
+     *
+     * @return {@code Map} of versions to {@link Resource}s.
      */
-    public String getVersion() {
-        return version;
+    @JsonValue
+    protected Map<String, Resource> getPaths() {
+        return paths;
     }
 
     /**
-     * Getter of the resource
-     * @return Resource
+     * Gets the {@link Resource} for a given version.
+     *
+     * @param version Resource version
+     * @return {@link Resource} or {@code null} if does-not-exist.
      */
-    public Resource getResource() {
-        return resource;
+    @JsonIgnore
+    public Resource get(String version) {
+        return paths.get(version);
+    }
+
+    /**
+     * Returns all resource-versions on this path.
+     *
+     * @return All resource-versions.
+     */
+    @JsonIgnore
+    public Set<String> getVersions() {
+        return paths.keySet();
     }
 
     /**
@@ -49,21 +75,33 @@ public class VersionedPath {
      *
      * @return Builder
      */
-    public static Builder versionedPath(String version, Resource resource) {
-        return new Builder(version, resource);
+    public static Builder versionedPath() {
+        return new Builder();
     }
 
     public static class Builder {
 
-        private String version;
-        private Resource resource;
+        private final Map<String, Resource> paths = new HashMap<>();
 
         /**
-         * Private default constructor with the mandatory fields
+         * Private default constructor
          */
-        private Builder(String version, Resource resource) {
-            this.version = version;
-            this.resource = resource;
+        private Builder() {
+        }
+
+        /**
+         * Adds a resource-version.
+         *
+         * @param version Resource-version
+         * @param resource {@link Resource}
+         * @return Builder
+         */
+        public Builder put(String version, Resource resource) {
+            if (paths.containsKey(Reject.checkNotNull(version))) {
+                throw new IllegalStateException("version not unique");
+            }
+            paths.put(version, Reject.checkNotNull(resource));
+            return this;
         }
 
         /**

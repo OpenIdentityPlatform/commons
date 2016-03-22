@@ -17,11 +17,10 @@ package com.forgerock.api.beans;
 
 /**
  * Class that represents the Action operation type in API descriptor.
- *
  */
 public final class Action extends Operation {
 
-    private final String id;
+    private final String name;
     private final String description;
     private final Schema request;
     private final Schema response;
@@ -33,7 +32,7 @@ public final class Action extends Operation {
      */
     private Action(Builder builder) {
         super(builder);
-        this.id = builder.id;
+        this.name = builder.name;
         this.description = builder.description;
         this.request = builder.request;
         this.response = builder.response;
@@ -41,14 +40,16 @@ public final class Action extends Operation {
 
     /**
      * Getter of the ID.
+     *
      * @return Id
      */
-    public String getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
     /**
      * Getter of the description.
+     *
      * @return description
      */
     public String getDescription() {
@@ -57,6 +58,7 @@ public final class Action extends Operation {
 
     /**
      * Getter of the request.
+     *
      * @return Request
      */
     public Schema getRequest() {
@@ -65,6 +67,7 @@ public final class Action extends Operation {
 
     /**
      * Getter of the response.
+     *
      * @return Response
      */
     public Schema getResponse() {
@@ -73,15 +76,16 @@ public final class Action extends Operation {
 
     /**
      * Creates a new builder for Action.
+     *
      * @return New builder instance
      */
     public static final Builder action() {
         return new Builder();
     }
 
-
     /**
      * Allocates the Action operation type to the given Resource Builder.
+     *
      * @param resourceBuilder - Resource Builder to add the operation
      */
     @Override
@@ -94,7 +98,7 @@ public final class Action extends Operation {
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private String id;
+        private String name;
         private String description;
         private Schema request;
         private Schema response;
@@ -107,12 +111,11 @@ public final class Action extends Operation {
         /**
          * Set the Id.
          *
-         * @param id Action id
-         *
+         * @param name Action name
          * @return Builder
          */
-        public Builder id(String id) {
-            this.id = id;
+        public Builder name(String name) {
+            this.name = name;
             return this;
         }
 
@@ -120,7 +123,6 @@ public final class Action extends Operation {
          * Set the description.
          *
          * @param description Action description
-         *
          * @return Builder
          */
         public Builder description(String description) {
@@ -132,7 +134,6 @@ public final class Action extends Operation {
          * Set the request.
          *
          * @param request Action request
-         *
          * @return Builder
          */
         public Builder request(Schema request) {
@@ -144,7 +145,6 @@ public final class Action extends Operation {
          * Set the response.
          *
          * @param response Action resopnse
-         *
          * @return Builder
          */
         public Builder response(Schema response) {

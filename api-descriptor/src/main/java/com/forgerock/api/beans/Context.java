@@ -59,7 +59,7 @@ public final class Context {
      * Creates a new Builder instance for building the Context.
      * @return New Builder instance
      */
-    private static Builder context() {
+    public static Builder context() {
         return new Builder();
     }
 

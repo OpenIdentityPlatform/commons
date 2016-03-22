@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Class that represents the Resource type in API descriptor.
  */
-public class Resource {
+public class Resource implements PathNode {
     private final Schema resourceSchema;
     private final String title;
     private final String description;
@@ -34,7 +34,6 @@ public class Resource {
     private final Patch patch;
     private final Action[] actions;
     private final Query[] queries;
-    private final String deprecatedSince;
 
     private Resource(Builder builder) {
         this.resourceSchema = builder.resourceSchema;
@@ -47,7 +46,6 @@ public class Resource {
         this.patch = builder.patch;
         this.actions = builder.actions.toArray(new Action[builder.actions.size()]);
         this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
-        this.deprecatedSince = builder.deprecatedSince;
     }
 
     /**
@@ -131,18 +129,10 @@ public class Resource {
     }
 
     /**
-     * Getter of deprecated since
-     * @return Deprecated since
-     */
-    public String getDeprecatedSince() {
-        return deprecatedSince;
-    }
-
-    /**
      * Create a new Builder for Resoruce
      * @return Builder
      */
-    private static Builder resource() {
+    public static Builder resource() {
         return new Builder();
     }
 
@@ -157,7 +147,6 @@ public class Resource {
         private Patch patch;
         private List<Action> actions;
         private List<Query> queries;
-        private String deprecatedSince;
 
         /**
          * Private default constructor
@@ -284,16 +273,6 @@ public class Resource {
          */
         public Builder query(Query query) {
             this.queries.add(query);
-            return this;
-        }
-
-        /**
-         * Set deprecated since
-         * @param deprecatedSince
-         * @return Builder
-         */
-        public Builder deprecatedSince(String deprecatedSince) {
-            this.deprecatedSince = deprecatedSince;
             return this;
         }
 

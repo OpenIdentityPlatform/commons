@@ -17,36 +17,27 @@ package com.forgerock.api.beans;
 
 /**
  * Class that represents the Error type in API descriptor.
- *
  */
 public final class Error {
 
-    private final String name;
     private final String description;
     private final Integer code;
     private final Schema schema;
 
     /**
      * Private constructor called by the builder build method.
+     *
      * @param builder
      */
     private Error(Builder builder) {
-        this.name = builder.name;
         this.description = builder.description;
         this.code = builder.code;
         this.schema = builder.schema;
     }
 
     /**
-     * Getter of the error name.
-     * @return Name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
      * Getter of the error description.
+     *
      * @return Description
      */
     public String getDescription() {
@@ -55,6 +46,7 @@ public final class Error {
 
     /**
      * Getter of the error code.
+     *
      * @return Code
      */
     public Integer getCode() {
@@ -63,6 +55,7 @@ public final class Error {
 
     /**
      * Getter of the error schema.
+     *
      * @return Schema
      */
     public Schema getSchema() {
@@ -71,12 +64,13 @@ public final class Error {
 
     /**
      * New error builder with the mandatory parameters.
-     * @param name Error name
+     *
+     * @param description Error description
      * @param code Error code
      * @return Builder
      */
-    public static Builder error(String name, Integer code) {
-        return new Builder(name, code);
+    public static Builder error(String description, Integer code) {
+        return new Builder(description, code);
     }
 
     /**
@@ -84,23 +78,24 @@ public final class Error {
      */
     public static final class Builder {
 
-        private String name;
         private String description;
         private Integer code;
         private Schema schema;
 
         /**
          * Error builder instance with the 2 mandatory parameters.
-         * @param name - Error name
+         *
+         * @param description - Error name
          * @param code - Error code
          */
-        private Builder(String name, Integer code) {
-            this.name = name;
+        private Builder(String description, Integer code) {
+            this.description = description;
             this.code = code;
         }
 
         /**
          * Set the error description.
+         *
          * @param description Error description
          * @return Builder
          */
@@ -111,6 +106,7 @@ public final class Error {
 
         /**
          * Set the schema.
+         *
          * @param schema Error schema
          * @return Builder
          */
@@ -121,6 +117,7 @@ public final class Error {
 
         /**
          * Builds the Error.
+         *
          * @return Error instance
          */
         public Error build() {
