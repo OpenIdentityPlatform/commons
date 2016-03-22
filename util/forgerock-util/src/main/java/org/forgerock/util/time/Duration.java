@@ -217,7 +217,7 @@ public class Duration implements Comparable<Duration> {
         }
     }
 
-    private static Map<String, TimeUnit> TIME_UNITS = new HashMap<>();
+    private static final Map<String, TimeUnit> TIME_UNITS = new HashMap<>();
     static {
         for (String days : asList("days", "day", "d")) {
             TIME_UNITS.put(days, DAYS);
