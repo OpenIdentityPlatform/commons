@@ -150,9 +150,9 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 code        | Number                      | ✓          | Three digit error code, corresponding to HTTP status codes.
 description | String                      | ✓          | Description of what may cause an error to occur.
-schema      | [Schema](#Schema)           |            | Optional definition of a schema for the error.
+detailSchema | [Schema](#Schema)          |            | Optional definition of a schema for the error-detail.
 
-When a schema is not provided, the default is:
+The schema for an error response is:
 
 ```
 {
@@ -216,7 +216,8 @@ Creates a new resource. Extends [Operation](#Operation).
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-mode        | String                      | ✓          | Values accepted are: `ID_FROM_CLIENT`, `DYNAMIC_ID_FROM_SERVER`, `STATIC_ID_FROM_SERVER`.
+mode        | String                      | ✓          | Values accepted are: `ID_FROM_CLIENT`, `ID_FROM_SERVER`.
+singleton   | boolean                     |            | Specifies that create operates on a singleton as opposed to a collection.
 mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
 
 ### Update
@@ -300,6 +301,7 @@ _resourceSchema_ and Patch-operation being performed:
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
+operations  | String[]                    | ✓          | Set of supported patch operations. Supported values are `ADD`, `REMOVE`, `REPLACE`, `INCREMENT`, `MOVE`, `COPY`, `TRANSFORM`.
 mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC update.
 
 ### Action

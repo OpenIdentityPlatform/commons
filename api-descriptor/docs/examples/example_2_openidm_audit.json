@@ -128,7 +128,7 @@
             "required" : true
           }
         ],
-        "supportedModes" : [ "DYNAMIC_ID_FROM_SERVER" ],
+        "supportedModes" : [ "ID_FROM_SERVER" ],
         "errors" : [
           {"$ref" : "frapi:common#/errors/badRequest"},
           {"$ref" : "frapi:common#/errors/forbidden"},
