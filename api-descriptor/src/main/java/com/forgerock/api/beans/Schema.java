@@ -15,44 +15,101 @@
  */
 package com.forgerock.api.beans;
 
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.Reject;
+
 /**
  * Class that represents the Schema type in API descriptor.
- *
  */
 public final class Schema {
 
-    /**
-     * private contstructor of the Schema.
-     *
-     * @param builder Operation Builder
-     */
-    private Schema(Builder builder) { }
+    private final Reference reference;
+    private final JsonValue schema;
 
     /**
-     * Create a new Builder for Schema using JSON schema and Forgerock extensions.
+     * Private contstructor of the Schema.
      *
-     * @return Builder
+     * @param builder Builder.
      */
-    public static Builder schema() {
+    private Schema(Builder builder) {
+        this.reference = builder.reference;
+        this.schema = builder.schema;
+    }
+
+    /**
+     * Getter for reference. May be null if the schema is specified here.
+     * @return The reference.
+     */
+    public Reference getReference() {
+        return reference;
+    }
+
+    /**
+     * Obtain the schema definition if it is not a reference.
+     * @return The schema.
+     */
+    public JsonValue getSchema() {
+        return schema;
+    }
+
+    /**
+     * Create a new Builder for Schema.
+     * @return The builder.
+     */
+    public static Builder newBuilder() {
         return new Builder();
     }
 
     /**
-     * Builder for the Schema.
+     * Create a new Builder for Schema. A synonym for {@link #newBuilder()} that is useful for static imports.
+     * @return The builder.
+     */
+    public static Builder schema() {
+        return newBuilder();
+    }
+
+    /**
+     * A builder class for {@code Schema} instances.
      */
     public static final class Builder {
 
+        private JsonValue schema;
+        private Reference reference;
+
         /**
-         * Private default constructor with the mandatory fields.
+         * Private default constructor.
          */
         private Builder() { }
 
         /**
+         * Sets the schema reference.
+         * @param reference The reference.
+         * @return This builder.
+         */
+        public Builder reference(Reference reference) {
+            Reject.ifNull(reference);
+            this.reference = reference;
+            return this;
+        }
+
+        /**
+         * Sets the schema.
+         * @param schema The schema.
+         * @return This builder.
+         */
+        public Builder schema(JsonValue schema) {
+            Reject.ifNull(schema);
+            this.schema = schema;
+            return this;
+        }
+
+        /**
          * Builds the Schema instace.
          *
-         * @return Schema instace
+         * @return Schema instace.
          */
         public Schema build() {
+            Reject.ifTrue(schema == null && reference == null, "Must provide either a reference or a schema");
             return new Schema(this);
         }
     }
