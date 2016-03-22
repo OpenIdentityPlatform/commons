@@ -1,6 +1,7 @@
 /*
  * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the License.
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
  * specific language governing permission and limitations under the License.
@@ -24,7 +25,7 @@ import java.util.NoSuchElementException;
 
 /**
  * A query string has the following string representation:
- * 
+ *
  * <pre>
  * Expr           = OrExpr
  * OrExpr         = AndExpr ( 'or' AndExpr ) *
@@ -49,16 +50,16 @@ import java.util.NoSuchElementException;
  * </pre>
  *
  * Note that white space, parentheses, and exclamation characters need URL
- * when passed via HTTP query strings.  
+ * when passed via HTTP query strings.
  * <p>
  * ASCII and UTF-8 strings will treat the backslash character as an escape character.
- * For an example, this will allow for the inclusion of quotes or single-quotes within 
- * a string that is surrounded by the same type of quotes: "tes\"t".  The backslash 
+ * For an example, this will allow for the inclusion of quotes or single-quotes within
+ * a string that is surrounded by the same type of quotes: "tes\"t".  The backslash
  * character itself will also need to be escaped if it is to be included in the string.
  * <p>
  * In addition to single valued properties (number, boolean, and string), query filters
- * can be applied to multi-valued properties. When operating on properties that are an 
- * array or list type the operation should be evaluated on each element in the array, 
+ * can be applied to multi-valued properties. When operating on properties that are an
+ * array or list type the operation should be evaluated on each element in the array,
  * passing if any of the elements in the array or list pass the operation.
  *
  * @param <F> The type of field description used in parsed {@link QueryFilter} objects.
@@ -321,59 +322,59 @@ public abstract class QueryFilterParser<F> {
 
         private void readNextToken() {
             switch (state) {
-                case NEED_START_STRING:
-                    final int stringStart = pos;
-                    for (; pos < filterString.length() && filterString.charAt(pos) != stringDelimiter; pos++) {
-                    	if (filterString.charAt(pos) == '\\') {
-                    		if ((pos + 1) == filterString.length()) {
-                    			throw new IllegalArgumentException("The filter string cannot end with an escape character");
-                    		}
-                    		// Found an escaped character, so remove the '\')
-                        	filterString = new StringBuilder(filterString).deleteCharAt(pos).toString();
-                    	}
-                        // Do nothing
-                    }
-                    nextToken = filterString.substring(stringStart, pos);
-                    state = NEED_END_STRING;
-                    break;
-                case NEED_END_STRING:
-                    // NEED_START_STRING guarantees that we are either at the end of the string
-                    // or the next character is a quote.
-                    if (pos < filterString.length()) {
-                        nextToken = filterString.substring(pos, ++pos);
-                    } else {
-                        nextToken = null;
-                    }
-                    state = NEED_TOKEN;
-                    break;
-                default: // NEED_TOKEN:
-                    if (!skipWhiteSpace()) {
-                        nextToken = null;
-                    } else {
-                        final int tokenStart = pos;
-                        switch (filterString.charAt(pos++)) {
-                            case '(':
-                            case ')':
-                                break;
-                            case '"':
-                                state = NEED_START_STRING;
-                                stringDelimiter = '"';
-                                break;
-                            case '\'':
-                                state = NEED_START_STRING;
-                                stringDelimiter = '\'';
-                                break;
-                            default:
-                                for (; pos < filterString.length(); pos++) {
-                                    final char c = filterString.charAt(pos);
-                                    if (c == '(' || c == ')' || c == ' ') {
-                                        break;
-                                    }
-                                }
-                                break;
+            case NEED_START_STRING:
+                final int stringStart = pos;
+                for (; pos < filterString.length() && filterString.charAt(pos) != stringDelimiter; pos++) {
+                    if (filterString.charAt(pos) == '\\') {
+                        if ((pos + 1) == filterString.length()) {
+                            throw new IllegalArgumentException("The filter string cannot end with an escape character");
                         }
-                        nextToken = filterString.substring(tokenStart, pos);
+                        // Found an escaped character, so remove the '\')
+                        filterString = new StringBuilder(filterString).deleteCharAt(pos).toString();
                     }
+                    // Do nothing
+                }
+                nextToken = filterString.substring(stringStart, pos);
+                state = NEED_END_STRING;
+                break;
+            case NEED_END_STRING:
+                // NEED_START_STRING guarantees that we are either at the end of the string
+                // or the next character is a quote.
+                if (pos < filterString.length()) {
+                    nextToken = filterString.substring(pos, ++pos);
+                } else {
+                    nextToken = null;
+                }
+                state = NEED_TOKEN;
+                break;
+            default: // NEED_TOKEN:
+                if (!skipWhiteSpace()) {
+                    nextToken = null;
+                } else {
+                    final int tokenStart = pos;
+                    switch (filterString.charAt(pos++)) {
+                    case '(':
+                    case ')':
+                        break;
+                    case '"':
+                        state = NEED_START_STRING;
+                        stringDelimiter = '"';
+                        break;
+                    case '\'':
+                        state = NEED_START_STRING;
+                        stringDelimiter = '\'';
+                        break;
+                    default:
+                        for (; pos < filterString.length(); pos++) {
+                            final char c = filterString.charAt(pos);
+                            if (c == '(' || c == ')' || c == ' ') {
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    nextToken = filterString.substring(tokenStart, pos);
+                }
             }
         }
 

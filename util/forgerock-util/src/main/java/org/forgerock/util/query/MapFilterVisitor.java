@@ -1,6 +1,7 @@
 /*
  * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the License.
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
  * specific language governing permission and limitations under the License.
@@ -55,7 +56,9 @@ import java.util.HashMap;
  *     <li>
  *         JSON notation used for convenience to illustrate Map-structure.
  *         <ul>
- *             <li>To produce JSON, use <pre>new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(map);</pre></li>
+ *             <li>To produce JSON, use
+ *                  {@code new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(map);}
+ *             </li>
  *             <li>Or wrap with JsonValue: <pre>new org.forgerock.json.JsonValue(map);</pre></li>
  *         </ul>
  *     </li>
@@ -119,7 +122,8 @@ public class MapFilterVisitor<F> implements QueryFilterVisitor<Map<String, Objec
      * {@inheritDoc}
      */
     @Override
-    public Map<String, Object> visitExtendedMatchFilter(Void parameters, F field, String operator, Object valueAssertion) {
+    public Map<String, Object> visitExtendedMatchFilter(Void parameters, F field, String operator,
+            Object valueAssertion) {
         return object(field, operator, valueAssertion);
     }
 

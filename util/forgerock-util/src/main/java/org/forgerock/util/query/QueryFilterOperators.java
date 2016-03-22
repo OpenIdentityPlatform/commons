@@ -1,6 +1,7 @@
 /*
  * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the License.
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
  * specific language governing permission and limitations under the License.
@@ -17,32 +18,32 @@ package org.forgerock.util.query;
 /**
  * QueryFilter constants.
  */
-public class QueryFilterOperators {
-    /** the "and" operator */
+public final class QueryFilterOperators {
+    /** the "and" operator. */
     public static final String AND = "and";
-    /** the "or" operator */
+    /** the "or" operator. */
     public static final String NOT = "!";
-    /** the "not" operator */
+    /** the "not" operator. */
     public static final String OR = "or";
-    /** a literal "true" */
+    /** a literal "true". */
     public static final String TRUE = "true";
-    /** a literal "false */
+    /** a literal "false. */
     public static final String FALSE = "false";
-    /** the "present" operator */
+    /** the "present" operator. */
     public static final String PRESENT = "pr";
-    /** the "equals" operator */
+    /** the "equals" operator. */
     public static final String EQUALS = "eq";
-    /** the "greater-than" operator */
+    /** the "greater-than" operator. */
     public static final String GREATER_THAN = "gt";
-    /** the "greater-than-or-equal" operator */
+    /** the "greater-than-or-equal" operator. */
     public static final String GREATER_EQUAL = "ge";
-    /** the "less-than" operator */
+    /** the "less-than" operator. */
     public static final String LESS_THAN = "lt";
-    /** the "less-than-or-equal" operator */
+    /** the "less-than-or-equal" operator. */
     public static final String LESS_EQUAL = "le";
-    /** the "contains" operator" */
+    /** the "contains" operator". */
     public static final String CONTAINS = "co";
-    /** the "starts-with" operator */
+    /** the "starts-with" operator. */
     public static final String STARTS_WITH = "sw";
 
     private QueryFilterOperators() {

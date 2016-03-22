@@ -1,6 +1,7 @@
 /*
  * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the License.
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
  * specific language governing permission and limitations under the License.
@@ -22,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * A filter which can be used to select resources, which is compatible with the CREST query filters:
+ * A filter which can be used to select resources, which is compatible with the CREST query filters.
  *
  * @param <F>
  *            The type of the field specification.
@@ -30,6 +31,8 @@ import java.util.List;
 public class QueryFilter<F> {
 
     /**
+     * Implementation of logical AND filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class AndImpl<FF> extends Impl<FF> {
@@ -79,6 +82,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of boolean literal filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class BooleanLiteralImpl<FF> extends Impl<FF> {
@@ -122,6 +127,8 @@ public class QueryFilter<F> {
      */
 
     /**
+     * Abstract implementation of comparator filter - declares field and value assertion.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static abstract class ComparatorImpl<FF> extends Impl<FF> {
@@ -159,6 +166,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of contains filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class ContainsImpl<FF> extends ComparatorImpl<FF> {
@@ -174,6 +183,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of equals filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class EqualsImpl<FF> extends ComparatorImpl<FF> {
@@ -189,6 +200,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of extended match filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class ExtendedMatchImpl<FF> extends ComparatorImpl<FF> {
@@ -217,6 +230,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of greater than filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class GreaterThanImpl<FF> extends ComparatorImpl<FF> {
@@ -232,6 +247,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of greater than or equal to filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class GreaterThanOrEqualToImpl<FF> extends ComparatorImpl<FF> {
@@ -247,6 +264,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Abstract filter implementation.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static abstract class Impl<FF> {
@@ -265,6 +284,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of less than filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class LessThanImpl<FF> extends ComparatorImpl<FF> {
@@ -280,6 +301,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implemnetation of less than or equal to filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class LessThanOrEqualToImpl<FF> extends ComparatorImpl<FF> {
@@ -295,6 +318,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of logical NOT filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class NotImpl<FF> extends Impl<FF> {
@@ -333,6 +358,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of logical OR filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class OrImpl<FF> extends Impl<FF> {
@@ -382,6 +409,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of field present filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class PresentImpl<FF> extends Impl<FF> {
@@ -420,6 +449,8 @@ public class QueryFilter<F> {
     }
 
     /**
+     * Implementation of starts with filter.
+     *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
     private static final class StartsWithImpl<FF> extends ComparatorImpl<FF> {
@@ -514,6 +545,7 @@ public class QueryFilter<F> {
      *            expression {@code [a-zA-Z_0-9.]+}.
      * @param valueAssertion
      *            The assertion value.
+     * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      * @return The newly created generic comparison filter.
      * @throws IllegalArgumentException
      *             If {@code operator} is not a valid operator name.
@@ -545,9 +577,9 @@ public class QueryFilter<F> {
     /**
      * Creates a new {@code contains} filter using the provided field name and
      * value assertion. This method is used to check that the string representation
-     * of the field contains the provided substring. When operating on a collection 
-     * of values the operation should be evaluated on each element in the collection, 
-     * passing if any of the element's string representations contain the provided 
+     * of the field contains the provided substring. When operating on a collection
+     * of values the operation should be evaluated on each element in the collection,
+     * passing if any of the element's string representations contain the provided
      * substring.
      *
      * @param field
@@ -581,9 +613,9 @@ public class QueryFilter<F> {
 
     /**
      * Creates a new {@code greater than} filter using the provided field name
-     * and value assertion. This method is used to check that the value of the field 
-     * is greater than the provided value. When operating on a collection of values 
-     * the operation should be evaluated on each element in the collection, passing 
+     * and value assertion. This method is used to check that the value of the field
+     * is greater than the provided value. When operating on a collection of values
+     * the operation should be evaluated on each element in the collection, passing
      * if any of the element's values are greater than the provided value.
      *
      * @param field
@@ -600,10 +632,10 @@ public class QueryFilter<F> {
 
     /**
      * Creates a new {@code greater than or equal to} filter using the provided
-     * field name and value assertion. This method is used to check that the value 
-     * of the field is greater than or equal to the provided value. When operating 
-     * on a collection of values the operation should be evaluated on each element 
-     * in the collection, passing if any of the element's values are greater than 
+     * field name and value assertion. This method is used to check that the value
+     * of the field is greater than or equal to the provided value. When operating
+     * on a collection of values the operation should be evaluated on each element
+     * in the collection, passing if any of the element's values are greater than
      * or equal to the provided value.
      *
      * @param field
@@ -621,9 +653,9 @@ public class QueryFilter<F> {
 
     /**
      * Creates a new {@code less than} filter using the provided field name and
-     * value assertion. This method is used to check that the value of the field 
-     * is less than the provided value. When operating on a collection of values 
-     * the operation should be evaluated on each element in the collection, passing 
+     * value assertion. This method is used to check that the value of the field
+     * is less than the provided value. When operating on a collection of values
+     * the operation should be evaluated on each element in the collection, passing
      * if any of the element's values are less than the provided value.
      *
      * @param field
@@ -652,16 +684,17 @@ public class QueryFilter<F> {
      *
      * @param <FF> The type of the field specification. Named to be distinct from the type of the parent class.
      */
-    public static <FF> QueryFilter<FF> extendedMatch(final FF field, final String operator, final Object valueAssertion) {
+    public static <FF> QueryFilter<FF> extendedMatch(final FF field, final String operator,
+            final Object valueAssertion) {
         return new QueryFilter<>(new ExtendedMatchImpl<>(field, operator, valueAssertion));
     }
 
     /**
      * Creates a new {@code less than or equal to} filter using the provided
-     * field name and value assertion. This method is used to check that the value 
-     * of the field is less than or equal to the provided value. When operating 
-     * on a collection of values the operation should be evaluated on each element 
-     * in the collection, passing if any of the element's values are less than 
+     * field name and value assertion. This method is used to check that the value
+     * of the field is less than or equal to the provided value. When operating
+     * on a collection of values the operation should be evaluated on each element
+     * in the collection, passing if any of the element's values are less than
      * or equal to the provided value.
      *
      * @param field
@@ -746,9 +779,9 @@ public class QueryFilter<F> {
     /**
      * Creates a new {@code starts with} filter using the provided field name
      * and value assertion. This method is used to check that the string representation
-     * of the field starts with the provided substring. When operating on a collection 
-     * of values the operation should be evaluated on each element in the collection, 
-     * passing if any of the element's string representations starts with the provided 
+     * of the field starts with the provided substring. When operating on a collection
+     * of values the operation should be evaluated on each element in the collection,
+     * passing if any of the element's string representations starts with the provided
      * substring.
      *
      * @param field
@@ -763,6 +796,7 @@ public class QueryFilter<F> {
         return new QueryFilter<>(new StartsWithImpl<>(field, valueAssertion));
     }
 
+    // @Checkstyle:off
     private static final QueryFilterVisitor<StringBuilder, StringBuilder, Object> TO_STRING_VISITOR =
             new QueryFilterVisitor<StringBuilder, StringBuilder, Object>() {
                 @Override
@@ -775,7 +809,8 @@ public class QueryFilter<F> {
                     return visitCompositeFilter(" or ", builder, subFilters);
                 }
 
-                public StringBuilder visitCompositeFilter(String operation, StringBuilder builder, List<QueryFilter<Object>> subFilters) {
+                public StringBuilder visitCompositeFilter(String operation, StringBuilder builder,
+                        List<QueryFilter<Object>> subFilters) {
                     builder.append('(');
                     boolean first = true;
                     for (QueryFilter<Object> subfilter : subFilters) {
@@ -806,7 +841,8 @@ public class QueryFilter<F> {
                 }
 
                 @Override
-                public StringBuilder visitExtendedMatchFilter(StringBuilder builder, Object field, String operator, Object valueAssertion) {
+                public StringBuilder visitExtendedMatchFilter(StringBuilder builder, Object field, String operator,
+                        Object valueAssertion) {
                     builder.append(field.toString()).append(" ").append(operator).append(" ");
                     if (valueAssertion instanceof Boolean || valueAssertion instanceof Number) {
                         // No need for quotes.
@@ -820,12 +856,14 @@ public class QueryFilter<F> {
                 }
 
                 @Override
-                public StringBuilder visitGreaterThanFilter(StringBuilder builder, Object field, Object valueAssertion) {
+                public StringBuilder visitGreaterThanFilter(StringBuilder builder, Object field,
+                        Object valueAssertion) {
                     return visitExtendedMatchFilter(builder, field, "gt", valueAssertion);
                 }
 
                 @Override
-                public StringBuilder visitGreaterThanOrEqualToFilter(StringBuilder builder, Object field, Object valueAssertion) {
+                public StringBuilder visitGreaterThanOrEqualToFilter(StringBuilder builder, Object field,
+                        Object valueAssertion) {
                     return visitExtendedMatchFilter(builder, field, "ge", valueAssertion);
                 }
 
@@ -835,7 +873,8 @@ public class QueryFilter<F> {
                 }
 
                 @Override
-                public StringBuilder visitLessThanOrEqualToFilter(StringBuilder builder, Object field, Object valueAssertion) {
+                public StringBuilder visitLessThanOrEqualToFilter(StringBuilder builder, Object field,
+                        Object valueAssertion) {
                     return visitExtendedMatchFilter(builder, field, "le", valueAssertion);
                 }
 
@@ -856,20 +895,33 @@ public class QueryFilter<F> {
                     return builder.append(field.toString()).append(" pr");
                 }
             };
+    // @Checkstyle:on
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static final QueryFilter ALWAYS_FALSE = new QueryFilter(new BooleanLiteralImpl(false));
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static final QueryFilter ALWAYS_TRUE = new QueryFilter(new BooleanLiteralImpl(true));
 
+    /** the filter implementation. */
     protected final Impl<F> pimpl;
     private final QueryFilterVisitor<StringBuilder, StringBuilder, F> toStringVisitor;
 
+    /**
+     * Construct a QueryFilter from a base filter implementation.
+     *
+     * @param pimpl the filter implementation.
+     */
     @SuppressWarnings("unchecked")
     protected QueryFilter(final Impl<F> pimpl) {
         this(pimpl, (QueryFilterVisitor<StringBuilder, StringBuilder, F>) TO_STRING_VISITOR);
     }
 
+    /**
+     * Construct a QueryFilter from a base filter implementation and a custom toString implementation.
+     *
+     * @param pimpl the filter implemntation.
+     * @param toStringVisitor the visitor to provide a toString implementation.
+     */
     protected QueryFilter(final Impl<F> pimpl, QueryFilterVisitor<StringBuilder, StringBuilder, F> toStringVisitor) {
         this.pimpl = pimpl;
         this.toStringVisitor = toStringVisitor;
