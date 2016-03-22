@@ -98,7 +98,7 @@ update      | [Update](#Update)           |            | The update operation de
 delete      | [Delete](#Delete)           |            | The delete operation description, if supported
 patch       | [Patch](#Patch)             |            | The patch operation description, if supported
 actions     | [Action](#Action)[]         |            | The action operation descriptions, if supported
-queries     | [Query](#Query)[]           |            | The query operation descriptions, if supported
+queries     | [Query](#Query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
 
 ### Context
 
@@ -321,6 +321,8 @@ response    | [Schema](#Schema)           | ✓          | The schema of the res
 
 Search or list the resources contained within a resource container. Extends [Operation](#Operation).
 
+Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
+
 #### Properties
 
 Key         | Type                        | Required?  | Description
@@ -332,6 +334,27 @@ queryId     | String                      | `type:ID`  | Required if `type` is `
 queryableFields | String[]                | `type:FILTER` | Required if `type` is `FILTER`. Lists the fields in the `resourceSchema` that can be queried. A value of “*” can be used to state that all fields can be queried.
 supportedSortKeys | String[]              |            | The keys that may be used to sort the filter results. A value of “*” can be used to state that all keys are supported.
 description | String                      |            | Describes this query.
+
+The following example shows a resource that supports all three types of query:
+
+```
+"paths": {
+  "/openidm/managed/user": {
+    "queries": [{
+      "type": "EXPRESSION",
+      "description": "Return the results of a SQL query. For example, `_queryExpression=select+%2A+from+managed_user`"
+    }, {
+      "type": "FILTER",
+      "description": "Return resources matching the filter. TODO get explanation of query filters from Javadoc.",
+      "queryableFields": ["*"]
+    }, {
+      "type": "ID",
+      "queryId": "query-all-ids"
+      "description": "Return all resources.",
+    }]
+  }
+}
+```
 
 ### Schema
 
