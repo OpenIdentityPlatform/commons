@@ -46,11 +46,11 @@ public enum ShutdownPriority {
     LOWEST(1);
 
     private int priority;
-    
+
     private ShutdownPriority(int priority) {
         this.priority = priority;
     }
-    
+
     /**
      * Returns the priority.
      *
@@ -59,7 +59,7 @@ public enum ShutdownPriority {
     public int getIntValue() {
         return priority;
     }
-    
+
     /**
      * Returns list of all the priorities (ordered from the highest to the
      * lowest priority) defined in the system.
@@ -69,4 +69,4 @@ public enum ShutdownPriority {
     public static List<ShutdownPriority> getPriorities() {
         return Arrays.asList(values());
     }
-} 
+}

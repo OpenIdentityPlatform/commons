@@ -46,7 +46,7 @@ public class PromiseContractTest {
     private static final RuntimeException PROMISE_RUNTIME_EXCEPTION = new RuntimeException("Boom");
 
     @Test(dataProvider = "completedPromisesWithResult")
-    public void completedPromiseWithResultWithListenerThrowingRuntimeException(String label, 
+    public void completedPromiseWithResultWithListenerThrowingRuntimeException(String label,
             Promise<String, Exception> promise) throws Exception {
         promise.thenOnResult(onResultThrowingRuntimeException(label));
 
