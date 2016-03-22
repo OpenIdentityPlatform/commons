@@ -18,7 +18,7 @@ package com.forgerock.api.beans;
 import org.forgerock.util.Reject;
 
 /**
- * Class that represents the Context type in API descriptor
+ * Class that represents the Context type in API descriptor.
  *
  */
 public class Context {

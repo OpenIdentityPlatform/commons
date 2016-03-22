@@ -21,7 +21,7 @@ import org.forgerock.util.Reject;
 import java.util.Map;
 
 /**
- * Class that represents the Schema type in API descriptor
+ * Class that represents the Schema type in API descriptor.
  *
  */
 public class Schema {

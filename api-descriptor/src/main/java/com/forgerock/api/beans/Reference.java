@@ -16,7 +16,7 @@
 package com.forgerock.api.beans;
 
 /**
- * Class that represents the Reference type in API descriptor
+ * Class that represents the Reference type in API descriptor.
  */
 public class Reference {
 

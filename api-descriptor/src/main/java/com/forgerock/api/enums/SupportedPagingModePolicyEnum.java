@@ -16,7 +16,7 @@
 package com.forgerock.api.enums;
 
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Query} supported paging mode
+ * Enum that represents the {@link com.forgerock.api.beans.Query} supported paging mode.
  */
 public enum SupportedPagingModePolicyEnum {
    NONE, ESTIMATE, EXACT;

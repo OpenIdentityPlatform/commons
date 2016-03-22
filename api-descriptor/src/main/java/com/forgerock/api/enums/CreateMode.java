@@ -19,6 +19,6 @@ package com.forgerock.api.enums;
  * Enum that represents the {@link com.forgerock.api.beans.Create} modes.
  *
  */
-public enum CreateModeEnum {
+public enum CreateMode {
     ID_FROM_SERVER, DYNAMIC_ID_FROM_SERVER, STATIC_ID_FROM_SERVER;
 }

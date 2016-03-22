@@ -16,7 +16,7 @@
 package com.forgerock.api.beans;
 
 /**
- * Class that represents the Resource type in API descriptor
+ * Class that represents the Resource type in API descriptor.
  */
 public class Resource {
     private final Schema resourceSchema;

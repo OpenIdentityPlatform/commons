@@ -13,11 +13,8 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-package com.forgerock.api.enums;
 
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Query} paging mode.
+ * API descriptor enums.
  */
-public enum PagingModeEnum {
-   COOKIE, OFFSET, NOT_SUPPORTED;
-}
+package com.forgerock.api.enums;

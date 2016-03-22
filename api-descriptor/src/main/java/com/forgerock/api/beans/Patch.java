@@ -18,7 +18,7 @@ package com.forgerock.api.beans;
 import org.forgerock.util.Reject;
 
 /**
- * Class that represents the Patch operation type in API descriptor
+ * Class that represents the Patch operation type in API descriptor.
  *
  */
 public class Patch extends Operation{

@@ -16,7 +16,7 @@
 package com.forgerock.api.beans;
 
 /**
- * Class that represents the Action operation type in API descriptor
+ * Class that represents the Action operation type in API descriptor.
  *
  */
 public class Action extends Operation{

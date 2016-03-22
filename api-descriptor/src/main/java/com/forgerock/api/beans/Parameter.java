@@ -19,7 +19,7 @@ import com.forgerock.api.enums.ParameterSource;
 import org.forgerock.util.Reject;
 
 /**
- * Class that represents the Parameter type in API descriptor
+ * Class that represents the Parameter type in API descriptor.
  *
  */
 public class Parameter {

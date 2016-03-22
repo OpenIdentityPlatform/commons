@@ -20,7 +20,7 @@ import com.forgerock.api.enums.QueryTypeEnum;
 import com.forgerock.api.enums.SupportedPagingModePolicyEnum;
 
 /**
- * Class that represents the Create Operation type in API descriptor
+ * Class that represents the Create Operation type in API descriptor.
  *
  */
 public class Query extends Operation{

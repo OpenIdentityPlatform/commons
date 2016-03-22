@@ -15,16 +15,16 @@
  */
 package com.forgerock.api.beans;
 
-import com.forgerock.api.enums.CreateModeEnum;
+import com.forgerock.api.enums.CreateMode;
 import org.forgerock.util.Reject;
 
 /**
- * Class that represents the Create Operation type in API descriptor
+ * Class that represents the Create Operation type in API descriptor.
  *
  */
 public class Create extends Operation{
 
-    private final CreateModeEnum mode;
+    private final CreateMode mode;
     private final Boolean mvccSupported;
 
     /**
@@ -42,7 +42,7 @@ public class Create extends Operation{
      * Getter of the mode
      * @return Mode
      */
-    public CreateModeEnum getMode() {
+    public CreateMode getMode() {
         return mode;
     }
 
@@ -64,7 +64,7 @@ public class Create extends Operation{
 
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private CreateModeEnum mode;
+        private CreateMode mode;
         private Boolean mvccSupported;
 
         @Override
@@ -77,7 +77,7 @@ public class Create extends Operation{
          * @param mode
          * @return Builder
          */
-        public Builder withMode(CreateModeEnum mode) {
+        public Builder withMode(CreateMode mode) {
             this.mode = mode;
             return this;
         }
