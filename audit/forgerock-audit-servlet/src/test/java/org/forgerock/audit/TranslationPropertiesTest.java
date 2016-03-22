@@ -28,6 +28,7 @@ import java.util.Set;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandlerConfiguration;
+import org.forgerock.audit.handlers.jms.JmsAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeMethod;
@@ -80,6 +81,12 @@ public class TranslationPropertiesTest {
     public void translationsExistForAllElasticsearchAuditEventHandlerConfigurationProperties() throws Exception {
         assertThat(translationKeys).containsAll(
                 propertyTranslationKeysOf(jsonSchemaForPojo(ElasticsearchAuditEventHandlerConfiguration.class)));
+    }
+
+    @Test
+    public void translationsExistForAllJmsAuditEventHandlerConfigurationProperties() throws Exception {
+        assertThat(translationKeys).containsAll(
+                propertyTranslationKeysOf(jsonSchemaForPojo(JmsAuditEventHandlerConfiguration.class)));
     }
 
     private Properties loadTranslations() throws IOException {
