@@ -20,66 +20,39 @@ package com.forgerock.api.beans;
  */
 public class Reference {
 
-    private final Resource[] resources;
-    private final VersionedPath versionedPath;
+    private final String reference;
 
     private Reference(Builder builder){
-        this.resources = builder.resources;
-        this.versionedPath = builder.versionedPath;
+        this.reference = builder.reference;
     }
 
     /**
-     * Getter of the resources
-     * @return resources
+     * Getter of the JSON reference
+     * @return reference
      */
-    public Resource[] getResources() {
-        return resources;
+    public String getReference() {
+        return reference;
     }
 
     /**
-     * Getter of the versionedPath
-     * @return VersionedPath
-     */
-    public VersionedPath getVersionedPath() {
-        return versionedPath;
-    }
-
-    /**
-     * Create a new Builder for Reference with the resources parameter
-     *
+     * Create a new Builder for Reference with the JSON ref parameter
+     * @param reference JSON reference
      * @return Builder
      */
-    public static Builder newBuilder(Resource... resources) {
-        return new Builder(resources);
+    public static Builder reference(String reference) {
+        return new Builder(reference);
     }
-
-    /**
-     * Create a new Builder for Reference with versionedPath parameter
-     *
-     * @return Builder
-     */
-    public static Builder newBuilder(VersionedPath versionedPath) {
-        return new Builder(versionedPath);
-    }
-
 
     public static class Builder {
 
-        private Resource[] resources;
+        private String reference;
         private VersionedPath versionedPath;
 
         /**
          * Private default constructor with the mandatory field
          */
-        private Builder(Resource... resources) {
-            this.resources = resources;
-        }
-
-        /**
-         * Private default constructor with the mandatory field
-         */
-        private Builder(VersionedPath versionedPath) {
-            this.versionedPath = versionedPath;
+        private Builder(String reference) {
+            this.reference = reference;
         }
 
         /**

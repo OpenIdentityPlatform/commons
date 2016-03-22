@@ -15,9 +15,9 @@
  */
 package com.forgerock.api.beans;
 
-import com.forgerock.api.enums.PagingModeEnum;
-import com.forgerock.api.enums.QueryTypeEnum;
-import com.forgerock.api.enums.SupportedPagingModePolicyEnum;
+import com.forgerock.api.enums.PagingMode;
+import com.forgerock.api.enums.QueryType;
+import com.forgerock.api.enums.SupportedPagingModePolicy;
 
 /**
  * Class that represents the Create Operation type in API descriptor.
@@ -25,9 +25,9 @@ import com.forgerock.api.enums.SupportedPagingModePolicyEnum;
  */
 public class Query extends Operation{
 
-    private final QueryTypeEnum queryType;
-    private final PagingModeEnum pagingMode;
-    private final SupportedPagingModePolicyEnum[] supportedPagingModePolicies;
+    private final QueryType queryType;
+    private final PagingMode pagingMode;
+    private final SupportedPagingModePolicy[] supportedPagingModePolicies;
     private final String queryId;
     private final String[] queryableFields;
     private final String description;
@@ -53,7 +53,7 @@ public class Query extends Operation{
      * Getter of the query type
      * @return Query type num
      */
-    public QueryTypeEnum getQueryType() {
+    public QueryType getQueryType() {
         return queryType;
     }
 
@@ -61,7 +61,7 @@ public class Query extends Operation{
      * Getter of the paging mode
      * @return Paging mode enum
      */
-    public PagingModeEnum getPagingMode() {
+    public PagingMode getPagingMode() {
         return pagingMode;
     }
 
@@ -69,7 +69,7 @@ public class Query extends Operation{
      * Getter of the supported paging policies
      * @return Supported paging policy enums
      */
-    public SupportedPagingModePolicyEnum[] getSupportedPagingModePolicies() {
+    public SupportedPagingModePolicy[] getSupportedPagingModePolicies() {
         return supportedPagingModePolicies;
     }
 
@@ -109,15 +109,24 @@ public class Query extends Operation{
      * Creates a new builder for Query
      * @return New builder instance
      */
-    public static final Builder newBuilder() {
+    public static final Builder query() {
         return new Builder();
+    }
+
+    /**
+     * Allocates the Query operation type to the given Resource Builder.
+     * @param resourceBuilder - Resource Builder to add the operation
+     */
+    @Override
+    protected void allocateToResource(Resource.Builder resourceBuilder) {
+        resourceBuilder.query(this);
     }
 
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private QueryTypeEnum queryType;
-        private PagingModeEnum pagingMode;
-        private SupportedPagingModePolicyEnum[] supportedPagingModePolicies;
+        private QueryType queryType;
+        private PagingMode pagingMode;
+        private SupportedPagingModePolicy[] supportedPagingModePolicies;
         private String queryId;
         private String[] queryableFields;
         private String description;
@@ -133,7 +142,7 @@ public class Query extends Operation{
          * @param queryType
          * @return Builder
          */
-        public Builder withQueryType(QueryTypeEnum queryType) {
+        public Builder queryType(QueryType queryType) {
             this.queryType = queryType;
             return this;
         }
@@ -143,7 +152,7 @@ public class Query extends Operation{
          * @param pagingMode
          * @return Builder
          */
-        public Builder withPagingMode(PagingModeEnum pagingMode) {
+        public Builder pagingMode(PagingMode pagingMode) {
             this.pagingMode = pagingMode;
             return this;
         }
@@ -153,7 +162,7 @@ public class Query extends Operation{
          * @param supportedPagingModePolicies
          * @return Builder
          */
-        public Builder withSupportedPagingModePolicies(SupportedPagingModePolicyEnum[] supportedPagingModePolicies) {
+        public Builder supportedPagingModePolicies(SupportedPagingModePolicy[] supportedPagingModePolicies) {
             this.supportedPagingModePolicies = supportedPagingModePolicies;
             return this;
         }
@@ -163,7 +172,7 @@ public class Query extends Operation{
          * @param queryId
          * @return Builder
          */
-        public Builder withQueryId(String queryId) {
+        public Builder queryId(String queryId) {
             this.queryId = queryId;
             return this;
         }
@@ -173,7 +182,7 @@ public class Query extends Operation{
          * @param queryableFields
          * @return Builder
          */
-        public Builder withQueryableFields(String[] queryableFields) {
+        public Builder queryableFields(String[] queryableFields) {
             this.queryableFields = queryableFields;
             return this;
         }
@@ -183,7 +192,7 @@ public class Query extends Operation{
          * @param description
          * @return Builder
          */
-        public Builder withDescription(String description) {
+        public Builder description(String description) {
             this.description = description;
             return this;
         }
@@ -193,7 +202,7 @@ public class Query extends Operation{
          * @param supportedSortKeys
          * @return Builder
          */
-        public Builder withSupportedSortKeys(String[] supportedSortKeys) {
+        public Builder supportedSortKeys(String[] supportedSortKeys) {
             this.supportedSortKeys = supportedSortKeys;
             return this;
         }

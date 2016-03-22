@@ -19,7 +19,7 @@ package com.forgerock.api.beans;
  * Class that represents the Error type in API descriptor.
  *
  */
-public class Error {
+public final class Error {
 
     private final String name;
     private final String description;
@@ -27,7 +27,7 @@ public class Error {
     private final Schema schema;
 
     /**
-     * Private constructor called by the builder build method
+     * Private constructor called by the builder build method.
      * @param builder
      */
     private Error(Builder builder) {
@@ -38,7 +38,7 @@ public class Error {
     }
 
     /**
-     * Getter of the error name
+     * Getter of the error name.
      * @return Name
      */
     public String getName() {
@@ -46,7 +46,7 @@ public class Error {
     }
 
     /**
-     * Getter of the error description
+     * Getter of the error description.
      * @return Description
      */
     public String getDescription() {
@@ -54,15 +54,15 @@ public class Error {
     }
 
     /**
-     * Getter of the error code
-     * @return - Code
+     * Getter of the error code.
+     * @return Code
      */
     public Integer getCode() {
         return code;
     }
 
     /**
-     * Getter of the error schema
+     * Getter of the error schema.
      * @return Schema
      */
     public Schema getSchema() {
@@ -70,15 +70,18 @@ public class Error {
     }
 
     /**
-     * New error builder with the mandatory parameters
+     * New error builder with the mandatory parameters.
      * @param name Error name
      * @param code Error code
      * @return Builder
      */
-    public static Builder newBuilder(String name, Integer code) {
+    public static Builder error(String name, Integer code) {
         return new Builder(name, code);
     }
 
+    /**
+     * Builder for the Error.
+     */
     public static final class Builder {
 
         private String name;
@@ -87,7 +90,7 @@ public class Error {
         private Schema schema;
 
         /**
-         * Error builder instance with the 2 mandatory parameters
+         * Error builder instance with the 2 mandatory parameters.
          * @param name - Error name
          * @param code - Error code
          */
@@ -97,27 +100,27 @@ public class Error {
         }
 
         /**
-         * Set the error description
-         * @param description
+         * Set the error description.
+         * @param description Error description
          * @return Builder
          */
-        public Builder withDescription(String description) {
+        public Builder description(String description) {
             this.description = description;
             return this;
         }
 
         /**
-         * Set the schema
-         * @param schema
+         * Set the schema.
+         * @param schema Error schema
          * @return Builder
          */
-        public Builder withSchema(Schema schema) {
+        public Builder schema(Schema schema) {
             this.schema = schema;
             return this;
         }
 
         /**
-         * Builds the Error
+         * Builds the Error.
          * @return Error instance
          */
         public Error build() {

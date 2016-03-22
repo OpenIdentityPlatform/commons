@@ -16,7 +16,6 @@
 package com.forgerock.api.beans;
 
 import com.forgerock.api.enums.ParameterSource;
-import org.forgerock.util.Reject;
 
 /**
  * Class that represents the Parameter type in API descriptor.
@@ -29,7 +28,7 @@ public class Parameter {
     private final String defaultValue; //Todo String?
     private final String description;
     private final ParameterSource parameterSource;
-    private final Boolean required;
+    private final boolean required;
 
     /**
      * Private Parameter constructor called by the builder
@@ -88,7 +87,7 @@ public class Parameter {
      * Getter of the required property
      * @return Required
      */
-    public Boolean isRequired() {
+    public boolean isRequired() {
         return required;
     }
 
@@ -98,7 +97,7 @@ public class Parameter {
      * @param type - Parameter type
      * @return Builder
      */
-    public static Builder newBuilder(String name, String type) {
+    public static Builder parameter(String name, String type) {
         return new Builder(name, type);
     }
 
@@ -112,7 +111,7 @@ public class Parameter {
         private String defaultValue;
         private String description;
         private ParameterSource parameterSource;
-        private Boolean required;
+        private boolean required;
 
         /**
          * Default builder contstructor with 2 mandatory parameters
@@ -129,7 +128,7 @@ public class Parameter {
          * @param defaultValue
          * @return builder
          */
-        public Builder withDefaultValue(String defaultValue) {
+        public Builder defaultValue(String defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
@@ -139,7 +138,7 @@ public class Parameter {
          * @param description
          * @return builder
          */
-        public Builder withDescription(String description) {
+        public Builder description(String description) {
             this.description = description;
             return this;
         }
@@ -149,7 +148,7 @@ public class Parameter {
          * @param parameterSource
          * @return builder
          */
-        public Builder withParameterSourceEnum(ParameterSource parameterSource) {
+        public Builder parameterSourceEnum(ParameterSource parameterSource) {
             this.parameterSource = parameterSource;
             return this;
         }
@@ -159,8 +158,7 @@ public class Parameter {
          * @param required
          * @return builder
          */
-        public Builder withRequired(Boolean required) {
-            Reject.ifNull(required);
+        public Builder required(boolean required) {
             this.required = required;
             return this;
         }

@@ -19,7 +19,7 @@ package com.forgerock.api.enums;
  * Enum that represents the {@link com.forgerock.api.beans.Schema} write policies.
  *
  */
-public enum WritePolicyEnum {
+public enum WritePolicy {
     /**the property MAY be set in the create request, but not thereafter*/
     WRITE_ON_CREATE,
     /**the property MAY be set only if the current value is NULL*/

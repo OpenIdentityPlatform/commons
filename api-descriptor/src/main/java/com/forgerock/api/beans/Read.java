@@ -34,8 +34,17 @@ public class Read extends Operation{
      * Creates a new builder for Operation
      * @return New builder instance
      */
-    public static final Builder newBuilder() {
+    public static final Builder read() {
         return new Builder();
+    }
+
+    /**
+     * Allocates the Read operation type to the given Resource Builder.
+     * @param resourceBuilder - Resource Builder to add the operation
+     */
+    @Override
+    protected void allocateToResource(Resource.Builder resourceBuilder) {
+        resourceBuilder.read(this);
     }
 
     public static final class Builder extends Operation.Builder<Builder> {

@@ -16,8 +16,8 @@
 package com.forgerock.api.enums;
 
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Query} type.
+ * Enum that represents the {@link com.forgerock.api.beans.Query} paging mode.
  */
-public enum QueryTypeEnum {
-   ID, FILTER, EXPRESSION;
+public enum PagingMode {
+   COOKIE, OFFSET, NOT_SUPPORTED;
 }

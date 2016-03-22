@@ -21,6 +21,8 @@ package com.forgerock.api.beans;
  */
 public class Update extends Operation{
 
+    private final boolean mvccSupported;
+
     /**
      * Protected contstructor of the Operation
      *
@@ -28,17 +30,39 @@ public class Update extends Operation{
      */
     private Update(Builder builder) {
         super(builder);
+        this.mvccSupported = builder.mvccSupported;
     }
 
     /**
      * Creates a new builder for Operation
+     * @param mvccSupported Multiversion concurrency control supported
      * @return New builder instance
      */
-    public static final Builder newBuilder() {
-        return new Builder();
+    public static final Builder update(boolean mvccSupported) {
+        return new Builder(mvccSupported);
+    }
+
+    /**
+     * Allocates the Update operation type to the given Resource Builder.
+     * @param resourceBuilder - Resource Builder to add the operation
+     */
+    @Override
+    protected void allocateToResource(Resource.Builder resourceBuilder) {
+        resourceBuilder.update(this);
     }
 
     public static final class Builder extends Operation.Builder<Builder> {
+
+        private boolean mvccSupported;
+
+        /**
+         * Private constructor with the required parameter
+         * @param mvccSupported Multiversion concurrency control supported
+         */
+        private Builder(boolean mvccSupported) {
+            super();
+            this.mvccSupported = mvccSupported;
+        }
 
         @Override
         protected Builder self() {

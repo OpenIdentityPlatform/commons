@@ -16,19 +16,18 @@
 package com.forgerock.api.beans;
 
 import com.forgerock.api.enums.CreateMode;
-import org.forgerock.util.Reject;
 
 /**
  * Class that represents the Create Operation type in API descriptor.
  *
  */
-public class Create extends Operation{
+public final class Create extends Operation {
 
     private final CreateMode mode;
-    private final Boolean mvccSupported;
+    private final boolean mvccSupported;
 
     /**
-     * Protected contstructor of the Create
+     * Protected contstructor of the Create.
      *
      * @param builder Operation Builder
      */
@@ -39,7 +38,7 @@ public class Create extends Operation{
     }
 
     /**
-     * Getter of the mode
+     * Getter of the mode.
      * @return Mode
      */
     public CreateMode getMode() {
@@ -47,54 +46,62 @@ public class Create extends Operation{
     }
 
     /**
-     * Getter of mvcc supported
+     * Getter of mvcc supported.
      * @return true if mvcc is supported
      */
-    public Boolean getMvccSupported() {
+    public boolean getMvccSupported() {
         return mvccSupported;
     }
 
     /**
-     * Creates a new builder for Create
+     * Creates a new builder for Create.
+     * @param mode Create mode
+     * @param mvccSupported Multiversion concurrency control supported
      * @return New builder instance
      */
-    public static final Builder newBuilder() {
-        return new Builder();
+    public static final Builder create(CreateMode mode, boolean mvccSupported) {
+        return new Builder(mode, mvccSupported);
     }
 
+    /**
+     * Allocates the Create operation type to the given Resource Builder.
+     * @param resourceBuilder - Resource Builder to add the operation
+     */
+    @Override
+    protected void allocateToResource(Resource.Builder resourceBuilder) {
+        resourceBuilder.create(this);
+    }
+
+    /**
+     * Builder for the Create.
+     */
     public static final class Builder extends Operation.Builder<Builder> {
 
         private CreateMode mode;
-        private Boolean mvccSupported;
+        private boolean mvccSupported;
 
+        /**
+         * Private constructor with the required parameter.
+         * @param mode Create mode
+         * @param mvccSupported Multiversion concurrency control supported
+         */
+        private Builder(CreateMode mode, boolean mvccSupported) {
+            super();
+            this.mode = mode;
+            this.mvccSupported = mvccSupported;
+        }
+
+        /**
+         * Returns the builder so this.
+         * @return this
+         */
         @Override
         protected Builder self() {
             return this;
         }
 
         /**
-         * Set the mode
-         * @param mode
-         * @return Builder
-         */
-        public Builder withMode(CreateMode mode) {
-            this.mode = mode;
-            return this;
-        }
-
-        /**
-         * Set the if mvccSupported
-         * @param mvccSupported
-         * @return Builder
-         */
-        public Builder withMvccSupported(Boolean mvccSupported) {
-            Reject.ifNull(mvccSupported);
-            this.mvccSupported = mvccSupported;
-            return this;
-        }
-
-        /**
-         * Builds the Create instace
+         * Builds the Create instace.
          *
          * @return Create instace
          */

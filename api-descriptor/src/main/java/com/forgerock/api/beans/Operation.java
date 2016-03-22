@@ -15,32 +15,34 @@
  */
 package com.forgerock.api.beans;
 
+import java.util.List;
+
 /**
  * Class that represents the Operation type in API descriptor.
  *
  */
-public class Operation {
+public abstract class Operation {
 
     private final Context supportedContext;
-    private final String[] supportedLocals;
+    private final String[] supportedLocales;
     private final String[] fields;
-    private final Error[] errors;
+    private final List<Error> errors;
     private final Parameter[] parameters;
 
     /**
-     * Protected contstructor of the Operation
+     * Protected contstructor of the Operation.
      * @param builder Operation Builder
      */
     protected Operation(Builder builder) {
         this.supportedContext = builder.supportedContext;
-        this.supportedLocals = builder.supportedLocals;
+        this.supportedLocales = builder.supportedLocales;
         this.fields = builder.fields;
         this.errors = builder.errors;
         this.parameters = builder.parameters;
     }
 
     /**
-     * Getter of the supported context
+     * Getter of the supported context.
      * @return Supported context
      */
     public Context getSupportedContext() {
@@ -48,15 +50,15 @@ public class Operation {
     }
 
     /**
-     * Getter of the supported locals array
-     * @return Supported locals
+     * Getter of the supported locales array.
+     * @return Supported locales
      */
-    public String[] getSupportedLocals() {
-        return supportedLocals;
+    public String[] getSupportedLocales() {
+        return supportedLocales;
     }
 
     /**
-     * Getter of the fields array
+     * Getter of the fields array.
      * @return Fields
      */
     public String[] getFields() {
@@ -64,15 +66,15 @@ public class Operation {
     }
 
     /**
-     * Getter of the errors array
+     * Getter of the errors array.
      * @return Errors
      */
-    public Error[] getErrors() {
+    public List<Error> getErrors() {
         return errors;
     }
 
     /**
-     * Getter of the parameters array
+     * Getter of the parameters array.
      * @return Parameters
      */
     public Parameter[] getParameters() {
@@ -80,14 +82,21 @@ public class Operation {
     }
 
     /**
-     * Builder to help construct the Operation
+     * Allocates the operation by operation type to the given Resource Builder
+     * by calling the corresonding method by type.
+     * @param resourceBuilder - Resource Builder to add the operation
+     */
+    protected abstract void allocateToResource(Resource.Builder resourceBuilder);
+
+    /**
+     * Builder to help construct the Operation.
      */
     public abstract static class Builder<T extends Builder<T>> {
 
         private Context supportedContext;
-        private String[] supportedLocals;
+        private String[] supportedLocales;
         private String[] fields;
-        private Error[] errors;
+        private List<Error> errors;
         private Parameter[] parameters;
 
         protected Builder() {
@@ -97,55 +106,54 @@ public class Operation {
         protected abstract T self();
 
         /**
-         * Set the supported context
-         * @param supportedContext
+         * Set the supported context.
+         * @param supportedContext The supported contexts
          * @return Builder
          */
-        public Builder withSupportedContext(Context supportedContext) {
+        public T supportedContext(Context supportedContext) {
             this.supportedContext = supportedContext;
             return self();
         }
 
         /**
-         * Set the supported context
-         * @param supportedLocals
+         * Set the supported context.
+         * @param supportedlocales Locales codes supported by the operation
          * @return Builder
          */
-        public Builder withSupportedLocals(String[] supportedLocals) {
-            this.supportedLocals = supportedLocals;
+        public T supportedLocales(String[] supportedlocales) {
+            this.supportedLocales = supportedlocales;
             return self();
         }
 
         /**
-         * Set the supported context
-         * @param fields
+         * Set the supported context.
+         * @param fields The fields that can be selected for returning in the response payload
          * @return Builder
          */
-        public Builder withFields(String[] fields) {
+        public T fields(String[] fields) {
             this.fields = fields;
             return self();
         }
 
         /**
-         * Set the supported context
-         * @param errors
+         * Set the supported context.
+         * @param errors What errors may be returned by this operation
          * @return Builder
          */
-        public Builder withErrors(Error[] errors) {
+        public T errors(List<Error> errors) {
             this.errors = errors;
             return self();
         }
 
         /**
-         * Set the supported context
-         * @param parameters
+         * Set the supported context.
+         * @param parameters Extra parameters supported by the operation
          * @return Builder
          */
-        public Builder withParameters(Parameter[] parameters) {
+        public T parameters(Parameter[] parameters) {
             this.parameters = parameters;
             return self();
         }
-
 
     }
 

@@ -15,18 +15,16 @@
  */
 package com.forgerock.api.beans;
 
-import org.forgerock.util.Reject;
-
 /**
  * Class that represents the Delete operation type in API descriptor.
  *
  */
-public class Delete extends Operation{
+public final class Delete extends Operation {
 
-    private final Boolean mvccSupported;
+    private final boolean mvccSupported;
 
     /**
-     * Protected contstructor of the Delete
+     * Protected contstructor of the Delete.
      *
      * @param builder Delete Builder
      */
@@ -36,31 +34,43 @@ public class Delete extends Operation{
     }
 
     /**
-     * Getter of the mvcc supported parameter
+     * Getter of the mvcc supported parameter.
      * @return true if mvcc is supported
      */
-    public Boolean getMvccSupported() {
+    public boolean getMvccSupported() {
         return mvccSupported;
     }
 
     /**
-     * Creates a new builder for Delete
+     * Creates a new builder for Delete.
+     * @param mvccSupported Multiversion concurrency control supported
      * @return New builder instance
      */
-    public static final Builder newBuilder(Boolean mvccSupported) {
-        Reject.ifNull(mvccSupported);
+    public static final Builder delete(boolean mvccSupported) {
         return new Builder(mvccSupported);
     }
 
+    /**
+     * Allocates the Delete operation type to the given Resource Builder.
+     * @param resourceBuilder - Resource Builder to add the operation
+     */
+    @Override
+    protected void allocateToResource(Resource.Builder resourceBuilder) {
+        resourceBuilder.delete(this);
+    }
+
+    /**
+     * Builder for the Delete.
+     */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private Boolean mvccSupported;
+        private boolean mvccSupported;
 
         /**
-         * Private constructor with the required parameter
-         * @param mvccSupported
+         * Private constructor with the required parameter.
+         * @param mvccSupported Multiversion concurrency control supported
          */
-        private Builder(Boolean mvccSupported) {
+        private Builder(boolean mvccSupported) {
             super();
             this.mvccSupported = mvccSupported;
         }
@@ -71,7 +81,7 @@ public class Delete extends Operation{
         }
 
         /**
-         * Builds the Delete instace
+         * Builds the Delete instace.
          *
          * @return Delete instace
          */

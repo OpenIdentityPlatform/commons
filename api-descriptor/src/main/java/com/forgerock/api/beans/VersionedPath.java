@@ -21,11 +21,11 @@ package com.forgerock.api.beans;
 public class VersionedPath {
 
     private final String version;
-    private final Resource[] resources;
+    private final Resource resource;
 
     private VersionedPath(Builder builder){
         this.version = builder.version;
-        this.resources = builder.resources;
+        this.resource = builder.resource;
     }
 
     /**
@@ -37,11 +37,11 @@ public class VersionedPath {
     }
 
     /**
-     * Getter of the resources
-     * @return Resources
+     * Getter of the resource
+     * @return Resource
      */
-    public Resource[] getResources() {
-        return resources;
+    public Resource getResource() {
+        return resource;
     }
 
     /**
@@ -49,21 +49,21 @@ public class VersionedPath {
      *
      * @return Builder
      */
-    public static Builder newBuilder(String version, Resource... resources) {
-        return new Builder(version, resources);
+    public static Builder versionedPath(String version, Resource resource) {
+        return new Builder(version, resource);
     }
 
     public static class Builder {
 
         private String version;
-        private Resource[] resources;
+        private Resource resource;
 
         /**
          * Private default constructor with the mandatory fields
          */
-        private Builder(String version, Resource... resources) {
+        private Builder(String version, Resource resource) {
             this.version = version;
-            this.resources = resources;
+            this.resource = resource;
         }
 
         /**

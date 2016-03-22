@@ -15,22 +15,16 @@
  */
 package com.forgerock.api.beans;
 
-import org.forgerock.util.Reject;
-
 /**
  * Class that represents the Context type in API descriptor.
  *
  */
-public class Context {
+public final class Context {
 
     private String name;
     private Schema schema;
-    private Boolean required;
+    private boolean required;
 
-    /**
-     *
-     * @param builder
-     */
     private Context(Builder builder) {
         this.name = builder.name;
         this.schema = builder.schema;
@@ -38,7 +32,7 @@ public class Context {
     }
 
     /**
-     * Getter of the context name
+     * Getter of the context name.
      * @return Name
      */
     public String getName() {
@@ -46,7 +40,7 @@ public class Context {
     }
 
     /**
-     * Getter of the context schema
+     * Getter of the context schema.
      * @return Schema
      */
     public Schema getSchema() {
@@ -54,58 +48,68 @@ public class Context {
     }
 
     /**
-     * Getter of the required parameter
+     * Getter of the required parameter.
      * @return true if required
      */
     public boolean isRequired() {
         return required;
     }
 
-    private static Builder newBuilder() {
+    /**
+     * Creates a new Builder instance for building the Context.
+     * @return New Builder instance
+     */
+    private static Builder context() {
         return new Builder();
     }
 
-    public static class Builder {
+    /**
+     * Context Builder.
+     */
+    public static final class Builder {
         private String name;
         private Schema schema;
-        private Boolean required;
+        private boolean required;
 
         /**
-         * Private default constructor
+         * Private default constructor.
          */
-        protected Builder() {}
+        protected Builder() { }
 
         /**
-         * Set the name
-         * @param name
+         * Set the name.
+         * @param name Context name
          * @return Builder
          */
-        public Builder withName(String name) {
+        public Builder name(String name) {
             this.name = name;
             return this;
         }
 
         /**
-         * Set the Schema
-         * @param schema
+         * Set the Schema.
+         * @param schema Context schema
          * @return Builder
          */
-        public Builder withSchema(Schema schema) {
+        public Builder schema(Schema schema) {
             this.schema = schema;
             return this;
         }
 
         /**
-         * Set if required or not
-         * @param required
+         * Set if required or not.
+         * @param required true if required
          * @return Builder
          */
-        public Builder withRequired(Boolean required) {
-            Reject.ifNull(required);
+        public Builder required(boolean required) {
             this.required = required;
             return this;
         }
 
+        /**
+         * Creates a new Context instance.
+         * @return Context instance
+         */
         public Context build() {
             return new Context(this);
         }

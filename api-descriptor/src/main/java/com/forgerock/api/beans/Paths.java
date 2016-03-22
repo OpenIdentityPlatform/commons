@@ -20,6 +20,7 @@ package com.forgerock.api.beans;
  */
 public class Paths {
 
+    //TODO This should be something like Map<String, Either<VersionedPath, Resource>>. Unfortunately there is no Either class at the moment, but we could add one to forgerock-util.
     private final Resource[] resources;
 
     private Paths(Builder builder){
@@ -39,7 +40,7 @@ public class Paths {
      *
      * @return Builder
      */
-    public static Builder newBuilder(Resource... resources) {
+    public static Builder paths(Resource... resources) {
         return new Builder(resources);
     }
 

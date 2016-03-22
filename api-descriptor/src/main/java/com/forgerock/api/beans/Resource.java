@@ -15,6 +15,11 @@
  */
 package com.forgerock.api.beans;
 
+import org.forgerock.util.Reject;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class that represents the Resource type in API descriptor.
  */
@@ -40,8 +45,8 @@ public class Resource {
         this.update = builder.update;
         this.delete = builder.delete;
         this.patch = builder.patch;
-        this.actions = builder.actions;
-        this.queries = builder.queries;
+        this.actions = builder.actions.toArray(new Action[builder.actions.size()]);
+        this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
         this.deprecatedSince = builder.deprecatedSince;
     }
 
@@ -137,7 +142,7 @@ public class Resource {
      * Create a new Builder for Resoruce
      * @return Builder
      */
-    private static Builder newBuilder() {
+    private static Builder resource() {
         return new Builder();
     }
 
@@ -150,21 +155,24 @@ public class Resource {
         private Update update;
         private Delete delete;
         private Patch patch;
-        private Action[] actions;
-        private Query[] queries;
+        private List<Action> actions;
+        private List<Query> queries;
         private String deprecatedSince;
 
         /**
          * Private default constructor
          */
-        protected Builder() {}
+        protected Builder() {
+            actions = new ArrayList<Action>();
+            queries = new ArrayList<Query>();
+        }
 
         /**
          * Set the resource schema
          * @param resourceSchema
          * @return Builder
          */
-        public Builder withResourceSchema(Schema resourceSchema) {
+        public Builder resourceSchema(Schema resourceSchema) {
             this.resourceSchema = resourceSchema;
             return this;
         }
@@ -174,7 +182,7 @@ public class Resource {
          * @param title
          * @return Builder
          */
-        public Builder withTitle(String title) {
+        public Builder title(String title) {
             this.title = title;
             return this;
         }
@@ -184,7 +192,7 @@ public class Resource {
          * @param description
          * @return Builder
          */
-        public Builder withDescription(String description) {
+        public Builder description(String description) {
             this.description = description;
             return this;
         }
@@ -194,7 +202,7 @@ public class Resource {
          * @param create
          * @return Builder
          */
-        public Builder withCreate(Create create) {
+        public Builder create(Create create) {
             this.create = create;
             return this;
         }
@@ -204,7 +212,7 @@ public class Resource {
          * @param read
          * @return Builder
          */
-        public Builder withRead(Read read) {
+        public Builder read(Read read) {
             this.read = read;
             return this;
         }
@@ -214,7 +222,7 @@ public class Resource {
          * @param update
          * @return Builder
          */
-        public Builder withUpdate(Update update) {
+        public Builder update(Update update) {
             this.update = update;
             return this;
         }
@@ -224,7 +232,7 @@ public class Resource {
          * @param delete
          * @return Builder
          */
-        public Builder withDelete(Delete delete) {
+        public Builder delete(Delete delete) {
             this.delete = delete;
             return this;
         }
@@ -234,7 +242,7 @@ public class Resource {
          * @param patch
          * @return Builder
          */
-        public Builder withPatch(Patch patch) {
+        public Builder patch(Patch patch) {
             this.patch = patch;
             return this;
         }
@@ -244,8 +252,18 @@ public class Resource {
          * @param actions
          * @return Builder
          */
-        public Builder withActions(Action[] actions) {
+        public Builder actions(List<Action> actions) {
             this.actions = actions;
+            return this;
+        }
+
+        /**
+         * Adds one Action to the list of Actions.
+         * @param action Action to be added to the list
+         * @return Builder
+         */
+        public Builder action(Action action) {
+            this.actions.add(action);
             return this;
         }
 
@@ -254,8 +272,18 @@ public class Resource {
          * @param queries
          * @return Builder
          */
-        public Builder withQueries(Query[] queries) {
+        public Builder queries(List<Query> queries) {
             this.queries = queries;
+            return this;
+        }
+
+        /**
+         * Adds one Query to the list of queries.
+         * @param query Query to be added to the list
+         * @return
+         */
+        public Builder query(Query query) {
+            this.queries.add(query);
             return this;
         }
 
@@ -264,8 +292,21 @@ public class Resource {
          * @param deprecatedSince
          * @return Builder
          */
-        public Builder withDeprecatedSince(String deprecatedSince) {
+        public Builder deprecatedSince(String deprecatedSince) {
             this.deprecatedSince = deprecatedSince;
+            return this;
+        }
+
+        /**
+         * Allocates the operations given in the parameter by their type
+         * @param operations One or more Operations
+         * @return Builder
+         */
+        public Builder operations(Operation... operations) {
+            Reject.ifNull(operations);
+            for (Operation operation : operations){
+                operation.allocateToResource(this);
+            }
             return this;
         }
 

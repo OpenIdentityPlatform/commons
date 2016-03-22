@@ -15,8 +15,7 @@
  */
 package com.forgerock.api.beans;
 
-import com.forgerock.api.enums.WritePolicyEnum;
-import org.forgerock.util.Reject;
+import com.forgerock.api.enums.WritePolicy;
 
 import java.util.Map;
 
@@ -29,8 +28,8 @@ public class Schema {
 
     private final Reference reference;
     private final Integer partyOrder;
-    private final WritePolicyEnum writePolicyEnum;
-    private final Boolean errorOnWritePolicyFailure;
+    private final WritePolicy writePolicy;
+    private final boolean errorOnWritePolicyFailure;
     private final Map<String, String> enumKeysValues; //TODO clarify
 
     /**
@@ -41,7 +40,7 @@ public class Schema {
     private Schema (Builder builder) {
         this.reference = builder.reference;
         this.partyOrder = builder.partyOrder;
-        this.writePolicyEnum = builder.writePolicyEnum;
+        this.writePolicy = builder.writePolicy;
         this.errorOnWritePolicyFailure = builder.errorOnWritePolicyFailure;
         this.enumKeysValues = builder.enumKeysValues;
     }
@@ -64,17 +63,17 @@ public class Schema {
 
     /**
      * Getter for write policy
-     * @return WritePolicyEnum
+     * @return WritePolicy
      */
-    public WritePolicyEnum getWritePolicyEnum() {
-        return writePolicyEnum;
+    public WritePolicy getWritePolicy() {
+        return writePolicy;
     }
 
     /**
      * Getter for error on write policy failure flag
      * @return true if the error on write policy is set
      */
-    public Boolean isErrorOnWritePolicyFailure() {
+    public boolean isErrorOnWritePolicyFailure() {
         return errorOnWritePolicyFailure;
     }
 
@@ -91,7 +90,7 @@ public class Schema {
      *
      * @return Builder
      */
-    public static Builder newBuilder(Reference reference) {
+    public static Builder schema(Reference reference) {
         return new Builder(reference);
     }
 
@@ -100,7 +99,7 @@ public class Schema {
      *
      * @return Builder
      */
-    public static Builder newBuilder() {
+    public static Builder schema() {
         return new Builder();
     }
 
@@ -108,8 +107,8 @@ public class Schema {
 
         private Reference reference;
         private Integer partyOrder;
-        private WritePolicyEnum writePolicyEnum;
-        private Boolean errorOnWritePolicyFailure;
+        private WritePolicy writePolicy;
+        private boolean errorOnWritePolicyFailure;
         private Map<String, String> enumKeysValues; //TODO clarify
 
         /**
@@ -129,18 +128,18 @@ public class Schema {
          * @param partyOrder
          * @return Builder
          */
-        public Builder withPartyOrder(Integer partyOrder) {
+        public Builder partyOrder(Integer partyOrder) {
             this.partyOrder = partyOrder;
             return this;
         }
 
         /**
          * Set the write policy
-         * @param writePolicyEnum
-         * @return WritePolicyEnum
+         * @param writePolicy
+         * @return WritePolicy
          */
-        public Builder withWritePolicyEnum(WritePolicyEnum writePolicyEnum) {
-            this.writePolicyEnum = writePolicyEnum;
+        public Builder writePolicyEnum(WritePolicy writePolicy) {
+            this.writePolicy = writePolicy;
             return this;
         }
 
@@ -149,8 +148,7 @@ public class Schema {
          * @param errorOnWritePolicyFailure
          * @return Builder
          */
-        public Builder withErrorOnWritePolicyFailure(Boolean errorOnWritePolicyFailure) {
-            Reject.ifNull(errorOnWritePolicyFailure);
+        public Builder errorOnWritePolicyFailure(boolean errorOnWritePolicyFailure) {
             this.errorOnWritePolicyFailure = errorOnWritePolicyFailure;
             return this;
         }
@@ -160,7 +158,7 @@ public class Schema {
          * @param enumKeysValues
          * @return Builder
          */
-        public Builder withEnumKeysValues(Map<String, String> enumKeysValues) {
+        public Builder enumKeysValues(Map<String, String> enumKeysValues) {
             this.enumKeysValues = enumKeysValues;
             return this;
         }

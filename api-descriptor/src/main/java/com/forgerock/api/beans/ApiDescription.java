@@ -18,30 +18,30 @@ package com.forgerock.api.beans;
 /**
  * Class that represents the ApiDescription type in API descriptor.
  */
-public class ApiDescription {
+public final class ApiDescription {
 
-    private String _id; //TODO fix the type to frURI?
+    private String id; //TODO fix the type to frURI?
     private Schema[] definitions;
     private Paths paths;
     private String[] protocolVersions;
 
-    private ApiDescription(Builder builder){
-        this._id = builder._id;
+    private ApiDescription(Builder builder) {
+        this.id = builder.id;
         this.definitions = builder.definitions;
         this.paths = builder.paths;
         this.protocolVersions = builder.protocolVersions;
     }
 
     /**
-     * Getter of _id
-     * @return _id
+     * Getter of id.
+     * @return id
      */
-    public String get_id() {
-        return _id;
+    public String getId() {
+        return id;
     }
 
     /**
-     * Getter of definitions
+     * Getter of definitions.
      * @return Definition array
      */
     public Schema[] getDefinitions() {
@@ -49,7 +49,7 @@ public class ApiDescription {
     }
 
     /**
-     * Getter of paths
+     * Getter of paths.
      * @return Paths
      */
     public Paths getPaths() {
@@ -57,7 +57,7 @@ public class ApiDescription {
     }
 
     /**
-     * Getter of protocol versions
+     * Getter of protocol versions.
      * @return ProtocolVersion array
      */
     public String[] getProtocolVersions() {
@@ -65,69 +65,72 @@ public class ApiDescription {
     }
 
     /**
-     * Create a new Builder for ApiDescription
+     * Create a new Builder for ApiDescription.
      *
      * @return Builder
      */
-    private static Builder newBuilder() {
+    private static Builder apiDescription() {
         return new Builder();
     }
 
-    public static class Builder {
+    /**
+     * Builder for the ApiDescription.
+     */
+    public static final class Builder {
 
-        private String _id; //TODO fix the type to frURI?
+        private String id; //TODO fix the type to frURI?
         private Schema[] definitions;
         private Paths paths;
         private String[] protocolVersions;
 
         /**
-         * Private default constructor with the mandatory fields
+         * Private default constructor with the mandatory fields.
          */
         private Builder() {
         }
 
         /**
-         * Set the _id
-         * @param _id
+         * Set the id.
+         * @param id ApiDescription id
          * @return Builder
          */
-        public Builder with_id(String _id) {
-            this._id = _id;
+        public Builder id(String id) {
+            this.id = id;
             return this;
         }
 
         /**
-         * Set the definitions
-         * @param definitions
+         * Set the definitions.
+         * @param definitions Definitions or this APIdescription
          * @return Builder
          */
-        public Builder withDefinitions(Schema[] definitions) {
+        public Builder definitions(Schema[] definitions) {
             this.definitions = definitions;
             return this;
         }
 
         /**
-         * Set the paths
-         * @param paths
+         * Set the paths.
+         * @param paths Paths
          * @return Builder
          */
-        public Builder withPaths(Paths paths) {
+        public Builder paths(Paths paths) {
             this.paths = paths;
             return this;
         }
 
         /**
-         * Set the protocol versions
-         * @param protocolVersions
+         * Set the protocol versions.
+         * @param protocolVersions Protocol version
          * @return ProtocolVersions
          */
-        public Builder withProtocolVersions(String[] protocolVersions) {
+        public Builder protocolVersions(String[] protocolVersions) {
             this.protocolVersions = protocolVersions;
             return this;
         }
 
         /**
-         * Builds the ApiDescription instace
+         * Builds the ApiDescription instace.
          *
          * @return ApiDescription instace
          */

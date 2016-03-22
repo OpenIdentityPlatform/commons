@@ -15,15 +15,13 @@
  */
 package com.forgerock.api.beans;
 
-import org.forgerock.util.Reject;
-
 /**
  * Class that represents the Patch operation type in API descriptor.
  *
  */
 public class Patch extends Operation{
 
-    private final Boolean mvccSupported;
+    private final boolean mvccSupported;
 
     /**
      * Protected contstructor of the Patch operation
@@ -39,20 +37,28 @@ public class Patch extends Operation{
      * Creates a new builder for Patch
      * @return New builder instance
      */
-    public static final Builder newBuilder(Boolean mvccSupported) {
-        Reject.ifNull(mvccSupported);
+    public static final Builder patch(boolean mvccSupported) {
         return new Builder(mvccSupported);
+    }
+
+    /**
+     * Allocates the Patch operation type to the given Resource Builder.
+     * @param resourceBuilder - Resource Builder to add the operation
+     */
+    @Override
+    protected void allocateToResource(Resource.Builder resourceBuilder) {
+        resourceBuilder.patch(this);
     }
 
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private Boolean mvccSupported;
+        private boolean mvccSupported;
 
         /**
          * Private constructor with the required parameter
          * @param mvccSupported
          */
-        private Builder(Boolean mvccSupported) {
+        private Builder(boolean mvccSupported) {
             super();
             this.mvccSupported = mvccSupported;
         }
