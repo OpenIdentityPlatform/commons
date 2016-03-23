@@ -1,8 +1,8 @@
 # API DESCRIPTOR
 
-### Description
+Related to https://bugster.forgerock.org/jira/browse/RAPID-5
 
-RAPID-5
+### Description
 
 As both ForgeRock customers and internal developers increasingly favor REST APIs to access the ForgeRock Identity Platform, they all depend on clear descriptions of the API contracts. Today, we maintain descriptions by hand through reverse engineering. We lack ways of ensuring this hand-written documentation is updated when the implementations change, which is an impediment to internal development. Furthermore, our products lack the ability to describe the APIs as they are exposed at runtime in deployment and hence make it harder for community members and customers to use our APIs.
 
