@@ -99,10 +99,17 @@ public abstract class Operation {
         private List<Error> errors;
         private Parameter[] parameters;
 
+        /**
+         * Default protected constructor.
+         */
         protected Builder() {
             //default private constructor
         }
 
+        /**
+         * Abstract method that returns the instantiated Builder itself.
+         * @return Builder
+         */
         protected abstract T self();
 
         /**

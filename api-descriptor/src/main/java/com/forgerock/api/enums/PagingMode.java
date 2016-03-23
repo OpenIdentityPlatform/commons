@@ -19,5 +19,16 @@ package com.forgerock.api.enums;
  * Enum that represents the {@link com.forgerock.api.beans.Query} paging mode.
  */
 public enum PagingMode {
-   COOKIE, OFFSET, NOT_SUPPORTED;
+   /**
+    * Paging mode is supported by cookies.
+    */
+   COOKIE,
+   /**
+    * Paging mode is supported by offset.
+    */
+   OFFSET,
+   /**
+    * Paging mode is not supported.
+    */
+   NOT_SUPPORTED;
 }

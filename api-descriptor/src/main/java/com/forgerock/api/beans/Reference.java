@@ -18,16 +18,16 @@ package com.forgerock.api.beans;
 /**
  * Class that represents the Reference type in API descriptor.
  */
-public class Reference {
+public final class Reference {
 
     private final String reference;
 
-    private Reference(Builder builder){
+    private Reference(Builder builder) {
         this.reference = builder.reference;
     }
 
     /**
-     * Getter of the JSON reference
+     * Getter of the JSON reference.
      * @return reference
      */
     public String getReference() {
@@ -35,7 +35,7 @@ public class Reference {
     }
 
     /**
-     * Create a new Builder for Reference with the JSON ref parameter
+     * Create a new Builder for Reference with the JSON ref parameter.
      * @param reference JSON reference
      * @return Builder
      */
@@ -43,20 +43,24 @@ public class Reference {
         return new Builder(reference);
     }
 
-    public static class Builder {
+    /**
+     * Builder to help construct the Reference.
+     */
+    public static final class Builder {
 
         private String reference;
         private VersionedPath versionedPath;
 
         /**
-         * Private default constructor with the mandatory field
+         * Private default constructor with the mandatory field.
+         * @param reference A JSON Reference to the required object. The URI should be an frURI type, or a URL
          */
         private Builder(String reference) {
             this.reference = reference;
         }
 
         /**
-         * Builds the Reference instace
+         * Builds the Reference instace.
          *
          * @return Reference instace
          */

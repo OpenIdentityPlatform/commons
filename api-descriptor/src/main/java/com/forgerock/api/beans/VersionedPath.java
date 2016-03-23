@@ -27,7 +27,7 @@ import org.forgerock.util.Reject;
 /**
  * Class that represents versioned {@link Resource}s on an API descriptor path.
  */
-public class VersionedPath implements PathNode {
+public final class VersionedPath implements PathNode {
 
     private final Map<String, Resource> paths;
 
@@ -71,7 +71,7 @@ public class VersionedPath implements PathNode {
     }
 
     /**
-     * Create a new Builder for VersionedPath
+     * Create a new Builder for VersionedPath.
      *
      * @return Builder
      */
@@ -79,12 +79,15 @@ public class VersionedPath implements PathNode {
         return new Builder();
     }
 
-    public static class Builder {
+    /**
+     * Builder to help construct the VersionedPath.
+     */
+    public static final class Builder {
 
         private final Map<String, Resource> paths = new HashMap<>();
 
         /**
-         * Private default constructor
+         * Private default constructor.
          */
         private Builder() {
         }
@@ -105,7 +108,7 @@ public class VersionedPath implements PathNode {
         }
 
         /**
-         * Builds the VersionedPath instace
+         * Builds the VersionedPath instace.
          *
          * @return VersionedPath instace
          */

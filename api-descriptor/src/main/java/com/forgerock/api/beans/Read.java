@@ -19,10 +19,10 @@ package com.forgerock.api.beans;
  * Class that represents the Read Operation type in API descriptor.
  *
  */
-public class Read extends Operation{
+public final class Read extends Operation {
 
     /**
-     * Protected contstructor of the Operation
+     * Protected contstructor of the Operation.
      *
      * @param builder Operation Builder
      */
@@ -31,7 +31,7 @@ public class Read extends Operation{
     }
 
     /**
-     * Creates a new builder for Operation
+     * Creates a new builder for Operation.
      * @return New builder instance
      */
     public static final Builder read() {
@@ -47,15 +47,22 @@ public class Read extends Operation{
         resourceBuilder.read(this);
     }
 
+    /**
+     * Builder to help construct the Read.
+     */
     public static final class Builder extends Operation.Builder<Builder> {
 
+        /**
+         * Returns the builder instance.
+         * @return Builder
+         */
         @Override
         protected Builder self() {
             return this;
         }
 
         /**
-         * Builds the Create instace
+         * Builds the Create instace.
          *
          * @return Create instace
          */

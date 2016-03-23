@@ -19,12 +19,12 @@ package com.forgerock.api.beans;
  * Class that represents the Patch operation type in API descriptor.
  *
  */
-public class Patch extends Operation{
+public final class Patch extends Operation {
 
     private final boolean mvccSupported;
 
     /**
-     * Protected contstructor of the Patch operation
+     * Protected contstructor of the Patch operation.
      *
      * @param builder Patch Builder
      */
@@ -34,7 +34,8 @@ public class Patch extends Operation{
     }
 
     /**
-     * Creates a new builder for Patch
+     * Creates a new builder for Patch.
+     * @param mvccSupported Whether this resource supports MVCC
      * @return New builder instance
      */
     public static final Builder patch(boolean mvccSupported) {
@@ -50,13 +51,16 @@ public class Patch extends Operation{
         resourceBuilder.patch(this);
     }
 
+    /**
+     * Builder to help construct the Patch.
+     */
     public static final class Builder extends Operation.Builder<Builder> {
 
         private boolean mvccSupported;
 
         /**
-         * Private constructor with the required parameter
-         * @param mvccSupported
+         * Private constructor with the required parameter.
+         * @param mvccSupported Whether this resource supports MVCC
          */
         private Builder(boolean mvccSupported) {
             super();
@@ -69,7 +73,7 @@ public class Patch extends Operation{
         }
 
         /**
-         * Builds the Patch instace
+         * Builds the Patch instace.
          *
          * @return Patch instace
          */

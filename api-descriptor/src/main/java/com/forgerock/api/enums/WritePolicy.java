@@ -20,10 +20,16 @@ package com.forgerock.api.enums;
  *
  */
 public enum WritePolicy {
-    /**the property MAY be set in the create request, but not thereafter*/
+    /**
+     * The property MAY be set in the create request, but not thereafter.
+     */
     WRITE_ON_CREATE,
-    /**the property MAY be set only if the current value is NULL*/
+    /**
+     * The property MAY be set only if the current value is NULL.
+     */
     WRITE_ONCE,
-    /**the property can be set at any time. This is the default value if no value is specified*/
+    /**
+     * The property can be set at any time. This is the default value if no value is specified
+     */
     WRITABLE;
 }

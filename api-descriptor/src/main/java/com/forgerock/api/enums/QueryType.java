@@ -19,5 +19,16 @@ package com.forgerock.api.enums;
  * Enum that represents the {@link com.forgerock.api.beans.Query} type.
  */
 public enum QueryType {
-   ID, FILTER, EXPRESSION;
+   /**
+    * Query run by ID.
+    */
+   ID,
+   /**
+    * Query by using filter.
+    */
+   FILTER,
+   /**
+    * Query by using expression.
+    */
+   EXPRESSION;
 }

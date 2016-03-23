@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * Class that represents the Resource type in API descriptor.
  */
-public class Resource implements PathNode {
+public final class Resource implements PathNode {
     private final Schema resourceSchema;
     private final String title;
     private final String description;
@@ -49,7 +49,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of resoruce schema
+     * Getter of resoruce schema.
      * @return Resource schema
      */
     public Schema getResourceSchema() {
@@ -57,7 +57,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of title
+     * Getter of title.
      * @return Title
      */
     public String getTitle() {
@@ -65,7 +65,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of description
+     * Getter of description.
      * @return Description
      */
     public String getDescription() {
@@ -73,7 +73,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of Create
+     * Getter of Create.
      * @return Create
      */
     public Create getCreate() {
@@ -81,7 +81,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of Read
+     * Getter of Read.
      * @return Read
      */
     public Read getRead() {
@@ -89,7 +89,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of Update
+     * Getter of Update.
      * @return Update
      */
     public Update getUpdate() {
@@ -97,7 +97,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of Delete
+     * Getter of Delete.
      * @return Delete
      */
     public Delete getDelete() {
@@ -105,7 +105,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of Patch
+     * Getter of Patch.
      * @return Patch
      */
     public Patch getPatch() {
@@ -113,7 +113,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of actions
+     * Getter of actions.
      * @return Actions
      */
     public Action[] getActions() {
@@ -121,7 +121,7 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Getter of queries
+     * Getter of queries.
      * @return Queries
      */
     public Query[] getQueries() {
@@ -129,14 +129,17 @@ public class Resource implements PathNode {
     }
 
     /**
-     * Create a new Builder for Resoruce
+     * Create a new Builder for Resoruce.
      * @return Builder
      */
     public static Builder resource() {
         return new Builder();
     }
 
-    public static class Builder {
+    /**
+     * Builder to help construct the Resource.
+     */
+    public final static class Builder {
         private Schema resourceSchema;
         private String title;
         private String description;
@@ -149,7 +152,7 @@ public class Resource implements PathNode {
         private List<Query> queries;
 
         /**
-         * Private default constructor
+         * Private default constructor.
          */
         protected Builder() {
             actions = new ArrayList<Action>();
@@ -157,8 +160,9 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set the resource schema
-         * @param resourceSchema
+         * Set the resource schema.
+         * @param resourceSchema The schema of the resource for this path.
+         *                       Required when any of create, read, update, delete, patch are supported
          * @return Builder
          */
         public Builder resourceSchema(Schema resourceSchema) {
@@ -167,8 +171,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set the title
-         * @param title
+         * Set the title.
+         * @param title The human-readable name of the endpoint
          * @return Builder
          */
         public Builder title(String title) {
@@ -177,8 +181,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set the description
-         * @param description
+         * Set the description.
+         * @param description A description of the endpoint
          * @return Builder
          */
         public Builder description(String description) {
@@ -187,8 +191,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set create
-         * @param create
+         * Set create.
+         * @param create The create operation description, if supported
          * @return Builder
          */
         public Builder create(Create create) {
@@ -197,8 +201,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set Read
-         * @param read
+         * Set Read.
+         * @param read The read operation description, if supported
          * @return Builder
          */
         public Builder read(Read read) {
@@ -207,8 +211,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set Update
-         * @param update
+         * Set Update.
+         * @param update The update operation description, if supported
          * @return Builder
          */
         public Builder update(Update update) {
@@ -217,8 +221,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set Delete
-         * @param delete
+         * Set Delete.
+         * @param delete The delete operation description, if supported
          * @return Builder
          */
         public Builder delete(Delete delete) {
@@ -227,8 +231,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set Patch
-         * @param patch
+         * Set Patch.
+         * @param patch The patch operation description, if supported
          * @return Builder
          */
         public Builder patch(Patch patch) {
@@ -237,8 +241,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set Actions
-         * @param actions
+         * Set Actions.
+         * @param actions The list of action operation descriptions, if supported
          * @return Builder
          */
         public Builder actions(List<Action> actions) {
@@ -248,7 +252,7 @@ public class Resource implements PathNode {
 
         /**
          * Adds one Action to the list of Actions.
-         * @param action Action to be added to the list
+         * @param action Action operation description to be added to the list
          * @return Builder
          */
         public Builder action(Action action) {
@@ -257,8 +261,8 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Set Queries
-         * @param queries
+         * Set Queries.
+         * @param queries The list or query operation descriptions, if supported
          * @return Builder
          */
         public Builder queries(List<Query> queries) {
@@ -268,8 +272,8 @@ public class Resource implements PathNode {
 
         /**
          * Adds one Query to the list of queries.
-         * @param query Query to be added to the list
-         * @return
+         * @param query Query operation description to be added to the list
+         * @return Builder
          */
         public Builder query(Query query) {
             this.queries.add(query);
@@ -277,20 +281,20 @@ public class Resource implements PathNode {
         }
 
         /**
-         * Allocates the operations given in the parameter by their type
+         * Allocates the operations given in the parameter by their type.
          * @param operations One or more Operations
          * @return Builder
          */
         public Builder operations(Operation... operations) {
             Reject.ifNull(operations);
-            for (Operation operation : operations){
+            for (Operation operation : operations) {
                 operation.allocateToResource(this);
             }
             return this;
         }
 
         /**
-         * Construct a new instance of Resource
+         * Construct a new instance of Resource.
          * @return Resource instance
          */
         public Resource build() {
@@ -298,5 +302,4 @@ public class Resource implements PathNode {
         }
 
     }
-    
 }

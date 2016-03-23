@@ -27,12 +27,12 @@ import org.testng.annotations.Test;
 
 public class ApiDescriptionTest {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper()
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
     @Test(expectedExceptions = ApiValidationException.class)
-    public void testFailedValidation_idMissing() {
+    public void testFailedValidationIdMissing() {
         final Map<String, Error> errors = new HashMap<>();
         errors.put("internalServerError", Error.error("Unexpected error", 500).build());
 
@@ -42,7 +42,7 @@ public class ApiDescriptionTest {
     }
 
     @Test(expectedExceptions = ApiValidationException.class)
-    public void testFailedValidation_minimumRequirements() {
+    public void testFailedValidationMinimumRequirements() {
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .id("frapi:test")
                 .build();
@@ -78,7 +78,7 @@ public class ApiDescriptionTest {
                 .build();
 
         // TODO this JSON output is just for development purposes at the moment
-        System.out.println(objectMapper.writeValueAsString(apiDescription));
+        System.out.println(OBJECT_MAPPER.writeValueAsString(apiDescription));
     }
 
 }

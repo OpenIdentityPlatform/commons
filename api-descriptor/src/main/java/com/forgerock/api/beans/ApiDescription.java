@@ -21,6 +21,7 @@ import com.forgerock.api.ApiValidationException;
 
 /**
  * Class that represents the ApiDescription type in API descriptor.
+ * @param <T> Type extends PathNode
  */
 public final class ApiDescription<T extends PathNode> {
 
@@ -67,6 +68,11 @@ public final class ApiDescription<T extends PathNode> {
         return description;
     }
 
+    /**
+     * Set the description of the ApiDescription.
+     *
+     * @param description Description of the API
+     */
     public void setDescription(String description) {
         this.description = description;
     }

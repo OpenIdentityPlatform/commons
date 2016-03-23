@@ -21,7 +21,7 @@ import com.forgerock.api.enums.ParameterSource;
  * Class that represents the Parameter type in API descriptor.
  *
  */
-public class Parameter {
+public final class Parameter {
 
     private final String name;
     private final String type;
@@ -31,7 +31,7 @@ public class Parameter {
     private final boolean required;
 
     /**
-     * Private Parameter constructor called by the builder
+     * Private Parameter constructor called by the builder.
      * @param builder Builder that holds the values for setting the parameter properties
      */
     private Parameter(Builder builder) {
@@ -44,7 +44,7 @@ public class Parameter {
     }
 
     /**
-     * Getter of the name of the parameter
+     * Getter of the name of the parameter.
      * @return Parameter name
      */
     public String getName() {
@@ -52,7 +52,7 @@ public class Parameter {
     }
 
     /**
-     * Getter of the parameter type
+     * Getter of the parameter type.
      * @return Parameter type
      */
     public String getType() {
@@ -60,7 +60,7 @@ public class Parameter {
     }
 
     /**
-     * Getter of the parameter's default value
+     * Getter of the parameter's default value.
      * @return Parameter default value
      */
     public String getDefaultValue() {
@@ -68,7 +68,7 @@ public class Parameter {
     }
 
     /**
-     * Getter of the parameter description
+     * Getter of the parameter description.
      * @return Parameter description
      */
     public String getDescription() {
@@ -76,7 +76,7 @@ public class Parameter {
     }
 
     /**
-     * Getter of the parameter source
+     * Getter of the parameter source.
      * @return Parameter source enum
      */
     public ParameterSource getParameterSource() {
@@ -84,7 +84,7 @@ public class Parameter {
     }
 
     /**
-     * Getter of the required property
+     * Getter of the required property.
      * @return Required
      */
     public boolean isRequired() {
@@ -92,9 +92,9 @@ public class Parameter {
     }
 
     /**
-     * New parameter builder
-     * @param name - Parameter name
-     * @param type - Parameter type
+     * New parameter builder.
+     * @param name - The name of the parameter
+     * @param type - The type of the parameter: string, number, boolean, enum, and array variants
      * @return Builder
      */
     public static Builder parameter(String name, String type) {
@@ -102,7 +102,7 @@ public class Parameter {
     }
 
     /**
-     * Builder to construct Parameter object
+     * Builder to construct Parameter object.
      */
     public static final class Builder {
 
@@ -114,9 +114,9 @@ public class Parameter {
         private boolean required;
 
         /**
-         * Default builder contstructor with 2 mandatory parameters
-         * @param name - parameter name
-         * @param type - parameter type
+         * Default builder contstructor with 2 mandatory parameters.
+         * @param name - The name of the parameter
+         * @param type - The type of the parameter: string, number, boolean, enum, and array variants
          */
         private Builder(String name, String type) {
             this.name = name;
@@ -124,8 +124,8 @@ public class Parameter {
         }
 
         /**
-         * Set the parameter default value
-         * @param defaultValue
+         * Set the parameter default value.
+         * @param defaultValue If exists, the default value
          * @return builder
          */
         public Builder defaultValue(String defaultValue) {
@@ -134,8 +134,8 @@ public class Parameter {
         }
 
         /**
-         * Set the parameter description
-         * @param description
+         * Set the parameter description.
+         * @param description The description of the parameter
          * @return builder
          */
         public Builder description(String description) {
@@ -144,8 +144,8 @@ public class Parameter {
         }
 
         /**
-         * Set the parameter source
-         * @param parameterSource
+         * Set the parameter source.
+         * @param parameterSource Where the parameter comes from. May be: PATH or ADDITIONAL
          * @return builder
          */
         public Builder parameterSourceEnum(ParameterSource parameterSource) {
@@ -154,8 +154,8 @@ public class Parameter {
         }
 
         /**
-         * Set the required property
-         * @param required
+         * Set the required property.
+         * @param required Whether the parameter is required
          * @return builder
          */
         public Builder required(boolean required) {
@@ -164,7 +164,7 @@ public class Parameter {
         }
 
         /**
-         * Builds the Parameter
+         * Builds the Parameter.
          * @return The parameter instance
          */
         public Parameter build() {

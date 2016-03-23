@@ -19,12 +19,12 @@ package com.forgerock.api.beans;
  * Class that represents the Create Operation type in API descriptor.
  *
  */
-public class Update extends Operation{
+public final class Update extends Operation {
 
     private final boolean mvccSupported;
 
     /**
-     * Protected contstructor of the Operation
+     * Protected contstructor of the Operation.
      *
      * @param builder Operation Builder
      */
@@ -34,7 +34,7 @@ public class Update extends Operation{
     }
 
     /**
-     * Creates a new builder for Operation
+     * Creates a new builder for Operation.
      * @param mvccSupported Multiversion concurrency control supported
      * @return New builder instance
      */
@@ -51,12 +51,15 @@ public class Update extends Operation{
         resourceBuilder.update(this);
     }
 
+    /**
+     * Builder to help construct Update.
+     */
     public static final class Builder extends Operation.Builder<Builder> {
 
         private boolean mvccSupported;
 
         /**
-         * Private constructor with the required parameter
+         * Private constructor with the required parameter.
          * @param mvccSupported Multiversion concurrency control supported
          */
         private Builder(boolean mvccSupported) {
@@ -70,7 +73,7 @@ public class Update extends Operation{
         }
 
         /**
-         * Builds the Create instace
+         * Builds the Create instace.
          *
          * @return Create instace
          */

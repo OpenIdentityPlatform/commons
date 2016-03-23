@@ -17,8 +17,18 @@ package com.forgerock.api.enums;
 
 /**
  * Enum that represents the {@link com.forgerock.api.beans.Create} modes.
- *
  */
 public enum CreateMode {
-    ID_FROM_SERVER, DYNAMIC_ID_FROM_SERVER, STATIC_ID_FROM_SERVER;
+    /**
+     * The ID is sent by the client.
+     */
+    ID_FROM_SERVER,
+    /**
+     * The ID is generated dynamically by the server.
+     */
+    DYNAMIC_ID_FROM_SERVER,
+    /**
+     * The ID is fixed to a value defined by the server.
+     */
+    STATIC_ID_FROM_SERVER;
 }

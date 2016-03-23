@@ -20,5 +20,12 @@ package com.forgerock.api.enums;
  *
  */
 public enum ParameterSource {
-    PATH, ADDITIONAL;
+    /**
+     * Parameter comes from the path.
+     */
+    PATH,
+    /**
+     * Parameter comes from the request.
+     */
+    ADDITIONAL;
 }

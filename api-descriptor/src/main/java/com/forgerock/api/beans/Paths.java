@@ -18,17 +18,17 @@ package com.forgerock.api.beans;
 /**
  * Class that represents the Paths type in API descriptor.
  */
-public class Paths {
+public final class Paths {
 
-    //TODO This should be something like Map<String, Either<VersionedPath, Resource>>. Unfortunately there is no Either class at the moment, but we could add one to forgerock-util.
     private final Resource[] resources;
 
-    private Paths(Builder builder){
+    private Paths(Builder builder) {
         this.resources = builder.resources;
     }
 
     /**
-     * Getter of the resources
+     * Getter of the resources.
+     *
      * @return Resources
      */
     public Resource[] getResources() {
@@ -36,27 +36,30 @@ public class Paths {
     }
 
     /**
-     * Create a new Builder for Path
-     *
+     * Create a new Builder for Path.
+     * @param resources One or more resources
      * @return Builder
      */
     public static Builder paths(Resource... resources) {
         return new Builder(resources);
     }
 
-    public static class Builder {
+    /**
+     * Builder that help construct the Paths.
+     */
+    public static final class Builder {
 
         private Resource[] resources;
 
         /**
-         * Private default constructor with the mandatory fields
+         * Private default constructor with the mandatory fields.
          */
         private Builder(Resource... resources) {
             this.resources = resources;
         }
 
         /**
-         * Builds the Paths instace
+         * Builds the Paths instace.
          *
          * @return Paths instace
          */
