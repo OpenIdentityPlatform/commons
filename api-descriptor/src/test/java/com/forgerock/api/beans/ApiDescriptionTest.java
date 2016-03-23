@@ -16,14 +16,17 @@
 
 package com.forgerock.api.beans;
 
+import static org.forgerock.json.JsonValue.*;
+
 import java.util.HashMap;
 import java.util.Map;
+
+import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.forgerock.api.ApiValidationException;
-import org.testng.annotations.Test;
 
 public class ApiDescriptionTest {
 
@@ -50,7 +53,7 @@ public class ApiDescriptionTest {
 
     @Test
     public void testVersionedPaths() throws JsonProcessingException {
-        final Schema responseSchema = Schema.schema().build();
+        final Schema responseSchema = Schema.schema().schema(json(object())).build();
 
         final Action action1 = Action.action().name("action1").response(responseSchema).build();
         final Action action2 = Action.action().name("action2").response(responseSchema).build();

@@ -15,8 +15,18 @@
  */
 package com.forgerock.api.beans;
 
+import static org.forgerock.json.JsonValue.json;
+
+import java.io.IOException;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
+
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchemaGenerator;
+import com.forgerock.api.jackson.CrestPropertyDetailsSchemaFactoryWrapper;
 
 /**
  * Class that represents the Schema type in API descriptor.
@@ -73,6 +83,9 @@ public final class Schema {
      */
     public static final class Builder {
 
+        private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+        private static final JsonSchemaGenerator SCHEMA_GENERATOR = new JsonSchemaGenerator(OBJECT_MAPPER);
+
         private JsonValue schema;
         private Reference reference;
 
@@ -100,6 +113,27 @@ public final class Schema {
         public Builder schema(JsonValue schema) {
             Reject.ifNull(schema);
             this.schema = schema;
+            return this;
+        }
+
+        /**
+         * Sets the schema.
+         * @param type The type to derive the schema from.
+         * @return This builder.
+         */
+        public Builder type(Class<?> type) {
+            Reject.ifNull(type);
+            try {
+                CrestPropertyDetailsSchemaFactoryWrapper visitor = new CrestPropertyDetailsSchemaFactoryWrapper();
+                OBJECT_MAPPER.acceptJsonFormatVisitor(type, visitor);
+                JsonSchema jsonSchema = visitor.finalSchema();
+                String schemaString = OBJECT_MAPPER.writer().writeValueAsString(jsonSchema);
+                this.schema = json(OBJECT_MAPPER.readValue(schemaString, Object.class));
+            } catch (JsonMappingException e) {
+                throw new IllegalArgumentException(e);
+            } catch (IOException e) {
+                throw new IllegalStateException("Jackson cannot read its own JSON", e);
+            }
             return this;
         }
 
