@@ -21,7 +21,8 @@ import com.forgerock.api.ApiValidationException;
 
 /**
  * Class that represents the ApiDescription type in API descriptor.
- * @param <T> Type extends PathNode
+ *
+ * @param <T> Type implements {@link PathNode}
  */
 public final class ApiDescription<T extends PathNode> {
 
@@ -30,7 +31,6 @@ public final class ApiDescription<T extends PathNode> {
     private Map<String, Schema> definitions;
     private Map<String, Error> errors;
     private Map<String, T> paths;
-    private String[] protocolVersions;
 
     private ApiDescription(Builder builder) {
         this.id = builder.id;
@@ -38,7 +38,6 @@ public final class ApiDescription<T extends PathNode> {
         this.definitions = builder.definitions;
         this.errors = builder.errors;
         this.paths = builder.paths;
-        this.protocolVersions = builder.protocolVersions;
 
         if (id == null || id.trim().isEmpty()) {
             throw new ApiValidationException("id required");
@@ -105,15 +104,6 @@ public final class ApiDescription<T extends PathNode> {
     }
 
     /**
-     * Getter of protocol versions.
-     *
-     * @return ProtocolVersion array
-     */
-    public String[] getProtocolVersions() {
-        return protocolVersions;
-    }
-
-    /**
      * Create a new Builder for ApiDescription.
      *
      * @return Builder
@@ -141,7 +131,6 @@ public final class ApiDescription<T extends PathNode> {
         private Map<String, Schema> definitions;
         private Map<String, Error> errors;
         private Map<String, T> paths;
-        private String[] protocolVersions;
 
         /**
          * Private default constructor with the mandatory fields.
@@ -201,17 +190,6 @@ public final class ApiDescription<T extends PathNode> {
          */
         public Builder<T> paths(Map<String, T> paths) {
             this.paths = paths;
-            return this;
-        }
-
-        /**
-         * Set the protocol versions.
-         *
-         * @param protocolVersions Protocol version
-         * @return ProtocolVersions
-         */
-        public Builder<T> protocolVersions(String[] protocolVersions) {
-            this.protocolVersions = protocolVersions;
             return this;
         }
 

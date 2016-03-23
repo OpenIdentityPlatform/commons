@@ -13,18 +13,39 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
+
 package com.forgerock.api.enums;
 
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Create} modes.
+ * Represents all {@link com.forgerock.api.beans.Patch} operations.
  */
-public enum CreateMode {
+public enum PatchOperations {
     /**
-     * The ID is set by the client.
+     * Adds a field.
      */
-    ID_FROM_CLIENT,
+    ADD,
     /**
-     * The ID is set by the server.
+     * Removes a field.
      */
-    ID_FROM_SERVER;
+    REMOVE,
+    /**
+     * Replaces a field.
+     */
+    REPLACE,
+    /**
+     * Increments a numeric field.
+     */
+    INCREMENT,
+    /**
+     * Moves a field.
+     */
+    MOVE,
+    /**
+     * Copies a field.
+     */
+    COPY,
+    /**
+     * Transforms a field.
+     */
+    TRANSFORM;
 }

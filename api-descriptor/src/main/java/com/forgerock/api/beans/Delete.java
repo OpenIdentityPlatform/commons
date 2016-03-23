@@ -15,13 +15,15 @@
  */
 package com.forgerock.api.beans;
 
+import com.forgerock.api.ApiValidationException;
+
 /**
  * Class that represents the Delete operation type in API descriptor.
  *
  */
 public final class Delete extends Operation {
 
-    private final boolean mvccSupported;
+    private final Boolean mvccSupported;
 
     /**
      * Protected contstructor of the Delete.
@@ -31,11 +33,16 @@ public final class Delete extends Operation {
     private Delete(Builder builder) {
         super(builder);
         this.mvccSupported = builder.mvccSupported;
+
+        if (mvccSupported == null) {
+            throw new ApiValidationException("mvccSupported required");
+        }
     }
 
     /**
-     * Getter of the mvcc supported parameter.
-     * @return true if mvcc is supported
+     * Informs if MVCC is supported.
+     *
+     * @return {@code true} if MVCC is supported and {@code false} otherwise
      */
     public boolean getMvccSupported() {
         return mvccSupported;
@@ -43,11 +50,10 @@ public final class Delete extends Operation {
 
     /**
      * Creates a new builder for Delete.
-     * @param mvccSupported Multiversion concurrency control supported
      * @return New builder instance
      */
-    public static final Builder delete(boolean mvccSupported) {
-        return new Builder(mvccSupported);
+    public static final Builder delete() {
+        return new Builder();
     }
 
     /**
@@ -64,15 +70,20 @@ public final class Delete extends Operation {
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private boolean mvccSupported;
+        private Boolean mvccSupported;
+
+        private Builder() {
+            super();
+        }
 
         /**
-         * Private constructor with the required parameter.
-         * @param mvccSupported Multiversion concurrency control supported
+         * Setter for MVCC-supported flag.
+         *
+         * @param mvccSupported Whether this resource supports MVCC
          */
-        private Builder(boolean mvccSupported) {
-            super();
+        private Builder mvccSupported(boolean mvccSupported) {
             this.mvccSupported = mvccSupported;
+            return this;
         }
 
         @Override

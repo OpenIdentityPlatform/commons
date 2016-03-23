@@ -15,13 +15,17 @@
  */
 package com.forgerock.api.beans;
 
+import static com.forgerock.api.beans.ValidationUtil.containsWhitespace;
+import static com.forgerock.api.beans.ValidationUtil.isEmpty;
+
+import com.forgerock.api.ApiValidationException;
+
 /**
  * Class that represents the Action operation type in API descriptor.
  */
 public final class Action extends Operation {
 
     private final String name;
-    private final String description;
     private final Schema request;
     private final Schema response;
 
@@ -33,9 +37,15 @@ public final class Action extends Operation {
     private Action(Builder builder) {
         super(builder);
         this.name = builder.name;
-        this.description = builder.description;
         this.request = builder.request;
         this.response = builder.response;
+
+        if (isEmpty(name) || response == null) {
+            throw new ApiValidationException("name and response are required");
+        }
+        if (containsWhitespace(name)) {
+            throw new ApiValidationException("name contains whitespace");
+        }
     }
 
     /**
@@ -45,15 +55,6 @@ public final class Action extends Operation {
      */
     public String getName() {
         return name;
-    }
-
-    /**
-     * Getter of the description.
-     *
-     * @return description
-     */
-    public String getDescription() {
-        return description;
     }
 
     /**
@@ -99,7 +100,6 @@ public final class Action extends Operation {
     public static final class Builder extends Operation.Builder<Builder> {
 
         private String name;
-        private String description;
         private Schema request;
         private Schema response;
 
@@ -116,17 +116,6 @@ public final class Action extends Operation {
          */
         public Builder name(String name) {
             this.name = name;
-            return this;
-        }
-
-        /**
-         * Set the description.
-         *
-         * @param description Action description
-         * @return Builder
-         */
-        public Builder description(String description) {
-            this.description = description;
             return this;
         }
 

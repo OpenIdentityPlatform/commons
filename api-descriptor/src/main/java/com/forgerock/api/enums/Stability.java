@@ -13,18 +13,31 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
+
 package com.forgerock.api.enums;
 
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Create} modes.
+ * Represents API stability.
  */
-public enum CreateMode {
+public enum Stability {
     /**
-     * The ID is set by the client.
+     * Stable API (default), suggested for use by all clients.
      */
-    ID_FROM_CLIENT,
+    STABLE,
     /**
-     * The ID is set by the server.
+     * Internal API that may change or be removed at any time.
      */
-    ID_FROM_SERVER;
+    INTERNAL,
+    /**
+     * Evolving API that may changed at any time.
+     */
+    EVOLVING,
+    /**
+     * Deprecated API, that should not be used and may be removed in the future.
+     */
+    DEPRECATED,
+    /**
+     * Removed API, that remains available for some technical reason and may return an error if used.
+     */
+    REMOVED;
 }

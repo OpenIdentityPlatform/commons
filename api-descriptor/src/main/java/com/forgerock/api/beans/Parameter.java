@@ -15,11 +15,14 @@
  */
 package com.forgerock.api.beans;
 
+import static com.forgerock.api.beans.ValidationUtil.isEmpty;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.forgerock.api.ApiValidationException;
 import com.forgerock.api.enums.ParameterSource;
 
 /**
  * Class that represents the Parameter type in API descriptor.
- *
  */
 public final class Parameter {
 
@@ -27,11 +30,15 @@ public final class Parameter {
     private final String type;
     private final String defaultValue; //Todo String?
     private final String description;
-    private final ParameterSource parameterSource;
+    private final ParameterSource source;
     private final boolean required;
+    private final String[] enumValues;
+    // TODO options/enum_titles
+    // TODO "Other appropriate fields as described in the JSON Schema Validation spec may also be used."
 
     /**
      * Private Parameter constructor called by the builder.
+     *
      * @param builder Builder that holds the values for setting the parameter properties
      */
     private Parameter(Builder builder) {
@@ -39,12 +46,18 @@ public final class Parameter {
         this.type = builder.type;
         this.defaultValue = builder.defaultValue;
         this.description = builder.description;
-        this.parameterSource = builder.parameterSource;
+        this.source = builder.source;
         this.required = builder.required;
+        this.enumValues = builder.enumValues;
+
+        if (isEmpty(name) || isEmpty(type) || source == null) {
+            throw new ApiValidationException("name, type, and source are required");
+        }
     }
 
     /**
      * Getter of the name of the parameter.
+     *
      * @return Parameter name
      */
     public String getName() {
@@ -53,6 +66,7 @@ public final class Parameter {
 
     /**
      * Getter of the parameter type.
+     *
      * @return Parameter type
      */
     public String getType() {
@@ -61,6 +75,7 @@ public final class Parameter {
 
     /**
      * Getter of the parameter's default value.
+     *
      * @return Parameter default value
      */
     public String getDefaultValue() {
@@ -69,6 +84,7 @@ public final class Parameter {
 
     /**
      * Getter of the parameter description.
+     *
      * @return Parameter description
      */
     public String getDescription() {
@@ -77,14 +93,16 @@ public final class Parameter {
 
     /**
      * Getter of the parameter source.
+     *
      * @return Parameter source enum
      */
-    public ParameterSource getParameterSource() {
-        return parameterSource;
+    public ParameterSource getSource() {
+        return source;
     }
 
     /**
      * Getter of the required property.
+     *
      * @return Required
      */
     public boolean isRequired() {
@@ -92,13 +110,22 @@ public final class Parameter {
     }
 
     /**
+     * Getter of required enum-values.
+     *
+     * @return Required enum-values or {@code null}
+     */
+    @JsonProperty("enum")
+    public String[] getEnumValues() {
+        return enumValues;
+    }
+
+    /**
      * New parameter builder.
-     * @param name - The name of the parameter
-     * @param type - The type of the parameter: string, number, boolean, enum, and array variants
+     *
      * @return Builder
      */
-    public static Builder parameter(String name, String type) {
-        return new Builder(name, type);
+    public static Builder parameter() {
+        return new Builder();
     }
 
     /**
@@ -106,25 +133,53 @@ public final class Parameter {
      */
     public static final class Builder {
 
-        private final String name;
-        private final String type;
+        private String name;
+        private String type;
         private String defaultValue;
         private String description;
-        private ParameterSource parameterSource;
+        private ParameterSource source;
         private boolean required;
+        private String[] enumValues;
+
+        private Builder() {
+        }
 
         /**
-         * Default builder contstructor with 2 mandatory parameters.
-         * @param name - The name of the parameter
-         * @param type - The type of the parameter: string, number, boolean, enum, and array variants
+         * Set the parameter name.
+         *
+         * @param name Parameter name
+         * @return Builder
          */
-        private Builder(String name, String type) {
+        public Builder name(String name) {
             this.name = name;
+            return this;
+        }
+
+        /**
+         * Sets enum-values that must match.
+         *
+         * @param enumValues Enum-values
+         * @return Builder
+         */
+        public Builder enumValues(String[] enumValues) {
+            this.enumValues = enumValues;
+            return this;
+        }
+
+        /**
+         * Set the parameter type.
+         *
+         * @param type Parameter type
+         * @return Builder
+         */
+        public Builder type(String type) {
             this.type = type;
+            return this;
         }
 
         /**
          * Set the parameter default value.
+         *
          * @param defaultValue If exists, the default value
          * @return builder
          */
@@ -135,6 +190,7 @@ public final class Parameter {
 
         /**
          * Set the parameter description.
+         *
          * @param description The description of the parameter
          * @return builder
          */
@@ -145,16 +201,18 @@ public final class Parameter {
 
         /**
          * Set the parameter source.
-         * @param parameterSource Where the parameter comes from. May be: PATH or ADDITIONAL
+         *
+         * @param source Where the parameter comes from. May be: PATH or ADDITIONAL
          * @return builder
          */
-        public Builder parameterSourceEnum(ParameterSource parameterSource) {
-            this.parameterSource = parameterSource;
+        public Builder source(ParameterSource source) {
+            this.source = source;
             return this;
         }
 
         /**
          * Set the required property.
+         *
          * @param required Whether the parameter is required
          * @return builder
          */
@@ -165,6 +223,7 @@ public final class Parameter {
 
         /**
          * Builds the Parameter.
+         *
          * @return The parameter instance
          */
         public Parameter build() {

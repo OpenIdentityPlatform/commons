@@ -15,6 +15,7 @@
  */
 package com.forgerock.api.beans;
 
+import com.forgerock.api.ApiValidationException;
 import org.forgerock.util.Reject;
 
 import java.util.ArrayList;
@@ -25,8 +26,6 @@ import java.util.List;
  */
 public final class Resource implements PathNode {
     private final Schema resourceSchema;
-    private final String title;
-    private final String description;
     private final Create create;
     private final Read read;
     private final Update update;
@@ -37,8 +36,6 @@ public final class Resource implements PathNode {
 
     private Resource(Builder builder) {
         this.resourceSchema = builder.resourceSchema;
-        this.title = builder.title;
-        this.description = builder.description;
         this.create = builder.create;
         this.read = builder.read;
         this.update = builder.update;
@@ -46,10 +43,16 @@ public final class Resource implements PathNode {
         this.patch = builder.patch;
         this.actions = builder.actions.toArray(new Action[builder.actions.size()]);
         this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
+
+        if (create == null && read == null && update == null && delete == null && patch == null
+                && actions.length == 0 && queries.length == 0) {
+            throw new ApiValidationException("At least one operation required");
+        }
     }
 
     /**
      * Getter of resoruce schema.
+     *
      * @return Resource schema
      */
     public Schema getResourceSchema() {
@@ -57,23 +60,8 @@ public final class Resource implements PathNode {
     }
 
     /**
-     * Getter of title.
-     * @return Title
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * Getter of description.
-     * @return Description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
      * Getter of Create.
+     *
      * @return Create
      */
     public Create getCreate() {
@@ -82,6 +70,7 @@ public final class Resource implements PathNode {
 
     /**
      * Getter of Read.
+     *
      * @return Read
      */
     public Read getRead() {
@@ -90,6 +79,7 @@ public final class Resource implements PathNode {
 
     /**
      * Getter of Update.
+     *
      * @return Update
      */
     public Update getUpdate() {
@@ -98,6 +88,7 @@ public final class Resource implements PathNode {
 
     /**
      * Getter of Delete.
+     *
      * @return Delete
      */
     public Delete getDelete() {
@@ -106,6 +97,7 @@ public final class Resource implements PathNode {
 
     /**
      * Getter of Patch.
+     *
      * @return Patch
      */
     public Patch getPatch() {
@@ -114,6 +106,7 @@ public final class Resource implements PathNode {
 
     /**
      * Getter of actions.
+     *
      * @return Actions
      */
     public Action[] getActions() {
@@ -122,6 +115,7 @@ public final class Resource implements PathNode {
 
     /**
      * Getter of queries.
+     *
      * @return Queries
      */
     public Query[] getQueries() {
@@ -130,6 +124,7 @@ public final class Resource implements PathNode {
 
     /**
      * Create a new Builder for Resoruce.
+     *
      * @return Builder
      */
     public static Builder resource() {
@@ -141,28 +136,27 @@ public final class Resource implements PathNode {
      */
     public final static class Builder {
         private Schema resourceSchema;
-        private String title;
-        private String description;
         private Create create;
         private Read read;
         private Update update;
         private Delete delete;
         private Patch patch;
-        private List<Action> actions;
-        private List<Query> queries;
+        private final List<Action> actions;
+        private final List<Query> queries;
 
         /**
          * Private default constructor.
          */
         protected Builder() {
-            actions = new ArrayList<Action>();
-            queries = new ArrayList<Query>();
+            actions = new ArrayList<>();
+            queries = new ArrayList<>();
         }
 
         /**
          * Set the resource schema.
+         *
          * @param resourceSchema The schema of the resource for this path.
-         *                       Required when any of create, read, update, delete, patch are supported
+         * Required when any of create, read, update, delete, patch are supported
          * @return Builder
          */
         public Builder resourceSchema(Schema resourceSchema) {
@@ -171,27 +165,8 @@ public final class Resource implements PathNode {
         }
 
         /**
-         * Set the title.
-         * @param title The human-readable name of the endpoint
-         * @return Builder
-         */
-        public Builder title(String title) {
-            this.title = title;
-            return this;
-        }
-
-        /**
-         * Set the description.
-         * @param description A description of the endpoint
-         * @return Builder
-         */
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        /**
          * Set create.
+         *
          * @param create The create operation description, if supported
          * @return Builder
          */
@@ -202,6 +177,7 @@ public final class Resource implements PathNode {
 
         /**
          * Set Read.
+         *
          * @param read The read operation description, if supported
          * @return Builder
          */
@@ -212,6 +188,7 @@ public final class Resource implements PathNode {
 
         /**
          * Set Update.
+         *
          * @param update The update operation description, if supported
          * @return Builder
          */
@@ -222,6 +199,7 @@ public final class Resource implements PathNode {
 
         /**
          * Set Delete.
+         *
          * @param delete The delete operation description, if supported
          * @return Builder
          */
@@ -232,6 +210,7 @@ public final class Resource implements PathNode {
 
         /**
          * Set Patch.
+         *
          * @param patch The patch operation description, if supported
          * @return Builder
          */
@@ -242,16 +221,18 @@ public final class Resource implements PathNode {
 
         /**
          * Set Actions.
+         *
          * @param actions The list of action operation descriptions, if supported
          * @return Builder
          */
         public Builder actions(List<Action> actions) {
-            this.actions = actions;
+            this.actions.addAll(actions);
             return this;
         }
 
         /**
          * Adds one Action to the list of Actions.
+         *
          * @param action Action operation description to be added to the list
          * @return Builder
          */
@@ -262,16 +243,18 @@ public final class Resource implements PathNode {
 
         /**
          * Set Queries.
+         *
          * @param queries The list or query operation descriptions, if supported
          * @return Builder
          */
         public Builder queries(List<Query> queries) {
-            this.queries = queries;
+            this.queries.addAll(queries);
             return this;
         }
 
         /**
          * Adds one Query to the list of queries.
+         *
          * @param query Query operation description to be added to the list
          * @return Builder
          */
@@ -282,6 +265,7 @@ public final class Resource implements PathNode {
 
         /**
          * Allocates the operations given in the parameter by their type.
+         *
          * @param operations One or more Operations
          * @return Builder
          */
@@ -295,6 +279,7 @@ public final class Resource implements PathNode {
 
         /**
          * Construct a new instance of Resource.
+         *
          * @return Resource instance
          */
         public Resource build() {

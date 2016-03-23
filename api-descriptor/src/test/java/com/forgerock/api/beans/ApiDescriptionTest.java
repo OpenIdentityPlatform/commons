@@ -37,7 +37,7 @@ public class ApiDescriptionTest {
     @Test(expectedExceptions = ApiValidationException.class)
     public void testFailedValidationIdMissing() {
         final Map<String, Error> errors = new HashMap<>();
-        errors.put("internalServerError", Error.error("Unexpected error", 500).build());
+        errors.put("internalServerError", Error.error().code(500).description("Unexpected error").build());
 
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .errors(errors)

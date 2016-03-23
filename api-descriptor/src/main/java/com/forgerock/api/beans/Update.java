@@ -15,13 +15,15 @@
  */
 package com.forgerock.api.beans;
 
+import com.forgerock.api.ApiValidationException;
+
 /**
  * Class that represents the Create Operation type in API descriptor.
  *
  */
 public final class Update extends Operation {
 
-    private final boolean mvccSupported;
+    private final Boolean mvccSupported;
 
     /**
      * Protected contstructor of the Operation.
@@ -31,15 +33,27 @@ public final class Update extends Operation {
     private Update(Builder builder) {
         super(builder);
         this.mvccSupported = builder.mvccSupported;
+
+        if (mvccSupported == null) {
+            throw new ApiValidationException("mvccSupported required");
+        }
+    }
+
+    /**
+     * Informs if MVCC is supported.
+     *
+     * @return {@code true} if MVCC is supported and {@code false} otherwise
+     */
+    public boolean isMvccSupported() {
+        return mvccSupported;
     }
 
     /**
      * Creates a new builder for Operation.
-     * @param mvccSupported Multiversion concurrency control supported
      * @return New builder instance
      */
-    public static final Builder update(boolean mvccSupported) {
-        return new Builder(mvccSupported);
+    public static final Builder update() {
+        return new Builder();
     }
 
     /**
@@ -56,15 +70,20 @@ public final class Update extends Operation {
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private boolean mvccSupported;
+        private Boolean mvccSupported;
+
+        private Builder() {
+            super();
+        }
 
         /**
-         * Private constructor with the required parameter.
-         * @param mvccSupported Multiversion concurrency control supported
+         * Setter for MVCC-supported flag.
+         *
+         * @param mvccSupported Whether this resource supports MVCC
          */
-        private Builder(boolean mvccSupported) {
-            super();
+        private Builder mvccSupported(boolean mvccSupported) {
             this.mvccSupported = mvccSupported;
+            return this;
         }
 
         @Override

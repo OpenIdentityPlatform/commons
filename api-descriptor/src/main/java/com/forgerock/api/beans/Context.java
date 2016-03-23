@@ -15,9 +15,13 @@
  */
 package com.forgerock.api.beans;
 
+import static com.forgerock.api.beans.ValidationUtil.containsWhitespace;
+import static com.forgerock.api.beans.ValidationUtil.isEmpty;
+
+import com.forgerock.api.ApiValidationException;
+
 /**
  * Class that represents the Context type in API descriptor.
- *
  */
 public final class Context {
 
@@ -29,10 +33,18 @@ public final class Context {
         this.name = builder.name;
         this.schema = builder.schema;
         this.required = builder.required;
+
+        if (isEmpty(name) || schema == null) {
+            throw new ApiValidationException("name and schema are required");
+        }
+        if (containsWhitespace(name)) {
+            throw new ApiValidationException("name contains whitespace");
+        }
     }
 
     /**
      * Getter of the context name.
+     *
      * @return Name
      */
     public String getName() {
@@ -41,6 +53,7 @@ public final class Context {
 
     /**
      * Getter of the context schema.
+     *
      * @return Schema
      */
     public Schema getSchema() {
@@ -49,6 +62,7 @@ public final class Context {
 
     /**
      * Getter of the required parameter.
+     *
      * @return true if required
      */
     public boolean isRequired() {
@@ -57,6 +71,7 @@ public final class Context {
 
     /**
      * Creates a new Builder instance for building the Context.
+     *
      * @return New Builder instance
      */
     public static Builder context() {
@@ -74,10 +89,12 @@ public final class Context {
         /**
          * Private default constructor.
          */
-        protected Builder() { }
+        protected Builder() {
+        }
 
         /**
          * Set the name.
+         *
          * @param name Context name
          * @return Builder
          */
@@ -88,6 +105,7 @@ public final class Context {
 
         /**
          * Set the Schema.
+         *
          * @param schema Context schema
          * @return Builder
          */
@@ -98,6 +116,7 @@ public final class Context {
 
         /**
          * Set if required or not.
+         *
          * @param required true if required
          * @return Builder
          */
@@ -108,6 +127,7 @@ public final class Context {
 
         /**
          * Creates a new Context instance.
+         *
          * @return Context instance
          */
         public Context build() {

@@ -15,16 +15,16 @@
  */
 package com.forgerock.api.beans;
 
+import com.forgerock.api.ApiValidationException;
 import com.forgerock.api.enums.CreateMode;
 
 /**
  * Class that represents the Create Operation type in API descriptor.
- *
  */
 public final class Create extends Operation {
 
     private final CreateMode mode;
-    private final boolean mvccSupported;
+    private final Boolean mvccSupported;
 
     /**
      * Protected contstructor of the Create.
@@ -35,6 +35,10 @@ public final class Create extends Operation {
         super(builder);
         this.mode = builder.mode;
         this.mvccSupported = builder.mvccSupported;
+
+        if (mode == null || mvccSupported == null) {
+            throw new ApiValidationException("mode and mvccSupported required");
+        }
     }
 
     /**
@@ -46,8 +50,9 @@ public final class Create extends Operation {
     }
 
     /**
-     * Getter of mvcc supported.
-     * @return true if mvcc is supported
+     * Informs if MVCC is supported.
+     *
+     * @return {@code true} if MVCC is supported and {@code false} otherwise
      */
     public boolean getMvccSupported() {
         return mvccSupported;
@@ -55,12 +60,10 @@ public final class Create extends Operation {
 
     /**
      * Creates a new builder for Create.
-     * @param mode Create mode
-     * @param mvccSupported Multiversion concurrency control supported
      * @return New builder instance
      */
-    public static final Builder create(CreateMode mode, boolean mvccSupported) {
-        return new Builder(mode, mvccSupported);
+    public static final Builder create() {
+        return new Builder();
     }
 
     /**
@@ -78,17 +81,20 @@ public final class Create extends Operation {
     public static final class Builder extends Operation.Builder<Builder> {
 
         private CreateMode mode;
-        private boolean mvccSupported;
+        private Boolean mvccSupported;
+
+        private Builder() {
+            super();
+        }
 
         /**
-         * Private constructor with the required parameter.
-         * @param mode Create mode
-         * @param mvccSupported Multiversion concurrency control supported
+         * Setter for MVCC-supported flag.
+         *
+         * @param mvccSupported Whether this resource supports MVCC
          */
-        private Builder(CreateMode mode, boolean mvccSupported) {
-            super();
-            this.mode = mode;
+        private Builder mvccSupported(boolean mvccSupported) {
             this.mvccSupported = mvccSupported;
+            return this;
         }
 
         /**

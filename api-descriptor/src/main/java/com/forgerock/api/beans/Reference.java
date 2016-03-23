@@ -49,7 +49,6 @@ public final class Reference {
     public static final class Builder {
 
         private String reference;
-        private VersionedPath versionedPath;
 
         /**
          * Private default constructor with the mandatory field.

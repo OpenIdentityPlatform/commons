@@ -25,12 +25,11 @@ import com.forgerock.api.enums.SupportedPagingModePolicy;
  */
 public final class Query extends Operation {
 
-    private final QueryType queryType;
+    private final QueryType type;
     private final PagingMode pagingMode;
     private final SupportedPagingModePolicy[] supportedPagingModePolicies;
     private final String queryId;
     private final String[] queryableFields;
-    private final String description;
     private final String[] supportedSortKeys;
 
     /**
@@ -40,12 +39,11 @@ public final class Query extends Operation {
      */
     private Query(Builder builder) {
         super(builder);
-        this.queryType = builder.queryType;
+        this.type = builder.type;
         this.pagingMode = builder.pagingMode;
         this.supportedPagingModePolicies = builder.supportedPagingModePolicies;
         this.queryId = builder.queryId;
         this.queryableFields = builder.queryableFields;
-        this.description = builder.description;
         this.supportedSortKeys = builder.supportedSortKeys;
     }
 
@@ -53,8 +51,8 @@ public final class Query extends Operation {
      * Getter of the query type.
      * @return Query type num
      */
-    public QueryType getQueryType() {
-        return queryType;
+    public QueryType getType() {
+        return type;
     }
 
     /**
@@ -90,14 +88,6 @@ public final class Query extends Operation {
     }
 
     /**
-     * Getter of the description.
-     * @return Description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
      * Getter of the supported sort keys.
      * @return Supported sort keys
      */
@@ -127,12 +117,11 @@ public final class Query extends Operation {
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private QueryType queryType;
+        private QueryType type;
         private PagingMode pagingMode;
         private SupportedPagingModePolicy[] supportedPagingModePolicies;
         private String queryId;
         private String[] queryableFields;
-        private String description;
         private String[] supportedSortKeys;
 
         /**
@@ -146,11 +135,11 @@ public final class Query extends Operation {
 
         /**
          * Set the query type.
-         * @param queryType query type enum
+         * @param type query type enum
          * @return Builder
          */
-        public Builder queryType(QueryType queryType) {
-            this.queryType = queryType;
+        public Builder type(QueryType type) {
+            this.type = type;
             return this;
         }
 
@@ -191,16 +180,6 @@ public final class Query extends Operation {
          */
         public Builder queryableFields(String[] queryableFields) {
             this.queryableFields = queryableFields;
-            return this;
-        }
-
-        /**
-         * Set the description.
-         * @param description Read operation description
-         * @return Builder
-         */
-        public Builder description(String description) {
-            this.description = description;
             return this;
         }
 

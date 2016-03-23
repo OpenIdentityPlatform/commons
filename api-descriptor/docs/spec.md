@@ -91,7 +91,6 @@ Specifies the descriptor at a given path. At least one _Operation_ (e.g., _creat
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 resourceSchema | [Schema](#Schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, or patch are supported.
-description | String                      |            | A description of the endpoint
 create      | [Create](#Create)           |            | The create operation description, if supported
 read        | [Operation](#Operation)     |            | The read operation description, if supported
 update      | [Update](#Update)           |            | The update operation description, if supported
@@ -123,6 +122,7 @@ _Read_ operations are defined at this level, and are used to read existing resou
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
+description | String                      |            | A description of the operation
 supportedContexts | [Context](#Context)[] |            | The supported contexts
 supportedLocales | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation
 fields      | String[]                    |            | Fields selected for inclusion in the response payload. All fields are included by default.
@@ -313,7 +313,6 @@ Actions are additional operations provided by a resource container. Extends [Ope
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 name        | String                      | ✓          | The action name.
-description | String                      |            | Describe this action.
 request     | [Schema](#Schema)           |            | The schema of the request payload for this action.
 response    | [Schema](#Schema)           | ✓          | The schema of the response payload for this action.
 
@@ -333,7 +332,6 @@ countPolicy | String[]                    |            | Supported values are `E
 queryId     | String                      | `type:ID`  | Required if `type` is `ID`.
 queryableFields | String[]                | `type:FILTER` | Required if `type` is `FILTER`. Lists the fields in the `resourceSchema` that can be queried. A value of “*” can be used to state that all fields can be queried.
 supportedSortKeys | String[]              |            | The keys that may be used to sort the filter results. A value of “*” can be used to state that all keys are supported.
-description | String                      |            | Describes this query.
 
 The following example shows a resource that supports all three types of query:
 

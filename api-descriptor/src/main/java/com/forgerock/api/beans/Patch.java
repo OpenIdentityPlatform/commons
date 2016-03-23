@@ -15,13 +15,16 @@
  */
 package com.forgerock.api.beans;
 
+import com.forgerock.api.ApiValidationException;
+import com.forgerock.api.enums.PatchOperations;
+
 /**
  * Class that represents the Patch operation type in API descriptor.
- *
  */
 public final class Patch extends Operation {
 
-    private final boolean mvccSupported;
+    private final PatchOperations[] operations;
+    private final Boolean mvccSupported;
 
     /**
      * Protected contstructor of the Patch operation.
@@ -31,19 +34,43 @@ public final class Patch extends Operation {
     private Patch(Builder builder) {
         super(builder);
         this.mvccSupported = builder.mvccSupported;
+        this.operations = builder.operations;
+
+        if (operations == null || operations.length == 0 || mvccSupported == null) {
+            throw new ApiValidationException("operations and mvccSupported required");
+        }
+    }
+
+    /**
+     * Getter for supported Patch operations.
+     *
+     * @return Supported Patch operations
+     */
+    public PatchOperations[] getOperations() {
+        return operations;
+    }
+
+    /**
+     * Informs if MVCC is supported.
+     *
+     * @return {@code true} if MVCC is supported and {@code false} otherwise
+     */
+    public boolean isMvccSupported() {
+        return mvccSupported;
     }
 
     /**
      * Creates a new builder for Patch.
-     * @param mvccSupported Whether this resource supports MVCC
+     *
      * @return New builder instance
      */
-    public static final Builder patch(boolean mvccSupported) {
-        return new Builder(mvccSupported);
+    public static final Builder patch() {
+        return new Builder();
     }
 
     /**
      * Allocates the Patch operation type to the given Resource Builder.
+     *
      * @param resourceBuilder - Resource Builder to add the operation
      */
     @Override
@@ -56,15 +83,26 @@ public final class Patch extends Operation {
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private boolean mvccSupported;
+        private PatchOperations[] operations;
+        private Boolean mvccSupported;
+
+        private Builder() {
+            super();
+        }
+
+        private Builder operations(PatchOperations[] operations) {
+            this.operations = operations;
+            return this;
+        }
 
         /**
-         * Private constructor with the required parameter.
+         * Setter for MVCC-supported flag.
+         *
          * @param mvccSupported Whether this resource supports MVCC
          */
-        private Builder(boolean mvccSupported) {
-            super();
+        private Builder mvccSupported(boolean mvccSupported) {
             this.mvccSupported = mvccSupported;
+            return this;
         }
 
         @Override

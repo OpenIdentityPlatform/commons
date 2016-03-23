@@ -15,24 +15,37 @@
  */
 package com.forgerock.api.beans;
 
+import com.forgerock.api.ApiValidationException;
+
 /**
  * Class that represents the Error type in API descriptor.
  */
 public final class Error {
 
-    private final String description;
+    /**
+     * Must be an Integer, because 0 is not a valid default.
+     */
     private final Integer code;
+    private final String description;
     private final Schema schema;
 
-    /**
-     * Private constructor called by the builder build method.
-     *
-     * @param builder
-     */
     private Error(Builder builder) {
-        this.description = builder.description;
         this.code = builder.code;
+        this.description = builder.description;
         this.schema = builder.schema;
+
+        if (code == null || ValidationUtil.isEmpty(description)) {
+            throw new ApiValidationException("code and description are required");
+        }
+    }
+
+    /**
+     * Getter of the error code.
+     *
+     * @return Code
+     */
+    public int getCode() {
+        return code;
     }
 
     /**
@@ -45,15 +58,6 @@ public final class Error {
     }
 
     /**
-     * Getter of the error code.
-     *
-     * @return Code
-     */
-    public Integer getCode() {
-        return code;
-    }
-
-    /**
      * Getter of the error schema.
      *
      * @return Schema
@@ -63,14 +67,12 @@ public final class Error {
     }
 
     /**
-     * New error builder with the mandatory parameters.
+     * New error builder.
      *
-     * @param description Error description
-     * @param code Error code
      * @return Builder
      */
-    public static Builder error(String description, Integer code) {
-        return new Builder(description, code);
+    public static Builder error() {
+        return new Builder();
     }
 
     /**
@@ -78,19 +80,25 @@ public final class Error {
      */
     public static final class Builder {
 
-        private String description;
+        /**
+         * Must be an Integer, because 0 is not a valid default.
+         */
         private Integer code;
+        private String description;
         private Schema schema;
 
+        private Builder() {
+        }
+
         /**
-         * Error builder instance with the 2 mandatory parameters.
+         * Set the error code.
          *
-         * @param description - Error name
-         * @param code - Error code
+         * @param code Error code
+         * @return Builder
          */
-        private Builder(String description, Integer code) {
-            this.description = description;
+        public Builder code(int code) {
             this.code = code;
+            return this;
         }
 
         /**
