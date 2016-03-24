@@ -408,54 +408,52 @@ public final class Promises {
     }
 
     private static final AsyncFunction<Exception, Object, Exception> EXCEPTION_IDEM_ASYNC_FUNC =
-            new AsyncFunction<Exception, Object, Exception>() {
-                // @Checkstyle:off
-                @Override
-                public Promise<Object, Exception> apply(final Exception exception) throws Exception {
-                    return newExceptionPromise(exception);
-                }
-                // @Checkstyle:off
-            };
+        new AsyncFunction<Exception, Object, Exception>() {
+            @Override
+            public Promise<Object, Exception> apply(final Exception exception) throws Exception {
+                return newExceptionPromise(exception);
+            }
+        };
 
     private static final Function<Exception, Object, Exception> EXCEPTION_IDEM_FUNC =
-            new Function<Exception, Object, Exception>() {
-                @Override
-                public Object apply(final Exception exception) throws Exception {
-                    throw exception;
-                }
-            };
+        new Function<Exception, Object, Exception>() {
+            @Override
+            public Object apply(final Exception exception) throws Exception {
+                throw exception;
+            }
+        };
 
     private static final AsyncFunction<RuntimeException, Object, Exception> RUNTIME_EXCEPTION_IDEM_ASYNC_FUNC =
-            new AsyncFunction<RuntimeException, Object, Exception>() {
-                @Override
-                public Promise<Object, Exception> apply(final RuntimeException runtimeException) throws Exception {
-                    return newRuntimeExceptionPromise(runtimeException);
-                }
-            };
+        new AsyncFunction<RuntimeException, Object, Exception>() {
+            @Override
+            public Promise<Object, Exception> apply(final RuntimeException runtimeException) throws Exception {
+                return newRuntimeExceptionPromise(runtimeException);
+            }
+        };
 
     private static final Function<RuntimeException, Object, Exception> RUNTIME_EXCEPTION_IDEM_FUNC =
-            new Function<RuntimeException, Object, Exception>() {
-                @Override
-                public Object apply(final RuntimeException runtimeException) {
-                    throw runtimeException;
-                }
-            };
+        new Function<RuntimeException, Object, Exception>() {
+            @Override
+            public Object apply(final RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+        };
 
     private static final AsyncFunction<Object, Object, Exception> RESULT_IDEM_ASYNC_FUNC =
-            new AsyncFunction<Object, Object, Exception>() {
-                @Override
-                public Promise<Object, Exception> apply(final Object object) throws Exception {
-                    return newResultPromise(object);
-                }
-            };
+        new AsyncFunction<Object, Object, Exception>() {
+            @Override
+            public Promise<Object, Exception> apply(final Object object) throws Exception {
+                return newResultPromise(object);
+            }
+        };
 
     private static final Function<Object, Object, Exception> RESULT_IDEM_FUNC =
-            new Function<Object, Object, Exception>() {
-                @Override
-                public Object apply(final Object value) throws Exception {
-                    return value;
-                }
-            };
+        new Function<Object, Object, Exception>() {
+            @Override
+            public Object apply(final Object value) throws Exception {
+                return value;
+            }
+        };
 
     /**
      * Returns a {@link Promise} representing an asynchronous task which has
@@ -554,12 +552,12 @@ public final class Promises {
                         composite.handleResult(results);
                     }
                 }
-            }).thenOnException(new ExceptionHandler<E>() {
+            })  .thenOnException(new ExceptionHandler<E>() {
                 @Override
                 public void handleException(final E exception) {
                     composite.handleException(exception);
                 }
-            }).thenOnRuntimeException(new RuntimeExceptionHandler() {
+            })  .thenOnRuntimeException(new RuntimeExceptionHandler() {
                 @Override
                 public void handleRuntimeException(RuntimeException exception) {
                     composite.handleRuntimeException(exception);
@@ -604,7 +602,8 @@ public final class Promises {
     }
 
     @SuppressWarnings("unchecked")
-    static <VOUT, E extends Exception> AsyncFunction<RuntimeException, VOUT, E> runtimeExceptionIdempotentAsyncFunction() {
+    static <VOUT, E extends Exception> AsyncFunction<RuntimeException, VOUT, E>
+        runtimeExceptionIdempotentAsyncFunction() {
         return (AsyncFunction<RuntimeException, VOUT, E>) RUNTIME_EXCEPTION_IDEM_ASYNC_FUNC;
     }
 
