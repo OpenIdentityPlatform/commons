@@ -1,7 +1,5 @@
 # API DESCRIPTOR
 
-Related to https://bugster.forgerock.org/jira/browse/RAPID-5
-
 ### Description
 
 As both ForgeRock customers and internal developers increasingly favor REST APIs to access the ForgeRock Identity Platform, they all depend on clear descriptions of the API contracts. Today, we maintain descriptions by hand through reverse engineering. We lack ways of ensuring this hand-written documentation is updated when the implementations change, which is an impediment to internal development. Furthermore, our products lack the ability to describe the APIs as they are exposed at runtime in deployment and hence make it harder for community members and customers to use our APIs.
@@ -52,7 +50,3 @@ There are multiple benefits of a well-functioning API Descriptor, both for Forge
 * Wordnik uses Swagger for their API doc: http://developer.wordnik.com/docs.html
 * Twitter has a API Console Tool, that seems to be the dynamic, Swagger-like tool that we want to build: https:/dev.twitter.com/rest/tools/console
 (Note: powered by Apigee)
-
-### Customer Feedback
-
-(Warren:) SDK generation, in as many languages as possible, is the number one reason to implement an API Descriptor. Customers do more and more DevOps work in **Go**, like many others. Most developers do not want to read REST docs. They want to use a library that does it for them.
