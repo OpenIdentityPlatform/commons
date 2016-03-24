@@ -44,18 +44,30 @@ of _definitions_, _errors_, or _paths_.
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| -------------------------------------
 id          | frURI                       | ✓          | The identifier of the API Descriptor
-definitions | [Schema](#Schemas)          |            | Locally defined schema definitions
 description | String                      |            | Short description of the API Descriptor
-errors      | [Error](#Error)             |            | Locally defined error definitions
+definitions | [Schemas](#Schemas)         |            | Locally defined schema definitions
+errors      | [Errors](#Errors)           |            | Locally defined error definitions
 paths       | [Paths](#Paths)             |            | The supported paths for this API.
 
 ### Schemas
+
+Locally defined schema definitions, that can be referred to via JSON References.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-*           | Schema                      | ✓          | The schema definitions
+*           | [Schema](#Schema)           | ✓          | The schema definitions
+
+### Errors
+
+Locally defined schema definitions, that can be referred to via JSON References.
+
+#### Properties
+
+Key         | Type                        | Required?  | Description
+----------- | --------------------------- |:----------:| ------------------------------------
+*           | [Error](#Error)             | ✓          | The error definitions
 
 ### Reference
 
@@ -133,7 +145,6 @@ Key         | Type                        | Required?  | Description
 description | String                      |            | A description of the operation
 supportedContexts | [Context](#Context)[] |            | The supported contexts
 supportedLocales | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation
-fields      | String[]                    |            | Fields selected for inclusion in the response payload. All fields are included by default.
 errors      | [Error](#Error)[]           |            | Errors known be returned by this operation
 parameters  | [Parameter](#Parameter)[]   |            | Extra parameters supported by the operation
 stability   | String                      |            | Stability of the endpoint. One of "internal", "stable" (default), "evolving", "deprecated", or "removed".

@@ -18,9 +18,6 @@ package com.forgerock.api.beans;
 
 import static org.forgerock.json.JsonValue.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -36,8 +33,14 @@ public class ApiDescriptionTest {
 
     @Test(expectedExceptions = ApiValidationException.class)
     public void testFailedValidationIdMissing() {
-        final Map<String, Error> errors = new HashMap<>();
-        errors.put("internalServerError", Error.error().code(500).description("Unexpected error").build());
+        final Error error = Error.error()
+                .code(500)
+                .description("Unexpected error")
+                .build();
+
+        final Errors errors = Errors.errors()
+                .put("internalServerError", error)
+                .build();
 
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .errors(errors)
@@ -53,15 +56,22 @@ public class ApiDescriptionTest {
 
     @Test
     public void testVersionedPaths() throws JsonProcessingException {
-        final Schema responseSchema = Schema.schema().schema(json(object())).build();
+        final Schema responseSchema = Schema.schema()
+                .schema(json(object()))
+                .build();
 
-        final Action action1 = Action.action().name("action1").response(responseSchema).build();
-        final Action action2 = Action.action().name("action2").response(responseSchema).build();
+        final Action action1 = Action.action()
+                .name("action1")
+                .response(responseSchema)
+                .build();
+        final Action action2 = Action.action()
+                .name("action2")
+                .response(responseSchema)
+                .build();
 
         final Resource resourceV1 = Resource.resource()
                 .action(action1)
                 .build();
-
         final Resource resourceV2 = Resource.resource()
                 .action(action1)
                 .action(action2)
@@ -72,8 +82,9 @@ public class ApiDescriptionTest {
                 .put("2.0", resourceV2)
                 .build();
 
-        final Map<String, VersionedPath> paths = new HashMap<>();
-        paths.put("/testPath", versionedPath);
+        final Paths<VersionedPath> paths = Paths.paths(VersionedPath.class)
+                .put("/testPath", versionedPath)
+                .build();
 
         final ApiDescription apiDescription = ApiDescription.apiDescriptionWithVersionedPaths()
                 .id("frapi:test")

@@ -26,9 +26,5 @@ public enum PagingMode {
    /**
     * Paging mode is supported by offset.
     */
-   OFFSET,
-   /**
-    * Paging mode is not supported.
-    */
-   NOT_SUPPORTED;
+   OFFSET;
 }

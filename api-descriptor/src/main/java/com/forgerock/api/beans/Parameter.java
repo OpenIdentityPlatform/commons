@@ -33,7 +33,8 @@ public final class Parameter {
     private final ParameterSource source;
     private final boolean required;
     private final String[] enumValues;
-    // TODO options/enum_titles
+    private final String[] enumTitles;
+
     // TODO "Other appropriate fields as described in the JSON Schema Validation spec may also be used."
 
     /**
@@ -49,9 +50,18 @@ public final class Parameter {
         this.source = builder.source;
         this.required = builder.required;
         this.enumValues = builder.enumValues;
+        this.enumTitles = builder.enumTitles;
 
         if (isEmpty(name) || isEmpty(type) || source == null) {
             throw new ApiValidationException("name, type, and source are required");
+        }
+        if (enumTitles != null) {
+            if (enumValues == null) {
+                throw new ApiValidationException("enum[] required when enum_values[] is defined");
+            }
+            if (enumTitles.length != enumValues.length) {
+                throw new ApiValidationException("enum[] and enum_values[] must be the same length");
+            }
         }
     }
 
@@ -120,6 +130,16 @@ public final class Parameter {
     }
 
     /**
+     * Getter of enum-titles.
+     *
+     * @return Enum-titles or {@code null}
+     */
+    @JsonProperty("options/enum_titles")
+    public String[] getEnumTitles() {
+        return enumTitles;
+    }
+
+    /**
      * New parameter builder.
      *
      * @return Builder
@@ -140,6 +160,7 @@ public final class Parameter {
         private ParameterSource source;
         private boolean required;
         private String[] enumValues;
+        private String[] enumTitles;
 
         private Builder() {
         }
@@ -163,6 +184,17 @@ public final class Parameter {
          */
         public Builder enumValues(String[] enumValues) {
             this.enumValues = enumValues;
+            return this;
+        }
+
+        /**
+         * Sets enum-titles that <b>must</b> be the same length as {@link #enumValues(String[])}, if provided.
+         *
+         * @param enumTitles Enum-titles
+         * @return Builder
+         */
+        public Builder enumTitles(String[] enumTitles) {
+            this.enumTitles = enumTitles;
             return this;
         }
 

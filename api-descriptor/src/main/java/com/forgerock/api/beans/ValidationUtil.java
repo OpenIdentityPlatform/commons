@@ -48,4 +48,14 @@ final class ValidationUtil {
     public static boolean isEmpty(final String s) {
         return s == null || s.trim().isEmpty();
     }
+
+    /**
+     * Determines if an array is {@code null} or zero-length.
+     *
+     * @param a Array to validate
+     * @return {@code true} if {@code null} or empty, and {@code false} otherwise
+     */
+    public static boolean isEmpty(final Object[] a) {
+        return a == null || a.length == 0;
+    }
 }

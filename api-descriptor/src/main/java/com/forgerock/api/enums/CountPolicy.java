@@ -16,13 +16,9 @@
 package com.forgerock.api.enums;
 
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Query} supported paging mode.
+ * Enum that represents the {@link com.forgerock.api.beans.Query} supported count-policy.
  */
-public enum SupportedPagingModePolicy {
-   /**
-    * No paging mode policy is supported.
-    */
-   NONE,
+public enum CountPolicy {
    /**
     * Estimate paging mode policy is supported.
     */

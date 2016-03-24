@@ -28,7 +28,6 @@ public abstract class Operation {
     private final String description;
     private final Context[] supportedContexts;
     private final String[] supportedLocales;
-    private final String[] fields;
     private final Error[] errors;
     private final Parameter[] parameters;
     private final Stability stability;
@@ -41,7 +40,6 @@ public abstract class Operation {
     protected Operation(Builder builder) {
         this.description = builder.description;
         this.supportedLocales = builder.supportedLocales;
-        this.fields = builder.fields;
         this.stability = builder.stability;
 
         // NOTE: had to use local variables for lists or else type-inference was getting confused
@@ -80,15 +78,6 @@ public abstract class Operation {
      */
     public String[] getSupportedLocales() {
         return supportedLocales;
-    }
-
-    /**
-     * Getter of the fields array.
-     *
-     * @return Fields
-     */
-    public String[] getFields() {
-        return fields;
     }
 
     /**
@@ -134,7 +123,6 @@ public abstract class Operation {
         private String description;
         private final List<Context> supportedContexts;
         private String[] supportedLocales;
-        private String[] fields;
         private final List<Error> errors;
         private final List<Parameter> parameters;
         private Stability stability;
@@ -196,17 +184,6 @@ public abstract class Operation {
          */
         public T supportedLocales(String[] supportedlocales) {
             this.supportedLocales = supportedlocales;
-            return self();
-        }
-
-        /**
-         * Set the supported fields.
-         *
-         * @param fields The fields that can be selected for returning in the response payload
-         * @return Builder
-         */
-        public T fields(String[] fields) {
-            this.fields = fields;
             return self();
         }
 

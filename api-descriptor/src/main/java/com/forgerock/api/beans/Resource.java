@@ -15,6 +15,8 @@
  */
 package com.forgerock.api.beans;
 
+import static com.forgerock.api.beans.ValidationUtil.isEmpty;
+
 import com.forgerock.api.ApiValidationException;
 import org.forgerock.util.Reject;
 
@@ -26,6 +28,7 @@ import java.util.List;
  */
 public final class Resource implements PathNode {
     private final Schema resourceSchema;
+    private final String description;
     private final Create create;
     private final Read read;
     private final Update update;
@@ -36,6 +39,7 @@ public final class Resource implements PathNode {
 
     private Resource(Builder builder) {
         this.resourceSchema = builder.resourceSchema;
+        this.description = builder.description;
         this.create = builder.create;
         this.read = builder.read;
         this.update = builder.update;
@@ -45,7 +49,7 @@ public final class Resource implements PathNode {
         this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
 
         if (create == null && read == null && update == null && delete == null && patch == null
-                && actions.length == 0 && queries.length == 0) {
+                && isEmpty(actions) && isEmpty(queries)) {
             throw new ApiValidationException("At least one operation required");
         }
     }
@@ -57,6 +61,15 @@ public final class Resource implements PathNode {
      */
     public Schema getResourceSchema() {
         return resourceSchema;
+    }
+
+    /**
+     * Getter of description.
+     *
+     * @return Description
+     */
+    public String getDescription() {
+        return description;
     }
 
     /**
@@ -136,6 +149,7 @@ public final class Resource implements PathNode {
      */
     public final static class Builder {
         private Schema resourceSchema;
+        private String description;
         private Create create;
         private Read read;
         private Update update;
@@ -161,6 +175,17 @@ public final class Resource implements PathNode {
          */
         public Builder resourceSchema(Schema resourceSchema) {
             this.resourceSchema = resourceSchema;
+            return this;
+        }
+
+        /**
+         * Set the description.
+         *
+         * @param description A description of the endpoint
+         * @return Builder
+         */
+        public Builder description(String description) {
+            this.description = description;
             return this;
         }
 

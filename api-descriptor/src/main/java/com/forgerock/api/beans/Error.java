@@ -22,9 +22,7 @@ import com.forgerock.api.ApiValidationException;
  */
 public final class Error {
 
-    /**
-     * Must be an Integer, because 0 is not a valid default.
-     */
+    // Must be an Integer, because 0 is not a valid default
     private final Integer code;
     private final String description;
     private final Schema schema;
@@ -80,9 +78,7 @@ public final class Error {
      */
     public static final class Builder {
 
-        /**
-         * Must be an Integer, because 0 is not a valid default.
-         */
+        // Must be an Integer, because 0 is not a valid default.
         private Integer code;
         private String description;
         private Schema schema;

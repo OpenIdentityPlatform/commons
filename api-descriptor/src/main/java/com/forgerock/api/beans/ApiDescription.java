@@ -15,8 +15,6 @@
  */
 package com.forgerock.api.beans;
 
-import java.util.Map;
-
 import com.forgerock.api.ApiValidationException;
 
 /**
@@ -28,11 +26,11 @@ public final class ApiDescription<T extends PathNode> {
 
     private String id;
     private String description;
-    private Map<String, Schema> definitions;
-    private Map<String, Error> errors;
-    private Map<String, T> paths;
+    private Definitions definitions;
+    private Errors errors;
+    private Paths<T> paths;
 
-    private ApiDescription(Builder builder) {
+    private ApiDescription(Builder<T> builder) {
         this.id = builder.id;
         this.description = builder.description;
         this.definitions = builder.definitions;
@@ -42,10 +40,8 @@ public final class ApiDescription<T extends PathNode> {
         if (id == null || id.trim().isEmpty()) {
             throw new ApiValidationException("id required");
         }
-        if ((definitions == null || definitions.isEmpty())
-                && (errors == null || errors.isEmpty())
-                && (paths == null || paths.isEmpty())) {
-            throw new ApiValidationException("At least one of {definitions, errors, paths} required to be non-empty");
+        if (definitions == null && errors == null && paths == null) {
+            throw new ApiValidationException("At least one of {definitions, errors, paths} required");
         }
     }
 
@@ -81,7 +77,7 @@ public final class ApiDescription<T extends PathNode> {
      *
      * @return Definitions map
      */
-    public Map<String, Schema> getDefinitions() {
+    public Definitions getDefinitions() {
         return definitions;
     }
 
@@ -90,7 +86,7 @@ public final class ApiDescription<T extends PathNode> {
      *
      * @return Errors map
      */
-    public Map<String, Error> getErrors() {
+    public Errors getErrors() {
         return errors;
     }
 
@@ -99,7 +95,7 @@ public final class ApiDescription<T extends PathNode> {
      *
      * @return Paths
      */
-    public Map<String, T> getPaths() {
+    public Paths<T> getPaths() {
         return paths;
     }
 
@@ -123,14 +119,16 @@ public final class ApiDescription<T extends PathNode> {
 
     /**
      * Builder for the ApiDescription.
+     *
+     * @param <T2> Type implements {@link PathNode}
      */
-    public static final class Builder<T extends PathNode> {
+    public static final class Builder<T2 extends PathNode> {
 
         private String id;
         private String description;
-        private Map<String, Schema> definitions;
-        private Map<String, Error> errors;
-        private Map<String, T> paths;
+        private Definitions definitions;
+        private Errors errors;
+        private Paths<T2> paths;
 
         /**
          * Private default constructor with the mandatory fields.
@@ -144,7 +142,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param id ApiDescription id
          * @return Builder
          */
-        public Builder<T> id(String id) {
+        public Builder<T2> id(String id) {
             this.id = id;
             return this;
         }
@@ -155,7 +153,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param description Description of API Description
          * @return Builder
          */
-        public Builder<T> description(String description) {
+        public Builder<T2> description(String description) {
             this.description = description;
             return this;
         }
@@ -166,7 +164,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param definitions Definitions for this API Description
          * @return Builder
          */
-        public Builder<T> definitions(Map<String, Schema> definitions) {
+        public Builder<T2> definitions(Definitions definitions) {
             this.definitions = definitions;
             return this;
         }
@@ -177,7 +175,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param errors Errors for this API Description
          * @return Builder
          */
-        public Builder<T> errors(Map<String, Error> errors) {
+        public Builder<T2> errors(Errors errors) {
             this.errors = errors;
             return this;
         }
@@ -188,7 +186,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param paths Paths
          * @return Builder
          */
-        public Builder<T> paths(Map<String, T> paths) {
+        public Builder<T2> paths(Paths<T2> paths) {
             this.paths = paths;
             return this;
         }
@@ -198,8 +196,8 @@ public final class ApiDescription<T extends PathNode> {
          *
          * @return ApiDescription instace
          */
-        public ApiDescription build() {
-            return new ApiDescription(this);
+        public ApiDescription<T2> build() {
+            return new ApiDescription<>(this);
         }
     }
 

@@ -15,6 +15,8 @@
  */
 package com.forgerock.api.beans;
 
+import static com.forgerock.api.beans.ValidationUtil.isEmpty;
+
 import com.forgerock.api.ApiValidationException;
 import com.forgerock.api.enums.PatchOperations;
 
@@ -36,7 +38,7 @@ public final class Patch extends Operation {
         this.mvccSupported = builder.mvccSupported;
         this.operations = builder.operations;
 
-        if (operations == null || operations.length == 0 || mvccSupported == null) {
+        if (isEmpty(operations) || mvccSupported == null) {
             throw new ApiValidationException("operations and mvccSupported required");
         }
     }

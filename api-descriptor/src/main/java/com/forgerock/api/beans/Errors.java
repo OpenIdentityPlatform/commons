@@ -13,6 +13,7 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
+
 package com.forgerock.api.beans;
 
 import static com.forgerock.api.beans.ValidationUtil.containsWhitespace;
@@ -28,72 +29,66 @@ import com.forgerock.api.ApiValidationException;
 import org.forgerock.util.Reject;
 
 /**
- * Class that represents the Paths type in API descriptor.
- *
- * @param <T> Type implements {@link PathNode}
+ * Class that represents API descriptor {@link Error} errors.
  */
-public final class Paths<T extends PathNode> {
+public final class Errors {
 
-    private final Map<String, T> paths;
+    private final Map<String, Error> errors;
 
-    private Paths(Builder<T> builder) {
-        this.paths = builder.paths;
+    private Errors(Builder builder) {
+        this.errors = builder.errors;
 
-        if (paths.isEmpty()) {
-            throw new ApiValidationException("Must have at least one path definition");
+        if (errors.isEmpty()) {
+            throw new ApiValidationException("Must have at least one error definition");
         }
     }
 
     /**
-     * Gets a {@code Map} of path-names to Paths. This method is currently only used for JSON serialization.
+     * Gets a {@code Map} of error-names to {@link Error}s. This method is currently only used for JSON serialization.
      *
-     * @return {@code Map} of path-names to Paths.
+     * @return {@code Map} of error-names to {@link Error}s.
      */
     @JsonValue
-    protected Map<String, T> getPaths() {
-        return paths;
+    protected Map<String, Error> getErrors() {
+        return errors;
     }
 
     /**
-     * Gets the Path for a given Path-name.
+     * Gets the {@link Error} for a given Error-name.
      *
-     * @param name Path name
-     * @return Path or {@code null} if does-not-exist.
+     * @param name Error name
+     * @return {@link Error} or {@code null} if does-not-exist.
      */
     @JsonIgnore
-    public T get(String name) {
-        return paths.get(name);
+    public Error get(String name) {
+        return errors.get(name);
     }
 
     /**
-     * Returns all Path names.
+     * Returns all {@link Error} names.
      *
-     * @return All Path names.
+     * @return All {@link Error} names.
      */
     @JsonIgnore
     public Set<String> getNames() {
-        return paths.keySet();
+        return errors.keySet();
     }
 
     /**
-     * Create a new Builder for Paths.
+     * Create a new Builder for Errors.
      *
-     * @param <T3> Type implements {@link PathNode}
-     * @param pathNodeClass {@code Class} of the {@link PathNode} implementation being used
      * @return Builder
      */
-    public static <T3 extends PathNode> Builder<T3> paths(Class<T3> pathNodeClass) {
-        return new Builder<>();
+    public static Builder errors() {
+        return new Builder();
     }
 
     /**
-     * Builder to help construct the Paths.
-     *
-     * @param <T2> Type implements {@link PathNode}
+     * Builder to help construct the Errors.
      */
-    public static final class Builder<T2 extends PathNode> {
+    public static final class Builder {
 
-        private final Map<String, T2> paths = new HashMap<>();
+        private final Map<String, Error> errors = new HashMap<>();
 
         /**
          * Private default constructor.
@@ -102,30 +97,30 @@ public final class Paths<T extends PathNode> {
         }
 
         /**
-         * Adds a Path.
+         * Adds a {@link Error}.
          *
-         * @param name Path name
-         * @param path Path
+         * @param name Error name
+         * @param error {@link Error}
          * @return Builder
          */
-        public Builder<T2> put(String name, T2 path) {
+        public Builder put(String name, Error error) {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalStateException("name required and may not contain whitespace");
             }
-            if (paths.containsKey(name)) {
+            if (errors.containsKey(name)) {
                 throw new IllegalStateException("name not unique");
             }
-            paths.put(name, Reject.checkNotNull(path));
+            errors.put(name, Reject.checkNotNull(error));
             return this;
         }
 
         /**
-         * Builds the Paths instance.
+         * Builds the Errors instance.
          *
-         * @return Paths instance
+         * @return Errors instance
          */
-        public Paths<T2> build() {
-            return new Paths<>(this);
+        public Errors build() {
+            return new Errors(this);
         }
     }
 
