@@ -62,9 +62,8 @@ import java.util.Arrays;
  * base64 @ miginfocom . com.
  *
  * @version 2.2
- * @author Mikael Grev Date: 2004-aug-02 Time: 11:31:11
  */
-public class Base64 {
+public final class Base64 {
 
     private static final char[] CA =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
@@ -173,9 +172,10 @@ public class Base64 {
          * returned array will be, so we don't have to reallocate & copy it
          * later.
          */
-        int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a bonus...)
-        for (int i = 0; i < sLen; i++) // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
-        {
+        // Number of separator characters. (Actually illegal characters, but that's a bonus...)
+        int sepCnt = 0;
+        // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
+        for (int i = 0; i < sLen; i++) {
             if (IA[sArr[i]] < 0) {
                 sepCnt++;
             }
@@ -250,9 +250,10 @@ public class Base64 {
          * returned array will be, so we don't have to reallocate & copy it
          * later.
          */
-        int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a bonus...)
-        for (int i = 0; i < sLen; i++) // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
-        {
+        // Number of separator characters. (Actually illegal characters, but that's a bonus...)
+        int sepCnt = 0;
+        // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
+        for (int i = 0; i < sLen; i++) {
             if (IA[str.charAt(i)] < 0) {
                 sepCnt++;
             }

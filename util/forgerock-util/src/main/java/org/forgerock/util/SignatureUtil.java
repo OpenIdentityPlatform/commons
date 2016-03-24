@@ -28,7 +28,7 @@ import java.text.MessageFormat;
 /**
  * Utility class for signing and verifying signatures.
  */
-public class SignatureUtil {
+public final class SignatureUtil {
 
     /**
      * Singleton approach by using a static inner class.

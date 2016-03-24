@@ -114,8 +114,7 @@ public final class Pair<F, S> {
      * @return a comparator for Pairs of comparable objects.
      */
     @SuppressWarnings("unchecked")
-    public static <F extends Comparable<F>, S extends Comparable<S>>
-    Comparator<Pair<F, S>> getPairComparator() {
+    public static <F extends Comparable<F>, S extends Comparable<S>> Comparator<Pair<F, S>> getPairComparator() {
         return COMPARATOR;
     }
 

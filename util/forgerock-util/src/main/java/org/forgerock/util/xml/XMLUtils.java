@@ -34,7 +34,8 @@ public final class XMLUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(XMLUtils.class);
     private static final Object SECURITY_MANAGER;
-    private static final Integer ENTITY_EXP_LIMIT = Integer.getInteger("org.forgerock.util.xml.entity.expansion.limit", 5000);
+    private static final Integer ENTITY_EXP_LIMIT =
+            Integer.getInteger("org.forgerock.util.xml.entity.expansion.limit", 5000);
 
     /**
      * When Xerces is used for XML parsing, the only way to control entityExpansionLimit is to override the default

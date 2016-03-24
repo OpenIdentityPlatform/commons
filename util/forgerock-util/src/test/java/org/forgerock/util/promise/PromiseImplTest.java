@@ -345,7 +345,6 @@ public class PromiseImplTest {
      * @param completeBefore complete the promise before or after registering the listeners
      */
     @Test(dataProvider = "completeBeforeAfter")
-    @SuppressWarnings("unchecked")
     public void completeRuntimeExceptionPromiseBeforeRegisteringListener(boolean completeBefore) throws Exception {
         final RuntimeException result = new RuntimeException("completed");
         // Setup mocks behavior

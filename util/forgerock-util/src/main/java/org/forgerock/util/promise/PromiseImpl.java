@@ -379,6 +379,7 @@ public class PromiseImpl<V, E extends Exception> implements Promise<V, E>, Resul
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
             final Function<? super V, VOUT, EOUT> onResult, final Function<? super E, VOUT, EOUT> onException,
             final Function<? super RuntimeException, VOUT, EOUT> onRuntimeException) {

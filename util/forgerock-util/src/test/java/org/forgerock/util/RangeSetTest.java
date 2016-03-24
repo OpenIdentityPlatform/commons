@@ -25,37 +25,37 @@ import org.testng.annotations.Test;
 public class RangeSetTest {
 
     @Test
-    public void positive_step1_10elements() {
+    public void positiveStep1With10Elements() {
         RangeSet range = new RangeSet(10, 20, 1); // 10 through 19 inclusive
         assertThat(range.size()).isEqualTo(10);
     }
 
     @Test
-    public void positive_step2_50elements() {
+    public void positiveStep2With50Elements() {
         RangeSet range = new RangeSet(0, 100, 2); // 0 through 98 inclusive, in steps of 2
         assertThat(range.size()).isEqualTo(50);
     }
 
     @Test
-    public void negative_step1_10elements() {
+    public void negativeStep1With10Elements() {
         RangeSet range = new RangeSet(0, -10, -1); // 0 through -9 inclusive
         assertThat(range.size()).isEqualTo(10);
     }
 
     @Test
-    public void negative_step5_24elements() {
+    public void negativeStep5With24Elements() {
         RangeSet range = new RangeSet(-10, -241, -10); // -10 through -240, in steps of -10
         assertThat(range.size()).isEqualTo(24);
     }
 
     @Test
-    public void contains_step5() {
+    public void containsStep5() {
         RangeSet range = new RangeSet(5, 26, 5); // 5 through 25 inclusive
         assertThat(range.contains(15)).isTrue();
     }
 
     @Test
-    public void notContains_step5() {
+    public void notContainsStep5() {
         RangeSet range = new RangeSet(5, 26, 5); // 5 through 25 inclusive
         assertThat(range.contains(16)).isFalse();
     }

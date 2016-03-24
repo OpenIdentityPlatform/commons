@@ -56,7 +56,8 @@ public class PreferredLocalesTest {
     @Test
     public void testGetBundlePreferredLocaleNotFound() throws Exception {
         // Given
-        PreferredLocales locales = new PreferredLocales(asList(Locale.forLanguageTag("en"), Locale.forLanguageTag("de")));
+        PreferredLocales locales = new PreferredLocales(
+                asList(Locale.forLanguageTag("en"), Locale.forLanguageTag("de")));
 
         // When
         ResourceBundle bundle = locales.getBundleInPreferredLocale(BUNDLE_NAME, getClass().getClassLoader());

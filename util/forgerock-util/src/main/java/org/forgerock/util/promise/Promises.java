@@ -173,7 +173,6 @@ public final class Promises {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
                 final Function<? super V, VOUT, EOUT> onResult,
                 final Function<? super E, VOUT, EOUT> onException) {
@@ -181,6 +180,7 @@ public final class Promises {
         }
 
         @Override
+        @SuppressWarnings("unchecked")
         public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> then(
                 final Function<? super V, VOUT, EOUT> onResult,
                 final Function<? super E, VOUT, EOUT> onException,
@@ -238,7 +238,6 @@ public final class Promises {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public final <VOUT, EOUT extends Exception> Promise<VOUT, EOUT> thenAsync(
                 final AsyncFunction<? super V, VOUT, EOUT> onResult,
                 final AsyncFunction<? super E, VOUT, EOUT> onException) {
@@ -410,10 +409,12 @@ public final class Promises {
 
     private static final AsyncFunction<Exception, Object, Exception> EXCEPTION_IDEM_ASYNC_FUNC =
             new AsyncFunction<Exception, Object, Exception>() {
+                // @Checkstyle:off
                 @Override
                 public Promise<Object, Exception> apply(final Exception exception) throws Exception {
                     return newExceptionPromise(exception);
                 }
+                // @Checkstyle:off
             };
 
     private static final Function<Exception, Object, Exception> EXCEPTION_IDEM_FUNC =

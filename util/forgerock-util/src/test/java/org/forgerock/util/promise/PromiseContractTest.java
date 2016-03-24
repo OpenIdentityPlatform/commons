@@ -91,8 +91,6 @@ public class PromiseContractTest {
 
     @DataProvider
     private Object[][] completedPromisesWithException() {
-        Object[][] result = new Object[2][];
-
         final Exception exception = new Exception("completed");
         // Async promise, completed immediately
         PromiseImpl<String, Exception> promise = PromiseImpl.create();
@@ -191,7 +189,7 @@ public class PromiseContractTest {
     }
 
     @Test(dataProvider = "resultPromises")
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void promiseReturningValueShouldIgnoreAChainedThenCatchAsync(Promise<String, Exception> rootPromise)
             throws Exception {
         //Given
@@ -206,7 +204,7 @@ public class PromiseContractTest {
     }
 
     @Test(dataProvider = "exceptionPromises")
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void promiseReturningExceptionShouldHitAChainedThenCatchAsync(Promise<String, Exception> rootPromise)
             throws Exception {
         //Given
@@ -228,7 +226,7 @@ public class PromiseContractTest {
     }
 
     @Test(dataProvider = "runtimeExceptionPromises")
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void promiseThrowingRuntimeExceptionShouldIgnoreAChainedThenCatchAsync(
             Promise<String, Exception> rootPromise) throws Exception {
         //Given
@@ -248,7 +246,7 @@ public class PromiseContractTest {
     }
 
     @Test(dataProvider = "exceptionPromises")
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void promiseReturningExceptionShouldIgnoreAChainedThenAsync(Promise<String, Exception> rootPromise)
             throws Exception {
         //Given
@@ -268,7 +266,7 @@ public class PromiseContractTest {
     }
 
     @Test(dataProvider = "exceptionPromises")
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public void promiseReturningExceptionShouldIgnoreAChainedThen(Promise<String, Exception> rootPromise)
             throws Exception {
         //Given
