@@ -32,6 +32,7 @@ import org.forgerock.audit.handlers.jms.JmsAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.syslog.SyslogAuditEventHandlerConfiguration;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +40,13 @@ import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
 
 @SuppressWarnings("javadoc")
+/**
+ * Tests that all the properties declared in the various CAUD config files have an entry in the
+ * commonsAudiTranslation.properties file.
+ *
+ * When a new configuration class is created it should be added to the auditEventHandlerConfigurations data provider
+ * so that it can be included in these tests.
+ */
 public class TranslationPropertiesTest {
 
     //checkstyle:off
@@ -53,40 +61,24 @@ public class TranslationPropertiesTest {
         translationKeys = (Set<String>) (Set) loadTranslations().keySet();
     }
 
-    @Test
-    public void translationsExistForAllAuditServiceConfigurationProperties() throws Exception {
-        assertThat(translationKeys).containsAll(
-                propertyTranslationKeysOf(jsonSchemaForPojo(AuditServiceConfiguration.class)));
+    @DataProvider
+    public Object[][] auditEventHandlerConfigurations() throws Exception{
+        return new Class[][] {
+                {AuditServiceConfiguration.class},
+                {CsvAuditEventHandlerConfiguration.class},
+                {JdbcAuditEventHandlerConfiguration.class},
+                {SyslogAuditEventHandlerConfiguration.class},
+                {ElasticsearchAuditEventHandlerConfiguration.class},
+                {JmsAuditEventHandlerConfiguration.class}
+        };
     }
 
-    @Test
-    public void translationsExistForAllCsvAuditEventHandlerConfigurationProperties() throws Exception {
-        assertThat(translationKeys).containsAll(
-                propertyTranslationKeysOf(jsonSchemaForPojo(CsvAuditEventHandlerConfiguration.class)));
-    }
 
-    @Test
-    public void translationsExistForAllJdbcAuditEventHandlerConfigurationProperties() throws Exception {
-        assertThat(translationKeys).containsAll(
-                propertyTranslationKeysOf(jsonSchemaForPojo(JdbcAuditEventHandlerConfiguration.class)));
-    }
-
-    @Test
-    public void translationsExistForAllSyslogAuditEventHandlerConfigurationProperties() throws Exception {
-        assertThat(translationKeys).containsAll(
-                propertyTranslationKeysOf(jsonSchemaForPojo(SyslogAuditEventHandlerConfiguration.class)));
-    }
-
-    @Test
-    public void translationsExistForAllElasticsearchAuditEventHandlerConfigurationProperties() throws Exception {
-        assertThat(translationKeys).containsAll(
-                propertyTranslationKeysOf(jsonSchemaForPojo(ElasticsearchAuditEventHandlerConfiguration.class)));
-    }
-
-    @Test
-    public void translationsExistForAllJmsAuditEventHandlerConfigurationProperties() throws Exception {
-        assertThat(translationKeys).containsAll(
-                propertyTranslationKeysOf(jsonSchemaForPojo(JmsAuditEventHandlerConfiguration.class)));
+    @Test(dataProvider = "auditEventHandlerConfigurations")
+    public void translationsExistForAllAuditConfigurationClasses(Class clazz) throws Exception {
+        assertThat(translationKeys)
+                .containsAll(propertyTranslationKeysOf(jsonSchemaForPojo(clazz)))
+                .as("Testing class %s has all translations mapped", clazz.getCanonicalName());
     }
 
     private Properties loadTranslations() throws IOException {
@@ -114,7 +106,6 @@ public class TranslationPropertiesTest {
         SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
         mapper.acceptJsonFormatVisitor(mapper.constructType(pojoClass), visitor);
         JsonSchema jsonSchema = visitor.finalSchema();
-        jsonSchema.setId("/");
         return new JsonValue(mapper.readValue(mapper.writeValueAsString(jsonSchema), Map.class));
     }
 }

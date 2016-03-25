@@ -4,6 +4,7 @@
       "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
       "config" : {
         "name" : "csv",
+        "enabled" : true,
         "topics": [ "access", "activity", "config", "authentication" ],
         "logDirectory" : "/tmp/audit",
         "formatting" : {
@@ -37,6 +38,7 @@
       "class" : "org.forgerock.audit.handlers.syslog.SyslogAuditEventHandler",
       "config" : {
         "name" : "syslog",
+        "enabled" : true,
         "topics": [ "access", "activity", "config", "authentication" ],
         "protocol" : "UDP",
         "host" : "localhost",
@@ -60,6 +62,7 @@
       "class" : "org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandler",
       "config" : {
         "name" : "jdbc",
+        "enabled" : false,
         "topics": [ "access", "activity", "config", "authentication" ],
         "databaseType" : "mysql",
         "connectionPool" : {
@@ -160,6 +163,7 @@
       "class" : "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
       "config" : {
         "name" : "elasticsearch",
+        "enabled" : false,
         "topics": [ "access", "activity", "config", "authentication" ],
         "connection" : {
           "useSSL" : false,
@@ -182,18 +186,30 @@
     {
       "class" : "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
       "config" : {
-        "name" : "jms",
-        "topics" : [ "access", "activity", "config", "authentication"],
-        "providerUrl" : "tcp://localhost:61616",
-        "jmsTopic" : "audit",
-        "initialContextFactory" : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
-        "deliveryMode" : "NON_PERSISTENT",
-        "sessionMode" : "AUTO",
-        "batchEnabled" : true,
-        "batchConfiguration" : {
-          "capacity" : 1000,
-          "threadCount" : 3,
-          "maxBatchedEvents" : 100
+        "name": "jms",
+        "enabled" : false,
+        "topics": [
+          "access",
+          "activity",
+          "config",
+          "authentication"
+        ],
+        "deliveryMode": "NON_PERSISTENT",
+        "sessionMode": "AUTO",
+        "batch": {
+          "batchEnabled": true,
+          "capacity": 1000,
+          "threadCount": 3,
+          "maxBatchedEvents": 100
+        },
+        "jndi": {
+          "contextProperties": {
+            "java.naming.factory.initial": "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+            "java.naming.provider.url": "tcp://localhost:61616",
+            "topic.audit": "audit"
+          },
+          "topicName": "audit",
+          "connectionFactoryName": "ConnectionFactory"
         }
       }
     }

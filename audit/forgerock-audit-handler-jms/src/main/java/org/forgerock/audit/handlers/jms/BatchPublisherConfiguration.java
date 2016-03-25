@@ -22,6 +22,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
  * and worker threads that process the items in the queue.
  */
 public class BatchPublisherConfiguration {
+
+    @JsonPropertyDescription("audit.handlers.jms.publisher.batch.batchEnabled")
+    private boolean batchEnabled = false;
+
     @JsonPropertyDescription("audit.handlers.jms.publisher.batch.capacity")
     private int capacity = 1;
 
@@ -150,5 +154,23 @@ public class BatchPublisherConfiguration {
      */
     public void setShutdownTimeoutSec(long shutdownTimeoutSec) {
         this.shutdownTimeoutSec = shutdownTimeoutSec;
+    }
+
+    /**
+     * Returns true if handling of audit events should be done in batches.
+     *
+     * @return true if handling of audit events should be done in batches.
+     */
+    public boolean isBatchEnabled() {
+        return batchEnabled;
+    }
+
+    /**
+     * sets if handling of audit events should be done in batches.
+     *
+     * @param batchEnabled true if handling of audit events should be done in batches.
+     */
+    public void setBatchEnabled(boolean batchEnabled) {
+        this.batchEnabled = batchEnabled;
     }
 }

@@ -17,42 +17,39 @@
 package org.forgerock.audit.handlers.jms;
 
 import static org.forgerock.audit.handlers.jms.JmsAuditEventHandlerTest.getAuditConfig;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.util.Hashtable;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.JMSContext;
-import javax.jms.Session;
 import javax.jms.Topic;
-import javax.jms.TopicConnection;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;
-import java.util.Hashtable;
 
 import org.forgerock.json.JsonPointer;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * This ContextFactory is instantiated by the JmsAuditEventHandlerTest through the JNDI JMS config it uses.
  */
 public class TestInitialContextFactory implements InitialContextFactory {
 
-    private static final JsonPointer TOPIC_CONFIG_POINTER = new JsonPointer("/config/jmsTopic");
+    private static final JsonPointer TOPIC_CONFIG_POINTER = new JsonPointer("/config/jndi/topicName");
+    private static final JsonPointer CONNECTION_FACTORY_CONFIG_POINTER =
+            new JsonPointer("/config/jndi/connectionFactoryName");
 
     @Override
     public Context getInitialContext(Hashtable<?, ?> environment) throws NamingException {
         try {
-            String testTopic = getAuditConfig("event-handler-config.json").get(TOPIC_CONFIG_POINTER).asString();
+            String topicName = getAuditConfig("event-handler-config.json").get(TOPIC_CONFIG_POINTER).asString();
+            String connectionFactoryName =
+                    getAuditConfig("event-handler-config.json").get(CONNECTION_FACTORY_CONFIG_POINTER).asString();
             Context context = mock(Context.class);
             ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 
-            when(context.lookup(eq("ConnectionFactory"))).thenReturn(connectionFactory);
-            when(context.lookup(eq(testTopic))).thenReturn(mock(Topic.class));
+            when(context.lookup(connectionFactoryName)).thenReturn(connectionFactory);
+            when(context.lookup(topicName)).thenReturn(mock(Topic.class));
             when(connectionFactory.createConnection()).thenReturn(mock(Connection.class));
 
             return context;

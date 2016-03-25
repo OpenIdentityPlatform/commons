@@ -1,3 +1,13 @@
+# 5.1.0
+
+## Changes
+
+### Major
+* CAUD-313 Added JMS audit event handler.
+
+### Bug Fixes
+* CAUD-325 Change type of response detail
+
 # 5.0.0
 
 ## Changes

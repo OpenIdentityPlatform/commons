@@ -21,38 +21,50 @@ import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.audit.json.AuditJsonConfig.parseAuditEventHandlerConfiguration;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.*;
 
+import java.util.Map;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
-import java.util.Map;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.DependencyProviderBase;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.EventTopicsMetaDataBuilder;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.http.Client;
 import org.forgerock.http.Handler;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.QueryResponse;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.util.promise.Promise;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Tests the functionality of the JMS Audit event handler.
@@ -61,6 +73,9 @@ public class JmsAuditEventHandlerTest {
     private static final Logger logger = LoggerFactory.getLogger(JmsAuditEventHandlerTest.class);
     private static final String RESOURCE_PATH = "/org/forgerock/audit/handlers/jms/";
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final EventTopicsMetaData coreEventTopics =
+            EventTopicsMetaDataBuilder.coreTopicSchemas().build();
+    private static final String bufferedConfigJsonFileName = "batch-handler-config.json";
     private int sessionCount = 0;
 
     /**
@@ -72,22 +87,21 @@ public class JmsAuditEventHandlerTest {
     public void testJmsAuditEventHandlerPublish() throws Exception {
         // given
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Topic topic = mock(Topic.class);
         Connection connection = mock(Connection.class);
         Session session = mock(Session.class);
         MessageProducer producer = mock(MessageProducer.class);
 
         when(connectionFactory.createConnection()).thenReturn(connection);
         when(connection.createSession(anyBoolean(), anyInt())).thenReturn(session);
-        when(session.createProducer(any(Destination.class))).thenReturn(producer);
+        when(session.createProducer(topic)).thenReturn(producer);
         when(session.createTextMessage(anyString())).thenReturn(mock(TextMessage.class));
-
-        JmsAuditEventHandler jmsAuditEventHandler = new JmsAuditEventHandler(
-                connectionFactory,
-                mock(Topic.class),
-                parseAuditEventHandlerConfiguration(
-                        JmsAuditEventHandlerConfiguration.class,
-                        getAuditConfig("event-handler-config.json")),
-                EventTopicsMetaDataBuilder.coreTopicSchemas().build());
+        doNothing().when(producer).send(any(Message.class));
+        AuditEventHandler jmsAuditEventHandler =
+                new JmsAuditEventHandler(
+                        new DefaultJmsContextManager(connectionFactory, topic),
+                        getDefaultConfiguration(),
+                        coreEventTopics);
         jmsAuditEventHandler.startup();
 
         // then
@@ -152,20 +166,18 @@ public class JmsAuditEventHandlerTest {
             }
         }).when(producer).send(textMessage);
 
-        JmsAuditEventHandlerConfiguration configuration = parseAuditEventHandlerConfiguration(
-                JmsAuditEventHandlerConfiguration.class,
-                getAuditConfig("batch-handler-config.json"));
-        assertThat(configuration.isBatchEnabled()).isTrue();   // make sure we are testing batch.
+        JmsAuditEventHandlerConfiguration configuration = getBufferedConfiguration();
+        assertThat(configuration.getBatch().isBatchEnabled()).isTrue();   // make sure we are testing batch.
 
-        JmsAuditEventHandler jmsAuditEventHandler = new JmsAuditEventHandler(
-                connectionFactory,
-                mock(Topic.class),
-                configuration,
-                EventTopicsMetaDataBuilder.coreTopicSchemas().build());
+        AuditEventHandler jmsAuditEventHandler =
+                new JmsAuditEventHandler(
+                        new DefaultJmsContextManager(connectionFactory, mock(Topic.class)),
+                        configuration,
+                        coreEventTopics);
         jmsAuditEventHandler.startup();
 
         // then
-        int messagesToSend = configuration.getBatchConfiguration().getMaxBatchedEvents() + 2;
+        int messagesToSend = configuration.getBatch().getMaxBatchedEvents() + 2;
         for (int i = 0; i < messagesToSend; i++) {
             jmsAuditEventHandler.publishEvent(
                     null,
@@ -213,8 +225,166 @@ public class JmsAuditEventHandlerTest {
         }
     }
 
+    @Test
+    public void testJmsAuditEventHandlerPublishWithSuccessfulRetry() throws Exception {
+        // given
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Topic topic = mock(Topic.class);
+        Connection connection = mock(Connection.class);
+        Session session = mock(Session.class);
+        MessageProducer producer = mock(MessageProducer.class);
+
+        when(connectionFactory.createConnection()).thenReturn(connection);
+
+        // fail first time , return session second time
+        when(connection.createSession(anyBoolean(), anyInt()))
+                .thenThrow(mock(JMSException.class))
+                .thenReturn(session);
+        when(session.createProducer(topic)).thenReturn(producer);
+        when(session.createTextMessage(anyString())).thenReturn(mock(TextMessage.class));
+        doNothing().when(producer).send(any(Message.class));
+        JmsAuditEventHandler jmsAuditEventHandler =
+                new JmsAuditEventHandler(
+                        new DefaultJmsContextManager(connectionFactory, topic),
+                        getDefaultConfiguration(),
+                        coreEventTopics);
+                        EventTopicsMetaDataBuilder.coreTopicSchemas().build();
+        jmsAuditEventHandler.startup();
+
+        // when
+        jmsAuditEventHandler.publishEvent(null, "TEST_AUDIT", json(object(field("name", "TestEvent"))));
+
+        // then
+        ArgumentCaptor<TextMessage> textMessageCaptor = ArgumentCaptor.forClass(TextMessage.class);
+        verify(producer).send(textMessageCaptor.capture());
+
+        ArgumentCaptor<String> stringCaptor = ArgumentCaptor.forClass(String.class);
+        verify(session).createTextMessage(stringCaptor.capture());
+
+        String text = stringCaptor.getValue();
+        JsonValue jsonValue = new JsonValue(mapper.readValue(text, Map.class));
+
+        assertThat(jsonValue).hasString("auditTopic");
+        assertThat(jsonValue).stringAt("auditTopic").isEqualTo("TEST_AUDIT");
+        assertThat(jsonValue).stringAt("event/name").isEqualTo("TestEvent");
+    }
+
+    @Test
+    public void testJmsAuditEventHandlerPublishWithFailedRetry() throws Exception {
+        // given
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Topic topic = mock(Topic.class);
+        Connection connection = mock(Connection.class);
+        Session session = mock(Session.class);
+        MessageProducer producer = mock(MessageProducer.class);
+
+        when(connectionFactory.createConnection()).thenReturn(connection);
+
+        // fail with exception, then fail with exception agian to fail completely
+        when(connection.createSession(anyBoolean(), anyInt()))
+                .thenThrow(mock(JMSException.class), mock(JMSException.class));
+        when(session.createProducer(topic)).thenReturn(producer);
+        when(session.createTextMessage(anyString())).thenReturn(mock(TextMessage.class));
+        doNothing().when(producer).send(any(Message.class));
+        JmsAuditEventHandler jmsAuditEventHandler =
+                new JmsAuditEventHandler(
+                        new DefaultJmsContextManager(connectionFactory, topic),
+                        getDefaultConfiguration(),
+                        coreEventTopics);
+        jmsAuditEventHandler.startup();
+
+        // when
+        final Promise<ResourceResponse, ResourceException> promise =
+                jmsAuditEventHandler.publishEvent(null, "TEST_AUDIT", json(object(field("name", "TestEvent"))));
+
+        // then
+        assertThat(promise).failedWithException().isInstanceOf(InternalServerErrorException.class);
+
+    }
+
+    @Test
+    public void testQueryNotSupported() throws Exception {
+
+        // given
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Topic topic = mock(Topic.class);
+        Connection connection = mock(Connection.class);
+
+        when(connectionFactory.createConnection()).thenReturn(connection);
+        JmsAuditEventHandler jmsAuditEventHandler =
+                new JmsAuditEventHandler(
+                        new DefaultJmsContextManager(connectionFactory, topic),
+                        getDefaultConfiguration(),
+                        coreEventTopics);
+        jmsAuditEventHandler.startup();
+
+        // then
+        Promise<QueryResponse, ResourceException> response =
+                jmsAuditEventHandler.queryEvents(null, "TEST_AUDIT", Requests.newQueryRequest(""), null);
+
+        assertThat(response).failedWithException().isInstanceOf(NotSupportedException.class);
+    }
+
+    @Test
+    public void testReadNotSupported() throws Exception {
+
+        // given
+        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        Topic topic = mock(Topic.class);
+        Connection connection = mock(Connection.class);
+
+        when(connectionFactory.createConnection()).thenReturn(connection);
+        JmsAuditEventHandler jmsAuditEventHandler =
+                new JmsAuditEventHandler(
+                        new DefaultJmsContextManager(connectionFactory, topic),
+                        getDefaultConfiguration(),
+                        coreEventTopics);
+        jmsAuditEventHandler.startup();
+
+        // when
+        Promise<ResourceResponse, ResourceException> response =
+                jmsAuditEventHandler.readEvent(null, "TEST_AUDIT", "id");
+
+
+        // then
+        assertThat(response).failedWithException().isInstanceOf(NotSupportedException.class);
+    }
+
+    private JmsAuditEventHandlerConfiguration getDefaultConfiguration() throws Exception {
+        return parseAuditEventHandlerConfiguration(
+                JmsAuditEventHandlerConfiguration.class,
+                getAuditConfig("event-handler-config.json"));
+    }
+
+    private JmsAuditEventHandlerConfiguration getBufferedConfiguration() throws Exception {
+        return parseAuditEventHandlerConfiguration(
+                JmsAuditEventHandlerConfiguration.class,
+                getAuditConfig("batch-handler-config.json"));
+    }
+
     static JsonValue getAuditConfig(String testConfigFile) throws AuditException {
         return AuditJsonConfig.getJson(
                 JmsAuditEventHandlerTest.class.getResourceAsStream(RESOURCE_PATH + testConfigFile));
+    }
+
+    private static class DefaultJmsContextManager implements JmsContextManager {
+
+        private final ConnectionFactory connectionFactory;
+        private final Topic topic;
+
+        public DefaultJmsContextManager(ConnectionFactory connectionFactory, Topic topic) {
+            this.connectionFactory = connectionFactory;
+            this.topic = topic;
+        }
+
+        @Override
+        public Topic getTopic() throws InternalServerErrorException {
+            return topic;
+        }
+
+        @Override
+        public ConnectionFactory getConnectionFactory() throws InternalServerErrorException {
+            return connectionFactory;
+        }
     }
 }

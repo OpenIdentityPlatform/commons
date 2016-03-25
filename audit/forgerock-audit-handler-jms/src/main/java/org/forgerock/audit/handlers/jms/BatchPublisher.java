@@ -172,7 +172,7 @@ public abstract class BatchPublisher<T> implements Publisher<T> {
          * {@link #publishMessages(List)}. <br/>
          * If the drain results in an empty list, then this will poll for a single item and process that item as a
          * singleton batch. <br/>
-         * If the poll timeouts ({@link BatchPublisherConfiguration#pollTimeoutSeconds }), and the queue is still
+         * If the poll timeouts ({@link BatchPublisherConfiguration#pollTimeoutSec }), and the queue is still
          * empty, then the run will exit.<br/>
          */
         @Override

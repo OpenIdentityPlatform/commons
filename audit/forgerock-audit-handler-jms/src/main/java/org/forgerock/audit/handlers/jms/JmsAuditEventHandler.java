@@ -16,20 +16,20 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import static org.forgerock.audit.util.ResourceExceptionsUtil.*;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
+import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import java.util.Collections;
+import java.util.List;
 import javax.inject.Inject;
-import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
-import javax.jms.Topic;
-import java.util.Collections;
-import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
@@ -42,10 +42,12 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
-import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Publishes Audit events on a JMS Topic.
@@ -54,47 +56,31 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
     private static final Logger logger = LoggerFactory.getLogger(JmsAuditEventHandler.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
-    private final JmsContextManager jmsContextManager;
+    private final JmsResourceManager jmsResourceManager;
     private final Publisher<JsonValue> publisher;
 
     /**
      * Creates a new AuditEventHandler instance that publishes JMS messages on a JMS Topic for each Audit event.
      *
-     * @param connectionFactory optional injected connection factory.
-     * @param topic optional injected jms topic.
+     * @param jmsContextManager optional injected {@link JmsContextManager}.
      * @param configuration Configuration parameters that can be adjusted by system administrators.
      * @param eventTopicsMetaData Meta-data for all audit event topics.
      */
     @Inject
     public JmsAuditEventHandler(
-            @Audit final ConnectionFactory connectionFactory,
-            @Audit final Topic topic,
+            @Audit final JmsContextManager jmsContextManager,
             final JmsAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData) throws ResourceException {
 
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
-        Reject.ifNull(configuration.getProviderUrl(), "JMS providerUrl is required");
-        Reject.ifNull(configuration.getJmsTopic(), "JMS publish topic is required");
-        Reject.ifNull(configuration.getInitialContextFactory(), "JMS provider connection context factory is required.");
 
         publisher = buildPublisher(configuration);
-        jmsContextManager = buildContextManager(configuration, connectionFactory, topic);
-
+        this.jmsResourceManager =
+                jmsContextManager == null
+                        ? new JmsResourceManager(
+                                configuration, new JndiJmsContextManager(configuration.getJndi()))
+                        : new JmsResourceManager(configuration, jmsContextManager);
         logger.debug("Successfully configured JMS audit event handler.");
-    }
-
-    /**
-     * Factory method for the JMS Context Manager.
-     *
-     * @param configuration the configuration of the handler.
-     * @param connectionFactory connection factory for the context manager to manage, if not null.
-     * @param topic the jms topic for the context manager to manage, if not null.
-     * @return the constructed JmsContextManager.
-     * @throws ResourceException if there is trouble constructing the JMS ContextManager.
-     */
-    JmsContextManager buildContextManager(JmsAuditEventHandlerConfiguration configuration,
-            ConnectionFactory connectionFactory, Topic topic) throws ResourceException {
-        return new JmsContextManager(configuration, connectionFactory, topic);
     }
 
     /**
@@ -104,8 +90,8 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
      * @return the constructed publisher.
      */
     Publisher<JsonValue> buildPublisher(JmsAuditEventHandlerConfiguration configuration) {
-        return configuration.isBatchEnabled()
-                ? new JmsBatchPublisher(configuration.getBatchConfiguration())
+        return configuration.getBatch().isBatchEnabled()
+                ? new JmsBatchPublisher(configuration.getBatch())
                 : new JmsPublisher();
     }
 
@@ -160,25 +146,51 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
         }
     }
 
+
     /**
      * Publishes the list of messages using a single producer.
      *
      * @param messages the messages to send.
+     * @throws InternalServerErrorException if unable to publish jms messages.
      */
-    private void publishJmsMessages(List<JsonValue> messages) {
-        try (Session session = jmsContextManager.createSession()) {
-            try (MessageProducer producer = jmsContextManager.createProducer(session)) {
+    private void publishJmsMessagesWithRetry(List<JsonValue> messages) throws InternalServerErrorException {
+        try {
+            publishJmsMessages(messages);
+        } catch (JMSException e) {
+            logger.debug("Retrying publish", e);
+            try {
+                resetConnection();
+                publishJmsMessages(messages);
+            } catch (JMSException|ResourceException ex) {
+                final String message = "Unable to publish JMS messages, messages are likely lost";
+                logger.error(message, e);
+                throw new InternalServerErrorException(message, e);
+            }
+        }
+    }
+
+    /**
+     * Publishes the list of messages using a single producer.
+     *
+     * @param messages the messages to send.
+     * @throws JMSException if unable to publish jms messages and a retry is possible.
+     *         InternalServerErrorException if unable to publish jms messages and a retry is not possible.
+     */
+    private void publishJmsMessages(List<JsonValue> messages) throws JMSException, InternalServerErrorException {
+        try (Session session = jmsResourceManager.createSession()) {
+            try (MessageProducer producer = jmsResourceManager.createProducer(session)) {
                 for (JsonValue message : messages) {
                     String text = mapper.writeValueAsString(message.getObject());
-                    try {
-                        producer.send(session.createTextMessage(text));
-                    } catch (JMSException e) {
-                        logger.error("unable to publish message " + text, e);
-                    }
+                    producer.send(session.createTextMessage(text));
                 }
             }
-        } catch (Exception e) {
-            logger.error("Unable to publish JMS messages, messages are likely lost: " + messages, e);
+        } catch (JMSException e) {
+            logger.debug("Failed to publish messages", e);
+            throw e;
+        } catch (JsonProcessingException e) {
+            final String message = "Unable to publish JMS messages, messages are likely lost";
+            logger.error(message, e);
+            throw new InternalServerErrorException(message, e);
         }
     }
 
@@ -234,7 +246,11 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
 
         @Override
         protected void publishMessages(List<JsonValue> messages) {
-            publishJmsMessages(messages);
+            try {
+                publishJmsMessagesWithRetry(messages);
+            } catch (InternalServerErrorException e) {
+                // do nothing
+            }
         }
     }
 
@@ -255,13 +271,13 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
 
         @Override
         public void publish(JsonValue message) throws ResourceException {
-            publishJmsMessages(Collections.singletonList(message));
+            publishJmsMessagesWithRetry(Collections.singletonList(message));
         }
     }
 
     private void openJmsConnection() throws InternalServerErrorException {
         try {
-            jmsContextManager.openConnection();
+            jmsResourceManager.openConnection();
         } catch (JMSException e) {
             throw new InternalServerErrorException("trouble opening connection", e);
         }
@@ -269,9 +285,14 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
 
     private void closeJmsConnection() throws InternalServerErrorException {
         try {
-            jmsContextManager.closeConnection();
+            jmsResourceManager.closeConnection();
         } catch (JMSException e) {
             throw new InternalServerErrorException("trouble closing connection", e);
         }
+    }
+
+    private void resetConnection() throws InternalServerErrorException {
+        closeJmsConnection();
+        openJmsConnection();
     }
 }
