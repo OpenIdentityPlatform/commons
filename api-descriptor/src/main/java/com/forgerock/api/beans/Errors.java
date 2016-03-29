@@ -105,7 +105,7 @@ public final class Errors {
          */
         public Builder put(String name, Error error) {
             if (isEmpty(name) || containsWhitespace(name)) {
-                throw new IllegalStateException("name required and may not contain whitespace");
+                throw new IllegalArgumentException("name required and may not contain whitespace");
             }
             if (errors.containsKey(name)) {
                 throw new IllegalStateException("name not unique");

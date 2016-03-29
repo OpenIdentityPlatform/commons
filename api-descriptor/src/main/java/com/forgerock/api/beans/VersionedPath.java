@@ -15,6 +15,9 @@
  */
 package com.forgerock.api.beans;
 
+import static com.forgerock.api.beans.ValidationUtil.containsWhitespace;
+import static com.forgerock.api.beans.ValidationUtil.isEmpty;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -100,7 +103,11 @@ public final class VersionedPath implements PathNode {
          * @return Builder
          */
         public Builder put(String version, Resource resource) {
-            if (paths.containsKey(Reject.checkNotNull(version))) {
+            // TODO can we agree on a regex to validate `version`?
+            if (isEmpty(version) || containsWhitespace(version)) {
+                throw new IllegalArgumentException("version required and may not contain whitespace");
+            }
+            if (paths.containsKey(version)) {
                 throw new IllegalStateException("version not unique");
             }
             paths.put(version, Reject.checkNotNull(resource));

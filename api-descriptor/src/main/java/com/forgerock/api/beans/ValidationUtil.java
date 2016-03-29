@@ -58,4 +58,26 @@ final class ValidationUtil {
     public static boolean isEmpty(final Object[] a) {
         return a == null || a.length == 0;
     }
+
+    /**
+     * Checks that there is only a single single non-{@code null} argument.
+     *
+     * @param args Arguments
+     * @return {@code true} if there is a single non-{@code null} argument, and {@code false} otherwise
+     */
+    public static boolean isSingleNonNull(final Object... args) {
+        boolean found = false;
+        if (args != null) {
+            for (final Object o : args) {
+                if (o != null) {
+                    if (found) {
+                        // there is more than one non-null argument
+                        return false;
+                    }
+                    found = true;
+                }
+            }
+        }
+        return found;
+    }
 }

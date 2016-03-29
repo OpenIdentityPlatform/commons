@@ -15,10 +15,12 @@
  */
 package com.forgerock.api.beans;
 
+import static com.forgerock.api.beans.ValidationUtil.isSingleNonNull;
 import static org.forgerock.json.JsonValue.json;
 
 import java.io.IOException;
 
+import com.forgerock.api.ApiValidationException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
@@ -44,6 +46,10 @@ public final class Schema {
     private Schema(Builder builder) {
         this.reference = builder.reference;
         this.schema = builder.schema;
+
+        if (!isSingleNonNull(schema, reference)) {
+            throw new ApiValidationException("reference or a schema required, but not both");
+        }
     }
 
     /**
@@ -143,7 +149,6 @@ public final class Schema {
          * @return Schema instance.
          */
         public Schema build() {
-            Reject.ifTrue(schema == null && reference == null, "Must provide either a reference or a schema");
             return new Schema(this);
         }
     }

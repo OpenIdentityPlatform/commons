@@ -105,7 +105,7 @@ public final class Definitions {
          */
         public Builder put(String name, Schema schema) {
             if (isEmpty(name) || containsWhitespace(name)) {
-                throw new IllegalStateException("name required and may not contain whitespace");
+                throw new IllegalArgumentException("name required and may not contain whitespace");
             }
             if (definitions.containsKey(name)) {
                 throw new IllegalStateException("name not unique");

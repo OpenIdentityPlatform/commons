@@ -15,19 +15,31 @@
  */
 package com.forgerock.api.beans;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.forgerock.api.ApiValidationException;
+
 /**
  * Class that represents the Reference type in API descriptor.
  */
 public final class Reference {
 
+    @JsonProperty("$ref")
     private final String reference;
 
     private Reference(Builder builder) {
         this.reference = builder.reference;
+
+        if (ValidationUtil.isEmpty(reference)) {
+            throw new ApiValidationException("reference is required");
+        }
+        if (ValidationUtil.containsWhitespace(reference)) {
+            throw new ApiValidationException("reference may not contain whitespace");
+        }
     }
 
     /**
      * Getter of the JSON reference.
+     *
      * @return reference
      */
     public String getReference() {
@@ -36,6 +48,7 @@ public final class Reference {
 
     /**
      * Create a new Builder for Reference with the JSON ref parameter.
+     *
      * @param reference JSON reference
      * @return Builder
      */
@@ -52,6 +65,7 @@ public final class Reference {
 
         /**
          * Private default constructor with the mandatory field.
+         *
          * @param reference A JSON Reference to the required object. The URI should be an frURI type, or a URL
          */
         private Builder(String reference) {

@@ -110,7 +110,7 @@ public final class Paths<T extends PathNode> {
          */
         public Builder<T2> put(String name, T2 path) {
             if (isEmpty(name) || containsWhitespace(name)) {
-                throw new IllegalStateException("name required and may not contain whitespace");
+                throw new IllegalArgumentException("name required and may not contain whitespace");
             }
             if (paths.containsKey(name)) {
                 throw new IllegalStateException("name not unique");
