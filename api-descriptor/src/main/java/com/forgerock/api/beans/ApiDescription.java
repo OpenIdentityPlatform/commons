@@ -192,9 +192,9 @@ public final class ApiDescription<T extends PathNode> {
         }
 
         /**
-         * Builds the ApiDescription instace.
+         * Builds the ApiDescription instance.
          *
-         * @return ApiDescription instace
+         * @return ApiDescription instance
          */
         public ApiDescription<T2> build() {
             return new ApiDescription<>(this);

@@ -138,9 +138,9 @@ public final class Schema {
         }
 
         /**
-         * Builds the Schema instace.
+         * Builds the Schema instance.
          *
-         * @return Schema instace.
+         * @return Schema instance.
          */
         public Schema build() {
             Reject.ifTrue(schema == null && reference == null, "Must provide either a reference or a schema");

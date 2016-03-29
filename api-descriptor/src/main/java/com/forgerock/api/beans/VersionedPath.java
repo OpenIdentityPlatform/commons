@@ -108,9 +108,9 @@ public final class VersionedPath implements PathNode {
         }
 
         /**
-         * Builds the VersionedPath instace.
+         * Builds the VersionedPath instance.
          *
-         * @return VersionedPath instace
+         * @return VersionedPath instance
          */
         public VersionedPath build() {
             return new VersionedPath(this);

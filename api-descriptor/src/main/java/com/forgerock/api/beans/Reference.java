@@ -59,9 +59,9 @@ public final class Reference {
         }
 
         /**
-         * Builds the Reference instace.
+         * Builds the Reference instance.
          *
-         * @return Reference instace
+         * @return Reference instance
          */
         public Reference build() {
             return new Reference(this);

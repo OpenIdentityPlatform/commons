@@ -92,9 +92,9 @@ public final class Delete extends Operation {
         }
 
         /**
-         * Builds the Delete instace.
+         * Builds the Delete instance.
          *
-         * @return Delete instace
+         * @return Delete instance
          */
         public Delete build() {
             return new Delete(this);

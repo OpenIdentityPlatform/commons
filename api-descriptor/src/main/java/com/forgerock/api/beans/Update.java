@@ -92,9 +92,9 @@ public final class Update extends Operation {
         }
 
         /**
-         * Builds the Create instace.
+         * Builds the Create instance.
          *
-         * @return Create instace
+         * @return Create instance
          */
         public Update build() {
             return new Update(this);

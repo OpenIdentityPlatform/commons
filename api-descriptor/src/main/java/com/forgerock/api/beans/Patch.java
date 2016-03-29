@@ -113,9 +113,9 @@ public final class Patch extends Operation {
         }
 
         /**
-         * Builds the Patch instace.
+         * Builds the Patch instance.
          *
-         * @return Patch instace
+         * @return Patch instance
          */
         public Patch build() {
             return new Patch(this);

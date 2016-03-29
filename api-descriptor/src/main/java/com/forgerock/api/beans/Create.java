@@ -107,9 +107,9 @@ public final class Create extends Operation {
         }
 
         /**
-         * Builds the Create instace.
+         * Builds the Create instance.
          *
-         * @return Create instace
+         * @return Create instance
          */
         public Create build() {
             return new Create(this);

@@ -142,9 +142,9 @@ public final class Action extends Operation {
         }
 
         /**
-         * Builds the Action instace.
+         * Builds the Action instance.
          *
-         * @return Action instace
+         * @return Action instance
          */
         public Action build() {
             return new Action(this);

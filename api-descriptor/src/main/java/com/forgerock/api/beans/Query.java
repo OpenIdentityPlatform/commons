@@ -216,9 +216,9 @@ public final class Query extends Operation {
         }
 
         /**
-         * Builds the Query instace.
+         * Builds the Query instance.
          *
-         * @return Query instace
+         * @return Query instance
          */
         public Query build() {
             return new Query(this);

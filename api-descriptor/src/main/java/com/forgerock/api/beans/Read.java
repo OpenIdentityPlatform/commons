@@ -62,9 +62,9 @@ public final class Read extends Operation {
         }
 
         /**
-         * Builds the Create instace.
+         * Builds the Create instance.
          *
-         * @return Create instace
+         * @return Create instance
          */
         public Read build() {
             return new Read(this);
