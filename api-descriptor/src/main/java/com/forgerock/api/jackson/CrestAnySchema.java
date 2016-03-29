@@ -16,13 +16,18 @@
 
 package com.forgerock.api.jackson;
 
+import javax.validation.ValidationException;
+
+import org.forgerock.json.JsonValue;
+
 import com.fasterxml.jackson.module.jsonSchema.types.AnySchema;
 import com.forgerock.api.enums.WritePolicy;
 
 /**
  * An extension to the Jackson {@code AnySchema} that includes the custom CREST JSON Schema attributes.
  */
-public class CrestAnySchema extends AnySchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema {
+public class CrestAnySchema extends AnySchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
+        ValidatableSchema {
     private WritePolicy writePolicy;
     private Boolean errorOnWritePolicyFailure;
     private Integer propertyOrder;
@@ -55,5 +60,10 @@ public class CrestAnySchema extends AnySchema implements CrestReadWritePoliciesS
     @Override
     public void setPropertyOrder(Integer order) {
         this.propertyOrder = order;
+    }
+
+    @Override
+    public void validate(JsonValue object) throws ValidationException {
+        // any Object is a valid AnySchema.
     }
 }

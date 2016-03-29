@@ -1,74 +1,72 @@
 {
-    "definitions":[
-        {
-            "_id":"frapi:openam:restsms:services:audit",
-            "title":"OpenAM Audit Service schema",
-            "schema":{
-                "type":"object",
-                "required":[
+    "definitions": {
+        "frapi:openam:restsms:services:audit": {
+            "title": "OpenAM Audit Service schema",
+            "schema": {
+                "type": "object",
+                "required": [
                     "auditEnabled"
                 ],
-                "properties":{
-                    "_id":{
-                        "type":"string",
-                        "title":"Name",
-                        "description":"The id of the service.",
-                        "readOnly":true
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The id of the service.",
+                        "readOnly": true
                     },
-                    "auditEnabled":{
-                        "type":"boolean",
-                        "title":"Audit Enabled",
-                        "description":"Whether the audit service is enabled",
-                        "propertyOrder":1
+                    "auditEnabled": {
+                        "type": "boolean",
+                        "title": "Audit Enabled",
+                        "description": "Whether the audit service is enabled",
+                        "propertyOrder": 1
                     },
-                    "fieldFilterPolicy":{
-                        "type":"array",
-                        "title":"Field exclusion policies",
-                        "description":"A list of fields or values (JSON pointers) to exclude from the audit event.",
-                        "propertyOrder":2,
-                        "items":{
-                            "type":"string"
+                    "fieldFilterPolicy": {
+                        "type": "array",
+                        "title": "Field exclusion policies",
+                        "description": "A list of fields or values (JSON pointers) to exclude from the audit event.",
+                        "propertyOrder": 2,
+                        "items": {
+                            "type": "string"
                         }
                     }
                 }
             }
         },
-        {
-            "_id":"frapi:openam:restsms:services:audit:csv",
-            "title":"OpenAM Audit Service CSV handler schema",
-            "schema":{
-                "type":"object",
-                "required":[
+        "frapi:openam:restsms:services:audit:csv": {
+            "title": "OpenAM Audit Service CSV handler schema",
+            "schema": {
+                "type": "object",
+                "required": [
                     "_id",
                     "topics"
                 ],
-                "properties":{
-                    "_id":{
-                        "type":"string",
-                        "title":"Name",
-                        "description":"The id of the service.",
-                        "propertyOrder":0,
-                        "readOnly":false,
-                        "writePolicy":"WRITE_ON_CREATE"
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The id of the service.",
+                        "propertyOrder": 0,
+                        "readOnly": false,
+                        "writePolicy": "WRITE_ON_CREATE"
                     },
-                    "enabled":{
-                        "type":"boolean",
-                        "title":"Audit Handler Enabled",
-                        "description":"Whether the CSV audit handler is enabled",
-                        "propertyOrder":1
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "Audit Handler Enabled",
+                        "description": "Whether the CSV audit handler is enabled",
+                        "propertyOrder": 1
                     },
-                    "topics":{
-                        "type":"array",
-                        "items":{
-                            "type":"string",
-                            "enum":[
+                    "topics": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
                                 "access",
                                 "activity",
                                 "authentication",
                                 "config"
                             ],
-                            "options":{
-                                "enum_titles":[
+                            "options": {
+                                "enum_titles": [
                                     "Access",
                                     "Activity",
                                     "Authentication",
@@ -76,55 +74,54 @@
                                 ]
                             }
                         },
-                        "title":"Topics",
-                        "description":"The audit topics to publish events for",
-                        "propertyOrder":2
+                        "title": "Topics",
+                        "description": "The audit topics to publish events for",
+                        "propertyOrder": 2
                     },
-                    "location":{
-                        "type":"string",
-                        "title":"Location",
-                        "description":"The location to save CSV files in.",
-                        "propertyOrder":3
+                    "location": {
+                        "type": "string",
+                        "title": "Location",
+                        "description": "The location to save CSV files in.",
+                        "propertyOrder": 3
                     }
                 }
             }
         },
-        {
-            "_id":"frapi:openam:restsms:services:audit:syslog",
-            "title":"OpenAM Audit Service SysLog handler schema",
-            "schema":{
-                "type":"object",
-                "required":[
+        "frapi:openam:restsms:services:audit:syslog": {
+            "title": "OpenAM Audit Service SysLog handler schema",
+            "schema": {
+                "type": "object",
+                "required": [
                     "_id",
                     "topics"
                 ],
-                "properties":{
-                    "_id":{
-                        "type":"string",
-                        "title":"Name",
-                        "description":"The id of the service.",
-                        "propertyOrder":0,
-                        "readOnly":false,
-                        "writePolicy":"WRITE_ON_CREATE"
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The id of the service.",
+                        "propertyOrder": 0,
+                        "readOnly": false,
+                        "writePolicy": "WRITE_ON_CREATE"
                     },
-                    "enabled":{
-                        "type":"boolean",
-                        "title":"Audit Handler Enabled",
-                        "description":"Whether the audit handler is enabled",
-                        "propertyOrder":1
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "Audit Handler Enabled",
+                        "description": "Whether the audit handler is enabled",
+                        "propertyOrder": 1
                     },
-                    "topics":{
-                        "type":"array",
-                        "items":{
-                            "type":"string",
-                            "enum":[
+                    "topics": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
                                 "access",
                                 "activity",
                                 "authentication",
                                 "config"
                             ],
-                            "options":{
-                                "enum_titles":[
+                            "options": {
+                                "enum_titles": [
                                     "Access",
                                     "Activity",
                                     "Authentication",
@@ -132,85 +129,82 @@
                                 ]
                             }
                         },
-                        "title":"Topics",
-                        "description":"The audit topics to publish events for",
-                        "propertyOrder":2
+                        "title": "Topics",
+                        "description": "The audit topics to publish events for",
+                        "propertyOrder": 2
                     },
-                    "host":{
-                        "type":"string",
-                        "title":"Host",
-                        "description":"The host for the syslog connections.",
-                        "propertyOrder":3
+                    "host": {
+                        "type": "string",
+                        "title": "Host",
+                        "description": "The host for the syslog connections.",
+                        "propertyOrder": 3
                     }
                 }
             }
         },
-        {
-            "_id":"frapi:openam:restsms:service",
-            "title":"OpenAM Common REST SMS schema",
-            "schema":{
-                "type":"object",
-                "required":[
+        "frapi:openam:restsms:service": {
+            "title": "OpenAM Common REST SMS schema",
+            "schema": {
+                "type": "object",
+                "required": [
                     "_id"
                 ],
-                "properties":{
-                    "_id":{
-                        "type":"string",
-                        "title":"Name",
-                        "description":"The name of the entry that is being set."
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The name of the entry that is being set."
                     }
                 }
             }
         },
-        {
-            "_id":"frapi:openam:restsms:service:type",
-            "title":"OpenAM Common REST SMS schema type",
-            "schema":{
-                "type":"object",
-                "required":[
+        "frapi:openam:restsms:service:type": {
+            "title": "OpenAM Common REST SMS schema type",
+            "schema": {
+                "type": "object",
+                "required": [
                     "_id",
                     "name"
                 ],
-                "properties":{
-                    "_id":{
-                        "type":"string",
-                        "title":"Resource name",
-                        "description":"The resource identifier of the SMS type"
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Resource name",
+                        "description": "The resource identifier of the SMS type"
                     },
-                    "name":{
-                        "type":"string",
-                        "title":"Name",
-                        "description":"The human-readable name of the SMS type"
+                    "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The human-readable name of the SMS type"
                     },
-                    "description":{
-                        "type":"string",
-                        "title":"Description",
-                        "description":"Additional information about the type."
+                    "description": {
+                        "type": "string",
+                        "title": "Description",
+                        "description": "Additional information about the type."
                     }
                 }
             }
         },
-        {
-            "_id":"frapi:openam:restsms:service:typeresults",
-            "title":"OpenAM Common REST SMS schema types",
-            "schema":{
-                "type":"object",
-                "required":[
+        "frapi:openam:restsms:service:typeresults": {
+            "title": "OpenAM Common REST SMS schema types",
+            "schema": {
+                "type": "object",
+                "required": [
                     "result"
                 ],
-                "properties":{
-                    "result":{
-                        "type":"array",
-                        "title":"Type array",
-                        "description":"The array of type objects",
-                        "items":{
-                            "$ref":"frapi:openam:restsms:service:type"
+                "properties": {
+                    "result": {
+                        "type": "array",
+                        "title": "Type array",
+                        "description": "The array of type objects",
+                        "items": {
+                            "$ref": "frapi:openam:restsms:service:type"
                         }
                     }
                 }
             }
         }
-    ],
+    },
     "paths":{
         "/realm-config/services":{
             "1.0":{

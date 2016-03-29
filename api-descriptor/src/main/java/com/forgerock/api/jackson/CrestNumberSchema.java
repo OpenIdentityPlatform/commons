@@ -16,9 +16,15 @@
 
 package com.forgerock.api.jackson;
 
+import static com.forgerock.api.jackson.JacksonUtils.*;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import javax.validation.ValidationException;
+
+import org.forgerock.json.JsonValue;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.module.jsonSchema.types.NumberSchema;
@@ -27,7 +33,8 @@ import com.forgerock.api.enums.WritePolicy;
 /**
  * An extension to the Jackson {@code NumberSchema} that includes the custom CREST JSON Schema attributes.
  */
-class CrestNumberSchema extends NumberSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema, EnumSchema {
+class CrestNumberSchema extends NumberSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema, EnumSchema,
+        ValidatableSchema {
     private WritePolicy writePolicy;
     private Boolean errorOnWritePolicyFailure;
     private Integer propertyOrder;
@@ -73,4 +80,16 @@ class CrestNumberSchema extends NumberSchema implements CrestReadWritePoliciesSc
     public void setEnumTitles(List<String> titles) {
         this.options = Collections.singletonMap(ENUM_TITLES, titles);
     }
+
+    @Override
+    public void validate(JsonValue object) throws ValidationException {
+        if (!object.isNumber()) {
+            throw new ValidationException("Expected number, but got " + object.getObject());
+        }
+        Number number = object.asNumber();
+        validateMaximumAndMinimum(number, getMaximum(), getExclusiveMaximum(), getMinimum(), getExclusiveMinimum());
+        validateFormatForNumber(format);
+        validateEnum(enums, number.toString());
+    }
+
 }

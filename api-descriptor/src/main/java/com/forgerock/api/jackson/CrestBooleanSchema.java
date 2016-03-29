@@ -16,13 +16,18 @@
 
 package com.forgerock.api.jackson;
 
+import javax.validation.ValidationException;
+
+import org.forgerock.json.JsonValue;
+
 import com.fasterxml.jackson.module.jsonSchema.types.BooleanSchema;
 import com.forgerock.api.enums.WritePolicy;
 
 /**
  * An extension to the Jackson {@code BooleanSchema} that includes the custom CREST JSON Schema attributes.
  */
-public class CrestBooleanSchema extends BooleanSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema {
+public class CrestBooleanSchema extends BooleanSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
+        ValidatableSchema {
     private WritePolicy writePolicy;
     private Boolean errorOnWritePolicyFailure;
     private Integer propertyOrder;
@@ -55,5 +60,12 @@ public class CrestBooleanSchema extends BooleanSchema implements CrestReadWriteP
     @Override
     public void setPropertyOrder(Integer order) {
         this.propertyOrder = order;
+    }
+
+    @Override
+    public void validate(JsonValue object) throws ValidationException {
+        if (!object.isBoolean()) {
+            throw new ValidationException("Expected boolean, but got " + object.getObject());
+        }
     }
 }
