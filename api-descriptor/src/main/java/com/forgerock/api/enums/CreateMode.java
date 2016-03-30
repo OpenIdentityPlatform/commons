@@ -15,8 +15,10 @@
  */
 package com.forgerock.api.enums;
 
+import com.forgerock.api.models.Create;
+
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Create} modes.
+ * Enum that represents the {@link Create} modes.
  */
 public enum CreateMode {
     /**

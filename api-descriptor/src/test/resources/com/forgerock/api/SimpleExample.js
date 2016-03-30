@@ -15,7 +15,7 @@
  */
 
 var imports = JavaImporter(
-    Packages.com.forgerock.api.beans,
+    Packages.com.forgerock.api.models,
     org.forgerock.json.JsonValue,
     com.fasterxml.jackson.databind.ObjectMapper,
     com.fasterxml.jackson.annotation.JsonInclude);

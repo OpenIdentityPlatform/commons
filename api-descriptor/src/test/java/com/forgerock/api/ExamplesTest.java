@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import com.forgerock.api.beans.ApiDescription;
+import com.forgerock.api.models.ApiDescription;
 import com.forgerock.api.jackson.JacksonUtils;
 
 public class ExamplesTest {

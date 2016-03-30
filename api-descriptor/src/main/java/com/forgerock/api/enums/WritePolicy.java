@@ -15,8 +15,10 @@
  */
 package com.forgerock.api.enums;
 
+import com.forgerock.api.models.Schema;
+
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Schema} write policies.
+ * Enum that represents the {@link Schema} write policies.
  *
  */
 public enum WritePolicy {

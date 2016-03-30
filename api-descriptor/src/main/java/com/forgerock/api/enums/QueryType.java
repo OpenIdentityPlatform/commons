@@ -15,8 +15,10 @@
  */
 package com.forgerock.api.enums;
 
+import com.forgerock.api.models.Query;
+
 /**
- * Enum that represents the {@link com.forgerock.api.beans.Query} type.
+ * Enum that represents the {@link Query} type.
  */
 public enum QueryType {
    /**

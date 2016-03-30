@@ -13,20 +13,11 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-package com.forgerock.api.enums;
 
-import com.forgerock.api.models.Query;
+package com.forgerock.api.models;
 
 /**
- * Enum that represents the {@link Query} paging mode.
+ * A node on an API Descriptor path.
  */
-public enum PagingMode {
-   /**
-    * Paging mode is supported by cookies.
-    */
-   COOKIE,
-   /**
-    * Paging mode is supported by offset.
-    */
-   OFFSET;
+interface PathNode {
 }

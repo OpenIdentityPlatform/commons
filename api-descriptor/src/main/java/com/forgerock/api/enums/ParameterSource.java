@@ -15,8 +15,10 @@
  */
 package com.forgerock.api.enums;
 
+import com.forgerock.api.models.Parameter;
+
 /**
- * Enum that represents where the {@link com.forgerock.api.beans.Parameter} comes from.
+ * Enum that represents where the {@link Parameter} comes from.
  *
  */
 public enum ParameterSource {

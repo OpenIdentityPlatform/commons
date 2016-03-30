@@ -16,8 +16,10 @@
 
 package com.forgerock.api.enums;
 
+import com.forgerock.api.models.Patch;
+
 /**
- * Represents all {@link com.forgerock.api.beans.Patch} operations.
+ * Represents all {@link Patch} operations.
  */
 public enum PatchOperations {
     /**
