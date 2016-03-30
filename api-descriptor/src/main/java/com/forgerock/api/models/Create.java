@@ -83,6 +83,7 @@ public final class Create extends Operation {
 
         private CreateMode mode;
         private Boolean mvccSupported;
+        private Boolean singleton;
 
         private Builder() {
             super();
@@ -107,6 +108,17 @@ public final class Create extends Operation {
          */
         public Builder mode(CreateMode mode) {
             this.mode = mode;
+            return this;
+        }
+
+        /**
+         * Setter for singleton.
+         *
+         * @param singleton Specifies that create operates on a singleton as opposed to a collection.
+         * @return Builder
+         */
+        public Builder singleton(boolean singleton) {
+            this.singleton = singleton;
             return this;
         }
 

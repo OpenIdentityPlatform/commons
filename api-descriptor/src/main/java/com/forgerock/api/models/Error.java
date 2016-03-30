@@ -95,7 +95,7 @@ public final class Error {
          * @param code Error code
          * @return Builder
          */
-        public Builder code(int code) {
+        public Builder code(Integer code) {
             this.code = code;
             return this;
         }

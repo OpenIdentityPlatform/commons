@@ -33,7 +33,7 @@ In this document the following type names are used:
 
 ## Specification
 
-### API Description (top level)
+### ApiDescription (top level)
 
 At the top level, the API is described by providing a collection of schema definitions and
 a Paths object that describes what paths are available in the application. The top-level must contain at least one
@@ -43,13 +43,13 @@ of _definitions_, _errors_, or _paths_.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| -------------------------------------
-id          | frURI                       | ✓          | The identifier of the API Descriptor
+id          | String                      | ✓          | The frURI identifier of the API Descriptor
 description | String                      |            | Short description of the API Descriptor
-definitions | [Schemas](#Schemas)         |            | Locally defined schema definitions
+definitions | [Definitions](#Definitions) |            | Locally defined schema definitions
 errors      | [Errors](#Errors)           |            | Locally defined error definitions
 paths       | [Paths](#Paths)             |            | The supported paths for this API.
 
-### Schemas
+### Definitions
 
 Locally defined schema definitions, that can be referred to via JSON References.
 
@@ -77,7 +77,7 @@ Use JSON Reference syntax to refer to schemas defined locally or externally.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-$ref        | String                      | ✓          | A JSON Reference to the required object. The URI should be an frURI type, or a URL.
+$ref        | String                      | ✓          | A JSON Reference ($ref) to the required object. The URI should be an frURI type, or a URL.
 
 ### Paths
 
@@ -100,7 +100,7 @@ version individual API endpoints may omit this level of the Path hierarchy.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-`[1-9][0-9]*(\.[1-9][0-9]*)*` | [Resource](#Resource)  | ✓ | The supported versions of the resources at this path.
+`*`         | [Resource](#Resource)       | ✓          | The supported versions of the resources at this path. Format: `[1-9][0-9]*(\.[1-9][0-9]*)*`
 
 ### Resource
 
@@ -112,7 +112,7 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 resourceSchema | [Schema](#Schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, or patch are supported.
 create      | [Create](#Create)           |            | The create operation description, if supported
-read        | [Operation](#Operation)     |            | The read operation description, if supported
+read        | [Read](#Read)               |            | The read operation description, if supported
 update      | [Update](#Update)           |            | The update operation description, if supported
 delete      | [Delete](#Delete)           |            | The delete operation description, if supported
 patch       | [Patch](#Patch)             |            | The patch operation description, if supported
@@ -147,7 +147,7 @@ supportedContexts | [Context](#Context)[] |            | The supported contexts
 supportedLocales | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation
 errors      | [Error](#Error)[]           |            | Errors known be returned by this operation
 parameters  | [Parameter](#Parameter)[]   |            | Extra parameters supported by the operation
-stability   | String                      |            | Stability of the endpoint. One of "internal", "stable" (default), "evolving", "deprecated", or "removed".
+stability   | String                      |            | Stability of the endpoint. Supported values are: "internal", "stable" (default), "evolving", "deprecated", or "removed".
 
 ### Error
 
@@ -167,9 +167,9 @@ define a minimum Error array definition, with 500 Internal Server Error, as foll
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-code        | Number                      | ✓          | Three digit error code, corresponding to HTTP status codes.
+code        | Integer                     | ✓          | Three digit error code, corresponding to HTTP status codes.
 description | String                      | ✓          | Description of what may cause an error to occur.
-detailSchema | [Schema](#Schema)          |            | Optional definition of a schema for the error-detail.
+schema      | [Schema](#Schema)           |            | Optional definition of a schema for the error-detail.
 
 The schema for an error response is:
 
@@ -215,13 +215,13 @@ or a _PATH_ parameter, surrounded by curly braces in the Path.
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 name        | String                      | ✓          | The name of the parameter
-type        | String                      | ✓          | The type of the parameter: `string`, `number`, `boolean`, and array variants
-defaultValue | `*`                        |            | The default value, if applicable
+type        | String                      | ✓          | The semantics/format of the parameter: `string`, `number`, `boolean`, and array variants
+defaultValue | String                     |            | The default value, if applicable
 description | String                      |            | The description of the parameter
-source      | String                      | ✓          | Where the parameter comes from. May be: PATH or ADDITIONAL
+source      | String                      | ✓          | Where the parameter comes from. Supported values are: PATH or ADDITIONAL
 required    | boolean                     |            | Whether the parameter is required
-enum        | String[]                    |            | One or more values that must match
-options/enum_titles | String[]            |            | String descriptions in the same order as the enum values.
+enumValues  | String[]                    |            | One or more values that must match
+enumTitles  | String[]                    |            | `options/enum_titles` - string descriptions in the same order as the enum values.
 
 Other appropriate fields as described in the
 [JSON Schema Validation](http://json-schema.org/latest/json-schema-validation.html) spec
@@ -235,9 +235,17 @@ Creates a new resource. Extends [Operation](#Operation).
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-mode        | String                      | ✓          | Values accepted are: `ID_FROM_CLIENT`, `ID_FROM_SERVER`.
+mode        | String                      | ✓          | Supported values are: `ID_FROM_CLIENT`, `ID_FROM_SERVER`.
 singleton   | boolean                     |            | Specifies that create operates on a singleton as opposed to a collection.
 mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
+
+### Read
+
+Reads the contents of an existing resource. Extends [Operation](#Operation).
+
+#### Properties
+
+No additional properties.
 
 ### Update
 
@@ -320,7 +328,7 @@ _resourceSchema_ and Patch-operation being performed:
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-operations  | String[]                    | ✓          | Set of supported patch operations. Supported values are `ADD`, `REMOVE`, `REPLACE`, `INCREMENT`, `MOVE`, `COPY`, `TRANSFORM`.
+operations  | String[]                    | ✓          | Set of supported patch operations. Supported values are:`ADD`, `REMOVE`, `REPLACE`, `INCREMENT`, `MOVE`, `COPY`, `TRANSFORM`.
 mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC update.
 
 ### Action
@@ -345,9 +353,9 @@ Resource queries arrays can include up to one query filter operation, one query 
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-type        | String                      | ✓          | Supported values are `ID`, `FILTER`, `EXPRESSION`.
-pagingMode  | String[]                    |            | Supported values are `COOKIE`, `OFFSET`. Paging is not supported if omitted.
-countPolicy | String[]                    |            | Supported values are `ESTIMATE`, `EXACT`. Counts are not provided if omitted.
+type        | String                      | ✓          | Supported values are:`ID`, `FILTER`, `EXPRESSION`.
+pagingMode  | String[]                    |            | Supported values are:`COOKIE`, `OFFSET`. Paging is not supported if omitted.
+countPolicy | String[]                    |            | Supported values are:`ESTIMATE`, `EXACT`. Counts are not provided if omitted.
 queryId     | String                      | `type:ID`  | Required if `type` is `ID`.
 queryableFields | String[]                | `type:FILTER` | Required if `type` is `FILTER`. Lists the fields in the `resourceSchema` that can be queried. A value of “*” can be used to state that all fields can be queried.
 supportedSortKeys | String[]              |            | The keys that may be used to sort the filter results. A value of “*” can be used to state that all keys are supported.
