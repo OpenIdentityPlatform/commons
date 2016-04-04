@@ -14,14 +14,14 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-package com.forgerock.api.models;
+package com.forgerock.api.util;
 
 import java.util.regex.Pattern;
 
 /**
  * API Descriptor model-validation utilities.
  */
-final class ValidationUtil {
+public final class ValidationUtil {
 
     private static final Pattern FIND_WHITESPACE_PATTERN = Pattern.compile("\\s");
 

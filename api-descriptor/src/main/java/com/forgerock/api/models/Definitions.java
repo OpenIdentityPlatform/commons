@@ -16,8 +16,8 @@
 
 package com.forgerock.api.models;
 
-import static com.forgerock.api.models.ValidationUtil.containsWhitespace;
-import static com.forgerock.api.models.ValidationUtil.isEmpty;
+import static com.forgerock.api.util.ValidationUtil.containsWhitespace;
+import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
 import java.util.HashMap;
 import java.util.Map;

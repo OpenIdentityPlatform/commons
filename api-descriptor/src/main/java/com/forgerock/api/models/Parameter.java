@@ -16,7 +16,7 @@
 
 package com.forgerock.api.models;
 
-import static com.forgerock.api.models.ValidationUtil.isEmpty;
+import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.forgerock.api.ApiValidationException;

@@ -16,7 +16,7 @@
 
 package com.forgerock.api.models;
 
-import static com.forgerock.api.models.ValidationUtil.*;
+import static com.forgerock.api.util.ValidationUtil.*;
 import static com.forgerock.api.jackson.JacksonUtils.*;
 import static org.forgerock.json.JsonValue.*;
 

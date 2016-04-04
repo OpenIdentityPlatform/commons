@@ -16,7 +16,7 @@
 
 package com.forgerock.api.models;
 
-import static com.forgerock.api.models.ValidationUtil.isEmpty;
+import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
 import com.forgerock.api.ApiValidationException;
 import com.forgerock.api.enums.PatchOperations;
