@@ -231,6 +231,9 @@
   },
   "paths": {
     "/groups": {
+      "resourceSchema": {
+        "$ref": "#/definitions/dynamically-generated-group-schema"
+      },
       "create": {
         "stability": "evolving",
         "mode": "ID_FROM_SERVER",
@@ -455,6 +458,9 @@
       }
     },
     "/users": {
+      "resourceSchema": {
+        "$ref": "#/definitions/dynamically-generated-user-schema"
+      },
       "create": {
         "stability": "evolving",
         "mode": "ID_FROM_SERVER",
