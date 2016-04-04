@@ -149,6 +149,19 @@ public final class Parameter {
         return new Builder();
     }
 
+    public static Parameter fromAnnotation(com.forgerock.api.annotations.Parameter parameter) {
+        return parameter()
+                .description(parameter.description())
+                .defaultValue(parameter.defaultValue())
+                .enumValues(parameter.enumValues())
+                .enumTitles(parameter.enumTitles())
+                .required(parameter.required())
+                .name(parameter.name())
+                .source(parameter.source())
+                .type(parameter.type())
+                .build();
+    }
+
     /**
      * Builder to construct Parameter object.
      */

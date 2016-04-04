@@ -19,6 +19,8 @@ package com.forgerock.api.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.forgerock.services.context.AbstractContext;
+
 import com.forgerock.api.enums.Stability;
 
 /**
@@ -241,6 +243,22 @@ public abstract class Operation {
         public T stability(Stability stability) {
             this.stability = stability;
             return self();
+        }
+
+        public T detailsFromAnnotation(com.forgerock.api.annotations.Operation operation) {
+            for (com.forgerock.api.annotations.Error error : operation.errors()) {
+                error(Error.fromAnnotation(error));
+            }
+            for (com.forgerock.api.annotations.Parameter error : operation.parameters()) {
+                parameter(Parameter.fromAnnotation(error));
+            }
+            for (Class<? extends AbstractContext> contextType : operation.contexts()) {
+                supportedContext(Context.forType(contextType));
+            }
+
+            return description(operation.description())
+                    .supportedLocales(operation.locales())
+                    .stability(operation.stability());
         }
     }
 

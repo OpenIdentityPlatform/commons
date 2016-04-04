@@ -22,9 +22,15 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
 import com.forgerock.api.ApiValidationException;
+import com.forgerock.api.annotations.*;
+import com.forgerock.api.annotations.Error;
+import com.forgerock.api.annotations.Parameter;
 import com.forgerock.api.enums.CreateMode;
 import com.forgerock.api.enums.PatchOperations;
 import com.forgerock.api.enums.QueryType;
+import com.forgerock.api.enums.Stability;
+
+import org.forgerock.services.context.SecurityContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -151,4 +157,68 @@ public class ResourceTest {
         Resource.resource().build();
     }
 
+    @Test
+    public void testSimpleAnnotatedHandler() throws Exception {
+        final Resource resource = Resource.fromAnnotatedType(SimpleAnnotatedHandler.class, false);
+        assertThat(resource.getResourceSchema()).isNull();
+        assertThat(resource.getActions()).hasSize(1);
+        Action action = resource.getActions()[0];
+        assertThat(action.getName()).isEqualTo("myAction");
+        assertThat(action.getErrors()).isEmpty();
+        assertThat(action.getParameters()).isEmpty();
+    }
+
+    @RequestHandler
+    private static final class SimpleAnnotatedHandler {
+        @com.forgerock.api.annotations.Action(
+                operationDescription = @com.forgerock.api.annotations.Operation
+        )
+        public void myAction() {
+
+        }
+    }
+
+    @Test
+    public void testCreateAnnotatedHandler() throws Exception {
+        final Resource resource = Resource.fromAnnotatedType(CreateAnnotatedHandler.class, false);
+        assertThat(resource.getResourceSchema()).isNull();
+        assertThat(resource.getCreate()).isNotNull();
+        Create create = resource.getCreate();
+        assertThat(create.isMvccSupported()).isTrue();
+        assertThat(create.getDescription()).isEqualTo("A create resource operation.");
+        assertThat(create.getErrors()).hasSize(2);
+        assertThat(create.getParameters()).hasSize(1);
+        assertThat(create.getSupportedLocales()).hasSize(2);
+        assertThat(create.getSupportedContexts()).hasSize(1);
+        assertThat(create.getStability()).isEqualTo(Stability.EVOLVING);
+        assertThat(create.getMode()).isEqualTo(CreateMode.ID_FROM_SERVER);
+    }
+
+    @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
+    private static final class CreateAnnotatedHandler {
+        @com.forgerock.api.annotations.Create(
+                operationDescription = @com.forgerock.api.annotations.Operation(
+                        contexts = SecurityContext.class,
+                        description = "A create resource operation.",
+                        errors = {
+                                @Error(code = 403, description = "You're forbidden from creating these resources"),
+                                @Error(code = 400, description = "You can't create these resources using too much jam")
+                        },
+                        parameters = {
+                                @Parameter(name = "id", type = "string", description = "Identifier for the created")
+                        },
+                        locales = {"en-GB", "en-US"},
+                        stability = Stability.EVOLVING
+                ),
+                mvccSupported = true
+        )
+        public void create() {
+
+        }
+    }
+
+    private static final class Response {
+        public String id;
+        public Integer field;
+    }
 }

@@ -19,6 +19,8 @@ package com.forgerock.api.models;
 import static com.forgerock.api.util.ValidationUtil.containsWhitespace;
 import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
+import org.forgerock.services.context.AbstractContext;
+
 import com.forgerock.api.ApiValidationException;
 
 /**
@@ -35,8 +37,8 @@ public final class Context {
         this.schema = builder.schema;
         this.required = builder.required;
 
-        if (isEmpty(name) || schema == null) {
-            throw new ApiValidationException("name and schema are required");
+        if (isEmpty(name)) {
+            throw new ApiValidationException("name is required");
         }
         if (containsWhitespace(name)) {
             throw new ApiValidationException("name contains whitespace");
@@ -77,6 +79,11 @@ public final class Context {
      */
     public static Builder context() {
         return new Builder();
+    }
+
+    public static Context forType(Class<? extends AbstractContext> contextType) {
+        // TODO: should we have some sort of schema? Does one make sense? Can we get the context type to return one?
+        return context().name(contextType.getSimpleName()).build();
     }
 
     /**

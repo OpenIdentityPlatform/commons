@@ -19,6 +19,10 @@ package com.forgerock.api.models;
 import static com.forgerock.api.util.ValidationUtil.containsWhitespace;
 import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
+import java.lang.reflect.Method;
+
+import org.forgerock.guava.common.base.Strings;
+
 import com.forgerock.api.ApiValidationException;
 
 /**
@@ -41,8 +45,8 @@ public final class Action extends Operation {
         this.request = builder.request;
         this.response = builder.response;
 
-        if (isEmpty(name) || response == null) {
-            throw new ApiValidationException("name and response are required");
+        if (isEmpty(name)) {
+            throw new ApiValidationException("name is required");
         }
         if (containsWhitespace(name)) {
             throw new ApiValidationException("name contains whitespace");
@@ -93,6 +97,19 @@ public final class Action extends Operation {
     @Override
     protected void allocateToResource(Resource.Builder resourceBuilder) {
         resourceBuilder.action(this);
+    }
+
+    public static Action fromAnnotation(com.forgerock.api.annotations.Action action, Method annotated) {
+        Builder builder = action();
+        String specifiedName = action.name();
+        if (Strings.isNullOrEmpty(specifiedName)) {
+            specifiedName = annotated.getName();
+        }
+        return builder.name(specifiedName)
+                .request(Schema.fromAnnotation(action.request()))
+                .response(Schema.fromAnnotation(action.response()))
+                .detailsFromAnnotation(action.operationDescription())
+                .build();
     }
 
     /**

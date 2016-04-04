@@ -76,6 +76,14 @@ public final class Error {
         return new Builder();
     }
 
+    public static Error fromAnnotation(com.forgerock.api.annotations.Error error) {
+        return error()
+                .description(error.description())
+                .code(error.code())
+                .schema(Schema.fromAnnotation(error.detailSchema()))
+                .build();
+    }
+
     /**
      * Builder for the Error.
      */

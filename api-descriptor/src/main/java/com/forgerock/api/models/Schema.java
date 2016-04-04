@@ -22,6 +22,7 @@ import static org.forgerock.json.JsonValue.*;
 
 import java.io.IOException;
 
+import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
@@ -81,6 +82,17 @@ public final class Schema {
      */
     public static Builder schema() {
         return newBuilder();
+    }
+
+    public static Schema fromAnnotation(com.forgerock.api.annotations.Schema schema) {
+        if (schema.fromType().equals(Void.class) && Strings.isNullOrEmpty(schema.schemaResource())) {
+            return null;
+        }
+        Builder builder = schema();
+        if (!schema.fromType().equals(Void.class)) {
+            builder.type(schema.fromType());
+        }
+        return builder.build();
     }
 
     /**

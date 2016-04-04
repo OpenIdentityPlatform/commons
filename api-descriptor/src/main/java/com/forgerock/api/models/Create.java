@@ -16,6 +16,11 @@
 
 package com.forgerock.api.models;
 
+import static com.forgerock.api.enums.CreateMode.*;
+
+import java.util.Arrays;
+import java.util.List;
+
 import com.forgerock.api.ApiValidationException;
 import com.forgerock.api.enums.CreateMode;
 
@@ -74,6 +79,18 @@ public final class Create extends Operation {
     @Override
     protected void allocateToResource(Resource.Builder resourceBuilder) {
         resourceBuilder.create(this);
+    }
+
+    public static Create fromAnnotation(com.forgerock.api.annotations.Create create, boolean singleton) {
+        List<CreateMode> modes = Arrays.asList(create.modes());
+        if ((singleton && !modes.contains(ID_FROM_CLIENT)) || (!singleton && !modes.contains(ID_FROM_SERVER))) {
+            return null;
+        }
+        return create()
+                .detailsFromAnnotation(create.operationDescription())
+                .mode(singleton ? ID_FROM_CLIENT : ID_FROM_SERVER)
+                .mvccSupported(create.mvccSupported())
+                .build();
     }
 
     /**

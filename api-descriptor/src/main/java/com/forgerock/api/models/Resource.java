@@ -19,8 +19,11 @@ package com.forgerock.api.models;
 import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
 import com.forgerock.api.ApiValidationException;
+import com.forgerock.api.annotations.RequestHandler;
+
 import org.forgerock.util.Reject;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,6 +146,31 @@ public final class Resource implements PathNode {
      */
     public static Builder resource() {
         return new Builder();
+    }
+
+    /**
+     * Build a {@code Resource} from an annotated request handler.
+     * @param type The annotated type.
+     * @return The built {@code Resource} object.
+     */
+    public static Resource fromAnnotatedType(Class<?> type, boolean singleton) {
+        Builder builder = resource();
+        RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
+        if (requestHandler == null) {
+            throw new IllegalArgumentException("Not a valid class - must have a RequestHandler annotation");
+        }
+//        builder.resourceSchema(Schema.newBuilder().fromAnnotation(requestHandler.resourceSchema()));
+        for (Method m : type.getDeclaredMethods()) {
+            com.forgerock.api.annotations.Action action = m.getAnnotation(com.forgerock.api.annotations.Action.class);
+            if (action != null) {
+                builder.actions.add(Action.fromAnnotation(action, m));
+            }
+            com.forgerock.api.annotations.Create create = m.getAnnotation(com.forgerock.api.annotations.Create.class);
+            if (create != null) {
+                builder.create = Create.fromAnnotation(create, singleton);
+            }
+        }
+        return builder.build();
     }
 
     /**
