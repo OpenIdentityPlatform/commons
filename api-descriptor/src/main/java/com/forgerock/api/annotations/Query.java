@@ -21,6 +21,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.forgerock.api.enums.CountPolicy;
+import com.forgerock.api.enums.PagingMode;
+import com.forgerock.api.enums.QueryType;
+
 /**
  * Indicates an CREST query method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
  * collection resource request handlers.
@@ -42,4 +46,18 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Query {
+    /** Describe the standard operation details of this action. */
+    Operation operationDescription();
+    /** The type of query this method supports. */
+    QueryType type();
+    /** The paging modes that can be used with this query. */
+    PagingMode[] pagingModes() default {};
+    /** The count policies that can be used with this query. */
+    CountPolicy[] countPolicies() default {};
+    /** The query ID - required only when {@code type} is {@code ID}. */
+    String id() default "";
+    /** The set of fields that can be used in a query filter. Required only when the {@code type} is {@code FILTER}. */
+    String[] queryableFields() default {};
+    /** The keys that can be used to sort the results of the query. */
+    String[] sortKeys() default {};
 }

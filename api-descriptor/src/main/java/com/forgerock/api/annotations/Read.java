@@ -42,4 +42,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Read {
+    /** Describe the standard operation details of this action. */
+    Operation operationDescription();
 }

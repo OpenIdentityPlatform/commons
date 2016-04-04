@@ -48,4 +48,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RequestHandler {
+    /**
+     * The schema for all the standard resource operations (CRUDPQ) on this endpoint. Only required if one or more
+     * of those operations are supported.
+     */
+    Schema resourceSchema() default @Schema;
 }

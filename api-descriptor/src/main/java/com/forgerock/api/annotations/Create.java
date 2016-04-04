@@ -21,6 +21,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.forgerock.api.enums.CreateMode;
+import com.forgerock.api.enums.CreateSingleton;
+
 /**
  * Indicates an CREST create method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
  * collection resource request handlers.
@@ -41,4 +44,20 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Create {
+    /** Describe the standard operation details of this action. */
+    Operation operationDescription();
+    /**
+     * Specify the types of create request that are supported. By default, both ID_FROM_CLIENT (POST-to-collection type)
+     * and ID_FROM_SERVER (PUT-to-instance type) are supported.
+     */
+    CreateMode[] modes() default { CreateMode.ID_FROM_CLIENT, CreateMode.ID_FROM_SERVER };
+    /**
+     * Specify whether or not the created resource is a singleton or one of a collection. By default this will be
+     * worked out from the context, and should rarely have to be set to anything different.
+     */
+    CreateSingleton singleton() default CreateSingleton.FROM_CONTEXT;
+    /**
+     * Whether MVCC style requests are supported.
+     */
+    boolean mvccSupported();
 }

@@ -46,5 +46,11 @@ public @interface Action {
      * The name of the action being exposed. If not supplied, the name of the method is assumed to be the name
      * of the action.
      */
-    String value() default "";
+    String name() default "";
+    /** Describe the standard operation details of this action. */
+    Operation operationDescription();
+    /** Describe the schema of the request payload. Defaults to no content. */
+    Schema request() default @Schema;
+    /** Describe the schema of the response payload. Defaults to no content. */
+    Schema response() default @Schema;
 }
