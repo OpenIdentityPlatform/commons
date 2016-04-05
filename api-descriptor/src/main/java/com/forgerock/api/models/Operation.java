@@ -245,6 +245,11 @@ public abstract class Operation {
             return self();
         }
 
+        /**
+         * Set all properties in the Builder using the data in the annotation.
+         * @param operation The annotation that holds the data
+         * @return Builder
+         */
         public T detailsFromAnnotation(com.forgerock.api.annotations.Operation operation) {
             for (com.forgerock.api.annotations.Error error : operation.errors()) {
                 error(Error.fromAnnotation(error));

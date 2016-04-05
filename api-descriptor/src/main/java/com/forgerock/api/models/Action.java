@@ -28,7 +28,7 @@ import com.forgerock.api.ApiValidationException;
 /**
  * Class that represents the Action operation type in API descriptor.
  */
-public final class Action extends Operation {
+public final class Action extends Operation implements Comparable<Action> {
 
     private final String name;
     private final Schema request;
@@ -99,6 +99,12 @@ public final class Action extends Operation {
         resourceBuilder.action(this);
     }
 
+    /**
+     * Builds an Action object using the data in the annotation.
+     * @param action The annotation that holds the data for the built object
+     * @param annotated The action method
+     * @return Action instance
+     */
     public static Action fromAnnotation(com.forgerock.api.annotations.Action action, Method annotated) {
         Builder builder = action();
         String specifiedName = action.name();
@@ -110,6 +116,20 @@ public final class Action extends Operation {
                 .response(Schema.fromAnnotation(action.response()))
                 .detailsFromAnnotation(action.operationDescription())
                 .build();
+    }
+
+    /**
+     * Compares two strings lexicographically.
+     * @param action Action to compare to
+     * @return  the value {@code 0} if the argument string is equal to
+     *          this string; a value less than {@code 0} if this string
+     *          is lexicographically less than the string argument; and a
+     *          value greater than {@code 0} if this string is
+     *          lexicographically greater than the string argument.
+     */
+    @Override
+    public int compareTo(Action action) {
+        return this.name.compareTo(action.getName());
     }
 
     /**

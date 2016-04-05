@@ -34,6 +34,6 @@ public @interface Operation {
     Parameter[] parameters() default {};
     /** The stability state for the operation. Defaults to {@code STABLE}. */
     Stability stability() default Stability.STABLE;
-    /** A description of the operation */
+    /** A description of the operation. */
     String description() default "";
 }

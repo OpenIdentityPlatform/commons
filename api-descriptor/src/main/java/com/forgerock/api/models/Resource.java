@@ -24,8 +24,9 @@ import com.forgerock.api.annotations.RequestHandler;
 import org.forgerock.util.Reject;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * Class that represents the Resource type in API descriptor.
@@ -151,6 +152,7 @@ public final class Resource implements PathNode {
     /**
      * Build a {@code Resource} from an annotated request handler.
      * @param type The annotated type.
+     * @param singleton True if the resource is singleton  //TODO: clarify this comment
      * @return The built {@code Resource} object.
      */
     public static Resource fromAnnotatedType(Class<?> type, boolean singleton) {
@@ -169,6 +171,26 @@ public final class Resource implements PathNode {
             if (create != null) {
                 builder.create = Create.fromAnnotation(create, singleton);
             }
+            com.forgerock.api.annotations.Read read = m.getAnnotation(com.forgerock.api.annotations.Read.class);
+            if (read != null) {
+                builder.read = Read.fromAnnotation(read);
+            }
+            com.forgerock.api.annotations.Update update = m.getAnnotation(com.forgerock.api.annotations.Update.class);
+            if (update != null) {
+                builder.update = Update.fromAnnotation(update);
+            }
+            com.forgerock.api.annotations.Delete delete = m.getAnnotation(com.forgerock.api.annotations.Delete.class);
+            if (delete != null) {
+                builder.delete = Delete.fromAnnotation(delete);
+            }
+            com.forgerock.api.annotations.Patch patch = m.getAnnotation(com.forgerock.api.annotations.Patch.class);
+            if (patch != null) {
+                builder.patch = Patch.fromAnnotation(patch);
+            }
+            com.forgerock.api.annotations.Query query = m.getAnnotation(com.forgerock.api.annotations.Query.class);
+            if (query != null) {
+                builder.queries.add(Query.fromAnnotation(query));
+            }
         }
         return builder.build();
     }
@@ -184,15 +206,15 @@ public final class Resource implements PathNode {
         private Update update;
         private Delete delete;
         private Patch patch;
-        private final List<Action> actions;
-        private final List<Query> queries;
+        private final Set<Action> actions;
+        private final Set<Query> queries;
 
         /**
          * Private default constructor.
          */
         protected Builder() {
-            actions = new ArrayList<>();
-            queries = new ArrayList<>();
+            actions = new TreeSet<>();
+            queries = new TreeSet<>();
         }
 
         /**

@@ -73,7 +73,7 @@ class CrestIntegerSchema extends IntegerSchema implements CrestReadWritePolicies
 
     @Override
     public List<String> getEnumTitles() {
-        return options.get(ENUM_TITLES);
+        return options == null ? null : options.get(ENUM_TITLES);
     }
 
     @Override

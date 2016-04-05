@@ -81,6 +81,12 @@ public final class Create extends Operation {
         resourceBuilder.create(this);
     }
 
+    /**
+     * Builds a Create object from the data in the annotation.
+     * @param create Create annotation that holds the data
+     * @param singleton True if singleton create //TODO fix this
+     * @return Create instance
+     */
     public static Create fromAnnotation(com.forgerock.api.annotations.Create create, boolean singleton) {
         List<CreateMode> modes = Arrays.asList(create.modes());
         if ((singleton && !modes.contains(ID_FROM_CLIENT)) || (!singleton && !modes.contains(ID_FROM_SERVER))) {

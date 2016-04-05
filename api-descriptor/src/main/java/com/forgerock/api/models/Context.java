@@ -81,6 +81,11 @@ public final class Context {
         return new Builder();
     }
 
+    /**
+     * Builds a Context object using the data in the parameter.
+     * @param contextType The contextType that holds the data for the Context object build
+     * @return Context instance
+     */
     public static Context forType(Class<? extends AbstractContext> contextType) {
         // TODO: should we have some sort of schema? Does one make sense? Can we get the context type to return one?
         return context().name(contextType.getSimpleName()).build();

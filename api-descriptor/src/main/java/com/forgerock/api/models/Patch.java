@@ -82,6 +82,20 @@ public final class Patch extends Operation {
     }
 
     /**
+     * Builds a Patch object from the data stored in the annotation.
+     * @param patch Patch annotation that holds the data
+     * @return Patch instance
+     */
+    public static Patch fromAnnotation(com.forgerock.api.annotations.Patch patch) {
+        return patch()
+                .detailsFromAnnotation(patch.operationDescription())
+                .mvccSupported(patch.mvccSupported())
+                .operations(patch.operations())
+                .build();
+    }
+
+
+    /**
      * Builder to help construct the Patch.
      */
     public static final class Builder extends Operation.Builder<Builder> {

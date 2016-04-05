@@ -84,6 +84,11 @@ public final class Schema {
         return newBuilder();
     }
 
+    /**
+     * Builds Schema object from the data in the annotation parameter.
+     * @param schema The annotation that holds the data
+     * @return Schema instance
+     */
     public static Schema fromAnnotation(com.forgerock.api.annotations.Schema schema) {
         if (schema.fromType().equals(Void.class) && Strings.isNullOrEmpty(schema.schemaResource())) {
             return null;

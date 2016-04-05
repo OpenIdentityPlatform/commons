@@ -67,6 +67,18 @@ public final class Update extends Operation {
     }
 
     /**
+     * Builds an Update object from the data stored in the annotation.
+     * @param update Update annotation that stores the data
+     * @return Update instance
+     */
+    public static Update fromAnnotation(com.forgerock.api.annotations.Update update) {
+        return update()
+                .detailsFromAnnotation(update.operationDescription())
+                .mvccSupported(update.mvccSupported())
+                .build();
+    }
+
+    /**
      * Builder to help construct Update.
      */
     public static final class Builder extends Operation.Builder<Builder> {

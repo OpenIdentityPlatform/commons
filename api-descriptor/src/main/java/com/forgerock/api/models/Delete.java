@@ -67,6 +67,18 @@ public final class Delete extends Operation {
     }
 
     /**
+     * Builds a Delete object from the data in the Delete annotation.
+     * @param delete Delete annotation where the data stored
+     * @return Delete instance
+     */
+    public static Delete fromAnnotation(com.forgerock.api.annotations.Delete delete) {
+        return delete()
+                .detailsFromAnnotation(delete.operationDescription())
+                .mvccSupported(delete.mvccSupported())
+                .build();
+    }
+
+    /**
      * Builder for the Delete.
      */
     public static final class Builder extends Operation.Builder<Builder> {

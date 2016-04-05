@@ -149,6 +149,11 @@ public final class Parameter {
         return new Builder();
     }
 
+    /**
+     * Builds a Parameter object from the data in the annotation.
+     * @param parameter The annotation that holds the data
+     * @return Parameter instance
+     */
     public static Parameter fromAnnotation(com.forgerock.api.annotations.Parameter parameter) {
         return parameter()
                 .description(parameter.description())

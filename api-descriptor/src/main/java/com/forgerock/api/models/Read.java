@@ -49,6 +49,17 @@ public final class Read extends Operation {
     }
 
     /**
+     * Builds a Read object from the data in the read annotation.
+     * @param read Read annotation that holds the data
+     * @return Read instance
+     */
+    public static Read fromAnnotation(com.forgerock.api.annotations.Read read) {
+        return read()
+                .detailsFromAnnotation(read.operationDescription())
+                .build();
+    }
+
+    /**
      * Builder to help construct the Read.
      */
     public static final class Builder extends Operation.Builder<Builder> {

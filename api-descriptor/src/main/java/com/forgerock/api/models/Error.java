@@ -76,6 +76,11 @@ public final class Error {
         return new Builder();
     }
 
+    /**
+     * Builds an Error object from the data in the annotation.
+     * @param error The annotation that holds the data
+     * @return Error instance
+     */
     public static Error fromAnnotation(com.forgerock.api.annotations.Error error) {
         return error()
                 .description(error.description())

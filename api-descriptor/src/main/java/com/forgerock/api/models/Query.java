@@ -19,14 +19,14 @@ package com.forgerock.api.models;
 import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
 import com.forgerock.api.ApiValidationException;
+import com.forgerock.api.enums.CountPolicy;
 import com.forgerock.api.enums.PagingMode;
 import com.forgerock.api.enums.QueryType;
-import com.forgerock.api.enums.CountPolicy;
 
 /**
  * Class that represents the Create Operation type in API descriptor.
  */
-public final class Query extends Operation {
+public final class Query extends Operation implements Comparable<Query> {
 
     private final QueryType type;
     private final PagingMode[] pagingMode;
@@ -126,6 +126,37 @@ public final class Query extends Operation {
     @Override
     protected void allocateToResource(Resource.Builder resourceBuilder) {
         resourceBuilder.query(this);
+    }
+
+    /**
+     * Builds a Query object from the data stored in the annotation.
+     * @param query The annotation that stores the data
+     * @return Query instance
+     */
+    public static Query fromAnnotation(com.forgerock.api.annotations.Query query) {
+        return query()
+                .detailsFromAnnotation(query.operationDescription())
+                .type(query.type())
+                .pagingMode(query.pagingModes())
+                .countPolicy(query.countPolicies())
+                .queryId(query.id())
+                .queryableFields(query.queryableFields())
+                .supportedSortKeys(query.sortKeys())
+                .build();
+    }
+
+    /**
+     * Compares two strings lexicographically.
+     * @param query Query to compare to
+     * @return  the value {@code 0} if the argument string is equal to
+     *          this string; a value less than {@code 0} if this string
+     *          is lexicographically less than the string argument; and a
+     *          value greater than {@code 0} if this string is
+     *          lexicographically greater than the string argument.
+     */
+    @Override
+    public int compareTo(Query query) {
+        return this.queryId.compareTo(query.getQueryId());
     }
 
     /**
