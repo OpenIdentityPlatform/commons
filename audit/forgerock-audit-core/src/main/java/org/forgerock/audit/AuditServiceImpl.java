@@ -511,10 +511,5 @@ final class AuditServiceImpl implements AuditService {
         public Promise<ActionResponse, ResourceException> handleAction(Context context, String topic, ActionRequest request) {
             throw new UnsupportedOperationException("Unsupported.");
         }
-
-        @Override
-        public boolean canBeUsedForQueries() {
-            return true;
-        }
     }
 }

@@ -85,11 +85,6 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase {
                 new NotSupportedException("The " + RequestType.QUERY + " operation is not supported.")).asPromise();
     }
 
-    @Override
-    public boolean canBeUsedForQueries() {
-        return true;
-    }
-
     /**
      * Read from the audit log.
      * {@inheritDoc}

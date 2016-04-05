@@ -143,6 +143,11 @@ public class CsvAuditEventHandlerConfiguration extends FileBasedEventHandlerConf
         this.buffering = bufferingConfiguration;
     }
 
+    @Override
+    public boolean isUsableForQueries() {
+        return true;
+    }
+
     /**
      * Contains the csv writer configuration parameters
      */

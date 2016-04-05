@@ -111,6 +111,11 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
         this.buffering = buffering;
     }
 
+    @Override
+    public boolean isUsableForQueries() {
+        return true;
+    }
+
     /**
      * Configuration of connection to Elasticsearch.
      */

@@ -17,16 +17,15 @@ package org.forgerock.audit.handlers.syslog;
 
 import static java.util.Collections.unmodifiableMap;
 
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import org.forgerock.util.Reject;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
  * Configuration object for the {@link SyslogAuditEventHandler}.
@@ -223,6 +222,11 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
      */
     public void setBufferingConfiguration(EventBufferingConfiguration bufferingConfiguration) {
         this.buffering = bufferingConfiguration;
+    }
+
+    @Override
+    public boolean isUsableForQueries() {
+        return false;
     }
 
     /**

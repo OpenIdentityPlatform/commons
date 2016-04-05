@@ -139,6 +139,11 @@ public class JmsAuditEventHandlerConfiguration extends EventHandlerConfiguration
         this.jndi = jndi;
     }
 
+    @Override
+    public boolean isUsableForQueries() {
+        return false;
+    }
+
 
     /**
      * Stores the JNDI context properties and lookup names.

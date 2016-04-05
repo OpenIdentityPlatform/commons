@@ -96,6 +96,11 @@ public class JdbcAuditEventHandlerConfiguration extends EventHandlerConfiguratio
         this.databaseType = databaseType;
     }
 
+    @Override
+    public boolean isUsableForQueries() {
+        return true;
+    }
+
     public static class ConnectionPool {
         @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.dataSourceClassName")
         private String dataSourceClassName;

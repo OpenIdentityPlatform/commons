@@ -19,15 +19,15 @@ import java.text.SimpleDateFormat;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
+
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 /**
  * Configures time based or size based log file rotation.
  */
-public class FileBasedEventHandlerConfiguration extends EventHandlerConfiguration {
+public abstract class FileBasedEventHandlerConfiguration extends EventHandlerConfiguration {
 
     @JsonPropertyDescription("audit.handlers.file.fileRotation")
     private FileRotation fileRotation = new FileRotation();

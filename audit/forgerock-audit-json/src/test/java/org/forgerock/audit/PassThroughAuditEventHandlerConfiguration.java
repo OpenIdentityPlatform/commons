@@ -44,4 +44,9 @@ public class PassThroughAuditEventHandlerConfiguration extends EventHandlerConfi
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public boolean isUsableForQueries() {
+        return false;
+    }
 }

@@ -81,11 +81,6 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase {
         return newQueryResponse().asPromise();
     }
 
-    @Override
-    public boolean canBeUsedForQueries() {
-        return true;
-    }
-
     /**
      * Read from the audit log.
      * {@inheritDoc}

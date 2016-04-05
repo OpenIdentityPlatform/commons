@@ -418,11 +418,6 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
         }
     }
 
-    @Override
-    public boolean canBeUsedForQueries() {
-        return true;
-    }
-
     private ActionResponse handleRotateAction(String topic)
             throws BadRequestException {
         CsvWriter csvWriter = writers.get(topic);

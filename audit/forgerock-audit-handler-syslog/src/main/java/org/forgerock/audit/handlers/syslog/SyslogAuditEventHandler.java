@@ -171,11 +171,6 @@ public class SyslogAuditEventHandler extends AuditEventHandlerBase {
     }
 
     @Override
-    public boolean canBeUsedForQueries() {
-        return false;
-    }
-
-    @Override
     public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         return new NotSupportedException("query operations are not supported").asPromise();
     }

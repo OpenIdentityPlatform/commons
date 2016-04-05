@@ -113,12 +113,6 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
         logger.debug("JMS audit event handler is shutdown.");
     }
 
-    @Override
-    public boolean canBeUsedForQueries() {
-        // JMS does not support Query or Read.
-        return false;
-    }
-
     /**
      * Converts the audit event into a JMS TextMessage and then publishes the message on the configured jmsTopic.
      *

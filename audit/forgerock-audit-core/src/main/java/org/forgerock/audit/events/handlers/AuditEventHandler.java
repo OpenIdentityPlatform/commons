@@ -132,11 +132,4 @@ public interface AuditEventHandler {
      * @return a promise with either a response or an exception
      */
     Promise<ActionResponse, ResourceException> handleAction(Context context, String topic, ActionRequest request);
-
-    /**
-     * States if an {@link AuditEventHandler} can be used for queries.
-     * @return True - If the {@link AuditEventHandler} can be used for queries.
-     *         False - If the {@link AuditEventHandler} can not be used for queries.
-     */
-    boolean canBeUsedForQueries();
 }

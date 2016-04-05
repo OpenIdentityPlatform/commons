@@ -17,6 +17,7 @@ package org.forgerock.audit.events.handlers;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 /**
  * Base class for audit event handler configuration.
@@ -92,4 +93,12 @@ public abstract class EventHandlerConfiguration {
     public void setTopics(Set<String> topics) {
         this.topics = topics;
     }
+
+    /**
+     * States if an {@link AuditEventHandler} can be used for queries.
+     * @return True - If the {@link AuditEventHandler} can be used for queries.
+     *         False - If the {@link AuditEventHandler} can not be used for queries.
+     */
+    @JsonIgnore
+    public abstract boolean isUsableForQueries();
 }

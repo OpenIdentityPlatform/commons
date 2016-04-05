@@ -73,11 +73,6 @@ public class NoOpAuditEventHandler extends AuditEventHandlerBase {
     }
 
     @Override
-    public boolean canBeUsedForQueries() {
-        return true;
-    }
-
-    @Override
     public Promise<ResourceResponse, ResourceException> readEvent(Context context, String topic, String resourceId) {
         return newResourceResponse(resourceId, null, json(object())).asPromise();
     }

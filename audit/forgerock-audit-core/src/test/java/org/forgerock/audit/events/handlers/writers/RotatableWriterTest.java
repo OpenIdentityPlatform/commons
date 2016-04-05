@@ -71,7 +71,7 @@ public class RotatableWriterTest {
         final File file = getTempFile();
         Files.write(file.toPath(), new byte[]{1});
         final long oneSecondAgo = setLastModifiedToOneSecondAgo(file);
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
 
         // when
         rotatableWriter = new RotatableWriter(file, configuration, true);
@@ -85,7 +85,7 @@ public class RotatableWriterTest {
     public void testBytesWritten() throws Exception {
         // given
         final File file = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         rotatableWriter = new RotatableWriter(file, configuration, true);
 
         // when
@@ -99,7 +99,7 @@ public class RotatableWriterTest {
     public void testCreatesNoRotationPoliciesForDefaultConfiguration() throws IOException {
         // given
         final File file = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
 
         // when
         rotatableWriter = new RotatableWriter(file, configuration, true);
@@ -113,7 +113,7 @@ public class RotatableWriterTest {
     public void testCreatesSizeBasedRotationPolicyIfMaxFileSizeConfigured() throws IOException {
         // given
         final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setMaxFileSize(100);
 
@@ -131,7 +131,7 @@ public class RotatableWriterTest {
             throws IOException {
         // given
         final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setMaxFileSize(0);
 
@@ -147,7 +147,7 @@ public class RotatableWriterTest {
     public void testCreatesFixedTimeRotationPolicyIfRotationTimesConfigured() throws IOException {
         // given
         final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationTimes(asList("0 seconds", "12 hours"));
 
@@ -167,7 +167,7 @@ public class RotatableWriterTest {
             throws IOException {
         // given
         final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationTimes(asList("unlimited", "winter"));
 
@@ -183,7 +183,7 @@ public class RotatableWriterTest {
     public void testCreatesTimeLimitRotationPolicyIfRotationIntervalConfigured() throws IOException {
         // given
         final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationInterval("1 hour");
 
@@ -211,7 +211,7 @@ public class RotatableWriterTest {
             String rotationInterval) throws IOException {
         // given
         final File initialFile = getTempFile();
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationInterval(rotationInterval);
 
@@ -228,7 +228,7 @@ public class RotatableWriterTest {
         // given
         final File file = getTempFile();
         final String prefix = "testRotationForSizeBasedRotationPolicy";
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.setRotationRetentionCheckInterval("1 hour"); // ensure asynchronous check is inactive
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationFilePrefix(prefix);
@@ -251,7 +251,7 @@ public class RotatableWriterTest {
         final File file = getTempFile();
         final String prefix = "testRotationForTimeLimitRotationPolicy";
         setLastModifiedToOneSecondAgo(file);
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationFilePrefix(prefix);
         configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
@@ -275,7 +275,7 @@ public class RotatableWriterTest {
         final File file = getTempFile();
         final String prefix = "testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified";
         setLastModifiedToOneSecondAgo(file);
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationFilePrefix(prefix);
         configuration.getFileRotation().setRotationFileSuffix(ROTATION_FILE_SUFFIX);
@@ -296,7 +296,7 @@ public class RotatableWriterTest {
         final File file = getTempFile();
         final String prefix = "testAutomaticallyEvaluatesPolicesPeriodicallyIfRotationIntervalSpecified";
         setLastModifiedToOneSecondAgo(file);
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.setRotationRetentionCheckInterval("100 ms");
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setRotationFilePrefix(prefix);
@@ -318,7 +318,7 @@ public class RotatableWriterTest {
         // given
         final File file = getTempFile();
         final String prefix = "testRetentionWithMaxNumberOfFiles";
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.setRotationRetentionCheckInterval("10ms");
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
@@ -359,7 +359,7 @@ public class RotatableWriterTest {
         // given
         final File file = getTempFile();
         final String prefix = "testRetentionWithMaxSizeOfFile";
-        final FileBasedEventHandlerConfiguration configuration = new FileBasedEventHandlerConfiguration();
+        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
         configuration.setRotationRetentionCheckInterval("100 ms");
         configuration.getFileRotation().setRotationEnabled(true);
         configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
@@ -462,8 +462,13 @@ public class RotatableWriterTest {
             Collections.sort(fileList);
             return fileList;
         }
+    }
 
-
+    private static class DefaultFileBasedAuditEventHandlerConfiguration extends FileBasedEventHandlerConfiguration {
+        @Override
+        public boolean isUsableForQueries() {
+            return true;
+        }
     }
 
 }
