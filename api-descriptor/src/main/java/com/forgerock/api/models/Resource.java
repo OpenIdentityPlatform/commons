@@ -19,6 +19,8 @@ package com.forgerock.api.models;
 import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
 import com.forgerock.api.ApiValidationException;
+import com.forgerock.api.annotations.Actions;
+import com.forgerock.api.annotations.Queries;
 import com.forgerock.api.annotations.RequestHandler;
 
 import org.forgerock.util.Reject;
@@ -161,11 +163,16 @@ public final class Resource implements PathNode {
         if (requestHandler == null) {
             throw new IllegalArgumentException("Not a valid class - must have a RequestHandler annotation");
         }
-//        builder.resourceSchema(Schema.newBuilder().fromAnnotation(requestHandler.resourceSchema()));
         for (Method m : type.getDeclaredMethods()) {
             com.forgerock.api.annotations.Action action = m.getAnnotation(com.forgerock.api.annotations.Action.class);
             if (action != null) {
                 builder.actions.add(Action.fromAnnotation(action, m));
+            }
+            Actions actions = m.getAnnotation(Actions.class);
+            if (actions != null) {
+                for (com.forgerock.api.annotations.Action a : actions.value()) {
+                    builder.actions.add(Action.fromAnnotation(a, null));
+                }
             }
             com.forgerock.api.annotations.Create create = m.getAnnotation(com.forgerock.api.annotations.Create.class);
             if (create != null) {
@@ -189,7 +196,13 @@ public final class Resource implements PathNode {
             }
             com.forgerock.api.annotations.Query query = m.getAnnotation(com.forgerock.api.annotations.Query.class);
             if (query != null) {
-                builder.queries.add(Query.fromAnnotation(query));
+                builder.queries.add(Query.fromAnnotation(query, m));
+            }
+            Queries queries = m.getAnnotation(Queries.class);
+            if (queries != null) {
+                for (com.forgerock.api.annotations.Query q : queries.value()) {
+                    builder.queries.add(Query.fromAnnotation(q, null));
+                }
             }
         }
         return builder.build();

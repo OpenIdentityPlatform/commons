@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
+import com.forgerock.api.annotations.Actions;
+import com.forgerock.api.annotations.Queries;
 import com.forgerock.api.annotations.RequestHandler;
 
 import com.forgerock.api.ApiValidationException;
@@ -33,6 +35,7 @@ import com.forgerock.api.enums.Stability;
 
 import org.forgerock.services.context.SecurityContext;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ResourceTest {
@@ -391,10 +394,14 @@ public class ResourceTest {
         }
     }
 
+    @DataProvider
+    public Object[][] actionAnnotations() {
+        return new Object[][]{{ActionAnnotatedHandler.class}, {ActionsAnnotatedHandler.class}};
+    }
 
-    @Test
-    public void testActionAnnotatedHandler() throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(ActionAnnotatedHandler.class, false);
+    @Test(dataProvider = "actionAnnotations")
+    public void testActionAnnotatedHandler(Class<?> type) throws Exception {
+        final Resource resource = Resource.fromAnnotatedType(type, false);
         assertThat(resource.getResourceSchema()).isNull();
         assertThat(resource.getActions()).isNotNull();
         assertThat(resource.getActions()).hasSize(2);
@@ -473,10 +480,64 @@ public class ResourceTest {
         }
     }
 
+    @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
+    private static final class ActionsAnnotatedHandler {
+        @Actions({
+                @com.forgerock.api.annotations.Action(
+                        operationDescription = @com.forgerock.api.annotations.Operation(
+                                contexts = SecurityContext.class,
+                                description = "An action resource operation.",
+                                errors = {
+                                        @com.forgerock.api.annotations.Error
+                                                (code = 403, description = "Action forbidden"),
+                                        @com.forgerock.api.annotations.Error
+                                                (code = 400, description = "Malformed action request")
+                                },
+                                parameters = {
+                                        @com.forgerock.api.annotations.Parameter
+                                                (name = "id", type = "string",
+                                                        description = "Identifier for the action")
+                                },
+                                locales = {"en-GB", "en-US"},
+                                stability = Stability.EVOLVING
+                        ),
+                        name = "action1",
+                        request = @com.forgerock.api.annotations.Schema(fromType = Request.class),
+                        response = @com.forgerock.api.annotations.Schema(fromType = Response.class)),
+                @com.forgerock.api.annotations.Action(
+                        operationDescription = @com.forgerock.api.annotations.Operation(
+                                contexts = SecurityContext.class,
+                                description = "An action resource operation.",
+                                errors = {
+                                        @com.forgerock.api.annotations.Error
+                                                (code = 403, description = "Action forbidden"),
+                                        @com.forgerock.api.annotations.Error
+                                                (code = 400, description = "Malformed action request")
+                                },
+                                parameters = {
+                                        @com.forgerock.api.annotations.Parameter
+                                                (name = "id", type = "string",
+                                                        description = "Identifier for the action")
+                                },
+                                locales = {"en-GB", "en-US"},
+                                stability = Stability.EVOLVING
+                        ),
+                        name = "action2",
+                        request = @com.forgerock.api.annotations.Schema(fromType = Request.class),
+                        response = @com.forgerock.api.annotations.Schema(fromType = Response.class))})
+        public void actions() {
 
-    @Test
-    public void testQueryAnnotatedHandler() throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(QueryAnnotatedHandler.class, false);
+        }
+    }
+
+    @DataProvider
+    public Object[][] queryAnnotations() {
+        return new Object[][]{{QueryAnnotatedHandler.class}, {QueriesAnnotatedHandler.class}};
+    }
+
+    @Test(dataProvider = "queryAnnotations")
+    public void testQueryAnnotatedHandler(Class<?> type) throws Exception {
+        final Resource resource = Resource.fromAnnotatedType(type, false);
         assertThat(resource.getQueries()).isNotNull();
         assertThat(resource.getQueries()).hasSize(2);
         Query query1 = resource.getQueries()[0];
@@ -563,12 +624,67 @@ public class ResourceTest {
                         stability = Stability.EVOLVING
                 ),
                 type = QueryType.ID,
-                id = "query2",
                 countPolicies = {CountPolicy.ESTIMATE},
                 pagingModes = {PagingMode.COOKIE, PagingMode.OFFSET},
                 queryableFields = {"field1", "field2"},
                 sortKeys = {"key1", "key2", "key3"})
         public void query2() {
+
+        }
+    }
+
+    @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
+    private static final class QueriesAnnotatedHandler {
+        @Queries({
+                @com.forgerock.api.annotations.Query(
+                        operationDescription = @com.forgerock.api.annotations.Operation(
+                                contexts = SecurityContext.class,
+                                description = "A query resource operation.",
+                                errors = {
+                                        @com.forgerock.api.annotations.Error
+                                                (code = 403, description = "Query forbidden"),
+                                        @com.forgerock.api.annotations.Error
+                                                (code = 400, description = "Malformed query request")
+                                },
+                                parameters = {
+                                        @com.forgerock.api.annotations.Parameter
+                                                (name = "id", type = "string",
+                                                        description = "Identifier for the queried")
+                                },
+                                locales = {"en-GB", "en-US"},
+                                stability = Stability.EVOLVING
+                        ),
+                        type = QueryType.ID,
+                        id = "query1",
+                        countPolicies = {CountPolicy.ESTIMATE},
+                        pagingModes = {PagingMode.COOKIE, PagingMode.OFFSET},
+                        queryableFields = {"field1", "field2"},
+                        sortKeys = {"key1", "key2", "key3"}),
+                @com.forgerock.api.annotations.Query(
+                        operationDescription = @com.forgerock.api.annotations.Operation(
+                                contexts = SecurityContext.class,
+                                description = "A query resource operation.",
+                                errors = {
+                                        @com.forgerock.api.annotations.Error
+                                                (code = 403, description = "Query forbidden"),
+                                        @com.forgerock.api.annotations.Error
+                                                (code = 400, description = "Malformed query request")
+                                },
+                                parameters = {
+                                        @com.forgerock.api.annotations.Parameter
+                                                (name = "id", type = "string",
+                                                        description = "Identifier for the queried")
+                                },
+                                locales = {"en-GB", "en-US"},
+                                stability = Stability.EVOLVING
+                        ),
+                        type = QueryType.ID,
+                        id = "query2",
+                        countPolicies = {CountPolicy.ESTIMATE},
+                        pagingModes = {PagingMode.COOKIE, PagingMode.OFFSET},
+                        queryableFields = {"field1", "field2"},
+                        sortKeys = {"key1", "key2", "key3"})})
+        public void queryies() {
 
         }
     }

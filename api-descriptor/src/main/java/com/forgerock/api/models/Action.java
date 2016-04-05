@@ -109,6 +109,9 @@ public final class Action extends Operation implements Comparable<Action> {
         Builder builder = action();
         String specifiedName = action.name();
         if (Strings.isNullOrEmpty(specifiedName)) {
+            if (annotated == null) {
+                throw new IllegalArgumentException("Action does not have a name: " + action);
+            }
             specifiedName = annotated.getName();
         }
         return builder.name(specifiedName)

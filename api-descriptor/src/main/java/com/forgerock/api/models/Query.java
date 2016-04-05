@@ -16,7 +16,11 @@
 
 package com.forgerock.api.models;
 
-import static com.forgerock.api.util.ValidationUtil.isEmpty;
+import static com.forgerock.api.util.ValidationUtil.*;
+
+import java.lang.reflect.Method;
+
+import org.forgerock.guava.common.base.Strings;
 
 import com.forgerock.api.ApiValidationException;
 import com.forgerock.api.enums.CountPolicy;
@@ -130,16 +134,24 @@ public final class Query extends Operation implements Comparable<Query> {
 
     /**
      * Builds a Query object from the data stored in the annotation.
-     * @param query The annotation that stores the data
+     * @param query The annotation that stores the data.
+     * @param annotated The method that the annotation was found on.
      * @return Query instance
      */
-    public static Query fromAnnotation(com.forgerock.api.annotations.Query query) {
+    public static Query fromAnnotation(com.forgerock.api.annotations.Query query, Method annotated) {
+        String queryId = query.id();
+        if (query.type() == QueryType.ID && Strings.isNullOrEmpty(queryId)) {
+            if (annotated == null) {
+                throw new IllegalArgumentException("Query is missing ID: " + query);
+            }
+            queryId = annotated.getName();
+        }
         return query()
                 .detailsFromAnnotation(query.operationDescription())
                 .type(query.type())
                 .pagingMode(query.pagingModes())
                 .countPolicy(query.countPolicies())
-                .queryId(query.id())
+                .queryId(queryId)
                 .queryableFields(query.queryableFields())
                 .supportedSortKeys(query.sortKeys())
                 .build();

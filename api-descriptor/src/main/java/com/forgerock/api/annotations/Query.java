@@ -54,7 +54,10 @@ public @interface Query {
     PagingMode[] pagingModes() default {};
     /** The count policies that can be used with this query. */
     CountPolicy[] countPolicies() default {};
-    /** The query ID - required only when {@code type} is {@code ID}. */
+    /**
+     * The query ID - required only when {@code type} is {@code ID}. If not supplied but required, the name of the
+     * annotated method is used.
+     */
     String id() default "";
     /** The set of fields that can be used in a query filter. Required only when the {@code type} is {@code FILTER}. */
     String[] queryableFields() default {};
