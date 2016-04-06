@@ -84,17 +84,18 @@ public final class Create extends Operation {
     /**
      * Builds a Create object from the data in the annotation.
      * @param create Create annotation that holds the data
-     * @param singleton True if singleton create //TODO fix this
+     * @param instanceOperations True if the resource is performing instance operations.
      * @return Create instance
      */
-    public static Create fromAnnotation(com.forgerock.api.annotations.Create create, boolean singleton) {
+    public static Create fromAnnotation(com.forgerock.api.annotations.Create create, boolean instanceOperations) {
         List<CreateMode> modes = Arrays.asList(create.modes());
-        if ((singleton && !modes.contains(ID_FROM_CLIENT)) || (!singleton && !modes.contains(ID_FROM_SERVER))) {
+        if ((instanceOperations && !modes.contains(ID_FROM_CLIENT))
+                || (!instanceOperations && !modes.contains(ID_FROM_SERVER))) {
             return null;
         }
         return create()
                 .detailsFromAnnotation(create.operationDescription())
-                .mode(singleton ? ID_FROM_CLIENT : ID_FROM_SERVER)
+                .mode(instanceOperations ? ID_FROM_CLIENT : ID_FROM_SERVER)
                 .mvccSupported(create.mvccSupported())
                 .build();
     }

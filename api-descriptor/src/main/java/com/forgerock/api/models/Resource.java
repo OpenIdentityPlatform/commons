@@ -154,10 +154,10 @@ public final class Resource implements PathNode {
     /**
      * Build a {@code Resource} from an annotated request handler.
      * @param type The annotated type.
-     * @param singleton True if the resource is singleton  //TODO: clarify this comment
+     * @param instanceOperations True if the resource is performing instance operations.
      * @return The built {@code Resource} object.
      */
-    public static Resource fromAnnotatedType(Class<?> type, boolean singleton) {
+    public static Resource fromAnnotatedType(Class<?> type, boolean instanceOperations) {
         Builder builder = resource();
         RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
         if (requestHandler == null) {
@@ -176,7 +176,7 @@ public final class Resource implements PathNode {
             }
             com.forgerock.api.annotations.Create create = m.getAnnotation(com.forgerock.api.annotations.Create.class);
             if (create != null) {
-                builder.create = Create.fromAnnotation(create, singleton);
+                builder.create = Create.fromAnnotation(create, instanceOperations);
             }
             com.forgerock.api.annotations.Read read = m.getAnnotation(com.forgerock.api.annotations.Read.class);
             if (read != null) {
