@@ -234,7 +234,7 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>font-awesome</artifactId>
-                <version>4.3.0</version>
+                <version>4.5.0</version>
                 <type>zip</type>
             </dependency>
 
