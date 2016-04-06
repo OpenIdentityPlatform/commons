@@ -16,10 +16,11 @@
 
 package org.forgerock.api.models;
 
-import static java.util.Arrays.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.json.JsonValue.*;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.api.jackson.TranslationModule;
+import org.forgerock.api.jackson.TranslationSerializer;
+import org.forgerock.api.util.Translator;
 import org.forgerock.services.context.SecurityContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -35,10 +36,19 @@ import org.forgerock.api.enums.PagingMode;
 import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.enums.Stability;
+import java.util.Locale;
+
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 public class ResourceTest {
 
     private final String description = "My Description";
+    public static final String TRANSLATED_DISCRIPTION_TWICE_REGEX =
+            ".*(If you see this it has been translated).*(If you see this it has been translated).*";
+    private final String i18nDescription = Translator.TRANSLATION_KEY_PREFIX + "api-dictionary#description_test";
     private Schema schema;
     private Create create;
     private Read read;
@@ -693,6 +703,36 @@ public class ResourceTest {
         public void queryies() {
 
         }
+    }
+
+    @Test
+    public void testResourceCustomSerializer() throws JsonProcessingException {
+
+        final Read readLocal = Read.read()
+                .description(i18nDescription)
+                .error(Error.error().code(12).description(i18nDescription).build())
+                .build();
+
+        final Resource resource = Resource.resource()
+                .description(description)
+                .resourceSchema(schema)
+                .operations(create, readLocal, update, delete, patch, action1, action2, query1, query2)
+                .build();
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        Translator translator = new Translator();
+        translator.setLocale(Locale.ENGLISH);
+
+        TranslationModule module = new TranslationModule();
+        module.addSerializer(new TranslationSerializer(translator));
+
+        mapper.registerModule(module);
+
+        String serialized = mapper.writeValueAsString(resource);
+
+        assertThat(serialized.matches(TRANSLATED_DISCRIPTION_TWICE_REGEX));
+
     }
 
     private static final class Request {
