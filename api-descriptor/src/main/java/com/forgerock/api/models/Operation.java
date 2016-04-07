@@ -248,11 +248,14 @@ public abstract class Operation {
         /**
          * Set all properties in the Builder using the data in the annotation.
          * @param operation The annotation that holds the data
+         * @param descriptor The root descriptor
+         * @param relativeType The type relative to which schema resources should be resolved.
          * @return Builder
          */
-        public T detailsFromAnnotation(com.forgerock.api.annotations.Operation operation) {
+        public T detailsFromAnnotation(com.forgerock.api.annotations.Operation operation,
+                ApiDescription<?> descriptor, Class<?> relativeType) {
             for (com.forgerock.api.annotations.Error error : operation.errors()) {
-                error(Error.fromAnnotation(error));
+                error(Error.fromAnnotation(error, descriptor, relativeType));
             }
             for (com.forgerock.api.annotations.Parameter error : operation.parameters()) {
                 parameter(Parameter.fromAnnotation(error));

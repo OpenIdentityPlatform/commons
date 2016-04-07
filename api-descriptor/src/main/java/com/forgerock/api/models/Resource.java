@@ -155,56 +155,70 @@ public final class Resource implements PathNode {
      * Build a {@code Resource} from an annotated request handler.
      * @param type The annotated type.
      * @param instanceOperations True if the resource is performing instance operations.
+     * @param descriptor The root descriptor to add definitions to.
      * @return The built {@code Resource} object.
      */
-    public static Resource fromAnnotatedType(Class<?> type, boolean instanceOperations) {
+    public static Resource fromAnnotatedType(Class<?> type, boolean instanceOperations, ApiDescription<?> descriptor) {
         Builder builder = resource();
         RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
         if (requestHandler == null) {
             throw new IllegalArgumentException("Not a valid class - must have a RequestHandler annotation");
         }
+        boolean foundCrudpq = false;
         for (Method m : type.getDeclaredMethods()) {
             com.forgerock.api.annotations.Action action = m.getAnnotation(com.forgerock.api.annotations.Action.class);
             if (action != null) {
-                builder.actions.add(Action.fromAnnotation(action, m));
+                builder.actions.add(Action.fromAnnotation(action, m, descriptor, type));
             }
             Actions actions = m.getAnnotation(Actions.class);
             if (actions != null) {
                 for (com.forgerock.api.annotations.Action a : actions.value()) {
-                    builder.actions.add(Action.fromAnnotation(a, null));
+                    builder.actions.add(Action.fromAnnotation(a, null, descriptor, type));
                 }
             }
             com.forgerock.api.annotations.Create create = m.getAnnotation(com.forgerock.api.annotations.Create.class);
             if (create != null) {
-                builder.create = Create.fromAnnotation(create, instanceOperations);
+                builder.create = Create.fromAnnotation(create, instanceOperations, descriptor, type);
+                foundCrudpq = true;
             }
             com.forgerock.api.annotations.Read read = m.getAnnotation(com.forgerock.api.annotations.Read.class);
             if (read != null) {
-                builder.read = Read.fromAnnotation(read);
+                builder.read = Read.fromAnnotation(read, descriptor, type);
+                foundCrudpq = true;
             }
             com.forgerock.api.annotations.Update update = m.getAnnotation(com.forgerock.api.annotations.Update.class);
             if (update != null) {
-                builder.update = Update.fromAnnotation(update);
+                builder.update = Update.fromAnnotation(update, descriptor, type);
+                foundCrudpq = true;
             }
             com.forgerock.api.annotations.Delete delete = m.getAnnotation(com.forgerock.api.annotations.Delete.class);
             if (delete != null) {
-                builder.delete = Delete.fromAnnotation(delete);
+                builder.delete = Delete.fromAnnotation(delete, descriptor, type);
+                foundCrudpq = true;
             }
             com.forgerock.api.annotations.Patch patch = m.getAnnotation(com.forgerock.api.annotations.Patch.class);
             if (patch != null) {
-                builder.patch = Patch.fromAnnotation(patch);
+                builder.patch = Patch.fromAnnotation(patch, descriptor, type);
+                foundCrudpq = true;
             }
             com.forgerock.api.annotations.Query query = m.getAnnotation(com.forgerock.api.annotations.Query.class);
             if (query != null) {
-                builder.queries.add(Query.fromAnnotation(query, m));
+                builder.queries.add(Query.fromAnnotation(query, m, descriptor, type));
+                foundCrudpq = true;
             }
             Queries queries = m.getAnnotation(Queries.class);
             if (queries != null) {
                 for (com.forgerock.api.annotations.Query q : queries.value()) {
-                    builder.queries.add(Query.fromAnnotation(q, null));
+                    builder.queries.add(Query.fromAnnotation(q, null, descriptor, type));
+                    foundCrudpq = true;
                 }
             }
         }
+        Schema resourceSchema = Schema.fromAnnotation(requestHandler.resourceSchema(), descriptor, type);
+        if (foundCrudpq && resourceSchema == null) {
+            throw new IllegalArgumentException("CRUDPQ operation(s) defined, but no resource schema declared");
+        }
+        builder.resourceSchema(resourceSchema);
         return builder.build();
     }
 

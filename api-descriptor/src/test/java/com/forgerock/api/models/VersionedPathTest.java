@@ -55,11 +55,6 @@ public class VersionedPathTest {
                 .build();
     }
 
-    @Test(expectedExceptions = ApiValidationException.class)
-    public void testEmptyDefinitions() {
-        Definitions.definitions().build();
-    }
-
     @DataProvider(name = "putValidationData")
     public Object[][] putValidationData() {
         return new Object[][]{

@@ -16,17 +16,16 @@
 
 package com.forgerock.api.models;
 
-import static com.forgerock.api.util.ValidationUtil.containsWhitespace;
-import static com.forgerock.api.util.ValidationUtil.isEmpty;
+import static com.forgerock.api.util.ValidationUtil.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.util.Reject;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.forgerock.api.ApiValidationException;
-import org.forgerock.util.Reject;
 
 /**
  * Class that represents API descriptor {@link Error} errors.
@@ -37,10 +36,6 @@ public final class Errors {
 
     private Errors(Builder builder) {
         this.errors = builder.errors;
-
-        if (errors.isEmpty()) {
-            throw new ApiValidationException("Must have at least one error definition");
-        }
     }
 
     /**
@@ -72,6 +67,26 @@ public final class Errors {
     @JsonIgnore
     public Set<String> getNames() {
         return errors.keySet();
+    }
+
+    /**
+     * This allows the models package to mutate the errors defined here. This is used when processing annotations on
+     * resources that may reference errors using an id, so those errors need to be defined here rather than in-line in
+     * the resource descriptions.
+     *
+     * @param id The error id.
+     * @param error The error definition.
+     * @see Error#fromAnnotation(com.forgerock.api.annotations.Error, ApiDescription, Class)
+     */
+    void addError(String id, Error error) {
+        if (error.getReference() != null) {
+            throw new IllegalArgumentException("Cannot define a error using a reference");
+        }
+        Error defined = errors.get(id);
+        if (defined != null && !defined.equals(error)) {
+            throw new IllegalArgumentException("Trying to redefine already defined error, " + id);
+        }
+        errors.put(id, error);
     }
 
     /**

@@ -51,11 +51,14 @@ public final class Read extends Operation {
     /**
      * Builds a Read object from the data in the read annotation.
      * @param read Read annotation that holds the data
+     * @param descriptor The root descriptor to add definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
      * @return Read instance
      */
-    public static Read fromAnnotation(com.forgerock.api.annotations.Read read) {
+    public static Read fromAnnotation(com.forgerock.api.annotations.Read read, ApiDescription<?> descriptor,
+            Class<?> relativeType) {
         return read()
-                .detailsFromAnnotation(read.operationDescription())
+                .detailsFromAnnotation(read.operationDescription(), descriptor, relativeType)
                 .build();
     }
 

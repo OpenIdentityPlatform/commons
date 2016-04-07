@@ -101,11 +101,14 @@ public final class Action extends Operation implements Comparable<Action> {
 
     /**
      * Builds an Action object using the data in the annotation.
-     * @param action The annotation that holds the data for the built object
-     * @param annotated The action method
-     * @return Action instance
+     * @param action The annotation that holds the data for the built object.
+     * @param annotated The action method.
+     * @param descriptor The root descriptor to add definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
+     * @return Action instance.
      */
-    public static Action fromAnnotation(com.forgerock.api.annotations.Action action, Method annotated) {
+    public static Action fromAnnotation(com.forgerock.api.annotations.Action action, Method annotated,
+            ApiDescription<?> descriptor, Class<?> relativeType) {
         Builder builder = action();
         String specifiedName = action.name();
         if (Strings.isNullOrEmpty(specifiedName)) {
@@ -115,9 +118,9 @@ public final class Action extends Operation implements Comparable<Action> {
             specifiedName = annotated.getName();
         }
         return builder.name(specifiedName)
-                .request(Schema.fromAnnotation(action.request()))
-                .response(Schema.fromAnnotation(action.response()))
-                .detailsFromAnnotation(action.operationDescription())
+                .request(Schema.fromAnnotation(action.request(), descriptor, relativeType))
+                .response(Schema.fromAnnotation(action.response(), descriptor, relativeType))
+                .detailsFromAnnotation(action.operationDescription(), descriptor, relativeType)
                 .build();
     }
 

@@ -84,11 +84,14 @@ public final class Patch extends Operation {
     /**
      * Builds a Patch object from the data stored in the annotation.
      * @param patch Patch annotation that holds the data
+     * @param descriptor The root descriptor to add definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
      * @return Patch instance
      */
-    public static Patch fromAnnotation(com.forgerock.api.annotations.Patch patch) {
+    public static Patch fromAnnotation(com.forgerock.api.annotations.Patch patch, ApiDescription<?> descriptor,
+            Class<?> relativeType) {
         return patch()
-                .detailsFromAnnotation(patch.operationDescription())
+                .detailsFromAnnotation(patch.operationDescription(), descriptor, relativeType)
                 .mvccSupported(patch.mvccSupported())
                 .operations(patch.operations())
                 .build();

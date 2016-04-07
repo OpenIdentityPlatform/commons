@@ -69,11 +69,14 @@ public final class Update extends Operation {
     /**
      * Builds an Update object from the data stored in the annotation.
      * @param update Update annotation that stores the data
+     * @param descriptor The root descriptor to add definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
      * @return Update instance
      */
-    public static Update fromAnnotation(com.forgerock.api.annotations.Update update) {
+    public static Update fromAnnotation(com.forgerock.api.annotations.Update update, ApiDescription<?> descriptor,
+            Class<?> relativeType) {
         return update()
-                .detailsFromAnnotation(update.operationDescription())
+                .detailsFromAnnotation(update.operationDescription(), descriptor, relativeType)
                 .mvccSupported(update.mvccSupported())
                 .build();
     }

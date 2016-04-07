@@ -69,11 +69,14 @@ public final class Delete extends Operation {
     /**
      * Builds a Delete object from the data in the Delete annotation.
      * @param delete Delete annotation where the data stored
+     * @param descriptor The root descriptor to add definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
      * @return Delete instance
      */
-    public static Delete fromAnnotation(com.forgerock.api.annotations.Delete delete) {
+    public static Delete fromAnnotation(com.forgerock.api.annotations.Delete delete, ApiDescription<?> descriptor,
+            Class<?> relativeType) {
         return delete()
-                .detailsFromAnnotation(delete.operationDescription())
+                .detailsFromAnnotation(delete.operationDescription(), descriptor, relativeType)
                 .mvccSupported(delete.mvccSupported())
                 .build();
     }

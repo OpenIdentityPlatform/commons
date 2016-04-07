@@ -34,8 +34,8 @@ public final class ApiDescription<T extends PathNode> {
     private ApiDescription(Builder<T> builder) {
         this.id = builder.id;
         this.description = builder.description;
-        this.definitions = builder.definitions;
-        this.errors = builder.errors;
+        this.definitions = builder.definitions == null ? Definitions.definitions().build() : builder.definitions;
+        this.errors = builder.errors == null ? Errors.errors().build() : builder.errors;
         this.paths = builder.paths;
 
         if (id == null || id.trim().isEmpty()) {

@@ -16,7 +16,9 @@
 
 package com.forgerock.api.models;
 
-import static com.forgerock.api.util.ValidationUtil.isEmpty;
+import static com.forgerock.api.util.ValidationUtil.*;
+
+import org.forgerock.guava.common.base.Strings;
 
 import com.forgerock.api.ApiValidationException;
 
@@ -29,14 +31,19 @@ public final class Error {
     private final Integer code;
     private final String description;
     private final Schema schema;
+    private final Reference reference;
 
     private Error(Builder builder) {
         this.code = builder.code;
         this.description = builder.description;
         this.schema = builder.schema;
+        this.reference = builder.reference;
 
-        if (code == null || isEmpty(description)) {
+        if (reference == null && (code == null || isEmpty(description))) {
             throw new ApiValidationException("code and description are required");
+        }
+        if (reference != null && (code != null || description != null || schema != null)) {
+            throw new ApiValidationException("Cannot set code, description or schema when using a reference");
         }
     }
 
@@ -68,6 +75,47 @@ public final class Error {
     }
 
     /**
+     * Getter of the reference.
+     *
+     * @return The reference.
+     */
+    public Reference getReference() {
+        return reference;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Error error = (Error) o;
+
+        if (code != null ? !code.equals(error.code) : error.code != null) {
+            return false;
+        }
+        if (description != null ? !description.equals(error.description) : error.description != null) {
+            return false;
+        }
+        if (schema != null ? !schema.equals(error.schema) : error.schema != null) {
+            return false;
+        }
+        return reference != null ? reference.equals(error.reference) : error.reference == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = code != null ? code.hashCode() : 0;
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        result = 31 * result + (reference != null ? reference.hashCode() : 0);
+        return result;
+    }
+
+    /**
      * New error builder.
      *
      * @return Builder
@@ -77,16 +125,28 @@ public final class Error {
     }
 
     /**
-     * Builds an Error object from the data in the annotation.
+     * Builds an Error object from the data in the annotation. If the {@code error} has an {@code id} defined, the
+     * error will be defined in the top-level {@code descriptor}, and a reference to that definition will be returned.
+     *
      * @param error The annotation that holds the data
+     * @param descriptor The root descriptor, for adding definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
      * @return Error instance
      */
-    public static Error fromAnnotation(com.forgerock.api.annotations.Error error) {
-        return error()
+    public static Error fromAnnotation(com.forgerock.api.annotations.Error error, ApiDescription<?> descriptor,
+            Class<?> relativeType) {
+        Error errorDefinition = error()
                 .description(error.description())
                 .code(error.code())
-                .schema(Schema.fromAnnotation(error.detailSchema()))
+                .schema(Schema.fromAnnotation(error.detailSchema(), descriptor, relativeType))
                 .build();
+        if (!Strings.isNullOrEmpty(error.id())) {
+            // we've got an id for this error, so define it at the top level and return a reference.
+            descriptor.getErrors().addError(error.id(), errorDefinition);
+            return error().reference(Reference.reference().value("#/errors/" + error.id()).build()).build();
+        } else {
+            return errorDefinition;
+        }
     }
 
     /**
@@ -98,6 +158,7 @@ public final class Error {
         private Integer code;
         private String description;
         private Schema schema;
+        private Reference reference;
 
         private Builder() {
         }
@@ -105,8 +166,8 @@ public final class Error {
         /**
          * Set the error code.
          *
-         * @param code Error code
-         * @return Builder
+         * @param code The error code.
+         * @return This builder.
          */
         public Builder code(Integer code) {
             this.code = code;
@@ -117,7 +178,7 @@ public final class Error {
          * Set the error description.
          *
          * @param description Error description
-         * @return Builder
+         * @return This builder.
          */
         public Builder description(String description) {
             this.description = description;
@@ -128,10 +189,20 @@ public final class Error {
          * Set the schema.
          *
          * @param schema Error schema
-         * @return Builder
+         * @return This builder.
          */
         public Builder schema(Schema schema) {
             this.schema = schema;
+            return this;
+        }
+
+        /**
+         * Set the error as a reference to another definition.
+         * @param reference The reference.
+         * @return This builder.
+         */
+        public Builder reference(Reference reference) {
+            this.reference = reference;
             return this;
         }
 

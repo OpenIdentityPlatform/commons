@@ -18,7 +18,6 @@ package com.forgerock.api.models;
 
 import static org.assertj.core.api.Assertions.*;
 
-import com.forgerock.api.ApiValidationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -73,8 +72,8 @@ public class DefinitionsTest {
         assertThat(definitions.getDefinitions()).isNotEmpty();
     }
 
-    @Test(expectedExceptions = ApiValidationException.class)
-    public void testEmptyDefinitions() {
+    @Test
+    public void testValidWithEmptyDefinitions() {
         Definitions.definitions().build();
     }
 

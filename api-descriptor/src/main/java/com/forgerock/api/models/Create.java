@@ -85,16 +85,19 @@ public final class Create extends Operation {
      * Builds a Create object from the data in the annotation.
      * @param create Create annotation that holds the data
      * @param instanceOperations True if the resource is performing instance operations.
+     * @param descriptor The root descriptor to add definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
      * @return Create instance
      */
-    public static Create fromAnnotation(com.forgerock.api.annotations.Create create, boolean instanceOperations) {
+    public static Create fromAnnotation(com.forgerock.api.annotations.Create create, boolean instanceOperations,
+            ApiDescription<?> descriptor, Class<?> relativeType) {
         List<CreateMode> modes = Arrays.asList(create.modes());
         if ((instanceOperations && !modes.contains(ID_FROM_CLIENT))
                 || (!instanceOperations && !modes.contains(ID_FROM_SERVER))) {
             return null;
         }
         return create()
-                .detailsFromAnnotation(create.operationDescription())
+                .detailsFromAnnotation(create.operationDescription(), descriptor, relativeType)
                 .mode(instanceOperations ? ID_FROM_CLIENT : ID_FROM_SERVER)
                 .mvccSupported(create.mvccSupported())
                 .build();

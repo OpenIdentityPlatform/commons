@@ -136,9 +136,12 @@ public final class Query extends Operation implements Comparable<Query> {
      * Builds a Query object from the data stored in the annotation.
      * @param query The annotation that stores the data.
      * @param annotated The method that the annotation was found on.
+     * @param descriptor The root descriptor to add definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
      * @return Query instance
      */
-    public static Query fromAnnotation(com.forgerock.api.annotations.Query query, Method annotated) {
+    public static Query fromAnnotation(com.forgerock.api.annotations.Query query, Method annotated,
+            ApiDescription<?> descriptor, Class<?> relativeType) {
         String queryId = query.id();
         if (query.type() == QueryType.ID && Strings.isNullOrEmpty(queryId)) {
             if (annotated == null) {
@@ -147,7 +150,7 @@ public final class Query extends Operation implements Comparable<Query> {
             queryId = annotated.getName();
         }
         return query()
-                .detailsFromAnnotation(query.operationDescription())
+                .detailsFromAnnotation(query.operationDescription(), descriptor, relativeType)
                 .type(query.type())
                 .pagingMode(query.pagingModes())
                 .countPolicy(query.countPolicies())

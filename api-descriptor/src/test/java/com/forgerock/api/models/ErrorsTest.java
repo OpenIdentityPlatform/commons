@@ -16,10 +16,8 @@
 
 package com.forgerock.api.models;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.assertj.core.api.Assertions.*;
 
-import com.forgerock.api.ApiValidationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -74,8 +72,8 @@ public class ErrorsTest {
         assertThat(errors.getErrors()).isNotEmpty();
     }
 
-    @Test(expectedExceptions = ApiValidationException.class)
-    public void testEmptyErrors() {
+    @Test
+    public void testValidWithEmptyErrors() {
         Errors.errors().build();
     }
 

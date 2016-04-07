@@ -16,9 +16,18 @@
 
 package com.forgerock.api.annotations;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * Specify a schema for the element that is being described.
+ * <p>
+ * This annotation can also be used to specify an {@code id} for a schema defined by a type.
  */
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
 public @interface Schema {
 
     /**
@@ -28,7 +37,11 @@ public @interface Schema {
     String id() default "";
     /** The type to produce the schema from. */
     Class<?> fromType() default Void.class;
-    /** A classpath resource that contains a JSON Schema structure to be used. */
+    /**
+     * A classpath resource that contains a JSON Schema structure to be used. The path is relative to the type
+     * that the annotated resource method is part of, and will be resolved using the
+     * {@link Class#getResourceAsStream(String)} method on that class instance.
+     */
     String schemaResource() default "";
 
 }

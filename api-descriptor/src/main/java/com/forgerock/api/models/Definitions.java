@@ -16,17 +16,16 @@
 
 package com.forgerock.api.models;
 
-import static com.forgerock.api.util.ValidationUtil.containsWhitespace;
-import static com.forgerock.api.util.ValidationUtil.isEmpty;
+import static com.forgerock.api.util.ValidationUtil.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.util.Reject;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
-import com.forgerock.api.ApiValidationException;
-import org.forgerock.util.Reject;
 
 /**
  * Class that represents API descriptor {@link Schema} definitions.
@@ -37,10 +36,6 @@ public final class Definitions {
 
     private Definitions(Builder builder) {
         this.definitions = builder.definitions;
-
-        if (definitions.isEmpty()) {
-            throw new ApiValidationException("Must have at least one schema definition");
-        }
     }
 
     /**
@@ -81,6 +76,26 @@ public final class Definitions {
      */
     public static Builder definitions() {
         return new Builder();
+    }
+
+    /**
+     * This allows the models package to mutate the schemas defined here. This is used when processing annotations on
+     * resources that may reference schemas using an id, so those schemas need to be defined here rather than in-line in
+     * the resource descriptions.
+     *
+     * @param id The schema id.
+     * @param schema The schema definition.
+     * @see Schema#fromAnnotation(com.forgerock.api.annotations.Schema, ApiDescription, Class)
+     */
+    void addDefinition(String id, Schema schema) {
+        if (schema.getReference() != null) {
+            throw new IllegalArgumentException("Cannot define a schema using a reference");
+        }
+        Schema defined = definitions.get(id);
+        if (defined != null && !defined.equals(schema)) {
+            throw new IllegalArgumentException("Trying to redefine already defined schema, " + id);
+        }
+        definitions.put(id, schema);
     }
 
     /**

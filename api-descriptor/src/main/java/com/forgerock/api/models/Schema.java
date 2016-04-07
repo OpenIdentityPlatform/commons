@@ -21,6 +21,7 @@ import static com.forgerock.api.jackson.JacksonUtils.*;
 import static org.forgerock.json.JsonValue.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonValue;
@@ -29,6 +30,7 @@ import org.forgerock.util.Reject;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.forgerock.api.ApiValidationException;
+import com.forgerock.api.jackson.JacksonUtils;
 
 /**
  * Class that represents the Schema type in API descriptor.
@@ -36,6 +38,7 @@ import com.forgerock.api.ApiValidationException;
 public final class Schema {
 
     private final Reference reference;
+
     private final JsonValue schema;
 
     /**
@@ -68,6 +71,33 @@ public final class Schema {
         return schema;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        Schema schema1 = (Schema) o;
+
+        return reference != null
+                ? reference.equals(schema1.reference)
+                : schema1.reference == null
+                && (schema != null && schema1.schema != null
+                ? schema.getObject().equals(schema1.schema.getObject())
+                : schema1.schema == schema);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = reference != null ? reference.hashCode() : 0;
+        result = 31 * result + (schema != null ? schema.getObject().hashCode() : 0);
+        return result;
+    }
+
     /**
      * Create a new Builder for Schema.
      * @return The builder.
@@ -85,19 +115,51 @@ public final class Schema {
     }
 
     /**
-     * Builds Schema object from the data in the annotation parameter.
+     * Builds Schema object from the data in the annotation parameter. If the {@code schema} has an {@code id} defined,
+     * or if the type being used for the schema definition has an {@code id} defined, the schema will be defined in the
+     * top-level {@code descriptor}, and a reference to that definition will be returned.
+     *
      * @param schema The annotation that holds the data
+     * @param descriptor The root descriptor to add definitions to.
+     * @param relativeType The type relative to which schema resources should be resolved.
      * @return Schema instance
      */
-    public static Schema fromAnnotation(com.forgerock.api.annotations.Schema schema) {
-        if (schema.fromType().equals(Void.class) && Strings.isNullOrEmpty(schema.schemaResource())) {
+    public static Schema fromAnnotation(com.forgerock.api.annotations.Schema schema, ApiDescription<?> descriptor,
+            Class<?> relativeType) {
+        Class<?> type = schema.fromType();
+        if (type.equals(Void.class) && Strings.isNullOrEmpty(schema.schemaResource())) {
             return null;
         }
         Builder builder = schema();
-        if (!schema.fromType().equals(Void.class)) {
-            builder.type(schema.fromType());
+        String id = schema.id();
+        if (!type.equals(Void.class)) {
+            // the annotation declares a type to use as the schema
+            builder.type(type);
+            if (Strings.isNullOrEmpty(id)) {
+                // if the schema annotation passed to this method does not have an id, check to see if the type being
+                // used to generate the schema is annotated with an id.
+                com.forgerock.api.annotations.Schema typeSchema =
+                        type.getAnnotation(com.forgerock.api.annotations.Schema.class);
+                if (typeSchema != null && !Strings.isNullOrEmpty(typeSchema.id())) {
+                    id = typeSchema.id();
+                }
+            }
+        } else {
+            // not using a type, so must be using a resource file containing JSON Schema json.
+            InputStream resource = relativeType.getResourceAsStream(schema.schemaResource());
+            try {
+                builder.schema(json(JacksonUtils.OBJECT_MAPPER.readValue(resource, Object.class)));
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Could not read declared resource " + schema.schemaResource(), e);
+            }
         }
-        return builder.build();
+        if (!Strings.isNullOrEmpty(id)) {
+            // we've got an id for this schema, so define it at the top level and return a reference.
+            descriptor.getDefinitions().addDefinition(id, builder.build());
+            return schema().reference(Reference.reference().value("#/definitions/" + id).build()).build();
+        } else {
+            return builder.build();
+        }
     }
 
     /**

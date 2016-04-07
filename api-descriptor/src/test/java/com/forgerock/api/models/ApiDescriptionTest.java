@@ -47,8 +47,8 @@ public class ApiDescriptionTest {
                 .build();
     }
 
-    @Test(expectedExceptions = ApiValidationException.class)
-    public void testFailedValidationMinimumRequirements() {
+    @Test
+    public void testSuccessfulValidationMinimumRequirements() {
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .id("frapi:test")
                 .build();

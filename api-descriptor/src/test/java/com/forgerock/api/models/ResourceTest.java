@@ -16,27 +16,25 @@
 
 package com.forgerock.api.models;
 
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static java.util.Arrays.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.json.JsonValue.*;
 
+import org.forgerock.services.context.SecurityContext;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+import com.forgerock.api.ApiValidationException;
 import com.forgerock.api.annotations.Actions;
 import com.forgerock.api.annotations.Queries;
 import com.forgerock.api.annotations.RequestHandler;
-
-import com.forgerock.api.ApiValidationException;
 import com.forgerock.api.enums.CountPolicy;
 import com.forgerock.api.enums.CreateMode;
 import com.forgerock.api.enums.PagingMode;
 import com.forgerock.api.enums.PatchOperations;
 import com.forgerock.api.enums.QueryType;
 import com.forgerock.api.enums.Stability;
-
-import org.forgerock.services.context.SecurityContext;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 public class ResourceTest {
 
@@ -163,13 +161,16 @@ public class ResourceTest {
 
     @Test
     public void testSimpleAnnotatedHandler() throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(SimpleAnnotatedHandler.class, false);
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(SimpleAnnotatedHandler.class, false, descriptor);
         assertThat(resource.getResourceSchema()).isNull();
         assertThat(resource.getActions()).hasSize(1);
         Action action = resource.getActions()[0];
         assertThat(action.getName()).isEqualTo("myAction");
         assertThat(action.getErrors()).isEmpty();
         assertThat(action.getParameters()).isEmpty();
+        assertThat(descriptor.getErrors().getErrors()).isEmpty();
+        assertThat(descriptor.getDefinitions().getDefinitions()).isEmpty();
     }
 
     @RequestHandler
@@ -182,9 +183,54 @@ public class ResourceTest {
     }
 
     @Test
+    public void testReferencedSchema() throws Exception {
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(ReferencedSchemaHandler.class, false, descriptor);
+        assertThat(resource.getRead()).isNotNull();
+        assertThat(resource.getResourceSchema()).isNotNull();
+        assertThat(resource.getResourceSchema().getReference().getValue()).isEqualTo("#/definitions/frapi:response");
+        assertThat(descriptor.getDefinitions().getDefinitions()).hasSize(1).containsKeys("frapi:response");
+    }
+
+    @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = IdentifiedResponse.class))
+    private static final class ReferencedSchemaHandler {
+        @com.forgerock.api.annotations.Read(
+                operationDescription = @com.forgerock.api.annotations.Operation(
+                        description = "A read resource operation."
+                ))
+        public void read() {
+
+        }
+    }
+
+    @Test
+    public void testReferencedError() throws Exception {
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(ReferencedErrorHandler.class, false, descriptor);
+        assertThat(resource.getRead()).isNotNull();
+        assertThat(resource.getRead().getErrors()).hasSize(1);
+        assertThat(resource.getRead().getErrors()[0].getReference().getValue()).isEqualTo("#/errors/frapi:myerror");
+        assertThat(descriptor.getErrors().getErrors()).hasSize(1).containsKeys("frapi:myerror");
+    }
+
+    @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = IdentifiedResponse.class))
+    private static final class ReferencedErrorHandler {
+        @com.forgerock.api.annotations.Read(
+                operationDescription = @com.forgerock.api.annotations.Operation(
+                        description = "A read resource operation.",
+                        errors = @com.forgerock.api.annotations.Error(id = "frapi:myerror", code = 500,
+                                description = "Our bad.")
+                ))
+        public void read() {
+
+        }
+    }
+
+    @Test
     public void testCreateAnnotatedHandler() throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(CreateAnnotatedHandler.class, false);
-        assertThat(resource.getResourceSchema()).isNull();
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(CreateAnnotatedHandler.class, false, descriptor);
+        assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getCreate()).isNotNull();
         Create create = resource.getCreate();
         assertThat(create.isMvccSupported()).isTrue();
@@ -223,39 +269,44 @@ public class ResourceTest {
         }
     }
 
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void testResourceSchemaRequiredForCrudpq() throws Exception {
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        Resource.fromAnnotatedType(ResourceSchemaRequiredAnnotatedHandler.class, false, descriptor);
+    }
+
+    @RequestHandler
+    private static final class ResourceSchemaRequiredAnnotatedHandler {
+        @com.forgerock.api.annotations.Create(
+                operationDescription = @com.forgerock.api.annotations.Operation(
+                        description = "A create resource operation."
+                ),
+                mvccSupported = true)
+        public void create() {
+
+        }
+    }
+
     @Test
     public void testReadAnnotatedHandler() throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(ReadAnnotatedHandler.class, false);
-        assertThat(resource.getResourceSchema()).isNull();
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(ReadAnnotatedHandler.class, false, descriptor);
+        assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getRead()).isNotNull();
         Read read = resource.getRead();
         assertThat(read.getDescription()).isEqualTo("A read resource operation.");
-        assertThat(read.getErrors()).hasSize(2);
-        assertThat(read.getParameters()).hasSize(1);
-        assertThat(read.getSupportedLocales()).hasSize(2);
-        assertThat(read.getSupportedContexts()).hasSize(1);
+        assertThat(read.getErrors()).hasSize(0);
+        assertThat(read.getParameters()).hasSize(0);
+        assertThat(read.getSupportedLocales()).hasSize(0);
+        assertThat(read.getSupportedContexts()).hasSize(0);
         assertThat(read.getStability()).isEqualTo(Stability.STABLE);
     }
-
 
     @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
     private static final class ReadAnnotatedHandler {
         @com.forgerock.api.annotations.Read(
                 operationDescription = @com.forgerock.api.annotations.Operation(
-                        contexts = SecurityContext.class,
-                        description = "A read resource operation.",
-                        errors = {
-                                @com.forgerock.api.annotations.Error
-                                        (code = 403, description = "Read forbidden"),
-                                @com.forgerock.api.annotations.Error
-                                        (code = 400, description = "Malformed read request")
-                        },
-                        parameters = {
-                                @com.forgerock.api.annotations.Parameter
-                                        (name = "id", type = "string", description = "Identifier for the read")
-                        },
-                        locales = {"en-GB", "en-US"},
-                        stability = Stability.STABLE
+                        description = "A read resource operation."
                 ))
         public void read() {
 
@@ -264,42 +315,25 @@ public class ResourceTest {
 
     @Test
     public void testUpdateAnnotatedHandler() throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(UpdateAnnotatedHandler.class, false);
-        assertThat(resource.getResourceSchema()).isNull();
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(UpdateAnnotatedHandler.class, false, descriptor);
+        assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getUpdate()).isNotNull();
         Update update = resource.getUpdate();
         assertThat(update.isMvccSupported()).isTrue();
         assertThat(update.getDescription()).isEqualTo("An update resource operation.");
-        assertThat(update.getErrors()).hasSize(2);
-        assertThat(update.getParameters()).hasSize(3);
-        assertThat(update.getSupportedLocales()).hasSize(2);
-        assertThat(update.getSupportedContexts()).hasSize(1);
-        assertThat(update.getStability()).isEqualTo(Stability.EVOLVING);
+        assertThat(update.getErrors()).hasSize(0);
+        assertThat(update.getParameters()).hasSize(0);
+        assertThat(update.getSupportedLocales()).hasSize(0);
+        assertThat(update.getSupportedContexts()).hasSize(0);
+        assertThat(update.getStability()).isEqualTo(Stability.STABLE);
     }
-
 
     @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
     private static final class UpdateAnnotatedHandler {
         @com.forgerock.api.annotations.Update(
                 operationDescription = @com.forgerock.api.annotations.Operation(
-                        contexts = SecurityContext.class,
-                        description = "An update resource operation.",
-                        errors = {
-                                @com.forgerock.api.annotations.Error
-                                        (code = 403, description = "Update forbidden"),
-                                @com.forgerock.api.annotations.Error
-                                        (code = 400, description = "Malformed update request")
-                        },
-                        parameters = {
-                                @com.forgerock.api.annotations.Parameter
-                                        (name = "id", type = "string", description = "Identifier for the updated"),
-                                @com.forgerock.api.annotations.Parameter
-                                        (name = "name", type = "string", description = "Name for the updated"),
-                                @com.forgerock.api.annotations.Parameter
-                                        (name = "date", type = "date", description = "Date for the updated")
-                        },
-                        locales = {"en-GB", "en-US"},
-                        stability = Stability.EVOLVING
+                        description = "An update resource operation."
                 ),
                 mvccSupported = true)
         public void update() {
@@ -309,38 +343,25 @@ public class ResourceTest {
 
     @Test
     public void testDeleteAnnotatedHandler() throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(DeleteAnnotatedHandler.class, false);
-        assertThat(resource.getResourceSchema()).isNull();
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(DeleteAnnotatedHandler.class, false, descriptor);
+        assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getDelete()).isNotNull();
         Delete delete = resource.getDelete();
         assertThat(delete.isMvccSupported()).isTrue();
         assertThat(delete.getDescription()).isEqualTo("A delete resource operation.");
-        assertThat(delete.getErrors()).hasSize(2);
-        assertThat(delete.getParameters()).hasSize(1);
-        assertThat(delete.getSupportedLocales()).hasSize(2);
-        assertThat(delete.getSupportedContexts()).hasSize(1);
-        assertThat(delete.getStability()).isEqualTo(Stability.EVOLVING);
+        assertThat(delete.getErrors()).hasSize(0);
+        assertThat(delete.getParameters()).hasSize(0);
+        assertThat(delete.getSupportedLocales()).hasSize(0);
+        assertThat(delete.getSupportedContexts()).hasSize(0);
+        assertThat(delete.getStability()).isEqualTo(Stability.STABLE);
     }
-
 
     @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
     private static final class DeleteAnnotatedHandler {
         @com.forgerock.api.annotations.Delete(
                 operationDescription = @com.forgerock.api.annotations.Operation(
-                        contexts = SecurityContext.class,
-                        description = "A delete resource operation.",
-                        errors = {
-                                @com.forgerock.api.annotations.Error
-                                        (code = 403, description = "Delete forbidden"),
-                                @com.forgerock.api.annotations.Error
-                                        (code = 400, description = "Malformed delete request")
-                        },
-                        parameters = {
-                                @com.forgerock.api.annotations.Parameter
-                                        (name = "id", type = "string", description = "Identifier for the deleted")
-                        },
-                        locales = {"en-GB", "en-US"},
-                        stability = Stability.EVOLVING
+                        description = "A delete resource operation."
                 ),
                 mvccSupported = true)
         public void delete() {
@@ -348,44 +369,29 @@ public class ResourceTest {
         }
     }
 
-
     @Test
     public void testPatchAnnotatedHandler() throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(PatchAnnotatedHandler.class, false);
-        assertThat(resource.getResourceSchema()).isNull();
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(PatchAnnotatedHandler.class, false, descriptor);
+        assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getPatch()).isNotNull();
         Patch patch = resource.getPatch();
         assertThat(patch.isMvccSupported()).isTrue();
         assertThat(patch.getDescription()).isEqualTo("A patch resource operation.");
-        assertThat(patch.getErrors()).hasSize(2);
-        assertThat(patch.getParameters()).hasSize(1);
-        assertThat(patch.getSupportedLocales()).hasSize(2);
-        assertThat(patch.getSupportedContexts()).hasSize(1);
-        assertThat(patch.getStability()).isEqualTo(Stability.EVOLVING);
+        assertThat(patch.getErrors()).hasSize(0);
+        assertThat(patch.getParameters()).hasSize(0);
+        assertThat(patch.getSupportedLocales()).hasSize(0);
+        assertThat(patch.getSupportedContexts()).hasSize(0);
+        assertThat(patch.getStability()).isEqualTo(Stability.STABLE);
         assertThat(patch.getOperations()).hasSize(2);
-        assertThat(patch.getOperations()[0]).isEqualTo(PatchOperations.INCREMENT);
-        assertThat(patch.getOperations()[1]).isEqualTo(PatchOperations.TRANSFORM);
+        assertThat(patch.getOperations()).contains(PatchOperations.INCREMENT, PatchOperations.TRANSFORM);
     }
-
 
     @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
     private static final class PatchAnnotatedHandler {
         @com.forgerock.api.annotations.Patch(
                 operationDescription = @com.forgerock.api.annotations.Operation(
-                        contexts = SecurityContext.class,
-                        description = "A patch resource operation.",
-                        errors = {
-                                @com.forgerock.api.annotations.Error
-                                        (code = 403, description = "Patch forbidden"),
-                                @com.forgerock.api.annotations.Error
-                                        (code = 400, description = "Malformed patch request")
-                        },
-                        parameters = {
-                                @com.forgerock.api.annotations.Parameter
-                                        (name = "id", type = "string", description = "Identifier for the patched")
-                        },
-                        locales = {"en-GB", "en-US"},
-                        stability = Stability.EVOLVING
+                        description = "A patch resource operation."
                 ),
                 mvccSupported = true,
                 operations = {PatchOperations.INCREMENT, PatchOperations.TRANSFORM})
@@ -401,7 +407,8 @@ public class ResourceTest {
 
     @Test(dataProvider = "actionAnnotations")
     public void testActionAnnotatedHandler(Class<?> type) throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(type, false);
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(type, false, descriptor);
         assertThat(resource.getResourceSchema()).isNull();
         assertThat(resource.getActions()).isNotNull();
         assertThat(resource.getActions()).hasSize(2);
@@ -428,8 +435,7 @@ public class ResourceTest {
         assertThat(action2.getResponse()).isNotNull();
     }
 
-
-    @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler
     private static final class ActionAnnotatedHandler {
         @com.forgerock.api.annotations.Action(
                 operationDescription = @com.forgerock.api.annotations.Operation(
@@ -480,7 +486,7 @@ public class ResourceTest {
         }
     }
 
-    @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler
     private static final class ActionsAnnotatedHandler {
         @Actions({
                 @com.forgerock.api.annotations.Action(
@@ -537,7 +543,8 @@ public class ResourceTest {
 
     @Test(dataProvider = "queryAnnotations")
     public void testQueryAnnotatedHandler(Class<?> type) throws Exception {
-        final Resource resource = Resource.fromAnnotatedType(type, false);
+        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        final Resource resource = Resource.fromAnnotatedType(type, false, descriptor);
         assertThat(resource.getQueries()).isNotNull();
         assertThat(resource.getQueries()).hasSize(2);
         Query query1 = resource.getQueries()[0];
@@ -576,7 +583,6 @@ public class ResourceTest {
         assertThat(query2.getSupportedSortKeys()[1]).isEqualTo("key2");
         assertThat(query2.getSupportedSortKeys()[2]).isEqualTo("key3");
     }
-
 
     @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
     private static final class QueryAnnotatedHandler {
@@ -689,13 +695,18 @@ public class ResourceTest {
         }
     }
 
-
     private static final class Request {
         public String id;
         public Integer field;
     }
 
     private static final class Response {
+        public String id;
+        public Integer field;
+    }
+
+    @com.forgerock.api.annotations.Schema(id = "frapi:response")
+    private static final class IdentifiedResponse {
         public String id;
         public Integer field;
     }
