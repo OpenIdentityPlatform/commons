@@ -18,6 +18,8 @@ package com.forgerock.api.models;
 
 import static com.forgerock.api.util.ValidationUtil.*;
 
+import java.util.Comparator;
+
 import org.forgerock.guava.common.base.Strings;
 
 import com.forgerock.api.ApiValidationException;
@@ -26,6 +28,11 @@ import com.forgerock.api.ApiValidationException;
  * Class that represents the Error type in API descriptor.
  */
 public final class Error {
+
+    /**
+     * {@link Error} {@link Comparator}, which sorts by code and description.
+     */
+    public static final ErrorComparator ERROR_COMPARATOR = new ErrorComparator();
 
     // Must be an Integer, because 0 is not a valid default
     private final Integer code;
@@ -198,6 +205,7 @@ public final class Error {
 
         /**
          * Set the error as a reference to another definition.
+         *
          * @param reference The reference.
          * @return This builder.
          */
@@ -213,6 +221,24 @@ public final class Error {
          */
         public Error build() {
             return new Error(this);
+        }
+    }
+
+    /**
+     * {@link Error} {@link Comparator}, which sorts by code and description. This {@code Comparator} does not handle
+     * {@code null} values or duplicates, because those conditions should never occur in practice.
+     * <p>
+     * This class is thread-safe.
+     * </p>
+     */
+    private static class ErrorComparator implements Comparator<Error> {
+        @Override
+        public int compare(final Error o1, final Error o2) {
+            final int codeCompare = o1.code.compareTo(o2.code);
+            if (codeCompare == 0) {
+                return o1.description.compareTo(o2.description);
+            }
+            return codeCompare;
         }
     }
 }

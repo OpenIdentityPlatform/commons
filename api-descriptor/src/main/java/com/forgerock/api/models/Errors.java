@@ -18,6 +18,7 @@ package com.forgerock.api.models;
 
 import static com.forgerock.api.util.ValidationUtil.*;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,11 @@ import com.fasterxml.jackson.annotation.JsonValue;
  */
 public final class Errors {
 
+    /**
+     * {@link Error} {@code Map}-entry {@link Comparator}, which sorts by code and description.
+     */
+    public static final ErrorEntryComparator ERROR_ENTRY_COMPARATOR = new ErrorEntryComparator();
+
     private final Map<String, Error> errors;
 
     private Errors(Builder builder) {
@@ -39,12 +45,12 @@ public final class Errors {
     }
 
     /**
-     * Gets a {@code Map} of error-names to {@link Error}s. This method is currently only used for JSON serialization.
+     * Gets a {@code Map} of error-names to {@link Error}s.
      *
      * @return {@code Map} of error-names to {@link Error}s.
      */
     @JsonValue
-    protected Map<String, Error> getErrors() {
+    public Map<String, Error> getErrors() {
         return errors;
     }
 
@@ -136,6 +142,24 @@ public final class Errors {
          */
         public Errors build() {
             return new Errors(this);
+        }
+    }
+
+    /**
+     * {@link Error} {@code Map}-entry {@link Comparator}, which sorts by code and description. This {@code Comparator}
+     * does not handle {@code null} values or duplicates, because those conditions should never occur in practice.
+     * <p>
+     * This class is thread-safe.
+     * </p>
+     */
+    private static class ErrorEntryComparator implements Comparator<Map.Entry<String, Error>> {
+        @Override
+        public int compare(final Map.Entry<String, Error> o1, final Map.Entry<String, Error> o2) {
+            final int codeCompare = Integer.compare(o1.getValue().getCode(), o2.getValue().getCode());
+            if (codeCompare == 0) {
+                return o1.getValue().getDescription().compareTo(o2.getValue().getDescription());
+            }
+            return codeCompare;
         }
     }
 

@@ -27,7 +27,11 @@ import java.util.regex.Pattern;
 import org.forgerock.util.Reject;
 
 /**
- * AsciiDoc table builder [<a href="http://asciidoctor.org/docs/user-manual/#tables">ref</a>].
+ * AsciiDoc table builder [<a href="http://asciidoctor.org/docs/user-manual/#tables">ref</a>], which defers insertion
+ * of the table, at the end of the parent document, until {@link #tableEnd()} is called.
+ * <p>
+ * This class is not thread-safe.
+ * </p>
  */
 public class AsciiDocTable {
 
@@ -112,7 +116,7 @@ public class AsciiDocTable {
     /**
      * Inserts a column-cell.
      *
-     * @param columnCell Column-cell
+     * @param columnCell Column-cell or {@code null} for empty cell
      * @return Table builder
      */
     public AsciiDocTable columnCell(final String columnCell) {
@@ -120,6 +124,21 @@ public class AsciiDocTable {
             throw new AsciiDocException("columnsPerRow not yet defined");
         }
         cells.add(TABLE_CELL + normalizeColumnCell(columnCell));
+        return this;
+    }
+
+    /**
+     * Inserts a column-cell, with a style.
+     *
+     * @param columnCell Column-cell or {@code null} for empty cell
+     * @param style Column-style
+     * @return Table builder
+     */
+    public AsciiDocTable columnCell(final String columnCell, final AsciiDocTableColumnStyles style) {
+        if (this.columnsPerRow == null) {
+            throw new AsciiDocException("columnsPerRow not yet defined");
+        }
+        cells.add(style.toString() + TABLE_CELL + normalizeColumnCell(columnCell));
         return this;
     }
 
@@ -145,7 +164,7 @@ public class AsciiDocTable {
     }
 
     /**
-     * Completes the table being built.
+     * Completes the table being built, and inserts it at the end of the parent document.
      *
      * @return Doc builder
      */
@@ -153,15 +172,15 @@ public class AsciiDocTable {
         // TODO table-options builder
         // TODO cell-options builder
 
-        // [cols="2*", options="header"]
-        builder.append("[cols=\"").append(columnsPerRow).append("*\", options=\"");
+        // [cols="2*", caption="", options="header"]
+        builder.append("[cols=\"").append(columnsPerRow).append("*\", caption=\"\", options=\"");
         if (hasHeader) {
             builder.append("header");
         }
         builder.append("\"]").append(NEWLINE);
 
         if (title != null) {
-            builder.append(".A ").append(title).append(NEWLINE);
+            builder.append(".").append(title).append(NEWLINE);
         }
 
         builder.append(TABLE).append(NEWLINE);

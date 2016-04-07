@@ -74,6 +74,11 @@ public enum AsciiDocSymbols {
      */
     LISTING("----"),
     /**
+     * <a href="http://asciidoctor.org/docs/user-manual/#complex-list-content">List continuation</a> marker, for
+     * including complex markup in a list-item.
+     */
+    LIST_CONTINUATION("+"),
+    /**
      * <a href="http://asciidoctor.org/docs/user-manual/#built-in-blocks-summary">Literal</a> block.
      */
     LITERAL("...."),
@@ -82,7 +87,9 @@ public enum AsciiDocSymbols {
      */
     MONO("`"),
     /**
-     * Unordered <a href="http://asciidoctor.org/docs/user-manual/#unordered-lists">list item</a>.
+     * Unordered <a href="http://asciidoctor.org/docs/user-manual/#unordered-lists">list item</a> at level-1.
+     *
+     * @see #LIST_CONTINUATION
      */
     UNORDERED_LIST_1("* "),
     /**
@@ -101,6 +108,10 @@ public enum AsciiDocSymbols {
      * <a href="http://asciidoctor.org/docs/user-manual/#tables">Table</a>-cell delimiter.
      */
     TABLE_CELL("|"),
+    /**
+     * <a href="http://asciidoctor.org/docs/user-manual/#user-toc">Table-of-Contents</a> directive.
+     */
+    TABLE_OF_CONTENTS(":toc:"),
     /**
      * <a href="http://asciidoctor.org/docs/user-manual/#sections">Section</a> title, level 1.
      */

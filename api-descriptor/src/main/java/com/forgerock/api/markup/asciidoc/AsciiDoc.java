@@ -32,6 +32,9 @@ import java.util.regex.Pattern;
 /**
  * Root builder for AsciiDoc markup. All operations may be applied at the current linear position within the
  * document being built, such that markup that must appear at the top should be added first.
+ * <p>
+ * This class is not thread-safe.
+ * </p>
  */
 public final class AsciiDoc {
 
@@ -74,7 +77,7 @@ public final class AsciiDoc {
         if (isEmpty(content)) {
             throw new AsciiDocException("content required");
         }
-        builder.append(checkNotNull(symbol)).append(content).append(NEWLINE);
+        builder.append(NEWLINE).append(checkNotNull(symbol)).append(content).append(NEWLINE);
         return this;
     }
 
@@ -119,6 +122,79 @@ public final class AsciiDoc {
         }
         builder.append(text);
         return this;
+    }
+
+    /**
+     * Inserts raw line (may contain markup), and will insert one newline-characters above and below, if those
+     * newlines do not already exist.
+     *
+     * @param text Raw text/markup
+     * @return builder
+     */
+    public AsciiDoc rawLine(final String text) {
+        if (isEmpty(text)) {
+            throw new AsciiDocException("text required");
+        }
+
+        int newlinesAbove = requireTrailingNewlines(1, builder);
+        while (--newlinesAbove > -1) {
+            builder.append(NEWLINE);
+        }
+
+        builder.append(text);
+
+        int newlinesBelow = requireTrailingNewlines(1, text);
+        while (--newlinesBelow > -1) {
+            builder.append(NEWLINE);
+        }
+        return this;
+    }
+
+    /**
+     * Inserts raw paragraph (may contain markup), and will insert two newline-characters above and below, if those
+     * newlines do not already exist [<a href="http://asciidoctor.org/docs/user-manual/#paragraph">ref</a>].
+     *
+     * @param text Raw text/markup
+     * @return builder
+     */
+    public AsciiDoc rawParagraph(final String text) {
+        if (isEmpty(text)) {
+            throw new AsciiDocException("text required");
+        }
+
+        int newlinesAbove = requireTrailingNewlines(2, builder);
+        while (--newlinesAbove > -1) {
+            builder.append(NEWLINE);
+        }
+
+        builder.append(text);
+
+        int newlinesBelow = requireTrailingNewlines(2, text);
+        while (--newlinesBelow > -1) {
+            builder.append(NEWLINE);
+        }
+        return this;
+    }
+
+    /**
+     * Checks for a minimum-number of trailing newline-characters.
+     *
+     * @param newlines Minimum number of required, trailing newline-characters (1 or higher)
+     * @param text Text to check
+     * @return Number of newline-characters that need to be added to the end of the text
+     */
+    private static int requireTrailingNewlines(int newlines, final CharSequence text) {
+        if (newlines < 0) {
+            throw new IllegalArgumentException("newlines must be positive");
+        }
+        for (int i = 0; newlines > 0; ++i) {
+            if (text.length() > i && text.charAt(text.length() - (i + 1)) == '\n') {
+                --newlines;
+            } else {
+                break;
+            }
+        }
+        return newlines;
     }
 
     /**
@@ -277,6 +353,24 @@ public final class AsciiDoc {
      * @return Doc builder
      */
     public AsciiDoc listingBlock(final String content) {
+        return block(LISTING, content);
+    }
+
+    /**
+     * Inserts a listing-block, with the source-code type (e.g., java, json, etc.) noted for formatting purposes.
+     *
+     * @param content Content
+     * @param sourceType Type of source-code in the listing
+     * @return Doc builder
+     */
+    public AsciiDoc listingBlock(final String content, final String sourceType) {
+        if (isEmpty(content) || isEmpty(sourceType)) {
+            throw new AsciiDocException("content and sourceType required");
+        }
+        builder.append("[source,")
+                .append(sourceType)
+                .append("]")
+                .append(NEWLINE);
         return block(LISTING, content);
     }
 

@@ -26,12 +26,20 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 
+import com.forgerock.api.enums.CountPolicy;
+import com.forgerock.api.enums.PagingMode;
+import com.forgerock.api.enums.ParameterSource;
+import com.forgerock.api.enums.QueryType;
+import com.forgerock.api.enums.Stability;
 import com.forgerock.api.models.Action;
 import com.forgerock.api.models.ApiDescription;
 import com.forgerock.api.models.Definitions;
 import com.forgerock.api.models.Error;
 import com.forgerock.api.models.Errors;
+import com.forgerock.api.models.Parameter;
 import com.forgerock.api.models.Paths;
+import com.forgerock.api.models.Query;
+import com.forgerock.api.models.Read;
 import com.forgerock.api.models.Resource;
 import com.forgerock.api.models.Schema;
 import com.forgerock.api.models.VersionedPath;
@@ -88,6 +96,46 @@ public class ApiDocGeneratorTest {
                 .schema(json(object()))
                 .build();
 
+        final String[] supportedLocales = new String[]{"en"};
+        final Error notFoundError = Error.error()
+                .code(404)
+                .description("Custom not-found error.")
+                .build();
+        final Parameter parameter1 = Parameter.parameter()
+                .name("param1")
+                .description("Description for param 1")
+                .type("string")
+                .source(ParameterSource.ADDITIONAL)
+                .defaultValue("default")
+                .required(true)
+                .build();
+        final Parameter parameter2 = Parameter.parameter()
+                .name("param2")
+                .description("Description for param 2")
+                .type("string")
+                .source(ParameterSource.ADDITIONAL)
+                .enumValues("enum1", "enum2")
+                .enumTitles("first enum", "second enum")
+                .build();
+
+        final Read read = Read.read()
+                .description("Default description for read.")
+                .supportedLocales(supportedLocales)
+                .stability(Stability.STABLE)
+                .error(notFoundError)
+                .parameter(parameter1)
+                .parameter(parameter2)
+                .build();
+
+        final Query query = Query.query()
+                .type(QueryType.EXPRESSION)
+                .description("Default description for query.")
+                .pagingMode(PagingMode.COOKIE, PagingMode.OFFSET)
+                .countPolicy(CountPolicy.EXACT, CountPolicy.ESTIMATE)
+                .queryableFields("field1", "field2")
+                .supportedSortKeys("key1", "key2")
+                .build();
+
         final Action action1 = Action.action()
                 .name("action1")
                 .description("Default description for action1.")
@@ -101,12 +149,18 @@ public class ApiDocGeneratorTest {
 
         final Resource resourceV1 = Resource.resource()
                 .description("Default description for resourceV1.")
+                .resourceSchema(schema)
                 .action(action1)
+                .read(read)
+                .query(query)
                 .build();
         final Resource resourceV2 = Resource.resource()
                 .description("Default description for resourceV2.")
+                .resourceSchema(schema)
                 .action(action1)
                 .action(action2)
+                .read(read)
+                .query(query)
                 .build();
 
         final Definitions definitions = Definitions.definitions()
