@@ -252,6 +252,13 @@
                 <classifier>bootstrap3</classifier>
                 <type>css</type>
             </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>dragula</artifactId>
+                <version>3.6.7</version>
+                <classifier>min</classifier>
+                <type>js</type>
+            </dependency>
 
             <!-- misc date utilities -->
             <dependency>
