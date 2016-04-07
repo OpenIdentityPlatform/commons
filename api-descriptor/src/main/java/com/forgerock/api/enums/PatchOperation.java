@@ -21,7 +21,7 @@ import com.forgerock.api.models.Patch;
 /**
  * Represents all {@link Patch} operations.
  */
-public enum PatchOperations {
+public enum PatchOperation {
     /**
      * Adds a field.
      */

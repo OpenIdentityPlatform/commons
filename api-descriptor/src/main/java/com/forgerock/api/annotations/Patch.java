@@ -16,14 +16,14 @@
 
 package com.forgerock.api.annotations;
 
-import static com.forgerock.api.enums.PatchOperations.*;
+import static com.forgerock.api.enums.PatchOperation.*;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.forgerock.api.enums.PatchOperations;
+import com.forgerock.api.enums.PatchOperation;
 
 /**
  * Indicates an CREST patch method on a {@link RequestHandler}-annotated POJO. This annotation can be used on
@@ -54,5 +54,5 @@ public @interface Patch {
     /** Whether MVCC style requests are supported. */
     boolean mvccSupported();
     /** The set of patch operations supported by this request handler. By default, all are supported. */
-    PatchOperations[] operations() default { ADD, REMOVE, REPLACE, INCREMENT, MOVE, COPY, TRANSFORM };
+    PatchOperation[] operations() default { ADD, REMOVE, REPLACE, INCREMENT, MOVE, COPY, TRANSFORM };
 }

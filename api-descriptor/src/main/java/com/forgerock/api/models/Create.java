@@ -31,6 +31,7 @@ public final class Create extends Operation {
 
     private final CreateMode mode;
     private final Boolean mvccSupported;
+    private final boolean singleton;
 
     /**
      * Protected contstructor of the Create.
@@ -41,6 +42,7 @@ public final class Create extends Operation {
         super(builder);
         this.mode = builder.mode;
         this.mvccSupported = builder.mvccSupported;
+        this.singleton = builder.singleton;
 
         if (mode == null || mvccSupported == null) {
             throw new ApiValidationException("mode and mvccSupported required");
@@ -49,6 +51,7 @@ public final class Create extends Operation {
 
     /**
      * Getter of the mode.
+     *
      * @return Mode
      */
     public CreateMode getMode() {
@@ -65,7 +68,17 @@ public final class Create extends Operation {
     }
 
     /**
+     * Informs if operation creates singleton resources.
+     *
+     * @return {@code true} if operation creates singleton resources and {@code false} otherwise
+     */
+    public boolean isSingleton() {
+        return singleton;
+    }
+
+    /**
      * Creates a new builder for Create.
+     *
      * @return New builder instance
      */
     public static final Builder create() {
@@ -74,6 +87,7 @@ public final class Create extends Operation {
 
     /**
      * Allocates the Create operation type to the given Resource Builder.
+     *
      * @param resourceBuilder - Resource Builder to add the operation
      */
     @Override
@@ -83,6 +97,7 @@ public final class Create extends Operation {
 
     /**
      * Builds a Create object from the data in the annotation.
+     *
      * @param create Create annotation that holds the data
      * @param instanceOperations True if the resource is performing instance operations.
      * @param descriptor The root descriptor to add definitions to.
@@ -110,7 +125,7 @@ public final class Create extends Operation {
 
         private CreateMode mode;
         private Boolean mvccSupported;
-        private Boolean singleton;
+        private boolean singleton;
 
         private Builder() {
             super();
@@ -151,6 +166,7 @@ public final class Create extends Operation {
 
         /**
          * Returns the builder so this.
+         *
          * @return this
          */
         @Override

@@ -32,7 +32,7 @@ import com.forgerock.api.annotations.RequestHandler;
 import com.forgerock.api.enums.CountPolicy;
 import com.forgerock.api.enums.CreateMode;
 import com.forgerock.api.enums.PagingMode;
-import com.forgerock.api.enums.PatchOperations;
+import com.forgerock.api.enums.PatchOperation;
 import com.forgerock.api.enums.QueryType;
 import com.forgerock.api.enums.Stability;
 
@@ -69,7 +69,7 @@ public class ResourceTest {
                 .build();
         patch = Patch.patch()
                 .mvccSupported(true)
-                .operations(PatchOperations.ADD, PatchOperations.COPY)
+                .operations(PatchOperation.ADD, PatchOperation.COPY)
                 .build();
         action1 = Action.action()
                 .name("action1")
@@ -384,7 +384,7 @@ public class ResourceTest {
         assertThat(patch.getSupportedContexts()).hasSize(0);
         assertThat(patch.getStability()).isEqualTo(Stability.STABLE);
         assertThat(patch.getOperations()).hasSize(2);
-        assertThat(patch.getOperations()).contains(PatchOperations.INCREMENT, PatchOperations.TRANSFORM);
+        assertThat(patch.getOperations()).contains(PatchOperation.INCREMENT, PatchOperation.TRANSFORM);
     }
 
     @RequestHandler(resourceSchema = @com.forgerock.api.annotations.Schema(fromType = Response.class))
@@ -394,7 +394,7 @@ public class ResourceTest {
                         description = "A patch resource operation."
                 ),
                 mvccSupported = true,
-                operations = {PatchOperations.INCREMENT, PatchOperations.TRANSFORM})
+                operations = {PatchOperation.INCREMENT, PatchOperation.TRANSFORM})
         public void patch() {
 
         }

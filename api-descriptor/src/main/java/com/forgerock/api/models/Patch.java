@@ -19,14 +19,14 @@ package com.forgerock.api.models;
 import static com.forgerock.api.util.ValidationUtil.isEmpty;
 
 import com.forgerock.api.ApiValidationException;
-import com.forgerock.api.enums.PatchOperations;
+import com.forgerock.api.enums.PatchOperation;
 
 /**
  * Class that represents the Patch operation type in API descriptor.
  */
 public final class Patch extends Operation {
 
-    private final PatchOperations[] operations;
+    private final PatchOperation[] operations;
     private final Boolean mvccSupported;
 
     /**
@@ -49,7 +49,7 @@ public final class Patch extends Operation {
      *
      * @return Supported Patch operations
      */
-    public PatchOperations[] getOperations() {
+    public PatchOperation[] getOperations() {
         return operations;
     }
 
@@ -103,7 +103,7 @@ public final class Patch extends Operation {
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private PatchOperations[] operations;
+        private PatchOperation[] operations;
         private Boolean mvccSupported;
 
         private Builder() {
@@ -116,7 +116,7 @@ public final class Patch extends Operation {
          * @param operations Supported Patch-operations
          * @return Builder
          */
-        public Builder operations(PatchOperations... operations) {
+        public Builder operations(PatchOperation... operations) {
             this.operations = operations;
             return this;
         }
