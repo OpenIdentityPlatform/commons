@@ -41,17 +41,22 @@ class JndiJmsContextManager implements JmsContextManager {
     private final JndiConfiguration jndiConfiguration;
 
     /**
-     * Given the configuration, this builds a JMS InitialContext.
+     * Given the configuration, this builds a JMS InitialContext. The classloader of this class will be used as
+     * the context classloader {@link Thread#setContextClassLoader(ClassLoader)}.
      *
      * @param configuration The {@link JndiConfiguration JNDI configuration}.
      * @throws InternalServerErrorException If unable to create the {@link InitialContext JNDI context}
      */
     JndiJmsContextManager(JndiConfiguration configuration) throws ResourceException {
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
             jndiConfiguration = configuration;
             context = new InitialContext(new Hashtable<>(configuration.getContextProperties()));
         } catch (NamingException e) {
             throw new InternalServerErrorException("Encountered issue building initial JNDI context", e);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalContextClassLoader);
         }
     }
 

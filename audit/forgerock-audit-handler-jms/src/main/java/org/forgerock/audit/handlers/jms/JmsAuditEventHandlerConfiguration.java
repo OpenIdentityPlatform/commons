@@ -16,18 +16,17 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import java.util.Collections;
-import java.util.Map;
 import javax.jms.ConnectionFactory;
-import javax.jms.JMSContext;
+import javax.jms.Session;
 import javax.jms.Topic;
 import javax.naming.InitialContext;
-
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
-import org.forgerock.util.Reject;
+import java.util.Collections;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+import org.forgerock.util.Reject;
 
 /**
  * Configuration object for the {@link JmsAuditEventHandler}.
@@ -89,7 +88,7 @@ public class JmsAuditEventHandlerConfiguration extends EventHandlerConfiguration
      * Returns the mode that the JMS session should use when publishing the JMS messages.
      *
      * @return the session's mode.
-     * @see JMSContext#getSessionMode()
+     * @see Session#getAcknowledgeMode()
      */
     public SessionModeConfig getSessionMode() {
         return sessionMode;
@@ -99,7 +98,7 @@ public class JmsAuditEventHandlerConfiguration extends EventHandlerConfiguration
      * Sets the session mode that the JMS session should use when publishing the JMS messages.
      *
      * @param sessionMode the session's acknowledgement mode.
-     * @see JMSContext#getSessionMode()
+     * @see Session#getAcknowledgeMode()
      */
     public void setSessionMode(SessionModeConfig sessionMode) {
         this.sessionMode = sessionMode;

@@ -16,15 +16,15 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import javax.jms.JMSContext;
+import javax.jms.Session;
 
 /**
- * Configuration wrapper for JMS {@link JMSContext#getSessionMode()} SessionMode setting.
+ * Configuration wrapper for JMS {@link Session#getAcknowledgeMode()} SessionMode setting.
  */
 public enum SessionModeConfig {
-    AUTO(JMSContext.AUTO_ACKNOWLEDGE),
-    CLIENT(JMSContext.CLIENT_ACKNOWLEDGE),
-    DUPS_OK(JMSContext.DUPS_OK_ACKNOWLEDGE);
+    AUTO(Session.AUTO_ACKNOWLEDGE),
+    CLIENT(Session.CLIENT_ACKNOWLEDGE),
+    DUPS_OK(Session.DUPS_OK_ACKNOWLEDGE);
 
     private int mode;
 
@@ -32,7 +32,7 @@ public enum SessionModeConfig {
      * Creates the config instance with the passed in 'mode' setting.
      *
      * @param mode the session mode setting for this instance.
-     * @see JMSContext#getSessionMode()
+     * @see Session#getAcknowledgeMode()
      */
     SessionModeConfig(int mode) {
         this.mode = mode;
@@ -42,7 +42,7 @@ public enum SessionModeConfig {
      * Returns the session mode setting for this configuration.
      *
      * @return the session mode setting for this configuration.
-     * @see JMSContext#getSessionMode()
+     * @see Session#getAcknowledgeMode()
      */
     public int getMode() {
         return mode;

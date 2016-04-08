@@ -28,7 +28,6 @@ import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.*;
 
-import java.util.Map;
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.Destination;
@@ -38,7 +37,9 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
+import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
@@ -64,8 +65,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Tests the functionality of the JMS Audit event handler.
  */
@@ -75,7 +74,6 @@ public class JmsAuditEventHandlerTest {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final EventTopicsMetaData coreEventTopics =
             EventTopicsMetaDataBuilder.coreTopicSchemas().build();
-    private static final String bufferedConfigJsonFileName = "batch-handler-config.json";
     private int sessionCount = 0;
 
     /**

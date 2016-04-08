@@ -16,20 +16,19 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import static org.forgerock.audit.util.ResourceExceptionsUtil.adapt;
-import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.audit.util.ResourceExceptionsUtil.*;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import java.util.Collections;
-import java.util.List;
 import javax.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
+import java.util.Collections;
+import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
@@ -45,9 +44,6 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Publishes Audit events on a JMS Topic.
@@ -171,11 +167,19 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
      *         InternalServerErrorException if unable to publish jms messages and a retry is not possible.
      */
     private void publishJmsMessages(List<JsonValue> messages) throws JMSException, InternalServerErrorException {
-        try (Session session = jmsResourceManager.createSession()) {
-            try (MessageProducer producer = jmsResourceManager.createProducer(session)) {
+        Session session = null;
+        try {
+            session = jmsResourceManager.createSession();
+            MessageProducer producer = null;
+            try {
+                producer = jmsResourceManager.createProducer(session);
                 for (JsonValue message : messages) {
                     String text = mapper.writeValueAsString(message.getObject());
                     producer.send(session.createTextMessage(text));
+                }
+            } finally {
+                if (null != producer) {
+                    producer.close();
                 }
             }
         } catch (JMSException e) {
@@ -185,6 +189,10 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
             final String message = "Unable to publish JMS messages, messages are likely lost";
             logger.error(message, e);
             throw new InternalServerErrorException(message, e);
+        } finally {
+            if (null != session) {
+                session.close();
+            }
         }
     }
 
