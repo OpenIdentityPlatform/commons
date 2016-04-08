@@ -134,6 +134,7 @@ public final class Query extends Operation implements Comparable<Query> {
 
     /**
      * Builds a Query object from the data stored in the annotation.
+     *
      * @param query The annotation that stores the data.
      * @param annotated The method that the annotation was found on.
      * @param descriptor The root descriptor to add definitions to.
@@ -161,17 +162,42 @@ public final class Query extends Operation implements Comparable<Query> {
     }
 
     /**
-     * Compares two strings lexicographically.
+     * Compares two queries.
+     *
      * @param query Query to compare to
-     * @return  the value {@code 0} if the argument string is equal to
-     *          this string; a value less than {@code 0} if this string
-     *          is lexicographically less than the string argument; and a
-     *          value greater than {@code 0} if this string is
-     *          lexicographically greater than the string argument.
+     * @return the value {@code 0} if the argument string is equal to
+     * this string; a value less than {@code 0} if this string
+     * is lexicographically less than the string argument; and a
+     * value greater than {@code 0} if this string is
+     * lexicographically greater than the string argument.
      */
     @Override
-    public int compareTo(Query query) {
-        return this.queryId.compareTo(query.getQueryId());
+    public int compareTo(final Query query) {
+        // Sort Order: EXPRESSION, FILTER, ID
+        // @Checkstyle:off
+        switch (query.getType()) {
+            case EXPRESSION:
+                if (this.getType() == QueryType.EXPRESSION) {
+                    return 0;
+                }
+                return 1;
+            case FILTER:
+                if (this.getType() == QueryType.FILTER) {
+                    return 0;
+                }
+                if (this.getType() == QueryType.EXPRESSION) {
+                    return -1;
+                }
+                return 1;
+            case ID:
+                if (this.getType() == QueryType.ID) {
+                    return this.queryId.compareTo(query.getQueryId());
+                }
+                return -1;
+            default:
+                throw new IllegalStateException("Unsupported QueryType: " + query.getType());
+        }
+        // @Checkstyle:on
     }
 
     /**
