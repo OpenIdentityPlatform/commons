@@ -1,3 +1,13 @@
+# 6.0.0
+
+## Changes
+
+### Major
+* CAUD-320 Declare whether a handler can be used for queries in the configuration class instead of the handler class
+
+### Bug Fixes
+* CAUD-328 Utilize context classloader passed to JndiJmsContextManager for OSGi compatibility, revert to JMS 1.1 api.
+
 # 5.1.0
 
 ## Changes
