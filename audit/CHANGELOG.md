@@ -1,3 +1,10 @@
+# 6.1.0
+
+## Changes
+
+### Bug Fixes
+* CAUD-328: Small delay needed to simulated message send in batch tests for JMS.  Improved test stability.
+
 # 6.0.0
 
 ## Changes

@@ -157,6 +157,7 @@ public class JmsAuditEventHandlerTest {
         doAnswer(new Answer() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
+                Thread.sleep(100L); // small delay to simulate time to send message.
                 logger.info("message sent by session {}: {}",
                         sessionCount,
                         invocation.getArgumentAt(0, TextMessage.class).getText());
