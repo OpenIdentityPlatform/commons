@@ -34,12 +34,11 @@ module.exports = function (grunt) {
             "src/main/js",
             "src/main/resources"
         ],
-        testWatchDirs = [
-            "src/test/js",
-            "src/test/resources",
-            "../forgerock-ui-commons/src/test/js",
-            "../forgerock-ui-user/src/test/js"
-        ];
+        testWatchDirs = {
+            "src/test/qunit": "/",
+            "../forgerock-ui-commons/src/test/qunit": "/tests/commons/",
+            "../forgerock-ui-user/src/test/qunit": "/tests/user/"
+        };
 
     grunt.initConfig({
         eslint: {
@@ -78,7 +77,7 @@ module.exports = function (grunt) {
             }
         },
         qunit: {
-            all: [testTargetDirectory + "/qunit.html"]
+            all: [testTargetDirectory + "/index.html"]
         },
         requirejs: {
             /**
@@ -130,11 +129,11 @@ module.exports = function (grunt) {
                 compareUsing: "md5"
             },
             test: {
-                files: testWatchDirs.map(function (dir) {
+                files: Object.keys(testWatchDirs).map(function (dir) {
                     return {
                         cwd: dir,
                         src: ["**"],
-                        dest: testTargetDirectory
+                        dest: testTargetDirectory + testWatchDirs[dir]
                     };
                 }),
                 verbose: true,
@@ -152,7 +151,7 @@ module.exports = function (grunt) {
                 tasks: ["build-dev"]
             },
             test: {
-                files: testWatchDirs.map(function (dir) {
+                files: Object.keys(testWatchDirs).map(function (dir) {
                     return dir + "/**";
                 }),
                 tasks: ["build-dev"]
@@ -160,8 +159,8 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask("build", ["eslint", "less", "requirejs"]);
-    grunt.registerTask("build-dev", ["less", "sync"]); //, "qunit"
+    grunt.registerTask("build", ["eslint", "less", "requirejs", "sync:test", "qunit"]);
+    grunt.registerTask("build-dev", ["less", "sync", "qunit"]);
     grunt.registerTask("dev", ["build-dev", "watch"]);
     grunt.registerTask("default", "dev");
 };

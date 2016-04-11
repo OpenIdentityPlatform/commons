@@ -93,7 +93,8 @@ define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
         data: {
             i18n: {}
         },
-
+        // included as part of the AnonymousProcessView object for test purposes
+        walkTreeForFilterStrings: walkTreeForFilterStrings,
         getFormContent: function () {
             if (this.$el.find("form").attr("id") === "userQuery") {
                 return {

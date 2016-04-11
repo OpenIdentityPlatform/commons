@@ -101,7 +101,6 @@
                         </goals>
                         <configuration>
                             <includeGroupIds>org.forgerock.commons.ui.libs</includeGroupIds>
-                            <excludeArtifactIds>less,qunit,r</excludeArtifactIds>
                             <includeTypes>js</includeTypes>
                             <outputDirectory>${project.build.directory}/www/libs</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
@@ -117,7 +116,6 @@
                         </goals>
                         <configuration>
                             <includeGroupIds>org.forgerock.commons.ui.libs</includeGroupIds>
-                            <excludeArtifactIds>qunit</excludeArtifactIds>
                             <includeTypes>css</includeTypes>
                             <outputDirectory>${project.build.directory}/www/css</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
@@ -150,20 +148,6 @@
                             <includeArtifactIds>r</includeArtifactIds>
                             <includeTypes>js</includeTypes>
                             <outputDirectory>${project.build.directory}/optimization</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>copy-dependencies-qunit</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>qunit</includeArtifactIds>
-                            <outputDirectory>${basedir}/target/test/libs</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
                             <overWriteSnapshots>false</overWriteSnapshots>
                             <overWriteIfNewer>true</overWriteIfNewer>

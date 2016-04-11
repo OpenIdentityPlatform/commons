@@ -11,19 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
-/*global define */
-
-
+// add new test modules here:
 define([
-    "org/forgerock/mock/ui/common/main/LocalStorage",
-    "org/forgerock/mock/ui/user/UserModel"
-], function (LocalStorage, UserModel) {
-    return function () {
-        UserModel.set(LocalStorage.get('mock/repo/internal/user/test'));
-        UserModel.hideAttribute("password");
-        return UserModel;
-    };
-});
+    "./commons/Base64",
+    "./commons/ObjectUtil",
+    "./user/AnonymousProcessView"
+]);
