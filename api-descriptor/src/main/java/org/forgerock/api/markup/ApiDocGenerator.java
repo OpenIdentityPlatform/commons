@@ -24,7 +24,9 @@ import static org.forgerock.api.util.ValidationUtil.isEmpty;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -85,10 +87,15 @@ public class ApiDocGenerator {
     private final Path outputDirPath;
 
     /**
+     * Optional input directory.
+     */
+    private final Path inputDirPath;
+
+    /**
      * Map of dynamically generated schema anchors (keys) to {@link JsonValue} instances, for all {@link Schema}s
      * not found in {@link ApiDescription#getDefinitions()}.
      */
-    private final Map<String, JsonValue> schemaMap;
+    private final Map<String, JsonValue> schemaMap = new HashMap<>();
 
     /**
      * Constructor that sets the root output directory for AsciiDoc files, which will be created if it does not exist.
@@ -96,8 +103,22 @@ public class ApiDocGenerator {
      * @param outputDirPath Root output directory
      */
     public ApiDocGenerator(final Path outputDirPath) {
+        this(null, outputDirPath);
+    }
+
+    /**
+     * Constructor that sets the root output directory for AsciiDoc files, which will be created if it does not exist,
+     * and an input directory used for overriding AsciiDoc files (e.g., descriptions).
+     *
+     * @param inputDirPath Input directory or {@code null}
+     * @param outputDirPath Root output directory
+     */
+    public ApiDocGenerator(final Path inputDirPath, final Path outputDirPath) {
+        this.inputDirPath = inputDirPath;
         this.outputDirPath = checkNotNull(outputDirPath, "outputDirPath required");
-        schemaMap = new HashMap<>();
+        if (outputDirPath.equals(inputDirPath)) {
+            throw new ApiDocGeneratorException("inputDirPath and outputDirPath can not be equal");
+        }
     }
 
     /**
@@ -153,11 +174,11 @@ public class ApiDocGenerator {
                 .documentTitle("API Descriptor")
                 .rawParagraph(asciiDoc().rawText("*ID:* ").mono(apiDescription.getId()).toString())
                 .rawLine(":toc: left")
-                .rawLine(":toclevels: 5");
+                .rawLine(":toclevels: 5")
+                .newline();
 
-        if (!isEmpty(apiDescription.getDescription())) {
-            pathsDoc.rawParagraph(apiDescription.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(apiDescription.getDescription(), namespace);
+        pathsDoc.include(descriptionFilename);
 
         if (pathsFilename != null) {
             pathsDoc.include(pathsFilename);
@@ -171,6 +192,31 @@ public class ApiDocGenerator {
 
         final String filename = namespace + ADOC_EXTENSION;
         pathsDoc.toFile(outputDirPath, filename);
+        return filename;
+    }
+
+    /**
+     * Outputs an AsciiDoc file for a description-block. The file will be blank when no description is defined.
+     * <p>
+     * This method will use a replacement-file from {@link #inputDirPath}, if it exists, to override the description.
+     * </p>
+     *
+     * @param defaultDescription Default description for the block or {@code null}
+     * @param parentNamespace Parent namespace
+     * @return File path suitable for AsciiDoc import-statement
+     * @throws IOException Unable to output AsciiDoc file
+     */
+    private String outputDescriptionBlock(final String defaultDescription, final String parentNamespace)
+            throws IOException {
+        final String namespace = normalizeName(parentNamespace, "description");
+        final String filename = namespace + ADOC_EXTENSION;
+        if (!copyReplacementFile(filename)) {
+            final AsciiDoc blockDoc = asciiDoc();
+            if (!isEmpty(defaultDescription)) {
+                blockDoc.rawParagraph(defaultDescription);
+            }
+            blockDoc.toFile(outputDirPath, filename);
+        }
         return filename;
     }
 
@@ -284,9 +330,8 @@ public class ApiDocGenerator {
         final String namespace = normalizeName(parentNamespace, "resource");
         final AsciiDoc resourceDoc = asciiDoc();
 
-        if (!isEmpty(resource.getDescription())) {
-            resourceDoc.rawParagraph(resource.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(resource.getDescription(), namespace);
+        resourceDoc.include(descriptionFilename);
 
         String resourceAnchor = null;
         if (resource.getResourceSchema() != null) {
@@ -353,12 +398,12 @@ public class ApiDocGenerator {
         final AsciiDoc operationDoc = asciiDoc()
                 .sectionTitle("Create", sectionLevel);
 
-        if (!isEmpty(create.getDescription())) {
-            operationDoc.rawParagraph(create.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(create.getDescription(), namespace);
+        operationDoc.include(descriptionFilename);
+
         outputStability(create.getStability(), operationDoc);
         outputMvccSupport(create.isMvccSupported(), operationDoc);
-        outputParameters(create.getParameters(), operationDoc);
+        outputParameters(create.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, false, operationDoc);
         outputCreateMode(create.getMode(), operationDoc);
         outputSingletonStatus(create.isSingleton(), operationDoc);
@@ -384,11 +429,11 @@ public class ApiDocGenerator {
         final AsciiDoc operationDoc = asciiDoc()
                 .sectionTitle("Read", sectionLevel);
 
-        if (!isEmpty(read.getDescription())) {
-            operationDoc.rawParagraph(read.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(read.getDescription(), namespace);
+        operationDoc.include(descriptionFilename);
+
         outputStability(read.getStability(), operationDoc);
-        outputParameters(read.getParameters(), operationDoc);
+        outputParameters(read.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, true, operationDoc);
         outputErrors(read.getErrors(), namespace, operationDoc);
 
@@ -413,12 +458,12 @@ public class ApiDocGenerator {
         final AsciiDoc operationDoc = asciiDoc()
                 .sectionTitle("Update", sectionLevel);
 
-        if (!isEmpty(update.getDescription())) {
-            operationDoc.rawParagraph(update.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(update.getDescription(), namespace);
+        operationDoc.include(descriptionFilename);
+
         outputStability(update.getStability(), operationDoc);
         outputMvccSupport(update.isMvccSupported(), operationDoc);
-        outputParameters(update.getParameters(), operationDoc);
+        outputParameters(update.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, false, operationDoc);
         outputErrors(update.getErrors(), namespace, operationDoc);
 
@@ -443,12 +488,12 @@ public class ApiDocGenerator {
         final AsciiDoc operationDoc = asciiDoc()
                 .sectionTitle("Delete", sectionLevel);
 
-        if (!isEmpty(delete.getDescription())) {
-            operationDoc.rawParagraph(delete.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(delete.getDescription(), namespace);
+        operationDoc.include(descriptionFilename);
+
         outputStability(delete.getStability(), operationDoc);
         outputMvccSupport(delete.isMvccSupported(), operationDoc);
-        outputParameters(delete.getParameters(), operationDoc);
+        outputParameters(delete.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, true, operationDoc);
         outputErrors(delete.getErrors(), namespace, operationDoc);
 
@@ -473,12 +518,12 @@ public class ApiDocGenerator {
         final AsciiDoc operationDoc = asciiDoc()
                 .sectionTitle("Patch", sectionLevel);
 
-        if (!isEmpty(patch.getDescription())) {
-            operationDoc.rawParagraph(patch.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(patch.getDescription(), namespace);
+        operationDoc.include(descriptionFilename);
+
         outputStability(patch.getStability(), operationDoc);
         outputMvccSupport(patch.isMvccSupported(), operationDoc);
-        outputParameters(patch.getParameters(), operationDoc);
+        outputParameters(patch.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, true, operationDoc);
         outputSupportedPatchOperations(patch.getOperations(), operationDoc);
         outputErrors(patch.getErrors(), namespace, operationDoc);
@@ -529,11 +574,11 @@ public class ApiDocGenerator {
         final AsciiDoc operationDoc = asciiDoc()
                 .sectionTitle(action.getName(), sectionLevel);
 
-        if (!isEmpty(action.getDescription())) {
-            operationDoc.rawParagraph(action.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(action.getDescription(), namespace);
+        operationDoc.include(descriptionFilename);
+
         outputStability(action.getStability(), operationDoc);
-        outputParameters(action.getParameters(), operationDoc);
+        outputParameters(action.getParameters(), namespace, operationDoc);
 
         if (action.getRequest() != null) {
             final String schemaAnchor = resolveSchemaAnchor(action.getRequest(), namespace);
@@ -612,11 +657,11 @@ public class ApiDocGenerator {
         }
         // @Checkstyle:on
 
-        if (!isEmpty(query.getDescription())) {
-            operationDoc.rawParagraph(query.getDescription());
-        }
+        final String descriptionFilename = outputDescriptionBlock(query.getDescription(), namespace);
+        operationDoc.include(descriptionFilename);
+
         outputStability(query.getStability(), operationDoc);
-        outputParameters(query.getParameters(), operationDoc);
+        outputParameters(query.getParameters(), namespace, operationDoc);
 
         if (!isEmpty(query.getQueryableFields())) {
             final AsciiDoc blockDoc = asciiDoc()
@@ -743,12 +788,15 @@ public class ApiDocGenerator {
      * Outputs operation parameters.
      *
      * @param parameters Operation parameters or {@code null}/empty for pass-through
+     * @param parentNamespace Parent namespace
      * @param doc AsciiDoc to write to
      */
-    private static void outputParameters(final Parameter[] parameters, final AsciiDoc doc) {
+    private void outputParameters(final Parameter[] parameters, final String parentNamespace, final AsciiDoc doc)
+            throws IOException {
         if (isEmpty(parameters)) {
             return;
         }
+        final String parametersNamespace = normalizeName(parentNamespace, "parameters");
         final AsciiDocTable table = doc.tableStart()
                 .title("Parameters")
                 .headers("Name", "Type", "Description", "Required", "In", "Values", "Default");
@@ -769,10 +817,14 @@ public class ApiDocGenerator {
                 }
                 enumValuesContent = enumValuesDoc.toString();
             }
+
+            final String namespace = normalizeName(parametersNamespace, parameter.getName());
+            final String descriptionFilename = outputDescriptionBlock(parameter.getDescription(), namespace);
+
             // format table
             table.columnCell(parameter.getName(), MONO_CELL)
                     .columnCell(parameter.getType(), MONO_CELL)
-                    .columnCell(parameter.getDescription())
+                    .columnCell(asciiDoc().include(descriptionFilename).toString(), ASCII_DOC_CELL)
                     .columnCell(parameter.isRequired() ? "✓" : null)
                     .columnCell(parameter.getSource().name(), MONO_CELL)
                     .columnCell(enumValuesContent, ASCII_DOC_CELL)
@@ -852,10 +904,12 @@ public class ApiDocGenerator {
                 .rawText(" " + error.getDescription());
         if (error.getSchema() != null) {
             final String resourceAnchor = resolveSchemaAnchor(error.getSchema(), parentNamespace);
-            errorDoc.rawText("+")
+            errorDoc.listContinuation()
                     .rawLine(asciiDoc()
                             .rawText("This error returns an error-detail described ")
-                            .anchor(resourceAnchor, "here").toString());
+                            .link(resourceAnchor, "here")
+                            .rawText(".")
+                            .toString());
         }
         doc.unorderedList1(errorDoc.toString());
     }
@@ -994,6 +1048,27 @@ public class ApiDocGenerator {
             schemaMap.put(anchor, schema.getSchema());
         }
         return anchor;
+    }
+
+    /**
+     * Checks for a given {@code filename} within {@link #inputDirPath}, and if it exists, will copy that file
+     * into {@link #outputDirPath}.
+     *
+     * @param filename Filename
+     * @return {@code true} if a replacement existed and was copied and {@code false} otherwise
+     * @throws IOException Unable to copy file
+     */
+    private boolean copyReplacementFile(final String filename) throws IOException {
+        if (inputDirPath != null) {
+            final Path inputFilePath = inputDirPath.resolve(filename);
+            final Path outputFilePath = outputDirPath.resolve(filename);
+            if (Files.exists(inputFilePath)) {
+                // replacement file exists, so copy it
+                Files.copy(inputFilePath, outputFilePath, StandardCopyOption.REPLACE_EXISTING);
+                return true;
+            }
+        }
+        return false;
     }
 
 }

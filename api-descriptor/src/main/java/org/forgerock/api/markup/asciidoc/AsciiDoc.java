@@ -136,15 +136,15 @@ public final class AsciiDoc {
             throw new AsciiDocException("text required");
         }
 
-        int newlinesAbove = requireTrailingNewlines(1, builder);
-        while (--newlinesAbove > -1) {
+        final int newlinesAbove = requireTrailingNewlines(1, builder);
+        if (newlinesAbove == 1) {
             builder.append(NEWLINE);
         }
 
         builder.append(text);
 
-        int newlinesBelow = requireTrailingNewlines(1, text);
-        while (--newlinesBelow > -1) {
+        final int newlinesBelow = requireTrailingNewlines(1, text);
+        if (newlinesBelow == 1) {
             builder.append(NEWLINE);
         }
         return this;
@@ -494,6 +494,21 @@ public final class AsciiDoc {
      */
     public AsciiDoc unorderedList1(final String content) {
         line(UNORDERED_LIST_1, content);
+        return this;
+    }
+
+    /**
+     * Inserts a <a href="http://asciidoctor.org/docs/user-manual/#complex-list-content">list-continuation</a>,
+     * for adding complex formatted content to a list.
+     *
+     * @return Doc builder
+     */
+    public AsciiDoc listContinuation() {
+        final int newlinesAbove = requireTrailingNewlines(1, builder);
+        if (newlinesAbove == 1) {
+            builder.append(NEWLINE);
+        }
+        builder.append(LIST_CONTINUATION);
         return this;
     }
 
