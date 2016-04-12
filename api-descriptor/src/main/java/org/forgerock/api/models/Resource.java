@@ -24,8 +24,11 @@ import org.forgerock.api.annotations.Queries;
 import org.forgerock.api.annotations.RequestHandler;
 
 import org.forgerock.util.Reject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -34,6 +37,8 @@ import java.util.TreeSet;
  * Class that represents the Resource type in API descriptor.
  */
 public final class Resource {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Resource.class);
+
     private final Schema resourceSchema;
     private final String description;
     private final Create create;
@@ -154,63 +159,72 @@ public final class Resource {
     /**
      * Build a {@code Resource} from an annotated request handler.
      * @param type The annotated type.
-     * @param instanceOperations True if the resource is performing instance operations.
+     * @param variant The annotated type variant.
      * @param descriptor The root descriptor to add definitions to.
      * @return The built {@code Resource} object.
      */
-    public static Resource fromAnnotatedType(Class<?> type, boolean instanceOperations, ApiDescription descriptor) {
+    public static Resource fromAnnotatedType(Class<?> type, AnnotatedTypeVariant variant, ApiDescription descriptor) {
         Builder builder = resource();
         RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
         if (requestHandler == null) {
-            throw new IllegalArgumentException("Not a valid class - must have a RequestHandler annotation");
+            LOGGER.warn("Asked for Resource for annotated type, but type does not have required RequestHandler"
+                    + " annotation. Returning null for " + type);
+            return null;
         }
         boolean foundCrudpq = false;
         for (Method m : type.getDeclaredMethods()) {
+            boolean instanceMethod = Arrays.asList(m.getParameterTypes()).indexOf(String.class) > -1;
             org.forgerock.api.annotations.Action action = m.getAnnotation(org.forgerock.api.annotations.Action.class);
-            if (action != null) {
+            if (action != null && instanceMethod == variant.actionRequiresId) {
                 builder.actions.add(Action.fromAnnotation(action, m, descriptor, type));
             }
             Actions actions = m.getAnnotation(Actions.class);
-            if (actions != null) {
+            if (actions != null && instanceMethod == variant.actionRequiresId) {
                 for (org.forgerock.api.annotations.Action a : actions.value()) {
                     builder.actions.add(Action.fromAnnotation(a, null, descriptor, type));
                 }
             }
             org.forgerock.api.annotations.Create create = m.getAnnotation(org.forgerock.api.annotations.Create.class);
             if (create != null) {
-                builder.create = Create.fromAnnotation(create, instanceOperations, descriptor, type);
+                builder.create = Create.fromAnnotation(create, variant.instanceCreate, descriptor, type);
                 foundCrudpq = true;
             }
-            org.forgerock.api.annotations.Read read = m.getAnnotation(org.forgerock.api.annotations.Read.class);
-            if (read != null) {
-                builder.read = Read.fromAnnotation(read, descriptor, type);
-                foundCrudpq = true;
-            }
-            org.forgerock.api.annotations.Update update = m.getAnnotation(org.forgerock.api.annotations.Update.class);
-            if (update != null) {
-                builder.update = Update.fromAnnotation(update, descriptor, type);
-                foundCrudpq = true;
-            }
-            org.forgerock.api.annotations.Delete delete = m.getAnnotation(org.forgerock.api.annotations.Delete.class);
-            if (delete != null) {
-                builder.delete = Delete.fromAnnotation(delete, descriptor, type);
-                foundCrudpq = true;
-            }
-            org.forgerock.api.annotations.Patch patch = m.getAnnotation(org.forgerock.api.annotations.Patch.class);
-            if (patch != null) {
-                builder.patch = Patch.fromAnnotation(patch, descriptor, type);
-                foundCrudpq = true;
-            }
-            org.forgerock.api.annotations.Query query = m.getAnnotation(org.forgerock.api.annotations.Query.class);
-            if (query != null) {
-                builder.queries.add(Query.fromAnnotation(query, m, descriptor, type));
-                foundCrudpq = true;
-            }
-            Queries queries = m.getAnnotation(Queries.class);
-            if (queries != null) {
-                for (org.forgerock.api.annotations.Query q : queries.value()) {
-                    builder.queries.add(Query.fromAnnotation(q, null, descriptor, type));
+            if (variant.rudpOperations) {
+                org.forgerock.api.annotations.Read read = m.getAnnotation(org.forgerock.api.annotations.Read.class);
+                if (read != null) {
+                    builder.read = Read.fromAnnotation(read, descriptor, type);
                     foundCrudpq = true;
+                }
+                org.forgerock.api.annotations.Update update =
+                        m.getAnnotation(org.forgerock.api.annotations.Update.class);
+                if (update != null) {
+                    builder.update = Update.fromAnnotation(update, descriptor, type);
+                    foundCrudpq = true;
+                }
+                org.forgerock.api.annotations.Delete delete =
+                        m.getAnnotation(org.forgerock.api.annotations.Delete.class);
+                if (delete != null) {
+                    builder.delete = Delete.fromAnnotation(delete, descriptor, type);
+                    foundCrudpq = true;
+                }
+                org.forgerock.api.annotations.Patch patch = m.getAnnotation(org.forgerock.api.annotations.Patch.class);
+                if (patch != null) {
+                    builder.patch = Patch.fromAnnotation(patch, descriptor, type);
+                    foundCrudpq = true;
+                }
+            }
+            if (variant.queryOperations) {
+                org.forgerock.api.annotations.Query query = m.getAnnotation(org.forgerock.api.annotations.Query.class);
+                if (query != null) {
+                    builder.queries.add(Query.fromAnnotation(query, m, descriptor, type));
+                    foundCrudpq = true;
+                }
+                Queries queries = m.getAnnotation(Queries.class);
+                if (queries != null) {
+                    for (org.forgerock.api.annotations.Query q : queries.value()) {
+                        builder.queries.add(Query.fromAnnotation(q, null, descriptor, type));
+                        foundCrudpq = true;
+                    }
                 }
             }
         }
@@ -220,6 +234,34 @@ public final class Resource {
         }
         builder.resourceSchema(resourceSchema);
         return builder.build();
+    }
+
+    /**
+     * The varient of the annotated type. Allows the annotation processing to make assumptions about what type of
+     * operations are expected from this context of the type.
+     */
+    public enum AnnotatedTypeVariant {
+        /** A singleton resource handler. (expect RUDPA operations). */
+        SINGLETON_RESOURCE(true, true, false, false),
+        /** A collection resource handler, collection endpoint (expect CAQ opererations). */
+        COLLECTION_RESOURCE_COLLECTION(false, false, false, true),
+        /** A collection resource handler, instance endpoint (expect CRUDPA operations). */
+        COLLECTION_RESOURCE_INSTANCE(true, true, true, false),
+        /** A plain request handler (expects all operations). */
+        REQUEST_HANDLER(false, true, false, true);
+
+        private final boolean instanceCreate;
+        private final boolean rudpOperations;
+        private final boolean actionRequiresId;
+        private final boolean queryOperations;
+
+        AnnotatedTypeVariant(boolean instanceCreate, boolean rudpOperations, boolean actionRequiresId,
+                boolean queryOperations) {
+            this.instanceCreate = instanceCreate;
+            this.rudpOperations = rudpOperations;
+            this.actionRequiresId = actionRequiresId;
+            this.queryOperations = queryOperations;
+        }
     }
 
     /**
@@ -386,6 +428,11 @@ public final class Resource {
          * @return Resource instance
          */
         public Resource build() {
+            if (create == null && read == null && update == null && delete == null && patch == null
+                    && actions.isEmpty() && queries.isEmpty()) {
+                return null;
+            }
+
             return new Resource(this);
         }
 

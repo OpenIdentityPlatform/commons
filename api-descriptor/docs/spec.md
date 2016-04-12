@@ -118,18 +118,6 @@ patch       | [Patch](#Patch)             |            | The patch operation des
 actions     | [Action](#Action)[]         |            | The action operation descriptions, if supported
 queries     | [Query](#Query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
 
-### Context
-
-Context contains metadata and/or state-data associated with a CREST API request.
-
-#### Properties
-
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-name        | String                      | ✓          | The name of the context
-schema      | [Schema](#Schema)           | ✓          | The schema for the context
-required    | boolean                     |            | Whether the context is required
-
 ### Operation
 
 A basic operation type for operations without any special features. This is the supertype of
@@ -142,7 +130,6 @@ _Read_ operations are defined at this level, and are used to read existing resou
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 description | String                      |            | A description of the operation
-supportedContexts | [Context](#Context)[] |            | The supported contexts
 supportedLocales | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation
 errors      | [Error](#Error)[]           |            | Errors known be returned by this operation
 parameters  | [Parameter](#Parameter)[]   |            | Extra parameters supported by the operation

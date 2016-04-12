@@ -16,8 +16,6 @@
 
 package org.forgerock.api.annotations;
 
-import org.forgerock.services.context.AbstractContext;
-
 import org.forgerock.api.enums.Stability;
 
 /**
@@ -26,8 +24,6 @@ import org.forgerock.api.enums.Stability;
 public @interface Operation {
     /** The list of supported locales for the operation. */
     String[] locales() default {};
-    /** The list of supported Context classes supported by the operation. */
-    Class<? extends AbstractContext>[] contexts() default {};
     /** The list of possible errors for the operation. */
     Error[] errors() default {};
     /** The lis of additional parameters for the operation. */

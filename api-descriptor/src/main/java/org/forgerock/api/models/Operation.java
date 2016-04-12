@@ -19,8 +19,6 @@ package org.forgerock.api.models;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.forgerock.services.context.AbstractContext;
-
 import org.forgerock.api.enums.Stability;
 
 /**
@@ -29,7 +27,6 @@ import org.forgerock.api.enums.Stability;
 public abstract class Operation {
 
     private final String description;
-    private final Context[] supportedContexts;
     private final String[] supportedLocales;
     private final Error[] errors;
     private final Parameter[] parameters;
@@ -45,10 +42,6 @@ public abstract class Operation {
         this.supportedLocales = builder.supportedLocales;
         this.stability = builder.stability;
 
-        // NOTE: had to use local variables for lists or else type-inference was getting confused
-        final List<Context> supportedContexts = builder.supportedContexts;
-        this.supportedContexts = supportedContexts.toArray(new Context[supportedContexts.size()]);
-
         final List<Error> errors = builder.errors;
         this.errors = errors.toArray(new Error[errors.size()]);
 
@@ -63,15 +56,6 @@ public abstract class Operation {
      */
     public String getDescription() {
         return description;
-    }
-
-    /**
-     * Getter of the supported contexts.
-     *
-     * @return Supported contexts
-     */
-    public Context[] getSupportedContexts() {
-        return supportedContexts;
     }
 
     /**
@@ -124,7 +108,6 @@ public abstract class Operation {
     public abstract static class Builder<T extends Builder<T>> {
 
         private String description;
-        private final List<Context> supportedContexts;
         private String[] supportedLocales;
         private final List<Error> errors;
         private final List<Parameter> parameters;
@@ -134,7 +117,6 @@ public abstract class Operation {
          * Creates a new Builder.
          */
         protected Builder() {
-            supportedContexts = new ArrayList<>();
             errors = new ArrayList<>();
             parameters = new ArrayList<>();
         }
@@ -154,28 +136,6 @@ public abstract class Operation {
          */
         public T description(String description) {
             this.description = description;
-            return self();
-        }
-
-        /**
-         * Sets multiple supported contexts.
-         *
-         * @param supportedContexts The supported contexts
-         * @return Builder
-         */
-        public T supportedContexts(List<Context> supportedContexts) {
-            this.supportedContexts.addAll(supportedContexts);
-            return self();
-        }
-
-        /**
-         * Set a single supported context.
-         *
-         * @param supportedContext The supported context
-         * @return Builder
-         */
-        public T supportedContext(Context supportedContext) {
-            this.supportedContexts.add(supportedContext);
             return self();
         }
 
@@ -260,10 +220,6 @@ public abstract class Operation {
             for (org.forgerock.api.annotations.Parameter error : operation.parameters()) {
                 parameter(Parameter.fromAnnotation(error));
             }
-            for (Class<? extends AbstractContext> contextType : operation.contexts()) {
-                supportedContext(Context.forType(contextType));
-            }
-
             return description(operation.description())
                     .supportedLocales(operation.locales())
                     .stability(operation.stability());

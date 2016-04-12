@@ -39,8 +39,6 @@ public class ReadTest {
     private Error notFoundError;
     private Parameter parameter1;
     private Parameter parameter2;
-    private Context context1;
-    private Context context2;
 
     @BeforeClass
     public void beforeClass() {
@@ -65,16 +63,6 @@ public class ReadTest {
                 .type("string")
                 .source(ParameterSource.ADDITIONAL)
                 .build();
-        context1 = Context.context()
-                .name("ctx1")
-                .required(true)
-                .schema(schema)
-                .build();
-        context2 = Context.context()
-                .name("ctx2")
-                .required(true)
-                .schema(schema)
-                .build();
     }
 
     @Test
@@ -87,8 +75,6 @@ public class ReadTest {
                 .errors(Arrays.asList(internalServerError))
                 .parameter(parameter1)
                 .parameters(Arrays.asList(parameter2))
-                .supportedContext(context1)
-                .supportedContexts(Arrays.asList(context2))
                 .build();
 
         // invoke allocateToResource method
@@ -101,7 +87,6 @@ public class ReadTest {
         assertThat(read.getStability()).isEqualTo(Stability.STABLE);
         assertThat(read.getErrors()).hasSize(2).contains(internalServerError, notFoundError);
         assertThat(read.getParameters()).hasSize(2).contains(parameter1, parameter2);
-        assertThat(read.getSupportedContexts()).hasSize(2).contains(context1, context2);
     }
 
 }

@@ -20,11 +20,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.http.routing.Version;
 import org.forgerock.util.Reject;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Class that represents versioned {@link Resource}s on an API descriptor path.
@@ -91,6 +92,18 @@ public final class VersionedPath {
      */
     public static Builder versionedPath() {
         return new Builder();
+    }
+
+    /**
+     * Allows for mutation of paths when merging {@code Paths} instances.
+     * @param v The version.
+     * @param resource The resource.
+     */
+    void addVersion(Version v, Resource resource) {
+        if (paths.containsKey(v)) {
+            throw new IllegalArgumentException("Trying to redefine version: " + v);
+        }
+        paths.put(v, Reject.checkNotNull(resource));
     }
 
     /**

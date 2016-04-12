@@ -26,6 +26,8 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.forgerock.api.ApiValidationException;
+
+import org.forgerock.http.routing.Version;
 import org.forgerock.util.Reject;
 
 /**
@@ -111,6 +113,26 @@ public final class Paths {
                 throw new IllegalStateException("name not unique");
             }
             paths.put(name, Reject.checkNotNull(path));
+            return this;
+        }
+
+        /**
+         * Merge the path definition into the existing path definitions. If the {@code node} is a {@code VersionedPath}
+         * and there is already a {@code VersionedPath} at this path, then the versions will be added together.
+         *
+         * @param path The path.
+         * @param node The node.
+         * @return This builder.
+         */
+        public Builder merge(String path, VersionedPath node) {
+            if (!paths.containsKey(path)) {
+                put(path, node);
+            } else {
+                VersionedPath existing = paths.get(path);
+                for (Version v : node.getVersions()) {
+                    existing.addVersion(v, node.get(v));
+                }
+            }
             return this;
         }
 
