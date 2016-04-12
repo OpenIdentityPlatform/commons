@@ -40,6 +40,7 @@ public class AsciiDocTable {
     private final AsciiDoc asciiDoc;
     private final StringBuilder builder;
     private final List<String> cells;
+    private int[] columnWidths;
     private Integer columnsPerRow;
     private String title;
     private boolean hasHeader;
@@ -97,7 +98,11 @@ public class AsciiDocTable {
     }
 
     /**
-     * Sets number of columns per row, which is implicitly set by {@link #headers(String...)}.
+     * Sets number of columns per row, which is implicitly set by {@link #headers(String...)} and
+     * {@link #columnWidths(int...)}.
+     * <p>
+     * This value can only be set once.
+     * </p>
      *
      * @param columnsPerRow Columns per row
      * @return Table builder
@@ -110,6 +115,33 @@ public class AsciiDocTable {
             throw new AsciiDocException("columnsPerRow < 1");
         }
         this.columnsPerRow = columnsPerRow;
+        return this;
+    }
+
+    /**
+     * Sets the widths for all columns-per-row, which can be a proportional integer (the default is 1) or a
+     * percentage (1 to 99).
+     *
+     * @param columnWidths An entry for each column-per row in value range [1,99]
+     * @return Table builder
+     */
+    public AsciiDocTable columnWidths(final int... columnWidths) {
+        if (columnWidths == null || columnWidths.length == 0) {
+            throw new AsciiDocException("columnWidths required");
+        }
+        for (final int w : columnWidths) {
+            if (w < 1 || w > 99) {
+                throw new AsciiDocException("columnWidths values must be within range [1,99]");
+            }
+        }
+        if (columnsPerRow != null) {
+            if (columnsPerRow != columnWidths.length) {
+                throw new AsciiDocException("columnWidths.length != columnsPerRow");
+            }
+        } else {
+            columnsPerRow = columnWidths.length;
+        }
+        this.columnWidths = columnWidths;
         return this;
     }
 
@@ -169,20 +201,34 @@ public class AsciiDocTable {
      * @return Doc builder
      */
     public AsciiDoc tableEnd() {
-        // TODO table-options builder
-        // TODO cell-options builder
+        if (columnsPerRow == null) {
+            throw new AsciiDocException("columnsPerRow has not be defined");
+        }
 
-        // [cols="2*", caption="", options="header"]
-        builder.append("[cols=\"").append(columnsPerRow).append("*\", caption=\"\", options=\"");
+        // table configuration (e.g., [cols="2*", caption="", options="header"])
+        builder.append("[cols=\"");
+        if (columnWidths != null) {
+            // unique column widths
+            builder.append(columnWidths[0]);
+            for (int i = 1; i < columnWidths.length; ++i) {
+                builder.append(',').append(columnWidths[i]);
+            }
+        } else {
+            // each column same width
+            builder.append(columnsPerRow).append("*");
+        }
+        builder.append("\", caption=\"\", options=\"");
         if (hasHeader) {
             builder.append("header");
         }
         builder.append("\"]").append(NEWLINE);
 
+        // optional title
         if (title != null) {
             builder.append(".").append(title).append(NEWLINE);
         }
 
+        // cells
         builder.append(TABLE).append(NEWLINE);
         if (cells.get(cells.size() - 1) == null) {
             // remove trailing "row spacer"

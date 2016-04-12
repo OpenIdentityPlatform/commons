@@ -20,6 +20,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.object;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -59,7 +60,7 @@ import org.testng.annotations.Test;
 
 public class ApiDocGeneratorTest {
 
-    private static final String API_DESCRIPTION_PATH = "frapi_test-index-description.adoc";
+    private static final String API_DESCRIPTION_PATH = "frapi_test_index_description.adoc";
     private static final String CUSTOM_API_DESCRIPTION = "\n\nCustom API description.\n\n";
     private static final String DEFAULT_API_DESCRIPTION = "Default API description.";
 
@@ -69,8 +70,8 @@ public class ApiDocGeneratorTest {
     @BeforeClass
     public void beforeClass() throws IOException {
         final String className = ApiDocGeneratorTest.class.getSimpleName();
-        inputDirPath = Files.createTempDirectory(className + "input");
-        outputDirPath = Files.createTempDirectory(className + "output");
+        inputDirPath = Files.createTempDirectory(className + "_input_");
+        outputDirPath = Files.createTempDirectory(className + "_output_");
     }
 
     @AfterClass
@@ -151,7 +152,13 @@ public class ApiDocGeneratorTest {
                 .build();
 
         final Schema errorDetailSchema = Schema.schema()
-                .schema(json(object(field("type", "object"), field("required", "true"))))
+                .schema(json(object(
+                        field("type", "object"),
+                        field("properties", object(
+                                field("reason", object(
+                                        field("type", "string")
+                                ))
+                        )))))
                 .build();
 
         final String[] supportedLocales = new String[]{"en"};

@@ -58,6 +58,10 @@ public enum AsciiDocSymbols {
      */
     EXAMPLE("===="),
     /**
+     * <a href="http://asciidoctor.org/docs/user-manual/#horizontal-rules">Horizontal rule</a>.
+     */
+    HORIZONTAL_RULE("'''"),
+    /**
      * <a href="http://asciidoctor.org/docs/user-manual/#include-directive">Include</a>-directive.
      */
     INCLUDE("include::"),

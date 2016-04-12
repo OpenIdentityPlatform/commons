@@ -341,29 +341,34 @@ public class ApiDocGenerator {
         if (resource.getCreate() != null) {
             final String filename = outputCreateOperation(resource.getCreate(), sectionLevel, resourceAnchor,
                     namespace);
-            resourceDoc.include(filename);
+            resourceDoc.horizontalRule()
+                    .include(filename);
         }
 
         if (resource.getRead() != null) {
             final String filename = outputReadOperation(resource.getRead(), sectionLevel, resourceAnchor, namespace);
-            resourceDoc.include(filename);
+            resourceDoc.horizontalRule()
+                    .include(filename);
         }
 
         if (resource.getUpdate() != null) {
             final String filename = outputUpdateOperation(resource.getUpdate(), sectionLevel, resourceAnchor,
                     namespace);
-            resourceDoc.include(filename);
+            resourceDoc.horizontalRule()
+                    .include(filename);
         }
 
         if (resource.getDelete() != null) {
             final String filename = outputDeleteOperation(resource.getDelete(), sectionLevel, resourceAnchor,
                     namespace);
-            resourceDoc.include(filename);
+            resourceDoc.horizontalRule()
+                    .include(filename);
         }
 
         if (resource.getPatch() != null) {
             final String filename = outputPatchOperation(resource.getPatch(), sectionLevel, resourceAnchor, namespace);
-            resourceDoc.include(filename);
+            resourceDoc.horizontalRule()
+                    .include(filename);
         }
 
         if (!isEmpty(resource.getActions())) {
@@ -545,12 +550,10 @@ public class ApiDocGenerator {
     private String outputActionOperations(final Action[] actions, final int sectionLevel, final String parentNamespace)
             throws IOException {
         final String namespace = normalizeName(parentNamespace, "action");
-        final AsciiDoc operationDoc = asciiDoc()
-                .sectionTitle("Action", sectionLevel);
-        final int actionSectionLevel = sectionLevel + 1;
+        final AsciiDoc operationDoc = asciiDoc();
 
         for (final Action action : actions) {
-            final String filename = outputActionOperation(action, actionSectionLevel, namespace);
+            final String filename = outputActionOperation(action, sectionLevel, namespace);
             operationDoc.include(filename);
         }
 
@@ -572,7 +575,8 @@ public class ApiDocGenerator {
             throws IOException {
         final String namespace = normalizeName(parentNamespace, action.getName());
         final AsciiDoc operationDoc = asciiDoc()
-                .sectionTitle(action.getName(), sectionLevel);
+                .horizontalRule()
+                .sectionTitle(asciiDoc().rawText("Action: ").mono(action.getName()).toString(), sectionLevel);
 
         final String descriptionFilename = outputDescriptionBlock(action.getDescription(), namespace);
         operationDoc.include(descriptionFilename);
@@ -619,12 +623,10 @@ public class ApiDocGenerator {
     private String outputQueryOperations(final Query[] queries, final int sectionLevel, final String resourceAnchor,
             final String parentNamespace) throws IOException {
         final String namespace = normalizeName(parentNamespace, "query");
-        final AsciiDoc operationDoc = asciiDoc()
-                .sectionTitle("Query", sectionLevel);
-        final int querySectionLevel = sectionLevel + 1;
+        final AsciiDoc operationDoc = asciiDoc();
 
         for (final Query query : queries) {
-            final String filename = outputQueryOperation(query, querySectionLevel, resourceAnchor, namespace);
+            final String filename = outputQueryOperation(query, sectionLevel, resourceAnchor, namespace);
             operationDoc.include(filename);
         }
 
@@ -636,7 +638,8 @@ public class ApiDocGenerator {
     private String outputQueryOperation(final Query query, final int sectionLevel, final String resourceAnchor,
             final String parentNamespace) throws IOException {
         final String namespace;
-        final AsciiDoc operationDoc = asciiDoc();
+        final AsciiDoc operationDoc = asciiDoc()
+                .horizontalRule();
         // @Checkstyle:off
         switch (query.getType()) {
             case ID:
@@ -799,21 +802,30 @@ public class ApiDocGenerator {
         final String parametersNamespace = normalizeName(parentNamespace, "parameters");
         final AsciiDocTable table = doc.tableStart()
                 .title("Parameters")
-                .headers("Name", "Type", "Description", "Required", "In", "Values", "Default");
+                .headers("Name", "Type", "Description", "Required", "In", "Values")
+                .columnWidths(2, 1, 4, 1, 1, 2);
         for (final Parameter parameter : parameters) {
             // format optional enumValues
             String enumValuesContent = null;
-            if (!isEmpty(parameter.getEnumValues())) {
+            if (!isEmpty(parameter.getEnumValues()) || !isEmpty(parameter.getDefaultValue())) {
                 final AsciiDoc enumValuesDoc = asciiDoc();
-                final String[] enumValues = parameter.getEnumValues();
-                final String[] enumTitles = parameter.getEnumTitles();
-                for (int i = 0; i < enumValues.length; ++i) {
-                    final AsciiDoc enumDoc = asciiDoc()
-                            .mono(enumValues[i]);
-                    if (enumTitles != null) {
-                        enumDoc.rawText(": " + enumTitles[i]);
+                if (!isEmpty(parameter.getDefaultValue())) {
+                    enumValuesDoc.italic("Default:")
+                            .rawText(" ")
+                            .mono(parameter.getDefaultValue())
+                            .newline();
+                }
+                if (!isEmpty(parameter.getEnumValues())) {
+                    final String[] enumValues = parameter.getEnumValues();
+                    final String[] enumTitles = parameter.getEnumTitles();
+                    for (int i = 0; i < enumValues.length; ++i) {
+                        final AsciiDoc enumDoc = asciiDoc()
+                                .mono(enumValues[i]);
+                        if (enumTitles != null) {
+                            enumDoc.rawText(": " + enumTitles[i]);
+                        }
+                        enumValuesDoc.unorderedList1(enumDoc.toString());
                     }
-                    enumValuesDoc.unorderedList1(enumDoc.toString());
                 }
                 enumValuesContent = enumValuesDoc.toString();
             }
@@ -828,7 +840,6 @@ public class ApiDocGenerator {
                     .columnCell(parameter.isRequired() ? "✓" : null)
                     .columnCell(parameter.getSource().name(), MONO_CELL)
                     .columnCell(enumValuesContent, ASCII_DOC_CELL)
-                    .columnCell(parameter.getDefaultValue(), MONO_CELL)
                     .rowEnd();
         }
         table.tableEnd();
@@ -957,15 +968,29 @@ public class ApiDocGenerator {
             if (schema.getSchema() != null) {
                 // namespace must follow exact format as a valid API Descriptor JSON Reference to a definition object
                 final String namespace = normalizeName(definitionsNamespace, name);
-                final String filename = outputSchema(name, schema.getSchema(), namespace);
-                definitionsDoc.include(filename);
+                definitionsDoc.newline()
+                        .anchor(namespace)
+                        .blockTitle(name);
+
+                final String descriptionFilename = outputDescriptionBlock(null, namespace);
+                definitionsDoc.include(descriptionFilename);
+
+                final String schemaFilename = outputJsonSchema(schema.getSchema(), namespace);
+                definitionsDoc.include(schemaFilename);
             }
         }
 
         // all other schema definitions
         final Set<String> generatedNames = schemaMap.keySet();
         for (final String namespace : generatedNames) {
-            final String filename = outputSchema(null, schemaMap.get(namespace), namespace);
+            definitionsDoc.newline()
+                    .anchor(namespace)
+                    .blockTitle(namespace);
+
+            final String descriptionFilename = outputDescriptionBlock(null, namespace);
+            definitionsDoc.include(descriptionFilename);
+
+            final String filename = outputJsonSchema(schemaMap.get(namespace), namespace);
             definitionsDoc.include(filename);
         }
 
@@ -975,24 +1000,18 @@ public class ApiDocGenerator {
     }
 
     /**
-     * Outputs an AsciiDoc file for a schema definition.
+     * Outputs an AsciiDoc file for a JSON schema definition.
      *
-     * @param name Schema name or {@code null} if name was auto-generated and should not be displayed
      * @param schema Schema as a {@link JsonValue}
-     * @param schemaDefinitionNamespace Schema definition namespace, which is also used as the AsciiDoc anchor
+     * @param parentNamespace Parent namespace
      * @return File path suitable for AsciiDoc import-statement
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputSchema(final String name, final JsonValue schema, final String schemaDefinitionNamespace)
+    private String outputJsonSchema(final JsonValue schema, final String parentNamespace)
             throws IOException {
-        final String jsonSchemaNamespace = normalizeName(schemaDefinitionNamespace, "jsonSchema");
+        final String jsonSchemaNamespace = normalizeName(parentNamespace, "jsonSchema");
         final AsciiDoc jsonSchemaDoc = asciiDoc()
-                .anchor(schemaDefinitionNamespace)
-                .newline();
-        if (name != null) {
-            jsonSchemaDoc.blockTitle(name);
-        }
-        jsonSchemaDoc.listingBlock(OBJECT_MAPPER.writeValueAsString(schema.getObject()), "json");
+                .listingBlock(OBJECT_MAPPER.writeValueAsString(schema.getObject()), "json");
 
         final String filename = jsonSchemaNamespace + ADOC_EXTENSION;
         jsonSchemaDoc.toFile(outputDirPath, filename);

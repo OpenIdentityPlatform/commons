@@ -41,6 +41,11 @@ public final class AsciiDoc {
     // TODO http://asciidoctor.org/docs/user-manual/#preventing-substitutions
 
     /**
+     * Underscore-character is used as the namespace-part delimiter.
+     */
+    private static final String NAMESPACE_DELIMITER = "_";
+
+    /**
      * Characters that must be replaced/removed for a filename to be a POSIX "Fully portable filename"
      * <a href="https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words">[ref]</a>.
      */
@@ -111,13 +116,13 @@ public final class AsciiDoc {
     }
 
     /**
-     * Inserts raw text (may contain markup).
+     * Inserts raw text (may contain markup or only whitespace).
      *
      * @param text Raw text/markup
      * @return builder
      */
     public AsciiDoc rawText(final String text) {
-        if (isEmpty(text)) {
+        if (text == null) {
             throw new AsciiDocException("text required");
         }
         builder.append(text);
@@ -513,6 +518,21 @@ public final class AsciiDoc {
     }
 
     /**
+     * Inserts a horizontal-rule divider.
+     *
+     * @return Doc builder
+     */
+    public AsciiDoc horizontalRule() {
+        final int newlinesAbove = requireTrailingNewlines(1, builder);
+        if (newlinesAbove == 1) {
+            builder.append(NEWLINE);
+        }
+        builder.append(HORIZONTAL_RULE)
+            .append(NEWLINE);
+        return this;
+    }
+
+    /**
      * Starts a table at the current position.
      *
      * @return Table builder
@@ -568,7 +588,8 @@ public final class AsciiDoc {
     /**
      * Normalizes a name such that it can be used as a unique
      * <a href="https://en.wikipedia.org/wiki/Filename#Reserved_characters_and_words">filename</a>
-     * and/or anchor in AsciiDoc.
+     * and/or anchor in AsciiDoc. Names are converted to lower-case, unsupported characters are collapsed to a single
+     * underscore-character, and parts are separated by an underscore.
      *
      * @param parts Name-parts to normalize
      * @return Normalized name
@@ -579,14 +600,14 @@ public final class AsciiDoc {
         }
         String s = parts[0].toLowerCase(Locale.ROOT);
         for (int i = 1; i < parts.length; ++i) {
-            s += "-" + parts[i].toLowerCase(Locale.ROOT);
+            s += NAMESPACE_DELIMITER + parts[i].toLowerCase(Locale.ROOT);
         }
         final Matcher m = POSIX_FILENAME_REPLACEMENT_PATTERN.matcher(s);
         if (!m.find()) {
             return s;
         }
-        final String normalized = m.replaceAll("_");
+        final String normalized = m.replaceAll(NAMESPACE_DELIMITER);
         final Matcher mm = SQUASH_UNDERSCORES_PATTERN.matcher(normalized);
-        return mm.find() ? mm.replaceAll("_") : normalized;
+        return mm.find() ? mm.replaceAll(NAMESPACE_DELIMITER) : normalized;
     }
 }
