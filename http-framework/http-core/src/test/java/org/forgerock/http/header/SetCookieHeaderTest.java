@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
@@ -377,5 +377,42 @@ public class SetCookieHeaderTest {
         assertThat(cookie.getDomain()).isNull();
         assertThat(cookie.isSecure()).isFalse();
         assertThat(cookie.isHttpOnly()).isFalse();
+    }
+
+    @Test
+    public void shouldParseSetCookieHeaderValueContainingEquals() {
+
+        //Given
+        String cookieString = "NAME=Prop=True&UserRole=ABC&UserID=XYZ&CallerID=1234";
+
+        //When
+        SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
+
+        //Then
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("Prop=True&UserRole=ABC&UserID=XYZ&CallerID=1234");
+    }
+
+    @Test
+    public void shouldParseSetCookieHeaderValueContainingEqualsWithAttributes() {
+
+        //Given
+        String cookieString = "NAME=Prop=True&UserRole=ABC&UserID=XYZ&CallerID=1234; Expires=" + EXPIRES_DATE_STRING
+                + "; Max-Age=100; Path=/path; Domain=DOMAIN; Secure; HttpOnly";
+
+        //When
+        SetCookieHeader setCookieHeader = SetCookieHeader.valueOf(cookieString);
+
+        //Then
+        Cookie cookie = setCookieHeader.getCookies().iterator().next();
+        assertThat(cookie.getName()).isEqualTo("NAME");
+        assertThat(cookie.getValue()).isEqualTo("Prop=True&UserRole=ABC&UserID=XYZ&CallerID=1234");
+        assertThat(cookie.getExpires()).isEqualTo(EXPIRES_DATE);
+        assertThat(cookie.getMaxAge()).isEqualTo(100);
+        assertThat(cookie.getPath()).isEqualTo("/path");
+        assertThat(cookie.getDomain()).isEqualTo("DOMAIN");
+        assertThat(cookie.isSecure()).isTrue();
+        assertThat(cookie.isHttpOnly()).isTrue();
     }
 }

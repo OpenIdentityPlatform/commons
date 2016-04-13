@@ -54,7 +54,7 @@ public class SetCookieHeader extends Header {
         List<String> parts = Arrays.asList(value.split(";"));
         Cookie cookie = new Cookie();
         for (String part : parts) {
-            String[] nvp = part.split("=");
+            String[] nvp = part.split("=", 2);
             if ("Expires".equalsIgnoreCase(nvp[0].trim())) {
                 cookie.setExpires(HeaderUtil.parseDate(nvp[1].trim()));
             } else if ("Max-Age".equalsIgnoreCase(nvp[0].trim())) {
