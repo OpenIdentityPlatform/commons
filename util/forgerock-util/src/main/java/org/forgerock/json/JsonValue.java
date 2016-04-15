@@ -17,14 +17,20 @@
 
 package org.forgerock.json;
 
+import static org.forgerock.json.JsonValueFunctions.charset;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
+import static org.forgerock.json.JsonValueFunctions.file;
+import static org.forgerock.json.JsonValueFunctions.list;
+import static org.forgerock.json.JsonValueFunctions.pattern;
+import static org.forgerock.json.JsonValueFunctions.pointer;
+import static org.forgerock.json.JsonValueFunctions.uri;
+import static org.forgerock.json.JsonValueFunctions.url;
+import static org.forgerock.json.JsonValueFunctions.uuid;
+
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -40,11 +46,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import org.forgerock.util.Function;
 import org.forgerock.util.RangeSet;
-import org.forgerock.util.Utils;
 import org.forgerock.util.annotations.VisibleForTesting;
 
 /**
@@ -486,13 +490,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @throws JsonValueException
      *             if the JSON value is not a string or the character set
      *             specified is invalid.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asCharset()} with {@code jv.map(JsonValueFunctions.charset())}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#charset()
      */
+    @Deprecated
     public Charset asCharset() {
-        try {
-            return (object == null ? null : Charset.forName(asString()));
-        } catch (final IllegalCharsetNameException | UnsupportedCharsetException e) {
-            throw new JsonValueException(this, e);
-        }
+        return as(charset());
     }
 
     /**
@@ -524,9 +529,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      *             if the JSON value does not match any of the enum's constants.
      * @throws NullPointerException
      *             if {@code type} is {@code null}.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asEnum(clazz)} with {@code jv.map(JsonValueFunctions.enumConstant(clazz)}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#enumConstant(Class)
      */
+    @Deprecated
     public <T extends Enum<T>> T asEnum(final Class<T> type) {
-        return Utils.asEnum(asString(), type);
+        return as(enumConstant(type));
     }
 
     /**
@@ -536,10 +546,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @return a file represented by the string value.
      * @throws JsonValueException
      *             if the JSON value is not a string.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asFile()} with {@code jv.map(JsonValueFunctions.file())}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#file()
      */
+    @Deprecated
     public File asFile() {
-        final String string = asString();
-        return (string != null ? new File(string) : null);
+        return as(file());
     }
 
     /**
@@ -723,22 +737,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      *             unexpected type, or contains an element that cannot be transformed
      * @throws NullPointerException
      *             if {@code transformFunction} is {@code null}.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asList(transformFunction)} with {@code jv.map(JsonValueFunctions.list(transformFunction))}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#list(Function)
      */
-    @SuppressWarnings("unchecked")
+    @Deprecated
     public <V, E extends Exception> List<V> asList(final Function<JsonValue, V, E> transformFunction) throws E {
-        if (object != null) {
-            if (isSet()) {
-                return new ArrayList<>(asSet(transformFunction));
-            }
-            expect(List.class);
-            final int size = size();
-            final List<V> list = new ArrayList<>(size);
-            for (int i = 0; i < size; i++) {
-                list.add(transformFunction.apply(get(i)));
-            }
-            return list;
-        }
-        return (List<V>) object;
+        return as(list(transformFunction));
     }
 
     /**
@@ -759,29 +765,46 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @param transformFunction
      *            a {@link Function} to transform an element of the JsonValue set
      *            to the desired type
-     * @return the list value, or {@code null} if no value.
+     * @return the set value, or {@code null} if no value.
      * @throws E
      *             if the JSON value is not a {@code Set}, contains an
      *             unexpected type, or contains an element that cannot be
      *             transformed
      * @throws NullPointerException
      *             if {@code transformFunction} is {@code null}.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asSet(transformFunction)} with {@code jv.map(JsonValueFunctions.set(transformFunction))}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#set(Function)
      */
-    @SuppressWarnings("unchecked")
+    @Deprecated
     public <V, E extends Exception> Set<V> asSet(final Function<JsonValue, V, E> transformFunction) throws E {
-        if (object != null) {
-            if (isList()) {
-                return new LinkedHashSet<>(asList(transformFunction));
-            }
-            expect(Set.class);
-            final int size = size();
-            final Set<V> set = new LinkedHashSet<>(size);
-            for (JsonValue element : this) {
-                set.add(transformFunction.apply(element));
-            }
-            return set;
-        }
-        return (Set<V>) object;
+        return as(JsonValueFunctions.set(transformFunction));
+    }
+
+    /**
+     * Returns the JSON value as an object whose type
+     * (and value) is specified by a transformation function. It is up to to the
+     * transformation function to transform/enforce source types of the elements
+     * in the Json source element and to decide what to do depending on the kind
+     * of {@link JsonValue} : if it is null, a {@link String}, a {@link List},
+     * a {@link Set} or {@link Map}. If the type-transformation cannot occur,
+     * the exception specified by the transformation function is thrown.
+     *
+     * @param <V>
+     *            the type of element
+     * @param <E>
+     *            the type of exception thrown by the transformation function
+     * @param transformFunction
+     *            a {@link Function} to transform the JsonValue element to the desired type
+     * @return the value, or {@code null} if no value.
+     * @throws E
+     *             if the JsonValue element cannot be transformed
+     * @throws NullPointerException
+     *             if {@code transformFunction} is {@code null}.
+     */
+    public <V, E extends Exception> V as(final Function<JsonValue, V, E> transformFunction) throws E {
+        return transformFunction.apply(this);
     }
 
     /**
@@ -904,13 +927,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @throws JsonValueException
      *             if the pattern is not a string or the value is not a valid
      *             regular expression pattern.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asPattern()} with {@code jv.map(JsonValueFunctions.pattern())}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#pattern()
      */
+    @Deprecated
     public Pattern asPattern() {
-        try {
-            return (object == null ? null : Pattern.compile(asString()));
-        } catch (final PatternSyntaxException pse) {
-            throw new JsonValueException(this, pse);
-        }
+        return as(pattern());
     }
 
     /**
@@ -920,13 +944,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @return the JSON pointer represented by the JSON value string.
      * @throws JsonValueException
      *             if the JSON value is not a string or valid JSON pointer.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asPointer()} with {@code jv.map(JsonValueFunctions.pointer())}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#pointer()
      */
+    @Deprecated
     public JsonPointer asPointer() {
-        try {
-            return (object == null ? null : new JsonPointer(asString()));
-        } catch (final JsonException je) {
-            throw (je instanceof JsonValueException ? je : new JsonValueException(this, je));
-        }
+        return as(pointer());
     }
 
     /**
@@ -948,13 +973,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @return the URI represented by the string value.
      * @throws JsonValueException
      *             if the given string violates URI syntax.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asURI()} with {@code jv.map(JsonValueFunctions.uri())}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#uri()
      */
+    @Deprecated
     public URI asURI() {
-        try {
-            return (object == null ? null : new URI(asString()));
-        } catch (final URISyntaxException use) {
-            throw new JsonValueException(this, use);
-        }
+        return as(uri());
     }
 
     /**
@@ -964,13 +990,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @return the URL represented by the string value.
      * @throws JsonValueException
      *             if the given string violates URL syntax.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asURL()} with {@code jv.map(JsonValueFunctions.url())}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#url()
      */
+    @Deprecated
     public URL asURL() {
-        try {
-            return (object == null ? null : new URL(asString()));
-        } catch (final MalformedURLException mue) {
-            throw new JsonValueException(this, mue);
-        }
+        return as(url());
     }
 
     /**
@@ -980,13 +1007,14 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @return the UUID represented by the JSON value string.
      * @throws JsonValueException
      *             if the JSON value is not a string or valid UUID.
+     * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
+     * {@code jv.asUUID()} with {@code jv.map(JsonValueFunctions.uuid())}).
+     * @see #as(Function)
+     * @see JsonValueFunctions#uuid()
      */
+    @Deprecated
     public UUID asUUID() {
-        try {
-            return (object == null ? null : UUID.fromString(asString()));
-        } catch (final IllegalArgumentException iae) {
-            throw new JsonValueException(this, iae);
-        }
+        return as(uuid());
     }
 
     /**

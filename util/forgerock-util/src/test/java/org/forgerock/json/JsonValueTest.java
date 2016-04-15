@@ -18,14 +18,15 @@
 package org.forgerock.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.assertj.core.data.MapEntry.entry;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.fieldIfNotNull;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.set;
 import static org.testng.Assert.fail;
-
-import org.forgerock.util.Function;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -37,6 +38,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.forgerock.util.Function;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * Unit tests for JsonValue.
@@ -656,6 +662,33 @@ public class JsonValueTest {
     public void testToIndex(final String input, final int expected) {
         final int actual = JsonValue.toIndex(input);
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    public void shouldTransformJsonValue() throws Exception {
+        Number number = json("1").as(new Function<JsonValue, Number, NumberFormatException>() {
+            @Override
+            public Number apply(JsonValue value) throws NumberFormatException {
+                return new Integer(value.asString());
+            }
+        });
+        assertThat(number).isInstanceOf(Integer.class).isEqualTo(1);
+    }
+
+    @Test
+    public void shouldThrowAnExceptionFromTheTransformationFunction() {
+        final Exception exception = new Exception("Boom");
+        try {
+            json("1").as(new Function<JsonValue, Number, Exception>() {
+                @Override
+                public Number apply(JsonValue value) throws Exception {
+                    throw exception;
+                }
+            });
+            failBecauseExceptionWasNotThrown(Exception.class);
+        } catch (Exception caught) {
+            assertThat(caught).isSameAs(exception);
+        }
     }
 
     private JsonPointer ptr(final String pointer) {
