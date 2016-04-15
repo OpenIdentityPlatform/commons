@@ -1,3 +1,10 @@
+# 6.2.0
+
+## Changes
+
+### Bug Fixes
+* CAUD-331: Disabled handlers should not utilize services until enabled.
+
 # 6.1.0
 
 ## Changes

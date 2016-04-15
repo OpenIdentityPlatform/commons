@@ -202,11 +202,14 @@ public final class AuditServiceBuilder {
                     handlerRegistration.configuration.getName(),
                     handlerRegistration.configuration.getTopics().toString());
             try {
-                handlers.add(auditEventHandlerFactory.create(
-                        handlerRegistration.configuration.getName(),
-                        handlerRegistration.clazz,
-                        handlerRegistration.configuration,
-                        eventTopicsMetaData));
+                // Only build the handler if it is enabled.
+                if (handlerRegistration.configuration.isEnabled()) {
+                    handlers.add(auditEventHandlerFactory.create(
+                            handlerRegistration.configuration.getName(),
+                            handlerRegistration.clazz,
+                            handlerRegistration.configuration,
+                            eventTopicsMetaData));
+                }
             } catch (AuditException e) {
                 logger.error(e.getMessage(), e);
             }

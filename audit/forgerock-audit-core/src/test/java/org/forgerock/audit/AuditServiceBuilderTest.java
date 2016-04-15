@@ -23,8 +23,15 @@ import static org.forgerock.audit.events.EventTopicsMetaDataBuilder.coreTopicSch
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.forgerock.audit.AuditServiceBuilder.AuditServiceFactory;
 import org.forgerock.audit.events.EventTopicsMetaData;
+import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.events.handlers.AuditEventHandlerFactory;
 import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.audit.events.handlers.impl.PassThroughAuditEventHandlerConfiguration;
@@ -33,10 +40,6 @@ import org.forgerock.json.JsonValue;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Set;
 
 @SuppressWarnings({"javadoc", "rawtypes", "unchecked" })
 public class AuditServiceBuilderTest {
@@ -295,6 +298,44 @@ public class AuditServiceBuilderTest {
                 any(Set.class));
 
         assertThat(topicSchemasCaptor.getValue().getTopics()).doesNotContain("customTopic");
+    }
+
+    /**
+     * Tests that only enabled handlers are instantiated when the audit service is built.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void shouldNotInstantiateDisabledHandlers() throws Exception {
+        // Given
+        final AuditServiceFactory factory = new AuditServiceFactory();
+        EventTopicsMetaData eventTopicsMetaData = coreTopicSchemas().build();
+        Set<String> topics = new HashSet<>();
+        topics.add("authentication");
+
+        PassThroughAuditEventHandlerConfiguration disabledConfig = new PassThroughAuditEventHandlerConfiguration();
+        disabledConfig.setName("disabledHandler");
+        disabledConfig.setEnabled(false);
+        disabledConfig.setTopics(topics);
+
+        PassThroughAuditEventHandlerConfiguration enabledConfig = new PassThroughAuditEventHandlerConfiguration();
+        enabledConfig.setName("enabledHandler");
+        enabledConfig.setEnabled(true);
+        enabledConfig.setTopics(topics);
+
+        // When
+        AuditService auditService = new AuditServiceBuilder(factory)
+                .withEventTopicsMetaData(eventTopicsMetaData)
+                .withAuditEventHandler(PassThroughAuditEventHandler.class, enabledConfig)
+                .withAuditEventHandler(PassThroughAuditEventHandler.class, disabledConfig)
+                .build();
+
+        // Then
+        Collection<AuditEventHandler> registeredHandlers = auditService.getRegisteredHandlers();
+        assertThat(registeredHandlers.size()).isEqualTo(1);
+        for (AuditEventHandler registeredHandler : registeredHandlers) {
+            assertThat(registeredHandler.isEnabled()).isTrue();
+        }
     }
 
     private JsonValue loadJson(String filename) throws IOException {
