@@ -220,7 +220,7 @@
             "city" : "City",
             "role" : "Admin Role",
             "stateProvince" : "State/Province",
-            "phoneNumber" : "Mobile Phone",
+            "phoneNumber" : "Phone Number",
             "postalCode" : "Postal Code",
             "lastPasswordSet" : "Last password set",
             "siteImage" : "Site Image",

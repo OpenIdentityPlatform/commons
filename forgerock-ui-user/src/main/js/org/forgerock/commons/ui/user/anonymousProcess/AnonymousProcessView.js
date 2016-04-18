@@ -25,8 +25,14 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function($, _, form2js, AbstractView, AnonymousProcessDelegate, Constants, EventManager, Router, UIUtils,
-            ValidatorsManager) {
+], function($, _, form2js,
+    AbstractView,
+    AnonymousProcessDelegate,
+    Constants,
+    EventManager,
+    Router,
+    UIUtils,
+    ValidatorsManager) {
 
     /**
      * Given a position in the DOM, look for children elements which comprise a
@@ -84,7 +90,6 @@ define([
         events: {
             "submit form": "formSubmit",
             "click #restart": "restartProcess",
-            "onValidate": "onValidate",
             "change #userQuery :input": "buildQueryFilter",
             "keyup #userQuery :input": "buildQueryFilter",
             "customValidate #userQuery": "validateForm"
@@ -94,6 +99,7 @@ define([
         },
         // included as part of the AnonymousProcessView object for test purposes
         walkTreeForFilterStrings: walkTreeForFilterStrings,
+
         getFormContent: function () {
             if (this.$el.find("form").attr("id") === "userQuery") {
                 return {
@@ -124,7 +130,7 @@ define([
                 this.setDelegate(Constants.SELF_SERVICE_CONTEXT + this.processType, params.token);
             }
 
-            if (params.token) {
+            if (!_.isEmpty(params)) {
                 this.submitDelegate(params, _.bind(function (response) {
                     // in the case when the token presented on the URL results in an unsuccessful
                     // response, do not simply redirect to /continue; doing so would reset the process

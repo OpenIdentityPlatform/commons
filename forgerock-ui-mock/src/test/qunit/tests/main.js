@@ -20,6 +20,7 @@ define([
     "./commons/AbstractModel",
     "./commons/Base64",
     "./commons/form2js",
+    "./commons/OAuth",
     "./commons/ObjectUtil",
     "./commons/UIUtils",
     "./commons/Queue",

@@ -1,0 +1,28 @@
+
+
+<body>
+
+Mock OAuth Provider redirecting in <span id="countDown"></span>....
+
+</body>
+
+
+<script>
+(function () {
+    var queryParams = window.location.search.replace("?", "").split("&").reduce(function (map, item) {
+            var parts = item.split("=");
+            map[parts[0]] = decodeURIComponent(parts[1]);
+            return map;
+        }, {}),
+        countDown = 3;
+
+    setInterval(function () {
+        document.getElementById("countDown").innerHTML = countDown;
+        countDown--;
+        if (countDown <= 0) {
+            window.location.href=queryParams.redirect_uri + "?code=randomAccessCode&state=" + encodeURIComponent(queryParams.state);
+        }
+    }, 1000);
+    document.getElementById("countDown").innerHTML = countDown+1;
+}())
+</script>

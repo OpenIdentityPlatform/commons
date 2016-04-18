@@ -371,26 +371,125 @@ define([
                 {
                     "Content-Type": "application/json;charset=UTF-8"
                 },
-                JSON.stringify(
-                    {
-                        "type": "emailValidation",
-                        "tag": "initial",
-                        "requirements": {
-                            "$schema": "http://json-schema.org/draft-04/schema#",
-                            "description": "Register your account",
-                            "type": "object",
-                            "required": [
-                                "mail"
-                            ],
-                            "properties": {
-                                "mail": {
-                                    "description": "Email address",
-                                    "type": "string"
+                JSON.stringify({
+                    "type": "userDetails",
+                    "tag": "initial",
+                    "requirements": {
+                        "$schema": "http://json-schema.org/draft-04/schema#",
+                        "type": "object",
+                        "description": "New user details",
+                        "required": [],
+                        "properties": {
+                            "user": {
+                                "description": "User details",
+                                "type": "object",
+                                "required": [
+                                    "userName",
+                                    "name",
+                                    "emails"
+                                ],
+                                "properties": {
+                                    "userName": {
+                                        "description": "User Name",
+                                        "type": "string"
+                                    },
+                                    "emails": {
+                                        "type": "array",
+                                        "items": {
+                                            "description": "Email",
+                                            "type": "object",
+                                            "required": [
+                                                "value"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "description": "Type",
+                                                    "type": "string"
+                                                },
+                                                "value": {
+                                                    "description": "Value",
+                                                    "type": "string"
+                                                },
+                                                "primary": {
+                                                    "description": "Primary",
+                                                    "type": "boolean"
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "name": {
+                                        "description": "Name",
+                                        "type": "object",
+                                        "required": [
+                                            "familyName",
+                                            "givenName"
+                                        ],
+                                        "properties": {
+                                            "honorificSuffix": {
+                                                "description": "Suffix",
+                                                "type": "string"
+                                            },
+                                            "familyName": {
+                                                "description": "Family Name",
+                                                "type": "string"
+                                            },
+                                            "givenName": {
+                                                "description": "Given Name",
+                                                "type": "string"
+                                            },
+                                            "honorificPrefix": {
+                                                "description": "Prefix",
+                                                "type": "string"
+                                            },
+                                            "middleName": {
+                                                "description": "Middle Name",
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "provider": {
+                                "description": "OAuth IDP Name",
+                                "type": "string"
+                            },
+                            "code": {
+                                "description": "OAuth Authorization Code",
+                                "type": "string"
+                            },
+                            "redirect_uri": {
+                                "description": "URI where IDP returns the Authorization Code",
+                                "type": "string"
+                            }
+                        },
+                        "definitions": {
+                            "providers": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "oneOf": [
+                                        {
+                                            "name": "Google",
+                                            "type": "openid_connect",
+                                            "icon": "https://developers.google.com/accounts/images/sign-in-with-google.png", //eslint-disable-line max-len
+                                            "client_id": "#yourClientIDHere",
+                                            "authorization_endpoint": "https://accounts.google.com/o/oauth2/v2/auth", //eslint-disable-line max-len,
+                                            "scopes": "openid profile email"
+                                        },
+                                        {
+                                            "name": "Mock",
+                                            "type": "openid_connect",
+                                            "icon": "images/mockSignIn.png",
+                                            "client_id": "mockClientIDXYZ1234",
+                                            "authorization_endpoint": "mockOAuthAuthorization.html",
+                                            "scopes": "openid profile email mock"
+                                        }
+                                    ]
                                 }
                             }
                         }
                     }
-                )
+                })
             ]
         );
 
@@ -402,12 +501,14 @@ define([
                     headers = {"Content-Type": "application/json;charset=UTF-8"};
                 switch (requestContent.token) {
                     case undefined:
-                        if (_.isObject(requestContent.input) && _.isString(requestContent.input.mail)) {
+                    case "mockToken1":
+                        if (_.isObject(requestContent.input) &&
+                            _.isObject(requestContent.input.user)) {
                             request.respond(
                                 200,
                                 headers,
                                 JSON.stringify({
-                                    "token": "mockToken1",
+                                    "token": "mockToken2",
                                     "type": "emailValidation",
                                     "tag": "validateCode",
                                     "requirements": {
@@ -426,40 +527,103 @@ define([
                                     }
                                 })
                             );
-                        } else {
-                            request.respond(
-                                400,
-                                headers,
-                                JSON.stringify({
-                                    "code": 400,
-                                    "reason": "Bad Request",
-                                    "message": "mail is missing"
-                                })
-                            );
-                        }
-                        break;
-                    case "mockToken1":
-                        if (_.isObject(requestContent.input) &&
+                        } else if (_.isObject(requestContent.input) &&
                             _.isString(requestContent.input.code) &&
-                            requestContent.input.code === "12345") {
+                            _.isString(requestContent.input.provider) &&
+                            _.isString(requestContent.input.redirect_uri)) {
                             request.respond(
                                 200,
                                 headers,
                                 JSON.stringify({
-                                    "token": "mockToken2",
+                                    "token": "mockToken1",
                                     "type": "userDetails",
-                                    "tag": "initial",
+                                    "tag": "validateUserProfile",
                                     "requirements": {
                                         "$schema": "http://json-schema.org/draft-04/schema#",
+                                        "description": "Verify user profile",
                                         "type": "object",
-                                        "description": "New user details",
                                         "required": [
                                             "user"
                                         ],
                                         "properties": {
                                             "user": {
                                                 "description": "User details",
-                                                "type": "object"
+                                                "type": "object",
+                                                "required": [
+                                                    "name",
+                                                    "userName",
+                                                    "emails"
+                                                ],
+                                                "properties": {
+                                                    "userName": {
+                                                        "default": "brmiller",
+                                                        "description": "User Name",
+                                                        "type": "string"
+                                                    },
+                                                    "emails": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "description": "Email",
+                                                            "type": "object",
+                                                            "required": [
+                                                                "value"
+                                                            ],
+                                                            "properties": {
+                                                                "type": {
+                                                                    "description": "Type",
+                                                                    "type": "string"
+                                                                },
+                                                                "value": {
+                                                                    "description": "Value",
+                                                                    "type": "string"
+                                                                },
+                                                                "primary": {
+                                                                    "description": "Primary",
+                                                                    "type": "boolean"
+                                                                }
+                                                            }
+                                                        },
+                                                        "default": [
+                                                            {
+                                                                "value": "brendan.miller@example.com",
+                                                                "type": "other",
+                                                                "primary": true
+                                                            }
+                                                        ]
+                                                    },
+                                                    "name": {
+                                                        "description": "Name",
+                                                        "type": "object",
+                                                        "required": [
+                                                            "familyName",
+                                                            "givenName"
+                                                        ],
+                                                        "properties": {
+                                                            "honorificSuffix": {
+                                                                "description": "Suffix",
+                                                                "type": "string"
+                                                            },
+                                                            "familyName": {
+                                                                "default": "Miller",
+                                                                "description": "Family Name",
+                                                                "type": "string"
+                                                            },
+                                                            "givenName": {
+                                                                "default": "Brendan",
+                                                                "description": "Given Name",
+                                                                "type": "string"
+                                                            },
+                                                            "honorificPrefix": {
+                                                                "description": "Prefix",
+                                                                "type": "string"
+                                                            },
+                                                            "middleName": {
+                                                                "description": "Middle Name",
+                                                                "type": "string"
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -472,14 +636,15 @@ define([
                                 JSON.stringify({
                                     "code": 400,
                                     "reason": "Bad Request",
-                                    "message": "Invalid code"
+                                    "message": "mail is missing"
                                 })
                             );
                         }
                         break;
                     case "mockToken2":
                         if (_.isObject(requestContent.input) &&
-                            _.isObject(requestContent.input.user)) {
+                            _.isString(requestContent.input.code) &&
+                            requestContent.input.code === "12345") {
                             request.respond(
                                 200,
                                 headers,
@@ -567,7 +732,7 @@ define([
                                 JSON.stringify({
                                     "code": 400,
                                     "reason": "Bad Request",
-                                    "message": "Missing required input"
+                                    "message": "Invalid code"
                                 })
                             );
                         }
@@ -598,17 +763,6 @@ define([
                                 })
                             );
                         }
-                        break;
-                    default:
-                        request.respond(
-                            400,
-                            headers,
-                            JSON.stringify({
-                                "code": 400,
-                                "reason": "Bad Request",
-                                "message": "Token provided not recognized"
-                            })
-                        );
                 }
             });
 

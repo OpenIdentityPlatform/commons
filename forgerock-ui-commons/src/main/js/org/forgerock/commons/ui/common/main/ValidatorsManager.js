@@ -169,11 +169,13 @@ define([
     obj.validationSucceeded = function (element) {
         element.attr("data-validation-status", "ok");
         element.trigger("validationSuccessful");
+        element.trigger("customValidate");
     };
 
     obj.validationFailed = function (element, allFailures) {
         element.attr("data-validation-status", "error");
         element.trigger("validationFailed", {failures: allFailures});
+        element.trigger("customValidate");
     };
 
     obj.formValidated = function(formElement) {

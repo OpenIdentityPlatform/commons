@@ -14,7 +14,9 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define(["underscore"], function (_) {
+define([
+    "lodash"
+], function (_) {
     /**
      * @exports org/forgerock/commons/ui/common/util/URIUtils
      */
