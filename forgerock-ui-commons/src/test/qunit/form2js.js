@@ -14,14 +14,25 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-// add new test modules here:
 define([
-    "./commons/AbstractModel",
-    "./commons/Base64",
-    "./commons/form2js",
-    "./commons/ObjectUtil",
-    "./commons/UIUtils",
-    "./commons/Queue",
-    "./commons/ValidatorsManager",
-    "./user/AnonymousProcessView"
-]);
+    "jquery",
+    "form2js",
+    "js2form"
+], function ($, form2js, js2form) {
+    QUnit.module('form2js usage');
+
+    QUnit.test("boolean fields", function () {
+        var form = $('<form><input type="checkbox" value="true" name="testBool"></form>')
+
+        $("#qunit-fixture").append(form);
+
+        js2form(form[0], {testBool: true});
+        QUnit.equal(form.find("[name=testBool]").prop("checked"), true);
+        QUnit.equal(form2js(form[0]).testBool, true);
+
+        js2form(form[0], {testBool: false});
+        QUnit.equal(form.find("[name=testBool]").prop("checked"), false);
+        QUnit.equal(form2js(form[0]).testBool, false);
+    });
+
+});
