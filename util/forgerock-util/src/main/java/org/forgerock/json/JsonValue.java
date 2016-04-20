@@ -584,6 +584,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     /**
      * Returns the JSON value as a {@link List} object. If the JSON value is
      * {@code null}, this method returns {@code null}.
+     * The returned {@link List} is <b>not</b> a copy : any interaction with it
+     * will affect the {@link JsonValue}.
      *
      * @return the list value, or {@code null} if no value.
      * @throws JsonValueException
@@ -596,6 +598,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
     /**
      * Returns the JSON value as a {@link Set} object. If the JSON value is
      * {@code null}, this method returns {@code null}.
+     * The returned {@link Set} is <b>not</b> a copy : any interaction with it
+     * will affect the {@link JsonValue}.
      *
      * @return the set value, or {@code null} if no value.
      * @throws JsonValueException
@@ -610,6 +614,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * specified type. If the value is {@code null}, this method returns
      * {@code null}. If any of the elements of the collection are not {@code null} and
      * not of the specified type, {@code JsonValueException} is thrown.
+     * The returned {@link Collection} is <b>not</b> a copy : any interaction with it
+     * will affect the {@link JsonValue}.
      *
      * @param <E>
      *            the type of elements in this collection
@@ -644,6 +650,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * specified type. If the value is {@code null}, this method returns
      * {@code null}. If any of the elements of the list are not {@code null} and
      * not of the specified type, {@code JsonValueException} is thrown.
+     * The returned {@link List} is <b>not</b> a copy : any interaction with it
+     * will affect the {@link JsonValue}.
      *
      * @param <E>
      *            the type of elements in this list
@@ -683,6 +691,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * not of the specified type, {@code JsonValueException} is thrown.  If
      * called on an object which wraps a List, this method will drop duplicates
      * performing element comparisons using equals/hashCode.
+     * The returned {@link Set} is <b>not</b> a copy : any interaction with it
+     * will affect the {@link JsonValue}.
      *
      * @param <E>
      *            the type of elements in this set
@@ -723,6 +733,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * in the Json source collection.  If any of the elements of the list are not of
      * the appropriate type, or the type-transformation cannot occur,
      * the exception specified by the transformation function is thrown.
+     * The returned {@link List} is a new one : any interaction with it
+     * will not affect the {@link JsonValue}.
      *
      * @param <V>
      *            the type of elements in this list
@@ -757,6 +769,8 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * equals/hashCode. If any of the elements of the collection are not of
      * the appropriate type, or the type-transformation cannot occur, the
      * exception specified by the transformation function is thrown.
+     * The returned {@link Set} is a new one : any interaction with it
+     * will not affect the {@link JsonValue}.
      *
      * @param <V>
      *            the type of elements in this set
