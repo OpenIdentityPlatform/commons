@@ -73,7 +73,7 @@ public final class Update extends Operation {
      * @param relativeType The type relative to which schema resources should be resolved.
      * @return Update instance
      */
-    public static Update fromAnnotation(org.forgerock.api.annotations.Update update, ApiDescription<?> descriptor,
+    public static Update fromAnnotation(org.forgerock.api.annotations.Update update, ApiDescription descriptor,
             Class<?> relativeType) {
         return update()
                 .detailsFromAnnotation(update.operationDescription(), descriptor, relativeType)

@@ -17,14 +17,33 @@
 package org.forgerock.api.models;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import org.forgerock.api.ApiValidationException;
+import org.forgerock.http.routing.Version;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class PathsTest {
 
-    private final SimplePathNode simplePathNode = new SimplePathNode();
+    private VersionedPath simplePathNode;
+
+    @BeforeClass
+    public void before() {
+        final Schema schema = Schema.schema()
+                .schema(json(object()))
+                .build();
+
+        final Action action1 = Action.action()
+                .name("action1")
+                .response(schema)
+                .build();
+        simplePathNode = VersionedPath.versionedPath()
+                .put(Version.version(1), Resource.resource().action(action1).build())
+                .build();
+    }
 
     @DataProvider(name = "putValidationData")
     public Object[][] putValidationData() {
@@ -41,14 +60,14 @@ public class PathsTest {
     }
 
     @Test(dataProvider = "putValidationData")
-    public void testPut(final String name, final SimplePathNode pathNode,
+    public void testPut(final String name, final VersionedPath pathNode,
             final Class<? extends Throwable> expectedException) {
-        final Paths.Builder<SimplePathNode> builder = Paths.paths(SimplePathNode.class);
+        final Paths.Builder builder = Paths.paths();
 
         // add an entry, so that we can test for name-uniqueness
         builder.put("/notUniqueName", simplePathNode);
 
-        final Paths<SimplePathNode> paths;
+        final Paths paths;
         try {
             builder.put(name, pathNode);
             paths = builder.build();
@@ -70,14 +89,7 @@ public class PathsTest {
 
     @Test(expectedExceptions = ApiValidationException.class)
     public void testEmptyPaths() {
-        Paths.paths(SimplePathNode.class).build();
-    }
-
-    /**
-     * Simple {@link PathNode} class used for unit tests.
-     */
-    private static class SimplePathNode implements PathNode {
-        // empty
+        Paths.paths().build();
     }
 
 }

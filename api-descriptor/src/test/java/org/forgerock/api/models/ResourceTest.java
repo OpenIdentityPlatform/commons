@@ -171,7 +171,7 @@ public class ResourceTest {
 
     @Test
     public void testSimpleAnnotatedHandler() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(SimpleAnnotatedHandler.class, false, descriptor);
         assertThat(resource.getResourceSchema()).isNull();
         assertThat(resource.getActions()).hasSize(1);
@@ -194,7 +194,7 @@ public class ResourceTest {
 
     @Test
     public void testReferencedSchema() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(ReferencedSchemaHandler.class, false, descriptor);
         assertThat(resource.getRead()).isNotNull();
         assertThat(resource.getResourceSchema()).isNotNull();
@@ -215,7 +215,7 @@ public class ResourceTest {
 
     @Test
     public void testReferencedError() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(ReferencedErrorHandler.class, false, descriptor);
         assertThat(resource.getRead()).isNotNull();
         assertThat(resource.getRead().getErrors()).hasSize(1);
@@ -238,7 +238,7 @@ public class ResourceTest {
 
     @Test
     public void testCreateAnnotatedHandler() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(CreateAnnotatedHandler.class, false, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getCreate()).isNotNull();
@@ -281,7 +281,7 @@ public class ResourceTest {
 
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testResourceSchemaRequiredForCrudpq() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         Resource.fromAnnotatedType(ResourceSchemaRequiredAnnotatedHandler.class, false, descriptor);
     }
 
@@ -299,7 +299,7 @@ public class ResourceTest {
 
     @Test
     public void testReadAnnotatedHandler() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(ReadAnnotatedHandler.class, false, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getRead()).isNotNull();
@@ -325,7 +325,7 @@ public class ResourceTest {
 
     @Test
     public void testUpdateAnnotatedHandler() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(UpdateAnnotatedHandler.class, false, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getUpdate()).isNotNull();
@@ -353,7 +353,7 @@ public class ResourceTest {
 
     @Test
     public void testDeleteAnnotatedHandler() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(DeleteAnnotatedHandler.class, false, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getDelete()).isNotNull();
@@ -381,7 +381,7 @@ public class ResourceTest {
 
     @Test
     public void testPatchAnnotatedHandler() throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(PatchAnnotatedHandler.class, false, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getPatch()).isNotNull();
@@ -417,7 +417,7 @@ public class ResourceTest {
 
     @Test(dataProvider = "actionAnnotations")
     public void testActionAnnotatedHandler(Class<?> type) throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(type, false, descriptor);
         assertThat(resource.getResourceSchema()).isNull();
         assertThat(resource.getActions()).isNotNull();
@@ -553,7 +553,7 @@ public class ResourceTest {
 
     @Test(dataProvider = "queryAnnotations")
     public void testQueryAnnotatedHandler(Class<?> type) throws Exception {
-        ApiDescription<?> descriptor = ApiDescription.apiDescription().id("frapi:test").build();
+        ApiDescription descriptor = ApiDescription.apiDescription().id("frapi:test").build();
         final Resource resource = Resource.fromAnnotatedType(type, false, descriptor);
         assertThat(resource.getQueries()).isNotNull();
         assertThat(resource.getQueries()).hasSize(2);

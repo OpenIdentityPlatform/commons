@@ -105,7 +105,7 @@ public final class Create extends Operation {
      * @return Create instance
      */
     public static Create fromAnnotation(org.forgerock.api.annotations.Create create, boolean instanceOperations,
-            ApiDescription<?> descriptor, Class<?> relativeType) {
+            ApiDescription descriptor, Class<?> relativeType) {
         List<CreateMode> modes = Arrays.asList(create.modes());
         if ((instanceOperations && !modes.contains(ID_FROM_CLIENT))
                 || (!instanceOperations && !modes.contains(ID_FROM_SERVER))) {

@@ -108,7 +108,7 @@ public final class Action extends Operation implements Comparable<Action> {
      * @return Action instance.
      */
     public static Action fromAnnotation(org.forgerock.api.annotations.Action action, Method annotated,
-            ApiDescription<?> descriptor, Class<?> relativeType) {
+            ApiDescription descriptor, Class<?> relativeType) {
         Builder builder = action();
         String specifiedName = action.name();
         if (Strings.isNullOrEmpty(specifiedName)) {

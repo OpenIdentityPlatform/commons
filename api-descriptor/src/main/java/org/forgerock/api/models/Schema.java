@@ -124,7 +124,7 @@ public final class Schema {
      * @param relativeType The type relative to which schema resources should be resolved.
      * @return Schema instance
      */
-    public static Schema fromAnnotation(org.forgerock.api.annotations.Schema schema, ApiDescription<?> descriptor,
+    public static Schema fromAnnotation(org.forgerock.api.annotations.Schema schema, ApiDescription descriptor,
             Class<?> relativeType) {
         Class<?> type = schema.fromType();
         if (type.equals(Void.class) && Strings.isNullOrEmpty(schema.schemaResource())) {

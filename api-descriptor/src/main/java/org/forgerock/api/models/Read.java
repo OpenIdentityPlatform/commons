@@ -55,7 +55,7 @@ public final class Read extends Operation {
      * @param relativeType The type relative to which schema resources should be resolved.
      * @return Read instance
      */
-    public static Read fromAnnotation(org.forgerock.api.annotations.Read read, ApiDescription<?> descriptor,
+    public static Read fromAnnotation(org.forgerock.api.annotations.Read read, ApiDescription descriptor,
             Class<?> relativeType) {
         return read()
                 .detailsFromAnnotation(read.operationDescription(), descriptor, relativeType)

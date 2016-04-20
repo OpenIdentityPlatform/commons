@@ -18,7 +18,8 @@ var imports = JavaImporter(
     Packages.org.forgerock.api.models,
     org.forgerock.json.JsonValue,
     com.fasterxml.jackson.databind.ObjectMapper,
-    com.fasterxml.jackson.annotation.JsonInclude);
+    com.fasterxml.jackson.annotation.JsonInclude,
+    org.forgerock.http.routing.Version);
 
 with (imports) {
     var jsonValue = JsonValue.json(JsonValue.object());
@@ -45,15 +46,15 @@ with (imports) {
         .build();
 
     var versionedPath = VersionedPath.versionedPath()
-        .put("1.0", resourceV1)
-        .put("2.0", resourceV2)
+        .put(Version.version(1), resourceV1)
+        .put(Version.version(2), resourceV2)
         .build();
 
-    var paths = Paths.paths(VersionedPath)
+    var paths = Paths.paths()
         .put("/testPath", versionedPath)
         .build();
 
-    var apiDescription = ApiDescription.apiDescriptionWithVersionedPaths()
+    var apiDescription = ApiDescription.apiDescription()
         .id("frapi:test")
         .paths(paths)
         .build();

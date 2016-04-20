@@ -16,9 +16,6 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.util.ValidationUtil.containsWhitespace;
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,20 +23,33 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.forgerock.api.ApiValidationException;
+import org.forgerock.http.routing.Version;
 import org.forgerock.util.Reject;
 
 /**
  * Class that represents versioned {@link Resource}s on an API descriptor path.
  */
-public final class VersionedPath implements PathNode {
+public final class VersionedPath {
 
-    private final Map<String, Resource> paths;
+    /**
+     * Version {@code 0.0} represents null/empty, for when resource versions are not required by an API (e.g., OpenIDM).
+     */
+    public static final Version UNVERSIONED = Version.version(0);
+
+    private final Map<Version, Resource> paths;
 
     private VersionedPath(Builder builder) {
         this.paths = builder.paths;
 
         if (paths.isEmpty()) {
             throw new ApiValidationException("Must have at least one versioned resource");
+        }
+        if (paths.size() > 1) {
+            for (final Version version : paths.keySet()) {
+                if (UNVERSIONED.equals(version)) {
+                    throw new ApiValidationException("Version 0.0 (unversioned) must be the only version when used");
+                }
+            }
         }
     }
 
@@ -49,7 +59,7 @@ public final class VersionedPath implements PathNode {
      * @return {@code Map} of versions to {@link Resource}s.
      */
     @JsonValue
-    protected Map<String, Resource> getPaths() {
+    protected Map<Version, Resource> getPaths() {
         return paths;
     }
 
@@ -60,7 +70,7 @@ public final class VersionedPath implements PathNode {
      * @return {@link Resource} or {@code null} if does-not-exist.
      */
     @JsonIgnore
-    public Resource get(String version) {
+    public Resource get(Version version) {
         return paths.get(version);
     }
 
@@ -70,7 +80,7 @@ public final class VersionedPath implements PathNode {
      * @return All resource-versions.
      */
     @JsonIgnore
-    public Set<String> getVersions() {
+    public Set<Version> getVersions() {
         return paths.keySet();
     }
 
@@ -88,7 +98,7 @@ public final class VersionedPath implements PathNode {
      */
     public static final class Builder {
 
-        private final Map<String, Resource> paths = new HashMap<>();
+        private final Map<Version, Resource> paths = new HashMap<>();
 
         /**
          * Private default constructor.
@@ -103,15 +113,11 @@ public final class VersionedPath implements PathNode {
          * @param resource {@link Resource}
          * @return Builder
          */
-        public Builder put(String version, Resource resource) {
-            // TODO can we agree on a regex to validate `version`?
-            if (isEmpty(version) || containsWhitespace(version)) {
-                throw new IllegalArgumentException("version required and may not contain whitespace");
-            }
+        public Builder put(Version version, Resource resource) {
             if (paths.containsKey(version)) {
                 throw new IllegalStateException("version not unique");
             }
-            paths.put(version, Reject.checkNotNull(resource));
+            paths.put(Reject.checkNotNull(version), Reject.checkNotNull(resource));
             return this;
         }
 

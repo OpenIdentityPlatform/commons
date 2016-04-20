@@ -20,18 +20,16 @@ import org.forgerock.api.ApiValidationException;
 
 /**
  * Class that represents the ApiDescription type in API descriptor.
- *
- * @param <T> Type implements {@link PathNode}
  */
-public final class ApiDescription<T extends PathNode> {
+public final class ApiDescription {
 
     private String id;
     private String description;
     private Definitions definitions;
     private Errors errors;
-    private Paths<T> paths;
+    private Paths paths;
 
-    private ApiDescription(Builder<T> builder) {
+    private ApiDescription(Builder builder) {
         this.id = builder.id;
         this.description = builder.description;
         this.definitions = builder.definitions == null ? Definitions.definitions().build() : builder.definitions;
@@ -87,7 +85,7 @@ public final class ApiDescription<T extends PathNode> {
      *
      * @return Paths
      */
-    public Paths<T> getPaths() {
+    public Paths getPaths() {
         return paths;
     }
 
@@ -96,31 +94,20 @@ public final class ApiDescription<T extends PathNode> {
      *
      * @return Builder
      */
-    public static Builder<VersionedPath> apiDescriptionWithVersionedPaths() {
-        return new Builder<>();
-    }
-
-    /**
-     * Create a new Builder for ApiDescription.
-     *
-     * @return Builder
-     */
-    public static Builder<Resource> apiDescription() {
-        return new Builder<>();
+    public static Builder apiDescription() {
+        return new Builder();
     }
 
     /**
      * Builder for the ApiDescription.
-     *
-     * @param <T2> Type implements {@link PathNode}
      */
-    public static final class Builder<T2 extends PathNode> {
+    public static final class Builder {
 
         private String id;
         private String description;
         private Definitions definitions;
         private Errors errors;
-        private Paths<T2> paths;
+        private Paths paths;
 
         /**
          * Private default constructor with the mandatory fields.
@@ -134,7 +121,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param id ApiDescription id
          * @return Builder
          */
-        public Builder<T2> id(String id) {
+        public Builder id(String id) {
             this.id = id;
             return this;
         }
@@ -145,7 +132,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param description Description of API Description
          * @return Builder
          */
-        public Builder<T2> description(String description) {
+        public Builder description(String description) {
             this.description = description;
             return this;
         }
@@ -156,7 +143,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param definitions Definitions for this API Description
          * @return Builder
          */
-        public Builder<T2> definitions(Definitions definitions) {
+        public Builder definitions(Definitions definitions) {
             this.definitions = definitions;
             return this;
         }
@@ -167,7 +154,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param errors Errors for this API Description
          * @return Builder
          */
-        public Builder<T2> errors(Errors errors) {
+        public Builder errors(Errors errors) {
             this.errors = errors;
             return this;
         }
@@ -178,7 +165,7 @@ public final class ApiDescription<T extends PathNode> {
          * @param paths Paths
          * @return Builder
          */
-        public Builder<T2> paths(Paths<T2> paths) {
+        public Builder paths(Paths paths) {
             this.paths = paths;
             return this;
         }
@@ -188,8 +175,8 @@ public final class ApiDescription<T extends PathNode> {
          *
          * @return ApiDescription instance
          */
-        public ApiDescription<T2> build() {
-            return new ApiDescription<>(this);
+        public ApiDescription build() {
+            return new ApiDescription(this);
         }
     }
 

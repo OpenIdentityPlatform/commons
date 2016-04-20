@@ -30,14 +30,12 @@ import org.forgerock.util.Reject;
 
 /**
  * Class that represents the Paths type in API descriptor.
- *
- * @param <T> Type implements {@link PathNode}
  */
-public final class Paths<T extends PathNode> {
+public final class Paths {
 
-    private final Map<String, T> paths;
+    private final Map<String, VersionedPath> paths;
 
-    private Paths(Builder<T> builder) {
+    private Paths(Builder builder) {
         this.paths = builder.paths;
 
         if (paths.isEmpty()) {
@@ -51,7 +49,7 @@ public final class Paths<T extends PathNode> {
      * @return {@code Map} of path-names to Paths.
      */
     @JsonValue
-    protected Map<String, T> getPaths() {
+    protected Map<String, VersionedPath> getPaths() {
         return paths;
     }
 
@@ -62,7 +60,7 @@ public final class Paths<T extends PathNode> {
      * @return Path or {@code null} if does-not-exist.
      */
     @JsonIgnore
-    public T get(String name) {
+    public VersionedPath get(String name) {
         return paths.get(name);
     }
 
@@ -79,22 +77,18 @@ public final class Paths<T extends PathNode> {
     /**
      * Create a new Builder for Paths.
      *
-     * @param <T3> Type implements {@link PathNode}
-     * @param pathNodeClass {@code Class} of the {@link PathNode} implementation being used
      * @return Builder
      */
-    public static <T3 extends PathNode> Builder<T3> paths(Class<T3> pathNodeClass) {
-        return new Builder<>();
+    public static Builder paths() {
+        return new Builder();
     }
 
     /**
      * Builder to help construct the Paths.
-     *
-     * @param <T2> Type implements {@link PathNode}
      */
-    public static final class Builder<T2 extends PathNode> {
+    public static final class Builder {
 
-        private final Map<String, T2> paths = new HashMap<>();
+        private final Map<String, VersionedPath> paths = new HashMap<>();
 
         /**
          * Private default constructor.
@@ -109,7 +103,7 @@ public final class Paths<T extends PathNode> {
          * @param path Path
          * @return Builder
          */
-        public Builder<T2> put(String name, T2 path) {
+        public Builder put(String name, VersionedPath path) {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");
             }
@@ -125,8 +119,8 @@ public final class Paths<T extends PathNode> {
          *
          * @return Paths instance
          */
-        public Paths<T2> build() {
-            return new Paths<>(this);
+        public Paths build() {
+            return new Paths(this);
         }
     }
 

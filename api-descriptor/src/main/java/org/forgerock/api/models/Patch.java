@@ -88,7 +88,7 @@ public final class Patch extends Operation {
      * @param relativeType The type relative to which schema resources should be resolved.
      * @return Patch instance
      */
-    public static Patch fromAnnotation(org.forgerock.api.annotations.Patch patch, ApiDescription<?> descriptor,
+    public static Patch fromAnnotation(org.forgerock.api.annotations.Patch patch, ApiDescription descriptor,
             Class<?> relativeType) {
         return patch()
                 .detailsFromAnnotation(patch.operationDescription(), descriptor, relativeType)

@@ -19,6 +19,7 @@ package org.forgerock.api.markup;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.http.routing.Version.version;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.JsonValue.object;
 
@@ -95,7 +96,7 @@ public class ApiDocGeneratorTest {
     }
 
     @Test
-    public void testExecute() throws Exception {
+    public void testExecuteWithUnversionedPaths() throws Exception {
         final Path testOutputDirPath = outputDirPath.resolve("testExecute");
         final ApiDescription apiDescription = createApiDescription(false);
         final ApiDocGenerator apiDocGenerator = new ApiDocGenerator(testOutputDirPath);
@@ -296,35 +297,28 @@ public class ApiDocGeneratorTest {
                 .put("internalServerError", Error.error().code(500).description("Internal Server Error").build())
                 .build();
 
+        final VersionedPath versionedPath;
         if (versioned) {
-            final VersionedPath versionedPath = VersionedPath.versionedPath()
-                    .put("1.0", resourceV1)
-                    .put("2.0", resourceV2)
-                    .build();
-
-            final Paths<VersionedPath> paths = Paths.paths(VersionedPath.class)
-                    .put("/testPath", versionedPath)
-                    .build();
-            return ApiDescription.apiDescriptionWithVersionedPaths()
-                    .id("frapi:test")
-                    .description(DEFAULT_API_DESCRIPTION)
-                    .definitions(definitions)
-                    .paths(paths)
-                    .errors(errors)
+            versionedPath = VersionedPath.versionedPath()
+                    .put(version(1), resourceV1)
+                    .put(version(2), resourceV2)
                     .build();
         } else {
-            final Paths<Resource> paths = Paths.paths(Resource.class)
-                    .put("/testPath", resourceV1)
-                    .build();
-            return ApiDescription.apiDescription()
-                    .id("frapi:test")
-                    .description(DEFAULT_API_DESCRIPTION)
-                    .definitions(definitions)
-                    .paths(paths)
-                    .errors(errors)
+            versionedPath = VersionedPath.versionedPath()
+                    .put(VersionedPath.UNVERSIONED, resourceV1)
                     .build();
         }
 
+        final Paths paths = Paths.paths()
+                .put("/testPath", versionedPath)
+                .build();
+        return ApiDescription.apiDescription()
+                .id("frapi:test")
+                .description(DEFAULT_API_DESCRIPTION)
+                .definitions(definitions)
+                .paths(paths)
+                .errors(errors)
+                .build();
     }
 
 }

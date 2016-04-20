@@ -73,7 +73,7 @@ public final class Delete extends Operation {
      * @param relativeType The type relative to which schema resources should be resolved.
      * @return Delete instance
      */
-    public static Delete fromAnnotation(org.forgerock.api.annotations.Delete delete, ApiDescription<?> descriptor,
+    public static Delete fromAnnotation(org.forgerock.api.annotations.Delete delete, ApiDescription descriptor,
             Class<?> relativeType) {
         return delete()
                 .detailsFromAnnotation(delete.operationDescription(), descriptor, relativeType)

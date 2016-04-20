@@ -16,6 +16,7 @@
 
 package org.forgerock.api.models;
 
+import static org.forgerock.http.routing.Version.version;
 import static org.forgerock.json.JsonValue.*;
 
 import org.testng.annotations.Test;
@@ -78,11 +79,11 @@ public class ApiDescriptionTest {
                 .build();
 
         final VersionedPath versionedPath = VersionedPath.versionedPath()
-                .put("1.0", resourceV1)
-                .put("2.0", resourceV2)
+                .put(version(1), resourceV1)
+                .put(version(2), resourceV2)
                 .build();
 
-        final Paths<VersionedPath> paths = Paths.paths(VersionedPath.class)
+        final Paths paths = Paths.paths()
                 .put("/testPath", versionedPath)
                 .build();
 
@@ -90,7 +91,7 @@ public class ApiDescriptionTest {
                 .put("def", schema)
                 .build();
 
-        final ApiDescription apiDescription = ApiDescription.apiDescriptionWithVersionedPaths()
+        final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .id("frapi:test")
                 .description("My Description")
                 .definitions(definitions)

@@ -33,7 +33,7 @@ import java.util.TreeSet;
 /**
  * Class that represents the Resource type in API descriptor.
  */
-public final class Resource implements PathNode {
+public final class Resource {
     private final Schema resourceSchema;
     private final String description;
     private final Create create;
@@ -158,7 +158,7 @@ public final class Resource implements PathNode {
      * @param descriptor The root descriptor to add definitions to.
      * @return The built {@code Resource} object.
      */
-    public static Resource fromAnnotatedType(Class<?> type, boolean instanceOperations, ApiDescription<?> descriptor) {
+    public static Resource fromAnnotatedType(Class<?> type, boolean instanceOperations, ApiDescription descriptor) {
         Builder builder = resource();
         RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
         if (requestHandler == null) {

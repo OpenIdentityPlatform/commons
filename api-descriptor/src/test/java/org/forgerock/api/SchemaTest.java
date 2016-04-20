@@ -18,12 +18,15 @@ package org.forgerock.api;
 import org.forgerock.api.markdown.MarkdownReader;
 import org.forgerock.api.markdown.PropertyRecord;
 import org.forgerock.api.markdown.TypeDescriptor;
+import org.forgerock.http.routing.Version;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Tests the beans and builders against the markdown document
@@ -37,6 +40,9 @@ public class SchemaTest {
     private List<TypeDescriptor> typeDescriptors;
     private static final String NO_SUCH_METHOD_EXCEPTION_MESSAGE = "# %s(%s) method not available in the schema.";
     private static final String MAP_PARAMETER_TYPE_MESSAGE = "java.util.Map<java.lang.String,%s>";
+    private static final Map<String, Class<?>> MAP_KEY_TYPES = new HashMap<String, Class<?>>() { {
+            put("VersionedPath", Version.class);
+        } };
 
     @BeforeTest
     public void before() {
@@ -59,11 +65,7 @@ public class SchemaTest {
                 MarkdownReader.API_DESCRIPTION_BEANS_PACKAGE + typeDescriptor.getName() + "$Builder");
         Method[] methods = builderClass.getMethods();
         checkSuperclass(typeDescriptor);
-        try {
-            assertThat(checkMethodNamesAndParameters(methods, typeDescriptor.getProperties()));
-        } catch (NoSuchMethodException nsme) {
-            throw new NoSuchMethodException(typeDescriptor.getName() + " " + nsme.getMessage());
-        }
+        assertThat(checkMethodNamesAndParameters(methods, typeDescriptor.getProperties()));
     }
 
     private void checkSuperclass(TypeDescriptor typeDescriptor) throws ClassNotFoundException {
@@ -130,10 +132,11 @@ public class SchemaTest {
     }
 
     private boolean isValidMapType(Method method, String type) throws ClassNotFoundException {
-        return method.getParameterTypes()[0].getName().equals(String.class.getName())
+        Class<?> keyType = MAP_KEY_TYPES.get(method.getDeclaringClass().getEnclosingClass().getSimpleName());
+        return method.getParameterTypes()[0].getName().equals((keyType == null ? String.class : keyType).getName())
                 && (method.getParameterTypes()[1].getName().equals(type)
-                    || method.getParameterTypes()[1].getName().equals(
-                        Class.forName(type).getInterfaces()[0].getName()));
+                || method.getParameterTypes()[1].getName().equals(
+                Class.forName(type).getInterfaces()[0].getName()));
     }
 
     private Method findMethod(Method[] methods, String key) {

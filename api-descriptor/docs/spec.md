@@ -82,14 +82,13 @@ $ref        | String                      | ✓          | A JSON Reference ($re
 ### Paths
 
 A path supported by the API being described. Paths may contain the names of Path [Parameter](#Parameter)s, contained
-in curly braces. Paths _must_ contain at least one _VersionedPath_ or _Resource_.
+in curly braces. Paths _must_ contain at least one _VersionedPath_.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 `*`         | [VersionedPath](#VersionedPath) |        | A mapping of path string to VersionedPath definition.
-`*`         | [Resource](#Resource)       |            | Resources mapped to a path, without a version.
 
 ### VersionedPath
 
@@ -199,7 +198,7 @@ The schema for an error response is:
       "description" : "Detailed error message."
     },
     "cause" : {
-      "$ref" : "frapi :error : default"
+      "$ref" : "frapi:error:default"
     }
   }
 }

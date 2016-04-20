@@ -142,7 +142,7 @@ public final class Query extends Operation implements Comparable<Query> {
      * @return Query instance
      */
     public static Query fromAnnotation(org.forgerock.api.annotations.Query query, Method annotated,
-            ApiDescription<?> descriptor, Class<?> relativeType) {
+            ApiDescription descriptor, Class<?> relativeType) {
         String queryId = query.id();
         if (query.type() == QueryType.ID && Strings.isNullOrEmpty(queryId)) {
             if (annotated == null) {

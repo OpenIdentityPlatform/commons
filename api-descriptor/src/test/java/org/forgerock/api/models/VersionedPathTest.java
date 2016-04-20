@@ -18,10 +18,12 @@ package org.forgerock.api.models;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.forgerock.http.routing.Version.version;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
 import org.forgerock.api.ApiValidationException;
+import org.forgerock.http.routing.Version;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -59,27 +61,25 @@ public class VersionedPathTest {
     public Object[][] putValidationData() {
         return new Object[][]{
                 {null, null, Exception.class},
-                {null, resourceV2, IllegalArgumentException.class},
-                {"", resourceV2, IllegalArgumentException.class},
-                {"\t", resourceV2, IllegalArgumentException.class},
-                {"contains space", resourceV2, IllegalArgumentException.class},
-                {"2.0", null, NullPointerException.class},
-                {"1.0", resourceV2, IllegalStateException.class},
-                {"2.0", resourceV2, null},
+                {null, resourceV2, NullPointerException.class},
+                {version(2), null, NullPointerException.class},
+                {version(1), resourceV2, IllegalStateException.class},
+                {VersionedPath.UNVERSIONED, resourceV2, ApiValidationException.class},
+                {version(2), resourceV2, null},
         };
     }
 
     @Test(dataProvider = "putValidationData")
-    public void testPut(final String name, final Resource resource,
+    public void testPut(final Version version, final Resource resource,
             final Class<? extends Throwable> expectedException) {
         final VersionedPath.Builder builder = VersionedPath.versionedPath();
 
         // add a version, so that we can test for version-uniqueness
-        builder.put("1.0", resourceV1);
+        builder.put(version(1), resourceV1);
 
         final VersionedPath versionedPath;
         try {
-            builder.put(name, resource);
+            builder.put(version, resource);
             versionedPath = builder.build();
         } catch (final Exception e) {
             if (expectedException != null) {
@@ -92,8 +92,8 @@ public class VersionedPathTest {
             failBecauseExceptionWasNotThrown(expectedException);
         }
 
-        assertThat(versionedPath.get("2.0")).isNotNull();
-        assertThat(versionedPath.getVersions()).contains("2.0", "1.0");
+        assertThat(versionedPath.get(version(2))).isNotNull();
+        assertThat(versionedPath.getVersions()).contains(version(2), version(1));
         assertThat(versionedPath.getPaths()).isNotEmpty();
     }
 

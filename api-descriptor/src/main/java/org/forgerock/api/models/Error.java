@@ -140,7 +140,7 @@ public final class Error {
      * @param relativeType The type relative to which schema resources should be resolved.
      * @return Error instance
      */
-    public static Error fromAnnotation(org.forgerock.api.annotations.Error error, ApiDescription<?> descriptor,
+    public static Error fromAnnotation(org.forgerock.api.annotations.Error error, ApiDescription descriptor,
             Class<?> relativeType) {
         Error errorDefinition = error()
                 .description(error.description())

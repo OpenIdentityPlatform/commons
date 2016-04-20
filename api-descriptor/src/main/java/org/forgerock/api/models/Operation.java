@@ -253,7 +253,7 @@ public abstract class Operation {
          * @return Builder
          */
         public T detailsFromAnnotation(org.forgerock.api.annotations.Operation operation,
-                ApiDescription<?> descriptor, Class<?> relativeType) {
+                ApiDescription descriptor, Class<?> relativeType) {
             for (org.forgerock.api.annotations.Error error : operation.errors()) {
                 error(Error.fromAnnotation(error, descriptor, relativeType));
             }

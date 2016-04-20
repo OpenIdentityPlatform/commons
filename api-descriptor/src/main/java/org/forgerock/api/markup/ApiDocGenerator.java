@@ -61,6 +61,7 @@ import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.Schema;
 import org.forgerock.api.models.Update;
 import org.forgerock.api.models.VersionedPath;
+import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
 
 /**
@@ -126,26 +127,10 @@ public class ApiDocGenerator {
      *
      * @param apiDescription API Description
      */
-    @SuppressWarnings("unchecked")
     public void execute(final ApiDescription apiDescription) {
         final String namespace = apiDescription.getId();
         try {
-            // output paths with or without versions
-            String pathsFilename = null;
-            if (apiDescription.getPaths() != null) {
-                try {
-                    pathsFilename = outputPaths((Paths<Resource>) apiDescription.getPaths(), namespace);
-                } catch (ClassCastException e1) {
-                    try {
-                        pathsFilename = outputVersionedPaths((Paths<VersionedPath>) apiDescription.getPaths(),
-                                namespace);
-                    } catch (ClassCastException e2) {
-                        throw new ApiDocGeneratorException(
-                                "Unsupported Paths type: " + apiDescription.getPaths().getClass().getName());
-                    }
-                }
-            }
-
+            final String pathsFilename = outputPaths(apiDescription.getPaths(), namespace);
             final String errorsFilename = outputErrors(apiDescription.getErrors(), namespace);
             final String definitionsFilename = outputDefinitions(apiDescription.getDefinitions(), namespace);
             outputRoot(apiDescription, pathsFilename, definitionsFilename, errorsFilename, namespace);
@@ -221,44 +206,6 @@ public class ApiDocGenerator {
     }
 
     /**
-     * Outputs an AsciiDoc file for each path, and another file that imports each path.
-     *
-     * @param paths Paths
-     * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
-     * @throws IOException Unable to output AsciiDoc file
-     */
-    private String outputPaths(final Paths<Resource> paths, final String parentNamespace) throws IOException {
-        final String allPathsDocNamespace = normalizeName(parentNamespace, "paths");
-        final AsciiDoc allPathsDoc = asciiDoc()
-                .sectionTitle1("Paths");
-        final List<String> pathNames = new ArrayList<>(paths.getNames());
-        Collections.sort(pathNames);
-        for (final String pathName : pathNames) {
-            // path
-            final String pathDocNamespace = normalizeName(allPathsDocNamespace, pathName);
-            final AsciiDoc pathDoc = asciiDoc()
-                    .sectionTitle2(asciiDoc().mono(pathName).toString());
-
-            // resource
-            final String resourceImport = outputResource(paths.get(pathName), 3, pathDocNamespace);
-            pathDoc.include(resourceImport);
-
-            // output path-file
-            final String pathDocFilename = pathDocNamespace + ADOC_EXTENSION;
-            pathDoc.toFile(outputDirPath, pathDocFilename);
-
-            // include path-file
-            allPathsDoc.include(pathDocFilename);
-        }
-
-        // output all-paths-file
-        final String filename = allPathsDocNamespace + ADOC_EXTENSION;
-        allPathsDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
-
-    /**
      * Outputs an AsciiDoc file for each path, which imports a file for each version under that path, and another
      * file that imports each path.
      *
@@ -267,7 +214,7 @@ public class ApiDocGenerator {
      * @return File path suitable for AsciiDoc import-statement
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputVersionedPaths(final Paths<VersionedPath> paths, final String parentNamespace)
+    private String outputPaths(final Paths paths, final String parentNamespace)
             throws IOException {
         final String allPathsDocNamespace = normalizeName(parentNamespace, "paths");
         final AsciiDoc allPathsDoc = asciiDoc()
@@ -282,32 +229,47 @@ public class ApiDocGenerator {
                     .sectionTitle2(asciiDoc().mono(pathName).toString());
 
             final VersionedPath versionedPath = paths.get(pathName);
-            final List<String> versions = new ArrayList<>(versionedPath.getVersions());
-            Collections.sort(versions);
-            for (final String versionName : versions) {
-                // version
-                final String versionDocNamespace = normalizeName(pathDocNamespace, versionName);
-                final AsciiDoc versionDoc = asciiDoc()
-                        .sectionTitle3(asciiDoc().mono(versionName).toString());
+            final List<Version> versions = new ArrayList<>(versionedPath.getVersions());
+            if (versions.size() == 1 && VersionedPath.UNVERSIONED.equals(versions.get(0))) {
+                // resources are unversioned, so do not output version in docs
+                final Resource resource = versionedPath.get(VersionedPath.UNVERSIONED);
+                final String resourceImport = outputResource(resource, 3, pathDocNamespace);
+                pathDoc.include(resourceImport);
 
-                // resource
-                final String resourceImport = outputResource(versionedPath.get(versionName), 4, versionDocNamespace);
-                versionDoc.include(resourceImport);
+                // output path-file
+                final String pathDocFilename = pathDocNamespace + ADOC_EXTENSION;
+                pathDoc.toFile(outputDirPath, pathDocFilename);
 
-                // output version-file
-                final String versionDocFilename = versionDocNamespace + ADOC_EXTENSION;
-                versionDoc.toFile(outputDirPath, versionDocFilename);
+                // include path-file
+                allPathsDoc.include(pathDocFilename);
+            } else {
+                Collections.sort(versions);
+                for (final Version version : versions) {
+                    // version
+                    final String versionName = version.toString();
+                    final String versionDocNamespace = normalizeName(pathDocNamespace, versionName);
+                    final AsciiDoc versionDoc = asciiDoc()
+                            .sectionTitle3(asciiDoc().mono(versionName).toString());
 
-                // include version-file
-                pathDoc.include(versionDocFilename);
+                    // resource
+                    final String resourceImport = outputResource(versionedPath.get(version), 4, versionDocNamespace);
+                    versionDoc.include(resourceImport);
+
+                    // output version-file
+                    final String versionDocFilename = versionDocNamespace + ADOC_EXTENSION;
+                    versionDoc.toFile(outputDirPath, versionDocFilename);
+
+                    // include version-file
+                    pathDoc.include(versionDocFilename);
+                }
+
+                // output path-file
+                final String pathDocFilename = pathDocNamespace + ADOC_EXTENSION;
+                pathDoc.toFile(outputDirPath, pathDocFilename);
+
+                // include path-file
+                allPathsDoc.include(pathDocFilename);
             }
-
-            // output path-file
-            final String pathDocFilename = pathDocNamespace + ADOC_EXTENSION;
-            pathDoc.toFile(outputDirPath, pathDocFilename);
-
-            // include path-file
-            allPathsDoc.include(pathDocFilename);
         }
 
         // output all-paths-file
