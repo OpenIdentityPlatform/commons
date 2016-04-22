@@ -4,6 +4,7 @@
 
 ### Bug Fixes
 * CAUD-331: Disabled handlers should not utilize services until enabled.
+* CAUD-333: NPE when connection wasn't established with unhelpful error messages.
 
 # 6.1.0
 

@@ -101,12 +101,14 @@ class JmsResourceManager {
      * @throws JMSException
      */
     public void closeConnection() throws JMSException {
-        try {
-            connection.close();
-            logger.debug("JMS Connection closed");
-        } finally {
-            // Set to null too allow for early garbage collection, rather than waiting for next openConnection.
-            connection = null;
+        if (null != connection) {
+            try {
+                connection.close();
+                logger.debug("JMS Connection closed");
+            } finally {
+                // Set to null too allow for early garbage collection, rather than waiting for next openConnection.
+                connection = null;
+            }
         }
     }
 
@@ -122,7 +124,7 @@ class JmsResourceManager {
     public Session createSession() throws JMSException {
         if (null == connection) {
             throw new IllegalStateException(
-                    "JMS Connection not available to create session. Check coding logic that a connection is opened.");
+                    "JMS Connection not available to create session. The JMS Audit Service requires a restart.");
         }
         return connection.createSession(false, sessionMode.getMode());
     }
