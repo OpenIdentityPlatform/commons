@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.test.assertj;
@@ -35,7 +35,12 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AbstractAssertJPromiseAssert;
 
-public class AssertJJsonValueAssert {
+/** Main that will provide the assertions on {@link JsonValue}. */
+public final class AssertJJsonValueAssert {
+
+    private AssertJJsonValueAssert() {
+        // Prevent from instantiating
+    }
 
     /**
      * Creates the relevant {@code AbstractJsonValueAssert} instance for the provided {@link JsonValue}.
@@ -69,15 +74,15 @@ public class AssertJJsonValueAssert {
     /**
      * An alias for {@link #assertThat(Promise)} for the case where different Promise assertThat methods
      * are statically imported and would clash.
+     * @param promise The {@link JsonValue} promise.
+     * @return The assertion object.
      */
     public static AssertJJsonValuePromiseAssert assertThatJsonValue(Promise<JsonValue, ?> promise) {
         return assertThat(promise);
     }
 
-    /**
-     * An assertion class for promises that return {@code JsonValue}s.
-     */
-    public static class AssertJJsonValuePromiseAssert
+    /** An assertion class for promises that return {@code JsonValue}s. */
+    public static final class AssertJJsonValuePromiseAssert
             extends AbstractAssertJPromiseAssert<JsonValue, AssertJJsonValuePromiseAssert, PromisedJsonValueAssert> {
 
         private AssertJJsonValuePromiseAssert(Promise<JsonValue, ?> promise) {
@@ -90,7 +95,12 @@ public class AssertJJsonValueAssert {
         }
     }
 
-    public static abstract class AbstractJsonValueAssert<T extends AbstractAssert<T, JsonValue>> extends AbstractAssert<T, JsonValue> {
+    /**
+     * Abstract class for assertions on {@link JsonValue}.
+     * @param <T> the assertion class
+     */
+    public static abstract class AbstractJsonValueAssert<T extends AbstractAssert<T, JsonValue>>
+            extends AbstractAssert<T, JsonValue> {
 
         private AbstractJsonValueAssert(Class<T> type, JsonValue value) {
             super(value, type);
@@ -231,7 +241,8 @@ public class AssertJJsonValueAssert {
         }
 
         /**
-         * Get a {@link AbstractCharSequenceAssert} for the referenced {@link JsonValue} is a string, to check its value.
+         * Get a {@link AbstractCharSequenceAssert} for the referenced {@link JsonValue} is a string, to check its
+         * value.
          * @param path The {@link JsonPointer} path to the expected value.
          * @return This {@link AbstractCharSequenceAssert} instance.
          */
@@ -326,13 +337,15 @@ public class AssertJJsonValueAssert {
 
     }
 
-    public static class PromisedJsonValueAssert extends AbstractJsonValueAssert<PromisedJsonValueAssert> {
-        public PromisedJsonValueAssert(JsonValue value) {
+    /** Class for assertions on {@link JsonValue} promises. */
+    public static final class PromisedJsonValueAssert extends AbstractJsonValueAssert<PromisedJsonValueAssert> {
+        private PromisedJsonValueAssert(JsonValue value) {
             super(PromisedJsonValueAssert.class, value);
         }
     }
 
-    public static class ObjectJsonValueAssert extends AbstractJsonValueAssert<ObjectJsonValueAssert> {
+    /** Class for assertions on object {@link JsonValue}. */
+    public static final class ObjectJsonValueAssert extends AbstractJsonValueAssert<ObjectJsonValueAssert> {
 
         private AbstractMapAssert<?, ? extends Map<String, Object>, String, Object> mapAssert;
 
@@ -439,7 +452,8 @@ public class AssertJJsonValueAssert {
 
     }
 
-    public static class ArrayJsonValueAssert extends AbstractJsonValueAssert<ArrayJsonValueAssert> {
+    /** Class for assertions on array {@link JsonValue}. */
+    public static final class ArrayJsonValueAssert extends AbstractJsonValueAssert<ArrayJsonValueAssert> {
         private AbstractListAssert<?, ? extends List<?>, Object> listAssert;
 
         private ArrayJsonValueAssert(JsonValue value) {

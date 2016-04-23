@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.util.test.assertj;
@@ -40,6 +40,7 @@ import org.forgerock.util.promise.Promise;
 /**
  * Assertion class for a promise. Allows verification of the value that was completed with.
  */
+//@Checkstyle:ignoreFor 2
 public final class AssertJPromiseAssert
         extends AbstractAssertJPromiseAssert<Object, AssertJPromiseAssert, AssertJPromiseAssert.SuccessfulPromiseAssert> {
 

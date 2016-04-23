@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.util.test.assertj;
@@ -29,9 +29,15 @@ import org.forgerock.util.promise.Promise;
  * @param <A> The type of assert that this class is.
  * @param <S> The type of assert that is returned from the succeeded method.
  */
+//@Checkstyle:ignoreFor 2
 public abstract class AbstractAssertJPromiseAssert<T, A extends AbstractAssertJPromiseAssert<T, A, S>, S extends AbstractAssert<S, T>>
         extends AbstractAssert<A, Promise<T, ?>> {
 
+    /**
+     * Constructs a new assertion on promise.
+     * @param promise the actual promise to check
+     * @param type the type of assertion
+     */
     protected AbstractAssertJPromiseAssert(Promise<T, ?> promise, Class<A> type) {
         super(promise, type);
     }

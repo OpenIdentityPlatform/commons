@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.util.test.assertj;
@@ -23,7 +23,11 @@ import org.assertj.core.api.Condition;
  * @see org.forgerock.json.test.assertj.AssertJJsonValueAssert.AbstractJsonValueAssert#stringIs(java.lang.String,
  * org.assertj.core.api.Condition)
  */
-public class Conditions {
+public final class Conditions {
+
+    private Conditions() {
+        // Prevent from instantiating
+    }
 
     /**
      * A condition for equality testing.
