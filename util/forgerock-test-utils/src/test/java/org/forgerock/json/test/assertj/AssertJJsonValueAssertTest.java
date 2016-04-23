@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.test.assertj;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.util.promise.Promises.*;
 import static org.forgerock.util.test.assertj.Conditions.*;
 
@@ -71,7 +72,7 @@ public class AssertJJsonValueAssertTest {
                 .hasBoolean("bool")
                 .hasString("obj/subobj/property");
         asserter.isObject().stringAt("string").isEqualTo("fred");
-        asserter.isObject().booleanAt("bool").isEqualTo(true);
+        asserter.isObject().booleanAt("bool").isTrue();
         asserter.isObject().integerAt("int").isEqualTo(5);
         asserter.isObject().longAt("long").isEqualTo(3_257_259_826_582_038L);
         asserter.isObject().doubleAt("double").isEqualTo(50.91D);
@@ -107,11 +108,28 @@ public class AssertJJsonValueAssertTest {
         asserter.doesNotContain("obj/findme");
     }
 
+    @Test
+    public void shouldAssertOnSimpleJsonValue() throws Exception {
+        assertThat(json(true)).isBoolean().isTrue();
+        assertThat(json("foo")).isString().isEqualTo("foo");
+        assertThat(json(1)).isNumber().isInteger().isEqualTo(1);
+        assertThat(json(1L)).isNumber().isLong().isEqualTo(1L);
+        assertThat(json(3.5)).isNumber().isDouble().isEqualTo(3.5);
+        assertThat(json(1)).isInteger().isPositive(); // another assertion for IntegerAssert
+        assertThat(json(1L)).isLong().isGreaterThan(0); // another assertion for LongAssert
+        assertThat(json(3.5)).isDouble().isBetween(3d, 4d); // another assertion for DoubleAssert
+        assertThat(json(set("foo", 42))).isSet().hasSize(2);
+    }
+
+    @Test (expectedExceptions = AssertionError.class)
+    public void shouldAssertFail() throws Exception {
+        assertThat(json(null)).isBoolean();
+    }
+
     @Test (expectedExceptions = AssertionError.class)
     public void testDoesNotContainThrowsException() throws Exception {
         // Given
-        JsonValue value = json(object(
-                field("null", null)));
+        JsonValue value = json(object(field("null", null)));
 
         // When
         AssertJJsonValueAssert.AbstractJsonValueAssert asserter = AssertJJsonValueAssert.assertThat(value);

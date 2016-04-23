@@ -24,6 +24,7 @@ import org.assertj.core.api.AbstractBooleanAssert;
 import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.assertj.core.api.AbstractDoubleAssert;
 import org.assertj.core.api.AbstractIntegerAssert;
+import org.assertj.core.api.AbstractIterableAssert;
 import org.assertj.core.api.AbstractListAssert;
 import org.assertj.core.api.AbstractLongAssert;
 import org.assertj.core.api.AbstractMapAssert;
@@ -45,18 +46,10 @@ public final class AssertJJsonValueAssert {
     /**
      * Creates the relevant {@code AbstractJsonValueAssert} instance for the provided {@link JsonValue}.
      * @param value The actual value.
-     * @return Either a {@code ArrayJsonValueAssert} if the JsonValue is underpinned by a {@link java.util.Set}
-     * or {@link java.util.List}, or a {@code ObjectJsonValueAssert} if underpinned by a {@link java.util.Map}.
-     * @throws java.lang.IllegalArgumentException If the JsonValue is not a JSON array or object.
+     * @return the subclass {@link AbstractJsonValueAssert} matching best the kind of {@link JsonValue}.
      */
     public static AbstractJsonValueAssert assertThat(JsonValue value) {
-        if (value.isList() || value.isSet()) {
-            return new ArrayJsonValueAssert(value);
-        } else if (value.isMap()) {
-            return new ObjectJsonValueAssert(value);
-        } else {
-            throw new IllegalArgumentException("Should be a root JsonValue - either an Object or an Array");
-        }
+        return new JsonValueAssert(value);
     }
 
     /**
@@ -99,7 +92,7 @@ public final class AssertJJsonValueAssert {
      * Abstract class for assertions on {@link JsonValue}.
      * @param <T> the assertion class
      */
-    public static abstract class AbstractJsonValueAssert<T extends AbstractAssert<T, JsonValue>>
+    public abstract static class AbstractJsonValueAssert<T extends AbstractAssert<T, JsonValue>>
             extends AbstractAssert<T, JsonValue> {
 
         private AbstractJsonValueAssert(Class<T> type, JsonValue value) {
@@ -108,20 +101,99 @@ public final class AssertJJsonValueAssert {
 
         /**
          * Check that the {@link JsonValue} is an object.
-         * @return The {@code ObjectJsonValueAssert} representation of this Assert instance.
+         * @return The {@link ObjectJsonValueAssert} representation of this Assert instance.
          */
         public ObjectJsonValueAssert isObject() {
-            Assertions.assertThat(actual.isMap()).isTrue();
+            isNotNull();
+            if (!actual.isMap()) {
+                failWithMessage("Expected %s to be an object", actual.getPointer());
+            }
             return new ObjectJsonValueAssert(actual);
         }
 
         /**
          * Check that the {@link JsonValue} is an array.
-         * @return The {@code ArrayJsonValueAssert} representation of this Assert instance.
+         * @return The {@link ArrayJsonValueAssert} representation of this Assert instance.
          */
         public ArrayJsonValueAssert isArray() {
-            Assertions.assertThat(actual.isSet() || actual.isList()).isTrue();
+            isNotNull();
+            if (!actual.isSet() && !actual.isList()) {
+                failWithMessage("Expected %s to be an array", actual.getPointer());
+            }
             return new ArrayJsonValueAssert(actual);
+        }
+
+        /**
+         * Check that the {@link JsonValue} is a set.
+         * @return The {@link AbstractIterableAssert} representation of this Assert instance.
+         */
+        public AbstractIterableAssert<?, ? extends Iterable<?>, Object> isSet() {
+            isNotNull();
+            if (!actual.isSet()) {
+                failWithMessage("Expected %s to be a set", actual.getPointer());
+            }
+            return Assertions.assertThat(actual.asSet());
+        }
+
+        /**
+         * Check that the {@link JsonValue} is a string.
+         * @return The {@link AbstractCharSequenceAssert} representation of this Assert instance.
+         */
+        public AbstractCharSequenceAssert<?, String> isString() {
+            isNotNull();
+            if (!actual.isString()) {
+                failWithMessage("Expected %s to be a string", actual.getPointer());
+            }
+            return Assertions.assertThat(actual.asString());
+        }
+
+        /**
+         * Check that the {@link JsonValue} is a boolean.
+         * @return The {@link AbstractBooleanAssert} representation of this Assert instance.
+         */
+        public AbstractBooleanAssert<?> isBoolean() {
+            isNotNull();
+            if (!actual.isBoolean()) {
+                failWithMessage("Expected %s to be a boolean", actual.getPointer());
+            }
+            return Assertions.assertThat(actual.asBoolean());
+
+        }
+
+        /**
+         * Check that the {@link JsonValue} is a number.
+         * @return The {@link NumberJsonValueAssert} representation of this Assert instance.
+         */
+        public NumberJsonValueAssert isNumber() {
+            isNotNull();
+            if (!actual.isNumber()) {
+                failWithMessage("Expected %s to be a number", actual.getPointer());
+            }
+            return new NumberJsonValueAssert(actual);
+        }
+
+        /**
+         * Check that the {@link JsonValue} is an integer.
+         * @return The {@link AbstractIntegerAssert} representation of this Assert instance.
+         */
+        public AbstractIntegerAssert<?> isInteger() {
+            return assertThat(actual).isNumber().isInteger();
+        }
+
+        /**
+         * Check that the {@link JsonValue} is a long.
+         * @return The {@link AbstractLongAssert} representation of this Assert instance.
+         */
+        public AbstractLongAssert<?> isLong() {
+            return assertThat(actual).isNumber().isLong();
+        }
+
+        /**
+         * Check that the {@link JsonValue} is a long.
+         * @return The {@link AbstractDoubleAssert} representation of this Assert instance.
+         */
+        public AbstractDoubleAssert<?> isDouble() {
+            return assertThat(actual).isNumber().isDouble();
         }
 
         /**
@@ -140,23 +212,19 @@ public final class AssertJJsonValueAssert {
         /**
          * Check that the referenced {@link JsonValue} is an object.
          * @param path The {@link JsonPointer} path to the expected value.
-         * @return The {@code ObjectJsonValueAssert} for that node.
+         * @return The {@link ObjectJsonValueAssert} for that node.
          */
         public ObjectJsonValueAssert hasObject(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isMap()).isTrue();
-            return new ObjectJsonValueAssert(child);
+            return hasPath(path).isObject();
         }
 
         /**
          * Check that the referenced {@link JsonValue} is an array.
          * @param path The {@link JsonPointer} path to the expected value.
-         * @return The {@code ArrayJsonValueAssert} for that node.
+         * @return The {@link ArrayJsonValueAssert} for that node.
          */
         public ArrayJsonValueAssert hasArray(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isList() || child.isSet()).isTrue();
-            return new ArrayJsonValueAssert(child);
+            return hasPath(path).isArray();
         }
 
         /**
@@ -165,8 +233,11 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T hasNull(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isNull()).isTrue();
+            JsonValue child = child(path);
+            // Either it does not contain that child or the defined child is null
+            if (child != null && child.isNotNull()) {
+                failWithMessage("Expected not to find a defined child at %s from %s", path, actual.getPointer());
+            }
             return myself;
         }
 
@@ -176,8 +247,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T doesNotContain(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child).isNull();
+            Assertions.assertThat(child(path)).isNull();
             return myself;
         }
 
@@ -188,9 +258,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T booleanIs(String path, Condition<Boolean> condition) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isBoolean()).isTrue();
-            Assertions.assertThat(child.asBoolean()).is(condition);
+            booleanAt(path).is(condition);
             return myself;
         }
 
@@ -200,8 +268,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T hasBoolean(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isBoolean()).isTrue();
+            booleanAt(path);
             return myself;
         }
 
@@ -211,9 +278,7 @@ public final class AssertJJsonValueAssert {
          * @return This {@link AbstractBooleanAssert} instance.
          */
         public AbstractBooleanAssert<?> booleanAt(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isBoolean()).isTrue();
-            return Assertions.assertThat(child.asBoolean());
+            return hasPath(path).isBoolean();
         }
 
         /**
@@ -222,8 +287,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T hasString(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isString()).isTrue();
+            hasPath(path).isString();
             return myself;
         }
 
@@ -234,9 +298,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T stringIs(String path, Condition<String> condition) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isString()).isTrue();
-            Assertions.assertThat(child.asString()).is(condition);
+            stringAt(path).is(condition);
             return myself;
         }
 
@@ -247,9 +309,7 @@ public final class AssertJJsonValueAssert {
          * @return This {@link AbstractCharSequenceAssert} instance.
          */
         public AbstractCharSequenceAssert<?, String> stringAt(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isString()).isTrue();
-            return Assertions.assertThat(child.asString());
+            return hasPath(path).isString();
         }
 
         /**
@@ -258,8 +318,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T hasNumber(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isNumber()).isTrue();
+            hasPath(path).isNumber();
             return myself;
         }
 
@@ -270,9 +329,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T integerIs(String path, Condition<Integer> condition) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isNumber()).isTrue();
-            Assertions.assertThat(child.asInteger()).is(condition);
+            integerAt(path).is(condition);
             return myself;
         }
 
@@ -282,9 +339,7 @@ public final class AssertJJsonValueAssert {
          * @return This {@link AbstractIntegerAssert} instance.
          */
         public AbstractIntegerAssert<?> integerAt(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isNumber()).isTrue();
-            return Assertions.assertThat(child.asInteger());
+            return hasPath(path).isNumber().isInteger();
         }
 
         /**
@@ -294,9 +349,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T longIs(String path, Condition<Long> condition) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isNumber()).isTrue();
-            Assertions.assertThat(child.asLong()).is(condition);
+            longAt(path).is(condition);
             return myself;
         }
 
@@ -306,9 +359,7 @@ public final class AssertJJsonValueAssert {
          * @return This {@link AbstractLongAssert} instance.
          */
         public AbstractLongAssert<?> longAt(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isNumber()).isTrue();
-            return Assertions.assertThat(child.asLong());
+            return hasPath(path).isNumber().isLong();
         }
 
         /**
@@ -318,9 +369,7 @@ public final class AssertJJsonValueAssert {
          * @return This assert object, for further processing.
          */
         public T doubleIs(String path, Condition<Double> condition) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isNumber()).isTrue();
-            Assertions.assertThat(child.asDouble()).is(condition);
+            doubleAt(path).is(condition);
             return myself;
         }
 
@@ -330,11 +379,42 @@ public final class AssertJJsonValueAssert {
          * @return This {@link AbstractDoubleAssert} instance.
          */
         public AbstractDoubleAssert<?> doubleAt(String path) {
-            JsonValue child = actual.get(new JsonPointer(path));
-            Assertions.assertThat(child.isNumber()).isTrue();
-            return Assertions.assertThat(child.asDouble());
+            return hasPath(path).isNumber().isDouble();
         }
 
+        @Override
+        public void isNull() {
+            if (actual.isNotNull()) {
+                failWithMessage("Expected %s to be null but contains %s", actual.getPointer(), actual.getObject());
+            }
+        }
+
+        @Override
+        public T isNotNull() {
+            if (actual.isNull()) {
+                failWithMessage("Expected %s not to be null.", actual.getPointer());
+            }
+            return myself;
+        }
+
+        /**
+         * Get a {@link AbstractJsonValueAssert} for the referenced {@link JsonValue}. It will fail if the path does
+         * not match any valid {@link JsonValue}.
+         *
+         * @param path The {@link JsonPointer} path to the expected value.
+         * @return A new {@link AbstractJsonValueAssert} instance built around the found child.
+         */
+        public AbstractJsonValueAssert hasPath(String path) {
+            JsonValue value = child(path);
+            if (value == null) {
+                failWithMessage("Expected the child %s from %s to defined", path, actual.getPointer());
+            }
+            return assertThat(value);
+        }
+
+        private JsonValue child(String path) {
+            return actual.get(new JsonPointer(path));
+        }
     }
 
     /** Class for assertions on {@link JsonValue} promises. */
@@ -565,5 +645,52 @@ public final class AssertJJsonValueAssert {
             return this;
         }
 
+    }
+
+    /** Class for assertions on simple {@link JsonValue}. */
+    public static final class JsonValueAssert extends AbstractJsonValueAssert<JsonValueAssert> {
+
+        private JsonValueAssert(JsonValue value) {
+            super(JsonValueAssert.class, value);
+        }
+
+    }
+
+    /** Class for assertions on number {@link JsonValue}. */
+    public static final class NumberJsonValueAssert extends AbstractJsonValueAssert<NumberJsonValueAssert> {
+
+        private NumberJsonValueAssert(JsonValue value) {
+            super(NumberJsonValueAssert.class, value);
+        }
+
+        /**
+         * Check that the {@link JsonValue} is an integer.
+         * @return The {@link AbstractIntegerAssert} representation of this Assert instance.
+         */
+        @Override
+        public AbstractIntegerAssert<?> isInteger() {
+            Assertions.assertThat(actual.getObject()).isInstanceOf(Integer.class);
+            return Assertions.assertThat(actual.asInteger());
+        }
+
+        /**
+         * Check that the {@link JsonValue} is a long.
+         * @return The {@link AbstractLongAssert} representation of this Assert instance.
+         */
+        @Override
+        public AbstractLongAssert<?> isLong() {
+            Assertions.assertThat(actual.getObject()).isInstanceOf(Long.class);
+            return Assertions.assertThat(actual.asLong());
+        }
+
+        /**
+         * Check that the {@link JsonValue} is a double.
+         * @return The {@link AbstractDoubleAssert} representation of this Assert instance.
+         */
+        @Override
+        public AbstractDoubleAssert<?> isDouble() {
+            Assertions.assertThat(actual.getObject()).isInstanceOf(Double.class);
+            return Assertions.assertThat(actual.asDouble());
+        }
     }
 }
