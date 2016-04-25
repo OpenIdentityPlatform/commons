@@ -16,11 +16,11 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import java.util.Hashtable;
 import javax.jms.ConnectionFactory;
 import javax.jms.Topic;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.Hashtable;
 
 import org.forgerock.audit.handlers.jms.JmsAuditEventHandlerConfiguration.JndiConfiguration;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -69,7 +69,7 @@ class JndiJmsContextManager implements JmsContextManager {
     public Topic getTopic() throws InternalServerErrorException {
         try {
             if (topic == null) {
-                topic = (Topic) getObject(jndiConfiguration.getTopicName(), Topic.class);
+                topic = getObject(jndiConfiguration.getTopicName(), Topic.class);
             }
             return topic;
         } catch (NamingException e) {
@@ -85,9 +85,7 @@ class JndiJmsContextManager implements JmsContextManager {
     public ConnectionFactory getConnectionFactory() throws InternalServerErrorException {
         try {
             if (connectionFactory == null) {
-                connectionFactory =
-                        (ConnectionFactory) getObject(
-                                jndiConfiguration.getConnectionFactoryName(), ConnectionFactory.class);
+                connectionFactory = getObject(jndiConfiguration.getConnectionFactoryName(), ConnectionFactory.class);
             }
             return connectionFactory;
         } catch (NamingException e) {
@@ -95,15 +93,27 @@ class JndiJmsContextManager implements JmsContextManager {
         }
     }
 
-    private Object getObject(final String jndiName, Class clazz) throws NamingException, InternalServerErrorException {
-        final Object object = context.lookup(jndiName);
-        if (clazz.isInstance(object)) {
-            return object;
-        } else {
-            final String error =
-                    String.format("JNDI object with name %s is not of type %s", jndiName, clazz.getCanonicalName());
+    private <T> T getObject(final String jndiName, final Class<T> clazz)
+            throws NamingException, InternalServerErrorException {
+
+        ClassLoader originalContextClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
+            final Object object = context.lookup(jndiName);
+            if (clazz.isInstance(object)) {
+                return (T) object;
+            }
+            final String error;
+            if (null == object) {
+                error = String.format("No Object was found at JNDI name '%s'", jndiName);
+            } else {
+                error = String.format("JNDI lookup('%s') did not return a '%s'. It returned a '%s'='%s'",
+                        jndiName, clazz.getCanonicalName(), object.getClass().getCanonicalName(), object.toString());
+            }
             logger.error(error);
             throw new InternalServerErrorException(error);
+        } finally {
+            Thread.currentThread().setContextClassLoader(originalContextClassLoader);
         }
     }
 }
