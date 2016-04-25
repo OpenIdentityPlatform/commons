@@ -52,6 +52,21 @@ public class ApiDescriptionTest {
     public void testSuccessfulValidationMinimumRequirements() {
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .id("frapi:test")
+                .version("a version")
+                .build();
+    }
+
+    @Test(expectedExceptions = ApiValidationException.class)
+    public void testValidationMinimumRequirementsMissingId() {
+        final ApiDescription apiDescription = ApiDescription.apiDescription()
+                .version("a version")
+                .build();
+    }
+
+    @Test(expectedExceptions = ApiValidationException.class)
+    public void testValidationMinimumRequirementsMissingVersion() {
+        final ApiDescription apiDescription = ApiDescription.apiDescription()
+                .id("frapi:test")
                 .build();
     }
 
@@ -93,6 +108,7 @@ public class ApiDescriptionTest {
 
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .id("frapi:test")
+                .version("a version")
                 .description("My Description")
                 .definitions(definitions)
                 .paths(paths)

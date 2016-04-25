@@ -16,6 +16,8 @@
 
 package org.forgerock.api.models;
 
+import static org.forgerock.api.util.ValidationUtil.isEmpty;
+
 import org.forgerock.api.ApiValidationException;
 
 /**
@@ -23,24 +25,23 @@ import org.forgerock.api.ApiValidationException;
  */
 public final class ApiDescription {
 
-    private String id;
-    private String description;
-    private Definitions definitions;
-    private Errors errors;
-    private Paths paths;
+    private final String id;
+    private final String version;
+    private final String description;
+    private final Definitions definitions;
+    private final Errors errors;
+    private final Paths paths;
 
     private ApiDescription(Builder builder) {
         this.id = builder.id;
+        this.version = builder.version;
         this.description = builder.description;
         this.definitions = builder.definitions == null ? Definitions.definitions().build() : builder.definitions;
         this.errors = builder.errors == null ? Errors.errors().build() : builder.errors;
         this.paths = builder.paths;
 
-        if (id == null || id.trim().isEmpty()) {
-            throw new ApiValidationException("id required");
-        }
-        if (definitions == null && errors == null && paths == null) {
-            throw new ApiValidationException("At least one of {definitions, errors, paths} required");
+        if (isEmpty(id) || isEmpty(version)) {
+            throw new ApiValidationException("id and version required");
         }
     }
 
@@ -51,6 +52,15 @@ public final class ApiDescription {
      */
     public String getId() {
         return id;
+    }
+
+    /**
+     * Getter of version.
+     *
+     * @return The version.
+     */
+    public String getVersion() {
+        return version;
     }
 
     /**
@@ -108,6 +118,7 @@ public final class ApiDescription {
         private Definitions definitions;
         private Errors errors;
         private Paths paths;
+        private String version;
 
         /**
          * Private default constructor with the mandatory fields.
@@ -167,6 +178,17 @@ public final class ApiDescription {
          */
         public Builder paths(Paths paths) {
             this.paths = paths;
+            return this;
+        }
+
+        /**
+         * Set the version of the API.
+         *
+         * @param version The version.
+         * @return This builder.
+         */
+        public Builder version(String version) {
+            this.version = version;
             return this;
         }
 

@@ -56,6 +56,7 @@ with (imports) {
 
     var apiDescription = ApiDescription.apiDescription()
         .id("frapi:test")
+        .version("1.0")
         .paths(paths)
         .build();
 

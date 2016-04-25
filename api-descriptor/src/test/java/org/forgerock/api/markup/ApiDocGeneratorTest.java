@@ -314,6 +314,7 @@ public class ApiDocGeneratorTest {
                 .build();
         return ApiDescription.apiDescription()
                 .id("frapi:test")
+                .version("1.0")
                 .description(DEFAULT_API_DESCRIPTION)
                 .definitions(definitions)
                 .paths(paths)

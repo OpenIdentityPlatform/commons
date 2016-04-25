@@ -44,6 +44,7 @@ of _definitions_, _errors_, or _paths_.
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| -------------------------------------
 id          | String                      | ✓          | The frURI identifier of the API Descriptor
+version     | String                      | ✓          | The version of the API.
 description | String                      |            | Short description of the API Descriptor
 definitions | [Definitions](#Definitions) |            | Locally defined schema definitions
 errors      | [Errors](#Errors)           |            | Locally defined error definitions
