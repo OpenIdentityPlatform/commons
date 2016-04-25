@@ -16,6 +16,10 @@
 
 package org.forgerock.util.test.assertj;
 
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Arrays;
@@ -24,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.testng.annotations.Test;
 
 public class AssertJPromiseAssertTest {
@@ -32,109 +35,109 @@ public class AssertJPromiseAssertTest {
     @Test(expectedExceptions = AssertionError.class)
     public void testIncorrectFailed() throws Exception {
         // Given
-        Promise<String, Exception> promise = Promises.newResultPromise("fred");
+        Promise<String, Exception> promise = newResultPromise("fred");
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).failedWithException();
+        assertThat(promise).failedWithException();
     }
 
     @Test
     public void testFailed() throws Exception {
         // Given
-        Promise<String, ? extends Exception> promise = Promises.newExceptionPromise(new RuntimeException("bleugh"));
+        Promise<String, ? extends Exception> promise = newExceptionPromise(new RuntimeException("bleugh"));
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).failedWithException().hasMessage("bleugh");
+        assertThat(promise).failedWithException().hasMessage("bleugh");
     }
 
     @Test
     public void testSuccessString() throws Exception {
         // Given
-        Promise<String, Exception> promise = Promises.newResultPromise("fred");
+        Promise<String, Exception> promise = newResultPromise("fred");
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withString().isEqualTo("fred");
+        assertThat(promise).succeeded().withString().isEqualTo("fred");
     }
 
     @Test(expectedExceptions = AssertionError.class)
     public void testIncorrectSuccess() throws Exception {
         // Given
-        Promise<String, Exception> promise = Promises.newExceptionPromise(new Exception());
+        Promise<String, Exception> promise = newExceptionPromise(new Exception());
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded();
+        assertThat(promise).succeeded();
     }
 
     @Test
     public void testSuccessList() throws Exception {
         // Given
-        Promise<List<String>, Exception> promise = Promises.newResultPromise(Arrays.asList("abc", "def"));
+        Promise<List<String>, Exception> promise = newResultPromise(Arrays.asList("abc", "def"));
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withList().containsExactly("abc", "def");
+        assertThat(promise).succeeded().withList().containsExactly("abc", "def");
     }
 
     @Test
     public void testSuccessIterable() throws Exception {
         // Given
-        Promise<List<String>, Exception> promise = Promises.newResultPromise(Arrays.asList("abc", "def"));
+        Promise<List<String>, Exception> promise = newResultPromise(Arrays.asList("abc", "def"));
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withIterable().contains("abc");
+        assertThat(promise).succeeded().withIterable().contains("abc");
     }
 
     @Test
     public void testSuccessInteger() throws Exception {
         // Given
-        Promise<Integer, Exception> promise = Promises.newResultPromise(5);
+        Promise<Integer, Exception> promise = newResultPromise(5);
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withInteger().isEqualTo(5);
+        assertThat(promise).succeeded().withInteger().isEqualTo(5);
     }
 
     @Test
     public void testSuccessLong() throws Exception {
         // Given
-        Promise<Long, Exception> promise = Promises.newResultPromise(5L);
+        Promise<Long, Exception> promise = newResultPromise(5L);
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withLong().isEqualTo(5L);
+        assertThat(promise).succeeded().withLong().isEqualTo(5L);
     }
 
     @Test
     public void testSuccessDouble() throws Exception {
         // Given
-        Promise<Double, Exception> promise = Promises.newResultPromise(5.0D);
+        Promise<Double, Exception> promise = newResultPromise(5.0D);
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withDouble().isEqualTo(5.0D);
+        assertThat(promise).succeeded().withDouble().isEqualTo(5.0D);
     }
 
     @Test
     public void testSuccessBoolean() throws Exception {
         // Given
-        Promise<Boolean, Exception> promise = Promises.newResultPromise(true);
+        Promise<Boolean, Exception> promise = newResultPromise(true);
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withBoolean().isTrue();
+        assertThat(promise).succeeded().withBoolean().isTrue();
     }
 
     @Test
     public void testSuccessObject() throws Exception {
         // Given
-        Promise<Boolean, Exception> promise = Promises.newResultPromise(true);
+        Promise<Boolean, Exception> promise = newResultPromise(true);
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withObject().isNotNull();
+        assertThat(promise).succeeded().withObject().isNotNull();
     }
 
     @Test
     public void testSuccessObjectArray() throws Exception {
         // Given
-        Promise<Object[], Exception> promise = Promises.newResultPromise(new Object[5]);
+        Promise<Object[], Exception> promise = newResultPromise(new Object[5]);
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withObjectArray().hasSize(5);
+        assertThat(promise).succeeded().withObjectArray().hasSize(5);
     }
 
     @Test
@@ -142,32 +145,31 @@ public class AssertJPromiseAssertTest {
         // Given
         Map<String, String> value = new HashMap<>();
         value.put("test", "fred");
-        Promise<Map<String, String>, Exception> promise = Promises.newResultPromise(value);
+        Promise<Map<String, String>, Exception> promise = newResultPromise(value);
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().<String, String>withMap().containsEntry("test", "fred");
+        assertThat(promise).succeeded().<String, String>withMap().containsEntry("test", "fred");
     }
 
     @Test
     public void testSuccessFile() throws Exception {
         // Given
-        Promise<File, Exception> promise = Promises.newResultPromise(new File("fred"));
+        Promise<File, Exception> promise = newResultPromise(new File("fred"));
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise).succeeded().withFile().isRelative().doesNotExist();
+        assertThat(promise).succeeded().withFile().isRelative().doesNotExist();
     }
 
     @Test
     public void testSuccessInputStream() throws Exception {
         // Given
-        Promise<ByteArrayInputStream, Exception> promise =
-                Promises.newResultPromise(new ByteArrayInputStream("fred".getBytes()));
+        byte[] bytes = "fred".getBytes();
+        Promise<ByteArrayInputStream, Exception> promise = newResultPromise(new ByteArrayInputStream(bytes));
 
         // When/Then
-        AssertJPromiseAssert.assertThat(promise)
-                            .succeeded()
-                            .withInputStream()
-                            .hasSameContentAs(new ByteArrayInputStream("fred".getBytes()));
+        assertThat(promise).succeeded()
+                           .withInputStream()
+                           .hasSameContentAs(new ByteArrayInputStream(bytes));
     }
 
 }
