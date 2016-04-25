@@ -575,7 +575,7 @@ public class ResourceTest {
         assertThat(query2.getStability()).isEqualTo(Stability.EVOLVING);
         assertThat(query2.getType()).isEqualTo(QueryType.ID);
         assertThat(query2.getQueryId()).isEqualTo("query2");
-        assertThat(query2.getCountPolicy()[0]).isEqualTo(CountPolicy.ESTIMATE);
+        assertThat(query2.getCountPolicy()[0]).isEqualTo(CountPolicy.NONE);
         assertThat(query2.getPagingMode()[0]).isEqualTo(PagingMode.COOKIE);
         assertThat(query2.getPagingMode()[1]).isEqualTo(PagingMode.OFFSET);
         assertThat(query2.getQueryableFields()[0]).isEqualTo("field1");
@@ -629,7 +629,7 @@ public class ResourceTest {
                         stability = Stability.EVOLVING
                 ),
                 type = QueryType.ID,
-                countPolicies = {CountPolicy.ESTIMATE},
+                countPolicies = {CountPolicy.NONE},
                 pagingModes = {PagingMode.COOKIE, PagingMode.OFFSET},
                 queryableFields = {"field1", "field2"},
                 sortKeys = {"key1", "key2", "key3"})
@@ -683,7 +683,7 @@ public class ResourceTest {
                         ),
                         type = QueryType.ID,
                         id = "query2",
-                        countPolicies = {CountPolicy.ESTIMATE},
+                        countPolicies = {CountPolicy.NONE},
                         pagingModes = {PagingMode.COOKIE, PagingMode.OFFSET},
                         queryableFields = {"field1", "field2"},
                         sortKeys = {"key1", "key2", "key3"})})

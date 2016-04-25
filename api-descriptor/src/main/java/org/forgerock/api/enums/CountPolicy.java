@@ -22,11 +22,15 @@ import org.forgerock.api.models.Query;
  */
 public enum CountPolicy {
    /**
-    * Estimate paging mode policy is supported.
+    * Estimate count policy is supported.
     */
    ESTIMATE,
    /**
-    * Exact paging mode policy is supported.
+    * Exact count policy is supported.
     */
-   EXACT;
+   EXACT,
+   /**
+    * No count policy is supported.
+    */
+   NONE;
 }
