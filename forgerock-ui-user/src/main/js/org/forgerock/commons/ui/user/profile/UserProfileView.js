@@ -14,8 +14,6 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-/*global define, document */
-
 define("org/forgerock/commons/ui/user/profile/UserProfileView", [
     "jquery",
     "underscore",

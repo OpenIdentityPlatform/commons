@@ -14,17 +14,15 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, Backbone, _, window */
-/*jslint regexp: false*/
-
 define("org/forgerock/commons/ui/common/main/Router", [
     "underscore",
+    "backbone",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/URIUtils"
-], function(_, EventManager, constants, conf, AbstractConfigurationAware, URIUtils) {
+], function(_, Backbone, EventManager, constants, conf, AbstractConfigurationAware, URIUtils) {
     /**
      * @exports org/forgerock/commons/ui/common/main/Router
      */

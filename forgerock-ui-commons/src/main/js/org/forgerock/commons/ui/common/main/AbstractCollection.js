@@ -14,8 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define, Math */
-
 define("org/forgerock/commons/ui/common/main/AbstractCollection", [
     "jquery",
     "underscore",

@@ -14,8 +14,6 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-/*global define */
-
 define("org/forgerock/commons/ui/common/util/Mime", [
     "org/forgerock/commons/ui/common/util/Base64"
 ], function (base64) {

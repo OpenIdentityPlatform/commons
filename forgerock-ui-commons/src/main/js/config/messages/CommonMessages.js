@@ -14,11 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define*/
-
-/**
- * @author jdabrowski
- */
 define("config/messages/CommonMessages", [
 ], function() {
 

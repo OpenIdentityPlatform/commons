@@ -14,8 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define */
-
 define("org/forgerock/mock/ui/common/util/ThemeManager", [
     "jquery",
     "underscore",

@@ -14,7 +14,6 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*global define, window, document*/
 define("org/forgerock/commons/ui/common/util/AutoScroll", [
     "jquery",
     "lodash"

@@ -14,8 +14,6 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-/*global define, window */
-
 define("org/forgerock/commons/ui/common/util/CustomPolyfill", [
 ], function () {
 

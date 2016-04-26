@@ -14,8 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define*/
-
 /**
  * Filters links on the logged-in users role, returning the first matching link.
  *

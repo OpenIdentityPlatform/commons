@@ -14,11 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define */
-
-/**
- * @author mbilski
- */
 define("org/forgerock/commons/ui/common/NotFoundView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",

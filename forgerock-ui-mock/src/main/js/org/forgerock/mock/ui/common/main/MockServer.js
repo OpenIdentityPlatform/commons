@@ -14,14 +14,9 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define */
-
 /**
  * Fake server to handle AJAX requests.
- *
- * @author Eugenia Sergueeva
  */
-
 define("org/forgerock/mock/ui/common/main/MockServer", [
     "mock/Data",
     "sinon"

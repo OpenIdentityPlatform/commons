@@ -14,7 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define, document */
 define("org/forgerock/commons/ui/common/backgrid/Backgrid", [
     "jquery",
     "backgrid"

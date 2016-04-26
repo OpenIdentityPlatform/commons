@@ -14,12 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, window, document */
-
-/**
- * @author mbilski
- */
-
 define("org/forgerock/commons/ui/common/components/Breadcrumbs", [
     "jquery",
     "underscore",

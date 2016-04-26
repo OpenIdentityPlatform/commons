@@ -14,11 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, location, */
-
-/**
- * @author Huck Elliott
- */
 define("org/forgerock/commons/ui/common/EnableCookiesView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/CookieHelper"

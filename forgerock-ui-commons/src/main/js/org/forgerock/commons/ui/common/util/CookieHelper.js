@@ -14,8 +14,6 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-/*global define, unescape*/
-
 define("org/forgerock/commons/ui/common/util/CookieHelper", [
     "lodash"
 ], function(_) {

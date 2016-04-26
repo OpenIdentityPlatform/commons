@@ -14,11 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define */
-
-/**
- * @author yaromin
- */
 define("org/forgerock/commons/ui/common/main/ProcessConfiguration", [
     "jquery",
     "underscore",

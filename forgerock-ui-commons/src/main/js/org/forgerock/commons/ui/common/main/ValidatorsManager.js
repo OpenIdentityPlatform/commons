@@ -14,8 +14,6 @@
  * Copyright 2012-2016 ForgeRock AS.
  */
 
-/*global define */
-
 define("org/forgerock/commons/ui/common/main/ValidatorsManager", [
     "jquery",
     "underscore",

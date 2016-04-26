@@ -14,9 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*jslint regexp:false */
-/*global define, _ */
-
  define("mock/Data", [
      "lodash",
      "org/forgerock/commons/ui/common/main/Configuration",

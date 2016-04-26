@@ -14,7 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define */
 define("org/forgerock/commons/ui/common/components/LoginHeader", [
     "org/forgerock/commons/ui/common/main/AbstractView"
 ], function(AbstractView) {

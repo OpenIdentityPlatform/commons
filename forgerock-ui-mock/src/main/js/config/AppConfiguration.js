@@ -14,8 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define*/
-
 define("config/AppConfiguration", [
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (Constants) {

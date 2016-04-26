@@ -14,13 +14,12 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-/*global define, window, _*/
-
 define("config/process/CommonConfig", [
     "jquery",
+    "lodash",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function($, Constants, EventManager) {
+], function($, _, Constants, EventManager) {
     var obj = [
         {
             startEvent: Constants.EVENT_APP_INITIALIZED,

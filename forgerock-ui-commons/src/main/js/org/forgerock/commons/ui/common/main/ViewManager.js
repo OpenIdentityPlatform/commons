@@ -14,11 +14,6 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-/*global define */
-
-/**
- * @author mbilski
- */
 define("org/forgerock/commons/ui/common/main/ViewManager", [
     "jquery",
     "underscore",

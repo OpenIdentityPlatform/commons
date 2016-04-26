@@ -14,8 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, i18n */
-
 define("org/forgerock/commons/ui/common/util/UIUtils", [
     "jquery",
     "underscore",
@@ -343,7 +341,7 @@ define("org/forgerock/commons/ui/common/util/UIUtils", [
     Handlebars.registerHelper('p', function(countValue, options) {
         var params, result;
         params = { count: countValue };
-        result = i18n.t(options.hash.key, params);
+        result = i18next.t(options.hash.key, params);
         return new Handlebars.SafeString(result);
      });
 

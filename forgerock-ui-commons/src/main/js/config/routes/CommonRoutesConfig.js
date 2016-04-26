@@ -14,12 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define*/
-/*jslint regexp:false */
-
-/**
- * @author jdabrowski
- */
 define("config/routes/CommonRoutesConfig", [
     "org/forgerock/commons/ui/common/util/Constants"
 ], function(constants) {

@@ -14,11 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, window */
-
-/**
- * @author mbilski
- */
 define("org/forgerock/commons/ui/common/main/SpinnerManager", [
     "jquery",
     "spin"

@@ -14,11 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define*/
-
-/**
- * @author yaromin
- */
 define("org/forgerock/commons/ui/common/main/Configuration", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",

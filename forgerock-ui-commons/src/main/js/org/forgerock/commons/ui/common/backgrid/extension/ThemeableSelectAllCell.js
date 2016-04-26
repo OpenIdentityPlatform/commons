@@ -14,7 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define*/
 /**
  * Themeable extension to <code>Backgrid.Extension.SelectAll</code>.
  * <p>

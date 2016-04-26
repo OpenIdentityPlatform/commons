@@ -14,8 +14,6 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-/*global define */
-
 define( "org/forgerock/commons/ui/common/main/i18nManager", [
     "jquery",
     "lodash",
@@ -92,11 +90,11 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             resGetPath: require.toUrl("locales/__lng__/__ns__.json")
         };
 
-        $.i18n.init(opts);
+        i18next.init(opts);
 
         Handlebars.registerHelper("t", function(key, options) {
             options = options || {};
-            return new Handlebars.SafeString($.i18n.t(key, options.hash));
+            return new Handlebars.SafeString(i18next.t(key, options.hash));
         });
 
         /**
@@ -111,10 +109,10 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
         */
         Handlebars.registerHelper("mapTranslate", function(map) {
             var fallback;
-            if (_.has(map, $.i18n.options.lng)) {
-                return new Handlebars.SafeString(map[$.i18n.options.lng]);
+            if (_.has(map, i18next.options.lng)) {
+                return new Handlebars.SafeString(map[i18next.options.lng]);
             } else {
-                fallback = _.find($.i18n.options.fallbackLng, function (lng) {
+                fallback = _.find(i18next.options.fallbackLng, function (lng) {
                     return _.has(map, lng);
                 });
                 return new Handlebars.SafeString(map[fallback]);

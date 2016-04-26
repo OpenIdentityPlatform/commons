@@ -14,14 +14,9 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, localStorage */
-
 /**
  * Local storage helper.
- *
- * @author Eugenia Sergueeva
  */
-
 define("org/forgerock/mock/ui/common/main/LocalStorage",[
     "underscore"
 ], function (_) {

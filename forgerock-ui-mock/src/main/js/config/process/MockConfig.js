@@ -14,8 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define, require, window, _*/
-
 define("config/process/MockConfig", [
     "org/forgerock/mock/ui/common/util/Constants"
 ], function(Constants) {

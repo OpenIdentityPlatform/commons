@@ -14,9 +14,6 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-/*global define, unescape, escape, atob, btoa */
-/*jslint bitwise:false */
-
 define("org/forgerock/commons/ui/common/util/Base64", [
 ], function () {
 

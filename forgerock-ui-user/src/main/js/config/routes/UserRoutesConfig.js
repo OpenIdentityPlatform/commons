@@ -14,9 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define*/
-/*jslint regexp:false */
-
 define("config/routes/UserRoutesConfig", [
 ], function() {
     //definitions for views here are generic

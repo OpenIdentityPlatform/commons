@@ -14,14 +14,12 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, XDate*/
-
 define("org/forgerock/commons/ui/common/util/DateUtil", [
     "underscore",
     "handlebars",
     "xdate",
     "moment"
-], function (_, Handlebars, xdate, moment) {
+], function (_, Handlebars, XDate, moment) {
 
     var obj = {};
 

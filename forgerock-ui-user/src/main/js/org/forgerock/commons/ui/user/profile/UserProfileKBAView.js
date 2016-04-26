@@ -14,8 +14,6 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-/*global define, document */
-
 define("org/forgerock/commons/ui/user/profile/UserProfileKBAView", [
     "jquery",
     "lodash",

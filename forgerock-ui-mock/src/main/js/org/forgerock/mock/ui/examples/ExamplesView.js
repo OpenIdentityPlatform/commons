@@ -14,8 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define, window */
-
 define("org/forgerock/mock/ui/examples/ExamplesView", [
     "jquery",
     "underscore",

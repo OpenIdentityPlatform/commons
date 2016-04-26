@@ -14,8 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define, window, require*/
-
 define("org/forgerock/commons/ui/common/util/ModuleLoader", [
     "jquery",
     "underscore"

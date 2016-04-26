@@ -14,8 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define*/
-
 define("org/forgerock/mock/ui/common/util/Constants", [
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (commonConstants) {

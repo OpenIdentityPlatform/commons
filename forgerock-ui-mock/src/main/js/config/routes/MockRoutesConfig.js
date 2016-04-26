@@ -14,9 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define*/
-/*jslint regexp:false */
-
 define("config/routes/MockRoutesConfig", [
 ], function() {
     var obj = {

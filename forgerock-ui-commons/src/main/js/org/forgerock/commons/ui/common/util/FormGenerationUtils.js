@@ -14,8 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define*/
-
 define("org/forgerock/commons/ui/common/util/FormGenerationUtils", [
     "jquery",
     "org/forgerock/commons/ui/common/util/DateUtil"

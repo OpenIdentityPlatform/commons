@@ -14,8 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define, require */
-
 define("org/forgerock/mock/ui/common/delegates/SiteConfigurationDelegate", [
 ], function(Constants, AbstractDelegate, configuration, eventManager) {
     var obj = {},

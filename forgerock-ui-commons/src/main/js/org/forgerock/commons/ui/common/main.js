@@ -14,8 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define*/
-
 // this module is merely a useful construct for identifying
 // top-level modules which would be likely to need to embed
 // within a single minified package, since they are pretty much

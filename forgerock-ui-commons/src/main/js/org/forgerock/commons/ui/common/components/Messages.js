@@ -14,11 +14,6 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-/*global define, window */
-
-/**
- * @author jkigwana
- */
 define("org/forgerock/commons/ui/common/components/Messages", [
     "jquery",
     "underscore",

@@ -14,8 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define*/
-
 // core files needed during startup of the mock app
 define("org/forgerock/mock/ui/main", [
     "./common/util/Constants",

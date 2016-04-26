@@ -14,7 +14,6 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-/*global define */
 define("org/forgerock/commons/ui/common/util/BackgridUtils", [
     "jquery",
     "lodash",

@@ -14,7 +14,6 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global define */
 define("org/forgerock/mock/ui/common/components/Footer", [
     "org/forgerock/commons/ui/common/components/Footer"
 ], function (Footer) {
