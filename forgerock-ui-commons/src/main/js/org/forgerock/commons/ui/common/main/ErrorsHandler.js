@@ -14,7 +14,7 @@
  * Copyright 2012-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/main/ErrorsHandler", [
+define([
     "underscore",
     "jquery",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",

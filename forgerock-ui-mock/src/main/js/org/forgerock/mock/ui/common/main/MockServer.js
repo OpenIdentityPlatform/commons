@@ -17,7 +17,7 @@
 /**
  * Fake server to handle AJAX requests.
  */
-define("org/forgerock/mock/ui/common/main/MockServer", [
+define([
     "mock/Data",
     "sinon"
 ], function (mockData, sinon) {

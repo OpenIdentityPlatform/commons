@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/components/LoginHeader", [
+define([
     "org/forgerock/commons/ui/common/main/AbstractView"
 ], function(AbstractView) {
     var LoginHeader = AbstractView.extend({

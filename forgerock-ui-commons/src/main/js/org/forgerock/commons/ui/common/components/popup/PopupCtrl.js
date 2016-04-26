@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/components/popup/PopupCtrl", [
+define([
 	"org/forgerock/commons/ui/common/components/popup/PopupView"
 ], function(view) {
     var obj = {};

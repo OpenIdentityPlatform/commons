@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/util/URIUtils", ["underscore"], function (_) {
+define(["underscore"], function (_) {
     /**
      * @exports org/forgerock/commons/ui/common/util/URIUtils
      */

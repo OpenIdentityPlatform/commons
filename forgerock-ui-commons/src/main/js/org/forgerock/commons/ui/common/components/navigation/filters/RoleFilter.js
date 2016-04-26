@@ -21,7 +21,7 @@
  *
  * @module org/forgerock/commons/ui/common/components/navigation/filters/RoleFilter
  */
-define("org/forgerock/commons/ui/common/components/navigation/filters/RoleFilter", [
+define([
     "lodash",
     "org/forgerock/commons/ui/common/main/Configuration"
 ], function(_, Configuration) {

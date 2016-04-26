@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/LoginView", [
+define([    
     "underscore",
     "placeholder",
     "org/forgerock/commons/ui/common/main/AbstractView",

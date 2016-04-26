@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/main/Router", [
+define([
     "underscore",
     "backbone",
     "org/forgerock/commons/ui/common/main/EventManager",

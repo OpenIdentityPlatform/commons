@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/LoginDialog", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/components/BootstrapDialog",

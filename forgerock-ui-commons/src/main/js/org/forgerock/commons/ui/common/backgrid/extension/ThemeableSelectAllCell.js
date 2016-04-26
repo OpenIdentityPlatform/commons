@@ -32,7 +32,7 @@
  *   headerCell: "select-all"
  * }
  */
-define("org/forgerock/commons/ui/common/backgrid/extension/ThemeableSelectAllCell", [
+define([
     "backgrid-selectall",
     "org/forgerock/commons/ui/common/backgrid/Backgrid"
 ], function (BackgridSelectAll, Backgrid) {

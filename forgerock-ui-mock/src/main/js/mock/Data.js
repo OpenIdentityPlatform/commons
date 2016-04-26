@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
- define("mock/Data", [
+ define([
      "lodash",
      "org/forgerock/commons/ui/common/main/Configuration",
      "org/forgerock/mock/ui/common/main/LocalStorage"

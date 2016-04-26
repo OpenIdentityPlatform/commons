@@ -17,7 +17,7 @@
 /**
  * Local storage helper.
  */
-define("org/forgerock/mock/ui/common/main/LocalStorage",[
+define([
     "underscore"
 ], function (_) {
     var mockPrefix = 'forgerock-mock-';

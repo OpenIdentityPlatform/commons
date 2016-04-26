@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/user/profile/ConfirmPasswordDialog", [
+define([
     "jquery",
     "org/forgerock/commons/ui/common/components/BootstrapDialogView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"

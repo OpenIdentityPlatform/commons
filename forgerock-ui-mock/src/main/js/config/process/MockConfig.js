@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("config/process/MockConfig", [
+define([
     "org/forgerock/mock/ui/common/util/Constants"
 ], function(Constants) {
     var obj = [

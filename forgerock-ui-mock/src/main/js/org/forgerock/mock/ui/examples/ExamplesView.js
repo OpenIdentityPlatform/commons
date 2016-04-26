@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/mock/ui/examples/ExamplesView", [
+define([
     "jquery",
     "underscore",
     "libs/codemirror-4.10/lib/codemirror",

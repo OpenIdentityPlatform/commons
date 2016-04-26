@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/mock/ui/common/delegates/SiteConfigurationDelegate", [
+define([
 ], function(Constants, AbstractDelegate, configuration, eventManager) {
     var obj = {},
         kbaEnabled = true;

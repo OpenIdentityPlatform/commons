@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("config/validators/CommonValidators", [
+define([
     "jquery"
 ], function($) {
     var obj = {

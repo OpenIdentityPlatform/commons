@@ -14,7 +14,7 @@
  * Copyright 2012-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/util/CustomPolyfill", [
+define([
 ], function () {
 
     var proto = "__proto__";

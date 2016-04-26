@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView", [
+define([
     "jquery",
     "form2js",
     "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView",

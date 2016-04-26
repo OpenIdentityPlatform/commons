@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("config/routes/UserRoutesConfig", [
+define([
 ], function() {
     //definitions for views here are generic
     //the actual path to each view is defined in config/AppConfiguration.js

@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("config/process/CommonConfig", [
+define([
     "jquery",
     "lodash",
     "org/forgerock/commons/ui/common/util/Constants",

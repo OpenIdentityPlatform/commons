@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("config/routes/CommonRoutesConfig", [
+define([
     "org/forgerock/commons/ui/common/util/Constants"
 ], function(constants) {
 

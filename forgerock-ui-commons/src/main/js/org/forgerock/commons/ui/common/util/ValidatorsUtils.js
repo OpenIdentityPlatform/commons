@@ -14,7 +14,7 @@
  * Copyright 2012-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/util/ValidatorsUtils", [
+define([
     "jquery",
     "underscore"
 ], function($, _) {

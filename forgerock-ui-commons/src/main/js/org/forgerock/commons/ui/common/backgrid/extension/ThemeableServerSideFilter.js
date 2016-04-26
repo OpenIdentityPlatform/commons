@@ -27,7 +27,7 @@
  * // ...or the reference on Backgrid.Extension
  * new Backgrid.Extension.ThemeableServerSideFilter({ ... });
  */
-define("org/forgerock/commons/ui/common/backgrid/extension/ThemeableServerSideFilter", [
+define([
     "jquery",
     "underscore",
     "backgrid-filter",

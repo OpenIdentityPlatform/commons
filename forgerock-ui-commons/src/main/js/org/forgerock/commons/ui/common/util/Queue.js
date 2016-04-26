@@ -14,7 +14,7 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/common/util/Queue", [
+define([
     "lodash"
 ], function (_) {
     /**

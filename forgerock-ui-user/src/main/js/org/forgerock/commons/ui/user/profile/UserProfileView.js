@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/user/profile/UserProfileView", [
+define([
     "jquery",
     "underscore",
     "form2js",

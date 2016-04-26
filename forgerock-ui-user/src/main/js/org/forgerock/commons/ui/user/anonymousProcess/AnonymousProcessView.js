@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView", [
+define([
     "jquery",
     "underscore",
     "form2js",

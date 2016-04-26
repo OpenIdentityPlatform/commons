@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/mock/ui/user/login/InternalLoginHelper", [
+define([
     "jquery",
     "org/forgerock/mock/ui/user/UserModel",
     "org/forgerock/commons/ui/common/main/EventManager",
