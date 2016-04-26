@@ -290,7 +290,7 @@ public final class JsonValueFunctions {
      * @throws NullPointerException
      *             if {@code transformFunction} is {@code null}.
      */
-    public static <V, E extends Exception> Function<JsonValue, List<V>, E> list(
+    public static <V, E extends Exception> Function<JsonValue, List<V>, E> listOf(
             final Function<JsonValue, V, E> transformFunction) throws E {
         return new Function<JsonValue, List<V>, E>() {
             @Override
@@ -333,7 +333,7 @@ public final class JsonValueFunctions {
      * @throws NullPointerException
      *             if {@code transformFunction} is {@code null}.
      */
-    public static <V, E extends Exception> Function<JsonValue, Set<V>, E> set(
+    public static <V, E extends Exception> Function<JsonValue, Set<V>, E> setOf(
             final Function<JsonValue, V, E> transformFunction) throws E {
         return new Function<JsonValue, Set<V>, E>() {
             @Override

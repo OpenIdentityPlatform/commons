@@ -20,9 +20,10 @@ package org.forgerock.json;
 import static org.forgerock.json.JsonValueFunctions.charset;
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.JsonValueFunctions.file;
-import static org.forgerock.json.JsonValueFunctions.list;
+import static org.forgerock.json.JsonValueFunctions.listOf;
 import static org.forgerock.json.JsonValueFunctions.pattern;
 import static org.forgerock.json.JsonValueFunctions.pointer;
+import static org.forgerock.json.JsonValueFunctions.setOf;
 import static org.forgerock.json.JsonValueFunctions.uri;
 import static org.forgerock.json.JsonValueFunctions.url;
 import static org.forgerock.json.JsonValueFunctions.uuid;
@@ -752,11 +753,11 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
      * {@code jv.asList(transformFunction)} with {@code jv.map(JsonValueFunctions.list(transformFunction))}).
      * @see #as(Function)
-     * @see JsonValueFunctions#list(Function)
+     * @see JsonValueFunctions#listOf(Function)
      */
     @Deprecated
     public <V, E extends Exception> List<V> asList(final Function<JsonValue, V, E> transformFunction) throws E {
-        return as(list(transformFunction));
+        return as(listOf(transformFunction));
     }
 
     /**
@@ -789,11 +790,11 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * @deprecated Use the method {@link #as(Function)} with the appropriate function. (Replace the following call
      * {@code jv.asSet(transformFunction)} with {@code jv.map(JsonValueFunctions.set(transformFunction))}).
      * @see #as(Function)
-     * @see JsonValueFunctions#set(Function)
+     * @see JsonValueFunctions#setOf(Function)
      */
     @Deprecated
     public <V, E extends Exception> Set<V> asSet(final Function<JsonValue, V, E> transformFunction) throws E {
-        return as(JsonValueFunctions.set(transformFunction));
+        return as(setOf(transformFunction));
     }
 
     /**

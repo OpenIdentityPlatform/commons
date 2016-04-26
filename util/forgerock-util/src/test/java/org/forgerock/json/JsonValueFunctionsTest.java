@@ -21,10 +21,10 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValueFunctions.charset;
 import static org.forgerock.json.JsonValueFunctions.duration;
 import static org.forgerock.json.JsonValueFunctions.file;
-import static org.forgerock.json.JsonValueFunctions.list;
+import static org.forgerock.json.JsonValueFunctions.listOf;
 import static org.forgerock.json.JsonValueFunctions.pattern;
 import static org.forgerock.json.JsonValueFunctions.pointer;
-import static org.forgerock.json.JsonValueFunctions.set;
+import static org.forgerock.json.JsonValueFunctions.setOf;
 import static org.forgerock.json.JsonValueFunctions.uri;
 import static org.forgerock.json.JsonValueFunctions.url;
 import static org.forgerock.json.JsonValueFunctions.uuid;
@@ -169,46 +169,46 @@ public class JsonValueFunctionsTest {
 
     @Test
     public void shouldConvertToList() throws Exception {
-        assertThat(list(integer).apply(json(array("1", null, "1")))).containsExactly(1, null, 1);
-        assertThat(list(integer).apply(json(JsonValue.set("1", null)))).containsExactly(1, null);
+        assertThat(listOf(integer).apply(json(array("1", null, "1")))).containsExactly(1, null, 1);
+        assertThat(listOf(integer).apply(json(JsonValue.set("1", null)))).containsExactly(1, null);
     }
 
     @Test
     public void shouldReturnNullIfNullJsonValueWhenConvertingToList() throws Exception {
-        assertThat(list(integer).apply(json(null))).isNull();
+        assertThat(listOf(integer).apply(json(null))).isNull();
     }
 
     @Test
     public void shouldReturnNullIfJsonValueIsNotCollectionWhenConvertingToList() throws Exception {
-        assertThat(list(integer).apply(json(true))).isNull();
+        assertThat(listOf(integer).apply(json(true))).isNull();
     }
 
     @Test(expectedExceptions = JsonValueException.class)
     public void shouldThrowExceptionIfJsonValueStringNotValidWhenConvertingToList() throws Exception {
-        list(integer).apply(json(array("foo")));
+        listOf(integer).apply(json(array("foo")));
     }
 
     // --- Set
 
     @Test
     public void shouldConvertToSet() throws Exception {
-        assertThat(set(integer).apply(json(JsonValue.set("1", null)))).containsExactly(1, null);
-        assertThat(set(integer).apply(json(JsonValue.array("1", null, "1")))).containsExactly(1, null);
+        assertThat(setOf(integer).apply(json(JsonValue.set("1", null)))).containsExactly(1, null);
+        assertThat(setOf(integer).apply(json(JsonValue.array("1", null, "1")))).containsExactly(1, null);
     }
 
     @Test
     public void shouldReturnNullIfNullJsonValueWhenConvertingToSet() throws Exception {
-        assertThat(set(integer).apply(json(null))).isNull();
+        assertThat(setOf(integer).apply(json(null))).isNull();
     }
 
     @Test
     public void shouldReturnNullIfJsonValueIsNotCollectionWhenConvertingToSet() throws Exception {
-        assertThat(set(integer).apply(json(true))).isNull();
+        assertThat(setOf(integer).apply(json(true))).isNull();
     }
 
     @Test(expectedExceptions = JsonValueException.class)
     public void shouldReturnNullIfJsonValueStringNotValidWhenConvertingToSet() throws Exception {
-        set(integer).apply(json(JsonValue.set("foo")));
+        setOf(integer).apply(json(JsonValue.set("foo")));
     }
 
     private Function<JsonValue, Integer, JsonValueException> integer =
