@@ -1,0 +1,29 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+    <TITLE>API Overview</TITLE>
+</HEAD>
+<BODY>
+<p>The JSON Schema Validator is a tool to validates simple java object against the <a
+        href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00"
+        title="A JSON Media Type for Describing the Structure and Meaning of JSON Documents" target="_new">draft-fge-json-schema-validation-00</a>
+    schema. </p>
+
+<p>This is a command line tool.</p>
+<code>
+    java -jar json-schema-cli-2.0.0-SNAPSHOT.jar
+
+    Option "-f (-file, -dir)" is required
+    java Main [options...] arguments...
+     -f (-file, -dir) FILE : file or folder contains the schema(s)
+     -i (-input) INPUT     : input from this file
+     -r (-root) VAL        : default schema base: http://www.forgerock.org/schema/
+     -s (-schema) VAL      : name of the schema. Optional if the object has
+                             "$schema" property
+     -v (-verbose)         : display all validation error not just the first
+
+      Example: java Main -f (-file, -dir) FILE
+      Example: java Main -f (-file, -dir) FILE -i (-input) INPUT -r (-root) VAL -s (-schema) VAL -v (-verbose)
+</code>
+</BODY>
+</HTML>
