@@ -646,10 +646,10 @@ public class ApiDocGenerator {
             operationDoc.rawParagraph(blockDoc.toString());
         }
 
-        if (!isEmpty(query.getCountPolicy())) {
+        if (!isEmpty(query.getCountPolicies())) {
             final AsciiDoc blockDoc = asciiDoc()
                     .blockTitle("Page Count Policies");
-            for (final CountPolicy countPolicy : query.getCountPolicy()) {
+            for (final CountPolicy countPolicy : query.getCountPolicies()) {
                 blockDoc.unorderedList1(asciiDoc().mono(countPolicy.toString()).toString());
             }
             operationDoc.rawParagraph(blockDoc.toString());

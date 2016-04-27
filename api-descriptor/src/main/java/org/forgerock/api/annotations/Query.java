@@ -52,7 +52,11 @@ public @interface Query {
     QueryType type();
     /** The paging modes that can be used with this query. */
     PagingMode[] pagingModes() default {};
-    /** The count policies that can be used with this query. */
+    /**
+     * The count policies that can be used with this query.
+     * If the array is empty, this means that the query does not support any form of count policy,
+     * and no value for count policy should be specified
+     */
     CountPolicy[] countPolicies() default {};
     /**
      * The query ID - required only when {@code type} is {@code ID}. If not supplied but required, the name of the

@@ -34,7 +34,7 @@ public final class Query extends Operation implements Comparable<Query> {
 
     private final QueryType type;
     private final PagingMode[] pagingMode;
-    private final CountPolicy[] countPolicy;
+    private final CountPolicy[] countPolicies;
     private final String queryId;
     private final String[] queryableFields;
     private final String[] supportedSortKeys;
@@ -43,7 +43,7 @@ public final class Query extends Operation implements Comparable<Query> {
         super(builder);
         this.type = builder.type;
         this.pagingMode = builder.pagingMode;
-        this.countPolicy = builder.countPolicy;
+        this.countPolicies = builder.countPolicies;
         this.queryId = builder.queryId;
         this.queryableFields = builder.queryableFields;
         this.supportedSortKeys = builder.supportedSortKeys;
@@ -79,11 +79,12 @@ public final class Query extends Operation implements Comparable<Query> {
 
     /**
      * Getter of the supported paging policies.
+     * If the array is empty, this means that the query does not support any form of count policy, and no value for count policy should be specified
      *
      * @return Supported paging policy enums
      */
-    public CountPolicy[] getCountPolicy() {
-        return countPolicy;
+    public CountPolicy[] getCountPolicies() {
+        return countPolicies;
     }
 
     /**
@@ -207,7 +208,7 @@ public final class Query extends Operation implements Comparable<Query> {
 
         private QueryType type;
         private PagingMode[] pagingMode;
-        private CountPolicy[] countPolicy;
+        private CountPolicy[] countPolicies;
         private String queryId;
         private String[] queryableFields;
         private String[] supportedSortKeys;
@@ -246,12 +247,13 @@ public final class Query extends Operation implements Comparable<Query> {
 
         /**
          * Set the supported page count policies.
+         * If the array is empty, this means that the query does not support any form of count policy, and no value for count policy should be specified
          *
          * @param countPolicy Array of supported paging mode policies
          * @return Builder
          */
         public Builder countPolicy(CountPolicy... countPolicy) {
-            this.countPolicy = countPolicy;
+            this.countPolicies = countPolicy;
             return this;
         }
 

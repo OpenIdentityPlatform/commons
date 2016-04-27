@@ -85,7 +85,7 @@ public class QueryTest {
 
         assertThat(query.getType()).isEqualTo(QueryType.EXPRESSION);
         assertThat(query.getPagingMode()).contains(PagingMode.COOKIE, PagingMode.OFFSET);
-        assertThat(query.getCountPolicy()).contains(CountPolicy.EXACT, CountPolicy.ESTIMATE);
+        assertThat(query.getCountPolicies()).contains(CountPolicy.EXACT, CountPolicy.ESTIMATE);
         assertThat(query.getQueryableFields()).contains("field1", "field2");
         assertThat(query.getSupportedSortKeys()).contains("key1", "key2");
     }
