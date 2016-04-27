@@ -48,13 +48,13 @@
 
   <ciManagement>
     <system>jenkins</system>
-    <url>https://ci.forgerock.org/view/Commons/job/*** TO BE UPDATED ***/</url>
+    <url>https://ci.forgerock.org/job/Commons%20-%20forgerock-commons%20-%20postcommit</url>
   </ciManagement>
 
   <scm>
-    <connection>scm:git:ssh://git@stash.forgerock.org:7999/san/mono-repo.git</connection>
-    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/san/mono-repo.git</developerConnection>
-    <url>https://stash.forgerock.org/projects/SAN/repos/mono-repo/browse</url>
+    <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-commons.git</connection>
+    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-commons.git</developerConnection>
+    <url>https://stash.forgerock.org/projects/COMMONS/repos/forgerock-commons/browse</url>
   </scm>
 
   <properties>
