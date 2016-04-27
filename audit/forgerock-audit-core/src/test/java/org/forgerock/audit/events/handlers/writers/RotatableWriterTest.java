@@ -11,17 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events.handlers.writers;
 
-import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.util.Files.newFile;
+import static org.assertj.core.util.Files.temporaryFolder;
 import static org.assertj.core.util.Files.temporaryFolderPath;
-import static org.assertj.core.util.Strings.concat;
 
 import java.io.File;
 import java.io.IOException;
@@ -390,10 +388,8 @@ public class RotatableWriterTest {
         writer.flush();
     }
 
-    private File getTempFile() {
-        // define file name using nanoTime instead of currentTimeMillis since the tests run so fast
-        String tempFileName = concat(valueOf(System.nanoTime()), ".txt");
-        File file = newFile(concat(temporaryFolderPath(), tempFileName));
+    private File getTempFile() throws IOException {
+        File file = File.createTempFile(getClass().getCanonicalName(), ".txt", temporaryFolder());
         file.deleteOnExit();
         return file;
     }
