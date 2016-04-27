@@ -49,6 +49,7 @@ public final class Resource {
     private final Action[] actions;
     private final Query[] queries;
     private final SubResources subresources;
+    private final Resource items;
     private final Boolean mvccSupported;
 
     private Resource(Builder builder) {
@@ -62,6 +63,7 @@ public final class Resource {
         this.subresources = builder.subresources;
         this.actions = builder.actions.toArray(new Action[builder.actions.size()]);
         this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
+        this.items = builder.items;
         this.mvccSupported = builder.mvccSupported;
 
         if (create == null && read == null && update == null && delete == null && patch == null
@@ -304,6 +306,7 @@ public final class Resource {
         private SubResources subresources;
         private final Set<Action> actions;
         private final Set<Query> queries;
+        private Resource items;
         private Boolean mvccSupported;
 
         /**
@@ -469,6 +472,17 @@ public final class Resource {
          */
         public Builder mvccSupported(boolean mvccSupported) {
             this.mvccSupported = mvccSupported;
+            return this;
+        }
+
+        /**
+         * Adds items Resource.
+         *
+         * @param items The Resource definition of the collection items
+         * @return Builder
+         */
+        public Builder items(Resource items) {
+            this.items = items;
             return this;
         }
 

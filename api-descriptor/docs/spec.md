@@ -47,6 +47,7 @@ id          | String                      | ✓          | The frURI identifier 
 version     | String                      | ✓          | The version of the API.
 description | String                      |            | Short description of the API Descriptor
 definitions | [Definitions](#definitions) |            | Locally defined schema definitions
+services    | [Services](#services)       |            | Locally defined service definitions
 errors      | [Errors](#errors)           |            | Locally defined error definitions
 paths       | [Paths](#paths)             |            | The supported paths for this API.
 
@@ -59,6 +60,16 @@ Locally defined schema definitions, that can be referred to via JSON References.
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 *           | [Schema](#schema)           | ✓          | The schema definitions
+
+### Services
+
+Locally defined service definitions, that can be referred to via JSON References.
+
+#### Properties
+
+Key         | Type                        | Required?  | Description
+----------- | --------------------------- |:----------:| ------------------------------------
+*           | [Resource](#resource)       | ✓          | The service definitions
 
 ### Errors
 
@@ -119,6 +130,7 @@ patch       | [Patch](#patch)             |            | The patch operation des
 actions     | [Action](#action)[]         |            | The action operation descriptions, if supported
 queries     | [Query](#query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
 subresources | [SubResources](#subresources) |         | Sub-resources of this resource. Sub-resources use the same version as their parent resource, so are not separately versioned.
+items       | [Resource](#resource)       |            | The items description in the resource. Used if the resource is a collection.
 mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
 
 ### SubResources

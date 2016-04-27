@@ -29,6 +29,7 @@ public final class ApiDescription {
     private final String version;
     private final String description;
     private final Definitions definitions;
+    private final Services services;
     private final Errors errors;
     private final Paths paths;
 
@@ -37,6 +38,7 @@ public final class ApiDescription {
         this.version = builder.version;
         this.description = builder.description;
         this.definitions = builder.definitions == null ? Definitions.definitions().build() : builder.definitions;
+        this.services = builder.services;
         this.errors = builder.errors == null ? Errors.errors().build() : builder.errors;
         this.paths = builder.paths;
 
@@ -82,6 +84,15 @@ public final class ApiDescription {
     }
 
     /**
+     * Getter of services.
+     *
+     * @return Services map
+     */
+    public Services getServices() {
+        return services;
+    }
+
+    /**
      * Getter of errors.
      *
      * @return Errors map
@@ -117,6 +128,7 @@ public final class ApiDescription {
         private String description;
         private Definitions definitions;
         private Errors errors;
+        private Services services;
         private Paths paths;
         private String version;
 
@@ -156,6 +168,18 @@ public final class ApiDescription {
          */
         public Builder definitions(Definitions definitions) {
             this.definitions = definitions;
+            return this;
+        }
+
+
+        /**
+         * Set the services.
+         *
+         * @param services Services for this API Description
+         * @return Builder
+         */
+        public Builder services(Services services) {
+            this.services = services;
             return this;
         }
 
