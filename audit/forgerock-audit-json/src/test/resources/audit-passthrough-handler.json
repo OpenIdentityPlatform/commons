@@ -1,0 +1,8 @@
+{
+  "class" : "org.forgerock.audit.PassThroughAuditEventHandler",
+  "config" : {
+    "name" : "passthrough",
+    "topics" : [ "access", "activity" ],
+    "message" : "added an event"
+  }
+}

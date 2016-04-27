@@ -1,0 +1,24 @@
+{
+  "type":"object",
+  "id":"urn:jsonschema:org:forgerock:audit:PassThroughAuditEventHandlerConfiguration",
+  "properties": {
+    "message": {
+      "type":"string"
+    },
+    "enabled": {
+      "type":"boolean",
+      "description":"audit.handlers.all.enabled.help"
+    },
+    "topics": {
+      "type":"array",
+      "description":"audit.handlers.all.topics.help",
+      "items": {
+        "type":"string"
+      }
+    },
+    "name": {
+      "type":"string",
+      "description":"audit.handlers.all.name.help"
+    }
+  }
+}

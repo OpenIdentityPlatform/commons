@@ -1,0 +1,20 @@
+{
+  "access": {
+    "schema": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "id": "/",
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "string"
+        },
+        "transactionId": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

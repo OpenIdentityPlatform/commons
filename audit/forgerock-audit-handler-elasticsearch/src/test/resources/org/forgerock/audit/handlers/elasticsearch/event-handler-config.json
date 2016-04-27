@@ -1,0 +1,23 @@
+{
+  "class" : "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
+  "config" : {
+    "name" : "elasticsearch",
+    "topics": [ "access", "activity", "config", "authentication" ],
+    "connection" : {
+      "useSSL" : false,
+      "host" : "localhost",
+      "port" : 9200,
+      "username" : "myUsername",
+      "password" : "myPassword"
+    },
+    "indexMapping" : {
+      "indexName" : "audit"
+    },
+    "buffering" : {
+      "enabled" : true,
+      "maxSize" : 10000,
+      "writeInterval" : "250 millis",
+      "maxBatchedEvents" : 500
+    }
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "class" : "org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandler",
+  "config" : {
+    "databaseType" : "oracle",
+    "name" : "jdbc",
+    "topics" : [ "access", "activity", "config", "authentication" ],
+    "connectionPool" : {
+      "jdbcUrl": "jdbc:oracle:thin:@//localhost:1521/XE",
+      "username": "audit",
+      "password": "audit"
+    },
+    "tableMappings" : [
+      {
+        "event": "authentication",
+        "table": "auditauthentication",
+        "fieldToColumn": {
+          "_id" : "id",
+          "transactionId" : "transactionid",
+          "timestamp" : "timestamp_",
+          "userId" : "userid",
+          "eventName" : "eventname",
+          "result" : "result",
+          "principal" : "principals",
+          "context" : "context",
+          "entries" : "entries",
+          "trackingIds" : "trackingids"
+        }
+      },
+      {
+        "event": "activity",
+        "table": "auditactivity",
+        "fieldToColumn": {
+          "_id" : "id",
+          "timestamp" : "timestamp_",
+          "eventName" : "eventname",
+          "transactionId" : "transactionid",
+          "userId" : "userid",
+          "trackingIds" : "trackingids",
+          "runAs" : "runas",
+          "objectId" : "objectid",
+          "operation" : "operation",
+          "before" : "beforeObject",
+          "after" : "afterObject",
+          "changedFields" : "changedfields",
+          "revision" : "rev"
+        }
+      },
+      {
+        "event": "access",
+        "table": "auditaccess",
+        "fieldToColumn": {
+          "_id" : "id",
+          "timestamp" : "timestamp_",
+          "eventName" : "eventname",
+          "transactionId" : "transactionid",
+          "userId" : "userid",
+          "trackingIds" : "trackingids",
+          "server/ip" : "server_ip",
+          "server/port" : "server_port",
+          "client/host" : "client_host",
+          "client/ip" : "client_ip",
+          "client/port" : "client_port",
+          "request/protocol" : "request_protocol",
+          "request/operation" : "request_operation",
+          "request/detail" : "request_detail",
+          "http/request/secure" : "http_request_secure",
+          "http/request/method" : "http_request_method",
+          "http/request/path" : "http_request_path",
+          "http/request/queryParameters" : "http_request_queryparameters",
+          "http/request/headers" : "http_request_headers",
+          "http/request/cookies" : "http_request_cookies",
+          "http/response/headers" : "http_response_headers",
+          "response/status" : "response_status",
+          "response/statusCode" : "response_statuscode",
+          "response/elapsedTime" : "response_elapsedtime",
+          "response/elapsedTimeUnits" : "response_elapsedtimeunits"
+        }
+      },
+      {
+        "event": "config",
+        "table": "auditconfig",
+        "fieldToColumn": {
+          "_id" : "id",
+          "timestamp" : "timestamp_",
+          "eventName" : "eventname",
+          "transactionId" : "transactionid",
+          "userId" : "userid",
+          "trackingIds" : "trackingids",
+          "runas" : "runas",
+          "objectId" : "objectid",
+          "operation" : "operation",
+          "before" : "beforeObject",
+          "after" : "afterObject",
+          "changedFields": "changedfields",
+          "revision" : "rev"
+        }
+      }
+    ]
+  },
+  "events" : [ "access", "activity", "config", "authentication" ]
+}

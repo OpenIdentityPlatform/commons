@@ -1,0 +1,2 @@
+{ "index" : { "_type" : "authentication", "_id" : "46696922-e569-4319-9ca5-dea2006c5f36-216" } }
+null

@@ -1,0 +1,22 @@
+{
+  "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+  "config" : {
+    "name" : "csv",
+    "topics": [ "access", "activity", "config", "authentication" ],
+    "logDirectory" : "/path/to/audit/files/",
+    "formatting" : {
+      "quoteChar" : "\"",
+      "delimiterChar" : ",",
+      "endOfLineSymbols" : "\n"
+    },
+    "security" : {
+      "enabled" : "true",
+      "signatureInterval" : "3 seconds",
+      "keyStoreHandlerName" : "csvSecure"
+    },
+    "buffering" : {
+      "enabled" : "false",
+      "autoFlush" : "true"
+    }
+  }
+}
