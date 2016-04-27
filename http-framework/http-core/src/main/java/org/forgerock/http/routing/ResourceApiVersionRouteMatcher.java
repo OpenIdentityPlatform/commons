@@ -11,14 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
 package org.forgerock.http.routing;
 
 import java.util.Objects;
 
-import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.IncomparableRouteMatchException;
 import org.forgerock.services.routing.RouteMatch;
@@ -119,16 +118,6 @@ class ResourceApiVersionRouteMatcher extends RouteMatcher<Version> {
         }
         ResourceApiVersionRouteMatcher that = (ResourceApiVersionRouteMatcher) o;
         return Objects.equals(routeVersion, that.routeVersion);
-    }
-
-    @Override
-    public String idFragment() {
-        return ":" + routeVersion.toString();
-    }
-
-    @Override
-    public <T> T transformApi(T descriptor, ApiContext<T> context) {
-        return context.withVersion(descriptor, context.getApiId(), routeVersion);
     }
 
     @Override

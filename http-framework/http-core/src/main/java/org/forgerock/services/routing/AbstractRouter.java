@@ -11,20 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
 package org.forgerock.services.routing;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Pair;
 
 /**
@@ -43,10 +39,8 @@ import org.forgerock.util.Pair;
  * @param <T> The type of the router.
  * @param <R> The type of the request.
  * @param <H> The type of the handler that will be used to handle routing requests.
- * @param <D> The type of descriptor object that the APIs supported by this router can be described using.
  */
-public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H, D>
-        implements Describable<D> {
+public abstract class AbstractRouter<T extends AbstractRouter<T, R, H>, R, H> {
 
     private final Map<RouteMatcher<R>, H> routes = new ConcurrentHashMap<>();
     private volatile H defaultRoute;
@@ -65,7 +59,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
      * @param router The router to be copied.
      */
     @SuppressWarnings("unchecked")
-    protected AbstractRouter(AbstractRouter<T, R, H, D> router) {
+    protected AbstractRouter(AbstractRouter<T, R, H> router) {
         this.defaultRoute = router.defaultRoute;
         addAllRoutes((T) router);
     }
@@ -82,7 +76,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
      *
      * @return All registered routes.
      */
-    protected final Map<RouteMatcher<R>, H> getRoutes() {
+    final Map<RouteMatcher<R>, H> getRoutes() {
         return Collections.unmodifiableMap(routes);
     }
 
@@ -203,19 +197,4 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
         }
         return null;
     }
-
-    @Override
-    public D api(ApiContext<D> context) {
-        List<D> descriptors = new ArrayList<>(routes.size());
-        for (Map.Entry<RouteMatcher<R>, H> route : routes.entrySet()) {
-            H handler = route.getValue();
-            if (handler instanceof Describable) {
-                RouteMatcher<R> matcher = route.getKey();
-                D descriptor = ((Describable<D>) handler).api(context.newChildContext(matcher.idFragment()));
-                descriptors.add(matcher.transformApi(descriptor, context));
-            }
-        }
-        return context.merge(context.getApiId(), descriptors);
-    }
-
 }

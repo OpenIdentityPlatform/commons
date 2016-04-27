@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2016 ForgeRock AS.
+ * Copyright 2012-2015 ForgeRock AS.
  */
 
 package org.forgerock.http.routing;
@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.IncomparableRouteMatchException;
 import org.forgerock.services.routing.RouteMatch;
@@ -154,16 +153,6 @@ class UriRouteMatcher extends RouteMatcher<List<String>> {
         }
         return variables.equals(that.variables);
 
-    }
-
-    @Override
-    public String idFragment() {
-        return "/" + uriTemplate;
-    }
-
-    @Override
-    public <T> T transformApi(T descriptor, ApiContext<T> context) {
-        return context.withPath(descriptor, context.getApiId(), uriTemplate);
     }
 
     @Override

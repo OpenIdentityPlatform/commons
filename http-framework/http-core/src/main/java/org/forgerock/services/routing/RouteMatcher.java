@@ -11,12 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
 package org.forgerock.services.routing;
 
-import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
 
 /**
@@ -51,24 +50,9 @@ public abstract class RouteMatcher<R> {
     @Override
     public abstract String toString();
 
-    /**
-     * The fragment of an API ID that this matcher provides.
-     * @return A fragment of the API ID.
-     */
-    public abstract String idFragment();
-
     @Override
     public abstract int hashCode();
 
     @Override
     public abstract boolean equals(Object o);
-
-    /**
-     * Transform the API Descriptor as appropriate for the parent router's view of the child routes.
-     * @param descriptor The descriptor to be mutated.
-     * @param context The API Descriptor context.
-     * @param <T> The type of descriptor object.
-     * @return The new descriptor object.
-     */
-    public abstract <T> T transformApi(T descriptor, ApiContext<T> context);
 }

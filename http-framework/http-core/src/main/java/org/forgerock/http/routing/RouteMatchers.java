@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
 package org.forgerock.http.routing;
@@ -22,7 +22,6 @@ import org.forgerock.http.Filter;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.util.Paths;
-import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.RouteMatch;
 import org.forgerock.services.routing.RouteMatcher;
@@ -134,11 +133,6 @@ public final class RouteMatchers {
         }
 
         @Override
-        public String idFragment() {
-            return delegate.idFragment();
-        }
-
-        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -148,11 +142,6 @@ public final class RouteMatchers {
             }
             RequestUriRouteMatcher that = (RequestUriRouteMatcher) o;
             return delegate.equals(that.delegate);
-        }
-
-        @Override
-        public <T> T transformApi(T descriptor, ApiContext<T> context) {
-            return delegate.transformApi(descriptor, context);
         }
 
         @Override
@@ -232,11 +221,6 @@ public final class RouteMatchers {
         }
 
         @Override
-        public String idFragment() {
-            return delegate.idFragment();
-        }
-
-        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -246,11 +230,6 @@ public final class RouteMatchers {
             }
             RequestApiVersionRouteMatcher that = (RequestApiVersionRouteMatcher) o;
             return delegate.equals(that.delegate);
-        }
-
-        @Override
-        public <T> T transformApi(T descriptor, ApiContext<T> context) {
-            return delegate.transformApi(descriptor, context);
         }
 
         @Override

@@ -11,21 +11,21 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
 package org.forgerock.http.routing;
 
-import static org.forgerock.http.HttpApplication.*;
-import static org.forgerock.http.routing.RouteMatchers.*;
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.http.HttpApplication.LOGGER;
+import static org.forgerock.http.routing.RouteMatchers.getRemainingRequestUri;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
-import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.AbstractRouter;
 import org.forgerock.services.routing.IncomparableRouteMatchException;
 import org.forgerock.services.routing.RouteMatch;
@@ -60,7 +60,7 @@ import org.forgerock.util.promise.Promise;
  * @see UriRouteMatcher
  * @see RouteMatchers
  */
-public final class Router extends AbstractRouter<Router, Request, Handler, Void> implements Handler {
+public final class Router extends AbstractRouter<Router, Request, Handler> implements Handler {
 
     /**
      * Creates a new router with no routes defined.
