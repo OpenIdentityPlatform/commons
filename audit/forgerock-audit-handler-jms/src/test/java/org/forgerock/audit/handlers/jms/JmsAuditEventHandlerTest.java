@@ -68,6 +68,7 @@ import org.testng.annotations.Test;
 /**
  * Tests the functionality of the JMS Audit event handler.
  */
+@Test(dependsOnGroups = {"JndiJmsContextManagerTest"})
 public class JmsAuditEventHandlerTest {
     private static final Logger logger = LoggerFactory.getLogger(JmsAuditEventHandlerTest.class);
     private static final String RESOURCE_PATH = "/org/forgerock/audit/handlers/jms/";
