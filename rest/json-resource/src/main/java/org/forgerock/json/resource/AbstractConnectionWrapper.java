@@ -11,13 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
 import java.util.Collection;
 
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
@@ -225,4 +227,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
         return connection.updateAsync(transform(context), request);
     }
 
+    @Override
+    public ApiDescription api(ApiContext<ApiDescription> apiContext) {
+        return connection.api(apiContext);
+    }
 }

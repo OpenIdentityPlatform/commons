@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -21,11 +21,19 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
-class InterfaceCollectionInstance implements RequestHandler {
+import org.forgerock.api.models.Resource;
+
+class InterfaceCollectionInstance extends DescribableResourceHandler implements RequestHandler {
     private final CollectionResourceProvider provider;
 
     InterfaceCollectionInstance(final CollectionResourceProvider provider) {
+        super(provider.getClass(), Resource.AnnotatedTypeVariant.COLLECTION_RESOURCE_INSTANCE);
         this.provider = provider;
+    }
+
+    protected InterfaceCollectionInstance(final Class<?> type) {
+        super(type, Resource.AnnotatedTypeVariant.COLLECTION_RESOURCE_INSTANCE);
+        this.provider = null;
     }
 
     @Override

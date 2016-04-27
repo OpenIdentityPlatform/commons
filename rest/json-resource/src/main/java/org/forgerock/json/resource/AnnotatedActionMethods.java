@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.annotations.Action;
+import org.forgerock.api.annotations.Action;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -52,7 +52,7 @@ class AnnotatedActionMethods {
             if (action != null) {
                 AnnotatedMethod checked = AnnotatedMethod.checkMethod(Action.class, requestHandler, method, needsId);
                 if (checked != null) {
-                    String actionName = action.value();
+                    String actionName = action.name();
                     if (actionName == null || actionName.length() == 0) {
                         actionName = method.getName();
                     }

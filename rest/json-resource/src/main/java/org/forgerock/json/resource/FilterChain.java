@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -23,21 +23,25 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
+
+import org.forgerock.api.models.ApiDescription;
 
 /**
  * A chain of filters terminated by a target request handler. The filter chain
  * is thread safe and supports updates to the list of filters and the target
  * request handler while actively processing requests.
  */
-public final class FilterChain implements RequestHandler {
+public final class FilterChain implements RequestHandler, Describable<ApiDescription> {
     /*
      * A request handler which represents the current position in the filter
      * chain. Maintains a reference to the filter chain which was in use at the
      * time when the cursor was created.
      */
-    private final class Cursor implements RequestHandler {
+    private final class Cursor implements RequestHandler, Describable<ApiDescription> {
         private final int pos;
         private final Filter[] snapshot;
 
@@ -118,6 +122,11 @@ public final class FilterChain implements RequestHandler {
             } else {
                 return target.handleUpdate(context, request);
             }
+        }
+
+        @Override
+        public ApiDescription api(ApiContext context) {
+            throw new UnsupportedOperationException("API resolution should skip filters");
         }
 
         private Filter get() {
@@ -241,6 +250,13 @@ public final class FilterChain implements RequestHandler {
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
             final UpdateRequest request) {
         return new Cursor().handleUpdate(context, request);
+    }
+
+    @Override
+    public ApiDescription api(ApiContext<ApiDescription> context) {
+        return target instanceof Describable
+                ? ((Describable<ApiDescription>) target).api(context)
+                : ApiDescription.apiDescription().id(context.getApiId()).build();
     }
 
     /**

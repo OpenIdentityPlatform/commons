@@ -22,10 +22,10 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 
 import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.annotations.Create;
-import org.forgerock.json.resource.annotations.Patch;
-import org.forgerock.json.resource.annotations.Query;
-import org.forgerock.json.resource.annotations.Update;
+import org.forgerock.api.annotations.Create;
+import org.forgerock.api.annotations.Patch;
+import org.forgerock.api.annotations.Query;
+import org.forgerock.api.annotations.Update;
 import org.forgerock.util.promise.Promise;
 
 /**

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -21,11 +21,19 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
-class InterfaceSingletonHandler implements RequestHandler {
+import org.forgerock.api.models.Resource;
+
+class InterfaceSingletonHandler extends DescribableResourceHandler implements RequestHandler {
     private final SingletonResourceProvider provider;
 
     InterfaceSingletonHandler(final SingletonResourceProvider provider) {
+        super(provider.getClass(), Resource.AnnotatedTypeVariant.SINGLETON_RESOURCE);
         this.provider = provider;
+    }
+
+    protected InterfaceSingletonHandler(Class<?> type) {
+        super(type, Resource.AnnotatedTypeVariant.SINGLETON_RESOURCE);
+        this.provider = null;
     }
 
     @Override

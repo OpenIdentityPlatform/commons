@@ -17,15 +17,16 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.annotations.Patch;
-import org.forgerock.json.resource.annotations.Read;
-import org.forgerock.json.resource.annotations.RequestHandler;
-import org.forgerock.json.resource.annotations.Update;
 import org.forgerock.util.promise.Promise;
+
+import org.forgerock.api.annotations.Patch;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.RequestHandler;
+import org.forgerock.api.annotations.Update;
 
 /**
  * Exposes an annotated POJO as an instance {@link org.forgerock.json.resource.RequestHandler} by looking for annotated
- * and/or conventionally-named methods (as per {@link org.forgerock.json.resource.annotations.RequestHandler}).
+ * and/or conventionally-named methods (as per {@link org.forgerock.api.annotations.RequestHandler}).
  * <p>
  * This class handles the requests to singleton endpoints, so only Read, Update, Patch and Action are supported.
  * are implemented - the remaining methods delegate to the {@link InterfaceSingletonHandler} for reporting the
@@ -40,7 +41,7 @@ class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
     private final AnnotatedActionMethods actionMethods;
 
     public AnnotatedSingletonHandler(Object requestHandler) {
-        super(null);
+        super(requestHandler.getClass());
         if (!requestHandler.getClass().isAnnotationPresent(RequestHandler.class)) {
             throw new IllegalArgumentException("RequestHandler missing from class: "
                     + requestHandler.getClass().getName());

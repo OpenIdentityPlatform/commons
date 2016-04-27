@@ -11,16 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 
-final class InternalConnection extends AbstractAsynchronousConnection {
+final class InternalConnection extends AbstractAsynchronousConnection implements Describable<ApiDescription> {
     private final RequestHandler requestHandler;
 
     InternalConnection(final RequestHandler handler) {
@@ -105,5 +108,12 @@ final class InternalConnection extends AbstractAsynchronousConnection {
                 return Resources.filterResource(response, request.getFields());
             }
         };
+    }
+
+    @Override
+    public ApiDescription api(ApiContext<ApiDescription> apiContext) {
+        return requestHandler instanceof Describable
+                ? ((Describable<ApiDescription>) requestHandler).api(apiContext)
+                : ApiDescription.apiDescription().id(apiContext.getApiId()).build();
     }
 }

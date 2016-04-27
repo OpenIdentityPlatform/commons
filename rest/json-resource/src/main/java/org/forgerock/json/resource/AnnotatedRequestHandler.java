@@ -16,13 +16,15 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.json.resource.annotations.Create;
-import org.forgerock.json.resource.annotations.Delete;
-import org.forgerock.json.resource.annotations.Patch;
-import org.forgerock.json.resource.annotations.Query;
-import org.forgerock.json.resource.annotations.Read;
-import org.forgerock.json.resource.annotations.RequestHandler;
-import org.forgerock.json.resource.annotations.Update;
+import org.forgerock.api.annotations.Create;
+import org.forgerock.api.annotations.Delete;
+import org.forgerock.api.annotations.Patch;
+import org.forgerock.api.annotations.Query;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.RequestHandler;
+import org.forgerock.api.annotations.Update;
+import org.forgerock.api.models.Resource;
+
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
@@ -31,7 +33,7 @@ import org.forgerock.util.promise.Promise;
  * and/or conventionally-named methods (as per {@link RequestHandler}).
  * {@see org.forgeock.json.resource.annotations}
  */
-class AnnotatedRequestHandler implements org.forgerock.json.resource.RequestHandler {
+class AnnotatedRequestHandler extends DescribableResourceHandler implements org.forgerock.json.resource.RequestHandler {
 
     private final AnnotatedMethod createMethod;
     private final AnnotatedMethod readMethod;
@@ -42,6 +44,7 @@ class AnnotatedRequestHandler implements org.forgerock.json.resource.RequestHand
     private final AnnotatedActionMethods actionMethods;
 
     public AnnotatedRequestHandler(Object requestHandler) {
+        super(requestHandler.getClass(), Resource.AnnotatedTypeVariant.REQUEST_HANDLER);
         if (!requestHandler.getClass().isAnnotationPresent(RequestHandler.class)) {
             throw new IllegalArgumentException("RequestHandler missing from class: "
                     + requestHandler.getClass().getName());

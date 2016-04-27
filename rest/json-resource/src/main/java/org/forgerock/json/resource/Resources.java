@@ -29,6 +29,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 
@@ -69,7 +70,9 @@ public final class Resources {
      * @return The adapted synchronous request handler.
      */
     public static RequestHandler asRequestHandler(final SynchronousRequestHandler syncHandler) {
-        return new SynchronousRequestHandlerAdapter(syncHandler);
+        return syncHandler instanceof Describable
+                ? new DescribedSyncRequestHandlerAdapter(syncHandler)
+                : new SynchronousRequestHandlerAdapter(syncHandler);
     }
 
     /**

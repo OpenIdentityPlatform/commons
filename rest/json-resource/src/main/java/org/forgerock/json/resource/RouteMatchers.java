@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -25,6 +25,7 @@ import java.util.List;
 import org.forgerock.http.routing.ResourceApiVersionBehaviourManager;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.routing.Version;
+import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.RouteMatch;
 import org.forgerock.services.routing.RouteMatcher;
@@ -114,6 +115,11 @@ public final class RouteMatchers {
         }
 
         @Override
+        public String idFragment() {
+            return delegate.idFragment();
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -123,6 +129,11 @@ public final class RouteMatchers {
             }
             RequestUriRouteMatcher that = (RequestUriRouteMatcher) o;
             return delegate.equals(that.delegate);
+        }
+
+        @Override
+        public <T> T transformApi(T t, ApiContext<T> apiContext) {
+            return delegate.transformApi(t, apiContext);
         }
 
         @Override
@@ -155,6 +166,11 @@ public final class RouteMatchers {
         }
 
         @Override
+        public String idFragment() {
+            return delegate.idFragment();
+        }
+
+        @Override
         public boolean equals(Object o) {
             if (this == o) {
                 return true;
@@ -164,6 +180,11 @@ public final class RouteMatchers {
             }
             RequestApiVersionRouteMatcher that = (RequestApiVersionRouteMatcher) o;
             return delegate.equals(that.delegate);
+        }
+
+        @Override
+        public <T> T transformApi(T t, ApiContext<T> apiContext) {
+            return delegate.transformApi(t, apiContext);
         }
 
         @Override

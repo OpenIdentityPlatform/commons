@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -19,14 +19,16 @@ package org.forgerock.json.resource;
 import java.io.Closeable;
 import java.util.Collection;
 
+import org.forgerock.api.models.ApiDescription;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
 /**
  * A client connection to a JSON resource provider over which read and update
  * requests may be performed.
  */
-public interface Connection extends Closeable {
+public interface Connection extends Closeable, Describable<ApiDescription> {
 
     /**
      * Performs an action against a specific resource, or set of resources. Bulk

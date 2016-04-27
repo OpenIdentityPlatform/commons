@@ -11,21 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.http.routing.RoutingMode.EQUALS;
-import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
+import static org.forgerock.http.routing.RoutingMode.*;
 import static org.forgerock.json.resource.Requests.*;
-import static org.forgerock.json.resource.ResourceApiVersionRoutingFilter.setApiVersionInfo;
-import static org.forgerock.json.resource.Resources.newCollection;
-import static org.forgerock.json.resource.Resources.newSingleton;
-import static org.forgerock.json.resource.RouteMatchers.requestResourceApiVersionMatcher;
-import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.json.resource.ResourceApiVersionRoutingFilter.*;
+import static org.forgerock.json.resource.Resources.*;
+import static org.forgerock.json.resource.RouteMatchers.*;
+import static org.forgerock.util.promise.Promises.*;
 
+import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.routing.ApiVersionRouterContext;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.routing.UriRouterContext;
@@ -62,7 +60,8 @@ import org.forgerock.util.promise.Promise;
  * @see AbstractRouter
  * @see RouteMatchers
  */
-public class Router extends AbstractRouter<Router, Request, RequestHandler> implements RequestHandler {
+public class Router extends AbstractRouter<Router, Request, RequestHandler, ApiDescription>
+        implements RequestHandler {
 
     /**
      * Creates a new router with no routes defined.
@@ -78,7 +77,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler> impl
      *
      * @param router The router to be copied.
      */
-    public Router(AbstractRouter<Router, Request, RequestHandler> router) {
+    public Router(AbstractRouter<Router, Request, RequestHandler, ApiDescription> router) {
         super(router);
     }
 

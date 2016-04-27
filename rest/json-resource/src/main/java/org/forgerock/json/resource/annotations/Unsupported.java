@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.annotations;
@@ -22,23 +22,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates an CREST create method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
- * collection resource request handlers.
- * <p>
- * The annotated method's return type must be:
- * <ul>
- *     <li>A {@code Promise<JsonValue, ? extends ResourceException>} promise.</li>
- * </ul>
- * The method must take the following parameters:
- * <ul>
- *     <li>A {@link org.forgerock.json.resource.CreateRequest} for the request.</li>
- * </ul>
- * The method may also take the following parameters:
- * <ul>
- *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
- * </ul>
+ * Mark a method on a resource provider interface implementation as not supported.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface Create {
+public @interface Unsupported {
 }

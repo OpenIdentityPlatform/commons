@@ -16,43 +16,42 @@
 
 package org.forgerock.json.resource;
 
-import static java.util.Collections.singletonMap;
-import static org.forgerock.http.routing.RoutingMode.EQUALS;
-import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
+import static java.util.Collections.*;
+import static org.forgerock.http.routing.RoutingMode.*;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.json.resource.Requests.newCreateRequest;
-import static org.forgerock.json.resource.Resources.newInternalConnection;
-import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.json.resource.Responses.newQueryResponse;
-import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
-import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.json.resource.Requests.*;
+import static org.forgerock.json.resource.Resources.*;
+import static org.forgerock.json.resource.ResourcesTest.HandlerType.*;
+import static org.forgerock.json.resource.Responses.*;
+import static org.forgerock.json.resource.RouteMatchers.*;
+import static org.forgerock.json.resource.Router.*;
 import static org.forgerock.json.resource.TestUtils.*;
-import static org.forgerock.json.resource.test.assertj.AssertJResourceResponseAssert.assertThat;
 import static org.forgerock.json.resource.test.assertj.AssertJActionResponseAssert.assertThat;
-import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.json.resource.test.assertj.AssertJResourceResponseAssert.assertThat;
+import static org.forgerock.util.promise.Promises.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
-import static org.forgerock.json.resource.ResourcesTest.HandlerType.*;
 
 import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
+import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.Create;
+import org.forgerock.api.annotations.Delete;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Patch;
+import org.forgerock.api.annotations.Query;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.Update;
+import org.forgerock.api.enums.QueryType;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.annotations.Action;
-import org.forgerock.json.resource.annotations.Create;
-import org.forgerock.json.resource.annotations.Delete;
-import org.forgerock.json.resource.annotations.Patch;
-import org.forgerock.json.resource.annotations.Query;
-import org.forgerock.json.resource.annotations.Read;
-import org.forgerock.json.resource.annotations.Update;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
@@ -562,115 +561,115 @@ public final class ResourcesTest {
         return router;
     }
 
-    @org.forgerock.json.resource.annotations.RequestHandler
+    @org.forgerock.api.annotations.RequestHandler
     public static final class NoMethods {
     }
 
-    @org.forgerock.json.resource.annotations.RequestHandler
+    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
     public static final class AnnotationCollection {
-        @Create
+        @Create(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myCreate(CreateRequest request) {
             return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
         }
-        @Read
+        @Read(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myRead(String id) {
             return newResultPromise(newResourceResponse("read-" + id, "1", json(object(field("result", null)))));
         }
-        @Update
+        @Update(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request, String id) {
             return newResultPromise(newResourceResponse("update-" + id, "1", json(object(field("result", null)))));
         }
-        @Delete
+        @Delete(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myDelete(String id) {
             return newResultPromise(newResourceResponse("delete-" + id, "1", json(object(field("result", null)))));
         }
-        @Patch
+        @Patch(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request, String id) {
             return newResultPromise(newResourceResponse("patch-" + id, "1", json(object(field("result", null)))));
         }
-        @Action("instanceAction1")
+        @Action(name = "instanceAction1", operationDescription = @Operation)
         public Promise<ActionResponse, ResourceException> instAction1(String id) {
             return newResultPromise(newActionResponse(json(object(field("result", "instanceAction1-" + id)))));
         }
-        @Action
+        @Action(operationDescription = @Operation)
         public Promise<ActionResponse, ResourceException> instanceAction2(String id) {
             return newResultPromise(newActionResponse(json(object(field("result", "instanceAction2-" + id)))));
         }
-        @Action("collectionAction1")
+        @Action(name = "collectionAction1", operationDescription = @Operation)
         public Promise<ActionResponse, ResourceException> action1() {
             return newResultPromise(newActionResponse(json(object(field("result", "collectionAction1")))));
         }
-        @Action
+        @Action(operationDescription = @Operation)
         public Promise<ActionResponse, ResourceException> collectionAction2() {
             return newResultPromise(newActionResponse(json(object(field("result", "collectionAction2")))));
         }
-        @Query
+        @Query(operationDescription = @Operation, type = QueryType.FILTER, queryableFields = "*")
         public Promise<QueryResponse, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
             return newResultPromise(newQueryResponse("query", CountPolicy.NONE, QueryResponse.NO_COUNT));
         }
     }
 
-    @org.forgerock.json.resource.annotations.RequestHandler
+    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
     public static final class AnnotationSingleton {
-        @Read
+        @Read(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myRead() {
             return newResultPromise(newResourceResponse("read", "1", json(object(field("result", "read")))));
         }
-        @Update
+        @Update(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request) {
             return newResultPromise(newResourceResponse("update", "1", json(object(field("result", null)))));
         }
-        @Patch
+        @Patch(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request) {
             return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
         }
-        @Action("instanceAction1")
+        @Action(name = "instanceAction1", operationDescription = @Operation)
         public Promise<ActionResponse, ResourceException> action1() {
             return newResultPromise(newActionResponse(json(object(field("result", "instanceAction1")))));
         }
-        @Action
+        @Action(operationDescription = @Operation)
         public Promise<ActionResponse, ResourceException> instanceAction2() {
             return newResultPromise(newActionResponse(json(object(field("result", "instanceAction2")))));
         }
     }
 
-    @org.forgerock.json.resource.annotations.RequestHandler
+    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
     public static final class AnnotationRequestHandler {
-        @Create
+        @Create(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myCreate(CreateRequest request) {
             return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
         }
-        @Read
+        @Read(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myRead() {
             return newResultPromise(newResourceResponse("read", "1", json(object(field("result", null)))));
         }
-        @Update
+        @Update(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request) {
             return newResultPromise(newResourceResponse("update", "1", json(object(field("result", null)))));
         }
-        @Delete
+        @Delete(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myDelete() {
             return newResultPromise(newResourceResponse("delete", "1", json(object(field("result", null)))));
         }
-        @Patch
+        @Patch(operationDescription = @Operation, mvccSupported = true)
         public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request) {
             return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
         }
-        @Action("instanceAction1")
+        @Action(name = "instanceAction1", operationDescription = @Operation)
         public Promise<ActionResponse, ResourceException> action1() {
             return newResultPromise(newActionResponse(json(object(field("result", "instanceAction1")))));
         }
-        @Action
+        @Action(operationDescription = @Operation)
         public Promise<ActionResponse, ResourceException> instanceAction2() {
             return newResultPromise(newActionResponse(json(object(field("result", "instanceAction2")))));
         }
-        @Query
+        @Query(operationDescription = @Operation, type = QueryType.FILTER, queryableFields = "*")
         public Promise<QueryResponse, ResourceException> query(QueryRequest request, QueryResourceHandler handler) {
             return newResultPromise(newQueryResponse("query", CountPolicy.NONE, QueryResponse.NO_COUNT));
         }
     }
 
-    @org.forgerock.json.resource.annotations.RequestHandler
+    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
     public static final class ConventionCollection {
         public Promise<ResourceResponse, ResourceException> create(CreateRequest request) {
             return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
@@ -692,7 +691,7 @@ public final class ResourcesTest {
         }
     }
 
-    @org.forgerock.json.resource.annotations.RequestHandler
+    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
     public static final class ConventionSingleton {
         public Promise<ResourceResponse, ResourceException> read() {
             return newResultPromise(newResourceResponse("read", "1", json(object(field("result", "read")))));
@@ -723,5 +722,9 @@ public final class ResourcesTest {
         };
 
         abstract RequestHandler makeHandler(Object provider);
+    }
+
+    private static final class SchemaType {
+
     }
 }

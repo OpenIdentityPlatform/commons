@@ -407,6 +407,12 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>api-descriptor</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
 
             <!-- ForgeRock Auth filters dependencies -->
             <dependency>

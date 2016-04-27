@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -28,7 +28,7 @@ import org.forgerock.util.promise.Promise;
 /**
  * Implementation class for {@link Resources#asRequestHandler}.
  */
-final class SynchronousRequestHandlerAdapter implements RequestHandler {
+class SynchronousRequestHandlerAdapter implements RequestHandler {
     private final SynchronousRequestHandler syncHandler;
 
     SynchronousRequestHandlerAdapter(final SynchronousRequestHandler syncHandler) {
