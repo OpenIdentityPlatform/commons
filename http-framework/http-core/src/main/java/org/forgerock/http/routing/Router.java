@@ -21,11 +21,11 @@ import static org.forgerock.http.protocol.Responses.newNotFound;
 import static org.forgerock.http.routing.RouteMatchers.getRemainingRequestUri;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.AbstractRouter;
 import org.forgerock.services.routing.IncomparableRouteMatchException;
 import org.forgerock.services.routing.RouteMatch;
@@ -60,7 +60,7 @@ import org.forgerock.util.promise.Promise;
  * @see UriRouteMatcher
  * @see RouteMatchers
  */
-public final class Router extends AbstractRouter<Router, Request, Handler> implements Handler {
+public final class Router extends AbstractRouter<Router, Request, Handler, Void> implements Handler {
 
     /**
      * Creates a new router with no routes defined.

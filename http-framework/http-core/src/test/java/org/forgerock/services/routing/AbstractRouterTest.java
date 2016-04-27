@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.services.routing;
@@ -332,13 +332,13 @@ public class AbstractRouterTest {
         }
     }
 
-    private static final class TestAbstractRouter extends AbstractRouter<TestAbstractRouter, Request, Handler> {
+    private static final class TestAbstractRouter extends AbstractRouter<TestAbstractRouter, Request, Handler, Void> {
 
         protected TestAbstractRouter() {
             super();
         }
 
-        protected TestAbstractRouter(AbstractRouter<TestAbstractRouter, Request, Handler> router) {
+        protected TestAbstractRouter(AbstractRouter<TestAbstractRouter, Request, Handler, Void> router) {
             super(router);
         }
 
