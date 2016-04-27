@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012 ForgeRock AS
+  !    
+-->
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+    <properties>
+        <title>About ${project.name}</title>
+        <author>ForgeRock AS</author>
+    </properties>
+    <body>
+        <section name="About ${project.name}">
+            <p>
+                JSON Resource provides a common framework for
+                implementing RESTful APIs within ForgeRock projects. It
+                is split into two parts:
+            </p>
+            <ul>
+                <li>
+                    <b>json-resource</b>
+                    - this Maven module which provides the core
+                    interfaces and types such as
+                    <tt>Connections</tt>
+                    ,
+                    <tt>Requests</tt>
+                    , and
+                    <tt>RequestHandlers</tt>
+                </li>
+                <li>
+                    <b>json-resource-servlet</b>
+                    - a Maven module which provides J2EE6 Servlet
+                    integration and defines a common HTTP based REST API
+                    for interacting with JSON Resources.
+                </li>
+            </ul>
+        </section>
+        <section name="Get ${project.name}">
+            <p>
+                JSON Resource is built and made available using Maven.
+                Your project can use JSON Resource by declaring the
+                following Maven dependency:
+            </p>
+            <source>&lt;repositories>
+    &lt;repository>
+        &lt;id>forgerock-staging-repository&lt;/id>
+        &lt;name>ForgeRock Release Repository&lt;/name>
+        &lt;url>http://maven.forgerock.org/repo/releases&lt;/url>
+        &lt;snapshots>
+            &lt;enabled>false&lt;/enabled>
+        &lt;/snapshots>
+    &lt;/repository>
+    &lt;repository>
+        &lt;id>forgerock-snapshots-repository&lt;/id>
+        &lt;name>ForgeRock Snapshot Repository&lt;/name>
+        &lt;url>http://maven.forgerock.org/repo/snapshots&lt;/url>
+        &lt;releases>
+            &lt;enabled>false&lt;/enabled>
+        &lt;/releases>
+    &lt;/repository>
+&lt;/repositories>
+
+...
+
+&lt;dependencies>
+    &lt;dependency>
+        &lt;groupId>${project.groupId}&lt;/groupId>
+        &lt;artifactId>${project.artifactId}&lt;/artifactId>
+        &lt;version>${project.version}&lt;/version>
+    &lt;/dependency>
+&lt;/dependencies></source>
+            <p>
+                See the documentation for
+                <a href="../json-resource-servlet/index.html">json-resource-servlet</a>
+                for instructions on building your own JSON Resource
+                based HTTP Servlets.
+            </p>
+        </section>
+        <section name="Getting started">
+            <p>
+                The following example shows how JSON Resource may be used
+                to create a simple in-memory back-end, connect to it
+                using an internal connection, add two user resources,
+                and then query them:
+            </p>
+            <source>// Create a new in memory backend which will store user resources.
+InMemoryBackend users = new InMemoryBackend();
+
+// Create a router request handler and route requests for user
+// resources to the in memory backend.
+Router router = new Router();
+router.addRoute(EQUALS, "users", users);
+
+// Obtain an internal connection to the router.
+Connection connection = newInternalConnection(router);
+
+// Create two users.
+JsonValue alice = new JsonValue(new LinkedHashMap&lt;String, Object>());
+alice.put("name", "Alice");
+alice.put("age", 21);
+alice.put("role", "administrator");
+Resource r1 = connection.create(new RootContext(), newCreateRequest("users", alice));
+
+JsonValue bob = new JsonValue(new LinkedHashMap&lt;String, Object>());
+bob.put("name", "Bob");
+bob.put("age", 40);
+bob.put("role", "sales");
+Resource r2 = connection.create(new RootContext(), newCreateRequest("users", bob));
+
+// Read a single user.
+Resource r3 = connection.read(new RootContext(), newReadRequest("users", r1.getId()));
+assertEquals(r1, r3);
+
+// Update a single user.
+bob.put("role", "marketing");
+Resource r4 = connection.update(new RootContext(), newUpdateRequest("users", r2.getId(),
+        bob));
+
+// Retrieve the list of users.
+Set&lt;Resource> results = new HashSet&lt;Resource>();
+connection.query(new RootContext(), newQueryRequest("users"), results);
+assertEquals(results, new HashSet&lt;Resource>(Arrays.asList(r3, r4)));</source>
+        </section>
+        <section name="Known Issues">
+            <p>
+                At the moment, JSON Resource is mostly complete and the
+                existing APIs
+                can be considered as stable (no changes are
+                envisaged at
+                the moment). However, there are a few
+                notable missing features which are being tracked in our
+                <a
+                    href="https://bugster.forgerock.org/jira/secure/IssueNavigator.jspa">issue tracker</a>
+                .
+            </p>
+        </section>
+    </body>
+</document>

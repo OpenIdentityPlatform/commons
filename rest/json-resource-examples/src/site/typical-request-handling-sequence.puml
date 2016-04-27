@@ -1,0 +1,78 @@
+@startuml
+title CREST Request Handling
+
+' List participants in order they should display
+entity CHF
+participant HttpAdapter
+participant ConnectionFactory
+participant Request
+participant Connection
+participant RequestRunner
+participant Router
+' Put Filters in a box
+box "FilterChain" #LightBlue
+participant Filter1
+participant Filter2
+participant FilterN
+end box
+participant YourResourceProvider
+
+' Activate Router and ResourceProvider as we assume these are long-lived
+activate Router
+activate YourResourceProvider
+
+' Get started!
+activate HttpAdapter
+activate ConnectionFactory
+
+CHF -> HttpAdapter : handle
+HttpAdapter -> HttpAdapter : determineRequestType
+create Request
+HttpAdapter -> Request : <i>create CREST Request</i>\n<i>from CHF Request</i>
+
+activate Request
+
+HttpAdapter <-- Request
+HttpAdapter -> ConnectionFactory : getConnection<i>Async</i>
+ConnectionFactory --> Connection : <i><<getConnection>></i>
+
+activate Connection
+
+ConnectionFactory --> Connection : <i>Connection</i>
+HttpAdapter --> ConnectionFactory :<i> Connection</i>
+create RequestRunner
+HttpAdapter -> RequestRunner : <i><<create>></i>
+
+activate RequestRunner
+
+' Main RequestRunner sequence through router, filters, and sample provider
+HttpAdapter -> RequestRunner : handleRequest(Connection,Request,...)
+RequestRunner -> Request : accept(this)
+Request -> RequestRunner : visitRequest
+RequestRunner -> Connection : actionAsync
+Connection -> Router : handleAction
+Router -> Router : getBestMatch
+Router -> Filter1 : handleAction
+Filter1 -> Filter2 : handleAction
+Filter2 -> FilterN : handleAction
+FilterN -> YourResourceProvider : handleAction
+FilterN <-- YourResourceProvider : ActionResponse
+Filter2 <-- FilterN : ActionResponse
+Filter1 <-- Filter2 : ActionResponse
+Router <-- Filter1 : ActionResponse
+Connection <-- Router : ActionResponse
+RequestRunner <-- Connection : ActionResponse
+
+deactivate Connection
+
+Request <-- RequestRunner : ActionResponse
+RequestRunner <-- Request : ActionResponse
+
+deactivate Request
+
+HttpAdapter <-- RequestRunner: <i>CHF</i> Response
+
+deactivate RequestRunner
+
+CHF <-- HttpAdapter : <i>CHF</i> Response
+@enduml
