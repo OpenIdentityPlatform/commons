@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.rotation;
 
@@ -27,7 +27,7 @@ public class SizeBasedRotationPolicyTest {
     public static final long MAX_FILE_SIZE_DISABLED = 0L;
 
     @Test
-    public void TestRotateFileThatIsTooLarge() {
+    public void testRotateFileThatIsTooLarge() {
         // given
         final SizeBasedRotationPolicy rotationPolicy = new SizeBasedRotationPolicy(MAX_FILE_SIZE_IN_BYTES);
         final RotatableObject rotatableObject = mock(RotatableObject.class);
@@ -41,7 +41,7 @@ public class SizeBasedRotationPolicyTest {
     }
 
     @Test
-    public void TestRotateFileThatIsLessThanMaxSize() {
+    public void testRotateFileThatIsLessThanMaxSize() {
         // given
         final SizeBasedRotationPolicy rotationPolicy = new SizeBasedRotationPolicy(MAX_FILE_SIZE_IN_BYTES);
         final RotatableObject rotatableObject = mock(RotatableObject.class);
@@ -55,7 +55,7 @@ public class SizeBasedRotationPolicyTest {
     }
 
     @Test
-    public void TestRotateFileWhenMaxSizeIsDisabled() {
+    public void testRotateFileWhenMaxSizeIsDisabled() {
         // given
         final SizeBasedRotationPolicy rotationPolicy = new SizeBasedRotationPolicy(MAX_FILE_SIZE_DISABLED);
         final RotatableObject rotatableObject = mock(RotatableObject.class);

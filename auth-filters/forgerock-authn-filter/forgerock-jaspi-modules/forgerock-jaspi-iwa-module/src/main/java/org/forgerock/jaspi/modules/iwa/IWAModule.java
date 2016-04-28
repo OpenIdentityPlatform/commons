@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.iwa;
@@ -44,7 +44,6 @@ import org.forgerock.util.promise.Promise;
 /**
  * Authentication module that uses IWA for authentication.
  *
- * @author Phill Cunningon
  * @since 1.0.0
  */
 public class IWAModule implements AsyncServerAuthModule {

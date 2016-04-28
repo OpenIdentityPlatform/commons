@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.json;
 
@@ -67,7 +67,7 @@ public class AuditJsonConfigTest {
         };
     }
 
-    @Test(dataProvider="eventHandlerBadJsonConfigurations", expectedExceptions=AuditException.class)
+    @Test(dataProvider = "eventHandlerBadJsonConfigurations", expectedExceptions = AuditException.class)
     public void testRegisterHandlerWhenConfigurationIsNotCorrect(String jsonResource) throws Exception {
         AuditServiceBuilder auditServiceBuilder = newAuditService().withConfiguration(loadConfiguration());
         final JsonValue config = loadJsonValue(jsonResource);

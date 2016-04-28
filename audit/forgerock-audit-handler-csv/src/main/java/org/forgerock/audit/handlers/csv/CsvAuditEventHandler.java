@@ -100,19 +100,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
-    private static final Logger logger = LoggerFactory.getLogger(CsvAuditEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvAuditEventHandler.class);
 
     /** Name of action to force file rotation. */
     public static final String ROTATE_FILE_ACTION_NAME = "rotate";
 
     static final String SECURE_CSV_FILENAME_PREFIX = "tamper-evident-";
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-    private static final Random random;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final Random RANDOM;
 
     static {
         try {
-            random = SecureRandom.getInstance("SHA1PRNG");
+            RANDOM = SecureRandom.getInstance("SHA1PRNG");
         } catch (NoSuchAlgorithmException ex) {
             throw new RuntimeException(ex);
         }
@@ -180,7 +180,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 }
                 fieldOrderByTopic.put(topic, Collections.unmodifiableSet(fieldOrder));
             } catch (ResourceException e) {
-                logger.error(topic + " topic schema meta-data misconfigured.");
+                LOGGER.error(topic + " topic schema meta-data misconfigured.");
             }
         }
         this.fieldOrderByTopic = Collections.unmodifiableMap(fieldOrderByTopic);
@@ -202,14 +202,14 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
      */
     @Override
     public void startup() throws ResourceException {
-        logger.trace("Audit logging to: {}", configuration.getLogDirectory());
+        LOGGER.trace("Audit logging to: {}", configuration.getLogDirectory());
         File file = new File(configuration.getLogDirectory());
         if (!file.isDirectory()) {
             if (file.exists()) {
-                logger.warn("Specified path is file but should be a directory: {}", configuration.getLogDirectory());
+                LOGGER.warn("Specified path is file but should be a directory: {}", configuration.getLogDirectory());
             } else {
                 if (!file.mkdirs()) {
-                    logger.warn("Unable to create audit directory in the path: {}", configuration.getLogDirectory());
+                    LOGGER.warn("Unable to create audit directory in the path: {}", configuration.getLogDirectory());
                 }
             }
         }
@@ -218,7 +218,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             try {
                 openWriter(topic, auditLogFile);
             } catch (IOException e) {
-                logger.error("Error when creating audit file: {}", auditLogFile, e);
+                LOGGER.error("Error when creating audit file: {}", auditLogFile, e);
             }
         }
     }
@@ -262,7 +262,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             writeEvent(topic, csvWriter, event);
         } catch (IOException ex) {
             // Re-try once in case the writer stream became closed for some reason
-            logger.debug("IOException while writing ({})", ex.getMessage());
+            LOGGER.debug("IOException while writing ({})", ex.getMessage());
             CsvWriter newCsvWriter;
             // An IOException may be thrown if the csvWriter reference we have above was reset by another thread.
             // Synchronize to ensure that we wait for any reset to complete before proceeding - Otherwise, we may
@@ -273,9 +273,9 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 if (newCsvWriter == csvWriter) {
                     // If both references are the same, the writer hasn't been reset.
                     newCsvWriter = resetAndReopenWriter(topic, false);
-                    logger.debug("Resetting writer");
+                    LOGGER.debug("Resetting writer");
                 } else {
-                    logger.debug("Writer reset by another thread");
+                    LOGGER.debug("Writer reset by another thread");
                 }
             }
             try {
@@ -297,11 +297,11 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     private CsvWriter getWriter(String topic) throws BadRequestException {
         CsvWriter csvWriter = writers.get(topic);
         if (csvWriter == null) {
-            logger.debug("CSV file writer for {} topic is null; checking for reset by another thread", topic);
+            LOGGER.debug("CSV file writer for {} topic is null; checking for reset by another thread", topic);
             synchronized (this) {
                 csvWriter = writers.get(topic);
                 if (csvWriter == null) {
-                    logger.debug("CSV file writer for {} topic not reset by another thread; resetting", topic);
+                    LOGGER.debug("CSV file writer for {} topic not reset by another thread; resetting", topic);
                     csvWriter = resetAndReopenWriter(topic, false);
                 }
             }
@@ -335,7 +335,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
     private synchronized CsvWriter createCsvWriter(final File auditFile, String topic) throws IOException {
         String[] headers = buildHeaders(fieldOrderByTopic.get(topic));
         if (configuration.getSecurity().isEnabled()) {
-            return new SecureCsvWriter(auditFile, headers, csvPreference, configuration, keyStoreHandler, random);
+            return new SecureCsvWriter(auditFile, headers, csvPreference, configuration, keyStoreHandler, RANDOM);
         } else {
             return new StandardCsvWriter(auditFile, headers, csvPreference, configuration);
         }
@@ -422,7 +422,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             throws BadRequestException {
         CsvWriter csvWriter = writers.get(topic);
         if (csvWriter == null) {
-            logger.debug("Unable to rotate file for topic: {}", topic);
+            LOGGER.debug("Unable to rotate file for topic: {}", topic);
             throw new BadRequestException("Unable to rotate file for topic: " + topic);
         }
         if (configuration.getFileRotation().isRotationEnabled()) {
@@ -433,8 +433,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             } catch (IOException e) {
                 throw new BadRequestException("Error when rotating file for topic: " + topic, e);
             }
-        }
-        else {
+        } else {
             // use a default rotation instead
             resetAndReopenWriter(topic, true);
         }
@@ -485,7 +484,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 writerToClose.close();
             } catch (Exception ex) {
                 // Debug level as the writer is expected to potentially be invalid
-                logger.debug("File writer close in closeWriter reported failure ", ex);
+                LOGGER.debug("File writer close in closeWriter reported failure ", ex);
             }
         }
     }
@@ -552,15 +551,15 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
             // Check if value is JSON object
             if (((String) value).startsWith("{") && ((String) value).endsWith("}")) {
                 try {
-                    jv = new JsonValue(mapper.readValue((String) value, Map.class));
+                    jv = new JsonValue(MAPPER.readValue((String) value, Map.class));
                 } catch (Exception e) {
-                    logger.debug("Error parsing JSON string: " + e.getMessage());
+                    LOGGER.debug("Error parsing JSON string: " + e.getMessage());
                 }
             } else if (((String) value).startsWith("[") && ((String) value).endsWith("]")) {
                 try {
-                    jv = new JsonValue(mapper.readValue((String) value, List.class));
+                    jv = new JsonValue(MAPPER.readValue((String) value, List.class));
                 } catch (Exception e) {
-                    logger.debug("Error parsing JSON string: " + e.getMessage());
+                    LOGGER.debug("Error parsing JSON string: " + e.getMessage());
                 }
             }
             if (jv == null) {
@@ -580,7 +579,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                 }
             }
         } catch (IOException e) {
-            logger.error("Unable to close filewriters during {} cleanup", this.getClass().getName(), e);
+            LOGGER.error("Unable to close filewriters during {} cleanup", this.getClass().getName(), e);
             throw new InternalServerErrorException(
                     "Unable to close filewriters during " + this.getClass().getName() + " cleanup", e);
         }

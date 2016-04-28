@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.rotation;
 
@@ -34,7 +34,7 @@ public class FixedTimeRotationPolicyTest {
     public static final String ONE_MINUTE = "1 minute";
 
     @Test
-    public void TestRotation() {
+    public void testRotation() {
         // given
         // rotateIfNeeded 50 ms after midnight
         final List<Duration> rotationTimes = Collections.singletonList(Duration.duration(ONE_MINUTE));

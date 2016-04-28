@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto;
@@ -68,6 +68,9 @@ public class JsonCrypto {
      * Note: This method does not suppress transformers in the specified value. Consequently,
      * this method can return {@code false} if members are transformed, for example if a
      * {@link JsonCryptoTransformer} transforms the value as it is being inspected.
+     *
+     * @param value The JSON to check.
+     * @return The result.
      */
     public static boolean isJsonCrypto(JsonValue value) {
         boolean result = false;
@@ -80,6 +83,7 @@ public class JsonCrypto {
 
     /**
      * Returns the type of JSON cryptographic representation.
+     * @return The type.
      */
     public String getType() {
         return type;
@@ -96,6 +100,7 @@ public class JsonCrypto {
 
     /**
      * Returns the JSON cryptographic value.
+     * @return The value.
      */
     public JsonValue getValue() {
         return value;
@@ -124,6 +129,7 @@ public class JsonCrypto {
 
     /**
      * Returns this object as a {@code $crypto} JSON object value.
+     * @return The value.
      */
     public JsonValue toJsonValue() {
         HashMap<String, Object> crypto = new HashMap<>();

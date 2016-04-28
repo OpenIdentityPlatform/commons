@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.schema;
@@ -51,10 +51,10 @@ import org.kohsuke.args4j.Option;
 /**
  * Command-line interface to manipulate schemas.
  */
-public class Main {
+public final class Main {
 
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final String ROOT_SCHEMA_ID = "http://www.forgerock.org/schema/";
 
     private final Map<URI, Validator> schemaCache = new HashMap<>();
@@ -62,13 +62,16 @@ public class Main {
     @Option(name = "-v", aliases = {"--verbose"}, usage = "display all validation error not just the first")
     private boolean verbose;
 
-    @Option(name = "-s", aliases = {"--schemas"}, required = true, usage = "file or folder contains the schema(s)", metaVar = "./schema")
+    @Option(name = "-s", aliases = {"--schemas"}, required = true, usage = "file or folder contains the schema(s)",
+            metaVar = "./schema")
     private File schemaFile = new File("./schema");
 
-    @Option(name = "-b", aliases = {"--base"}, usage = "base value to resolve relative schema IDs. Default: " + ROOT_SCHEMA_ID, metaVar = ROOT_SCHEMA_ID)
+    @Option(name = "-b", aliases = {"--base"}, metaVar = ROOT_SCHEMA_ID,
+            usage = "base value to resolve relative schema IDs. Default: " + ROOT_SCHEMA_ID)
     private String schemeBase = ROOT_SCHEMA_ID;
 
-    @Option(name = "-i", aliases = {"--id"}, usage = "id of the schema. Optional if the object has \"$schema\" property")
+    @Option(name = "-i", aliases = {"--id"},
+            usage = "id of the schema. Optional if the object has \"$schema\" property")
     private String schemaURI;
 
     @Option(name = "-f", aliases = {"--file"}, usage = "input from this file", metaVar = "sample.json")
@@ -78,11 +81,16 @@ public class Main {
     @Argument
     private List<String> arguments = new ArrayList<>();
 
+    /**
+     * Entry point.
+     * @param args The CLI args.
+     * @throws Exception On failure.
+     */
     public static void main(String[] args) throws Exception {
         new Main().doMain(args);
     }
 
-    public void doMain(String[] args) throws Exception {
+    private void doMain(String[] args) throws Exception {
         CmdLineParser parser = new CmdLineParser(this);
 
         // if you have a wider console, you could increase the value;
@@ -128,7 +136,7 @@ public class Main {
         init(base);
 
         if (null == inputFile) {
-            for (; ; ) {
+            while (true) {
                 try {
                     validate(loadFromConsole());
                 } catch (Exception e) {
@@ -147,7 +155,11 @@ public class Main {
     //Initialization
 
     private void init(URI base) throws IOException {
-        System.out.append("Loading schemas from: ").append(schemaFile.getAbsolutePath()).append(" with base ").append(base.toString()).println(" URI");
+        System.out.append("Loading schemas from: ")
+                .append(schemaFile.getAbsolutePath())
+                .append(" with base ")
+                .append(base.toString())
+                .println(" URI");
         if (schemaFile.isDirectory()) {
             validateDirectory(schemaFile);
             FileFilter filter = new FileFilter() {
@@ -171,7 +183,7 @@ public class Main {
     }
 
     private void loadSchema(URI base, File schemaFile) throws IOException {
-        JsonValue schemaMap = new JsonValue(mapper.readValue(new FileInputStream(schemaFile), Map.class));
+        JsonValue schemaMap = new JsonValue(MAPPER.readValue(new FileInputStream(schemaFile), Map.class));
         URI id = schemaMap.get(Constants.ID).required().asURI();
         Validator v = ObjectValidatorFactory.getTypeValidator(schemaMap.asMap());
         if (!id.isAbsolute()) {
@@ -293,11 +305,11 @@ public class Main {
                 stringBuilder.append(input);
             }
         }
-        return new JsonValue(mapper.readValue(stringBuilder.toString(), Object.class));
+        return new JsonValue(MAPPER.readValue(stringBuilder.toString(), Object.class));
     }
 
     private JsonValue loadFromFile() throws IOException {
-        return new JsonValue(mapper.readValue(inputFile, Object.class));
+        return new JsonValue(MAPPER.readValue(inputFile, Object.class));
     }
 
 
@@ -312,10 +324,15 @@ public class Main {
         sb.append(top.substring(sb.length()));
 
         System.out.println(sb);
-        if ((ex instanceof SchemaException) && (null != ((SchemaException) ex).getJsonValue()))
+        if ((ex instanceof SchemaException) && (null != ((SchemaException) ex).getJsonValue())) {
             System.out.append("Path: ").println(((SchemaException) ex).getJsonValue().getPointer().toString());
+        }
         System.out.append("Message: ").println(ex.getMessage());
         System.out.println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -");
+
+    }
+
+    private Main() {
 
     }
 }

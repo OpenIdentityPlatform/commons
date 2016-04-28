@@ -41,12 +41,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, Void, JsonPointer> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ElasticsearchQueryFilterVisitor.class);
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticsearchQueryFilterVisitor.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
      * Creates a
-     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-all-query.html">match_all</a>
+     * <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-match-all-query.html">
+     *     match_all</a>
      * query for literal true. Literal false will return an {@link UnsupportedOperationException}.
      * @param aVoid A unused {@link Void} parameter.
      * @param value The booolean true or false literal.
@@ -56,7 +57,7 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     @Override
     public JsonValue visitBooleanLiteralFilter(Void aVoid, boolean value) {
         // "match_all": { }
-        if (value == false) {
+        if (!value) {
             throw new UnsupportedOperationException("Boolean literal filter (false) not supported on this endpoint");
         }
         return json(object(field("match_all", object())));
@@ -80,12 +81,12 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
                             "wildcard",
                             object(field(
                                     jsonPointerToDotNotation(normalizeJsonPointer(field).toString()),
-                                    "*" + mapper.writeValueAsString(valueAssertion) + "*"
+                                    "*" + MAPPER.writeValueAsString(valueAssertion) + "*"
                             ))
                     ))
             );
         } catch (JsonProcessingException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
             return json(object());
         }
     }
@@ -191,7 +192,8 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     }
 
     /**
-     * Creates a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-bool-query.html">bool</a>
+     * Creates a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-bool-query.html">
+     *     bool</a>
      * query that populates the "must_not" field.
      * @param aVoid A unused {@link Void} parameter.
      * @param subFilter The subFilters for the not operation.
@@ -206,7 +208,8 @@ class ElasticsearchQueryFilterVisitor implements QueryFilterVisitor<JsonValue, V
     }
 
     /**
-     * Creates a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-bool-query.html">bool</a>
+     * Creates a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/2.0/query-dsl-bool-query.html">
+     *     bool</a>
      * query that populates the "should" field.
      * @param aVoid A unused {@link Void} parameter.
      * @param subFilters The subFilters for the or operation.

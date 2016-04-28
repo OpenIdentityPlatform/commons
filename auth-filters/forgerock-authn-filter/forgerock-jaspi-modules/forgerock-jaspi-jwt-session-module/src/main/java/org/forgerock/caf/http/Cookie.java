@@ -11,19 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.http;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.caf.authentication.api.MessageInfoContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionCookie;
 
 /**
@@ -33,6 +32,7 @@ import org.forgerock.jaspi.modules.session.jwt.JwtSessionCookie;
  * @see javax.servlet.http.Cookie
  * @since 1.5.0
  */
+//@Checkstyle:ignore
 public class Cookie implements JwtSessionCookie {
 
     //So as to test both Servlet 2.5 or 3.0 being present

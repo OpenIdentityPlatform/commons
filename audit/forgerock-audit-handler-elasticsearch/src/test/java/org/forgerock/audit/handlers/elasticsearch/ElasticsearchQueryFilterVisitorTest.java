@@ -45,7 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ElasticsearchQueryFilterVisitorTest {
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private static final JsonPointer FIELD_1 = new JsonPointer("field1");
     private static final JsonPointer FIELD_2 = new JsonPointer("field2");
@@ -55,10 +55,10 @@ public class ElasticsearchQueryFilterVisitorTest {
     private static final String VALUE_2 = "value2";
     private static final String EM_OPERATOR = "em";
 
-    private static final ElasticsearchQueryFilterVisitor visitor = new ElasticsearchQueryFilterVisitor();
+    private static final ElasticsearchQueryFilterVisitor VISITOR = new ElasticsearchQueryFilterVisitor();
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void TestExtendedMatchFilter() {
+    public void testExtendedMatchFilter() {
         // given
         final ElasticsearchQueryFilterVisitor elasticsearchQueryFilterVisitor = new ElasticsearchQueryFilterVisitor();
         final QueryFilter<JsonPointer> queryFilter = extendedMatch(FIELD_1, EM_OPERATOR, VALUE_1);
@@ -68,7 +68,7 @@ public class ElasticsearchQueryFilterVisitorTest {
     }
 
     @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void TestBooleanLiteralFilterFalse() throws Exception {
+    public void testBooleanLiteralFilterFalse() throws Exception {
         // given
         final ElasticsearchQueryFilterVisitor elasticsearchQueryFilterVisitor = new ElasticsearchQueryFilterVisitor();
         final QueryFilter<JsonPointer> queryFilter = QueryFilter.alwaysFalse();
@@ -78,7 +78,7 @@ public class ElasticsearchQueryFilterVisitorTest {
     }
 
     @DataProvider
-    public Object[][] elasticsearchData() throws Exception{
+    public Object[][] elasticsearchData() throws Exception {
         // Use longs for integer values because valueOf parses integers as Longs and
         // equals() is sensitive to the type.
         return new Object[][] {
@@ -97,7 +97,7 @@ public class ElasticsearchQueryFilterVisitorTest {
                                 field("wildcard", object(
                                         field(
                                                 jsonPointerToDotNotation(FIELD_1.toString()),
-                                                "*" + mapper.writeValueAsString(VALUE_1) + "*"
+                                                "*" + MAPPER.writeValueAsString(VALUE_1) + "*"
                                         )
                                 ))
                         ))
@@ -196,6 +196,6 @@ public class ElasticsearchQueryFilterVisitorTest {
 
     @Test(dataProvider = "elasticsearchData")
     public void testToString(QueryFilter<JsonPointer> filter, JsonValue jsonObject) {
-        assertThat(filter.accept(visitor, null).asMap()).isEqualTo(jsonObject.asMap());
+        assertThat(filter.accept(VISITOR, null).asMap()).isEqualTo(jsonObject.asMap());
     }
 }

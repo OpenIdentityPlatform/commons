@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
@@ -145,8 +145,8 @@ public class ModuleAuditingIT extends HandlerHolder {
              */
             {"Single Failing Auth Module Only",
                 null, moduleArray(moduleParams(FailureAuditingAuthModule.class, "AUTH-MODULE-ONE",
-                    SEND_FAILURE_AUTH_STATUS, null)), 401, "FAILED", false, "FailureAuditingAuthModule",
-                    new MapEntry[0], new MapEntry[]{entry("message", "FAILURE_REASON")}
+                SEND_FAILURE_AUTH_STATUS, null)), 401, "FAILED", false, "FailureAuditingAuthModule",
+                new MapEntry[0], new MapEntry[]{entry("message", "FAILURE_REASON")}
             },
         };
     }
@@ -161,7 +161,8 @@ public class ModuleAuditingIT extends HandlerHolder {
         Request request = given(handler, sessionModuleParams, authModuleParametersList)
                 .setUri("http://localhost/protected/resource").setMethod("GET");
 
-        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()), request);
+        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
+                request);
         assertThat(result).succeeded();
         assertThat(result.get().getStatus().getCode()).isEqualTo(expectedResponseStatus);
 

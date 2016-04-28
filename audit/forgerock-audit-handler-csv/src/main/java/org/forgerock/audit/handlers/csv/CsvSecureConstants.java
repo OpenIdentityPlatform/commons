@@ -11,7 +11,7 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2015 ForgeRock AS.
+* Copyright 2015-2016 ForgeRock AS.
 */
 package org.forgerock.audit.handlers.csv;
 
@@ -19,10 +19,10 @@ package org.forgerock.audit.handlers.csv;
  *
  * Holds the constants shared between the CsvSecure classes.
  */
-class CsvSecureConstants {
+final class CsvSecureConstants {
 
-    // The key stored with the label "InitialKey" is the first key (salt) used to generate the HEADER_HMAC for the first row.
-    // Then on this key, we apply a rotation that gives another key, that will be used to generated the HEADER_HMAC
+    // The key stored with the label "InitialKey" is the first key (salt) used to generate the HEADER_HMAC for the first
+    // row. Then on this key, we apply a rotation that gives another key, that will be used to generated the HEADER_HMAC
     // for the second row, ... and so on.
     static final String ENTRY_INITIAL_KEY = "InitialKey";
     // The last signature inserted into the CSV file
@@ -45,5 +45,5 @@ class CsvSecureConstants {
     private CsvSecureConstants() {
         // Prevent from instantiating
     }
-    
+
 }

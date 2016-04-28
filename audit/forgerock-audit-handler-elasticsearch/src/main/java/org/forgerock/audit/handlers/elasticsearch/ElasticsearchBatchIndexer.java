@@ -70,8 +70,8 @@ class ElasticsearchBatchIndexer {
                 max(maxBatchedEvents, MIN_BATCH_SIZE),
                 max(averagePerEventPayloadSize, MIN_PER_EVENT_PAYLOAD_SIZE),
                 autoFlush, queue, scheduler, Reject.checkNotNull(eventHandler));
-        this.writeInterval = writeInterval == null || writeInterval.getValue() <= 0 ?
-                DEFAULT_WRITE_INTERVAL : writeInterval;
+        this.writeInterval = writeInterval == null || writeInterval.getValue() <= 0
+                ? DEFAULT_WRITE_INTERVAL : writeInterval;
     }
 
     /**

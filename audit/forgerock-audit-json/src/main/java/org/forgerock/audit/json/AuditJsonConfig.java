@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.json;
 
@@ -46,8 +46,8 @@ import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
  * Utility class to facilitate creation and configuration of audit service and audit event handlers
  * through JSON.
  */
-public class AuditJsonConfig {
-    private static final Logger logger = LoggerFactory.getLogger(AuditJsonConfig.class);
+public final class AuditJsonConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditJsonConfig.class);
 
     /** Field containing the name of an event handler. */
     private static final String NAME_FIELD = "name";
@@ -59,12 +59,10 @@ public class AuditJsonConfig {
     private static final String EVENTS_FIELD = "events";
 
     /** The mapper from JSON structure to Java object. */
-    //checkstyle:off
-    private static final ObjectMapper mapper = new ObjectMapper();
-    // checkstyle:on
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final AnnotationIntrospector defaultAnnotationIntrospector = new JacksonAnnotationIntrospector();
-    private static final AnnotationIntrospector helpAppenderAnnotationIntrospector =
+    private static final AnnotationIntrospector DEFAULT_ANNOTATION_INTROSPECTOR = new JacksonAnnotationIntrospector();
+    private static final AnnotationIntrospector HELP_APPENDER_ANNOTATION_INTROSPECTOR =
             new HelpAppenderAnnotationIntrospector();
 
     private AuditJsonConfig() {
@@ -82,7 +80,7 @@ public class AuditJsonConfig {
      */
     public static JsonValue getJson(InputStream input) throws AuditException {
         try {
-            return new JsonValue(mapper.readValue(input, LinkedHashMap.class));
+            return new JsonValue(MAPPER.readValue(input, LinkedHashMap.class));
         } catch (IOException e) {
             throw new AuditException(String.format("Unable to retrieve json value from json input stream"), e);
         }
@@ -99,7 +97,7 @@ public class AuditJsonConfig {
      */
     public static AuditServiceConfiguration parseAuditServiceConfiguration(InputStream input) throws AuditException {
         try {
-            return mapper.readValue(input, AuditServiceConfiguration.class);
+            return MAPPER.readValue(input, AuditServiceConfiguration.class);
         } catch (IOException e) {
             throw new AuditException(String.format("Unable to retrieve class %s from json input stream",
                     AuditServiceConfiguration.class), e);
@@ -120,7 +118,7 @@ public class AuditJsonConfig {
             return new AuditServiceConfiguration();
         }
         try {
-            return mapper.readValue(json, AuditServiceConfiguration.class);
+            return MAPPER.readValue(json, AuditServiceConfiguration.class);
         } catch (IOException e) {
             throw new AuditException(String.format("Unable to retrieve class %s from json: %s",
                     AuditServiceConfiguration.class, json), e);
@@ -257,6 +255,7 @@ public class AuditJsonConfig {
      *          The type of the configuration bean for the event handler.
      * @param jsonConfig
      *          The configuration of the audit event handler as JSON.
+     * @param clazz The class for type {@code <C>}.
      * @return the fully configured audit event handler
      * @throws AuditException
      *             If any error occurs while instantiating the configuration from JSON.
@@ -266,7 +265,7 @@ public class AuditJsonConfig {
         C configuration = null;
         JsonValue conf = jsonConfig.get(CONFIG_FIELD);
         if (conf != null) {
-            configuration = mapper.convertValue(conf.getObject(), clazz);
+            configuration = MAPPER.convertValue(conf.getObject(), clazz);
         }
         return configuration;
     }
@@ -290,17 +289,17 @@ public class AuditJsonConfig {
                                 classLoader),
                         classLoader);
         try {
-            mapper.setAnnotationIntrospector(helpAppenderAnnotationIntrospector);
+            MAPPER.setAnnotationIntrospector(HELP_APPENDER_ANNOTATION_INTROSPECTOR);
             SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
-            mapper.acceptJsonFormatVisitor(mapper.constructType(eventHandlerConfiguration), visitor);
+            MAPPER.acceptJsonFormatVisitor(MAPPER.constructType(eventHandlerConfiguration), visitor);
             JsonSchema jsonSchema = visitor.finalSchema();
-            final JsonValue schema = json(mapper.readValue(mapper.writeValueAsString(jsonSchema), Map.class));
-            mapper.setAnnotationIntrospector(defaultAnnotationIntrospector);
+            final JsonValue schema = json(MAPPER.readValue(MAPPER.writeValueAsString(jsonSchema), Map.class));
+            MAPPER.setAnnotationIntrospector(DEFAULT_ANNOTATION_INTROSPECTOR);
             return schema;
         } catch (IOException e) {
             final String error = String.format("Unable to parse configuration class schema for configuration class %s",
                     eventHandlerConfiguration.getName());
-            logger.error(error, e);
+            LOGGER.error(error, e);
             throw new AuditException(error, e);
         }
     }

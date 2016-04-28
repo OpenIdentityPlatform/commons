@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -69,7 +69,8 @@ class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvider {
             pageSizeParam = Integer.MAX_VALUE;
         }
 
-        final String filterString = queryRequest.getQueryFilter().accept(queryFilterVisitor, tableMappingParametersPair).toSql();
+        final String filterString = queryRequest.getQueryFilter().accept(queryFilterVisitor, tableMappingParametersPair)
+                .toSql();
 
         // default to ordering by id
         String keysClause = "ORDER BY id ASC";
@@ -81,21 +82,21 @@ class OracleDatabaseStatementProvider extends BaseDatabaseStatementProvider {
         if (sortKeys != null && sortKeys.size() > 0) {
             final List<String> keys = new ArrayList<>();
             for (final SortKey sortKey : sortKeys) {
-                keys.add(tableMappingParametersPair.getColumnName(sortKey.getField()) + (sortKey.isAscendingOrder() ?
-                        " ASC" : " DESC"));
+                keys.add(tableMappingParametersPair.getColumnName(sortKey.getField()) + (sortKey.isAscendingOrder()
+                        ? " ASC" : " DESC"));
             }
             keysClause = "ORDER BY " + joinAsString(", ", keys);
         }
 
         final String tableName = tableMappingParametersPair.getTableMapping().getTable();
-        return String.format("SELECT * " +
-                        "FROM ( SELECT %s.*, row_number() OVER ( %s ) AS R FROM %s WHERE %s ) " +
-                        "WHERE R BETWEEN %d AND %d ORDER BY R",
+        return String.format("SELECT * "
+                + "FROM ( SELECT %s.*, row_number() OVER ( %s ) AS R FROM %s WHERE %s ) "
+                + "WHERE R BETWEEN %d AND %d ORDER BY R",
                 tableName,
                 keysClause,
                 tableName,
                 filterString,
-                offsetParam+1,
+                offsetParam + 1,
                 offsetParam + pageSizeParam);
     }
 

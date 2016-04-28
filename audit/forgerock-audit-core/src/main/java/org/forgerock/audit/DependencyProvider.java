@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit;
@@ -24,6 +24,7 @@ public interface DependencyProvider {
      * Retrieve the dependency of type T.
      *
      * @param clazz the dependency's class
+     * @param <T> The type of the dependency class.
      * @return the dependency
      * @throws ClassNotFoundException if provider does not have a class registered for the
      *         requested class type

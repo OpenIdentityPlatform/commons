@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.rotation;
 
@@ -30,7 +30,7 @@ public class TimeLimitRotationPolicyTest {
     private final Duration disabled = Duration.duration(DISABLED);
 
     @Test
-    public void TestRotateFileThatIsTooOld() {
+    public void testRotateFileThatIsTooOld() {
         // given
         final TimeLimitRotationPolicy rotationPolicy = new TimeLimitRotationPolicy(duration);
         final RotatableObject rotatableObject = mock(RotatableObject.class);
@@ -44,7 +44,7 @@ public class TimeLimitRotationPolicyTest {
     }
 
     @Test
-    public void TestRotateFileLastRotatedBeforeDuration() {
+    public void testRotateFileLastRotatedBeforeDuration() {
         // given
         final TimeLimitRotationPolicy rotationPolicy = new TimeLimitRotationPolicy(duration);
         final RotatableObject rotatableObject = mock(RotatableObject.class);
@@ -58,7 +58,7 @@ public class TimeLimitRotationPolicyTest {
     }
 
     @Test
-    public void TestRotateFileWhenMaxSizeIsDisabled() {
+    public void testRotateFileWhenMaxSizeIsDisabled() {
         // given
         final TimeLimitRotationPolicy rotationPolicy = new TimeLimitRotationPolicy(disabled);
         final RotatableObject rotatableObject = mock(RotatableObject.class);

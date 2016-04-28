@@ -71,7 +71,7 @@ class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
      * @param threads The number of writer threads.
      */
     public BufferedJdbcAuditEventExecutor(int capacity, boolean autoFlush, JdbcAuditEventExecutor delegate,
-                                          Duration writeInterval, int threads, int maxBatchedEvents, final DataSource dataSource) {
+            Duration writeInterval, int threads, int maxBatchedEvents, final DataSource dataSource) {
         Reject.ifNull(delegate);
         this.autoFlush = autoFlush;
         this.delegate = delegate;
@@ -188,7 +188,8 @@ class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
                 Map<String, Collection<JdbcAuditEvent>> sqlTemplatesToEvents = groupSqlTemplatesToEvents(events);
                 for (Entry<String, Collection<JdbcAuditEvent>> sqlTemplate : sqlTemplatesToEvents.entrySet()) {
                     // Use a PreparedStatement batch to insert the events into the DB
-                    try (final PreparedStatement preparedStatement = connection.prepareStatement(sqlTemplate.getKey())) {
+                    String key = sqlTemplate.getKey();
+                    try (final PreparedStatement preparedStatement = connection.prepareStatement(key)) {
                         for (JdbcAuditEvent event : sqlTemplate.getValue()) {
                             preparedStatement.clearParameters();
                             try {
@@ -227,7 +228,7 @@ class BufferedJdbcAuditEventExecutor implements JdbcAuditEventExecutor {
         }
         return sqlTemplatesToEvents;
     }
-    
+
     private void shutdownPool(final ExecutorService executorService) {
         try {
             executorService.shutdown();

@@ -11,23 +11,31 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.schema.validator;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.forgerock.json.schema.validator.validators.*;
-import org.testng.annotations.Test;
-
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
+import static org.assertj.core.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
+
+import org.forgerock.json.schema.validator.validators.AnyTypeValidator;
+import org.forgerock.json.schema.validator.validators.ArrayTypeValidator;
+import org.forgerock.json.schema.validator.validators.BooleanTypeValidator;
+import org.forgerock.json.schema.validator.validators.IntegerTypeValidator;
+import org.forgerock.json.schema.validator.validators.NullTypeValidator;
+import org.forgerock.json.schema.validator.validators.NumberTypeValidator;
+import org.forgerock.json.schema.validator.validators.ObjectTypeValidator;
+import org.forgerock.json.schema.validator.validators.StringTypeValidator;
+import org.forgerock.json.schema.validator.validators.UnionTypeValidator;
+import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
 public class ObjectValidatorFactoryTest {
@@ -36,38 +44,38 @@ public class ObjectValidatorFactoryTest {
     public void testGetTypeValidatorBySchema() throws Exception {
         Map<String, Object> schema = new HashMap<>();
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(AnyTypeValidator.class);
-        schema.put(Constants.TYPE,Constants.TYPE_STRING);
+        schema.put(Constants.TYPE, Constants.TYPE_STRING);
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(StringTypeValidator.class);
-        schema.put(Constants.TYPE,Constants.TYPE_NUMBER);
+        schema.put(Constants.TYPE, Constants.TYPE_NUMBER);
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(NumberTypeValidator.class);
-        schema.put(Constants.TYPE,Constants.TYPE_INTEGER);
+        schema.put(Constants.TYPE, Constants.TYPE_INTEGER);
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(IntegerTypeValidator.class);
-        schema.put(Constants.TYPE,Constants.TYPE_BOOLEAN);
+        schema.put(Constants.TYPE, Constants.TYPE_BOOLEAN);
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(BooleanTypeValidator.class);
-        schema.put(Constants.TYPE,Constants.TYPE_OBJECT);
+        schema.put(Constants.TYPE, Constants.TYPE_OBJECT);
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(ObjectTypeValidator.class);
-        schema.put(Constants.TYPE,Constants.TYPE_ARRAY);
+        schema.put(Constants.TYPE, Constants.TYPE_ARRAY);
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(ArrayTypeValidator.class);
-        schema.put(Constants.TYPE,Constants.TYPE_NULL);
+        schema.put(Constants.TYPE, Constants.TYPE_NULL);
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(NullTypeValidator.class);
-        schema.put(Constants.TYPE,Constants.TYPE_ANY);
+        schema.put(Constants.TYPE, Constants.TYPE_ANY);
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(AnyTypeValidator.class);
-        schema.put(Constants.TYPE, Arrays.asList(Constants.TYPE_ANY,Constants.TYPE_NULL));
+        schema.put(Constants.TYPE, Arrays.asList(Constants.TYPE_ANY, Constants.TYPE_NULL));
         assertThat(ObjectValidatorFactory.getTypeValidator(schema)).isInstanceOf(UnionTypeValidator.class);
     }
 
     @Test(expectedExceptions = RuntimeException.class)
     public void testGetUnsupportedTypeValidator() throws Exception {
         Map<String, Object> schema = new HashMap<>();
-        schema.put(Constants.TYPE,"FAKE");
+        schema.put(Constants.TYPE, "FAKE");
         ObjectValidatorFactory.getTypeValidator(schema);
 
     }
 
-     @Test(expectedExceptions = RuntimeException.class)
+    @Test(expectedExceptions = RuntimeException.class)
     public void testInvalidSchema() throws Exception {
         Map<String, Object> schema = new HashMap<>();
-        schema.put(Constants.TYPE,1);
+        schema.put(Constants.TYPE, 1);
         ObjectValidatorFactory.getTypeValidator(schema);
     }
 
@@ -76,8 +84,8 @@ public class ObjectValidatorFactoryTest {
         ScriptEngineManager manager = new ScriptEngineManager();
         List<ScriptEngineFactory> factoryList = manager.getEngineFactories();
         for (ScriptEngineFactory factory : factoryList) {
-          System.out.println(factory.getEngineName());
-          System.out.println(factory.getLanguageName());
+            System.out.println(factory.getEngineName());
+            System.out.println(factory.getLanguageName());
         }
     }
 }

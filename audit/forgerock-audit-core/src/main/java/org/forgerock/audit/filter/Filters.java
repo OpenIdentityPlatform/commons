@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.filter;
 
@@ -28,30 +28,50 @@ import org.forgerock.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Filters {
+/** Utility methods for creating audit event filters. */
+public final class Filters {
     private static final Logger logger = LoggerFactory.getLogger(Filters.class);
 
+    /** The filter types. */
     protected enum FilterNames {
+        /** Value event filter type. */
         VALUE,
+        /** Field event filter type. */
         FIELD
     }
 
+    /**
+     * Create a new filter for values and fields.
+     *
+     * @param auditTopics The topics to filter.
+     * @param policy The policy to apply.
+     * @return The new filter.
+     */
     public static ValueOrFieldFilter newValueOrFieldFilter(final List<String> auditTopics, final FilterPolicy policy) {
         return new ValueOrFieldFilter(exclusionListPerTopic(auditTopics, policy));
     }
 
+    /**
+     * Create a new filter for of the type specified.
+     *
+     * @param name The name of the filter type.
+     * @param auditTopics The topics to filter.
+     * @param policy The policy to apply.
+     * @return The filter.
+     * @throws AuditException If the type is unknown, or cannot be created.
+     */
     public static ValueOrFieldFilter newFilter(final String name, final List<String> auditTopics,
             final FilterPolicy policy) throws AuditException {
         Reject.ifNull(name);
         FilterNames filterName = Utils.asEnum(name, FilterNames.class);
         switch (filterName) {
-            case VALUE:
-            case FIELD:
-                return newValueOrFieldFilter(auditTopics, policy);
-            default:
-                final String error = String.format("Unknown filter policy name: %s", name);
-                logger.error(error);
-                throw new AuditException(error);
+        case VALUE:
+        case FIELD:
+            return newValueOrFieldFilter(auditTopics, policy);
+        default:
+            final String error = String.format("Unknown filter policy name: %s", name);
+            logger.error(error);
+            throw new AuditException(error);
         }
     }
 
@@ -83,6 +103,10 @@ public class Filters {
             topicMap.put(auditTopic, new LinkedList<JsonPointer>());
         }
         return topicMap;
+    }
+
+    private Filters() {
+        // utility class
     }
 
 }

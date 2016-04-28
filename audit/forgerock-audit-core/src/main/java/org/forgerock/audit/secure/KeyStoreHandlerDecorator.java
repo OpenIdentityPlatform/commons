@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.secure;
 
@@ -33,7 +33,7 @@ public class KeyStoreHandlerDecorator implements KeyStoreHandler {
     private final KeyStoreHandler delegate;
 
     /**
-     * Constructs a new {@literal KeyStoreHandlerDecorator}
+     * Constructs a new {@literal KeyStoreHandlerDecorator}.
      * @param delegate the {@literal KeyStoreHandler} to decorate.
      */
     public KeyStoreHandlerDecorator(KeyStoreHandler delegate) {
@@ -51,8 +51,8 @@ public class KeyStoreHandlerDecorator implements KeyStoreHandler {
      *             if it fails to write secret data from secret store
      */
     public void writeToKeyStore(SecretKey secretKey, String alias) throws SecureStorageException {
-         writeToKeyStore(secretKey, alias, getPassword());
-     }
+        writeToKeyStore(secretKey, alias, getPassword());
+    }
 
     /**
      * Writes to the secret storage.
@@ -66,7 +66,7 @@ public class KeyStoreHandlerDecorator implements KeyStoreHandler {
      * @throws SecureStorageException
      *             if it fails to write secret data from secret store
      */
-     public void writeToKeyStore(SecretKey secretKey, String alias, String password) throws SecureStorageException {
+    public void writeToKeyStore(SecretKey secretKey, String alias, String password) throws SecureStorageException {
         // Note that it need JCEKS to support secret keys.
         try {
             KeyStore store = getStore();
@@ -81,6 +81,12 @@ public class KeyStoreHandlerDecorator implements KeyStoreHandler {
         }
     }
 
+    /**
+     * Get the public key with the given alias.
+     * @param alias The alias.
+     * @return The key.
+     * @throws SecureStorageException If the key could not be read.
+     */
     public PublicKey readPublicKeyFromKeyStore(String alias) throws SecureStorageException {
         try {
             KeyStore store = getStore();
@@ -91,15 +97,29 @@ public class KeyStoreHandlerDecorator implements KeyStoreHandler {
         }
     }
 
+    /**
+     * Get a private key for the alias using the default password from {@link #getPassword()}.
+     * @param alias The alias.
+     * @return The key.
+     * @throws SecureStorageException If the key could not be read.
+     */
     public PrivateKey readPrivateKeyFromKeyStore(String alias) throws SecureStorageException {
         return readPrivateKeyFromKeyStore(alias, getPassword());
     }
 
+    /**
+     * Get the private key with the given alias.
+     * @param alias The alias.
+     * @param password The password to use to access the keystore.
+     * @return The key.
+     * @throws SecureStorageException If the key could not be read.
+     */
     public PrivateKey readPrivateKeyFromKeyStore(String alias, String password) throws SecureStorageException {
         try {
             KeyStore store = getStore();
-            KeyStore.ProtectionParameter params = password != null ?
-                    new KeyStore.PasswordProtection(password.toCharArray()) : null;
+            KeyStore.ProtectionParameter params = password != null
+                    ? new KeyStore.PasswordProtection(password.toCharArray())
+                    : null;
             KeyStore.PrivateKeyEntry keyentry = (KeyStore.PrivateKeyEntry) store.getEntry(alias, params);
             return keyentry != null ? keyentry.getPrivateKey() : null;
         } catch (NoSuchAlgorithmException | UnrecoverableEntryException | KeyStoreException ex) {
@@ -107,10 +127,23 @@ public class KeyStoreHandlerDecorator implements KeyStoreHandler {
         }
     }
 
+    /**
+     * Get the secret key with the given alias using the default password from {@link #getPassword()}.
+     * @param alias The alias.
+     * @return The key.
+     * @throws SecureStorageException If the key could not be read.
+     */
     public SecretKey readSecretKeyFromKeyStore(String alias) throws SecureStorageException {
         return readSecretKeyFromKeyStore(alias, getPassword());
     }
 
+    /**
+     * Get the secret key with the given alias.
+     * @param alias The alias.
+     * @param password The password to use to access the keystore.
+     * @return The key.
+     * @throws SecureStorageException If the key could not be read.
+     */
     public SecretKey readSecretKeyFromKeyStore(String alias, String password) throws SecureStorageException {
         try {
             KeyStore store = getStore();

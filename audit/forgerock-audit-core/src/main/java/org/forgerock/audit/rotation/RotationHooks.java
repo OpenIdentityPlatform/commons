@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.rotation;
 
@@ -23,12 +23,14 @@ import java.io.IOException;
 public interface RotationHooks {
     /**
      * Method to run an action just after file has been rotated.
+     * @param context The rotation context.
      * @throws IOException If the post action fails.
      */
     void postRotationAction(RotationContext context) throws IOException;
 
     /**
      * Method to run an action just before file will be rotated.
+     * @param context The rotation context.
      * @throws IOException If the pre action fails.
      */
     void preRotationAction(RotationContext context) throws IOException;

@@ -11,19 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2.crest;
 
-import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
-import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
-import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.authz.filter.crest.AuthorizationFilters.*;
+import static org.forgerock.http.routing.RoutingMode.*;
+import static org.forgerock.json.resource.RouteMatchers.*;
+import static org.forgerock.util.promise.Promises.*;
 
 import java.util.Collections;
 
 import org.forgerock.authz.basic.crest.SimpleResource;
-import org.forgerock.authz.filter.crest.AuthorizationFilters;
 import org.forgerock.authz.modules.oauth2.AccessTokenValidationResponse;
 import org.forgerock.authz.modules.oauth2.OAuth2AccessTokenValidator;
 import org.forgerock.authz.modules.oauth2.OAuth2Authorization;
@@ -75,7 +75,7 @@ public final class OAuth2AuthorizationConnectionFactory {
 
         Router router = new Router();
 
-        router.addRoute(requestUriMatcher(STARTS_WITH, "/resource"), AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/resource"), createAuthorizationFilter(SIMPLE_RESOURCE,
                 authorizationModule));
 
         return Resources.newInternalConnectionFactory(router);

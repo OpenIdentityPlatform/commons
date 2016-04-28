@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit.events.handlers;
@@ -73,9 +73,9 @@ public class DependencyProviderAuditEventHandlerFactory implements AuditEventHan
                 return (Constructor<T>) candidateConstructor;
             }
         }
-        throw new IllegalStateException(clazz.getSimpleName() +
-                " should have a single public constructor. If multiple public constructors " +
-                "are required, annotate one with @Inject.");
+        throw new IllegalStateException(clazz.getSimpleName()
+                + " should have a single public constructor. If multiple public constructors "
+                + "are required, annotate one with @Inject.");
     }
 
     private boolean hasInjectAnnotation(Constructor<?> constructor) {

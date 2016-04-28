@@ -18,7 +18,7 @@ package org.forgerock.audit.handlers.csv;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.contentOf;
-import static org.forgerock.audit.handlers.csv.CsvSecureConstants.KEYSTORE_TYPE;
+import static org.forgerock.audit.handlers.csv.CsvSecureConstants.*;
 import static org.forgerock.util.time.Duration.duration;
 
 import java.io.ByteArrayOutputStream;
@@ -150,7 +150,8 @@ public class SecureCsvWriterTest {
         actual.delete();
         final String header = "FOO";
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
-                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig(), keyStoreHandler, random)) {
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig(),
+                keyStoreHandler, random)) {
             Map<String, String> values;
 
 //            secureCsvWriter.writeHeader(header);
@@ -162,7 +163,8 @@ public class SecureCsvWriterTest {
             secureCsvWriter.writeEvent(values);
         }
 
-        assertThat(contentOf(actual)).isEqualTo(contentOf(new File("target/test-classes/shouldGenerateHMACColumn-expected.txt")));
+        assertThat(contentOf(actual)).isEqualTo(contentOf(
+                new File("target/test-classes/shouldGenerateHMACColumn-expected.txt")));
     }
 
     @Test
@@ -180,7 +182,8 @@ public class SecureCsvWriterTest {
         actual.delete();
         final String header = "FOO";
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
-                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig(), keyStoreHandler, random)) {
+                actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, createBasicSecureConfig(),
+                keyStoreHandler, random)) {
 
             secureCsvWriter.writeEvent(singletonMap(header, "bar"));
 
@@ -191,7 +194,8 @@ public class SecureCsvWriterTest {
             // - header
             // - data row with bar + HMAC
             // - signature
-            assertThat(contentOf(actual)).isEqualTo(contentOf(new File("target/test-classes/shouldGeneratePeriodicallySignature-partial.txt")));
+            assertThat(contentOf(actual)).isEqualTo(contentOf(
+                    new File("target/test-classes/shouldGeneratePeriodicallySignature-partial.txt")));
 
 
             secureCsvWriter.writeEvent(singletonMap(header, "quix"));
@@ -203,7 +207,8 @@ public class SecureCsvWriterTest {
         // - signature
         // - data row with bar + HMAC
         // - signature // because of closing the CsvWriter
-        assertThat(contentOf(actual)).isEqualTo(contentOf(new File("target/test-classes/shouldGeneratePeriodicallySignature-expected.txt")));
+        assertThat(contentOf(actual)).isEqualTo(contentOf(
+                new File("target/test-classes/shouldGeneratePeriodicallySignature-expected.txt")));
     }
 
     private CsvAuditEventHandlerConfiguration createBasicSecureConfig() {
@@ -236,7 +241,7 @@ public class SecureCsvWriterTest {
             secureCsvWriter.writeEvent(singletonMap(header, "six"));
         }
 
-        final SecretKey keystorePasswordKey = keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD);
+        final SecretKey keystorePasswordKey = keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD);
         final String keystorePassword = Base64.encode(keystorePasswordKey.getEncoded());
         final PublicKey publicKey = keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE);
         final FileNamingPolicy fileNamingPolicy =
@@ -259,8 +264,9 @@ public class SecureCsvWriterTest {
         // The final file is not verifiable currently as it doesn't contain any audit events (so no HMAC entry).
         // This means lastHMAC will be null when running CsvSecureVerifier.verifySignature and verification fails
         // See CAUD-225.
-        logger.trace("Skipping verification of {} as it doesn't contain a HMAC and" +
-                "verification of the closing signature will fail", finalVerificationResult.getArchiveFile().getName());
+        logger.trace("Skipping verification of {} as it doesn't contain a HMAC and "
+                + "verification of the closing signature will fail",
+                finalVerificationResult.getArchiveFile().getName());
         assertThat(finalVerificationResult.hasPassedVerification())
                 .as("File " + finalVerificationResult.getArchiveFile() + " cannot be verified as it contains no HMAC")
                 .isFalse(); // TODO: Fix this
@@ -271,19 +277,21 @@ public class SecureCsvWriterTest {
         CsvSecureArchiveVerifierCli.err = new PrintStream(err);
 
         String[] args = {
-                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_ARCHIVE_DIRECTORY, logDirectory.toString(),
-                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_TOPIC, "shouldRotateCsvAndKeyStoreFile",
-                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_PREFIX, "",
-                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_SUFFIX, "-yyyy.MM.dd-HH.mm.ss.SSS",
-                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_FILE, KEYSTORE_FILENAME,
-                CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_PASSWORD, KEYSTORE_PASSWORD
+            CsvSecureArchiveVerifierCli.OptionsParser.FLAG_ARCHIVE_DIRECTORY, logDirectory.toString(),
+            CsvSecureArchiveVerifierCli.OptionsParser.FLAG_TOPIC, "shouldRotateCsvAndKeyStoreFile",
+            CsvSecureArchiveVerifierCli.OptionsParser.FLAG_PREFIX, "",
+            CsvSecureArchiveVerifierCli.OptionsParser.FLAG_SUFFIX, "-yyyy.MM.dd-HH.mm.ss.SSS",
+            CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_FILE, KEYSTORE_FILENAME,
+            CsvSecureArchiveVerifierCli.OptionsParser.FLAG_KEYSTORE_PASSWORD, KEYSTORE_PASSWORD
         };
-        CsvSecureArchiveVerifierCli.fileNamingPolicyFactory = new CsvSecureArchiveVerifierCli.FileNamingPolicyFactory() {
-            @Override
-            public FileNamingPolicy newFileNamingPolicy(final File liveFile, final String suffix, final String prefix) {
-                return new TimeStampFileNamingPolicyWithNamedBasedOrdering(liveFile, suffix, prefix);
-            }
-        };
+        CsvSecureArchiveVerifierCli.fileNamingPolicyFactory =
+            new CsvSecureArchiveVerifierCli.FileNamingPolicyFactory() {
+                @Override
+                public FileNamingPolicy newFileNamingPolicy(final File liveFile, final String suffix,
+                        final String prefix) {
+                    return new TimeStampFileNamingPolicyWithNamedBasedOrdering(liveFile, suffix, prefix);
+                }
+            };
         CsvSecureArchiveVerifierCli.main(args);
 
         String expectedOutput = "";

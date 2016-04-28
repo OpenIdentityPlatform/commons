@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -26,27 +26,27 @@ import org.forgerock.audit.AuditException;
 interface JdbcAuditEventExecutor {
 
     /**
-     * Creates a {@link JdbcAuditEvent}
+     * Creates a {@link JdbcAuditEvent}.
      * @param event The {@link JdbcAuditEvent} to create.
      * @throws AuditException If unable to create the {@link JdbcAuditEvent}.
      */
     void createAuditEvent(final JdbcAuditEvent event) throws AuditException;
 
     /**
-     * Reads a {@link JdbcAuditEvent}
+     * Reads a {@link JdbcAuditEvent}.
      * @param event The {@link JdbcAuditEvent} to read.
      * @return The read {@link JdbcAuditEvent} data.
      * @throws AuditException If unable to read the {@link JdbcAuditEvent}.
      */
-    List<Map<String,Object>> readAuditEvent(final JdbcAuditEvent event) throws AuditException;
+    List<Map<String, Object>> readAuditEvent(final JdbcAuditEvent event) throws AuditException;
 
     /**
-     * Queries a {@link JdbcAuditEvent}
+     * Queries a {@link JdbcAuditEvent}.
      * @param event The {@link JdbcAuditEvent} to query.
      * @return The read {@link JdbcAuditEvent} data.
      * @throws AuditException If unable to query the {@link JdbcAuditEvent}.
      */
-    List<Map<String,Object>> queryAuditEvent(final JdbcAuditEvent event) throws AuditException;
+    List<Map<String, Object>> queryAuditEvent(final JdbcAuditEvent event) throws AuditException;
 
     /**
      * Closes JdbcAuditEventExecutor and performs cleanup.

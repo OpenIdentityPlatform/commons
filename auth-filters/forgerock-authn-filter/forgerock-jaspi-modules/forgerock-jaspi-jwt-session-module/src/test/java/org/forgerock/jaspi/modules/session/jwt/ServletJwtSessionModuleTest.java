@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
@@ -106,10 +106,12 @@ public class ServletJwtSessionModuleTest {
                 URLDecoder.decode(ClassLoader.getSystemResource("keystore.jks").getFile(), "UTF-8"));
         options.put(JwtSessionModule.KEYSTORE_PASSWORD_KEY, "password");
         if (timeUnit == Calendar.MINUTE) {
-            options.put(JwtSessionModule.TOKEN_IDLE_TIME_IN_MINUTES_CLAIM_KEY, idleTimeout != null ? idleTimeout.toString() : null);
+            options.put(JwtSessionModule.TOKEN_IDLE_TIME_IN_MINUTES_CLAIM_KEY, idleTimeout != null
+                    ? idleTimeout.toString() : null);
             options.put(JwtSessionModule.MAX_TOKEN_LIFE_IN_MINUTES_KEY, maxLife != null ? maxLife.toString() : null);
         } else if (timeUnit == Calendar.SECOND) {
-            options.put(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, idleTimeout != null ? idleTimeout.toString() : null);
+            options.put(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, idleTimeout != null
+                    ? idleTimeout.toString() : null);
             options.put(JwtSessionModule.MAX_TOKEN_LIFE_IN_SECONDS_KEY, maxLife != null ? maxLife.toString() : null);
         }
         return options;
@@ -683,7 +685,8 @@ public class ServletJwtSessionModuleTest {
         verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
         verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
         verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
-        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY),
+                idleTimeoutCaptor.capture());
         verify(jwtClaimsSetBuilder).claims(anyMap());
         verify(response).addCookie(cookieCaptor.capture());
 
@@ -768,7 +771,8 @@ public class ServletJwtSessionModuleTest {
         verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
         verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
         verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
-        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY),
+                idleTimeoutCaptor.capture());
         verify(jwtClaimsSetBuilder).claims(anyMap());
         verify(response).addCookie(cookieCaptor.capture());
 
@@ -892,7 +896,8 @@ public class ServletJwtSessionModuleTest {
         verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
         verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
         verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
-        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY),
+                idleTimeoutCaptor.capture());
         verify(jwtClaimsSetBuilder).claims(anyMap());
         verify(response).addCookie(cookieCaptor.capture());
 
@@ -977,7 +982,8 @@ public class ServletJwtSessionModuleTest {
         verify(jwtClaimsSetBuilder).exp(expCaptor.capture());
         verify(jwtClaimsSetBuilder).nbf(nbfCaptor.capture());
         verify(jwtClaimsSetBuilder).iat(iatCaptor.capture());
-        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY), idleTimeoutCaptor.capture());
+        verify(jwtClaimsSetBuilder).claim(eq(JwtSessionModule.TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY),
+                idleTimeoutCaptor.capture());
         verify(jwtClaimsSetBuilder).claims(anyMap());
         verify(response).addCookie(cookieCaptor.capture());
 

@@ -21,7 +21,9 @@ import javax.jms.DeliveryMode;
  * Configuration wrapper for JMS {@link DeliveryMode} persistence constants.
  */
 public enum DeliveryModeConfig {
+    /** A persistent delivery mode. */
     PERSISTENT(DeliveryMode.PERSISTENT),
+    /** A non-persistent delivery mode. */
     NON_PERSISTENT(DeliveryMode.NON_PERSISTENT);
 
     private int mode;

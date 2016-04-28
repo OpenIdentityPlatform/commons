@@ -27,14 +27,14 @@ public interface Publisher<T> {
     /**
      * Initialize services that are reused by individual publish calls.
      *
-     * @throws ResourceException
+     * @throws ResourceException If the publisher cannot be started.
      */
     void startup() throws ResourceException;
 
     /**
-     * Cleanup services that were initialized with {@link #startup()}
+     * Cleanup services that were initialized with {@link #startup()}.
      *
-     * @throws ResourceException
+     * @throws ResourceException If the publisher cannot be shut down.
      */
     void shutdown() throws ResourceException;
 
@@ -42,7 +42,7 @@ public interface Publisher<T> {
      * implement this to deliver the audit event representation to the service.
      *
      * @param message representative object of the audit event
-     * @throws ResourceException
+     * @throws ResourceException If the message cannot be published.
      */
     void publish(T message) throws ResourceException;
 }

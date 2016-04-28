@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.syslog;
 
@@ -44,6 +44,12 @@ public enum TransportProtocol {
         }
     };
 
+    /**
+     * Get the publisher for the given configuration.
+     * @param socket The socket.
+     * @param config The configuration.
+     * @return The publisher.
+     */
     public SyslogPublisher getPublisher(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config) {
         SyslogConnection syslogConnection = getSyslogConnection(socket, config);
         EventBufferingConfiguration buffering = config.getBuffering();
@@ -54,6 +60,7 @@ public enum TransportProtocol {
         }
     }
 
-    abstract SyslogConnection getSyslogConnection(InetSocketAddress socket, SyslogAuditEventHandlerConfiguration config);
+    abstract SyslogConnection getSyslogConnection(InetSocketAddress socket,
+            SyslogAuditEventHandlerConfiguration config);
 
 }

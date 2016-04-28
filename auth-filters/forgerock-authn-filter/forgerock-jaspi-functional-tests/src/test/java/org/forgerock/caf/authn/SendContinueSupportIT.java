@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
@@ -284,7 +284,8 @@ public class SendContinueSupportIT extends HandlerHolder {
 
     static RequestParameters request(AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
-            boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams) {
+            boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody,
+            AuditParameters auditParams) {
         return new RequestParameters(sessionModuleParams, authModuleParametersList, expectedResponseStatus,
                 expectResourceToBeCalled, expectedBody, auditParams);
     }
@@ -300,7 +301,8 @@ public class SendContinueSupportIT extends HandlerHolder {
 
         private RequestParameters(AuthModuleParameters sessionModuleParams,
                 List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
-                boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams) {
+                boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody,
+                AuditParameters auditParams) {
             this.sessionModuleParams = sessionModuleParams;
             this.authModuleParametersList = authModuleParametersList;
             this.expectedResponseStatus = expectedResponseStatus;

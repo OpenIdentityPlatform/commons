@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.ref;
@@ -34,13 +34,15 @@ public class JsonReferenceException extends JsonException {
 
     /**
      * Constructs a new exception with the specified detail message.
+     * @param message The message.
      */
     public JsonReferenceException(String message) {
         super(message);
     }
-    
+
     /**
      * Constructs a new exception with the specified cause.
+     * @param cause The cause.
      */
     public JsonReferenceException(Throwable cause) {
         super(cause);
@@ -48,6 +50,8 @@ public class JsonReferenceException extends JsonException {
 
     /**
      * Constructs a new exception with the specified detail message and cause.
+     * @param cause The cause.
+     * @param message The message.
      */
     public JsonReferenceException(String message, Throwable cause) {
         super(message, cause);

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
@@ -244,7 +244,8 @@ public class SingleAuthModuleOnlyIT extends HandlerHolder {
             {"Single Auth Module Only - SUCCESS:AuthException",
                 null, moduleArray(
                     moduleParams(AuthModuleOne.class, "AUTH-MODULE-ONE", SUCCESS_AUTH_STATUS, null)), 500, true,
-                exceptionMatcher(500, containsString("X-JASPI-AUTH-MODULE-ONE-SECURE-RESPONSE header not set, so throwing AuthException.")),
+                exceptionMatcher(500, containsString("X-JASPI-AUTH-MODULE-ONE-SECURE-RESPONSE header not set, so"
+                        + " throwing AuthException.")),
                 auditParams("SUCCESSFUL", AUTH_MODULE_ONE_PRINCIPAL, false,
                         entry("AuthModuleOne", "SUCCESSFUL"))
             },

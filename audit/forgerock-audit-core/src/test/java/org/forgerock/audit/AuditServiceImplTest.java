@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit;
@@ -395,12 +395,14 @@ public class AuditServiceImplTest {
 
     @Test
     public void canQueryForRegisteredHandlerByName() throws Exception {
-        final PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
         firstConfiguration.setName("firstHandler");
         firstConfiguration.setTopics(Collections.singleton("access"));
-        final PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
+
+        PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
         secondConfiguration.setName("secondHandler");
         secondConfiguration.setTopics(Collections.singleton("access"));
+
         final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final AuditService auditService = newAuditService()
                 .withAuditEventHandler(clazz, firstConfiguration)
@@ -414,12 +416,14 @@ public class AuditServiceImplTest {
 
     @Test
     public void canQueryForTopicHandlingBasedOnRegisteredHandlers() throws Exception {
-        final PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
         firstConfiguration.setName("firstHandler");
         firstConfiguration.setTopics(Collections.singleton("access"));
-        final PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
+
+        PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
         secondConfiguration.setName("secondHandler");
         secondConfiguration.setTopics(Collections.singleton("activity"));
+
         final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
         final AuditService auditService = newAuditService()
                 .withAuditEventHandler(clazz, firstConfiguration)
@@ -518,12 +522,14 @@ public class AuditServiceImplTest {
     @Test
     public void shouldSkipHandlersShutdownIfNotStarted() throws Exception {
         //given
-        final PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
+        PassThroughAuditEventHandlerConfiguration firstConfiguration = new PassThroughAuditEventHandlerConfiguration();
         firstConfiguration.setName("firstHandler");
         firstConfiguration.setTopics(Collections.singleton("access"));
-        final PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
+
+        PassThroughAuditEventHandlerConfiguration secondConfiguration = new PassThroughAuditEventHandlerConfiguration();
         secondConfiguration.setName("secondHandler");
         secondConfiguration.setTopics(Collections.singleton("access"));
+
         final PassThroughAuditEventHandler firstHandler = mock(PassThroughAuditEventHandler.class, "firstHandler");
         final PassThroughAuditEventHandler secondHandler = mock(PassThroughAuditEventHandler.class, "secondHandler");
         final Class<PassThroughAuditEventHandler> clazz = PassThroughAuditEventHandler.class;
@@ -720,7 +726,8 @@ public class AuditServiceImplTest {
     }
 
     @Test
-    public void shouldNotDelegateReadRequestToConfiguredHandlerForQueriesWhenInvalidResourcePathGiven() throws Exception {
+    public void shouldNotDelegateReadRequestToConfiguredHandlerForQueriesWhenInvalidResourcePathGiven()
+            throws Exception {
         //given
         final String topic = "access";
         final AuditServiceConfiguration configuration = getAuditServiceConfiguration(QUERY_HANDLER_NAME, topic);

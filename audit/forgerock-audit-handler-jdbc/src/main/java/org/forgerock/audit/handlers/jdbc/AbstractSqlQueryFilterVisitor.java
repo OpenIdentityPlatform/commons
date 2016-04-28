@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -53,8 +53,10 @@ import org.forgerock.util.query.QueryFilterVisitor;
  *     function AND behaves</li>
  *     <li>@{link #visitOrFilter(Object, List&lt;QueryFilter&gt;, Object)} to dictate how the composite
  *     function OR behaves</li>
+ * </ul>
  */
-abstract class AbstractSqlQueryFilterVisitor<R extends SqlRenderer<?>, P> implements QueryFilterVisitor<R, P, JsonPointer> {
+abstract class AbstractSqlQueryFilterVisitor<R extends SqlRenderer<?>, P>
+        implements QueryFilterVisitor<R, P, JsonPointer> {
 
     /**
      * A templating method that will generate the actual value assertion.
@@ -72,11 +74,13 @@ abstract class AbstractSqlQueryFilterVisitor<R extends SqlRenderer<?>, P> implem
      * <pre><blockquote>
      *     return getDatabaseColumnFor("email") + "=" + ":email";
      * </blockquote></pre>
-     * The parameters argument is implementation-dependent as a way to store placeholder mapping throughout the query-filter visiting.
+     * The parameters argument is implementation-dependent as a way to store placeholder mapping throughout the
+     * query-filter visiting.
      *
      * @param parameters storage of parameter-substitutions for the value of the assertion
      * @param operand the operand used to compare
-     * @param field the object field as a JsonPointer - implementations need to map this to an appropriate database column
+     * @param field the object field as a JsonPointer - implementations need to map this to an appropriate database
+     *              column
      * @param valueAssertion the value in the assertion
      * @return a query expression or clause
      */

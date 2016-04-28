@@ -49,8 +49,8 @@ import org.slf4j.LoggerFactory;
  * Publishes Audit events on a JMS Topic.
  */
 public class JmsAuditEventHandler extends AuditEventHandlerBase {
-    private static final Logger logger = LoggerFactory.getLogger(JmsAuditEventHandler.class);
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(JmsAuditEventHandler.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final JmsResourceManager jmsResourceManager;
     private final Publisher<JsonValue> publisher;
@@ -61,6 +61,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
      * @param jmsContextManager optional injected {@link JmsContextManager}.
      * @param configuration Configuration parameters that can be adjusted by system administrators.
      * @param eventTopicsMetaData Meta-data for all audit event topics.
+     * @throws ResourceException If JMS connections cannot be established.
      */
     @Inject
     public JmsAuditEventHandler(
@@ -76,7 +77,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
                         ? new JmsResourceManager(
                                 configuration, new JndiJmsContextManager(configuration.getJndi()))
                         : new JmsResourceManager(configuration, jmsContextManager);
-        logger.debug("Successfully configured JMS audit event handler.");
+        LOGGER.debug("Successfully configured JMS audit event handler.");
     }
 
     /**
@@ -97,7 +98,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
     @Override
     public void startup() throws ResourceException {
         publisher.startup();
-        logger.debug("JMS audit event handler is started.");
+        LOGGER.debug("JMS audit event handler is started.");
     }
 
     /**
@@ -106,7 +107,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
     @Override
     public void shutdown() throws ResourceException {
         publisher.shutdown();
-        logger.debug("JMS audit event handler is shutdown.");
+        LOGGER.debug("JMS audit event handler is shutdown.");
     }
 
     /**
@@ -147,13 +148,13 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
         try {
             publishJmsMessages(messages);
         } catch (JMSException e) {
-            logger.debug("Retrying publish", e);
+            LOGGER.debug("Retrying publish", e);
             try {
                 resetConnection();
                 publishJmsMessages(messages);
-            } catch (JMSException|ResourceException ex) {
+            } catch (JMSException | ResourceException ex) {
                 final String message = "Unable to publish JMS messages, messages are likely lost";
-                logger.error(message, e);
+                LOGGER.error(message, e);
                 throw new InternalServerErrorException(message, e);
             }
         }
@@ -174,7 +175,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
             try {
                 producer = jmsResourceManager.createProducer(session);
                 for (JsonValue message : messages) {
-                    String text = mapper.writeValueAsString(message.getObject());
+                    String text = MAPPER.writeValueAsString(message.getObject());
                     producer.send(session.createTextMessage(text));
                 }
             } finally {
@@ -183,11 +184,11 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
                 }
             }
         } catch (JMSException e) {
-            logger.debug("Failed to publish messages", e);
+            LOGGER.debug("Failed to publish messages", e);
             throw e;
         } catch (JsonProcessingException e) {
             final String message = "Unable to publish JMS messages, messages are likely lost";
-            logger.error(message, e);
+            LOGGER.error(message, e);
             throw new InternalServerErrorException(message, e);
         } finally {
             if (null != session) {
@@ -228,7 +229,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
     private class JmsBatchPublisher extends BatchPublisher<JsonValue> {
 
         /**
-         * Constructor that passes the configuration to {@link BatchPublisher}
+         * Constructor that passes the configuration to {@link BatchPublisher}.
          *
          * @param configuration config of the publisher.
          */

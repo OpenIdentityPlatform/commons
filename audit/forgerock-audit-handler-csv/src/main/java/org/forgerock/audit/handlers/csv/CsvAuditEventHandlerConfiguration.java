@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -53,7 +53,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
  */
 public class CsvAuditEventHandlerConfiguration extends FileBasedEventHandlerConfiguration {
 
-    @JsonProperty(required=true)
+    @JsonProperty(required = true)
     @JsonPropertyDescription("audit.handlers.csv.logDirectory")
     private String logDirectory;
 
@@ -149,7 +149,7 @@ public class CsvAuditEventHandlerConfiguration extends FileBasedEventHandlerConf
     }
 
     /**
-     * Contains the csv writer configuration parameters
+     * Contains the csv writer configuration parameters.
      */
     public static class CsvFormatting {
         @JsonPropertyDescription("audit.handlers.csv.formatting.quoteChar")
@@ -309,10 +309,18 @@ public class CsvAuditEventHandlerConfiguration extends FileBasedEventHandlerConf
             return signatureIntervalDuration;
         }
 
+        /**
+         * Set the key store handler name.
+         * @param keyStoreName The name.
+         */
         public void setKeyStoreHandlerName(String keyStoreName) {
             this.keyStoreHandlerName = keyStoreName;
         }
 
+        /**
+         * Get the key store handler name.
+         * @return The name.
+         */
         public String getKeyStoreHandlerName() {
             return keyStoreHandlerName;
         }

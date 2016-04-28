@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit;
@@ -49,9 +49,7 @@ import com.fasterxml.jackson.module.jsonSchema.factories.SchemaFactoryWrapper;
  */
 public class TranslationPropertiesTest {
 
-    //checkstyle:off
-    private static final ObjectMapper mapper = new ObjectMapper();
-    // checkstyle:on
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private Set<String> translationKeys;
 
@@ -62,14 +60,14 @@ public class TranslationPropertiesTest {
     }
 
     @DataProvider
-    public Object[][] auditEventHandlerConfigurations() throws Exception{
+    public Object[][] auditEventHandlerConfigurations() throws Exception {
         return new Class[][] {
-                {AuditServiceConfiguration.class},
-                {CsvAuditEventHandlerConfiguration.class},
-                {JdbcAuditEventHandlerConfiguration.class},
-                {SyslogAuditEventHandlerConfiguration.class},
-                {ElasticsearchAuditEventHandlerConfiguration.class},
-                {JmsAuditEventHandlerConfiguration.class}
+            { AuditServiceConfiguration.class },
+            { CsvAuditEventHandlerConfiguration.class },
+            { JdbcAuditEventHandlerConfiguration.class },
+            { SyslogAuditEventHandlerConfiguration.class },
+            { ElasticsearchAuditEventHandlerConfiguration.class },
+            { JmsAuditEventHandlerConfiguration.class }
         };
     }
 
@@ -83,8 +81,8 @@ public class TranslationPropertiesTest {
 
     private Properties loadTranslations() throws IOException {
         Properties properties = new Properties();
-        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("commonsAuditTranslation" +
-                ".properties")) {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(
+                "commonsAuditTranslation.properties")) {
             properties.load(inputStream);
         }
         return properties;
@@ -104,8 +102,8 @@ public class TranslationPropertiesTest {
 
     private JsonValue jsonSchemaForPojo(final Class<?> pojoClass) throws IOException {
         SchemaFactoryWrapper visitor = new SchemaFactoryWrapper();
-        mapper.acceptJsonFormatVisitor(mapper.constructType(pojoClass), visitor);
+        OBJECT_MAPPER.acceptJsonFormatVisitor(OBJECT_MAPPER.constructType(pojoClass), visitor);
         JsonSchema jsonSchema = visitor.finalSchema();
-        return new JsonValue(mapper.readValue(mapper.writeValueAsString(jsonSchema), Map.class));
+        return new JsonValue(OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsString(jsonSchema), Map.class));
     }
 }

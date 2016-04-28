@@ -44,7 +44,7 @@ import org.supercsv.prefs.CsvPreference;
 /**
  * Command line interface for verifying an archived set of tamper evident CSV audit log files for a particular topic.
  */
-public class CsvSecureArchiveVerifierCli {
+public final class CsvSecureArchiveVerifierCli {
 
     private static final Option<Path> ARCHIVE_DIRECTORY = Option.of(Path.class, null);
     private static final Option<String> TOPIC = Option.of(String.class, null);
@@ -61,7 +61,7 @@ public class CsvSecureArchiveVerifierCli {
     static FileNamingPolicyFactory fileNamingPolicyFactory = new DefaultFileNamingPolicyFactory();
 
     /**
-     * Entry point for CLI
+     * Entry point for CLI.
      *
      * @param args command line arguments.
      */
@@ -187,29 +187,29 @@ public class CsvSecureArchiveVerifierCli {
                 flagsSeen.add(currentArgument);
                 final String nextArgument = isLastArgument ? null : args[i + 1];
                 switch (currentArgument) {
-                    case FLAG_ARCHIVE_DIRECTORY:
-                        options.set(ARCHIVE_DIRECTORY,
-                                getPathOption(nextArgument, FLAG_ARCHIVE_DIRECTORY, DESC_ARCHIVE_DIRECTORY));
-                        break;
-                    case FLAG_TOPIC:
-                        options.set(TOPIC, getStringOption(nextArgument, FLAG_TOPIC, DESC_TOPIC));
-                        break;
-                    case FLAG_PREFIX:
-                        options.set(PREFIX, getStringOption(nextArgument, FLAG_PREFIX, DESC_PREFIX));
-                        break;
-                    case FLAG_SUFFIX:
-                        options.set(SUFFIX, getStringOption(nextArgument, FLAG_SUFFIX, DESC_SUFFIX));
-                        break;
-                    case FLAG_KEYSTORE_FILE:
-                        options.set(KEYSTORE_FILE, getPathOption(nextArgument, FLAG_KEYSTORE_FILE, DESC_KEYSTORE_FILE));
-                        break;
-                    case FLAG_KEYSTORE_PASSWORD:
-                        options.set(KEYSTORE_PASSWORD,
-                                getStringOption(nextArgument, FLAG_KEYSTORE_PASSWORD, DESC_KEYSTORE_PASSWORD));
-                        break;
-                    default:
-                        err.println("Unknown flag " + currentArgument);
-                        return null;
+                case FLAG_ARCHIVE_DIRECTORY:
+                    options.set(ARCHIVE_DIRECTORY,
+                            getPathOption(nextArgument, FLAG_ARCHIVE_DIRECTORY, DESC_ARCHIVE_DIRECTORY));
+                    break;
+                case FLAG_TOPIC:
+                    options.set(TOPIC, getStringOption(nextArgument, FLAG_TOPIC, DESC_TOPIC));
+                    break;
+                case FLAG_PREFIX:
+                    options.set(PREFIX, getStringOption(nextArgument, FLAG_PREFIX, DESC_PREFIX));
+                    break;
+                case FLAG_SUFFIX:
+                    options.set(SUFFIX, getStringOption(nextArgument, FLAG_SUFFIX, DESC_SUFFIX));
+                    break;
+                case FLAG_KEYSTORE_FILE:
+                    options.set(KEYSTORE_FILE, getPathOption(nextArgument, FLAG_KEYSTORE_FILE, DESC_KEYSTORE_FILE));
+                    break;
+                case FLAG_KEYSTORE_PASSWORD:
+                    options.set(KEYSTORE_PASSWORD,
+                            getStringOption(nextArgument, FLAG_KEYSTORE_PASSWORD, DESC_KEYSTORE_PASSWORD));
+                    break;
+                default:
+                    err.println("Unknown flag " + currentArgument);
+                    return null;
                 }
             }
 
@@ -234,8 +234,8 @@ public class CsvSecureArchiveVerifierCli {
         }
 
         private void printHelp() {
-            out.println(String.format("arguments: %s <path> %s <topic> [%s <prefix>] " +
-                    "[%s <suffix>] %s <path> %s <password>", FLAG_ARCHIVE_DIRECTORY, FLAG_TOPIC, FLAG_PREFIX,
+            out.println(String.format("arguments: %s <path> %s <topic> [%s <prefix>] "
+                    + "[%s <suffix>] %s <path> %s <password>", FLAG_ARCHIVE_DIRECTORY, FLAG_TOPIC, FLAG_PREFIX,
                     FLAG_SUFFIX, FLAG_KEYSTORE_FILE, FLAG_KEYSTORE_PASSWORD));
             out.println("");
             out.println(String.format("   %-15s %s", FLAG_ARCHIVE_DIRECTORY, DESC_ARCHIVE_DIRECTORY));
@@ -289,4 +289,9 @@ public class CsvSecureArchiveVerifierCli {
             return new TimeStampFileNamingPolicy(liveFile, suffix, prefix);
         }
     }
+
+    private CsvSecureArchiveVerifierCli() {
+        // never created
+    }
+
 }

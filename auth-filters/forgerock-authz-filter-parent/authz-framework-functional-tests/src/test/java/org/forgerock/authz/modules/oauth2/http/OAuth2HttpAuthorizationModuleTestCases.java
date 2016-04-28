@@ -11,21 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2.http;
 
-import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.EncoderConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.parsing.Parser;
+import static com.jayway.restassured.RestAssured.*;
+import static org.hamcrest.Matchers.*;
 
 import org.forgerock.authz.AuthzTestCase;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 @Test(testName = "OAuth2Http")

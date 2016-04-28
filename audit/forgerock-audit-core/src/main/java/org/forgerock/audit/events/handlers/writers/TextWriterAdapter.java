@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events.handlers.writers;
 
@@ -57,7 +57,7 @@ public class TextWriterAdapter extends Writer implements TextWriter {
 
     @Override
     public void write(String str, int off, int len) throws IOException {
-        write(str.substring(off, off+len));
+        write(str.substring(off, off + len));
     }
 
     @Override

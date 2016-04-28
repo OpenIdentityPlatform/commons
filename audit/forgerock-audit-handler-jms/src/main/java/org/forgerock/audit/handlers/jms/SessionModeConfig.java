@@ -22,8 +22,11 @@ import javax.jms.Session;
  * Configuration wrapper for JMS {@link Session#getAcknowledgeMode()} SessionMode setting.
  */
 public enum SessionModeConfig {
+    /** Auto-acknowledge session mode. */
     AUTO(Session.AUTO_ACKNOWLEDGE),
+    /** Client-acknowledge session mode. */
     CLIENT(Session.CLIENT_ACKNOWLEDGE),
+    /** Dups-OK-acknowledge session mode. */
     DUPS_OK(Session.DUPS_OK_ACKNOWLEDGE);
 
     private int mode;

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -133,7 +133,8 @@ public class OAuth2ModuleTest {
 
         createOAuth2Module(true);
         given(cache.get("ACCESS_TOKEN")).willReturn(null);
-        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(Promises.<AccessTokenValidationResponse, OAuth2Exception>newResultPromise(validationResponse));
+        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(
+                Promises.<AccessTokenValidationResponse, OAuth2Exception>newResultPromise(validationResponse));
         given(validationResponse.isTokenValid()).willReturn(true);
         given(validationResponse.getTokenScopes()).willReturn(Collections.singleton("SCOPE_A"));
 
@@ -253,7 +254,9 @@ public class OAuth2ModuleTest {
         AuthorizationContext context = mock(AuthorizationContext.class);
 
         createOAuth2Module(false);
-        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(Promises.<AccessTokenValidationResponse, OAuth2Exception>newExceptionPromise(mock(OAuth2Exception.class)));
+        OAuth2Exception mock = mock(OAuth2Exception.class);
+        given(tokenValidator.validate("ACCESS_TOKEN")).willReturn(
+                Promises.<AccessTokenValidationResponse, OAuth2Exception>newExceptionPromise(mock));
 
         //When
         oAuth2Module.authorize(accessToken, context).getOrThrowUninterruptibly();

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.rotation;
 
@@ -32,7 +32,8 @@ public class FixedTimeRotationPolicy implements RotationPolicy {
     private final List<Duration> dailyRotationTimes;
 
     /**
-     * Constructs a {@link FixedTimeRotationPolicy} given a list of milliseconds after midnight to rotateIfNeeded the files.
+     * Constructs a {@link FixedTimeRotationPolicy} given a list of milliseconds after midnight to rotateIfNeeded the
+     * files.
      *
      * @param rotationTimes List of {@link Duration} objects specifying the time after midnight to rotate the log file.
      */
@@ -56,6 +57,10 @@ public class FixedTimeRotationPolicy implements RotationPolicy {
         return false;
     }
 
+    /**
+     * Get the list of times since midnight that rotation will occur at.
+     * @return The list of times as {@code Duration} instances.
+     */
     public List<Duration> getDailyRotationTimes() {
         return dailyRotationTimes;
     }

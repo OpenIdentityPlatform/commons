@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test;
@@ -62,8 +62,10 @@ public class ProtectedResource implements Handler {
 
         response.getHeaders().put(RESOURCE_CALLED_HEADER, "true");
 
-        String principal = (String) context.asContext(AttributesContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL);
-        Map<String, Object> requestContextMap = (Map<String, Object>) context.asContext(AttributesContext.class).getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
+        String principal = (String) context.asContext(AttributesContext.class).getAttributes()
+                .get(AuthenticationFramework.ATTRIBUTE_AUTH_PRINCIPAL);
+        Map<String, Object> requestContextMap = (Map<String, Object>) context.asContext(AttributesContext.class)
+                .getAttributes().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
 
         JsonValue json = json(object());
         json.put("data", "RESOURCE_DATA");

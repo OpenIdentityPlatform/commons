@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -79,8 +79,8 @@ class GenericDatabaseStatementProvider extends BaseDatabaseStatementProvider {
         if (sortKeys != null && sortKeys.size() > 0) {
             List<String> keys = new ArrayList<>();
             for (SortKey sortKey : sortKeys) {
-                keys.add(tableMappingParametersPair.getColumnName(sortKey.getField()) + (sortKey.isAscendingOrder() ?
-                        " ASC" : " DESC"));
+                keys.add(tableMappingParametersPair.getColumnName(sortKey.getField()) + (sortKey.isAscendingOrder()
+                        ? " ASC" : " DESC"));
             }
             pageClause = "ORDER BY " + joinAsString(", ", keys) + pageClause;
         }

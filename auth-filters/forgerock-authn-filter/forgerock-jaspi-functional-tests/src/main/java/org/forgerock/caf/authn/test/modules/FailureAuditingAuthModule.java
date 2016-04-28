@@ -11,21 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.modules;
 
-import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_FAILURE_REASON_KEY;
+import static java.util.Collections.*;
+import static org.forgerock.caf.authentication.framework.AuditTrail.*;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
@@ -94,7 +95,7 @@ public class FailureAuditingAuthModule implements AsyncServerAuthModule {
     public Promise<AuthStatus, AuthenticationException> validateRequest(MessageInfoContext messageInfo,
             Subject clientSubject, Subject serviceSubject) {
 
-        messageInfo.getRequestContextMap().put(AUDIT_FAILURE_REASON_KEY, Collections.singletonMap("message", "FAILURE_REASON"));
+        messageInfo.getRequestContextMap().put(AUDIT_FAILURE_REASON_KEY, singletonMap("message", "FAILURE_REASON"));
 
         return Promises.newResultPromise(AuthStatus.SEND_FAILURE);
     }

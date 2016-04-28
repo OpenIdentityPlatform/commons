@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.http;
@@ -38,6 +38,10 @@ public class HttpAuthorizationFilter implements Filter {
     private final ResponseHandler responseHandler;
     private final HttpAuthorizationModule module;
 
+    /**
+     * Construct the filter using the provided module.
+     * @param module The module.
+     */
     public HttpAuthorizationFilter(HttpAuthorizationModule module) {
         Reject.ifNull(module);
         this.module = module;

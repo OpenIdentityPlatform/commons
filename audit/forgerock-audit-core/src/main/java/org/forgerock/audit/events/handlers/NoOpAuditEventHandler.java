@@ -42,9 +42,13 @@ import org.forgerock.util.promise.Promise;
  */
 public class NoOpAuditEventHandler extends AuditEventHandlerBase {
 
+    /**
+     * Default constructor.
+     */
     public NoOpAuditEventHandler() {
         super("NullAuditEventHandler",
-                new EventTopicsMetaData(Collections.<String, JsonValue>emptyMap()), Collections.<String>emptySet(), true);
+                new EventTopicsMetaData(Collections.<String, JsonValue>emptyMap()), Collections.<String>emptySet(),
+                        true);
     }
 
     @Override

@@ -18,7 +18,6 @@ package org.forgerock.audit.handlers.jms;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
@@ -135,7 +134,7 @@ class JmsResourceManager {
      * @param session the session to get the producer from.
      * @return a new producer from the session with the destination set to the configured JMS topic.
      * @throws JMSException if there is trouble creating the producer.
-     * @see Session#createProducer(Destination)
+     * @see Session#createProducer(javax.jms.Destination)
      * @see MessageProducer#setDeliveryMode(int)
      */
     public MessageProducer createProducer(Session session) throws JMSException {

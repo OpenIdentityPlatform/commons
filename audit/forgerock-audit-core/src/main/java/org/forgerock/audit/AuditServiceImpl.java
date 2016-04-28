@@ -374,25 +374,25 @@ final class AuditServiceImpl implements AuditService {
     @Override
     public void startup() throws ServiceUnavailableException {
         switch (lifecycleState) {
-            case STARTING:
-                for (Map.Entry<String, AuditEventHandler> entry : auditEventHandlersByName.entrySet()) {
-                    String handlerName = entry.getKey();
-                    AuditEventHandler handler = entry.getValue();
-                    try {
-                        handler.startup();
-                    } catch (ResourceException e) {
-                        logger.warn("Unable to startup handler " + handlerName,  e);
-                    }
+        case STARTING:
+            for (Map.Entry<String, AuditEventHandler> entry : auditEventHandlersByName.entrySet()) {
+                String handlerName = entry.getKey();
+                AuditEventHandler handler = entry.getValue();
+                try {
+                    handler.startup();
+                } catch (ResourceException e) {
+                    logger.warn("Unable to startup handler " + handlerName,  e);
                 }
-                lifecycleState = LifecycleState.RUNNING;
-                break;
-            case RUNNING:
-                // nothing to do
-                break;
-            case SHUTDOWN:
-                throw new ServiceUnavailableException("AuditService cannot be restarted after shutdown");
-            default:
-                throw new IllegalStateException("AuditService is in an unknown state");
+            }
+            lifecycleState = LifecycleState.RUNNING;
+            break;
+        case RUNNING:
+            // nothing to do
+            break;
+        case SHUTDOWN:
+            throw new ServiceUnavailableException("AuditService cannot be restarted after shutdown");
+        default:
+            throw new IllegalStateException("AuditService is in an unknown state");
         }
     }
 
@@ -406,26 +406,26 @@ final class AuditServiceImpl implements AuditService {
     @Override
     public void shutdown() {
         switch (lifecycleState) {
-            case STARTING:
-                lifecycleState = LifecycleState.SHUTDOWN;
-                break;
-            case RUNNING:
-                for (Map.Entry<String, AuditEventHandler> entry : auditEventHandlersByName.entrySet()) {
-                    String handlerName = entry.getKey();
-                    AuditEventHandler handler = entry.getValue();
-                    try {
-                        handler.shutdown();
-                    } catch (ResourceException e) {
-                        logger.warn("Unable to shutdown handler " + handlerName,  e);
-                    }
+        case STARTING:
+            lifecycleState = LifecycleState.SHUTDOWN;
+            break;
+        case RUNNING:
+            for (Map.Entry<String, AuditEventHandler> entry : auditEventHandlersByName.entrySet()) {
+                String handlerName = entry.getKey();
+                AuditEventHandler handler = entry.getValue();
+                try {
+                    handler.shutdown();
+                } catch (ResourceException e) {
+                    logger.warn("Unable to shutdown handler " + handlerName,  e);
                 }
-                lifecycleState = LifecycleState.SHUTDOWN;
-                break;
-            case SHUTDOWN:
-                // nothing to do
-                break;
-            default:
-                throw new IllegalStateException("AuditService is in an unknown state");
+            }
+            lifecycleState = LifecycleState.SHUTDOWN;
+            break;
+        case SHUTDOWN:
+            // nothing to do
+            break;
+        default:
+            throw new IllegalStateException("AuditService is in an unknown state");
         }
     }
 
@@ -451,7 +451,7 @@ final class AuditServiceImpl implements AuditService {
     /**
      * Substitute {@link AuditEventHandler} to use when no query handler is available.
      */
-    private class NullQueryHandler implements AuditEventHandler {
+    private final class NullQueryHandler implements AuditEventHandler {
 
         private final String errorMessage;
 
@@ -459,8 +459,8 @@ final class AuditServiceImpl implements AuditService {
             if (handlerForQueries == null || handlerForQueries.trim().isEmpty()) {
                 this.errorMessage = "No handler defined for queries.";
             } else {
-                this.errorMessage = "The handler defined for queries, '" + handlerForQueries +
-                        "', has not been registered to the audit service.";
+                this.errorMessage = "The handler defined for queries, '" + handlerForQueries
+                        + "', has not been registered to the audit service.";
             }
         }
 
@@ -508,7 +508,8 @@ final class AuditServiceImpl implements AuditService {
         }
 
         @Override
-        public Promise<ActionResponse, ResourceException> handleAction(Context context, String topic, ActionRequest request) {
+        public Promise<ActionResponse, ResourceException> handleAction(Context context, String topic,
+                ActionRequest request) {
             throw new UnsupportedOperationException("Unsupported.");
         }
     }

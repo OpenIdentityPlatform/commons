@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit;
@@ -78,6 +78,11 @@ public final class AuditServiceBuilder {
         return this;
     }
 
+    /**
+     * Set the topic metadata that should be used by the audit service and the handlers.
+     * @param eventTopicsMetaData The metadata.
+     * @return This builder.
+     */
     public AuditServiceBuilder withEventTopicsMetaData(EventTopicsMetaData eventTopicsMetaData) {
         Reject.ifNull(eventTopicsMetaData, "Audit service event topic meta-data cannot be null");
         this.eventTopicsMetaData = eventTopicsMetaData;
@@ -226,7 +231,7 @@ public final class AuditServiceBuilder {
      * is available for validation of the mapping from topics to handlers without constraining
      * the order in which the builder's methods should be called.
      */
-    private static class HandlerRegistration<C extends EventHandlerConfiguration> {
+    private static final class HandlerRegistration<C extends EventHandlerConfiguration> {
 
         final Class<? extends AuditEventHandler> clazz;
         final C configuration;

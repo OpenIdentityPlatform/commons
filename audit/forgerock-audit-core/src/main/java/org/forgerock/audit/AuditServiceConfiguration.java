@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit;
 
@@ -123,10 +123,18 @@ public class AuditServiceConfiguration {
         this.availableAuditEventHandlers = availableAuditEventHandlers;
     }
 
+    /**
+     * Get the filter policy mappings.
+     * @return The policies.
+     */
     public Map<String, FilterPolicy> getFilterPolicies() {
         return filterPolicies;
     }
 
+    /**
+     * Set the filter policy mappings.
+     * @param filterPolicies The policies.
+     */
     public void setFilterPolicies(Map<String, FilterPolicy> filterPolicies) {
         this.filterPolicies.putAll(filterPolicies);
     }

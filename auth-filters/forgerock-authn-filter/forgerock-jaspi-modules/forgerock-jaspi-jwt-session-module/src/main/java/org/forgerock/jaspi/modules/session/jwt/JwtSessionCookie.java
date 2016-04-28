@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
@@ -20,7 +20,7 @@ import org.forgerock.caf.http.Cookie;
 
 /**
  * Abstraction of a cookie to allow for the CHF {@link org.forgerock.http.protocol.Cookie}
- * and the Http {@link Cookie}
+ * and the Http {@link Cookie}.
  */
 public interface JwtSessionCookie {
 

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.retention;
 
@@ -34,7 +34,7 @@ public class TimeStampFileNamingPolicyTest {
     public static final String PREFIX = "prefix-";
 
     @Test
-    public void TestGetInitialName() {
+    public void testGetInitialName() {
         // given
         final File initialFile = getTempFile();
         final TimeStampFileNamingPolicy fileNamingPolicy =
@@ -48,7 +48,7 @@ public class TimeStampFileNamingPolicyTest {
     }
 
     @Test
-    public void TestGetNextName() {
+    public void testGetNextName() {
         // given
         final File initialFile = getTempFile();
         final TimeStampFileNamingPolicy fileNamingPolicy =
@@ -63,7 +63,7 @@ public class TimeStampFileNamingPolicyTest {
     }
 
     @Test
-    public void TestListFiles() throws Exception {
+    public void testListFiles() throws Exception {
         // given
         final File initialFile = getTempFile();
         final TimeStampFileNamingPolicy fileNamingPolicy =

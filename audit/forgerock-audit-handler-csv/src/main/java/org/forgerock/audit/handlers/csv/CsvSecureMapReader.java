@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -68,7 +68,7 @@ class CsvSecureMapReader implements ICsvMapReader {
 
             result.put(key, value == null ? null : value.toString());
         }
-        
+
         return result;
     }
 
@@ -79,7 +79,7 @@ class CsvSecureMapReader implements ICsvMapReader {
             return null;
         }
         // The 2 last columns are the HMAC and SIGNATURE one.
-        String[] result = new String[header.length-2];
+        String[] result = new String[header.length - 2];
         System.arraycopy(header, 0, result, 0, result.length);
 
         return result;

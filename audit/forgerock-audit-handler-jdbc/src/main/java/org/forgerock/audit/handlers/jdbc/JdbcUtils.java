@@ -34,8 +34,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 final class JdbcUtils {
 
-    private static final Logger logger = LoggerFactory.getLogger(JdbcUtils.class);
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final Logger LOGGER = LoggerFactory.getLogger(JdbcUtils.class);
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private JdbcUtils() {
         // Prevent instantiation
@@ -47,59 +47,59 @@ final class JdbcUtils {
         for (final Parameter parameter : params) {
             final Object parameterValue = parameter.getParameter();
             switch (parameter.getParameterType()) {
-                case STRING:
-                    preparedStatement.setString(i, (String) parameterValue);
-                    break;
-                case NUMBER:
-                    if (parameterValue == null) {
-                        preparedStatement.setNull(i, Types.FLOAT);
-                        break; // avoid fall through into INTEGER case
-                    }
-                    if (parameterValue instanceof Float) {
-                        preparedStatement.setFloat(i, (Float) parameterValue);
-                    } else if (parameterValue instanceof Double) {
-                        preparedStatement.setDouble(i, (Double) parameterValue);
-                    } else if (parameterValue instanceof BigDecimal) {
-                        preparedStatement.setBigDecimal(i, (BigDecimal) parameterValue);
-                    }
-                    // intentional fall through so that number can support the json integer type subset as well
-                case INTEGER:
-                    if (parameterValue == null) {
-                        preparedStatement.setNull(i, Types.INTEGER);
-                    } else if (parameterValue instanceof Long) {
-                        preparedStatement.setLong(i, (Long) parameterValue);
-                    } else if (parameterValue instanceof Integer) {
-                        preparedStatement.setInt(i, (Integer) parameterValue);
-                    } else {
-                        final String error = String.format("Unable to map class type %s to %s for field %d",
-                                parameterValue.getClass().getCanonicalName(),
-                                parameter.getParameterType(),
-                                i);
-                        logger.error(error);
-                        throw new AuditException(error);
-                    }
-                    break;
-                case BOOLEAN:
-                    if (parameterValue == null) {
-                        preparedStatement.setNull(i, Types.BOOLEAN);
-                    } else {
-                        preparedStatement.setBoolean(i, (Boolean) parameterValue);
-                    }
-                    break;
-                case OBJECT:
-                case ARRAY:
-                    if (parameterValue == null) {
-                        preparedStatement.setString(i, null);
-                    } else {
-                        preparedStatement.setString(i, mapper.writeValueAsString(parameterValue));
-                    }
-                    break;
-                default:
-                    final String error = String.format("Schema defines unknown type %s for field %d",
+            case STRING:
+                preparedStatement.setString(i, (String) parameterValue);
+                break;
+            case NUMBER:
+                if (parameterValue == null) {
+                    preparedStatement.setNull(i, Types.FLOAT);
+                    break; // avoid fall through into INTEGER case
+                }
+                if (parameterValue instanceof Float) {
+                    preparedStatement.setFloat(i, (Float) parameterValue);
+                } else if (parameterValue instanceof Double) {
+                    preparedStatement.setDouble(i, (Double) parameterValue);
+                } else if (parameterValue instanceof BigDecimal) {
+                    preparedStatement.setBigDecimal(i, (BigDecimal) parameterValue);
+                }
+                // intentional fall through so that number can support the json integer type subset as well
+            case INTEGER:
+                if (parameterValue == null) {
+                    preparedStatement.setNull(i, Types.INTEGER);
+                } else if (parameterValue instanceof Long) {
+                    preparedStatement.setLong(i, (Long) parameterValue);
+                } else if (parameterValue instanceof Integer) {
+                    preparedStatement.setInt(i, (Integer) parameterValue);
+                } else {
+                    final String error = String.format("Unable to map class type %s to %s for field %d",
+                            parameterValue.getClass().getCanonicalName(),
                             parameter.getParameterType(),
                             i);
-                    logger.error(error);
+                    LOGGER.error(error);
                     throw new AuditException(error);
+                }
+                break;
+            case BOOLEAN:
+                if (parameterValue == null) {
+                    preparedStatement.setNull(i, Types.BOOLEAN);
+                } else {
+                    preparedStatement.setBoolean(i, (Boolean) parameterValue);
+                }
+                break;
+            case OBJECT:
+            case ARRAY:
+                if (parameterValue == null) {
+                    preparedStatement.setString(i, null);
+                } else {
+                    preparedStatement.setString(i, MAPPER.writeValueAsString(parameterValue));
+                }
+                break;
+            default:
+                final String error = String.format("Schema defines unknown type %s for field %d",
+                        parameter.getParameterType(),
+                        i);
+                LOGGER.error(error);
+                throw new AuditException(error);
             }
             i++;
         }

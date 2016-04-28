@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.retention;
 
@@ -43,7 +43,7 @@ public class DiskSpaceUsedRetentionPolicy implements RetentionPolicy {
         final List<File> archivedFiles = fileNamingPolicy.listFiles();
         long currentDiskSpaceUsed = 0L;
         for (final File file: archivedFiles) {
-           currentDiskSpaceUsed += file.length();
+            currentDiskSpaceUsed += file.length();
         }
 
         if (currentDiskSpaceUsed <= maxDiskSpaceToUse) {

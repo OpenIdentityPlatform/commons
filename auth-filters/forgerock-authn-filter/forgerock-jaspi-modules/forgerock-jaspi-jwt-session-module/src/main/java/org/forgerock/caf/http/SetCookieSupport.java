@@ -1,3 +1,4 @@
+//@Checkstyle:ignoreFor 24
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,7 +18,7 @@
 /*
  * Copied from, https://github.com/apache/tomcat/blob/trunk/java/org/apache/tomcat/util/http/SetCookieSupport.java
  *
- * Portions Copyright 2014 ForgeRock AS.
+ * Portions Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.http;
@@ -39,19 +40,19 @@ public class SetCookieSupport {
     // Other fields
     private static final String OLD_COOKIE_PATTERN = "EEE, dd-MMM-yyyy HH:mm:ss z";
     private static final ThreadLocal<DateFormat> OLD_COOKIE_FORMAT =
-            new ThreadLocal<DateFormat>() {
-                @Override
-                protected DateFormat initialValue() {
-                    DateFormat df =
-                            new SimpleDateFormat(OLD_COOKIE_PATTERN, Locale.US);
-                    df.setTimeZone(TimeZone.getTimeZone("GMT"));
-                    return df;
-                }
-            };
-    private static final String ancientDate;
+        new ThreadLocal<DateFormat>() {
+            @Override
+            protected DateFormat initialValue() {
+                DateFormat df =
+                        new SimpleDateFormat(OLD_COOKIE_PATTERN, Locale.US);
+                df.setTimeZone(TimeZone.getTimeZone("GMT"));
+                return df;
+            }
+        };
+    private static final String ANCIENT_DATE;
 
     static {
-        ancientDate = OLD_COOKIE_FORMAT.get().format(new Date(10000));
+        ANCIENT_DATE = OLD_COOKIE_FORMAT.get().format(new Date(10000));
     }
 
     /**
@@ -106,11 +107,11 @@ public class SetCookieSupport {
         // Add version 1 specific information
         if (version == 1) {
             // Version=1 ... required
-            buf.append ("; Version=1");
+            buf.append("; Version=1");
 
             // Comment=comment
             if (comment != null) {
-                buf.append ("; Comment=");
+                buf.append("; Comment=");
                 maybeQuote(buf, comment);
             }
         }
@@ -125,17 +126,17 @@ public class SetCookieSupport {
         int maxAge = cookie.getMaxAge();
         if (maxAge >= 0) {
             if (version > 0) {
-                buf.append ("; Max-Age=");
-                buf.append (maxAge);
+                buf.append("; Max-Age=");
+                buf.append(maxAge);
             }
             // IE6, IE7 and possibly other browsers don't understand Max-Age.
             // They do understand Expires, even with V1 cookies!
             if (version == 0) {
                 // Wdy, DD-Mon-YY HH:MM:SS GMT ( Expires Netscape format )
-                buf.append ("; Expires=");
+                buf.append("; Expires=");
                 // To expire immediately we need to set the time in past
                 if (maxAge == 0) {
-                    buf.append( ancientDate );
+                    buf.append(ANCIENT_DATE);
                 } else {
                     OLD_COOKIE_FORMAT.get().format(
                             new Date(System.currentTimeMillis() + maxAge * 1000L),
@@ -146,14 +147,14 @@ public class SetCookieSupport {
         }
 
         // Path=path
-        if (path!=null) {
-            buf.append ("; Path=");
+        if (path != null) {
+            buf.append("; Path=");
             maybeQuote(buf, path);
         }
 
         // Secure
         if (cookie.isSecure()) {
-            buf.append ("; Secure");
+            buf.append("; Secure");
         }
 
         // HttpOnly
@@ -168,11 +169,11 @@ public class SetCookieSupport {
             buf.append("\"\"");
         } else if (alreadyQuoted(value)) {
             buf.append('"');
-            escapeDoubleQuotes(buf, value,1,value.length()-1);
+            escapeDoubleQuotes(buf, value, 1, value.length() - 1);
             buf.append('"');
         } else if (needsQuotes(value)) {
             buf.append('"');
-            escapeDoubleQuotes(buf, value,0,value.length());
+            escapeDoubleQuotes(buf, value, 0, value.length());
             buf.append('"');
         } else {
             buf.append(value);
@@ -187,7 +188,7 @@ public class SetCookieSupport {
 
         for (int i = beginIndex; i < endIndex; i++) {
             char c = s.charAt(i);
-            if (c == '\\' ) {
+            if (c == '\\') {
                 b.append('\\').append('\\');
             } else if (c == '"') {
                 b.append('\\').append('"');
@@ -221,8 +222,8 @@ public class SetCookieSupport {
     }
 
     private static boolean alreadyQuoted(String value) {
-        return value.length() >= 2 &&
-                value.charAt(0) == '\"' &&
-                value.charAt(value.length() - 1) == '\"';
+        return value.length() >= 2
+                && value.charAt(0) == '\"'
+                && value.charAt(value.length() - 1) == '\"';
     }
 }

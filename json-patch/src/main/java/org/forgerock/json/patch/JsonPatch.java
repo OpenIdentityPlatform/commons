@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.patch;
@@ -65,14 +65,14 @@ public final class JsonPatch {
      * Default transform for patch values; Conforms to RFC6902.
      */
     private static final JsonPatchValueTransformer DEFAULT_TRANSFORM =
-            new JsonPatchValueTransformer() {
-                public Object getTransformedValue(JsonValue target, JsonValue op) {
-                    if (op.get(JsonPatch.VALUE_PTR) != null) {
-                        return op.get(JsonPatch.VALUE_PTR).getObject();
-                    }
-                    throw new JsonValueException(op, "expecting a value member");
+        new JsonPatchValueTransformer() {
+            public Object getTransformedValue(JsonValue target, JsonValue op) {
+                if (op.get(JsonPatch.VALUE_PTR) != null) {
+                    return op.get(JsonPatch.VALUE_PTR).getObject();
                 }
-            };
+                throw new JsonValueException(op, "expecting a value member");
+            }
+        };
 
     /**
      * Compares two JSON values, and produces a JSON Patch value, which contains the

@@ -77,13 +77,16 @@ public class CsvWriterTest {
         CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
-        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration, keyStoreHandler, random)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration,
+                keyStoreHandler, random)) {
             Map<String, String> values = getValues(header, "one-a", "one-b", "one-c");
             writer.writeEvent(values);
         }
 
-        String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
-        KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, csvFile.getPath() + ".keystore", password);
+        String password = Base64.encode(
+                keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                csvFile.getPath() + ".keystore", password);
         SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
                 keyStoreHandler.readPublicKeyFromKeyStore(KeyStoreSecureStorage.ENTRY_SIGNATURE));
         CsvSecureVerifier verifier = new CsvSecureVerifier(csvFile, CsvPreference.EXCEL_PREFERENCE, secureStorage);
@@ -111,12 +114,14 @@ public class CsvWriterTest {
         CsvAuditEventHandlerConfiguration configuration = new CsvAuditEventHandlerConfiguration();
         configuration.setBufferingConfiguration(bufferConfig);
         configuration.setSecurity(csvSecurity);
-        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration, keyStoreHandler, random)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration,
+                keyStoreHandler, random)) {
             Map<String, String> values = getValues(header, "one-a", "one-b", "one-c");
             writer.writeEvent(values);
         }
 
-        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration, keyStoreHandler, random)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration,
+                keyStoreHandler, random)) {
             Map<String, String> values = new HashMap<>(3);
             values.put(header[0], "riri");
             values.put(header[1], "fifi");
@@ -125,7 +130,8 @@ public class CsvWriterTest {
             writer.writeEvent(values);
         }
 
-        String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        String password = Base64.encode(
+                keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
         KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
                 csvFile.getPath() + ".keystore", password);
         SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,
@@ -135,7 +141,8 @@ public class CsvWriterTest {
 
         // Expecting to fail
         try {
-            new SecureCsvWriter(csvFile, new String[] { "child1", "child2", "child3", "enfant4" }, csvPreference, configuration, keyStoreHandler, random);
+            new SecureCsvWriter(csvFile, new String[] { "child1", "child2", "child3", "enfant4" }, csvPreference,
+                    configuration, keyStoreHandler, random);
             fail("Should have failed because headers do not match.");
         } catch (RuntimeException e) {
             // This is ok, we expect to have this exception.
@@ -182,7 +189,8 @@ public class CsvWriterTest {
         CsvAuditEventHandlerConfiguration configuration =
                 createCsvAuditEventHandlerConfigurationWithRotation(bufferConfig, 1000L);
         configuration.setSecurity(csvSecurity);
-        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration, keyStoreHandler, random)) {
+        try (SecureCsvWriter writer = new SecureCsvWriter(csvFile, header, csvPreference, configuration,
+                keyStoreHandler, random)) {
             writeNRows(header, writer, 12);
         }
 
@@ -199,7 +207,8 @@ public class CsvWriterTest {
                 new TimestampFilenameFilter(csvFile, PREFIX, DateTimeFormat.forPattern(TIME_STAMP_FORMAT));
         final File[] files = csvFile.getParentFile().listFiles(timestampFilenameFilter);
         assertThat(files).isNotEmpty();
-        String password = Base64.encode(keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
+        String password = Base64.encode(
+                keyStoreHandler.readSecretKeyFromKeyStore(CsvSecureConstants.ENTRY_PASSWORD).getEncoded());
         KeyStoreHandler csvKeyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
                 files[0].getPath() + ".keystore", password);
         SecureStorage secureStorage = new KeyStoreSecureStorage(csvKeyStoreHandler,

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -90,7 +90,7 @@ public class JdbcAuditEventHandlerConfiguration extends EventHandlerConfiguratio
 
     /**
      * Sets the type of the database.
-     * @return The type of the database.
+     * @param databaseType The type of the database.
      */
     public void setDatabaseType(String databaseType) {
         this.databaseType = databaseType;
@@ -101,6 +101,9 @@ public class JdbcAuditEventHandlerConfiguration extends EventHandlerConfiguratio
         return true;
     }
 
+    /**
+     * Configuration for a connection pool.
+     */
     public static class ConnectionPool {
         @JsonPropertyDescription("audit.handlers.jdbc.connectionPool.dataSourceClassName")
         private String dataSourceClassName;
@@ -326,7 +329,7 @@ public class JdbcAuditEventHandlerConfiguration extends EventHandlerConfiguratio
 
         /**
          * Sets the auto commit value.
-         * @return The auto commit value.
+         * @param autoCommit The auto commit value.
          */
         public void setAutoCommit(boolean autoCommit) {
             this.autoCommit = autoCommit;

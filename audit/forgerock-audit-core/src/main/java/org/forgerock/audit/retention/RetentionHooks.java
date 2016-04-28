@@ -11,19 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.retention;
 
 import java.io.IOException;
 
+/**
+ * Hook into the retention checking operations for a file.
+ */
 public interface RetentionHooks {
 
     /**
      * Method to run an action just before the file is run through the {@link RetentionPolicy}'s.
      * @throws IOException If the pre action fails.
      */
-     void postRetentionAction() throws IOException;
+    void postRetentionAction() throws IOException;
 
     /**
      * {@link RetentionHooks} that do nothing.

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.crest;
@@ -150,7 +150,8 @@ public final class AuthorizationFilters {
      *
      * @param target The RequestHandler.
      * @param modules The {@code CrestAuthorizationModule}s that will perform authorization for each request.
-     * @return A new {@code FilterChain} which will filter requests before allowing access to the provided RequestHandler.
+     * @return A new {@code FilterChain} which will filter requests before allowing access to the provided
+     * RequestHandler.
      * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
      * {@code null}.
      */
@@ -164,7 +165,8 @@ public final class AuthorizationFilters {
      *
      * @param target The RequestHandler.
      * @param modules The {@code CrestAuthorizationModule}s that will perform authorization for each request.
-     * @return A new {@code FilterChain} which will filter requests before allowing access to the provided RequestHandler.
+     * @return A new {@code FilterChain} which will filter requests before allowing access to the provided
+     * RequestHandler.
      * @throws java.lang.NullPointerException If either the specified {@code target} or {@code modules} parameters are
      * {@code null}.
      */

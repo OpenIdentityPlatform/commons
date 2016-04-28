@@ -33,12 +33,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Utilities for working with Elasticsearch.
  */
-class ElasticsearchUtil {
+final class ElasticsearchUtil {
 
     /**
      * Jackson {@link ObjectMapper} for working with JSON.
      */
-    public static final ObjectMapper objectMapper = new ObjectMapper();
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      * JSON field-name of metadata to assist in de-normalization.
@@ -157,7 +157,7 @@ class ElasticsearchUtil {
     @VisibleForTesting
     protected static JsonValue replaceKeyPeriodsWithUnderscores(final JsonValue value,
             final Map<String, Object> normalized) throws IOException {
-        final String s = objectMapper.writeValueAsString(value.getObject());
+        final String s = OBJECT_MAPPER.writeValueAsString(value.getObject());
         final Matcher m = JSON_KEY_WITH_PERIOD_CHAR_PATTERN.matcher(s);
         if (m.find()) {
             // fieldNames contains metadata for de-normalization
@@ -207,7 +207,7 @@ class ElasticsearchUtil {
     protected static JsonValue restoreKeyPeriods(final JsonValue value, final JsonValue normalized) throws IOException {
         final JsonValue fieldNames = normalized.get(FIELD_NAMES_FIELD);
         if (fieldNames.isNotNull()) {
-            final String s = objectMapper.writeValueAsString(value.getObject());
+            final String s = OBJECT_MAPPER.writeValueAsString(value.getObject());
             final Matcher m = JSON_KEY_WITH_UNDERSCORE_CHAR_PATTERN.matcher(s);
             if (m.find()) {
                 final int n = s.length();

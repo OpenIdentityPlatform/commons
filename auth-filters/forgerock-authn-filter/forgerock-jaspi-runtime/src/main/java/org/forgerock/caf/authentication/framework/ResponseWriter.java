@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authentication.framework;
@@ -21,8 +21,6 @@ import java.util.Collection;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
 import org.forgerock.guava.common.net.MediaType;
-import org.forgerock.http.protocol.Response;
-import org.forgerock.json.resource.ResourceException;
 
 /**
  * Writes {@code AuthenticationException} responses for different media types.

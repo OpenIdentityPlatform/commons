@@ -11,24 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.nio.charset.StandardCharsets.*;
+import static org.assertj.core.api.Assertions.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
 import org.forgerock.audit.handlers.csv.CsvSecureArchiveVerifierCli.OptionsParser;
 import org.forgerock.audit.handlers.csv.CsvSecureVerifier.VerificationResult;
-
 import org.testng.annotations.Test;
 
 @SuppressWarnings("javadoc")
@@ -49,10 +47,10 @@ public class CsvSecureArchiveVerifierCliTest {
         CsvSecureArchiveVerifierCli.printVerificationResults(results, new PrintStream(out));
 
         // then
-        assertThat(out.toString(UTF_8.name())).isEqualTo(
-                "PASS    access.csv.1" + NEW_LINE +
-                "FAIL    access.csv.2    Missing signature" + NEW_LINE +
-                "PASS    access.csv.3" + NEW_LINE);
+        assertThat(out.toString(UTF_8.name())).isEqualTo(""
+                + "PASS    access.csv.1" + NEW_LINE
+                + "FAIL    access.csv.2    Missing signature" + NEW_LINE
+                + "PASS    access.csv.3" + NEW_LINE);
     }
 
     @Test
@@ -66,15 +64,16 @@ public class CsvSecureArchiveVerifierCliTest {
         optionsParser.parse(new String[]{});
 
         // then
-        assertThat(out.toString(UTF_8.name())).isEqualTo("arguments: --archive <path> --topic <topic> " +
-                "[--prefix <prefix>] [--suffix <suffix>] --keystore <path> --password <password>" + NEW_LINE +
-                NEW_LINE +
-                "   --archive       path to directory containing files to verify" + NEW_LINE +
-                "   --topic         name of topic fileset to verify" + NEW_LINE +
-                "   --prefix        prefix prepended to archive files" + NEW_LINE +
-                "   --suffix        format of timestamp suffix appended to archive files" + NEW_LINE +
-                "   --keystore      path to keystore file" + NEW_LINE +
-                "   --password      keystore file password" + NEW_LINE);
+        assertThat(out.toString(UTF_8.name())).isEqualTo(""
+                + "arguments: --archive <path> --topic <topic> "
+                + "[--prefix <prefix>] [--suffix <suffix>] --keystore <path> --password <password>" + NEW_LINE
+                + NEW_LINE
+                + "   --archive       path to directory containing files to verify" + NEW_LINE
+                + "   --topic         name of topic fileset to verify" + NEW_LINE
+                + "   --prefix        prefix prepended to archive files" + NEW_LINE
+                + "   --suffix        format of timestamp suffix appended to archive files" + NEW_LINE
+                + "   --keystore      path to keystore file" + NEW_LINE
+                + "   --password      keystore file password" + NEW_LINE);
         assertThat(err.toString()).isEqualTo("");
     }
 }

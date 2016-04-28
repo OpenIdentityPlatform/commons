@@ -11,32 +11,33 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.openam;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.forgerock.util.promise.Promises.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.testng.Assert.*;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.TrustManager;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.Client;
-import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.header.CookieHeader;
@@ -44,7 +45,7 @@ import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ResourceException;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Options;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -642,7 +643,7 @@ public class OpenAMSessionModuleTest {
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Test
-    public void validateRequestShouldReturnSuccessWhenSsoTokenOnCookie() throws ResourceException, AuthenticationException {
+    public void validateRequestShouldReturnSuccessWhenSsoTokenOnCookie() throws Exception {
 
         //Given
         initialise();
@@ -672,7 +673,7 @@ public class OpenAMSessionModuleTest {
     }
 
     @Test
-    public void validateRequestShouldReturnSuccessWhenAccessingRootRealm() throws ResourceException, AuthenticationException {
+    public void validateRequestShouldReturnSuccessWhenAccessingRootRealm() throws Exception {
 
         //Given
         initialise();

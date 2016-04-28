@@ -11,13 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.retention;
 
 import java.io.File;
 import java.util.List;
 
+/**
+ * An interface to declare the names of audit log files.
+ */
 public interface FileNamingPolicy {
     /**
      * Initializes the policy and returns the current name to use.

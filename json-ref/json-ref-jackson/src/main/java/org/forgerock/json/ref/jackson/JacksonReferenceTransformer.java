@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.ref.jackson;
@@ -51,8 +51,8 @@ public class JacksonReferenceTransformer extends JsonReferenceTransformer {
     @Override
     protected boolean isResolvable(URI uri) {
         String scheme = (uri == null ? null : uri.getScheme());
-        return (scheme != null && (scheme.equalsIgnoreCase("file") ||
-         scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")));
+        return (scheme != null && (scheme.equalsIgnoreCase("file")
+                || scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https")));
     }
 
     @Override

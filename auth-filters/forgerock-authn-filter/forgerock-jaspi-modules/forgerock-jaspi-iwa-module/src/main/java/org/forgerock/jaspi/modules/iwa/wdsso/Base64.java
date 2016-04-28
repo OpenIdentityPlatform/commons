@@ -1,4 +1,5 @@
-/**
+//@Checkstyle:ignoreFor 33
+/*
  * Licence (BSD):
  * ==============
  *
@@ -26,14 +27,14 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
- */
-/**
- * Portions Copyrighted 2011 ForgeRock AS
+ *
+ * Portions Copyrighted 2011-2016 ForgeRock AS.
  */
 package org.forgerock.jaspi.modules.iwa.wdsso;
 
 import java.util.Arrays;
 
+//@Checkstyle:ignoreFor 40
 /**
  * A very fast and memory efficient class to encode and decode to and from BASE64 in full accordance
  * with RFC 2045.<br><br>
@@ -74,7 +75,7 @@ import java.util.Arrays;
  *         Date: 2004-aug-02
  *         Time: 11:31:11
  */
-public class Base64 {
+public final class Base64 {
 
     private static final char[] CA = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     private static final int[] IA = new int[256];
@@ -159,8 +160,8 @@ public class Base64 {
         // Count illegal characters (including '\r', '\n') to know what size the returned array will be,
         // so we don't have to reallocate & copy it later.
         int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a bonus...)
-        for (int i = 0; i < sLen; i++) // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
-        {
+        // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
+        for (int i = 0; i < sLen; i++) {
             if (IA[sArr[i]] < 0) {
                 sepCnt++;
             }
@@ -343,8 +344,8 @@ public class Base64 {
         // Count illegal characters (including '\r', '\n') to know what size the returned array will be,
         // so we don't have to reallocate & copy it later.
         int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a bonus...)
-        for (int i = 0; i < sLen; i++) // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
-        {
+        // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
+        for (int i = 0; i < sLen; i++) {
             if (IA[sArr[i] & 0xff] < 0) {
                 sepCnt++;
             }
@@ -477,7 +478,7 @@ public class Base64 {
 
     /**
      * This method is using {@link #encode(byte[], boolean)}, and it
-     * only exists so we don't break the API. 
+     * only exists so we don't break the API.
      *
      * @param content The bytearray that needs to be Base64 encoded
      * @return the Base64 encoded
@@ -486,8 +487,9 @@ public class Base64 {
         return encode(content, false);
     }
 
-    /** Decodes a BASE64 encoded <code>String</code>. All illegal characters will be ignored and can handle both strings with
-     * and without line separators.<br>
+    /**
+     * Decodes a BASE64 encoded <code>String</code>. All illegal characters will be ignored and can handle both strings
+     * with and without line separators.<br>
      * <b>Note!</b> It can be up to about 2x the speed to call <code>decode(str.toCharArray())</code> instead. That
      * will create a temporary array though. This version will use <code>str.charAt(i)</code> to iterate the string.
      * @param str The source string. <code>null</code> or length 0 will return an empty array.
@@ -504,8 +506,8 @@ public class Base64 {
         // Count illegal characters (including '\r', '\n') to know what size the returned array will be,
         // so we don't have to reallocate & copy it later.
         int sepCnt = 0; // Number of separator characters. (Actually illegal characters, but that's a bonus...)
-        for (int i = 0; i < sLen; i++) // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
-        {
+        // If input is "pure" (I.e. no line separators or illegal chars) base64 this loop can be commented out.
+        for (int i = 0; i < sLen; i++) {
             if (IA[str.charAt(i)] < 0) {
                 sepCnt++;
             }
@@ -591,7 +593,10 @@ public class Base64 {
         int d = 0;
         for (int cc = 0, eLen = (len / 3) * 3; d < eLen;) {
             // Assemble three bytes into an int from four "valid" characters.
-            int i = IA[s.charAt(sIx++)] << 18 | IA[s.charAt(sIx++)] << 12 | IA[s.charAt(sIx++)] << 6 | IA[s.charAt(sIx++)];
+            int i = IA[s.charAt(sIx++)] << 18
+                    | IA[s.charAt(sIx++)] << 12
+                    | IA[s.charAt(sIx++)] << 6
+                    | IA[s.charAt(sIx++)];
 
             // Add the bytes
             dArr[d++] = (byte) (i >> 16);
@@ -618,5 +623,9 @@ public class Base64 {
         }
 
         return dArr;
+    }
+
+    private Base64() {
+        // utility class
     }
 }

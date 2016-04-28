@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.rotation;
 
@@ -30,8 +30,8 @@ public class TimeLimitRotationPolicy implements RotationPolicy {
     private final long rotationIntervalInMillis;
 
     /**
-     * Constructs a TimeLimitRotationPolicy with a given {@link Duration}
-     * @param rotationInterval
+     * Constructs a TimeLimitRotationPolicy with a given {@link Duration}.
+     * @param rotationInterval The interval to rotate at.
      */
     public TimeLimitRotationPolicy(final Duration rotationInterval) {
         this.rotationInterval = rotationInterval;

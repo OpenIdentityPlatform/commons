@@ -11,22 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit.handlers.csv;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
-import static org.forgerock.audit.AuditServiceProxy.ACTION_PARAM_TARGET_HANDLER;
-import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.ROTATE_FILE_ACTION_NAME;
+import static java.nio.charset.StandardCharsets.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.audit.AuditServiceBuilder.*;
+import static org.forgerock.audit.AuditServiceProxy.*;
+import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.*;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.*;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -81,7 +81,8 @@ public class CsvAuditEventHandlerTest {
         final AuditServiceBuilder auditServiceBuilder = newAuditService();
 
         final DefaultKeyStoreHandlerProvider provider = new DefaultKeyStoreHandlerProvider();
-        KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME, "password");
+        KeyStoreHandler keyStoreHandler = new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, KEYSTORE_FILENAME,
+                "password");
         KeyStoreHandlerDecorator deco = new KeyStoreHandlerDecorator(keyStoreHandler);
         provider.registerKeyStoreHandler("csvSecure", keyStoreHandler);
         DependencyProviderBase dependencyProvider = new DependencyProviderBase();
@@ -200,7 +201,7 @@ public class CsvAuditEventHandlerTest {
     private static JsonValue dropNullEntries(JsonValue jsonValue) {
         JsonValue result = jsonValue.clone();
 
-        for(String key : jsonValue.keys()) {
+        for (String key : jsonValue.keys()) {
             if (jsonValue.get(key).isNull()) {
                 result.remove(key);
             }
@@ -210,7 +211,7 @@ public class CsvAuditEventHandlerTest {
     }
 
     @Test
-    public void testQueryOnAuditLogEntry() throws Exception{
+    public void testQueryOnAuditLogEntry() throws Exception {
         //given
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
@@ -305,7 +306,7 @@ public class CsvAuditEventHandlerTest {
         };
     }
 
-    @Test(dataProvider="rotateActionData")
+    @Test(dataProvider = "rotateActionData")
     public void testActionToRotateFile(String label, boolean isRotationEnabled) throws Exception {
         final Path logDirectory = Files.createTempDirectory("CsvAuditEventHandlerTest");
         logDirectory.toFile().deleteOnExit();
@@ -388,7 +389,7 @@ public class CsvAuditEventHandlerTest {
             csvHandler.shutdown();
         }
 
-        List<String> linesInCurrentFile = Files.readAllLines(logDirectory.resolve("access.csv"), StandardCharsets.UTF_8);
+        List<String> linesInCurrentFile = Files.readAllLines(logDirectory.resolve("access.csv"), UTF_8);
         if (linesInCurrentFile.size() > 1) {
             assertThat(linesInCurrentFile.get(1))
                     .describedAs("First file has been rotated")
@@ -418,7 +419,8 @@ public class CsvAuditEventHandlerTest {
         }
 
         private CsvAuditEventHandlerBuilder withSecureLoggingEnabled() throws Exception {
-            CsvAuditEventHandlerConfiguration.CsvSecurity csvSecurity = new CsvAuditEventHandlerConfiguration.CsvSecurity();
+            CsvAuditEventHandlerConfiguration.CsvSecurity csvSecurity =
+                    new CsvAuditEventHandlerConfiguration.CsvSecurity();
             csvSecurity.setEnabled(true);
             csvSecurity.setKeyStoreHandlerName("csvSecure");
             config.setSecurity(csvSecurity);
@@ -429,7 +431,7 @@ public class CsvAuditEventHandlerTest {
         private EventTopicsMetaData getEventTopicsMetaData() throws Exception {
             Map<String, JsonValue> events = new LinkedHashMap<>();
             try (final InputStream configStream = getClass().getResourceAsStream("/events.json")) {
-                final JsonValue predefinedEventTypes = new JsonValue(new ObjectMapper().readValue(configStream, Map.class));
+                final JsonValue predefinedEventTypes = json(new ObjectMapper().readValue(configStream, Map.class));
                 for (String eventTypeName : predefinedEventTypes.keys()) {
                     events.put(eventTypeName, predefinedEventTypes.get(eventTypeName));
                 }
@@ -460,13 +462,15 @@ public class CsvAuditEventHandlerTest {
         }
 
         private CsvAuditEventHandler build() throws ResourceException {
-            CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData, keystoreHandlerProvider);
+            CsvAuditEventHandler handler = new CsvAuditEventHandler(config, eventTopicsMetaData,
+                    keystoreHandlerProvider);
             handler.startup();
             return handler;
         }
 
         private KeyStoreHandlerProvider setupKeyStoreHandlerProvider() throws Exception {
-            final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks").getAbsolutePath();
+            final String keystorePath = new File(System.getProperty("java.io.tmpdir"), "secure-audit.jks")
+                    .getAbsolutePath();
             DefaultKeyStoreHandlerProvider provider = new DefaultKeyStoreHandlerProvider();
             final KeyStoreHandlerDecorator keyStoreHandler = new KeyStoreHandlerDecorator(
                     new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keystorePath, "forgerock"));

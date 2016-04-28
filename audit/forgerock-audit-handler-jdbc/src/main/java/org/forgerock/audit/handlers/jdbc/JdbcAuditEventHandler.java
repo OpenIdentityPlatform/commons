@@ -60,8 +60,11 @@ import com.zaxxer.hikari.HikariDataSource;
 public class JdbcAuditEventHandler extends AuditEventHandlerBase {
 
     private static final Logger logger = LoggerFactory.getLogger(JdbcAuditEventHandler.class);
+    /** The name used for a MySQL database. */
     public static final String MYSQL = "mysql";
+    /** The name used for an H2 database. */
     public static final String H2 = "h2";
+    /** The name used for an Oracle database. */
     public static final String ORACLE = "oracle";
 
     private final JdbcAuditEventHandlerConfiguration configuration;
@@ -270,14 +273,14 @@ public class JdbcAuditEventHandler extends AuditEventHandlerBase {
 
     private DatabaseStatementProvider getDatabaseStatementProvider(final String databaseName) {
         switch (databaseName) {
-            case MYSQL:
-            case H2:
-                return new GenericDatabaseStatementProvider();
-            case ORACLE:
-                return new OracleDatabaseStatementProvider();
-            default:
-                logger.warn("Unknown databaseName provided. Using the generic statement provider: {}", databaseName);
-                return new GenericDatabaseStatementProvider();
+        case MYSQL:
+        case H2:
+            return new GenericDatabaseStatementProvider();
+        case ORACLE:
+            return new OracleDatabaseStatementProvider();
+        default:
+            logger.warn("Unknown databaseName provided. Using the generic statement provider: {}", databaseName);
+            return new GenericDatabaseStatementProvider();
         }
     }
 
@@ -290,7 +293,7 @@ public class JdbcAuditEventHandler extends AuditEventHandlerBase {
             return true;
         }
         for (int i = 0; i < length; i++) {
-            if (Character.isWhitespace(charSeq.charAt(i)) == false) {
+            if (!Character.isWhitespace(charSeq.charAt(i))) {
                 return false;
             }
         }

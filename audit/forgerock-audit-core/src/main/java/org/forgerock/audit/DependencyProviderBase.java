@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit;
 
@@ -41,7 +41,7 @@ public class DependencyProviderBase implements DependencyProvider {
 
     /**
      * Register a new provided dependency.
-     * @param <T>
+     * @param <T> The type of the dependency.
      * @param clazz the class to register
      * @param obj the instance to provide
      * @return the previous values registered for {@literal clazz}

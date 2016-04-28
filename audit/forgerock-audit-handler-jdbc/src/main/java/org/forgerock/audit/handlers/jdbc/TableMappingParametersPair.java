@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -63,7 +63,7 @@ class TableMappingParametersPair {
     }
 
     /**
-     * Utility method to get the column name out of a {@link TableMapping}
+     * Utility method to get the column name out of a {@link TableMapping}.
      * @param field The {@link JsonPointer} field to get the column of.
      * @return The column name mapped to the given field.
      */

@@ -191,6 +191,7 @@ public interface AuditService extends RequestHandler {
     /**
      * Allows this {@code AuditService} and all its {@link AuditEventHandler}s to perform any initialization that
      * would be unsafe to do if any other instance of the {@code AuditService} were still running.
+     * @throws ServiceUnavailableException if the AuditService has been closed.
      */
     void startup() throws ServiceUnavailableException;
 

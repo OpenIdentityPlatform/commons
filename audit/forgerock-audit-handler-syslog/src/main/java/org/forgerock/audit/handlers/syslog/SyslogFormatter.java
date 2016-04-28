@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013 Cybernetica AS
- * Portions copyright 2014-2015 ForgeRock AS.
+ * Portions copyright 2014-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.syslog;
 
@@ -161,7 +161,7 @@ class SyslogFormatter {
             if (mappedField != null && !mappedField.startsWith("/")) {
                 mappedField = "/" + mappedField;
             }
-            if (! topicFieldPointers.contains(mappedField)) {
+            if (!topicFieldPointers.contains(mappedField)) {
                 logger.warn("Syslog severity field mapping for topic {} references unknown field {}",
                         mapping.getTopic(), mapping.getField());
                 continue;

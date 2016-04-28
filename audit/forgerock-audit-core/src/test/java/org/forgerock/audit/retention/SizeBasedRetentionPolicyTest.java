@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.retention;
 
@@ -27,7 +27,7 @@ import org.testng.annotations.Test;
 
 public class SizeBasedRetentionPolicyTest {
 
-    private static int MAX_HISTORY_FILES = 3;
+    private static final int MAX_HISTORY_FILES = 3;
 
     @Test
     public void testGettingFilesToDeleteWhenTooManyHistoryExist() {
@@ -35,7 +35,7 @@ public class SizeBasedRetentionPolicyTest {
         final SizeBasedRetentionPolicy retentionPolicy = new SizeBasedRetentionPolicy(MAX_HISTORY_FILES);
         final FileNamingPolicy fileNamingPolicy = mock(FileNamingPolicy.class);
         final List<File> archivedFiles = new LinkedList<>();
-        for (int i = 0; i < MAX_HISTORY_FILES + 1; i++){
+        for (int i = 0; i < MAX_HISTORY_FILES + 1; i++) {
             archivedFiles.add(mock(File.class));
         }
         when(fileNamingPolicy.listFiles()).thenReturn(archivedFiles);
@@ -53,7 +53,7 @@ public class SizeBasedRetentionPolicyTest {
         final SizeBasedRetentionPolicy retentionPolicy = new SizeBasedRetentionPolicy(MAX_HISTORY_FILES);
         final FileNamingPolicy fileNamingPolicy = mock(FileNamingPolicy.class);
         final List<File> archivedFiles = new LinkedList<>();
-        for (int i = 0; i < MAX_HISTORY_FILES - 1; i++){
+        for (int i = 0; i < MAX_HISTORY_FILES - 1; i++) {
             archivedFiles.add(mock(File.class));
         }
         when(fileNamingPolicy.listFiles()).thenReturn(archivedFiles);

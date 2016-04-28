@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.modules;
@@ -47,7 +47,8 @@ import org.forgerock.util.promise.Promises;
 public class SessionAuthModule implements AsyncServerAuthModule {
 
     /**
-     * The request header for deciding the return value from {@link #validateRequest(MessageInfoContext, Subject, Subject)}.
+     * The request header for deciding the return value from
+     * {@link #validateRequest(MessageInfoContext, Subject, Subject)}.
      */
     public final static String SESSION_VALIDATE_REQUEST_HEADER_NAME = "X-JASPI-SESSION-VALIDATE-REQUEST";
 
@@ -151,7 +152,8 @@ public class SessionAuthModule implements AsyncServerAuthModule {
         String header = request.getHeaders().getFirst(SESSION_VALIDATE_REQUEST_HEADER_NAME.toLowerCase());
 
         Map<String, Object> context =
-                (Map<String, Object>) messageInfo.getRequestContextMap().get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
+                (Map<String, Object>) messageInfo.getRequestContextMap()
+                        .get(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT);
         context.put(SESSION_MODULE_CONTEXT_ENTRY, true);
 
         if (SUCCESS_AUTH_STATUS.equalsIgnoreCase(header)) {

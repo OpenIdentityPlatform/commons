@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authentication.framework;
@@ -25,7 +25,6 @@ import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -57,7 +56,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
 
     /**
      * <p>Calls {@link AsyncServerAuthModule#validateRequest(
-     * MessageInfoContext, Subject, Subject)} directly.</p>
+     * org.forgerock.caf.authentication.api.MessageInfoContext, Subject, Subject)} directly.</p>
      *
      * <p>If the configured {@code AsyncServerAuthModule} is {@code null} return a successful
      * promise with the value {@link AuthStatus#SEND_FAILURE}.</p>
@@ -79,7 +78,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
 
     /**
      * <p>Calls {@link AsyncServerAuthModule#secureResponse(
-     * MessageInfoContext, Subject)} directly.</p>
+     * org.forgerock.caf.authentication.api.MessageInfoContext, Subject)} directly.</p>
      *
      * <p>If the configured {@code AsyncServerAuthModule} is {@code null} return a successful
      * promise with the value {@link AuthStatus#SEND_SUCCESS}.</p>
@@ -98,7 +97,7 @@ final class SessionAuthContext implements AsyncServerAuthContext {
 
     /**
      * <p>Calls {@link AsyncServerAuthModule#cleanSubject(
-     * MessageInfoContext, Subject)} directly.</p>
+     * org.forgerock.caf.authentication.api.MessageInfoContext, Subject)} directly.</p>
      *
      * <p>If the configured {@code AsyncServerAuthModule} is {@code null} return a successful
      * promise with the value {@code null}.</p>

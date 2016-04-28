@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -77,7 +77,7 @@ class CsvFormatter {
         }
 
         @Override
-        public void write(char cbuf[]) throws IOException {
+        public void write(char[] cbuf) throws IOException {
             buffer.append(cbuf);
         }
 

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events;
 
@@ -110,7 +110,8 @@ public class AccessAuditEventBuilderTest {
         assertThat(value.get(SERVER).get(PORT).asLong()).isEqualTo(80);
         assertThat(value.get(HTTP).get(REQUEST).get(METHOD).asString()).isEqualTo("GET");
         assertThat(value.get(HTTP).get(REQUEST).get(HEADERS).asMapOfList(String.class)).isEqualTo(requestHeaders);
-        assertThat(value.get(HTTP).get(REQUEST).get(QUERY_PARAMETERS).asMapOfList(String.class)).isEqualTo(queryParameters);
+        assertThat(value.get(HTTP).get(REQUEST).get(QUERY_PARAMETERS).asMapOfList(String.class))
+                .isEqualTo(queryParameters);
         assertThat(value.get(HTTP).get(REQUEST).get(COOKIES).asMap(String.class)).isEqualTo(expectedCookies);
         assertThat(value.get(HTTP).get(RESPONSE).get(HEADERS).asMapOfList(String.class)).isEqualTo(responseHeaders);
         assertThat(value.get(REQUEST).get(PROTOCOL).asString()).isEqualTo("CREST");

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.schema.validator.validators;
@@ -141,7 +141,8 @@ public class ObjectTypeValidator extends Validator {
 
             for (Map.Entry<String, Object> entry : objectProperties.entrySet()) {
                 final List<String> newPointer = newList(jsonPointer, PROPERTIES, entry.getKey());
-                Validator validator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) entry.getValue(), newPointer);
+                Validator validator = ObjectValidatorFactory.getTypeValidator(
+                        (Map<String, Object>) entry.getValue(), newPointer);
                 propertyValidators.put(entry.getKey(), new PropertyValidatorBag(validator));
             }
         } else {
@@ -154,7 +155,8 @@ public class ObjectTypeValidator extends Validator {
                     allowAdditionalProperties = false;
                 } else if (e.getValue() != null && e.getValue() instanceof Map) {
                     final List<String> newPointer = newList(jsonPointer, ADDITIONALPROPERTIES, e.getKey());
-                    additionalPropertyValidator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) e.getValue(), newPointer);
+                    additionalPropertyValidator = ObjectValidatorFactory.getTypeValidator(
+                            (Map<String, Object>) e.getValue(), newPointer);
                 }
             } else if (PATTERNPROPERTIES.equals(e.getKey())) {
                 if (e.getValue() instanceof Map) {
@@ -165,21 +167,24 @@ public class ObjectTypeValidator extends Validator {
                         try {
                             Pattern p = Pattern.compile(entry.getKey());
                             List<String> newPointer = newList(jsonPointer, PATTERNPROPERTIES, entry.getKey());
-                            Validator validator = ObjectValidatorFactory.getTypeValidator((Map<String, Object>) entry.getValue(), newPointer);
+                            Validator validator = ObjectValidatorFactory.getTypeValidator(
+                                    (Map<String, Object>) entry.getValue(), newPointer);
                             patternPropertyValidators.put(p, validator);
                         } catch (PatternSyntaxException pse) {
-                            //LOG.error("Failed to apply pattern on " + at + ": Invalid RE syntax [" + pattern + "]", pse);
+                            //LOG.error("Failed to apply pattern on " + at + ":
+                            // Invalid RE syntax [" + pattern + "]", pse);
                         }
                     }
                 }
             } else if (DEPENDENCIES.equals(e.getKey())) {
                 if (e.getValue() instanceof Map) {
                     for (Map.Entry<String, Object> d : ((Map<String, Object>) e.getValue()).entrySet()) {
-                        PropertyValidatorBag validator = propertyValidators != null ? propertyValidators.get(d.getKey()) : null;
+                        PropertyValidatorBag validator = propertyValidators.get(d.getKey());
                         if (null != validator) {
                             if (d.getValue() instanceof Map) {
                                 List<String> newPointer = newList(jsonPointer, DEPENDENCIES, d.getKey());
-                                validator.setDependencyValidator(ObjectValidatorFactory.getTypeValidator((Map<String, Object>) d.getValue(), newPointer));
+                                validator.setDependencyValidator(ObjectValidatorFactory.getTypeValidator(
+                                        (Map<String, Object>) d.getValue(), newPointer));
                             } else {
                                 validator.setDependencyValue(d.getValue());
                             }
@@ -189,7 +194,8 @@ public class ObjectTypeValidator extends Validator {
                             }
                             if (d.getValue() instanceof Map) {
                                 // @TODO: Validate additional properties
-                                //validator.setDependencyValidator(ObjectValidatorFactory.getTypeValidator((Map<String, Object>) d.getValue()));
+                                //validator.setDependencyValidator(ObjectValidatorFactory.getTypeValidator(
+                                // (Map<String, Object>) d.getValue()));
                             } else if (d.getValue() instanceof String) {
                                 dependencyValues.put(d.getKey(), Collections.singleton((String) d.getValue()));
                             } else if (d.getValue() instanceof Collection) {
@@ -281,7 +287,8 @@ public class ObjectTypeValidator extends Validator {
                 }
 
                 // @TODO: Implement Dependency check
-                Validator dependencyPropertyValidator = null != dependenciesValidators ? dependenciesValidators.get(additionalPropertyName) : null;
+                Validator dependencyPropertyValidator = null != dependenciesValidators
+                        ? dependenciesValidators.get(additionalPropertyName) : null;
                 if (null != dependencyPropertyValidator) {
                     dependencyPropertyValidator.validate(propertyValue, getPath(at, additionalPropertyName), handler);
                 }

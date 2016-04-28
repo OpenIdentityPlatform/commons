@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events;
 
@@ -33,10 +33,15 @@ import java.util.Set;
  */
 public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
 
+    /** Event name event payload field name. */
     public static final String EVENT_NAME = "eventName";
+    /** Timestamp event payload field name. */
     public static final String TIMESTAMP = "timestamp";
+    /** Transaction ID event payload field name. */
     public static final String TRANSACTION_ID = "transactionId";
+    /** User ID event payload field name. */
     public static final String USER_ID = "userId";
+    /** Tracking IDs event payload field name. */
     public static final String TRACKING_IDS = "trackingIds";
 
     /** Represents the event as a JSON value. */

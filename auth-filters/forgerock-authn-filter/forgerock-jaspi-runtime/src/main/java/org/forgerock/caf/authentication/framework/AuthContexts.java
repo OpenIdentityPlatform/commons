@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authentication.framework;
@@ -75,12 +75,12 @@ final class AuthContexts {
      * {@code Void}.
      */
     static final AsyncFunction<List<Void>, Void, AuthenticationException> ON_SUCCESS_RETURN_VOID =
-            new AsyncFunction<List<Void>, Void, AuthenticationException>() {
-                @Override
-                public Promise<Void, AuthenticationException> apply(List<Void> voids) {
-                    return Promises.newResultPromise(null);
-                }
-            };
+        new AsyncFunction<List<Void>, Void, AuthenticationException>() {
+            @Override
+            public Promise<Void, AuthenticationException> apply(List<Void> voids) {
+                return Promises.newResultPromise(null);
+            }
+        };
 
     /**
      * <p>Attaches a success function to the result of both the

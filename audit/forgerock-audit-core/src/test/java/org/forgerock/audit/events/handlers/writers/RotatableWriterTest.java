@@ -15,11 +15,10 @@
  */
 package org.forgerock.audit.events.handlers.writers;
 
-import static java.util.Arrays.asList;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.util.Files.temporaryFolder;
-import static org.assertj.core.util.Files.temporaryFolderPath;
+import static java.util.Arrays.*;
+import static java.util.concurrent.TimeUnit.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.util.Files.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -404,7 +403,7 @@ public class RotatableWriterTest {
         return oneSecondAgo;
     }
 
-    private void assertRetainedHistoricalFiles(File file, String prefix, int expectedNumber) throws InterruptedException {
+    private void assertRetainedHistoricalFiles(File file, String prefix, int expectedNumber) throws Exception {
         Set<File> retainedHistoricalFiles = getAllHistoricalFiles(file, prefix, expectedNumber, new HashSet<File>());
         assertThat(retainedHistoricalFiles).isNotEmpty().hasSize(expectedNumber);
     }

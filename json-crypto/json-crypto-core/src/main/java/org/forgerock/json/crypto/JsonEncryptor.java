@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto;
@@ -25,7 +25,8 @@ public interface JsonEncryptor {
 
     /**
      * Returns the type of cryptographic representation that this JSON encryptor supports.
-     * Expressed in the {@code type} property of a {@link JsonCrypto} object. 
+     * Expressed in the {@code type} property of a {@link JsonCrypto} object.
+     * @return The type.
      */
     String getType();
 

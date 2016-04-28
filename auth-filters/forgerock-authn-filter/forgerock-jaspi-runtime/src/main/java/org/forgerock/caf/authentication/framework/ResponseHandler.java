@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authentication.framework;
@@ -107,8 +107,7 @@ class ResponseHandler {
 
             try {
                 acceptedTypes.add(MediaType.parse(acceptHeader.substring(lastGroup)));
-            }
-            catch(IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
                 // The Accept header has invalid content, ignore, and just select the default handler
                 return defaultHandler;
             }

@@ -11,15 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto;
 
 /**
  * An exception that is thrown during JSON cryptographic operations.
- *
- * @author Paul C. Bryan
  */
 public class JsonCryptoException extends Exception {
 
@@ -34,13 +32,15 @@ public class JsonCryptoException extends Exception {
 
     /**
      * Constructs a new exception with the specified detail message.
+     * @param message The message.
      */
     public JsonCryptoException(String message) {
         super(message);
     }
-    
+
     /**
      * Constructs a new exception with the specified cause.
+     * @param cause The cause.
      */
     public JsonCryptoException(Throwable cause) {
         super(cause);
@@ -48,6 +48,8 @@ public class JsonCryptoException extends Exception {
 
     /**
      * Constructs a new exception with the specified detail message and cause.
+     * @param message The message.
+     * @param cause The cause.
      */
     public JsonCryptoException(String message, Throwable cause) {
         super(message, cause);

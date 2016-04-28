@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.rotation;
 
@@ -28,26 +28,50 @@ public class RotationContext {
     private File nextFile;
     private Writer writer;
 
+    /**
+     * Get the initial file.
+     * @return The file.
+     */
     public File getInitialFile() {
         return initialFile;
     }
 
+    /**
+     * Set the initial file.
+     * @param initialFile The file.
+     */
     public void setInitialFile(File initialFile) {
         this.initialFile = initialFile;
     }
 
+    /**
+     * Get the next file.
+     * @return The file.
+     */
     public File getNextFile() {
         return nextFile;
     }
 
+    /**
+     * Set the next file.
+     * @param nextFile The file.
+     */
     public void setNextFile(File nextFile) {
         this.nextFile = nextFile;
     }
 
+    /**
+     * Get the writer.
+     * @return The writer.
+     */
     public Writer getWriter() {
         return writer;
     }
 
+    /**
+     * Set the writer.
+     * @param writer The writer.
+     */
     public void setWriter(Writer writer) {
         this.writer = writer;
     }

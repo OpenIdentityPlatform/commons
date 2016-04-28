@@ -80,6 +80,7 @@ public class AuditServiceProxy implements AuditService {
      *
      * @param newDelegate
      *          A new AuditService instance with updated configuration.
+     * @throws ServiceUnavailableException If the new audit service cannot be started.
      */
     public void setDelegate(AuditService newDelegate) throws ServiceUnavailableException {
         Reject.ifNull(newDelegate);

@@ -11,15 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.basic.crest;
 
-import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
-import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
+import static org.forgerock.authz.filter.crest.AuthorizationFilters.*;
+import static org.forgerock.http.routing.RoutingMode.*;
+import static org.forgerock.json.resource.RouteMatchers.*;
 
-import org.forgerock.authz.filter.crest.AuthorizationFilters;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resources;
@@ -67,9 +67,9 @@ public final class BasicAuthorizationConnectionFactory {
     private static RequestHandler createEndpointCheckerHandler() {
         Router router = new Router();
 
-        router.addRoute(requestUriMatcher(STARTS_WITH, "/users"), AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/users"), createAuthorizationFilter(SIMPLE_RESOURCE,
                 new AlwaysAllowAuthorizationModule()));
-        router.addRoute(requestUriMatcher(STARTS_WITH, "/roles"), AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
+        router.addRoute(requestUriMatcher(STARTS_WITH, "/roles"), createAuthorizationFilter(SIMPLE_RESOURCE,
                 new AlwaysDenyAuthorizationModule("roles")));
 
         return router;
@@ -81,7 +81,7 @@ public final class BasicAuthorizationConnectionFactory {
      * @return A no action {@code RequestHandler}.
      */
     private static RequestHandler createNotActionHandler() {
-        return AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
+        return createAuthorizationFilter(SIMPLE_RESOURCE,
                 new NotActionAuthorizationModule());
     }
 
@@ -91,7 +91,7 @@ public final class BasicAuthorizationConnectionFactory {
      * @return A no create or patch {@code RequestHandler}.
      */
     private static RequestHandler createNotCreateOrPatchHandler() {
-        return AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
+        return createAuthorizationFilter(SIMPLE_RESOURCE,
                 new NotCreateAuthorizationModule(), new NotPatchAuthorizationModule());
     }
 
@@ -101,7 +101,7 @@ public final class BasicAuthorizationConnectionFactory {
      * @return A deny all {@code RequestHandler}.
      */
     private static RequestHandler createNoneHandler() {
-        return AuthorizationFilters.createAuthorizationFilter(SIMPLE_RESOURCE,
+        return createAuthorizationFilter(SIMPLE_RESOURCE,
                 new NotCreateAuthorizationModule(), new NotReadAuthorizationModule(),
                 new NotUpdateAuthorizationModule(), new NotDeleteAuthorizationModule(),
                 new NotPatchAuthorizationModule(), new NotActionAuthorizationModule(),

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
@@ -281,7 +281,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
     abstract void setClaimsOnRequest(MessageInfo messageInfo, Jwt jwt);
 
     /**
-     * Ensures the context map exists within the messageInfo object, and then returns the context map to be used
+     * Ensures the context map exists within the messageInfo object, and then returns the context map to be used.
      *
      * @param messageInfo The MessageInfo instance.
      * @return The context map internal to the messageInfo's map.

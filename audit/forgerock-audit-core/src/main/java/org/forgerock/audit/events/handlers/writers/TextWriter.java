@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events.handlers.writers;
 
@@ -34,7 +34,7 @@ public interface TextWriter {
     void write(String text) throws IOException;
 
     /**
-     * Flushes any buffered contents of the output stream
+     * Flushes any buffered contents of the output stream.
      *
      * @throws IOException
      *             If a problem occurs.

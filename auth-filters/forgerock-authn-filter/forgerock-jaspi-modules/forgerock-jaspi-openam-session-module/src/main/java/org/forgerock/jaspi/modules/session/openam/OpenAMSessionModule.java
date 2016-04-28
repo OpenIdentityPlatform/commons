@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.session.openam;
@@ -366,8 +366,8 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
                 try {
                     JsonValue usersResponse = json(response.getEntity().getJson());
                     handler.handle(new Callback[]{
-                            new CallerPrincipalCallback(clientSubject, usersResponse.get(openamUserAttribute)
-                                    .get(0).asString())
+                        new CallerPrincipalCallback(clientSubject, usersResponse.get(openamUserAttribute)
+                                .get(0).asString())
                     });
                     return SUCCESS;
                 } catch (IOException | UnsupportedCallbackException e) {

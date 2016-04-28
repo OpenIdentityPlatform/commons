@@ -11,7 +11,7 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014-2015 ForgeRock AS.
+* Copyright 2014-2016 ForgeRock AS.
 */
 
 package org.forgerock.jaspi.modules.openid.helpers;
@@ -33,12 +33,12 @@ public class SimpleHTTPClient {
     /**
      * Default read timeout on HTTP requests from this client.
      */
-    private final int DEFAULT_READ_TIMEOUT = 5_000;
+    private static final int DEFAULT_READ_TIMEOUT = 5_000;
 
     /**
      * Default connection timeout on HTTP requests from this client.
      */
-    private final int DEFAULT_CONNECTION_TIMEOUT = 5_000;
+    private static final int DEFAULT_CONNECTION_TIMEOUT = 5_000;
 
     private final int readTimeout;
     private final int connTimeout;

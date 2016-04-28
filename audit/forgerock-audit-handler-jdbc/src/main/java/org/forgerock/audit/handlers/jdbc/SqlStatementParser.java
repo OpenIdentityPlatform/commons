@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -28,8 +28,8 @@ class SqlStatementParser {
     private String sqlStatement;
     private final List<String> namedParameters = new LinkedList<>();
 
-    /** Pattern matches alphanumeric strings that may contain _ and / surrounded by ${} */
-    private static final Pattern pattern = Pattern.compile("\\$\\{([a-zA-Z0-9/_]+)\\}");
+    /** Pattern matches alphanumeric strings that may contain _ and / surrounded by ${}. */
+    private static final Pattern PATTERN = Pattern.compile("\\$\\{([a-zA-Z0-9/_]+)\\}");
 
     /**
      * Creates a SQLStatementParser given a sql string.
@@ -37,7 +37,7 @@ class SqlStatementParser {
      */
     public SqlStatementParser(final String sql) {
         final StringBuffer stringBuffer = new StringBuffer();
-        Matcher m = pattern.matcher(sql);
+        Matcher m = PATTERN.matcher(sql);
         while (m.find()) {
             final String parameter = m.group(1);
             m.appendReplacement(stringBuffer, "?");

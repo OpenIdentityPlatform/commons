@@ -11,24 +11,21 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
 
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.entry;
-import static org.forgerock.caf.authn.test.ProtectedResource.RESOURCE_CALLED_HEADER;
+import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.caf.authn.test.ProtectedResource.*;
 import static org.forgerock.json.JsonValue.*;
-import static org.hamcrest.Matchers.nullValue;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.testng.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.assertj.core.api.Condition;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
@@ -44,6 +41,8 @@ import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Test framework for running tests and verifing results against the JASPI runtime.
@@ -83,7 +82,8 @@ class TestFramework {
                 .setEntity(configuration.getObject()).setMethod("PUT");
         request.getHeaders().add(ContentTypeHeader.valueOf("application/json; charset=UTF-8"));
         request.getHeaders().add("If-Match", "*");
-        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()), request);
+        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
+                request);
         assertThat(result).succeeded();
         assertThat(result.get().getStatus()).isEqualTo(Status.OK);
     }
@@ -99,7 +99,8 @@ class TestFramework {
         final Request request = new Request().setUri("/auditrecords?_action=readAndClear")
                 .setEntity("{}").setMethod("POST");
         request.getHeaders().add(ContentTypeHeader.valueOf("application/json; charset=UTF-8"));
-        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()), request);
+        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
+                request);
         assertThat(result).succeeded();
         assertThat(result.get().getStatus()).isEqualTo(Status.OK);
         return json(result.get().getEntity().getJson());
@@ -165,7 +166,7 @@ class TestFramework {
     static void runTest(Handler handler, String resourceName, AuthModuleParameters sessionModuleParams,
             List<AuthModuleParameters> authModuleParametersList, int expectedResponseStatus,
             boolean expectResourceToBeCalled, Map<JsonPointer, Condition<?>> expectedBody, AuditParameters auditParams)
-            throws Exception{
+            throws Exception {
 
         /* Ensure audit records are cleared before running test. */
         getAuditRecords(handler);
@@ -173,7 +174,8 @@ class TestFramework {
         Request request = given(handler, sessionModuleParams, authModuleParametersList)
                 .setUri(resourceName);
 
-        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()), request);
+        Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
+                request);
         assertThat(result).succeeded();
 
         Response response = result.get();
@@ -189,7 +191,8 @@ class TestFramework {
             } else {
                 final JsonValue json = json(response.getEntity().getJson());
                 final JsonValue jsonValue = json.get(bodyMatcher.getKey());
-                assertThat(jsonValue == null ? null : jsonValue.getObject()).is((Condition<? super Object>) bodyMatcher.getValue());
+                assertThat(jsonValue == null ? null : jsonValue.getObject()).is(
+                        (Condition<? super Object>) bodyMatcher.getValue());
             }
         }
 

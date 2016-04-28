@@ -11,29 +11,45 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014 ForgeRock AS.
+* Copyright 2014-2016 ForgeRock AS.
 */
 package org.forgerock.jaspi.modules.openid.exceptions;
 
 /**
- * Invalid signature
+ * Invalid signature.
  */
 public class InvalidSignatureException extends OpenIdConnectVerificationException {
 
     static final long serialVersionUID = 1L;
 
+    /**
+     * Construct the exception.
+     */
     public InvalidSignatureException() {
         super();
     }
 
+    /**
+     * Construct the exception with the given message.
+     * @param message The message.
+     */
     public InvalidSignatureException(final String message) {
         super(message);
     }
 
+    /**
+     * Construct the exception with the given message and cause.
+     * @param message The message.
+     * @param cause The cause.
+     */
     public InvalidSignatureException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Construct the exception with the given cause.
+     * @param cause The cause.
+     */
     public InvalidSignatureException(final Throwable cause) {
         super(cause);
     }

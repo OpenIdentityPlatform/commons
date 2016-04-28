@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events.handlers.writers;
 
@@ -64,7 +64,7 @@ public final class MeteredStream extends OutputStream {
      *                if the write failed.
      */
     @Override
-    public void write(byte buff[]) throws IOException {
+    public void write(byte[] buff) throws IOException {
         out.write(buff);
         written += buff.length;
     }
@@ -82,7 +82,7 @@ public final class MeteredStream extends OutputStream {
      *                if the write failed.
      */
     @Override
-    public void write(byte buff[], int off, int len) throws IOException {
+    public void write(byte[] buff, int off, int len) throws IOException {
         out.write(buff, off, len);
         written += len;
     }

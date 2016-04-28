@@ -68,7 +68,8 @@ class CsvSecureArchiveVerifier {
         return verificationResults;
     }
 
-    private VerificationResult verifyArchiveFile(File archiveFile, String keystorePassword, PublicKey publicKey) throws Exception {
+    private VerificationResult verifyArchiveFile(File archiveFile, String keystorePassword, PublicKey publicKey)
+            throws Exception {
         SecureStorage secureStorage = openSecureStorageForCsvFile(archiveFile, keystorePassword, publicKey);
         CsvSecureVerifier verifier = new CsvSecureVerifier(archiveFile, csvPreference, secureStorage);
         return verifier.verify();

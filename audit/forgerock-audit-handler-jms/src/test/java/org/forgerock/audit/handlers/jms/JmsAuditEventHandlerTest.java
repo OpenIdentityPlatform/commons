@@ -71,8 +71,8 @@ import org.testng.annotations.Test;
 public class JmsAuditEventHandlerTest {
     private static final Logger logger = LoggerFactory.getLogger(JmsAuditEventHandlerTest.class);
     private static final String RESOURCE_PATH = "/org/forgerock/audit/handlers/jms/";
-    private static final ObjectMapper mapper = new ObjectMapper();
-    private static final EventTopicsMetaData coreEventTopics =
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final EventTopicsMetaData CORE_EVENT_TOPICS =
             EventTopicsMetaDataBuilder.coreTopicSchemas().build();
     private int sessionCount = 0;
 
@@ -99,7 +99,7 @@ public class JmsAuditEventHandlerTest {
                 new JmsAuditEventHandler(
                         new DefaultJmsContextManager(connectionFactory, topic),
                         getDefaultConfiguration(),
-                        coreEventTopics);
+                        CORE_EVENT_TOPICS);
         jmsAuditEventHandler.startup();
 
         // then
@@ -113,7 +113,7 @@ public class JmsAuditEventHandlerTest {
         verify(session).createTextMessage(stringCaptor.capture());
 
         String text = stringCaptor.getValue();
-        JsonValue jsonValue = new JsonValue(mapper.readValue(text, Map.class));
+        JsonValue jsonValue = new JsonValue(MAPPER.readValue(text, Map.class));
 
         assertThat(jsonValue).hasString("auditTopic");
         assertThat(jsonValue).stringAt("auditTopic").isEqualTo("TEST_AUDIT");
@@ -172,7 +172,7 @@ public class JmsAuditEventHandlerTest {
                 new JmsAuditEventHandler(
                         new DefaultJmsContextManager(connectionFactory, mock(Topic.class)),
                         configuration,
-                        coreEventTopics);
+                        CORE_EVENT_TOPICS);
         jmsAuditEventHandler.startup();
 
         // then
@@ -246,8 +246,8 @@ public class JmsAuditEventHandlerTest {
                 new JmsAuditEventHandler(
                         new DefaultJmsContextManager(connectionFactory, topic),
                         getDefaultConfiguration(),
-                        coreEventTopics);
-                        EventTopicsMetaDataBuilder.coreTopicSchemas().build();
+                        CORE_EVENT_TOPICS);
+        EventTopicsMetaDataBuilder.coreTopicSchemas().build();
         jmsAuditEventHandler.startup();
 
         // when
@@ -261,7 +261,7 @@ public class JmsAuditEventHandlerTest {
         verify(session).createTextMessage(stringCaptor.capture());
 
         String text = stringCaptor.getValue();
-        JsonValue jsonValue = new JsonValue(mapper.readValue(text, Map.class));
+        JsonValue jsonValue = new JsonValue(MAPPER.readValue(text, Map.class));
 
         assertThat(jsonValue).hasString("auditTopic");
         assertThat(jsonValue).stringAt("auditTopic").isEqualTo("TEST_AUDIT");
@@ -289,7 +289,7 @@ public class JmsAuditEventHandlerTest {
                 new JmsAuditEventHandler(
                         new DefaultJmsContextManager(connectionFactory, topic),
                         getDefaultConfiguration(),
-                        coreEventTopics);
+                        CORE_EVENT_TOPICS);
         jmsAuditEventHandler.startup();
 
         // when
@@ -314,7 +314,7 @@ public class JmsAuditEventHandlerTest {
                 new JmsAuditEventHandler(
                         new DefaultJmsContextManager(connectionFactory, topic),
                         getDefaultConfiguration(),
-                        coreEventTopics);
+                        CORE_EVENT_TOPICS);
         jmsAuditEventHandler.startup();
 
         // then
@@ -337,7 +337,7 @@ public class JmsAuditEventHandlerTest {
                 new JmsAuditEventHandler(
                         new DefaultJmsContextManager(connectionFactory, topic),
                         getDefaultConfiguration(),
-                        coreEventTopics);
+                        CORE_EVENT_TOPICS);
         jmsAuditEventHandler.startup();
 
         // when

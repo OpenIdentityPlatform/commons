@@ -42,10 +42,10 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
         this.dataSource = dataSource;
     }
 
-    private List<Map<String,Object>> execute(final JdbcAuditEvent event) throws AuditException {
+    private List<Map<String, Object>> execute(final JdbcAuditEvent event) throws AuditException {
         logger.debug("Publishing event");
         Connection connection = null;
-        final List<Map<String,Object>> results;
+        final List<Map<String, Object>> results;
         try {
             connection = dataSource.getConnection();
             if (connection == null) {
@@ -73,8 +73,8 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
         }
     }
 
-    private List<Map<String,Object>> convertResultSetToList(final ResultSet resultSet) throws SQLException {
-        final List<Map<String,Object>> list = new ArrayList<>();
+    private List<Map<String, Object>> convertResultSetToList(final ResultSet resultSet) throws SQLException {
+        final List<Map<String, Object>> list = new ArrayList<>();
         if (resultSet == null) {
             return list;
         }
@@ -93,25 +93,25 @@ class JdbcAuditEventExecutorImpl implements JdbcAuditEventExecutor {
     private Object getResultSetObject(final ResultSet resultSet, final int type, int column)
             throws SQLException {
         switch (type) {
-            case Types.INTEGER:
-            case Types.TINYINT:
-            case Types.SMALLINT:
-            case Types.BIGINT:
-                return resultSet.getInt(column);
-            case Types.FLOAT:
-                return resultSet.getFloat(column);
-            case Types.VARCHAR:
-            case Types.NCHAR:
-            case Types.NVARCHAR:
-            case Types.LONGNVARCHAR:
-            case Types.LONGVARCHAR:
-            case Types.CLOB:
-            case Types.NCLOB:
-                return resultSet.getString(column);
-            case Types.BOOLEAN:
-                return resultSet.getBoolean(column);
-            default:
-                return resultSet.getString(column);
+        case Types.INTEGER:
+        case Types.TINYINT:
+        case Types.SMALLINT:
+        case Types.BIGINT:
+            return resultSet.getInt(column);
+        case Types.FLOAT:
+            return resultSet.getFloat(column);
+        case Types.VARCHAR:
+        case Types.NCHAR:
+        case Types.NVARCHAR:
+        case Types.LONGNVARCHAR:
+        case Types.LONGVARCHAR:
+        case Types.CLOB:
+        case Types.NCLOB:
+            return resultSet.getString(column);
+        case Types.BOOLEAN:
+            return resultSet.getBoolean(column);
+        default:
+            return resultSet.getString(column);
         }
     }
 

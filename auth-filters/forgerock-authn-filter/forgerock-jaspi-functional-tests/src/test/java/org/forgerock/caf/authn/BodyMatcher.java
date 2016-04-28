@@ -11,25 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
 
-import org.assertj.core.api.Condition;
-import org.assertj.core.api.StringAssert;
-import org.forgerock.json.JsonPointer;
-import org.forgerock.util.test.assertj.Conditions;
-import org.hamcrest.Matcher;
+import static org.forgerock.json.JsonValue.*;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.object;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.core.Is.is;
+import org.assertj.core.api.Condition;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.util.test.assertj.Conditions;
+import org.hamcrest.Matcher;
 
 /**
  * Utility class which contains methods for creating a {@code Map} of {@code Matcher}s that will be used to verify the

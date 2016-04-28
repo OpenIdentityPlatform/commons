@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events.handlers;
 
@@ -31,6 +31,7 @@ import org.forgerock.util.promise.Promise;
 public abstract class AuditEventHandlerBase implements AuditEventHandler {
 
     private final String name;
+    /** The event topic meta data for the handler. */
     protected final EventTopicsMetaData eventTopicsMetaData;
     private final boolean enabled;
 
@@ -73,7 +74,8 @@ public abstract class AuditEventHandlerBase implements AuditEventHandler {
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> handleAction(Context context, String topic, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, String topic,
+            ActionRequest request) {
         return new BadRequestException(String.format("Unable to handle action: %s", request.getAction())).asPromise();
     }
 

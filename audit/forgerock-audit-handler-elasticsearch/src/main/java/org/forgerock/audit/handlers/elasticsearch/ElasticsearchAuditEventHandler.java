@@ -16,7 +16,7 @@
 package org.forgerock.audit.handlers.elasticsearch;
 
 import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.ConnectionConfiguration;
-import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.objectMapper;
+import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.OBJECT_MAPPER;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -72,8 +72,8 @@ import org.slf4j.LoggerFactory;
 public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implements
         ElasticsearchBatchAuditEventHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
-    private static final ElasticsearchQueryFilterVisitor elasticsearchQueryFilterVisitor =
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
+    private static final ElasticsearchQueryFilterVisitor ELASTICSEARCH_QUERY_FILTER_VISITOR =
             new ElasticsearchQueryFilterVisitor();
 
     private static final String QUERY = "query";
@@ -179,38 +179,37 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
         final JsonValue payload =
                 json(object(field(
-                        QUERY, query.getQueryFilter().accept(elasticsearchQueryFilterVisitor, null).getObject())));
+                        QUERY, query.getQueryFilter().accept(ELASTICSEARCH_QUERY_FILTER_VISITOR, null).getObject())));
         try {
             final Request request = createRequest(GET, buildSearchUri(topic, pageSize, offset), payload.getObject());
-            return client.send(request)
-                         .then(new Function<Response, QueryResponse, ResourceException>() {
-                                        @Override
-                                        public QueryResponse apply(Response response) throws ResourceException {
-                                            if (!response.getStatus().isSuccessful()) {
-                                                final String message = "Elasticsearch response (" + indexName + "/" + topic + SEARCH + "): " +
-                                                        response.getEntity();
-                                                throw newResourceException(response.getStatus().getCode(), message);
-                                            }
-                                            try {
-                                                JsonValue events = json(response.getEntity().getJson());
-                                                for (JsonValue event : events.get(HITS).get(HITS)) {
-                                                    handler.handleResource(
-                                                            newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null,
-                                                                                ElasticsearchUtil.denormalizeJson(event.get(SOURCE))));
-                                                }
-                                                final int totalResults = events.get(HITS).get(TOTAL).asInteger();
-                                                final String pagedResultsCookie = (pageSize + offset) >= totalResults
-                                                        ? null
-                                                        : Integer.toString(pageSize + offset);
-                                                return newQueryResponse(pagedResultsCookie,
-                                                                        CountPolicy.EXACT,
-                                                                        totalResults);
-                                            } catch (IOException e) {
-                                                throw new InternalServerErrorException(e.getMessage(), e);
-                                            }
-                                        }
-                                    },
-                                 ElasticsearchAuditEventHandler.<QueryResponse>noopException());
+            return client.send(request).then(new Function<Response, QueryResponse, ResourceException>() {
+                    @Override
+                    public QueryResponse apply(Response response) throws ResourceException {
+                        if (!response.getStatus().isSuccessful()) {
+                            final String message = "Elasticsearch response (" + indexName + "/" + topic + SEARCH + "): "
+                                    + response.getEntity();
+                            throw newResourceException(response.getStatus().getCode(), message);
+                        }
+                        try {
+                            JsonValue events = json(response.getEntity().getJson());
+                            for (JsonValue event : events.get(HITS).get(HITS)) {
+                                handler.handleResource(
+                                        newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null,
+                                                ElasticsearchUtil.denormalizeJson(event.get(SOURCE))));
+                            }
+                            final int totalResults = events.get(HITS).get(TOTAL).asInteger();
+                            final String pagedResultsCookie = (pageSize + offset) >= totalResults
+                                    ? null
+                                    : Integer.toString(pageSize + offset);
+                            return newQueryResponse(pagedResultsCookie,
+                                    CountPolicy.EXACT,
+                                    totalResults);
+                        } catch (IOException e) {
+                            throw new InternalServerErrorException(e.getMessage(), e);
+                        }
+                    }
+            },
+                    ElasticsearchAuditEventHandler.<QueryResponse>noopException());
         } catch (URISyntaxException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
@@ -224,30 +223,28 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             request = createRequest(GET, buildEventUri(topic, resourceId), null);
         } catch (Exception e) {
             final String error = String.format("Unable to read audit entry for topic=%s, _id=%s", topic, resourceId);
-            logger.error(error, e);
+            LOGGER.error(error, e);
             return new InternalServerErrorException(error, e).asPromise();
         }
 
-        return client.send(request)
-                .then(new Function<Response, ResourceResponse, ResourceException>() {
-                          @Override
-                          public ResourceResponse apply(Response response) throws ResourceException {
-                              if (!response.getStatus().isSuccessful()) {
-                                  throw resourceException(indexName, topic, resourceId, response);
-                              }
+        return client.send(request).then(new Function<Response, ResourceResponse, ResourceException>() {
+                @Override
+                public ResourceResponse apply(Response response) throws ResourceException {
+                    if (!response.getStatus().isSuccessful()) {
+                        throw resourceException(indexName, topic, resourceId, response);
+                    }
 
-                              try {
-                                  // the original audit JSON is under _source, and we also add back the _id
-                                  JsonValue jsonValue = json(response.getEntity().getJson());
-                                  jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
-                                  jsonValue.put(FIELD_CONTENT_ID, resourceId);
-                                  return newResourceResponse(resourceId, null, jsonValue);
-                              } catch (IOException e) {
-                                  throw new InternalServerErrorException(e.getMessage(), e);
-                              }
-                          }
-                      },
-                        ElasticsearchAuditEventHandler.<ResourceResponse>noopException());
+                    try {
+                        // the original audit JSON is under _source, and we also add back the _id
+                        JsonValue jsonValue = json(response.getEntity().getJson());
+                        jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
+                        jsonValue.put(FIELD_CONTENT_ID, resourceId);
+                        return newResourceResponse(resourceId, null, jsonValue);
+                    } catch (IOException e) {
+                        throw new InternalServerErrorException(e.getMessage(), e);
+                    }
+                }
+        }, ElasticsearchAuditEventHandler.<ResourceResponse>noopException());
     }
 
     @Override
@@ -257,8 +254,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             return publishSingleEvent(topic, event);
         } else {
             if (!batchIndexer.offer(topic, event)) {
-                return new ServiceUnavailableException("Elasticsearch batch indexer full, so dropping audit event " +
-                        indexName + "/" + topic + "/" + event.get("_id").asString()).asPromise();
+                return new ServiceUnavailableException("Elasticsearch batch indexer full, so dropping audit event "
+                        + indexName + "/" + topic + "/" + event.get("_id").asString()).asPromise();
             }
             return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
                     event).asPromise();
@@ -280,26 +277,24 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
         try {
             final JsonValue normalizedEvent = ElasticsearchUtil.normalizeJson(event);
-            final String jsonPayload = objectMapper.writeValueAsString(normalizedEvent.getObject());
+            final String jsonPayload = OBJECT_MAPPER.writeValueAsString(normalizedEvent.getObject());
             event.put(FIELD_CONTENT_ID, resourceId);
 
             final Request request = createRequest(PUT, buildEventUri(topic, resourceId), jsonPayload);
 
-            return client.send(request)
-                    .then(new Function<Response, ResourceResponse, ResourceException>() {
-                              @Override
-                              public ResourceResponse apply(Response response) throws ResourceException {
-                                  if (!response.getStatus().isSuccessful()) {
-                                      throw resourceException(indexName, topic, resourceId, response);
-                                  }
-                                  return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
-                                          event);
-                              }
-                          },
-                            ElasticsearchAuditEventHandler.<ResourceResponse>noopException());
+            return client.send(request).then(new Function<Response, ResourceResponse, ResourceException>() {
+                    @Override
+                    public ResourceResponse apply(Response response) throws ResourceException {
+                        if (!response.getStatus().isSuccessful()) {
+                            throw resourceException(indexName, topic, resourceId, response);
+                        }
+                        return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
+                                event);
+                    }
+            }, ElasticsearchAuditEventHandler.<ResourceResponse>noopException());
         } catch (Exception e) {
             final String error = String.format("Unable to create audit entry for topic=%s, _id=%s", topic, resourceId);
-            logger.error(error, e);
+            LOGGER.error(error, e);
             return new InternalServerErrorException(error, e).asPromise();
         }
     }
@@ -320,14 +315,14 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             final String resourceId = event.get(FIELD_CONTENT_ID).asString();
             event.remove(FIELD_CONTENT_ID);
             final JsonValue normalizedEvent = ElasticsearchUtil.normalizeJson(event);
-            final String jsonPayload = objectMapper.writeValueAsString(normalizedEvent.getObject());
+            final String jsonPayload = OBJECT_MAPPER.writeValueAsString(normalizedEvent.getObject());
 
             // newlines have special significance in the Bulk API
             // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
             payload.append("{ \"index\" : { \"_type\" : ")
-                    .append(objectMapper.writeValueAsString(topic))
+                    .append(OBJECT_MAPPER.writeValueAsString(topic))
                     .append(", \"_id\" : ")
-                    .append(objectMapper.writeValueAsString(resourceId))
+                    .append(OBJECT_MAPPER.writeValueAsString(resourceId))
                     .append(" } }\n")
                     .append(jsonPayload)
                     .append('\n');
@@ -365,8 +360,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                             failureItems.add(item);
                         }
                     }
-                    final String message = "One or more Elasticsearch batch index entries failed: " +
-                            objectMapper.writeValueAsString(failureItems);
+                    final String message = "One or more Elasticsearch batch index entries failed: "
+                            + OBJECT_MAPPER.writeValueAsString(failureItems);
                     throw new BatchException(message);
                 }
             }
@@ -385,8 +380,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             return basicAuthHeaderValue;
         }
         final ConnectionConfiguration connection = configuration.getConnection();
-        if (connection.getUsername() == null || connection.getUsername().isEmpty() ||
-                connection.getPassword() == null || connection.getPassword().isEmpty()) {
+        if (connection.getUsername() == null || connection.getUsername().isEmpty()
+                || connection.getPassword() == null || connection.getPassword().isEmpty()) {
             return null;
         }
         final String credentials = connection.getUsername() + ":" + connection.getPassword();
@@ -439,8 +434,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             return baseUri;
         }
         final ConnectionConfiguration connection = configuration.getConnection();
-        return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + ":" + connection.getPort() +
-                "/" + indexName;
+        return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + ":" + connection.getPort()
+                + "/" + indexName;
     }
 
     /**
@@ -457,7 +452,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         if (response.getStatus().getCode() == ResourceException.NOT_FOUND) {
             return new NotFoundException("Object " + resourceId + " not found in " + indexName + "/" + topic);
         }
-        final String message = "Elasticsearch response (" + indexName +"/" + topic + "/" + resourceId + "): "
+        final String message = "Elasticsearch response (" + indexName + "/" + topic + "/" + resourceId + "): "
                 + response.getEntity();
         return newResourceException(response.getStatus().getCode(), message);
     }

@@ -1,4 +1,5 @@
-/**
+//@Checkstyle:ignoreFor 29
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2005 Sun Microsystems Inc. All Rights Reserved
@@ -24,12 +25,11 @@
  *
  * $Id: DerValue.java,v 1.2 2008/06/25 05:42:07 qcheng Exp $
  *
- */
-
-/*
- * Portions Copyrighted [2011] [ForgeRock AS]
+ * Portions Copyrighted 2011-2016 ForgeRock AS.
  */
 package org.forgerock.jaspi.modules.iwa.wdsso;
+
+import static java.lang.Integer.toHexString;
 
 import java.io.ByteArrayInputStream;
 
@@ -44,7 +44,8 @@ public class DerValue {
     private byte[] data = null;
 
     /**
-     * TODO-JAVADOC
+     * Construct from a byte-array.
+     * @param data The data.
      */
     public DerValue(byte[] data) {
         ByteArrayInputStream stream = new ByteArrayInputStream(data);
@@ -52,35 +53,39 @@ public class DerValue {
     }
 
     /**
-     * TODO-JAVADOC
+     * Construct from a byte input stream.
+     * @param input The data.
      */
     public DerValue(ByteArrayInputStream input) {
         init(input);
     }
 
     /**
-     * TODO-JAVADOC
+     * Get the tag.
+     * @return The tag.
      */
-    public byte getTag(){
+    public byte getTag() {
         return tag;
     }
 
     /**
-     * TODO-JAVADOC
+     * Get the length.
+     * @return The length.
      */
     public int getLength() {
         return length;
     }
 
     /**
-     * TODO-JAVADOC
+     * Get the data.
+     * @return The data.
      */
     public byte[] getData() {
         return data;
     }
-    
+
     private void init(ByteArrayInputStream input) {
-        tag = (byte)input.read();
+        tag = (byte) input.read();
         length = getLength(input);
         data = new byte[length];
         input.read(data, 0, length);
@@ -91,14 +96,14 @@ public class DerValue {
         int tmp;
         byte tmpbyte;
 
-         tmp = input.read();
+        tmp = input.read();
 
         if ((tmp & 0x80) == 0) {
             value = tmp;
         } else {
             tmp &= 0x7f;
-            for (value = 0; tmp > 0; tmp --) {
-                tmpbyte = (byte)input.read();
+            for (value = 0; tmp > 0; tmp--) {
+                tmpbyte = (byte) input.read();
                 value = value * 256 + (tmpbyte & 0xff);
             }
         }
@@ -106,29 +111,34 @@ public class DerValue {
     }
 
     /**
-     * TODO-JAVADOC
+     * Print the byte as a hex string.
+     * @param code The byte.
+     * @return The hex string.
      */
     public static String printByte(byte code) {
-        return        Integer.toHexString(((code & 0xf0)>>4) & 0x0f) +
-                Integer.toHexString((code & 0x0f) & 0x0f);
+        return toHexString(((code & 0xf0) >> 4) & 0x0f) + toHexString((code & 0x0f) & 0x0f);
     }
 
     /**
-     * TODO-JAVADOC
+     * Convert a byte array to a hex string.
+     * @param token The array.
+     * @param from Starting point.
+     * @param len End point.
+     * @return The hex string.
      */
     public static String printByteArray(byte[] token, int from, int len) {
         StringBuilder buf = new StringBuilder();
         int bytePerLine = 16;
         int line;
-        for (line = 1; line*bytePerLine < len; line++) {
-            for (int j = 0; j < bytePerLine; j ++) {
+        for (line = 1; line * bytePerLine < len; line++) {
+            for (int j = 0; j < bytePerLine; j++) {
                 buf.append(printByte(token[(line - 1) * bytePerLine + j + from])).append(" ");
             }
             buf.append("\n");
         }
-        line --;
-        if (line*bytePerLine < len) {
-            for (int j = line*bytePerLine; j < len; j ++) {
+        line--;
+        if (line * bytePerLine < len) {
+            for (int j = line * bytePerLine; j < len; j++) {
                 buf.append(printByte(token[j + from])).append(" ");
             }
         }

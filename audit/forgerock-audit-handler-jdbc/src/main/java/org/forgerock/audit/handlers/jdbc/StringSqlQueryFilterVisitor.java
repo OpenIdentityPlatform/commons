@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -48,7 +48,8 @@ import org.forgerock.util.query.QueryFilterVisitor;
  * <p>
  * This implementation does not support extended-match.
  * <p>
- * The implementer is responsible for implementing {@link #visitValueAssertion(Object, String, org.forgerock.json.JsonPointer, Object)}
+ * The implementer is responsible for implementing
+ * {@link #visitValueAssertion(Object, String, org.forgerock.json.JsonPointer, Object)}
  * which handles the value assertions - x operand y for the standard operands.  The implementer is also responsible for
  * implementing {@link #visitPresentFilter(Object, org.forgerock.json.JsonPointer)} as "field present" can vary
  * by database implementation (though typically "field IS NOT NULL" is chosen).
@@ -108,9 +109,9 @@ class StringSqlQueryFilterVisitor
      * {@inheritDoc}
      */
     @Override
-    public StringSqlRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand, JsonPointer field,
-            Object valueAssertion) {
-        String value = "${"+ field.toString() + "}";
+    public StringSqlRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand,
+            JsonPointer field, Object valueAssertion) {
+        String value = "${" + field.toString() + "}";
         parameters.getParameters().put(field.toString(), valueAssertion);
         return new StringSqlRenderer(parameters.getColumnName(field) + " " + operand + " " + value);
     }

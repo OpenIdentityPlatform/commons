@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.schema.validator;
@@ -39,7 +39,7 @@ import org.forgerock.json.schema.validator.validators.Validator;
  * ObjectValidatorFactory initialises the validator instances for given schemas.
  */
 @SuppressWarnings("deprecation")
-public class ObjectValidatorFactory {
+public final class ObjectValidatorFactory {
 
     private static final Map<String, Class<? extends Validator>> VALIDATORS;
 

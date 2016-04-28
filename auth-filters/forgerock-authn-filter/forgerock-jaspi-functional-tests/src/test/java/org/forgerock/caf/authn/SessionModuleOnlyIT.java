@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn;
@@ -91,7 +91,7 @@ public class SessionModuleOnlyIT extends HandlerHolder {
      *
      */
     @Test
-    public void testValidUsageSessionModuleOnly_SendSuccess_AuthException() throws Exception {
+    public void testValidUsageSessionModuleOnlySendSuccessAuthException() throws Exception {
         sessionModuleOnlyValidUsage("Session Module Only - SEND_SUCCESS:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_SUCCESS_AUTH_STATUS, null),
                 moduleArray(), 200, false, noData(),
@@ -120,7 +120,7 @@ public class SessionModuleOnlyIT extends HandlerHolder {
      *
      */
     @Test
-    public void testValidUsageSessionModuleOnly_SendFailure_AuthException() throws Exception {
+    public void testValidUsageSessionModuleOnlySendFailureAuthException() throws Exception {
         sessionModuleOnlyValidUsage("Session Module Only - SEND_FAILURE:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_FAILURE_AUTH_STATUS, null),
                 moduleArray(), 401, false, exceptionMatcher(401),
@@ -145,7 +145,7 @@ public class SessionModuleOnlyIT extends HandlerHolder {
      *
      */
     @Test
-    public void testValidUsageSessionModuleOnly_SendContinue_AuthException() throws Exception {
+    public void testValidUsageSessionModuleOnlySendContinueAuthException() throws Exception {
         sessionModuleOnlyValidUsage("Session Module Only - SEND_CONTINUE:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SEND_CONTINUE_AUTH_STATUS, null),
                 moduleArray(), 200, false, noData(), null);
@@ -173,7 +173,7 @@ public class SessionModuleOnlyIT extends HandlerHolder {
      *
      */
     @Test
-    public void testValidUsageSessionModuleOnly_AuthException_SendSuccess() throws Exception {
+    public void testValidUsageSessionModuleOnlyAuthExceptionSendSuccess() throws Exception {
         sessionModuleOnlyValidUsage("Session Module Only - AuthException:SEND_SUCCESS",
                 moduleParams(SessionAuthModule.class, "SESSION", null, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 500, false, exceptionMatcher(500),
@@ -205,7 +205,7 @@ public class SessionModuleOnlyIT extends HandlerHolder {
      *
      */
     @Test
-    public void testValidUsageSessionModuleOnly_Success_SendSuccess() throws Exception {
+    public void testValidUsageSessionModuleOnlySuccessSendSuccess() throws Exception {
         sessionModuleOnlyValidUsage("Session Module Only - SUCCESS:SEND_SUCCESS",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_SUCCESS_AUTH_STATUS),
                 moduleArray(), 200, true, resourceMatcher(SESSION_MODULE_PRINCIPAL, SESSION_MODULE_CONTEXT_ENTRY),
@@ -236,7 +236,7 @@ public class SessionModuleOnlyIT extends HandlerHolder {
      *
      */
     @Test
-    public void testValidUsageSessionModuleOnly_Success_SendFailure() throws Exception {
+    public void testValidUsageSessionModuleOnlySuccessSendFailure() throws Exception {
         sessionModuleOnlyValidUsage("Session Module Only - SUCCESS:SEND_FAILURE",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, SEND_FAILURE_AUTH_STATUS),
                 moduleArray(), 500, true,
@@ -268,14 +268,14 @@ public class SessionModuleOnlyIT extends HandlerHolder {
      *
      */
     @Test
-    public void testValidUsageSessionModuleOnly_Success_AuthException() throws Exception {
+    public void testValidUsageSessionModuleOnlySuccessAuthException() throws Exception {
         sessionModuleOnlyValidUsage("Session Module Only - SUCCESS:AuthException",
                 moduleParams(SessionAuthModule.class, "SESSION", SUCCESS_AUTH_STATUS, null),
                 moduleArray(), 500, true,
-                exceptionMatcher(500, containsString("X-JASPI-SESSION-SECURE-RESPONSE header not set, so throwing AuthException")),
-                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false,
-                        entry("SessionAuthModule", "SUCCESSFUL")));
-            }
+                exceptionMatcher(500, containsString("X-JASPI-SESSION-SECURE-RESPONSE header not set, so throwing"
+                        + " AuthException")),
+                auditParams("SUCCESSFUL", SESSION_MODULE_PRINCIPAL, false, entry("SessionAuthModule", "SUCCESSFUL")));
+    }
 
     @DataProvider(name = "invalidUsage")
     private Object[][] invalidUsage() {

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.util;
 
@@ -36,7 +36,7 @@ public class LastModifiedTimeFileComparator implements Comparator<File> {
      */
     @Override
     public int compare(File o1, File o2) {
-        if(o1 == o2) {
+        if (o1 == o2) {
             return 0;
         }
 

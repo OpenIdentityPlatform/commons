@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.syslog;
 
@@ -56,22 +56,22 @@ import com.fasterxml.jackson.annotation.JsonPropertyDescription;
  */
 public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfiguration {
 
-    @JsonProperty(required=true)
+    @JsonProperty(required = true)
     @JsonPropertyDescription("audit.handlers.syslog.transportProtocol")
     private TransportProtocol protocol;
 
-    @JsonProperty(required=true)
+    @JsonProperty(required = true)
     @JsonPropertyDescription("audit.handlers.syslog.host")
     private String host;
 
-    @JsonProperty(required=true)
+    @JsonProperty(required = true)
     @JsonPropertyDescription("audit.handlers.syslog.port")
     private int port;
 
     @JsonPropertyDescription("audit.handlers.syslog.connectTimeout")
     private int connectTimeout;
 
-    @JsonProperty(required=true)
+    @JsonProperty(required = true)
     @JsonPropertyDescription("audit.handlers.syslog.facility")
     private Facility facility;
 
@@ -234,15 +234,15 @@ public class SyslogAuditEventHandlerConfiguration extends EventHandlerConfigurat
      */
     public static final class SeverityFieldMapping {
 
-        @JsonProperty(required=true)
+        @JsonProperty(required = true)
         @JsonPropertyDescription("audit.handlers.syslog.severityFieldMapping.topic")
         private String topic;
 
-        @JsonProperty(required=true)
+        @JsonProperty(required = true)
         @JsonPropertyDescription("audit.handlers.syslog.severityFieldMapping.field")
         private String field;
 
-        @JsonProperty(required=true)
+        @JsonProperty(required = true)
         @JsonPropertyDescription("audit.handlers.syslog.severityFieldMapping.valueMappings")
         private Map<String, Severity> valueMappings = new HashMap<>();
 

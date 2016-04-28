@@ -47,8 +47,7 @@ public class JsonValueFunctionsTest {
 
     @DataProvider(name = "functions")
     public static Object[][] functions() {
-        //@Checkstyle:off
-        return new Object[][]{
+        return new Object[][] {
                 { charset() },
                 { duration() },
                 { file() },
@@ -57,8 +56,7 @@ public class JsonValueFunctionsTest {
                 { uri() },
                 { url() },
                 { uuid() },
-                };
-        //@Checkstyle:on
+        };
     }
 
     @Test(dataProvider = "functions")
@@ -212,21 +210,21 @@ public class JsonValueFunctionsTest {
     }
 
     private Function<JsonValue, Integer, JsonValueException> integer =
-            new Function<JsonValue, Integer, JsonValueException>() {
-                @Override
-                public Integer apply(JsonValue value) throws JsonValueException {
-                    if (value.isNull()) {
-                        return null;
-                    }
-                    if (value.isString()) {
-                        try {
-                            return new Integer(value.asString());
-                        } catch (NumberFormatException nfe) {
-                            throw new JsonValueException(value, nfe);
-                        }
-                    }
-                    throw new JsonValueException(value, "Expecting a String");
+        new Function<JsonValue, Integer, JsonValueException>() {
+            @Override
+            public Integer apply(JsonValue value) throws JsonValueException {
+                if (value.isNull()) {
+                    return null;
                 }
-            };
+                if (value.isString()) {
+                    try {
+                        return new Integer(value.asString());
+                    } catch (NumberFormatException nfe) {
+                        throw new JsonValueException(value, nfe);
+                    }
+                }
+                throw new JsonValueException(value, "Expecting a String");
+            }
+        };
 
 }

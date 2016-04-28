@@ -16,7 +16,6 @@
 package org.forgerock.audit.handlers.jms;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -161,7 +160,7 @@ public abstract class BatchPublisher<T> implements Publisher<T> {
     /**
      * This runnable defines the logic of the worker threads that process the queue.
      *
-     * @see BlockingQueue#drainTo(Collection, int)
+     * @see BlockingQueue#drainTo(java.util.Collection, int)
      * @see BlockingQueue#poll(long, TimeUnit)
      * @see Executors#newFixedThreadPool(int, ThreadFactory)
      */

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events;
 
@@ -126,7 +126,7 @@ public final class EventTopicsMetaDataBuilder {
      * @return this builder for method-chaining.
      */
     public EventTopicsMetaDataBuilder withAdditionalTopicSchemas(JsonValue additionalTopicSchemas) {
-        this.additionalTopicSchemas = additionalTopicSchemas == null ? json(object()) : additionalTopicSchemas;;
+        this.additionalTopicSchemas = additionalTopicSchemas == null ? json(object()) : additionalTopicSchemas;
         return this;
     }
 

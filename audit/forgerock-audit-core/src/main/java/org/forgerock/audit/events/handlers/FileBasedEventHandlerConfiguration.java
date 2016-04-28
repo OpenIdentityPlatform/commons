@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events.handlers;
 
@@ -113,7 +113,9 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
      */
     public static class FileRotation {
 
+        /** The file size value to use when no maximum is set. */
         public static final long NO_MAX_FILE_SIZE = -1;
+        /** The default file rotation suffix format. */
         public static final String DEFAULT_ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-HH.mm.ss";
 
         @JsonPropertyDescription("audit.handlers.file.rotationEnabled")
@@ -277,7 +279,9 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
      */
     public static class FileRetention {
 
+        /** The value of number of history files to use when the value is unlimited. */
         public static final int UNLIMITED_HISTORY_FILES = -1;
+        /** The disk space value when disk space is unrestricted. */
         public static final long ANY_DISK_SPACE = -1;
 
         @JsonPropertyDescription("audit.handlers.file.maxNumberOfHistoryFiles")
@@ -299,7 +303,7 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
 
         /**
          * Sets the maximum number of historical log files to retain. -1 disables pruning of old history files.
-         * @return The maximum number of log files. -1 disables pruning of old history files.
+         * @param maxNumberOfHistoryFiles The maximum number of log files. -1 disables pruning of old history files.
          */
         public void setMaxNumberOfHistoryFiles(int maxNumberOfHistoryFiles) {
             this.maxNumberOfHistoryFiles = maxNumberOfHistoryFiles;

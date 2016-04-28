@@ -91,8 +91,9 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
     private File keyStoreFile;
     private String keyStorePassword;
 
-    SecureCsvWriter(File csvFile, String[] headers, CsvPreference csvPreference, CsvAuditEventHandlerConfiguration config,
-            KeyStoreHandler keyStoreHandler, Random random) throws IOException {
+    SecureCsvWriter(File csvFile, String[] headers, CsvPreference csvPreference,
+            CsvAuditEventHandlerConfiguration config, KeyStoreHandler keyStoreHandler, Random random)
+            throws IOException {
         Reject.ifFalse(config.getSecurity().isEnabled(), "SecureCsvWriter should only be used if security is enabled");
         final boolean fileAlreadyInitialized = csvFile.exists() && csvFile.length() > 0;
         this.random = random;
@@ -122,7 +123,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                         "No '%s' signing key found in the provided keystore: %s. This key must be provided.",
                         CsvSecureConstants.ENTRY_SIGNATURE, keyStoreHandlerDecorated.getLocation()));
             }
-            this.secureStorage = new KeyStoreSecureStorage(hmacKeyStoreHandler, publicSignatureKey, privateSignatureKey);
+            this.secureStorage = new KeyStoreSecureStorage(hmacKeyStoreHandler, publicSignatureKey,
+                    privateSignatureKey);
             final CsvAuditEventHandlerConfiguration.CsvSecurity securityConfiguration = config.getSecurity();
             if (fileAlreadyInitialized) {
                 // Run the CsvVerifier to check that the file was not tampered.
@@ -405,7 +407,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
         public void postRotationAction(RotationContext context) throws IOException {
             // Rename the keystore and create a new one.
             String currentName = keyStoreFile.getName();
-            String nextName = currentName.replaceFirst(context.getInitialFile().getName(), context.getNextFile().getName());
+            String nextName = currentName.replaceFirst(context.getInitialFile().getName(),
+                    context.getNextFile().getName());
             final File nextFile = new File(keyStoreFile.getParent(), nextName);
             logger.trace("Renaming keystore file {} to {}", currentName, nextName);
             boolean renamed = keyStoreFile.renameTo(nextFile);
@@ -413,7 +416,8 @@ class SecureCsvWriter implements CsvWriter, RolloverLifecycleHook {
                 logger.error("Unable to rename {} to {}", keyStoreFile.getAbsolutePath(), nextFile.getAbsolutePath());
             }
             try {
-                secureStorage.setKeyStoreHandler(new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE, keyStoreFile.getPath(), keyStorePassword));
+                secureStorage.setKeyStoreHandler(new JcaKeyStoreHandler(CsvSecureConstants.KEYSTORE_TYPE,
+                        keyStoreFile.getPath(), keyStorePassword));
                 logger.trace("Updated secureStorage to reference new keyStoreFile");
                 initHmacCalculatorWithRandomData();
             } catch (Exception ex) {

@@ -122,12 +122,12 @@ public class ElasticsearchAuditEventHandlerConfiguration extends EventHandlerCon
     public static class ConnectionConfiguration {
 
         /**
-         * Elasticsearch default host ({@code localhost}) in a development environment
+         * Elasticsearch default host ({@code localhost}) in a development environment.
          */
         private static final String DEFAULT_HOST = "localhost";
 
         /**
-         * Elasticsearch default port ({@code 9200}) in a development environment
+         * Elasticsearch default port ({@code 9200}) in a development environment.
          */
         private static final int DEFAULT_PORT = 9200;
 

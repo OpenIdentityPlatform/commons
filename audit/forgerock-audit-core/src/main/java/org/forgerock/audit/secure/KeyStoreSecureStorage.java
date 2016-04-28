@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.secure;
 
@@ -42,8 +42,11 @@ public class KeyStoreSecureStorage implements SecureStorage {
     /** The current key used to calculate the HEADER_HMAC. */
     public static final String ENTRY_CURRENT_KEY = "CurrentKey";
 
+    /** The algorithm to use for signing and verifying. */
     public static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
+    /** The HMAC algorithm to use. */
     public static final String HMAC_ALGORITHM = "HmacSHA256";
+    /** The name of the Java Cryptography Extension KeyStore (JCEKS) type. */
     public static final String JCEKS_KEYSTORE_TYPE = "JCEKS";
 
     private KeyStoreHandlerDecorator keyStoreHandler;
@@ -106,6 +109,10 @@ public class KeyStoreSecureStorage implements SecureStorage {
         }
     }
 
+    /**
+     * Set the key store handler.
+     * @param keyStoreHandler The handler.
+     */
     public void setKeyStoreHandler(KeyStoreHandler keyStoreHandler) {
         this.keyStoreHandler = new KeyStoreHandlerDecorator(keyStoreHandler);
     }
@@ -127,7 +134,8 @@ public class KeyStoreSecureStorage implements SecureStorage {
 
     @Override
     public void writeCurrentSignatureKey(SecretKey key) throws SecureStorageException {
-        keyStoreHandler.writeToKeyStore(key, KeyStoreSecureStorage.ENTRY_CURRENT_SIGNATURE, keyStoreHandler.getPassword());
+        keyStoreHandler.writeToKeyStore(key, KeyStoreSecureStorage.ENTRY_CURRENT_SIGNATURE,
+                keyStoreHandler.getPassword());
         try {
             keyStoreHandler.store();
         } catch (Exception ex) {

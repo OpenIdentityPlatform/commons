@@ -1,27 +1,19 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
+ * Copyright 2011-2016 ForgeRock AS.
  */
+
 package org.forgerock.json.schema.validator.helpers;
 
 import org.forgerock.json.JsonPointer;
@@ -52,38 +44,29 @@ public class MaximumHelper implements SimpleValidator<Number> {
      */
     private int exclusiveMaximum = 0;
 
+    /**
+     * Create a maximum helper.
+     * @param maximum The maximum.
+     * @param exclusiveMaximum Whether it is an exclusive maximum.
+     */
     public MaximumHelper(Number maximum, boolean exclusiveMaximum) {
         this.maximum = maximum;
         this.exclusiveMaximum = exclusiveMaximum ? 1 : 0;
     }
 
+    @Override
     public void validate(Number node, JsonPointer at, ErrorHandler handler) throws SchemaException {
-
         if (maximum.getClass().isAssignableFrom(node.getClass())) {
-
             try {
-                Method method = maximum.getClass().getMethod("compareTo",maximum.getClass());
-                method.invoke(maximum,node);
-                if ((Integer)method.invoke(maximum,node) < exclusiveMaximum) {
+                Method method = maximum.getClass().getMethod("compareTo", maximum.getClass());
+                method.invoke(maximum, node);
+                if ((Integer) method.invoke(maximum, node) < exclusiveMaximum) {
                     handler.error(new ValidationException("minimum violation", at));
                 }
             } catch (Exception e) {
-                handler.error(new ValidationException("Reflection exception at \"compareTo\" method invocation." ,e, at));
+                handler.error(new ValidationException("Reflection exception at \"compareTo\" method invocation." , e,
+                        at));
             }
-
-//            if (maximum instanceof Float) {
-//                if (((Float) maximum).compareTo((Float) node) < exclusiveMaximum) {
-//                    handler.error(new ValidationException("maximum violation", at));
-//                }
-//            } else if (maximum instanceof Double) {
-//                if (((Double) maximum).compareTo((Double) node) < exclusiveMaximum) {
-//                    handler.error(new ValidationException("maximum violation", at));
-//                }
-//            } else if (maximum instanceof Integer) {
-//                if (((Integer) maximum).compareTo((Integer) node) < exclusiveMaximum) {
-//                    handler.error(new ValidationException("maximum violation", at));
-//                }
-//            }
         } else {
             if (maximum instanceof Float) {
                 if (((Float) maximum).compareTo(node.floatValue()) < exclusiveMaximum) {

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.ref;
@@ -74,8 +74,8 @@ public class JsonReferenceTransformer implements JsonTransformer {
      */
     private static boolean isStandaloneFragment(URI uri) {
         return (uri != null && uri.getScheme() == null
-         && (uri.getSchemeSpecificPart() == null || uri.getSchemeSpecificPart().length() == 0)
-         && uri.getRawFragment() != null);
+            && (uri.getSchemeSpecificPart() == null || uri.getSchemeSpecificPart().length() == 0)
+            && uri.getRawFragment() != null);
     }
 
     /**
@@ -131,7 +131,7 @@ public class JsonReferenceTransformer implements JsonTransformer {
                     rel = null; // ain't relative
                 }
             } else if (!ref.isAbsolute()) {
-                  rel = ref; // allows use of standalone fragment without base
+                rel = ref; // allows use of standalone fragment without base
             }
 
             if (root != null && isStandaloneFragment(rel)) { // resolve against already-loaded document

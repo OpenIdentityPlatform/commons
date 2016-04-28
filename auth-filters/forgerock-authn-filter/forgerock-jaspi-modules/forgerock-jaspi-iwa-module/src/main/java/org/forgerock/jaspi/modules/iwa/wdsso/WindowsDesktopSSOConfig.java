@@ -1,4 +1,5 @@
-/**
+//@Checkstyle:ignoreFor 29
+/*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2005 Sun Microsystems Inc. All Rights Reserved
@@ -24,6 +25,7 @@
  *
  * $Id: WindowsDesktopSSOConfig.java,v 1.3 2009/04/07 22:55:13 beomsuk Exp $
  *
+ * Portions Copyrighted 2013-2016 ForgeRock AS.
  */
 
 
@@ -32,32 +34,30 @@ package org.forgerock.jaspi.modules.iwa.wdsso;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.security.auth.login.Configuration;
 import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * Configuration for WDSSO.
+ */
 public class WindowsDesktopSSOConfig extends Configuration {
 
     static final String DEFAULT_KRB5_LOGINMODULE =
             "com.sun.security.auth.module.Krb5LoginModule";
 
+    /** Default app name. */
+    public static final String DEFAULT_APP_NAME = "com.sun.identity.authentication.windowsdesktopsso";
+    private static final String KERBEROS_MODULE_NAME = DEFAULT_KRB5_LOGINMODULE;
+    private static final String CREDS_TYPE = "acceptor";
 
-
-    public static final String defaultAppName = 
-        "com.sun.identity.authentication.windowsdesktopsso";
-    private static final String kerberosModuleName =
-//        SystemProperties.get(Constants.KRB5_LOGINMODULE,
-                /*Constants.*/DEFAULT_KRB5_LOGINMODULE;//);
-    private static final String credsType =
-//        SystemProperties.get(KRB5_CREDENTIAL_TYPE,
-            "acceptor";//);
-                    
     private Configuration config = null;
     private String servicePrincipal = null;
     private String keytab = null;
     private String refreshConf = "false";
 
     /**
-     * Constructor
+     * Constructor.
      *
-     * @param config
+     * @param config The configuration.
      */
     public WindowsDesktopSSOConfig(Configuration config) {
         this.config = config;
@@ -66,7 +66,7 @@ public class WindowsDesktopSSOConfig extends Configuration {
     /**
      * Sets principal name.
      *
-     * @param principalName
+     * @param principalName The name.
      */
     public void setPrincipalName(String principalName) {
         servicePrincipal = principalName;
@@ -75,14 +75,15 @@ public class WindowsDesktopSSOConfig extends Configuration {
     /**
      * Sets key tab file.
      *
-     * @param keytabFile
+     * @param keytabFile The file.
      */
     public void setKeyTab(String keytabFile) {
         keytab = keytabFile;
     }
 
     /**
-     * TODO-JAVADOC
+     * The the refresh config.
+     * @param refresh The refresh.
      */
     public void setRefreshConfig(String refresh) {
         refreshConf = refresh;
@@ -92,16 +93,16 @@ public class WindowsDesktopSSOConfig extends Configuration {
      * Returns AppConfigurationEntry array for the application <I>appName</I>
      * using Kerberos module.
      *
-     * @param appName
+     * @param appName The app name.
      * @return Array of AppConfigurationEntry
      */
-    public AppConfigurationEntry[] getAppConfigurationEntry(String appName){
-        if (appName.equals(defaultAppName)) {
-            HashMap hashmap = new HashMap();
+    public AppConfigurationEntry[] getAppConfigurationEntry(String appName) {
+        if (appName.equals(DEFAULT_APP_NAME)) {
+            Map<String, String> hashmap = new HashMap<>();
             hashmap.put("principal", servicePrincipal);
-            if (kerberosModuleName.equalsIgnoreCase("com.ibm.security.auth.module.Krb5LoginModule")) {
+            if (KERBEROS_MODULE_NAME.equalsIgnoreCase("com.ibm.security.auth.module.Krb5LoginModule")) {
                 hashmap.put("useKeytab", keytab);
-                hashmap.put("credsType", credsType);
+                hashmap.put("credsType", CREDS_TYPE);
                 hashmap.put("refreshKrb5Config", "false");
             } else {
                 hashmap.put("storeKey", "true");
@@ -113,7 +114,7 @@ public class WindowsDesktopSSOConfig extends Configuration {
 
             AppConfigurationEntry appConfigurationEntry =
                 new AppConfigurationEntry(
-                    kerberosModuleName,
+                        KERBEROS_MODULE_NAME,
                     AppConfigurationEntry.LoginModuleControlFlag.REQUIRED,
                     hashmap);
             return new AppConfigurationEntry[]{ appConfigurationEntry };
@@ -122,7 +123,7 @@ public class WindowsDesktopSSOConfig extends Configuration {
     }
 
     /**
-     * TODO-JAVADOC
+     * Do a config refresh.
      */
     public void refresh() {
         config.refresh();

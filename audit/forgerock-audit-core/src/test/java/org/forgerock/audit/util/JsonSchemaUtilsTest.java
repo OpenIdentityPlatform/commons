@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit.util;
@@ -33,7 +33,7 @@ public class JsonSchemaUtilsTest {
     public void testGeneratingJsonPointersFromSchema() {
         //given
         JsonValue schema = json(object(
-                field("id","/"),
+                field("id", "/"),
                 field("properties", object(
                         field("timestamp", object(
                                 field("id", "timestamp"),
@@ -59,11 +59,11 @@ public class JsonSchemaUtilsTest {
                                 field("items", array(
                                         object(
                                                 field("id", "0"),
-                                                field("type","string")
+                                                field("type", "string")
                                         ),
                                         object(
                                                 field("id", "1"),
-                                                field("type","string")
+                                                field("type", "string")
                                         )
                                 ))
                         ))

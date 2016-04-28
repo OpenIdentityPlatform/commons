@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -94,7 +94,7 @@ public class JdbcAuditEventHandlerTest {
     public static final String CUSTOM_INTEGER_FIELD = "customInteger";
     public static final int CUSTOM_INTEGER_VALUE = 1;
 
-    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private Connection connection;
 
@@ -441,11 +441,11 @@ public class JdbcAuditEventHandlerTest {
 
     private JdbcAuditEventHandlerConfiguration createConfiguration(final boolean bufferingEnabled) throws Exception {
         if (bufferingEnabled) {
-            return mapper.readValue(
+            return MAPPER.readValue(
                     getResource("/event-handler-config-buffering.json"), JdbcAuditEventHandlerConfiguration.class);
 
         } else {
-            return mapper.readValue(
+            return MAPPER.readValue(
                     getResource("/event-handler-config.json"), JdbcAuditEventHandlerConfiguration.class);
         }
     }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.crypto;
@@ -153,7 +153,7 @@ public class JsonCryptoTest {
 
     // ----- exceptions ----------
 
-    @Test(expectedExceptions=JsonCryptoException.class)
+    @Test(expectedExceptions = JsonCryptoException.class)
     public void testDroppedIV() throws JsonCryptoException {
         JsonValue value = new JsonValue(PLAINTEXT);
         value = new SimpleEncryptor(SYMMETRIC_CIPHER, secretKey, "secretKey").encrypt(value);
@@ -161,7 +161,7 @@ public class JsonCryptoTest {
         new SimpleDecryptor(selector).decrypt(value);
     }
 
-    @Test(expectedExceptions=JsonCryptoException.class)
+    @Test(expectedExceptions = JsonCryptoException.class)
     public void testUnknownKey() throws JsonCryptoException {
         JsonValue value = new JsonValue(PLAINTEXT);
         value = new SimpleEncryptor(SYMMETRIC_CIPHER, secretKey, "secretKey").encrypt(value);

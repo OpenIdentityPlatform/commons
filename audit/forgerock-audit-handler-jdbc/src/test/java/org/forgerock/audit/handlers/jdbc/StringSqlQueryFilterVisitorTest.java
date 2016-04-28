@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.handlers.jdbc;
 
@@ -32,7 +32,8 @@ public class StringSqlQueryFilterVisitorTest {
     /* a visitor to generate base value assertions */
     private StringSqlQueryFilterVisitor visitor = new StringSqlQueryFilterVisitor() {
         @Override
-        public StringSqlRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand, JsonPointer field, Object valueAssertion) {
+        public StringSqlRenderer visitValueAssertion(TableMappingParametersPair parameters, String operand,
+                JsonPointer field, Object valueAssertion) {
             String quote = valueAssertion instanceof String ? "'" : "";
             return new StringSqlRenderer(field.leaf())
                     .append(" ")
@@ -54,37 +55,35 @@ public class StringSqlQueryFilterVisitorTest {
         // Use longs for integer values because valueOf parses integers as Longs and
         // equals() is sensitive to the type.
         return new Object[][] {
-                // @formatter:off
-                { alwaysTrue(), "1 = 1" },
-                { alwaysFalse(), "1 <> 1" },
-                { equalTo(ptr("/name"), "alice"), "name = 'alice'"},
-                { equalTo(ptr("/age"), 1234L), "age = 1234" },
-                { equalTo(ptr("/balance"), 3.14159), "balance = 3.14159" },
-                { equalTo(ptr("/isAdmin"), false), "isAdmin = false" },
-                { lessThan(ptr("/age"), 1234L), "age < 1234" },
-                { lessThanOrEqualTo(ptr("/age"), 1234L), "age <= 1234" },
-                { greaterThan(ptr("/age"), 1234L), "age > 1234" },
-                { greaterThanOrEqualTo(ptr("/age"), 1234L), "age >= 1234" },
-                { contains(ptr("/name"), "al"), "name LIKE '%al%'" },
-                { startsWith(ptr("/name"), "al"), "name LIKE 'al%'" },
-                { present(ptr("/name")), "name IS NOT NULL" },
-                { or(), "1 <> 1" }, // zero operand or is always false
-                { and(), "1 = 1" }, // zero operand and is always true
-                { or(equalTo(ptr("/age"), 1234L)), "age = 1234" }, // single operand or is no-op
-                { and(equalTo(ptr("/age"), 1234L)), "age = 1234" }, // single operand and is no-op
-                { or(lessThan(ptr("/age"), 18L), greaterThan(ptr("/age"), 30L)), "(age < 18 OR age > 30)" },
-                { and(lessThan(ptr("/age"), 18L), greaterThan(ptr("/age"), 30L)), "(age < 18 AND age > 30)" },
-                { or(equalTo(ptr("/role"), "a"), equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c")),
-                        "(role = 'a' OR role = 'b' OR role = 'c')" },
-                { and(equalTo(ptr("/role"), "a"), equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c")),
-                        "(role = 'a' AND role = 'b' AND role = 'c')" },
-                { or(equalTo(ptr("/role"), "a"), and(equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c"))),
-                        "(role = 'a' OR (role = 'b' AND role = 'c'))" },
-                { and(equalTo(ptr("/role"), "a"), or(equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c"))),
-                        "(role = 'a' AND (role = 'b' OR role = 'c'))" },
-                { not(equalTo(ptr("/age"), 1234L)), "NOT age = 1234" },
-                { not(not(equalTo(ptr("/age"), 1234L))), "NOT NOT age = 1234" },
-                // @formatter:on
+            { alwaysTrue(), "1 = 1" },
+            { alwaysFalse(), "1 <> 1" },
+            { equalTo(ptr("/name"), "alice"), "name = 'alice'"},
+            { equalTo(ptr("/age"), 1234L), "age = 1234" },
+            { equalTo(ptr("/balance"), 3.14159), "balance = 3.14159" },
+            { equalTo(ptr("/isAdmin"), false), "isAdmin = false" },
+            { lessThan(ptr("/age"), 1234L), "age < 1234" },
+            { lessThanOrEqualTo(ptr("/age"), 1234L), "age <= 1234" },
+            { greaterThan(ptr("/age"), 1234L), "age > 1234" },
+            { greaterThanOrEqualTo(ptr("/age"), 1234L), "age >= 1234" },
+            { contains(ptr("/name"), "al"), "name LIKE '%al%'" },
+            { startsWith(ptr("/name"), "al"), "name LIKE 'al%'" },
+            { present(ptr("/name")), "name IS NOT NULL" },
+            { or(), "1 <> 1" }, // zero operand or is always false
+            { and(), "1 = 1" }, // zero operand and is always true
+            { or(equalTo(ptr("/age"), 1234L)), "age = 1234" }, // single operand or is no-op
+            { and(equalTo(ptr("/age"), 1234L)), "age = 1234" }, // single operand and is no-op
+            { or(lessThan(ptr("/age"), 18L), greaterThan(ptr("/age"), 30L)), "(age < 18 OR age > 30)" },
+            { and(lessThan(ptr("/age"), 18L), greaterThan(ptr("/age"), 30L)), "(age < 18 AND age > 30)" },
+            { or(equalTo(ptr("/role"), "a"), equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c")),
+                "(role = 'a' OR role = 'b' OR role = 'c')" },
+            { and(equalTo(ptr("/role"), "a"), equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c")),
+                "(role = 'a' AND role = 'b' AND role = 'c')" },
+            { or(equalTo(ptr("/role"), "a"), and(equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c"))),
+                "(role = 'a' OR (role = 'b' AND role = 'c'))" },
+            { and(equalTo(ptr("/role"), "a"), or(equalTo(ptr("/role"), "b"), equalTo(ptr("/role"), "c"))),
+                "(role = 'a' AND (role = 'b' OR role = 'c'))" },
+            { not(equalTo(ptr("/age"), 1234L)), "NOT age = 1234" },
+            { not(not(equalTo(ptr("/age"), 1234L))), "NOT NOT age = 1234" },
         };
     }
 
@@ -93,7 +92,7 @@ public class StringSqlQueryFilterVisitorTest {
         assertThat(filter.accept(visitor, null).toSql()).isEqualTo(whereClause);
     }
 
-    private static JsonPointer ptr(String jsonPointer){
+    private static JsonPointer ptr(String jsonPointer) {
         return new JsonPointer(jsonPointer);
     }
 }

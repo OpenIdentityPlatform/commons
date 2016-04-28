@@ -1,27 +1,19 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- * $Id$
+ * Copyright 2011-2016 ForgeRock AS.
  */
+
 package org.forgerock.json.schema.validator.helpers;
 
 import org.forgerock.json.JsonPointer;
@@ -52,37 +44,30 @@ public class MinimumHelper implements SimpleValidator<Number> {
      */
     private int exclusiveMinimum = 0;
 
+    /**
+     * Create a minimum helper.
+     * @param minimum The minimum.
+     * @param exclusiveMinimum Whether it is an exclusive minimum.
+     */
     public MinimumHelper(Number minimum, boolean exclusiveMinimum) {
         this.minimum = minimum;
         this.exclusiveMinimum = exclusiveMinimum ? -1 : 0;
     }
 
+    @Override
     public void validate(Number node, JsonPointer at, ErrorHandler handler) throws SchemaException {
 
         if (minimum.getClass().isAssignableFrom(node.getClass())) {
             try {
-                Method method = minimum.getClass().getMethod("compareTo",minimum.getClass());
-                method.invoke(minimum,node);
-                if ((Integer)method.invoke(minimum,node) > exclusiveMinimum) {
+                Method method = minimum.getClass().getMethod("compareTo", minimum.getClass());
+                method.invoke(minimum, node);
+                if ((Integer) method.invoke(minimum, node) > exclusiveMinimum) {
                     handler.error(new ValidationException("minimum violation", at));
                 }
             } catch (Exception e) {
-                handler.error(new ValidationException("Reflection exception at \"compareTo\" method invocation." ,e, at));
+                handler.error(new ValidationException("Reflection exception at \"compareTo\" method invocation." , e,
+                        at));
             }
-
-//            if (minimum instanceof Float) {
-//                if (((Float) minimum).compareTo((Float) node) > exclusiveMinimum) {
-//                    handler.error(new ValidationException("minimum violation", at));
-//                }
-//            } else if (minimum instanceof Double) {
-//                if (((Double) minimum).compareTo((Double) node) > exclusiveMinimum) {
-//                    handler.error(new ValidationException("minimum violation", at));
-//                }
-//            } else if (minimum instanceof Integer) {
-//                if (((Integer) minimum).compareTo((Integer) node) > exclusiveMinimum) {
-//                    handler.error(new ValidationException("minimum violation", at));
-//                }
-//            }
         } else {
             if (minimum instanceof Float) {
                 if (((Float) minimum).compareTo(node.floatValue()) > exclusiveMinimum) {

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.schema.validator.validators;
@@ -38,9 +38,9 @@ public class ValidatorTest {
             public void validate(Object node, JsonPointer at, ErrorHandler handler) throws SchemaException {
             }
         };
-        Assert.assertTrue(validator.required,"Required MUST be True");
-        Assert.assertEquals(validator.getPath(null,null),new JsonPointer());
-        Assert.assertEquals(validator.getPath(new JsonPointer("/path"),null),new JsonPointer("path"));
-        Assert.assertEquals(validator.getPath(null,"path"),new JsonPointer("path"));
+        Assert.assertTrue(validator.required, "Required MUST be True");
+        Assert.assertEquals(validator.getPath(null, null), new JsonPointer());
+        Assert.assertEquals(validator.getPath(new JsonPointer("/path"), null), new JsonPointer("path"));
+        Assert.assertEquals(validator.getPath(null, "path"), new JsonPointer("path"));
     }
 }

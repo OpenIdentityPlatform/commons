@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.audit.events.handlers.writers;
@@ -85,7 +85,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
 
     /**
      * Constructs a {@link RotatableWriter} given an initial file to manage rotation/retention, and
-     * a {@link FileBasedEventHandlerConfiguration}
+     * a {@link FileBasedEventHandlerConfiguration}.
      * @param file The initial file to manage rotation/retention.
      * @param configuration The configuration of the rotation and retention policies.
      * @param append Whether to append to the rotatable file or not.
@@ -98,7 +98,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
 
     /**
      * Constructs a {@link RotatableWriter} given an initial file to manage rotation/retention, a
-     * a {@link FileBasedEventHandlerConfiguration} and a {@link RolloverLifecycleHook}
+     * a {@link FileBasedEventHandlerConfiguration} and a {@link RolloverLifecycleHook}.
      *
      * @param file The initial file to manage rotation/retention.
      * @param configuration The configuration of the rotation and retention policies.
@@ -217,8 +217,8 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                             currentFile.toString());
                 }
             } else {
-                logger.error("Unable to rename the audit file {}; further events will continue to be logged to " +
-                        "the current file", currentFile.toString());
+                logger.error("Unable to rename the audit file {}; further events will continue to be logged to "
+                        + "the current file", currentFile.toString());
                 writer = constructWriter(currentFile, true);
             }
             lastRotationTime = DateTime.now(DateTimeZone.UTC);
@@ -330,8 +330,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         try {
             isRotating.set(true);
             return rotate();
-        }
-        finally {
+        } finally {
             isRotating.set(false);
             readWriteLock.writeLock().unlock();
         }
@@ -412,7 +411,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                                             fileNamingPolicy.getInitialName(), e);
                                 }
                             } finally {
-                              rolloverLifecycleHook.afterRollingOver();
+                                rolloverLifecycleHook.afterRollingOver();
                             }
                         }
                     },

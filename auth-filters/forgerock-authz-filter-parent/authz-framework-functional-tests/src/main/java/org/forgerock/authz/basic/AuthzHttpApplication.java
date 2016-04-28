@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.basic;
@@ -66,7 +66,8 @@ public class AuthzHttpApplication implements HttpApplication {
                 Handlers.chainOf(new AuthorizationContextHandler(),
                         new HttpAuthorizationFilter(OAuth2Authorization.forHttp(new OAuth2AccessTokenValidator() {
                             @Override
-                            public Promise<AccessTokenValidationResponse, OAuth2Exception> validate(String accessToken) {
+                            public Promise<AccessTokenValidationResponse, OAuth2Exception> validate(
+                                    String accessToken) {
                                 if ("VALID".equalsIgnoreCase(accessToken)) {
                                     return newResultPromise(
                                             new AccessTokenValidationResponse(System.currentTimeMillis() + 5000,

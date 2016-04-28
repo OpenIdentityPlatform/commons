@@ -54,7 +54,7 @@ class CsvSecureVerifier {
     private String[] headers;
 
     /**
-     * Constructs a new verifier
+     * Constructs a new verifier.
      *
      * @param csvFile
      *            the CSV file to verify
@@ -64,7 +64,7 @@ class CsvSecureVerifier {
      *            the secure storage containing keys
      */
     public CsvSecureVerifier(File csvFile, CsvPreference csvPreference, SecureStorage secureStorage) {
-        this.csvFile= csvFile;
+        this.csvFile = csvFile;
         this.csvPreference = csvPreference;
         this.secureStorage = secureStorage;
 
@@ -94,7 +94,8 @@ class CsvSecureVerifier {
                 }
             }
 
-            if (!(HEADER_HMAC.equals(header[header.length - 2]) && HEADER_SIGNATURE.equals(header[header.length - 1]))) {
+            if (!(HEADER_HMAC.equals(header[header.length - 2])
+                    && HEADER_SIGNATURE.equals(header[header.length - 1]))) {
                 String msg = "Found only " + checkCount + " checked headers from : " + Arrays.toString(header);
                 logger.debug(msg);
                 return newVerificationFailureResult(msg);
@@ -211,7 +212,7 @@ class CsvSecureVerifier {
     }
 
     /**
-     * Returns the headers of the underlying CSV
+     * Returns the headers of the underlying CSV.
      *
      * @return the headers of the underlying CSV
      */
@@ -220,7 +221,7 @@ class CsvSecureVerifier {
     }
 
     /**
-     * Returns the latest read and validated HMAC
+     * Returns the latest read and validated HMAC.
      *
      * @return the latest read and validated HMAC
      */
@@ -229,7 +230,7 @@ class CsvSecureVerifier {
     }
 
     /**
-     * Returns the latest read and validated signature
+     * Returns the latest read and validated signature.
      *
      * @return the latest read and validated signature
      */

@@ -54,7 +54,7 @@ public class BatchPublisherConfiguration {
     }
 
     /**
-     * Sets the maximum capacity of the publishing queue
+     * Sets the maximum capacity of the publishing queue.
      *
      * @param capacity the maximum capacity of the publishing queue
      */

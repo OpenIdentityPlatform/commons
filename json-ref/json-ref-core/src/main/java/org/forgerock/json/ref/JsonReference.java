@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.ref;
@@ -59,6 +59,7 @@ public class JsonReference {
 
     /**
      * Returns the URI of the value being referenced.
+     * @return The URI.
      */
     public URI getURI() {
         return uri;
@@ -90,6 +91,7 @@ public class JsonReference {
 
     /**
      * Returns this object as a {@code $ref} JSON object value.
+     * @return The value.
      */
     public JsonValue toJsonValue() {
         HashMap<String, Object> result = new HashMap<>();

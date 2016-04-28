@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events;
 
@@ -71,27 +71,48 @@ import org.slf4j.LoggerFactory;
  */
 public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> extends AuditEventBuilder<T> {
 
+    /** The server event payload field name. */
     public static final String SERVER = "server";
+    /** The client event payload field name. */
     public static final String CLIENT = "client";
+    /** The IP event payload field name. */
     public static final String IP = "ip";
+    /** The port event payload field name. */
     public static final String PORT = "port";
+    /** The request event payload field name. */
     public static final String REQUEST = "request";
+    /** The protocol event payload field name. */
     public static final String PROTOCOL = "protocol";
+    /** The operation event payload field name. */
     public static final String OPERATION = "operation";
+    /** The secure event payload field name. */
     public static final String SECURE = "secure";
+    /** The method event payload field name. */
     public static final String METHOD = "method";
+    /** The detail event payload field name. */
     public static final String DETAIL = "detail";
+    /** The path event payload field name. */
     public static final String PATH = "path";
+    /** The query parameters event payload field name. */
     public static final String QUERY_PARAMETERS = "queryParameters";
+    /** The headers event payload field name. */
     public static final String HEADERS = "headers";
+    /** The http event payload field name. */
     public static final String HTTP = "http";
+    /** The status event payload field name. */
     public static final String STATUS = "status";
+    /** The status code event payload field name. */
     public static final String STATUS_CODE = "statusCode";
+    /** The elapsed time event payload field name. */
     public static final String ELAPSED_TIME = "elapsedTime";
+    /** The elapsed time unit event payload field name. */
     public static final String ELAPSED_TIME_UNITS = "elapsedTimeUnits";
+    /** The response event payload field name. */
     public static final String RESPONSE = "response";
+    /** The cookies event payload field name. */
     public static final String COOKIES = "cookies";
 
+    /** The protocol field CREST value. */
     public static final String CREST_PROTOCOL = "CREST";
 
     private static final String HTTP_CONTEXT_NAME = "http";
@@ -125,7 +146,8 @@ public class AccessAuditEventBuilder<T extends AccessAuditEventBuilder<T>> exten
     }
 
     /**
-     * @return True if client.host should be looked up from client.ip.
+     * Whether the client.host should be looked up from client.ip.
+     * @return True if so.
      */
     protected boolean isReverseDnsLookupEnabled() {
         return performReverseDnsLookup;

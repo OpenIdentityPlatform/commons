@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.secure;
 
@@ -74,7 +74,7 @@ public interface SecureStorage {
      * @param signedData
      *          The data to sign.
      * @return the signed data
-     * @throws SecureStorageException
+     * @throws SecureStorageException If an error occured during signing process.
      */
     byte[] sign(byte[] signedData) throws SecureStorageException;
 
@@ -86,7 +86,7 @@ public interface SecureStorage {
      * @param signature
      *          the signature
      * @return {@code true} if data corresponds, {@code false} otherwise
-     * @throws SecureStorageException
+     * @throws SecureStorageException If an error occured during the verification process.
      */
     boolean verify(byte[] signedData, byte[] signature) throws SecureStorageException;
 
