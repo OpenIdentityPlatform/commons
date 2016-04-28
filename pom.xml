@@ -68,6 +68,7 @@
   </prerequisites>
 
   <modules>
+    <module>api-descriptor</module>
     <module>commons-bom</module>
     <module>audit</module>
     <module>auth-filters</module>
