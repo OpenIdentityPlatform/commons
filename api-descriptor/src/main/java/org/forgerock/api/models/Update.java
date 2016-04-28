@@ -24,8 +24,6 @@ import org.forgerock.api.ApiValidationException;
  */
 public final class Update extends Operation {
 
-    private final Boolean mvccSupported;
-
     /**
      * Protected contstructor of the Operation.
      *
@@ -33,20 +31,6 @@ public final class Update extends Operation {
      */
     private Update(Builder builder) {
         super(builder);
-        this.mvccSupported = builder.mvccSupported;
-
-        if (mvccSupported == null) {
-            throw new ApiValidationException("mvccSupported required");
-        }
-    }
-
-    /**
-     * Informs if MVCC is supported.
-     *
-     * @return {@code true} if MVCC is supported and {@code false} otherwise
-     */
-    public boolean isMvccSupported() {
-        return mvccSupported;
     }
 
     /**
@@ -77,7 +61,6 @@ public final class Update extends Operation {
             Class<?> relativeType) {
         return update()
                 .detailsFromAnnotation(update.operationDescription(), descriptor, relativeType)
-                .mvccSupported(update.mvccSupported())
                 .build();
     }
 
@@ -86,21 +69,8 @@ public final class Update extends Operation {
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private Boolean mvccSupported;
-
         private Builder() {
             super();
-        }
-
-        /**
-         * Setter for MVCC-supported flag.
-         *
-         * @param mvccSupported Whether this resource supports MVCC
-         * @return Builder
-         */
-        public Builder mvccSupported(boolean mvccSupported) {
-            this.mvccSupported = mvccSupported;
-            return this;
         }
 
         @Override

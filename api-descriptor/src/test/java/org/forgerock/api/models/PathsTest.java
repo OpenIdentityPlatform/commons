@@ -41,7 +41,7 @@ public class PathsTest {
                 .response(schema)
                 .build();
         simplePathNode = VersionedPath.versionedPath()
-                .put(Version.version(1), Resource.resource().action(action1).build())
+                .put(Version.version(1), Resource.resource().action(action1).mvccSupported(true).build())
                 .build();
     }
 

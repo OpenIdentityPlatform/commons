@@ -56,8 +56,4 @@ public @interface Create {
      * worked out from the context, and should rarely have to be set to anything different.
      */
     CreateSingleton singleton() default CreateSingleton.FROM_CONTEXT;
-    /**
-     * Whether MVCC style requests are supported.
-     */
-    boolean mvccSupported();
 }

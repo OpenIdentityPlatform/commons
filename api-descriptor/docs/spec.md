@@ -119,6 +119,7 @@ patch       | [Patch](#patch)             |            | The patch operation des
 actions     | [Action](#action)[]         |            | The action operation descriptions, if supported
 queries     | [Query](#query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
 subresources | [SubResources](#subresources) |         | Sub-resources of this resource. Sub-resources use the same version as their parent resource, so are not separately versioned.
+mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
 
 ### SubResources
 
@@ -237,7 +238,6 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 mode        | String                      | ✓          | Supported values are: `ID_FROM_CLIENT`, `ID_FROM_SERVER`.
 singleton   | boolean                     |            | Specifies that create operates on a singleton as opposed to a collection.
-mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
 
 ### Read
 
@@ -253,9 +253,7 @@ Replaces the contents of an existing resource. Extends [Operation](#operation).
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC update.
+No additional properties.
 
 ### Delete
 
@@ -263,9 +261,7 @@ Deletes a resource. Extends [Operation](#operation).
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC update.
+No additional properties.
 
 ### Patch
 
@@ -329,7 +325,6 @@ _resourceSchema_ and Patch-operation being performed:
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 operations  | String[]                    | ✓          | Set of supported patch operations. Supported values are:`ADD`, `REMOVE`, `REPLACE`, `INCREMENT`, `MOVE`, `COPY`, `TRANSFORM`.
-mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC update.
 
 ### Action
 

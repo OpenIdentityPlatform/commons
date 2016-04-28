@@ -44,8 +44,4 @@ import java.lang.annotation.Target;
 public @interface Delete {
     /** Describe the standard operation details of this action. */
     Operation operationDescription();
-    /**
-     * Whether MVCC style requests are supported.
-     */
-    boolean mvccSupported();
 }

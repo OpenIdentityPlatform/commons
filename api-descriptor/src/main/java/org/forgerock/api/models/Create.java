@@ -30,7 +30,6 @@ import org.forgerock.api.enums.CreateMode;
 public final class Create extends Operation {
 
     private final CreateMode mode;
-    private final Boolean mvccSupported;
     private final boolean singleton;
 
     /**
@@ -41,11 +40,10 @@ public final class Create extends Operation {
     private Create(Builder builder) {
         super(builder);
         this.mode = builder.mode;
-        this.mvccSupported = builder.mvccSupported;
         this.singleton = builder.singleton;
 
-        if (mode == null || mvccSupported == null) {
-            throw new ApiValidationException("mode and mvccSupported required");
+        if (mode == null) {
+            throw new ApiValidationException("mode required");
         }
     }
 
@@ -56,15 +54,6 @@ public final class Create extends Operation {
      */
     public CreateMode getMode() {
         return mode;
-    }
-
-    /**
-     * Informs if MVCC is supported.
-     *
-     * @return {@code true} if MVCC is supported and {@code false} otherwise
-     */
-    public boolean isMvccSupported() {
-        return mvccSupported;
     }
 
     /**
@@ -114,7 +103,6 @@ public final class Create extends Operation {
         return create()
                 .detailsFromAnnotation(create.operationDescription(), descriptor, relativeType)
                 .mode(instanceOperations ? ID_FROM_CLIENT : ID_FROM_SERVER)
-                .mvccSupported(create.mvccSupported())
                 .build();
     }
 
@@ -124,23 +112,12 @@ public final class Create extends Operation {
     public static final class Builder extends Operation.Builder<Builder> {
 
         private CreateMode mode;
-        private Boolean mvccSupported;
         private boolean singleton;
 
         private Builder() {
             super();
         }
 
-        /**
-         * Setter for MVCC-supported flag.
-         *
-         * @param mvccSupported Whether this resource supports MVCC
-         * @return Builder
-         */
-        public Builder mvccSupported(boolean mvccSupported) {
-            this.mvccSupported = mvccSupported;
-            return this;
-        }
 
         /**
          * Setter for create-mode.

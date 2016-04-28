@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Tests the beans and builders against the markdown document
+ * Tests the beans and builders against the markdown document.
  */
 public class SchemaTest {
 
@@ -38,7 +38,7 @@ public class SchemaTest {
     public static final String ARRAY_CLASS_NAME_FORMAT = "[L%s";
     private MarkdownReader mdReader;
     private List<TypeDescriptor> typeDescriptors;
-    private static final String NO_SUCH_METHOD_EXCEPTION_MESSAGE = "# %s(%s) method not available in the schema.";
+    private static final String NO_SUCH_METHOD_EXCEPTION_MESSAGE = "# %s(%s) method not available in %s type.";
     private static final String MAP_PARAMETER_TYPE_MESSAGE = "java.util.Map<java.lang.String,%s>";
     private static final Map<String, Class<?>> MAP_KEY_TYPES = new HashMap<String, Class<?>>() { {
             put("VersionedPath", Version.class);
@@ -65,7 +65,7 @@ public class SchemaTest {
                 MarkdownReader.API_DESCRIPTION_BEANS_PACKAGE + typeDescriptor.getName() + "$Builder");
         Method[] methods = builderClass.getMethods();
         checkSuperclass(typeDescriptor);
-        assertThat(checkMethodNamesAndParameters(methods, typeDescriptor.getProperties()));
+        assertThat(checkMethodNamesAndParameters(methods, typeDescriptor.getProperties(), typeDescriptor.getName()));
     }
 
     private void checkSuperclass(TypeDescriptor typeDescriptor) throws ClassNotFoundException {
@@ -79,12 +79,12 @@ public class SchemaTest {
         }
     }
 
-    private boolean checkMethodNamesAndParameters(Method[] methods, List<PropertyRecord> properties)
+    private boolean checkMethodNamesAndParameters(Method[] methods, List<PropertyRecord> properties, String typeName)
             throws NoSuchMethodException, ClassNotFoundException {
         for (PropertyRecord property : properties) {
             String methodName = isMapType(property) ? PUT : property.getKey();
             Method method = findMethod(methods, methodName);
-            checkIfMethodAvailable(property, method);
+            checkIfMethodAvailable(property, method, typeName);
         }
         return true;
     }
@@ -93,20 +93,20 @@ public class SchemaTest {
         return property.getKey().contains("*") || property.getKey().contains("[");
     }
 
-    private void checkIfMethodAvailable(PropertyRecord property, Method method)
+    private void checkIfMethodAvailable(PropertyRecord property, Method method, String typeName)
             throws NoSuchMethodException, ClassNotFoundException {
         if (method == null) {
             throw new NoSuchMethodException(
-                    String.format(NO_SUCH_METHOD_EXCEPTION_MESSAGE, property.getKey(), property.getType()));
+                    String.format(NO_SUCH_METHOD_EXCEPTION_MESSAGE, property.getKey(), property.getType(), typeName));
         } else if (!method.getName().equalsIgnoreCase(PUT)
                 && !isValidSimpleType(method, property.getType(), property.isEnumType())) {
             throw new NoSuchMethodException(
-                    String.format(NO_SUCH_METHOD_EXCEPTION_MESSAGE, property.getKey(), property.getType()));
+                    String.format(NO_SUCH_METHOD_EXCEPTION_MESSAGE, property.getKey(), property.getType(), typeName));
         } else if (method.getName().equalsIgnoreCase(PUT)
                 && !isValidMapType(method, property.getType())) {
             throw new NoSuchMethodException(
                     String.format(NO_SUCH_METHOD_EXCEPTION_MESSAGE, PUT,
-                            String.format(MAP_PARAMETER_TYPE_MESSAGE, property.getType())));
+                            String.format(MAP_PARAMETER_TYPE_MESSAGE, property.getType(), typeName)));
         }
     }
 

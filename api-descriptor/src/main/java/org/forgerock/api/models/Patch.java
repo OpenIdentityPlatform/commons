@@ -27,7 +27,6 @@ import org.forgerock.api.enums.PatchOperation;
 public final class Patch extends Operation {
 
     private final PatchOperation[] operations;
-    private final Boolean mvccSupported;
 
     /**
      * Protected contstructor of the Patch operation.
@@ -36,11 +35,10 @@ public final class Patch extends Operation {
      */
     private Patch(Builder builder) {
         super(builder);
-        this.mvccSupported = builder.mvccSupported;
         this.operations = builder.operations;
 
-        if (isEmpty(operations) || mvccSupported == null) {
-            throw new ApiValidationException("operations and mvccSupported required");
+        if (isEmpty(operations)) {
+            throw new ApiValidationException("operations required");
         }
     }
 
@@ -51,15 +49,6 @@ public final class Patch extends Operation {
      */
     public PatchOperation[] getOperations() {
         return operations;
-    }
-
-    /**
-     * Informs if MVCC is supported.
-     *
-     * @return {@code true} if MVCC is supported and {@code false} otherwise
-     */
-    public boolean isMvccSupported() {
-        return mvccSupported;
     }
 
     /**
@@ -92,7 +81,6 @@ public final class Patch extends Operation {
             Class<?> relativeType) {
         return patch()
                 .detailsFromAnnotation(patch.operationDescription(), descriptor, relativeType)
-                .mvccSupported(patch.mvccSupported())
                 .operations(patch.operations())
                 .build();
     }
@@ -104,7 +92,6 @@ public final class Patch extends Operation {
     public static final class Builder extends Operation.Builder<Builder> {
 
         private PatchOperation[] operations;
-        private Boolean mvccSupported;
 
         private Builder() {
             super();
@@ -118,17 +105,6 @@ public final class Patch extends Operation {
          */
         public Builder operations(PatchOperation... operations) {
             this.operations = operations;
-            return this;
-        }
-
-        /**
-         * Setter for MVCC-supported flag.
-         *
-         * @param mvccSupported Whether this resource supports MVCC
-         * @return Builder
-         */
-        public Builder mvccSupported(boolean mvccSupported) {
-            this.mvccSupported = mvccSupported;
             return this;
         }
 

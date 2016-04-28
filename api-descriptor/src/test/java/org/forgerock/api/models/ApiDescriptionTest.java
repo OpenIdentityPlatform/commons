@@ -87,10 +87,12 @@ public class ApiDescriptionTest {
 
         final Resource resourceV1 = Resource.resource()
                 .action(action1)
+                .mvccSupported(true)
                 .build();
         final Resource resourceV2 = Resource.resource()
                 .action(action1)
                 .action(action2)
+                .mvccSupported(true)
                 .build();
 
         final VersionedPath versionedPath = VersionedPath.versionedPath()

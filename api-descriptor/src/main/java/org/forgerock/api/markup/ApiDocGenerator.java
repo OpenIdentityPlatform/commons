@@ -292,6 +292,8 @@ public class ApiDocGenerator {
         final String namespace = normalizeName(parentNamespace, "resource");
         final AsciiDoc resourceDoc = asciiDoc();
 
+        outputMvccSupport(resource.isMvccSupported(), resourceDoc);
+
         final String descriptionFilename = outputDescriptionBlock(resource.getDescription(), namespace);
         resourceDoc.include(descriptionFilename);
 
@@ -369,7 +371,6 @@ public class ApiDocGenerator {
         operationDoc.include(descriptionFilename);
 
         outputStability(create.getStability(), operationDoc);
-        outputMvccSupport(create.isMvccSupported(), operationDoc);
         outputParameters(create.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, false, operationDoc);
         outputCreateMode(create.getMode(), operationDoc);
@@ -429,7 +430,6 @@ public class ApiDocGenerator {
         operationDoc.include(descriptionFilename);
 
         outputStability(update.getStability(), operationDoc);
-        outputMvccSupport(update.isMvccSupported(), operationDoc);
         outputParameters(update.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, false, operationDoc);
         outputErrors(update.getErrors(), namespace, operationDoc);
@@ -459,7 +459,6 @@ public class ApiDocGenerator {
         operationDoc.include(descriptionFilename);
 
         outputStability(delete.getStability(), operationDoc);
-        outputMvccSupport(delete.isMvccSupported(), operationDoc);
         outputParameters(delete.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, true, operationDoc);
         outputErrors(delete.getErrors(), namespace, operationDoc);
@@ -489,7 +488,6 @@ public class ApiDocGenerator {
         operationDoc.include(descriptionFilename);
 
         outputStability(patch.getStability(), operationDoc);
-        outputMvccSupport(patch.isMvccSupported(), operationDoc);
         outputParameters(patch.getParameters(), namespace, operationDoc);
         outputResourceEntity(resourceAnchor, true, operationDoc);
         outputSupportedPatchOperations(patch.getOperations(), operationDoc);
@@ -706,7 +704,7 @@ public class ApiDocGenerator {
         if (mvccSupported) {
             final AsciiDoc blockDoc = asciiDoc()
                     .blockTitle("Support For MVCC")
-                    .rawText("This operation supports MVCC.");
+                    .rawText("This service supports MVCC.");
             doc.rawParagraph(blockDoc.toString());
         }
     }

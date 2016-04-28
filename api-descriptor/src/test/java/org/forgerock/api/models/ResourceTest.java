@@ -67,18 +67,14 @@ public class ResourceTest {
                 .build();
         create = Create.create()
                 .mode(CreateMode.ID_FROM_SERVER)
-                .mvccSupported(true)
                 .build();
         read = Read.read()
                 .build();
         update = Update.update()
-                .mvccSupported(true)
                 .build();
         delete = Delete.delete()
-                .mvccSupported(true)
                 .build();
         patch = Patch.patch()
-                .mvccSupported(true)
                 .operations(PatchOperation.ADD, PatchOperation.COPY)
                 .build();
         action1 = Action.action()
@@ -116,6 +112,7 @@ public class ResourceTest {
                 .action(action2)
                 .query(query1)
                 .query(query2)
+                .mvccSupported(true)
                 .build();
 
         assertTestBuilder(resource);
@@ -136,6 +133,7 @@ public class ResourceTest {
                 .patch(patch)
                 .actions(asList(action1, action2))
                 .queries(asList(query1, query2))
+                .mvccSupported(true)
                 .build();
 
         assertTestBuilder(resource);
@@ -147,6 +145,7 @@ public class ResourceTest {
                 .description(description)
                 .resourceSchema(schema)
                 .operations(create, read, update, delete, patch, action1, action2, query1, query2)
+                .mvccSupported(true)
                 .build();
 
         assertTestBuilder(resource);
@@ -162,6 +161,7 @@ public class ResourceTest {
         assertThat(resource.getPatch()).isEqualTo(patch);
         assertThat(resource.getActions()).contains(action1, action2);
         assertThat(resource.getQueries()).contains(query1, query2);
+        assertThat(resource.isMvccSupported()).isTrue();
     }
 
     @Test
@@ -181,9 +181,10 @@ public class ResourceTest {
         assertThat(action.getParameters()).isEmpty();
         assertThat(descriptor.getErrors().getErrors()).isEmpty();
         assertThat(descriptor.getDefinitions().getDefinitions()).isEmpty();
+        assertThat(resource.isMvccSupported()).isTrue();
     }
 
-    @RequestHandler
+    @RequestHandler(mvccSupported = true)
     private static final class SimpleAnnotatedHandler {
         @org.forgerock.api.annotations.Action(
                 operationDescription = @org.forgerock.api.annotations.Operation)
@@ -197,12 +198,16 @@ public class ResourceTest {
         ApiDescription descriptor = createApiDescription();
         final Resource resource = fromAnnotatedType(ReferencedSchemaHandler.class, SINGLETON_RESOURCE, descriptor);
         assertThat(resource.getRead()).isNotNull();
+        assertThat(resource.isMvccSupported()).isTrue();
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getResourceSchema().getReference().getValue()).isEqualTo("#/definitions/frapi:response");
         assertThat(descriptor.getDefinitions().getDefinitions()).hasSize(1).containsKeys("frapi:response");
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = IdentifiedResponse.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = IdentifiedResponse.class),
+            mvccSupported = true)
     private static final class ReferencedSchemaHandler {
         @org.forgerock.api.annotations.Read(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -218,12 +223,16 @@ public class ResourceTest {
         ApiDescription descriptor = createApiDescription();
         Resource resource = Resource.fromAnnotatedType(ReferencedErrorHandler.class, SINGLETON_RESOURCE, descriptor);
         assertThat(resource.getRead()).isNotNull();
+        assertThat(resource.isMvccSupported()).isTrue();
         assertThat(resource.getRead().getErrors()).hasSize(1);
         assertThat(resource.getRead().getErrors()[0].getReference().getValue()).isEqualTo("#/errors/frapi:myerror");
         assertThat(descriptor.getErrors().getErrors()).hasSize(1).containsKeys("frapi:myerror");
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = IdentifiedResponse.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = IdentifiedResponse.class),
+            mvccSupported = true)
     private static final class ReferencedErrorHandler {
         @org.forgerock.api.annotations.Read(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -243,8 +252,8 @@ public class ResourceTest {
                 descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getCreate()).isNotNull();
+        assertThat(resource.isMvccSupported()).isTrue();
         Create create = resource.getCreate();
-        assertThat(create.isMvccSupported()).isTrue();
         assertThat(create.getDescription()).isEqualTo("A create resource operation.");
         assertThat(create.getErrors()).hasSize(2);
         assertThat(create.getParameters()).hasSize(1);
@@ -253,7 +262,10 @@ public class ResourceTest {
         assertThat(create.getMode()).isEqualTo(CreateMode.ID_FROM_SERVER);
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = Response.class),
+            mvccSupported = true)
     private static final class CreateAnnotatedHandler {
         @org.forgerock.api.annotations.Create(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -271,8 +283,8 @@ public class ResourceTest {
                         },
                         locales = {"en-GB", "en-US"},
                         stability = Stability.EVOLVING
-                ),
-                mvccSupported = true)
+                )
+        )
         public void create() {
 
         }
@@ -284,13 +296,13 @@ public class ResourceTest {
         fromAnnotatedType(ResourceSchemaRequiredAnnotatedHandler.class, SINGLETON_RESOURCE, descriptor);
     }
 
-    @RequestHandler
+    @RequestHandler(mvccSupported = true)
     private static final class ResourceSchemaRequiredAnnotatedHandler {
         @org.forgerock.api.annotations.Create(
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "A create resource operation."
-                ),
-                mvccSupported = true)
+                )
+        )
         public void create() {
 
         }
@@ -302,6 +314,7 @@ public class ResourceTest {
         final Resource resource = fromAnnotatedType(ReadAnnotatedHandler.class, SINGLETON_RESOURCE, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getRead()).isNotNull();
+        assertThat(resource.isMvccSupported()).isTrue();
         Read read = resource.getRead();
         assertThat(read.getDescription()).isEqualTo("A read resource operation.");
         assertThat(read.getErrors()).hasSize(0);
@@ -310,7 +323,10 @@ public class ResourceTest {
         assertThat(read.getStability()).isEqualTo(Stability.STABLE);
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = Response.class),
+            mvccSupported = true)
     private static final class ReadAnnotatedHandler {
         @org.forgerock.api.annotations.Read(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -327,8 +343,8 @@ public class ResourceTest {
         final Resource resource = fromAnnotatedType(UpdateAnnotatedHandler.class, SINGLETON_RESOURCE, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getUpdate()).isNotNull();
+        assertThat(resource.isMvccSupported()).isTrue();
         Update update = resource.getUpdate();
-        assertThat(update.isMvccSupported()).isTrue();
         assertThat(update.getDescription()).isEqualTo("An update resource operation.");
         assertThat(update.getErrors()).hasSize(0);
         assertThat(update.getParameters()).hasSize(0);
@@ -336,13 +352,16 @@ public class ResourceTest {
         assertThat(update.getStability()).isEqualTo(Stability.STABLE);
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = Response.class),
+            mvccSupported = true)
     private static final class UpdateAnnotatedHandler {
         @org.forgerock.api.annotations.Update(
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "An update resource operation."
-                ),
-                mvccSupported = true)
+                )
+        )
         public void update() {
 
         }
@@ -354,8 +373,8 @@ public class ResourceTest {
         final Resource resource = fromAnnotatedType(DeleteAnnotatedHandler.class, SINGLETON_RESOURCE, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getDelete()).isNotNull();
+        assertThat(resource.isMvccSupported()).isTrue();
         Delete delete = resource.getDelete();
-        assertThat(delete.isMvccSupported()).isTrue();
         assertThat(delete.getDescription()).isEqualTo("A delete resource operation.");
         assertThat(delete.getErrors()).hasSize(0);
         assertThat(delete.getParameters()).hasSize(0);
@@ -363,13 +382,16 @@ public class ResourceTest {
         assertThat(delete.getStability()).isEqualTo(Stability.STABLE);
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = Response.class),
+            mvccSupported = true)
     private static final class DeleteAnnotatedHandler {
         @org.forgerock.api.annotations.Delete(
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "A delete resource operation."
-                ),
-                mvccSupported = true)
+                )
+        )
         public void delete() {
 
         }
@@ -381,8 +403,8 @@ public class ResourceTest {
         final Resource resource = fromAnnotatedType(PatchAnnotatedHandler.class, SINGLETON_RESOURCE, descriptor);
         assertThat(resource.getResourceSchema()).isNotNull();
         assertThat(resource.getPatch()).isNotNull();
+        assertThat(resource.isMvccSupported()).isTrue();
         Patch patch = resource.getPatch();
-        assertThat(patch.isMvccSupported()).isTrue();
         assertThat(patch.getDescription()).isEqualTo("A patch resource operation.");
         assertThat(patch.getErrors()).hasSize(0);
         assertThat(patch.getParameters()).hasSize(0);
@@ -392,13 +414,15 @@ public class ResourceTest {
         assertThat(patch.getOperations()).contains(PatchOperation.INCREMENT, PatchOperation.TRANSFORM);
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = Response.class),
+            mvccSupported = true)
     private static final class PatchAnnotatedHandler {
         @org.forgerock.api.annotations.Patch(
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "A patch resource operation."
                 ),
-                mvccSupported = true,
                 operations = {PatchOperation.INCREMENT, PatchOperation.TRANSFORM})
         public void patch() {
 
@@ -442,7 +466,7 @@ public class ResourceTest {
         return ApiDescription.apiDescription().id("frapi:test").version("1.0").build();
     }
 
-    @RequestHandler
+    @RequestHandler(mvccSupported = true)
     private static final class ActionAnnotatedHandler {
         @org.forgerock.api.annotations.Action(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -491,7 +515,7 @@ public class ResourceTest {
         }
     }
 
-    @RequestHandler
+    @RequestHandler(mvccSupported = true)
     private static final class ActionsAnnotatedHandler {
         @Actions({
                 @org.forgerock.api.annotations.Action(
@@ -585,7 +609,10 @@ public class ResourceTest {
         assertThat(query2.getSupportedSortKeys()[2]).isEqualTo("key3");
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = Response.class),
+            mvccSupported = true)
     private static final class QueryAnnotatedHandler {
         @org.forgerock.api.annotations.Query(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -638,7 +665,10 @@ public class ResourceTest {
         }
     }
 
-    @RequestHandler(resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class))
+    @RequestHandler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(
+                    fromType = Response.class),
+            mvccSupported = true)
     private static final class QueriesAnnotatedHandler {
         @Queries({
                 @org.forgerock.api.annotations.Query(
@@ -704,6 +734,7 @@ public class ResourceTest {
                 .description(description)
                 .resourceSchema(schema)
                 .operations(create, readLocal, update, delete, patch, action1, action2, query1, query2)
+                .mvccSupported(true)
                 .build();
 
         ObjectMapper mapper = new ObjectMapper();

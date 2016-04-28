@@ -561,13 +561,15 @@ public final class ResourcesTest {
         return router;
     }
 
-    @org.forgerock.api.annotations.RequestHandler
+    @org.forgerock.api.annotations.RequestHandler(mvccSupported = true)
     public static final class NoMethods {
     }
 
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
+    @org.forgerock.api.annotations.RequestHandler(
+            resourceSchema = @Schema(fromType = SchemaType.class),
+            mvccSupported = true)
     public static final class AnnotationCollection {
-        @Create(operationDescription = @Operation, mvccSupported = true)
+        @Create(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myCreate(CreateRequest request) {
             return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
         }
@@ -575,15 +577,15 @@ public final class ResourcesTest {
         public Promise<ResourceResponse, ResourceException> myRead(String id) {
             return newResultPromise(newResourceResponse("read-" + id, "1", json(object(field("result", null)))));
         }
-        @Update(operationDescription = @Operation, mvccSupported = true)
+        @Update(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request, String id) {
             return newResultPromise(newResourceResponse("update-" + id, "1", json(object(field("result", null)))));
         }
-        @Delete(operationDescription = @Operation, mvccSupported = true)
+        @Delete(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myDelete(String id) {
             return newResultPromise(newResourceResponse("delete-" + id, "1", json(object(field("result", null)))));
         }
-        @Patch(operationDescription = @Operation, mvccSupported = true)
+        @Patch(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request, String id) {
             return newResultPromise(newResourceResponse("patch-" + id, "1", json(object(field("result", null)))));
         }
@@ -609,17 +611,19 @@ public final class ResourcesTest {
         }
     }
 
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
+    @org.forgerock.api.annotations.RequestHandler(
+            resourceSchema = @Schema(fromType = SchemaType.class),
+            mvccSupported = true)
     public static final class AnnotationSingleton {
         @Read(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myRead() {
             return newResultPromise(newResourceResponse("read", "1", json(object(field("result", "read")))));
         }
-        @Update(operationDescription = @Operation, mvccSupported = true)
+        @Update(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request) {
             return newResultPromise(newResourceResponse("update", "1", json(object(field("result", null)))));
         }
-        @Patch(operationDescription = @Operation, mvccSupported = true)
+        @Patch(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request) {
             return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
         }
@@ -633,9 +637,11 @@ public final class ResourcesTest {
         }
     }
 
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
+    @org.forgerock.api.annotations.RequestHandler(
+            resourceSchema = @Schema(fromType = SchemaType.class),
+            mvccSupported = true)
     public static final class AnnotationRequestHandler {
-        @Create(operationDescription = @Operation, mvccSupported = true)
+        @Create(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myCreate(CreateRequest request) {
             return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
         }
@@ -643,15 +649,15 @@ public final class ResourcesTest {
         public Promise<ResourceResponse, ResourceException> myRead() {
             return newResultPromise(newResourceResponse("read", "1", json(object(field("result", null)))));
         }
-        @Update(operationDescription = @Operation, mvccSupported = true)
+        @Update(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myUpdate(UpdateRequest request) {
             return newResultPromise(newResourceResponse("update", "1", json(object(field("result", null)))));
         }
-        @Delete(operationDescription = @Operation, mvccSupported = true)
+        @Delete(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myDelete() {
             return newResultPromise(newResourceResponse("delete", "1", json(object(field("result", null)))));
         }
-        @Patch(operationDescription = @Operation, mvccSupported = true)
+        @Patch(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myPatch(PatchRequest request) {
             return newResultPromise(newResourceResponse("patch", "1", json(object(field("result", null)))));
         }
@@ -669,7 +675,9 @@ public final class ResourcesTest {
         }
     }
 
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
+    @org.forgerock.api.annotations.RequestHandler(
+            resourceSchema = @Schema(fromType = SchemaType.class),
+            mvccSupported = true)
     public static final class ConventionCollection {
         public Promise<ResourceResponse, ResourceException> create(CreateRequest request) {
             return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
@@ -691,7 +699,9 @@ public final class ResourcesTest {
         }
     }
 
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class))
+    @org.forgerock.api.annotations.RequestHandler(
+            resourceSchema = @Schema(fromType = SchemaType.class),
+            mvccSupported = true)
     public static final class ConventionSingleton {
         public Promise<ResourceResponse, ResourceException> read() {
             return newResultPromise(newResourceResponse("read", "1", json(object(field("result", "read")))));

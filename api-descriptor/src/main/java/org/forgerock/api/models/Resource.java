@@ -49,6 +49,7 @@ public final class Resource {
     private final Action[] actions;
     private final Query[] queries;
     private final SubResources subresources;
+    private final Boolean mvccSupported;
 
     private Resource(Builder builder) {
         this.resourceSchema = builder.resourceSchema;
@@ -61,10 +62,14 @@ public final class Resource {
         this.subresources = builder.subresources;
         this.actions = builder.actions.toArray(new Action[builder.actions.size()]);
         this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
+        this.mvccSupported = builder.mvccSupported;
 
         if (create == null && read == null && update == null && delete == null && patch == null
                 && isEmpty(actions) && isEmpty(queries)) {
             throw new ApiValidationException("At least one operation required");
+        }
+        if (mvccSupported == null) {
+            throw new ApiValidationException("mvccSupported required");
         }
     }
 
@@ -159,6 +164,15 @@ public final class Resource {
     }
 
     /**
+     * Informs if MVCC is supported.
+     *
+     * @return {@code true} if MVCC is supported and {@code false} otherwise
+     */
+    public boolean isMvccSupported() {
+        return mvccSupported;
+    }
+
+    /**
      * Create a new Builder for Resoruce.
      *
      * @return Builder
@@ -244,6 +258,7 @@ public final class Resource {
             throw new IllegalArgumentException("CRUDPQ operation(s) defined, but no resource schema declared");
         }
         builder.resourceSchema(resourceSchema);
+        builder.mvccSupported(requestHandler.mvccSupported());
         return builder.build();
     }
 
@@ -289,6 +304,7 @@ public final class Resource {
         private SubResources subresources;
         private final Set<Action> actions;
         private final Set<Query> queries;
+        private Boolean mvccSupported;
 
         /**
          * Private default constructor.
@@ -442,6 +458,17 @@ public final class Resource {
             for (Operation operation : operations) {
                 operation.allocateToResource(this);
             }
+            return this;
+        }
+
+        /**
+         * Setter for MVCC-supported flag.
+         *
+         * @param mvccSupported Whether this resource supports MVCC
+         * @return Builder
+         */
+        public Builder mvccSupported(boolean mvccSupported) {
+            this.mvccSupported = mvccSupported;
             return this;
         }
 

@@ -39,10 +39,12 @@ with (imports) {
 
     var resourceV1 = Resource.resource()
         .action(action1)
+        .mvccSupported(true)
         .build();
     var resourceV2 = Resource.resource()
         .action(action1)
         .action(action2)
+        .mvccSupported(true)
         .build();
 
     var versionedPath = VersionedPath.versionedPath()

@@ -78,9 +78,10 @@ public class ReadTest {
                 .build();
 
         // invoke allocateToResource method
-        final Resource resource = Resource.resource().operations(read).build();
+        final Resource resource = Resource.resource().operations(read).mvccSupported(true).build();
 
         assertThat(resource.getRead()).isEqualTo(read);
+        assertThat(resource.isMvccSupported()).isTrue();
 
         assertThat(read.getDescription()).isEqualTo(description);
         assertThat(read.getSupportedLocales()).contains(supportedLocales);

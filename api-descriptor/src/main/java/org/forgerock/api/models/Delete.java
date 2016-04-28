@@ -16,15 +16,11 @@
 
 package org.forgerock.api.models;
 
-import org.forgerock.api.ApiValidationException;
-
 /**
  * Class that represents the Delete operation type in API descriptor.
  *
  */
 public final class Delete extends Operation {
-
-    private final Boolean mvccSupported;
 
     /**
      * Protected contstructor of the Delete.
@@ -33,20 +29,6 @@ public final class Delete extends Operation {
      */
     private Delete(Builder builder) {
         super(builder);
-        this.mvccSupported = builder.mvccSupported;
-
-        if (mvccSupported == null) {
-            throw new ApiValidationException("mvccSupported required");
-        }
-    }
-
-    /**
-     * Informs if MVCC is supported.
-     *
-     * @return {@code true} if MVCC is supported and {@code false} otherwise
-     */
-    public boolean isMvccSupported() {
-        return mvccSupported;
     }
 
     /**
@@ -77,7 +59,6 @@ public final class Delete extends Operation {
             Class<?> relativeType) {
         return delete()
                 .detailsFromAnnotation(delete.operationDescription(), descriptor, relativeType)
-                .mvccSupported(delete.mvccSupported())
                 .build();
     }
 
@@ -86,21 +67,8 @@ public final class Delete extends Operation {
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
-        private Boolean mvccSupported;
-
         private Builder() {
             super();
-        }
-
-        /**
-         * Setter for MVCC-supported flag.
-         *
-         * @param mvccSupported Whether this resource supports MVCC
-         * @return Builder
-         */
-        public Builder mvccSupported(boolean mvccSupported) {
-            this.mvccSupported = mvccSupported;
-            return this;
         }
 
         @Override

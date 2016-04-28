@@ -188,13 +188,11 @@ public class ApiDocGeneratorTest {
         final Create createIdFromServer = Create.create()
                 .description("Default description for create (ID from server).")
                 .mode(CreateMode.ID_FROM_SERVER)
-                .mvccSupported(true)
                 .build();
 
         final Create createIdFromClient = Create.create()
                 .description("Default description for create (ID from client).")
                 .mode(CreateMode.ID_FROM_CLIENT)
-                .mvccSupported(false)
                 .singleton(true)
                 .build();
 
@@ -209,17 +207,14 @@ public class ApiDocGeneratorTest {
 
         final Update update = Update.update()
                 .description("Default description for update.")
-                .mvccSupported(true)
                 .build();
 
         final Delete delete = Delete.delete()
                 .description("Default description for delete.")
-                .mvccSupported(false)
                 .build();
 
         final Patch patch = Patch.patch()
                 .description("Default description for patch.")
-                .mvccSupported(true)
                 .operations(PatchOperation.ADD, PatchOperation.COPY)
                 .build();
 
@@ -274,6 +269,7 @@ public class ApiDocGeneratorTest {
                 .patch(patch)
                 .action(action1)
                 .queries(asList(expressionQuery, filterQuery, id1Query, id2Query))
+                .mvccSupported(true)
                 .build();
         final Resource resourceV2 = Resource.resource()
                 .description("Default description for resourceV2.")
@@ -286,6 +282,7 @@ public class ApiDocGeneratorTest {
                 .action(action1)
                 .action(action2)
                 .queries(asList(expressionQuery, filterQuery, id1Query, id2Query))
+                .mvccSupported(false)
                 .build();
 
         final Definitions definitions = Definitions.definitions()

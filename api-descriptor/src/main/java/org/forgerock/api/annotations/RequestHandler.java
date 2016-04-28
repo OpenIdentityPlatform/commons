@@ -53,4 +53,8 @@ public @interface RequestHandler {
      * of those operations are supported.
      */
     Schema resourceSchema() default @Schema;
+
+    /** Whether MVCC style requests are supported. */
+    boolean mvccSupported();
+
 }
