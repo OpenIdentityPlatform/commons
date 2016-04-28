@@ -32,7 +32,8 @@ define([
                 "org/forgerock/commons/ui/common/main/SessionManager",
                 "org/forgerock/commons/ui/common/main/i18nManager"
             ],
-            processDescription: function(event, Router, Configuration, UIUtils, CookieHelper, SessionManager, i18nManager) {
+            processDescription: function(event, Router, Configuration, UIUtils, CookieHelper, SessionManager,
+                                         i18nManager) {
                 var postSessionCheck = function () {
                         UIUtils.preloadInitialTemplates();
                         UIUtils.preloadInitialPartials();
@@ -51,13 +52,15 @@ define([
                     initLocalization();
                     // WARNING - do not use the promise returned from sendEvent as an example for using this system
                     // TODO - replace with simplified event system as per CUI-110
-                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false}).then(postSessionCheck);
+                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false})
+                        .then(postSessionCheck);
                 }, function() {
                     initLocalization();
                     if (!CookieHelper.cookiesEnabled()) {
                         location.href = "#enableCookies/";
                     }
-                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true}).then(postSessionCheck);
+                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true})
+                        .then(postSessionCheck);
                 });
             }
         },
@@ -147,7 +150,8 @@ define([
                 if(Configuration.baseView) {
                     ModuleLoader.load(Router.configuration.routes[Configuration.baseView].view).then(function (view) {
                         view.rebind();
-                        Router.navigate(Router.getLink(Router.configuration.routes[Configuration.baseView], Configuration.baseViewArgs));
+                        Router.navigate(Router.getLink(Router.configuration.routes[Configuration.baseView],
+                            Configuration.baseViewArgs));
                         Navigation.reload();
                     });
                 }
@@ -199,7 +203,8 @@ define([
                 "org/forgerock/commons/ui/common/main/SpinnerManager",
                 "org/forgerock/commons/ui/common/main/ViewManager"
             ],
-            processDescription: function(event, Configuration, ModuleLoader, Navigation, Router, SiteConfigurator, SpinnerManager, ViewManager) {
+            processDescription: function(event, Configuration, ModuleLoader, Navigation, Router, SiteConfigurator,
+                                         SpinnerManager, ViewManager) {
                 var route = event.route,
                     params = event.args,
                     callback = event.callback,
@@ -305,7 +310,7 @@ define([
             dependencies: [
                 "org/forgerock/commons/ui/common/main/Router"
             ],
-            processDescription: function(error, router) {
+            processDescription: function() {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "serviceUnavailable");
             }
         },
@@ -370,13 +375,11 @@ define([
                         if (Configuration.gotoURL && _.indexOf(["#","","#/","/#"], Configuration.gotoURL) === -1) {
                             Router.navigate(Configuration.gotoURL, {trigger: true});
                             delete Configuration.gotoURL;
+                        } else if (Router.checkRole(Router.configuration.routes["default"])) {
+                            EventManager.sendEvent(Constants.ROUTE_REQUEST, {routeName: "default", args: []});
                         } else {
-                            if (Router.checkRole(Router.configuration.routes["default"])) {
-                                EventManager.sendEvent(Constants.ROUTE_REQUEST, {routeName: "default", args: []});
-                            } else {
-                                EventManager.sendEvent(Constants.EVENT_UNAUTHORIZED);
-                                return;
-                            }
+                            EventManager.sendEvent(Constants.EVENT_UNAUTHORIZED);
+                            return;
                         }
                     } else if (ViewManager.currentDialog !== null) {
                         ModuleLoader.load(ViewManager.currentDialog).then(function (dialog) {
@@ -457,7 +460,9 @@ define([
                     delete conf.gotoURL;
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
-                    return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                    return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                        route: router.configuration.routes.login
+                    });
                 });
             }
         },
@@ -480,8 +485,6 @@ define([
             processDescription: function(event, KBAView) {
                 KBAView.deleteQuestion(event.viewId);
             }
-        }
-
-        ];
+        }];
     return obj;
 });

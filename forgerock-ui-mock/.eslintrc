@@ -14,6 +14,30 @@
          * --------------------------------------------------------------------------------
          */
 
+        "array-bracket-spacing": [2, "never"],
+        "indent": [2, 4, {
+            "SwitchCase": 1,
+            "VariableDeclarator": 1
+        }],
+        "max-len": [2, 120, 4],
+        "new-parens": 2,
+        "no-alert": 2,
+        "no-catch-shadow": 2,
+        "no-duplicate-case": 2,
+        "no-empty-character-class": 2,
+        "no-extend-native": 2,
+        "no-invalid-regexp": 2,
+        "no-irregular-whitespace": 2,
+        "no-labels": 2,
+        "no-lonely-if": 2,
+        "no-mixed-spaces-and-tabs": 2,
+        "no-multiple-empty-lines": 2,
+        "no-multi-str": 2,
+        "no-native-reassign": 2,
+        "no-trailing-spaces": 2,
+        "no-unused-vars": 2,
+        "no-void": 2,
+
         /*
          * --------------------------------------------------------------------------------
          * WARNING RULES

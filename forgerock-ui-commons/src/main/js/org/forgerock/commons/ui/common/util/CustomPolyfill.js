@@ -63,5 +63,5 @@ define([
             F.prototype = o;
             return new F();
         };
-    }    
+    }
 });

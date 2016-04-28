@@ -117,7 +117,8 @@ define([
     /**
      * Discovers differences between new and old object and invokes patch action only on attributes which are not equal.
      */
-    obj.prototype.patchEntityDifferences = function(queryParameters, oldObject, newObject, successCallback, errorCallback, noChangesCallback, errorsHandlers) {
+    obj.prototype.patchEntityDifferences = function(queryParameters, oldObject, newObject, successCallback,
+                                                    errorCallback, noChangesCallback, errorsHandlers) {
 
         var differences = this.getDifferences(oldObject, newObject);
         if(!differences.length){
@@ -126,13 +127,16 @@ define([
             }
             return;
         }
-        return this.patchEntity(queryParameters, differences, successCallback, errorCallback, noChangesCallback, errorsHandlers);
+        return this.patchEntity(queryParameters, differences, successCallback, errorCallback, noChangesCallback,
+            errorsHandlers);
     };
 
     /**
-     * Invokes patch action which modify only selected object attributes defined as PATCH action compatible JSON object {"operation": "replace", "field": "fieldname", value: "value" }
+     * Invokes patch action which modify only selected object attributes defined as PATCH action compatible JSON
+     * object {"operation": "replace", "field": "fieldname", value: "value" }
      */
-    obj.prototype.patchEntity = function(queryParameters, patchDefinition, successCallback, errorCallback, noChangesCallback, errorsHandlers) {
+    obj.prototype.patchEntity = function(queryParameters, patchDefinition, successCallback, errorCallback,
+                                         noChangesCallback, errorsHandlers) {
         //simple transformation
         var i;
         for(i = 0; i < patchDefinition.length; i++) {
@@ -155,8 +159,10 @@ define([
     /**
      *  Patches single attribute
      */
-    obj.prototype.patchEntityAttribute = function(queryParameters, attributeName, newValue, successCallback, errorCallback, noChangesCallback) {
-        return this.patchEntity(queryParameters, [{operation: "replace", field: attributeName, value: newValue}], successCallback, errorCallback, noChangesCallback);
+    obj.prototype.patchEntityAttribute = function(queryParameters, attributeName, newValue, successCallback,
+                                                  errorCallback, noChangesCallback) {
+        return this.patchEntity(queryParameters, [{operation: "replace", field: attributeName, value: newValue}],
+            successCallback, errorCallback, noChangesCallback);
     };
 
     /**

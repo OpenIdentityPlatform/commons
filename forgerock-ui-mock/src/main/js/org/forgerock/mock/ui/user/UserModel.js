@@ -27,7 +27,7 @@ define([
         UserModel;
     UserModel = AbstractModel.extend({
         // sync has to be overridden to work with localstorage; products using CREST backend shouldn't need to do so
-        sync: function (method, model, options) {
+        sync: function (method, model) {
             switch (method) {
                 case "read":
                     model.set(LocalStorage.get(mockPrefix + model.id));
@@ -42,7 +42,8 @@ define([
                         _.any(model.getProtectedAttributes(), function (protectedAttribute) {
                             return _.has(model.changedAttributes(), protectedAttribute);
                         }) &&
-                        // normally this 'currentPassword' check would be done on the backend, of course. In the mock we do it in memory
+                        // normally this 'currentPassword' check would be done on the backend, of course. In the mock
+                        // we do it in memory
                         (!_.has(model, "currentPassword") || model.currentPassword !== model.hidden.password)
                     ) { // then reset the model and display the failure message
                         previous = model.previousAttributes();
@@ -50,8 +51,11 @@ define([
                         model.set(previous);
                         EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "userProfileIncorrectPassword");
                         deferred.reject(model.toJSON());
-                    } else { // either no protected attributes have changed, or the proper current password was provided, so make the change
-                        LocalStorage.patch(mockPrefix + model.id, ObjectUtil.generatePatchSet(model.toJSON(), model.previousAttributes()));
+                    } else {
+                        // either no protected attributes have changed, or the proper current password was
+                        // provided, so make the change
+                        LocalStorage.patch(mockPrefix + model.id,
+                            ObjectUtil.generatePatchSet(model.toJSON(), model.previousAttributes()));
                         model.set(LocalStorage.get(mockPrefix + model.id));
                         deferred.resolve(model.toJSON());
                     }

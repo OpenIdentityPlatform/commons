@@ -31,7 +31,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
      * Initialises the i18next module.
      *
      * Takes the following options: serverLang, paramLang, defaultLang, and nameSpace.
-     * i18nManger with i18next will try to detect the user language and load the corresponding translation in the following order:
+     * i18nManger with i18next will try to detect the user language and load the corresponding translation in the
+     * following order:
      * 1) paramLang which is a query string parameter (&locale=fr).
      * 2) serverLang, a 2-5 character long language or locale code passed in from server. The value can be "en" or
      * "en-US" for example.
@@ -74,7 +75,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
         // return if the stored lang matches the new one.
         if (obj.lang && obj.lang === options.serverLang) {
-           return;
+            return;
         }
         obj.lang = options.serverLang;
 

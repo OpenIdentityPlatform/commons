@@ -69,9 +69,8 @@ define([
         field.off(eventsToBind);
         // restrict the handler method so that multiple simultaneous events don't trigger repeat evaluation
         field.on(eventsToBind, _.debounce(function () {
-                obj.evaluateAllValidatorsForField(field, containerElement);
-            }, 100, { 'leading': true, 'trailing': false })
-        );
+            obj.evaluateAllValidatorsForField(field, containerElement);
+        }, 100, { 'leading': true, 'trailing': false }));
     };
 
     /**
@@ -87,8 +86,7 @@ define([
         validators should be evaluated on it.
     */
     obj.evaluateAllValidatorsForField = function (element, container) {
-        var validatorsRegistered = element.attr("data-validator"),
-            validationResults = [];
+        var validatorsRegistered = element.attr("data-validator");
 
         if (validatorsRegistered) {
             // wait for all promises to be resolved from the various valiators named on the element

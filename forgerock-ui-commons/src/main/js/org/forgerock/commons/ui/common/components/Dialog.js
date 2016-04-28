@@ -81,8 +81,6 @@ define([
             }, this));
         },
 
-
-
         /**
          * Loads template from 'contentTemplate'
          */
@@ -125,7 +123,7 @@ define([
         },
 
         addTitle: function(title) {
-          this.data.dialogTitle = title;
+            this.data.dialogTitle = title;
         },
 
         getAction: function(name) {

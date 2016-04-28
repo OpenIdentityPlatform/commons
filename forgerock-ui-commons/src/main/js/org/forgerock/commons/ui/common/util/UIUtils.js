@@ -105,21 +105,18 @@ define([
         if (templateUrl) {
             return ThemeManager.getTheme().then(function (theme) {
                 var templateUrlWithPath = theme.path + templateUrl,
-                    templateSavedPath = theme.path ? templateUrlWithPath : templateUrl,
-                    compiledTemplate;
+                    templateSavedPath = theme.path ? templateUrlWithPath : templateUrl;
 
                 if (obj.templates[templateSavedPath]) {
                     return Handlebars.compile(obj.templates[templateSavedPath])(data);
+                } else if (theme.path) {
+                    return fetchAndCompileTemplate(templateUrlWithPath, templateUrlWithPath, data)
+                        .then(null, function fallBackToDefaultPath() {
+                            console.log(templateUrlWithPath + " was not found. Trying " + templateUrl);
+                            return fetchAndCompileTemplate(templateUrl, templateUrlWithPath, data);
+                        });
                 } else {
-                    if (theme.path) {
-                        return fetchAndCompileTemplate(templateUrlWithPath, templateUrlWithPath, data)
-                            .then(null, function fallBackToDefaultPath() {
-                                console.log(templateUrlWithPath + " was not found. Trying " + templateUrl);
-                                return fetchAndCompileTemplate(templateUrl, templateUrlWithPath, data);
-                            });
-                    } else {
-                        return fetchAndCompileTemplate(templateUrl, templateUrl, data);
-                    }
+                    return fetchAndCompileTemplate(templateUrl, templateUrl, data);
                 }
             });
         } else {
@@ -223,11 +220,11 @@ define([
     };
 
     $.event.special.delayedkeyup = {
-        setup: function( data, namespaces ) {
+        setup: function() {
             $(this).bind("keyup", $.event.special.delayedkeyup.handler);
         },
 
-        teardown: function( namespaces ) {
+        teardown: function() {
             $(this).unbind("keyup", $.event.special.delayedkeyup.handler);
         },
 
@@ -270,10 +267,8 @@ define([
                 if (selectedValue === map[entityName]) {
                     isSelected = true;
                 }
-            } else {
-                if (selectedKey && selectedKey === entityName) {
-                    isSelected = true;
-                }
+            } else if (selectedKey && selectedKey === entityName) {
+                isSelected = true;
             }
 
             if (isSelected) {
@@ -315,10 +310,8 @@ define([
                 if (selectedValue === map[entityName]) {
                     isSelected = true;
                 }
-            } else {
-                if (selectedKey && selectedKey !== '' && selectedKey === entityName) {
-                    isSelected = true;
-                }
+            } else if (selectedKey && selectedKey !== '' && selectedKey === entityName) {
+                isSelected = true;
             }
 
             if (entityName === '__null') {
@@ -343,7 +336,7 @@ define([
         params = { count: countValue };
         result = i18next.t(options.hash.key, params);
         return new Handlebars.SafeString(result);
-     });
+    });
 
 
     /**
@@ -366,7 +359,7 @@ define([
         }
     });
 
-    Handlebars.registerHelper('checkbox', function(map, name, options) {
+    Handlebars.registerHelper('checkbox', function(map, name) {
         var ret = "<div class='checkboxList' id='"+name+"'><ol>", idx,
             sortedMap = _.chain(map)
                             .pairs()
@@ -374,7 +367,9 @@ define([
                             .value();
 
         for(idx=0;idx<sortedMap.length;idx++) {
-            ret += '<li><input type="checkbox" name="'+ name +'" value="'+ sortedMap[idx][0] +'" id="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'"><label for="'+ name +'_'+ encodeURIComponent(sortedMap[idx][0]) +'">' + sortedMap[idx][1] + '</label></li>';
+            ret += '<li><input type="checkbox" name="'+ name +'" value="'+ sortedMap[idx][0] +'" id="'+ name +'_'
+                + encodeURIComponent(sortedMap[idx][0]) +'"><label for="'+ name +'_'
+                + encodeURIComponent(sortedMap[idx][0]) +'">' + sortedMap[idx][1] + '</label></li>';
         }
 
         ret += "</ol></div>";
@@ -382,11 +377,13 @@ define([
         return new Handlebars.SafeString(ret);
     });
 
-    Handlebars.registerHelper('siteImages', function(images, options) {
+    Handlebars.registerHelper('siteImages', function(images) {
         var ret = "", i;
 
         for(i = 0; i < images.length; i++) {
-            ret += '<img class="item" src="' + encodeURI(images[i]) +'" data-site-image="'+ encodeURI(images[i]) +'" />';
+            ret += '<img class="item" src="'
+                + encodeURI(images[i]) +'" data-site-image="'
+                + encodeURI(images[i]) +'" />';
         }
 
         return new Handlebars.SafeString(ret);
@@ -486,11 +483,11 @@ define([
 
     obj.loadSelectOptions = function(data, el, empty, callback) {
         if( empty === undefined || empty === true ) {
-            data = [ {
+            data = [{
                 "key" : "",
                 "value" : $.t("common.form.pleaseSelect")
-            } ].concat(data);
-            }
+            }].concat(data);
+        }
 
         el.loadSelect(data);
 
@@ -556,7 +553,7 @@ define([
                 ]
             });
         });
-     };
+    };
 
     obj.responseMessageMatch = function(error, string){
         var responseMessage = JSON.parse(error).message;
@@ -568,27 +565,29 @@ define([
     _.mixin({
 
         /**
-        * findByValues takes a collection and returns a subset made up of objects where the given property name matches a value in the list.
-        * @returns {Array} subset of made up of {Object} where there is no match between the given property name and the values in the list.
-        * @example
-        *
-        *    var collections = [
-        *        {id: 1, stack: 'am'},
-        *        {id: 2, stack: 'dj'},
-        *        {id: 3, stack: 'idm'},
-        *        {id: 4, stack: 'api'},
-        *        {id: 5, stack: 'rest'}
-        *    ];
-        *
-        *    var filtered = _.findByValues(collections, "id", [1,3,4]);
-        *
-        *    filtered = [
-        *        {id: 1, stack: 'am'},
-        *        {id: 3, stack: 'idm'},
-        *        {id: 4, stack: 'api'}
-        *    ]
-        *
-        */
+         * findByValues takes a collection and returns a subset made up of objects where the given property name
+         * matches a value in the list.
+         * @returns {Array} subset of made up of {Object} where there is no match between the given property name and
+         *                  the values in the list.
+         * @example
+         *
+         *    var collections = [
+         *        {id: 1, stack: 'am'},
+         *        {id: 2, stack: 'dj'},
+         *        {id: 3, stack: 'idm'},
+         *        {id: 4, stack: 'api'},
+         *        {id: 5, stack: 'rest'}
+         *    ];
+         *
+         *    var filtered = _.findByValues(collections, "id", [1,3,4]);
+         *
+         *    filtered = [
+         *        {id: 1, stack: 'am'},
+         *        {id: 3, stack: 'idm'},
+         *        {id: 4, stack: 'api'}
+         *    ]
+         *
+         */
         "findByValues": function(collection, property, values) {
             return _.filter(collection, function(item) {
                 return _.contains(values, item[property]);
@@ -596,18 +595,19 @@ define([
         },
 
         /**
-        * Returns subset array from a collection
-        * @returns {Array} subset of made up of {Object} where there is no match between the given property name and the values in the list.
-        * @example
-        *
-        *    var filtered = _.removeByValues(collections, "id", [1,3,4]);
-        *
-        *    filtered = [
-        *        {id: 2, stack: 'dj'},
-        *        {id: 5, stack: 'rest'}
-        *    ]
-        *
-        */
+         * Returns subset array from a collection
+         * @returns {Array} subset of made up of {Object} where there is no match between the given property name and
+         *                  the values in the list.
+         * @example
+         *
+         *    var filtered = _.removeByValues(collections, "id", [1,3,4]);
+         *
+         *    filtered = [
+         *        {id: 2, stack: 'dj'},
+         *        {id: 5, stack: 'rest'}
+         *    ]
+         *
+         */
         "removeByValues": function(collection, property, values) {
             return _.reject(collection, function(item) {
                 return _.contains(values, item[property]);
@@ -615,9 +615,9 @@ define([
         },
 
         /**
-        * isUrl checks to see if string is a valid URL
-        * @returns {Boolean}
-        */
+         * isUrl checks to see if string is a valid URL
+         * @returns {Boolean}
+         */
         "isUrl": function(string){
             var regexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
             return regexp.test(string);

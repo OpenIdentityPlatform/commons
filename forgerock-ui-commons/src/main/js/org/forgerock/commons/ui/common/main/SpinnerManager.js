@@ -28,10 +28,10 @@ define([
 
         obj.spinner = new Spinner().spin(document.getElementById('wrapper'));
         $(".spinner").position({
-                                of: $(window),
-                                my: "center center",
-                                at: "center center"
-                            });
+            of: $(window),
+            my: "center center",
+            at: "center center"
+        });
 
         if (priority && (!obj.priority || priority > obj.priority)) {
             obj.priority = priority;

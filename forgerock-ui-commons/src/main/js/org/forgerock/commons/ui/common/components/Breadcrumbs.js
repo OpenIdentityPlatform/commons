@@ -95,7 +95,8 @@ define([
          */
         push: function(name, url) {
             $(this.element).find("a:last").after(' <a href="'+url+'" class="active">' + name + '</a>');
-            $(this.element).find("a:last").before('<img src="images/navi-next.png" width="3" height="5" alt="" align="absmiddle" class="navi-next" /><span></span>');
+            $(this.element).find("a:last").before('<img src="images/navi-next.png" width="3" height="5"'
+                + ' alt="" align="absmiddle" class="navi-next" /><span></span>');
 
             this.size++;
         },

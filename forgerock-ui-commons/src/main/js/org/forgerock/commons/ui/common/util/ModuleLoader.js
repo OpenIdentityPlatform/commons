@@ -15,9 +15,8 @@
  */
 
 define([
-    "jquery",
-    "underscore"
-], function ($, _) {
+    "jquery"
+], function ($) {
 
     return {
         load: function (libPath) {
@@ -77,7 +76,8 @@ define([
                     return response !== undefined ? response : promise;
                 };
 
-            // assumes the functionToCall has two remaining (non-curried) parameters to pass into it, the success and failure handlers
+            // assumes the functionToCall has two remaining (non-curried) parameters to pass into it, the success and
+            // failure handlers
             return $.when(functionToCall(function () {
                 if (params && params.success) {
                     params.success.apply(window, arguments);

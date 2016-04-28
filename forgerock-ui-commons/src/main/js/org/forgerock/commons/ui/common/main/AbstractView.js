@@ -25,10 +25,9 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "ThemeManager",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/util/ValidatorsUtils"
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
 ], function($, _, Backbone, Configuration, Constants, EventManager, ModuleLoader, Router, ThemeManager, UIUtils,
-            ValidatorsManager, ValidatorsUtils) {
+            ValidatorsManager) {
     /**
      * @exports org/forgerock/commons/ui/common/main/AbstractView
      */
@@ -128,11 +127,11 @@ define([
                         return true;
                     } else if (self.route === Router.configuration.routes.login) {
                         /**
-                        * Determines if the current route is a login route, in which case allow the route  to execute.
-                        * This is due to OpenAM's requirement for two views rendering being rendered at the same time (an
-                        * arbitrary view and a session expiry login dialog view layered above) where the route and the hash
-                        * don't match.
-                        */
+                         * Determines if the current route is a login route, in which case allow the route  to execute.
+                         * This is due to OpenAM's requirement for two views rendering being rendered at the same time
+                         * (an arbitrary view and a session expiry login dialog view layered above) where the route and
+                         * the hash don't match.
+                         */
                         return true;
                     } else {
                         return Router.getCurrentHash().replace(/^#/, '').match(self.route.url);
@@ -172,10 +171,10 @@ define([
 
 
         /**
-            This is the default implementation of the function used to reflect that
-            a given field has passed validation. It is invoked via a the event system,
-            and can be overridden per-view as needed.
-        */
+         * This is the default implementation of the function used to reflect that
+         * a given field has passed validation. It is invoked via a the event system,
+         * and can be overridden per-view as needed.
+         */
         validationSuccessful: function (event) {
             validationStarted(event)
             .then(function (input) {
@@ -189,27 +188,32 @@ define([
         },
 
         /**
-            This is the default implementation of the function used to reflect that
-            a given field has failed validation. It is invoked via a the event system,
-            and can be overridden per-view as needed.
-
-            @param {object} details - "failures" entry lists all messages (localized) associated with this validation failure
-        */
+         * This is the default implementation of the function used to reflect that
+         * a given field has failed validation. It is invoked via a the event system,
+         * and can be overridden per-view as needed.
+         *
+         * @param {object} details - "failures" entry lists all messages (localized) associated with this validation
+         *                           failure
+         */
         validationFailed: function (event, details) {
             validationStarted(event)
             .then(function (input) {
                 input.parents(".form-group").addClass('has-feedback has-error');
                 if (input.data()["bs.popover"]) {
-                    input.data('bs.popover').options.content = '<i class="fa fa-exclamation-circle"></i> ' + details.failures.join('<br><i class="fa fa-exclamation-circle"></i> ');
+                    input.data('bs.popover').options.content = '<i class="fa fa-exclamation-circle"></i> '
+                        + details.failures.join('<br><i class="fa fa-exclamation-circle"></i> ');
                 } else {
                     input.popover({
                         validationMessage: details.failures,
                         animation: false,
-                        content: '<i class="fa fa-exclamation-circle"></i> ' + details.failures.join('<br><i class="fa fa-exclamation-circle"></i> '),
+                        content: '<i class="fa fa-exclamation-circle"></i> '
+                        + details.failures.join('<br><i class="fa fa-exclamation-circle"></i> '),
                         trigger:'focus hover',
                         placement:'top',
                         html: 'true',
-                        template: '<div class="popover popover-error help-block" role="tooltip"><div class="arrow"></div><h3 class="popover-title"></h3><div class="popover-content"></div></div>'
+                        template: '<div class="popover popover-error help-block" role="tooltip">' +
+                            '<div class="arrow"></div><h3 class="popover-title"></h3>' +
+                            '<div class="popover-content"></div></div>'
                     });
                 }
                 if (input.is(":focus")) {
@@ -221,7 +225,7 @@ define([
         },
 
         // legacy; needed here to prevent breakage of views which have an event registered for this function
-        onValidate: function(event, input, msg, validatorType) {
+        onValidate: function() {
             console.warn("Deprecated use of onValidate method; Change to validationSuccessful / validationFailed");
         }
     });

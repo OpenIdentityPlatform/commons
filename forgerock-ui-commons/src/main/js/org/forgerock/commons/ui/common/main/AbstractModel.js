@@ -28,7 +28,8 @@ define([
         idAttribute: "_id",
         additionalParameters: {},
         /**
-         * @returns {string} The multiversion concurrency control revision associated with this object, or "*" if undefined
+         * @returns {string} The multiversion concurrency control revision associated with this object, or "*" if
+         * undefined
          */
         getMVCCRev : function () {
             return this.get("_rev") || "*";
@@ -115,7 +116,8 @@ define([
                         {
                             "url" : model.url + "/" + model.id + "?" + $.param(model.additionalParameters),
                             "type": "PATCH",
-                            "data": JSON.stringify(ObjectUtil.generatePatchSet(model.toJSON(), model.previousAttributes())),
+                            "data": JSON.stringify(ObjectUtil.generatePatchSet(model.toJSON(),
+                                model.previousAttributes())),
                             "headers": {
                                 "If-Match": model.getMVCCRev()
                             }

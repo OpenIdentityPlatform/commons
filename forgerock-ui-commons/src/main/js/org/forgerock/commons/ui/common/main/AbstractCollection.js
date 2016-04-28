@@ -48,7 +48,8 @@ define([
             passed in, it will default to NONE
         */
         setTotalPagedResultsPolicy: function (policy) {
-            this.state.totalPagedResultsPolicy = (_.indexOf(["ESTIMATE","NONE","EXACT"], policy) !== -1) ? policy : "NONE";
+            this.state.totalPagedResultsPolicy = (_.indexOf(["ESTIMATE","NONE","EXACT"], policy) !== -1)
+                ? policy : "NONE";
             return this;
         },
 
@@ -64,13 +65,16 @@ define([
             return (this.getPagingType() === "offset" && this.state.currentPage >= 1);
         },
         hasNext: function () {
-            return  (this.getPagingType() === "cookie" && this.state.pagedResultsCookie !== null) ||
-                    (this.getPagingType() === "offset" && this.state.totalRecords === null) || // when we don't have a total, assume there are more results
-                    (this.getPagingType() === "offset" && this.state.totalRecords >= ((this.state.currentPage+1) * this.state.pageSize));
+            return (this.getPagingType() === "cookie" && this.state.pagedResultsCookie !== null) ||
+                // when we don't have a total, assume there are more results
+                (this.getPagingType() === "offset" && this.state.totalRecords === null) ||
+                (this.getPagingType() === "offset"
+                    && this.state.totalRecords >= ((this.state.currentPage+1) * this.state.pageSize));
         },
         sync: function (method, collection, options) {
             if (method === "read") {
-                delete options.data.order; // BackbonePaginator seems to insist that this field be included anytime sorting is performed.
+                // BackbonePaginator seems to insist that this field be included anytime sorting is performed.
+                delete options.data.order;
                 options.processData = false;
 
                 options.error = function (response) {
@@ -144,7 +148,8 @@ define([
             }
 
             // totalPagedResults may not be defined in the response, depending on the policy
-            this.state.totalRecords = _.isFinite(resp.totalPagedResults) && resp.totalPagedResults > -1 ? resp.totalPagedResults : null;
+            this.state.totalRecords = _.isFinite(resp.totalPagedResults) && resp.totalPagedResults > -1
+                ? resp.totalPagedResults : null;
 
             if (!this.state.totalPages && this.state.totalRecords) {
                 this.state.totalPages = Math.ceil(this.state.totalRecords / this.state.pageSize);

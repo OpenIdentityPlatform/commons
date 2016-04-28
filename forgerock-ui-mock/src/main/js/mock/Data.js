@@ -14,22 +14,22 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
- define([
-     "lodash",
-     "org/forgerock/commons/ui/common/main/Configuration",
-     "org/forgerock/mock/ui/common/main/LocalStorage"
- ], function (_, Configuration, LocalStorage) {
+define([
+    "lodash",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/mock/ui/common/main/LocalStorage"
+], function (_, Configuration, LocalStorage) {
     return function (server) {
 
-    var kbaQuestions = {
-          "1": {
-            "en": "What's your favorite color?",
-            "en_GB": "What's your favorite colour?",
-            "fr": "Quelle est votre couleur préférée?"
-          },
-          "2": {
-            "en": "Who was your first employer?"
-          }
+        var kbaQuestions = {
+            "1": {
+                "en": "What's your favorite color?",
+                "en_GB": "What's your favorite colour?",
+                "fr": "Quelle est votre couleur préférée?"
+            },
+            "2": {
+                "en": "Who was your first employer?"
+            }
         };
 
         server.respondWith(
@@ -41,7 +41,7 @@
                     "Content-Type": "application/json;charset=UTF-8"
                 },
                 JSON.stringify({
-                    "questions" : kbaQuestions
+                    "questions": kbaQuestions
                 })
             ]
         );
@@ -54,13 +54,13 @@
                     request.respond(
                         401,
                         {},
-                        JSON.stringify({"code":401,"reason":"Unauthorized","message":"Access Denied"})
+                        JSON.stringify({"code": 401, "reason": "Unauthorized", "message": "Access Denied"})
                     );
                 } else {
                     request.respond(
                         200,
                         {},
-                        JSON.stringify({"code":200,details:Configuration.loggedUser})
+                        JSON.stringify({"code": 200, details: Configuration.loggedUser})
                     );
                 }
             }
@@ -71,12 +71,13 @@
             /\/mock\/selfservice\/user\/.*/,
             function (request) {
                 var requestContent = JSON.parse(request.requestBody),
-                    headers = { "Content-Type": "application/json;charset=UTF-8" };
+                    headers = {"Content-Type": "application/json;charset=UTF-8"};
 
                 request.respond(
                     200,
                     headers,
-                    JSON.stringify(LocalStorage.patch("mock/repo/internal/user/" + Configuration.loggedUser.id, requestContent))
+                    JSON.stringify(LocalStorage.patch("mock/repo/internal/user/" + Configuration.loggedUser.id,
+                        requestContent))
                 );
             }
         );
@@ -91,19 +92,19 @@
                 },
                 JSON.stringify(
                     {
-                        "type" : "userQuery",
-                        "tag" : "initial",
-                        "requirements" : {
+                        "type": "userQuery",
+                        "tag": "initial",
+                        "requirements": {
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "description": "Find your account",
-                            "type" : "object",
-                            "required" : [
+                            "type": "object",
+                            "required": [
                                 "queryFilter"
                             ],
-                            "properties" : {
-                                "queryFilter" : {
-                                    "description" : "filter string to find account",
-                                    "type" : "string"
+                            "properties": {
+                                "queryFilter": {
+                                    "description": "filter string to find account",
+                                    "type": "string"
                                 }
                             }
                         }
@@ -118,7 +119,7 @@
             "/mock/selfservice/username?_action=submitRequirements",
             function (request) {
                 var requestContent = JSON.parse(request.requestBody),
-                    headers = { "Content-Type": "application/json;charset=UTF-8" };
+                    headers = {"Content-Type": "application/json;charset=UTF-8"};
                 switch (requestContent.token) {
                     case undefined:
                         if (_.isObject(requestContent.input) && _.isString(requestContent.input.queryFilter)) {
@@ -126,12 +127,12 @@
                                 200,
                                 headers,
                                 JSON.stringify({
-                                    "type" : "retrieveUsername",
-                                    "tag" : "end",
-                                    "additions" : {
-                                        "userName" : "test"
+                                    "type": "retrieveUsername",
+                                    "tag": "end",
+                                    "additions": {
+                                        "userName": "test"
                                     },
-                                    "status" : {
+                                    "status": {
                                         "success": true
                                     }
                                 })
@@ -147,7 +148,7 @@
                                 })
                             );
                         }
-                    break;
+                        break;
                     default:
                         request.respond(
                             400,
@@ -173,19 +174,19 @@
                 },
                 JSON.stringify(
                     {
-                        "type" : "userQuery",
-                        "tag" : "initial",
-                        "requirements" : {
+                        "type": "userQuery",
+                        "tag": "initial",
+                        "requirements": {
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "description": "Find your account",
-                            "type" : "object",
-                            "required" : [
+                            "type": "object",
+                            "required": [
                                 "queryFilter"
                             ],
-                            "properties" : {
-                                "queryFilter" : {
-                                    "description" : "filter string to find account",
-                                    "type" : "string"
+                            "properties": {
+                                "queryFilter": {
+                                    "description": "filter string to find account",
+                                    "type": "string"
                                 }
                             }
                         }
@@ -199,7 +200,7 @@
             "/mock/selfservice/reset?_action=submitRequirements",
             function (request) {
                 var requestContent = JSON.parse(request.requestBody),
-                    headers = { "Content-Type": "application/json;charset=UTF-8" };
+                    headers = {"Content-Type": "application/json;charset=UTF-8"};
                 switch (requestContent.token) {
                     case undefined:
                         if (_.isObject(requestContent.input) && _.isString(requestContent.input.queryFilter)) {
@@ -208,19 +209,19 @@
                                 headers,
                                 JSON.stringify({
                                     "token": "mockToken1",
-                                    "type" : "emailValidation",
-                                    "tag" : "validateCode",
-                                    "requirements" : {
+                                    "type": "emailValidation",
+                                    "tag": "validateCode",
+                                    "requirements": {
                                         "$schema": "http://json-schema.org/draft-04/schema#",
                                         "description": "Verify email address",
-                                        "type" : "object",
-                                        "required" : [
+                                        "type": "object",
+                                        "required": [
                                             "code"
                                         ],
-                                        "properties" : {
-                                            "code" : {
-                                                "description" : "Enter code emailed to your address",
-                                                "type" : "string"
+                                        "properties": {
+                                            "code": {
+                                                "description": "Enter code emailed to your address",
+                                                "type": "string"
                                             }
                                         }
                                     }
@@ -237,39 +238,39 @@
                                 })
                             );
                         }
-                    break;
+                        break;
                     case "mockToken1":
                         if (_.isObject(requestContent.input) &&
                             _.isString(requestContent.input.code) &&
                             requestContent.input.code === "12345") {
-                                request.respond(
-                                    200,
-                                    headers,
-                                    JSON.stringify({
-                                        "type": "kbaSecurityAnswerVerificationStage",
-                                        "tag": "initial",
-                                        "requirements": {
-                                            "$schema": "http://json-schema.org/draft-04/schema#",
-                                            "description": "Answer security questions",
-                                            "type": "object",
-                                            "required": [
-                                                "answer1",
-                                                "answer2"
-                                            ],
-                                            "properties": {
-                                                "answer1": {
-                                                    "systemQuestion": kbaQuestions["1"],
-                                                    "type": "string"
-                                                },
-                                                "answer2": {
-                                                    "userQuestion": "Who is your favorite author?",
-                                                    "type": "string"
-                                                }
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "type": "kbaSecurityAnswerVerificationStage",
+                                    "tag": "initial",
+                                    "requirements": {
+                                        "$schema": "http://json-schema.org/draft-04/schema#",
+                                        "description": "Answer security questions",
+                                        "type": "object",
+                                        "required": [
+                                            "answer1",
+                                            "answer2"
+                                        ],
+                                        "properties": {
+                                            "answer1": {
+                                                "systemQuestion": kbaQuestions["1"],
+                                                "type": "string"
+                                            },
+                                            "answer2": {
+                                                "userQuestion": "Who is your favorite author?",
+                                                "type": "string"
                                             }
-                                        },
-                                        "token": "mockToken2"
-                                    })
-                                );
+                                        }
+                                    },
+                                    "token": "mockToken2"
+                                })
+                            );
                         } else {
                             request.respond(
                                 400,
@@ -281,29 +282,29 @@
                                 })
                             );
                         }
-                    break;
+                        break;
                     case "mockToken2":
                         if (_.isObject(requestContent.input) &&
                             _.isString(requestContent.input.answer1) &&
                             _.isString(requestContent.input.answer2)) {
-                                request.respond(
-                                    200,
-                                    headers,
-                                    JSON.stringify({
-                                    "token" : "mockToken3",
-                                    "type" : "resetStage",
-                                    "tag" : "initial",
-                                    "requirements" : {
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "token": "mockToken3",
+                                    "type": "resetStage",
+                                    "tag": "initial",
+                                    "requirements": {
                                         "$schema": "http://json-schema.org/draft-04/schema#",
                                         "description": "Reset password",
-                                        "type" : "object",
-                                        "required" : [
+                                        "type": "object",
+                                        "required": [
                                             "password"
                                         ],
-                                        "properties" : {
-                                            "password" : {
-                                                "description" : "Password",
-                                                "type" : "string"
+                                        "properties": {
+                                            "password": {
+                                                "description": "Password",
+                                                "type": "string"
                                             }
                                         }
                                     }
@@ -320,7 +321,7 @@
                                 })
                             );
                         }
-                    break;
+                        break;
                     case "mockToken3":
                         if (_.isObject(requestContent.input) &&
                             _.isString(requestContent.input.password)) {
@@ -328,9 +329,9 @@
                                 200,
                                 headers,
                                 JSON.stringify({
-                                    "type" : "emailValidation",
-                                    "tag" : "end",
-                                    "status" : {
+                                    "type": "emailValidation",
+                                    "tag": "end",
+                                    "status": {
                                         "success": true
                                     }
                                 })
@@ -346,7 +347,7 @@
                                 })
                             );
                         }
-                    break;
+                        break;
                     default:
                         request.respond(
                             400,
@@ -372,19 +373,19 @@
                 },
                 JSON.stringify(
                     {
-                        "type" : "emailValidation",
-                        "tag" : "initial",
-                        "requirements" : {
+                        "type": "emailValidation",
+                        "tag": "initial",
+                        "requirements": {
                             "$schema": "http://json-schema.org/draft-04/schema#",
                             "description": "Register your account",
-                            "type" : "object",
-                            "required" : [
+                            "type": "object",
+                            "required": [
                                 "mail"
                             ],
-                            "properties" : {
-                                "mail" : {
-                                    "description" : "Email address",
-                                    "type" : "string"
+                            "properties": {
+                                "mail": {
+                                    "description": "Email address",
+                                    "type": "string"
                                 }
                             }
                         }
@@ -398,49 +399,49 @@
             "/mock/selfservice/registration?_action=submitRequirements",
             function (request) {
                 var requestContent = JSON.parse(request.requestBody),
-                    headers = { "Content-Type": "application/json;charset=UTF-8" };
+                    headers = {"Content-Type": "application/json;charset=UTF-8"};
                 switch (requestContent.token) {
                     case undefined:
-                    if (_.isObject(requestContent.input) && _.isString(requestContent.input.mail)) {
-                        request.respond(
-                            200,
-                            headers,
-                            JSON.stringify({
-                                "token": "mockToken1",
-                                "type" : "emailValidation",
-                                "tag" : "validateCode",
-                                "requirements" : {
-                                    "$schema": "http://json-schema.org/draft-04/schema#",
-                                    "description": "Verify email address",
-                                    "type" : "object",
-                                    "required" : [
-                                        "code"
-                                    ],
-                                    "properties" : {
-                                        "code" : {
-                                            "description" : "Enter code emailed to your address",
-                                            "type" : "string"
+                        if (_.isObject(requestContent.input) && _.isString(requestContent.input.mail)) {
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "token": "mockToken1",
+                                    "type": "emailValidation",
+                                    "tag": "validateCode",
+                                    "requirements": {
+                                        "$schema": "http://json-schema.org/draft-04/schema#",
+                                        "description": "Verify email address",
+                                        "type": "object",
+                                        "required": [
+                                            "code"
+                                        ],
+                                        "properties": {
+                                            "code": {
+                                                "description": "Enter code emailed to your address",
+                                                "type": "string"
+                                            }
                                         }
                                     }
-                                }
-                            })
-                        );
-                    } else {
-                        request.respond(
-                            400,
-                            headers,
-                            JSON.stringify({
-                                "code": 400,
-                                "reason": "Bad Request",
-                                "message": "mail is missing"
-                            })
-                        );
-                    }
-                break;
-                case "mockToken1":
-                    if (_.isObject(requestContent.input) &&
-                        _.isString(requestContent.input.code) &&
-                        requestContent.input.code === "12345") {
+                                })
+                            );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "mail is missing"
+                                })
+                            );
+                        }
+                        break;
+                    case "mockToken1":
+                        if (_.isObject(requestContent.input) &&
+                            _.isString(requestContent.input.code) &&
+                            requestContent.input.code === "12345") {
                             request.respond(
                                 200,
                                 headers,
@@ -463,153 +464,153 @@
                                         }
                                     }
                                 })
-                        );
-                    } else {
-                        request.respond(
-                            400,
-                            headers,
-                            JSON.stringify({
-                                "code": 400,
-                                "reason": "Bad Request",
-                                "message": "Invalid code"
-                            })
-                        );
-                    }
-                break;
-                case "mockToken2":
-                    if (_.isObject(requestContent.input) &&
-                        _.isObject(requestContent.input.user)) {
-                        request.respond(
-                            200,
-                            headers,
-                            JSON.stringify({
-                              "type": "kbaSecurityAnswerDefinitionStage",
-                              "tag": "initial",
-                              "requirements": {
-                                "$schema": "http://json-schema.org/draft-04/schema#",
-                                "description": "Knowledge based questions",
-                                "type": "object",
-                                "required": [
-                                  "kba"
-                                ],
-                                "properties": {
-                                  "kba": {
-                                    "type": "array",
-                                    "minItems": 2,
-                                    "items": {
-                                      "type": "object",
-                                      "oneOf": [
-                                        {
-                                          "$ref": "#/definitions/systemQuestion"
+                            );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "Invalid code"
+                                })
+                            );
+                        }
+                        break;
+                    case "mockToken2":
+                        if (_.isObject(requestContent.input) &&
+                            _.isObject(requestContent.input.user)) {
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "type": "kbaSecurityAnswerDefinitionStage",
+                                    "tag": "initial",
+                                    "requirements": {
+                                        "$schema": "http://json-schema.org/draft-04/schema#",
+                                        "description": "Knowledge based questions",
+                                        "type": "object",
+                                        "required": [
+                                            "kba"
+                                        ],
+                                        "properties": {
+                                            "kba": {
+                                                "type": "array",
+                                                "minItems": 2,
+                                                "items": {
+                                                    "type": "object",
+                                                    "oneOf": [
+                                                        {
+                                                            "$ref": "#/definitions/systemQuestion"
+                                                        },
+                                                        {
+                                                            "$ref": "#/definitions/userQuestion"
+                                                        }
+                                                    ]
+                                                },
+                                                "questions": _.map(kbaQuestions, function (value, key) {
+                                                    return {
+                                                        "id": key,
+                                                        "question": value
+                                                    };
+                                                })
+                                            }
                                         },
-                                        {
-                                          "$ref": "#/definitions/userQuestion"
+                                        "definitions": {
+                                            "userQuestion": {
+                                                "description": "User Question",
+                                                "type": "object",
+                                                "required": [
+                                                    "customQuestion",
+                                                    "answer"
+                                                ],
+                                                "properties": {
+                                                    "customQuestion": {
+                                                        "description": "Question defined by the user",
+                                                        "type": "string"
+                                                    },
+                                                    "answer": {
+                                                        "description": "Answer to the question",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "additionalProperties": false
+                                            },
+                                            "systemQuestion": {
+                                                "description": "System Question",
+                                                "type": "object",
+                                                "required": [
+                                                    "questionId",
+                                                    "answer"
+                                                ],
+                                                "properties": {
+                                                    "questionId": {
+                                                        "description": "Id of predefined question",
+                                                        "type": "string"
+                                                    },
+                                                    "answer": {
+                                                        "description": "Answer to the referenced question",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "additionalProperties": false
+                                            }
                                         }
-                                      ]
                                     },
-                                    "questions": _.map(kbaQuestions, function (value, key) {
-                                        return {
-                                            "id" : key,
-                                            "question" : value
-                                        };
-                                    })
-                                  }
-                                },
-                                "definitions": {
-                                  "userQuestion": {
-                                    "description": "User Question",
-                                    "type": "object",
-                                    "required": [
-                                      "customQuestion",
-                                      "answer"
-                                    ],
-                                    "properties": {
-                                      "customQuestion": {
-                                        "description": "Question defined by the user",
-                                        "type": "string"
-                                      },
-                                      "answer": {
-                                        "description": "Answer to the question",
-                                        "type": "string"
-                                      }
-                                    },
-                                    "additionalProperties": false
-                                  },
-                                  "systemQuestion": {
-                                    "description": "System Question",
-                                    "type": "object",
-                                    "required": [
-                                      "questionId",
-                                      "answer"
-                                    ],
-                                    "properties": {
-                                      "questionId": {
-                                        "description": "Id of predefined question",
-                                        "type": "string"
-                                      },
-                                      "answer": {
-                                        "description": "Answer to the referenced question",
-                                        "type": "string"
-                                      }
-                                    },
-                                    "additionalProperties": false
-                                  }
-                                }
-                              },
-                              "token": "mockToken3"
-                            })
-                        );
-                    } else {
+                                    "token": "mockToken3"
+                                })
+                            );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "Missing required input"
+                                })
+                            );
+                        }
+                        break;
+                    case "mockToken3":
+                        if (_.isObject(requestContent.input) &&
+                            _.isArray(requestContent.input.kba) &&
+                            requestContent.input.kba.length >= 2) {
+                            request.respond(
+                                200,
+                                headers,
+                                JSON.stringify({
+                                    "type": "selfRegistration",
+                                    "tag": "end",
+                                    "status": {
+                                        "success": true
+                                    }
+                                })
+                            );
+                        } else {
+                            request.respond(
+                                400,
+                                headers,
+                                JSON.stringify({
+                                    "code": 400,
+                                    "reason": "Bad Request",
+                                    "message": "Missing required input"
+                                })
+                            );
+                        }
+                        break;
+                    default:
                         request.respond(
                             400,
                             headers,
                             JSON.stringify({
                                 "code": 400,
                                 "reason": "Bad Request",
-                                "message": "Missing required input"
+                                "message": "Token provided not recognized"
                             })
                         );
-                    }
-                break;
-                case "mockToken3":
-                    if (_.isObject(requestContent.input) &&
-                        _.isArray(requestContent.input.kba) &&
-                        requestContent.input.kba.length >= 2) {
-                        request.respond(
-                            200,
-                            headers,
-                            JSON.stringify({
-                                "type" : "selfRegistration",
-                                "tag" : "end",
-                                "status" : {
-                                    "success": true
-                                }
-                            })
-                        );
-                    } else {
-                        request.respond(
-                            400,
-                            headers,
-                            JSON.stringify({
-                                "code": 400,
-                                "reason": "Bad Request",
-                                "message": "Missing required input"
-                            })
-                        );
-                    }
-                break;
-                default:
-                    request.respond(
-                        400,
-                        headers,
-                        JSON.stringify({
-                            "code": 400,
-                            "reason": "Bad Request",
-                            "message": "Token provided not recognized"
-                        })
-                    );
                 }
-        });
+            });
 
     };
 });

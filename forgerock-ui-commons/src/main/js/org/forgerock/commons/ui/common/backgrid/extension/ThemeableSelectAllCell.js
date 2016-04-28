@@ -40,11 +40,11 @@ define([
         /**
          * @inheritdoc
          */
-         onChange: function () {
+        onChange: function () {
             var checked = this.$el.find("input[type=checkbox]").prop("checked");
             this.$el.parent().toggleClass("info", checked);
             this.model.trigger("backgrid:selected", this.model, checked);
-         }
+        }
     });
 
     return Backgrid.Extension.ThemeableSelectAllCell;

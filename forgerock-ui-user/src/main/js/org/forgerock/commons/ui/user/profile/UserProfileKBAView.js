@@ -91,12 +91,14 @@ define([
                 isKbaQuestion = target.hasClass("kba-questions");
                 customQuestionContainer.toggleClass("hidden", predefinedQuestion.val() !== "custom");
 
-                // below conditions check to see if a new KBA answer needs to be provided, or whether it can stay unchanged
+                // below conditions check to see if a new KBA answer needs to be provided, or whether
+                // it can stay unchanged
                 if (currentKbaInfo && currentKbaInfo[kbaPair.attr('index')]) {
                     if (predefinedQuestion.val() === "custom") {
-                        answerRequired = (currentKbaInfo[kbaPair.attr('index')].customQuestion !== customQuestionContainer.find(":input").val());
+                        answerRequired = currentKbaInfo[kbaPair.attr('index')].customQuestion
+                            !== customQuestionContainer.find(":input").val();
                     } else {
-                        answerRequired = (currentKbaInfo[kbaPair.attr('index')].questionId !== predefinedQuestion.val());
+                        answerRequired = currentKbaInfo[kbaPair.attr('index')].questionId !== predefinedQuestion.val();
                     }
                 } else {
                     answerRequired = true;
@@ -140,42 +142,43 @@ define([
                 // cannot rely upon a particular named field in the form content,
                 // so apply the logic to all fields found in the form
                 return _(formContent)
-                        .map(function (value, key) {
-                            if (_.isArray(value)) {
-                                return [
-                                    key,
-                                    _(value)
-                                        .map(function (kbaPair, index) {
-                                            var newPair = {};
+                    .map(function (value, key) {
+                        if (_.isArray(value)) {
+                            return [
+                                key,
+                                _(value)
+                                    .map(function (kbaPair, index) {
+                                        var newPair = {};
 
-                                            // deleted pairs will be hidden
-                                            if ($(form).is(":visible") && !$(form).find(".kba-pair[index="+index+"]:visible").length) {
-                                                // express their removal via an explicit undefined value in that position
-                                                return undefined;
-                                            }
+                                        // deleted pairs will be hidden
+                                        if ($(form).is(":visible")
+                                            && !$(form).find(".kba-pair[index="+index+"]:visible").length) {
+                                            // express their removal via an explicit undefined value in that position
+                                            return undefined;
+                                        }
 
-                                            if (kbaPair.answer && kbaPair.answer.length) {
-                                                newPair.answer = kbaPair.answer;
-                                            } else if (this.data.user[key] && _.isObject(this.data.user[key][index])) {
-                                                newPair.answer = this.data.user[key][index].answer;
-                                            }
+                                        if (kbaPair.answer && kbaPair.answer.length) {
+                                            newPair.answer = kbaPair.answer;
+                                        } else if (this.data.user[key] && _.isObject(this.data.user[key][index])) {
+                                            newPair.answer = this.data.user[key][index].answer;
+                                        }
 
-                                            if (kbaPair.questionId === "custom") {
-                                                newPair.customQuestion = kbaPair.customQuestion;
-                                            } else {
-                                                newPair.questionId = kbaPair.questionId;
-                                            }
-                                            return newPair;
-                                        }, this)
-                                        .compact()
-                                        .value()
-                                ];
-                            } else {
-                                return [ key, value ];
-                            }
-                        }, this)
-                        .object()
-                        .value();
+                                        if (kbaPair.questionId === "custom") {
+                                            newPair.customQuestion = kbaPair.customQuestion;
+                                        } else {
+                                            newPair.questionId = kbaPair.questionId;
+                                        }
+                                        return newPair;
+                                    }, this)
+                                    .compact()
+                                    .value()
+                            ];
+                        } else {
+                            return [key, value];
+                        }
+                    }, this)
+                    .object()
+                    .value();
             } else {
                 return UserProfileView.getFormContent.call(this, form);
             }
@@ -235,7 +238,7 @@ define([
                                  })
                              ];
                          } else {
-                             return [ key, this.data.user[key] ];
+                             return [key, this.data.user[key]];
                          }
                      }, this)
                      .object()
@@ -261,7 +264,7 @@ define([
         }
     });
 
-     UserProfileKBAView.prototype = _.extend(Object.create(UserProfileView), UserProfileKBAView.prototype);
+    UserProfileKBAView.prototype = _.extend(Object.create(UserProfileView), UserProfileKBAView.prototype);
 
     return new UserProfileKBAView();
 });

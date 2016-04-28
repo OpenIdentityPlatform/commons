@@ -152,7 +152,8 @@ define([
         options.headers["X-Requested-With"] = "XMLHttpRequest";
 
         /**
-         * Default to disabled caching for all AJAX requests. Can be overriden in the rare cases when caching AJAX is needed
+         * Default to disabled caching for all AJAX requests. Can be overriden in the rare cases when caching AJAX is
+         * needed
          */
         if (!_.has(options.headers, "Cache-Control")) {
             options.headers["Cache-Control"] = "no-cache";

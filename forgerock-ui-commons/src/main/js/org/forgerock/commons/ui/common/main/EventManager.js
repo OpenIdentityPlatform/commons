@@ -16,14 +16,12 @@
 
 define([
     "jquery",
-    "underscore",
-    "org/forgerock/commons/ui/common/util/Constants"
-], function($, _, constants) {
+    "underscore"
+], function($, _) {
 
     var obj = {},
         eventRegistry = {},
         subscriptions = {};
-
 
     obj.sendEvent = function (eventId, event) {
         return $.when.apply($,

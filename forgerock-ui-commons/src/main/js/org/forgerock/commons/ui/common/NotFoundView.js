@@ -15,16 +15,13 @@
  */
 
 define([
-    "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants"
-], function(AbstractView, validatorsManager, eventManager, constants) {
+    "org/forgerock/commons/ui/common/main/AbstractView"
+], function(AbstractView) {
     var NotFoundView = AbstractView.extend({
         template: "templates/common/404.html",
         baseTemplate: "templates/common/LoginBaseTemplate.html"
-    }); 
-    
+    });
+
     return new NotFoundView();
 });
 

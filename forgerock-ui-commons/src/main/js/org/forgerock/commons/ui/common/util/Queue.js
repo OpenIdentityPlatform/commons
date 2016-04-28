@@ -22,15 +22,15 @@ define([
      * @exports org/forgerock/commons/ui/common/util/Queue
      */
 
-     /**
-      * Constructor. Takes an optional array for initializing the queue with values
-      *
-      * @param {array} initialValues - optional array of values to start queuing.
-      */
-     var obj = function (initialValues) {
-         this._values = _.isArray(initialValues) ? initialValues : [];
-         return this;
-     };
+    /**
+     * Constructor. Takes an optional array for initializing the queue with values
+     *
+     * @param {array} initialValues - optional array of values to start queuing.
+     */
+    var obj = function (initialValues) {
+        this._values = _.isArray(initialValues) ? initialValues : [];
+        return this;
+    };
 
     /**
      * Put a new item in the queue
@@ -56,7 +56,7 @@ define([
      * @param {string} queueName - name of queue to remove from
      * @returns {Object} whatever is on the head of the queue, or undefined if nothing is available
      */
-    obj.prototype.peek = function (queueName) {
+    obj.prototype.peek = function () {
         return this._values[0];
     };
 

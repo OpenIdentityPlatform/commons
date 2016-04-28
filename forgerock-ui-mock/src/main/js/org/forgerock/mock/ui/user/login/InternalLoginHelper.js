@@ -29,7 +29,7 @@ define([
         return UserModel.getProfile(params.userName, params.password).then(successCallback,errorCallback);
     };
 
-    obj.logout = function (successCallback, errorCallback) {
+    obj.logout = function (successCallback) {
         delete conf.loggedUser;
         if (successCallback) {
             successCallback();

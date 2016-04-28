@@ -24,7 +24,8 @@ define([
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
-        cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
+        // resets the session cookie to discard old session that may still exist
+        cookieHelper.deleteCookie("session-jwt", "/", "");
         return ModuleLoader.load(obj.configuration.loginHelperClass).then(function (helper) {
             return ModuleLoader.promiseWrapper(_.bind(_.curry(helper.login)(params), helper), {
                 success: successCallback,

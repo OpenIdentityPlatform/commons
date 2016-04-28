@@ -43,11 +43,11 @@ define([
 
 
     if(obj.appConfiguration.loggerLevel !== 'debug') {
-        console.log = function(message) {};
-        console.debug = function(message) {};
-        console.info = function(message) {};
-        console.error = function(message) {};
-        console.warn = function(message) {};
+        console.log = function() {};
+        console.debug = function() {};
+        console.info = function() {};
+        console.error = function() {};
+        console.warn = function() {};
     }
 
     obj.sendConfigurationChangeInfo = function() {

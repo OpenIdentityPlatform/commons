@@ -15,11 +15,11 @@
  */
 
 define([
-], function(Constants, AbstractDelegate, configuration, eventManager) {
+], function() {
     var obj = {},
         kbaEnabled = true;
 
-    obj.getConfiguration = function(successCallback, errorCallback) {
+    obj.getConfiguration = function(successCallback) {
         // based on whatever environmental condition able to be read, set the appropriate
         // version of the UserProfileView. In this case, hard-code it to the KBA version
 

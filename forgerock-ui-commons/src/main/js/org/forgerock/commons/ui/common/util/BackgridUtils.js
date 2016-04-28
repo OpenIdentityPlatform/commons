@@ -43,7 +43,8 @@ define([
      * @param {Object} data
      * @param {array} data.containers - an array of container elements
      * @params {array} data.rows - array of the rows in the table
-     * @params {string} data.handlesClassname - the classname of the handles a use must click on to drag, omit property if the whole element should be selectable
+     * @params {string} data.handlesClassname - the classname of the handles a use must click on to drag, omit property
+     *                                          if the whole element should be selectable
      * @params {boolean} data.autoScroll [true] - if the grid should auto scroll when a row is dragged out of bounds
      * @param {Object} callback - called on row drop
      *
@@ -144,7 +145,7 @@ define([
     obj.DatetimeAgoCell = Backgrid.Cell.extend({
         className: "date-time-ago-cell",
         formatter: {
-            fromRaw: function (rawData, model) {
+            fromRaw: function (rawData) {
                 return moment(rawData).fromNow();
             }
         },
@@ -177,7 +178,8 @@ define([
 
         _.each(buttons, function (button, index) {
             if (button.href) {
-                html += ("<a href=\"" + button.href + "\"><i class=\"button-" + index + " " + button.className + "\"></i></a>");
+                html += ("<a href=\"" + button.href + "\"><i class=\"button-" + index + " " + button.className
+                + "\"></i></a>");
             } else {
                 events["click .button-" + index] = button.callback;
                 html += ("<i class=\"button-" + index + " " + button.className + "\"></i>");
@@ -241,10 +243,9 @@ define([
                 className: "smallScreenCell",
                 events: {},
                 render: function () {
-                    var html = "",
-                        filteredCols = _.reject(cols, function (c) {
-                            return c.name === "smallScreenCell";
-                        });
+                    var filteredCols = _.reject(cols, function (c) {
+                        return c.name === "smallScreenCell";
+                    });
 
                     _.each(filteredCols, _.bind(function (col) {
                         var cellView,
@@ -279,7 +280,8 @@ define([
                             }
                         } else {
                             cellWrapper = $("<p>");
-                            if (this.model.get(col.name) && this.model.get(col.name).length && !hideColumnLabels && col.label) {
+                            if (this.model.get(col.name) && this.model.get(col.name).length && !hideColumnLabels
+                                && col.label) {
                                 cellWrapper.append(label);
                             }
 

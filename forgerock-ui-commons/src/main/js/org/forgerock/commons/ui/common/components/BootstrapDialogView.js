@@ -39,8 +39,8 @@ define([
         show: function(callback) {
             var self = this;
             self.setButtons();
-            $.when(ModuleLoader.load("org/forgerock/commons/ui/common/components/BootstrapDialog"), self.loadContent()).then(_.bind(
-                function (BootstrapDialog, content) {
+            $.when(ModuleLoader.load("org/forgerock/commons/ui/common/components/BootstrapDialog"), self.loadContent())
+                .then(_.bind(function (BootstrapDialog, content) {
                     self.type = self.type || BootstrapDialog.TYPE_DEFAULT;
                     self.size = self.size || BootstrapDialog.SIZE_NORMAL;
 
@@ -49,8 +49,7 @@ define([
                     if (callback) {
                         callback();
                     }
-                },
-            this));
+                }, this));
         },
 
         loadContent: function() {

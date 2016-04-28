@@ -18,10 +18,8 @@ define([
     "jquery",
     "underscore",
     "backbone",
-    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
-    "org/forgerock/commons/ui/common/main/Configuration"
-
-], function($, _, Backbone, AbstractConfigurationAware, conf) {
+    "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
+], function($, _, Backbone, AbstractConfigurationAware) {
     var obj = new AbstractConfigurationAware(), Messages;
 
     obj.TYPE_SUCCESS =  "success";
@@ -58,7 +56,8 @@ define([
 
         addMessage: function(msg) {
             var i, _this = obj.messages;
-            if(!msg.message && msg.response && typeof msg.response.responseJSON === "object" && typeof msg.response.responseJSON.message === "string"){
+            if(!msg.message && msg.response && typeof msg.response.responseJSON === "object"
+                && typeof msg.response.responseJSON.message === "string"){
                 msg.message = msg.response.responseJSON.message;
             }
             for(i = 0; i < _this.list.length; i++) {
@@ -100,20 +99,20 @@ define([
             switch (this.list[0].type ){
                 case obj.TYPE_DANGER:
                     alertClass = "alert-danger";
-                break;
+                    break;
                 case obj.TYPE_SUCCESS:
                     alertClass = "alert-success";
                     alertIcon = "fa-check-circle-o";
-                break;
+                    break;
                 case obj.TYPE_WARNING:
                     alertClass = "alert-warning";
-                break;
+                    break;
                 case obj.TYPE_INFO:
                     alertClass = "alert-info";
-                break;
+                    break;
                 default:
                     alertClass = "alert-info";
-                break;
+                    break;
             }
 
             if (this.hasNavigation()) {
@@ -122,7 +121,9 @@ define([
                 _this.$el.removeClass('logged-user');
             }
 
-            this.$el.append("<div role='alert' class='alert-system alert-message alert " + alertClass + "'><i class='fa " + alertIcon + "'></i><span class='message'>" + this.list[0].message + "</span></div>");
+            this.$el.append("<div role='alert' class='alert-system alert-message alert " + alertClass
+                + "'><i class='fa " + alertIcon + "'></i><span class='message'>" + this.list[0].message
+                + "</span></div>");
             this.$el.find("div:last").fadeIn(300, function () {
                 _this.timer = window.setTimeout(_this.removeAndNext, delay);
             });

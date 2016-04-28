@@ -25,7 +25,8 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function($, _, form2js, AbstractView, AnonymousProcessDelegate, Constants, EventManager, Router, UIUtils, ValidatorsManager) {
+], function($, _, form2js, AbstractView, AnonymousProcessDelegate, Constants, EventManager, Router, UIUtils,
+            ValidatorsManager) {
 
     /**
      * Given a position in the DOM, look for children elements which comprise a
@@ -115,7 +116,7 @@ define([
 
         },
 
-        render: function(args, callback) {
+        render: function(args) {
             var params = Router.convertCurrentUrlToJSON().params;
             this.stateData = {};
 
@@ -171,13 +172,16 @@ define([
                 baseTemplateUrl = "templates/user/process/",
                 loadGenericTemplate = function (stateData) {
                     UIUtils.fillTemplateWithData(
-                        baseTemplateUrl + (_.has(response, "requirements") ? "GenericInputForm.html" : "GenericEndPage.html"),
+                        baseTemplateUrl + (_.has(response, "requirements")
+                            ? "GenericInputForm.html" : "GenericEndPage.html"),
                         stateData,
                         processStatePromise.resolve
                     );
                 },
                 attemptCustomTemplate = _.bind(function (stateData) {
-                    UIUtils.compileTemplate(baseTemplateUrl + this.processType + "/" + response.type + "-" + response.tag + ".html", stateData)
+                    var templateUrl = baseTemplateUrl + this.processType
+                        + "/" + response.type + "-" + response.tag + ".html";
+                    UIUtils.compileTemplate(templateUrl, stateData)
                         .then(function (renderedTemplate) {
                             processStatePromise.resolve(renderedTemplate);
                         }, function () {

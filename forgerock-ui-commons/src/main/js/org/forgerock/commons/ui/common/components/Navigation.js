@@ -25,7 +25,8 @@ define([
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/main/Router",
     "NavigationFilter"
-], function($, _, Backbone, AbstractConfigurationAware, AbstractView, Configuration, EventManager, ModuleLoader, Router, NavigationFilter) {
+], function($, _, Backbone, AbstractConfigurationAware, AbstractView, Configuration, EventManager, ModuleLoader,
+            Router, NavigationFilter) {
     var obj = new AbstractConfigurationAware(),
 
         getUserName = function () {
@@ -39,12 +40,14 @@ define([
         };
 
     /*
-        Navigation is configured from AppConfiguration in each forgerock application. There are several items that can be controlled and configured.
+        Navigation is configured from AppConfiguration in each forgerock application.
+        There are several items that can be controlled and configured.
 
 
         Username: Configuration of control of the username in userbar. This can be configured in two primary ways
 
-            href - Link location. If provided the username (and any additional labels) will become a link, otherwise if nothing provided it will default to a static field.
+            href - Link location. If provided the username (and any additional labels) will become a link,
+                   otherwise if nothing provided it will default to a static field.
             label - Provides a title that will sit above the username.
             secondaryLabel - Provides a secondary title that will sit below username.
 
@@ -88,7 +91,8 @@ define([
         Navigation: Besides username and userbar specific controls the general navigation items can be controlled here.
 
             role - Controls the role a user must have set for this navigation item to display
-            urls - A list of provided navigation. When tied to drop down controls drop down items. Currently this list can only go two levels deep.
+            urls - A list of provided navigation. When tied to drop down controls drop down items. Currently this list
+                   can only go two levels deep.
             name - Name of the navigation element
             icon - Icon to display with the navigation name
             url - Link location
@@ -223,12 +227,15 @@ define([
                 }
 
                 _.each(context.urls, function(navObj) {
-                    var userHasRole = _.intersection(Configuration.loggedUser.uiroles, navObj.visibleToRoles).length > 0;
+                    var roles = _.intersection(Configuration.loggedUser.uiroles, navObj.visibleToRoles),
+                        userHasRole = roles.length > 0;
                     if(navObj.visibleToRoles && !userHasRole) {
                         return;
                     }
 
-                    baseActive = self.isCurrent(navObj.url) || self.isCurrent(navObj.baseUrl) || self.childIsCurrent(navObj.urls);
+                    baseActive = self.isCurrent(navObj.url)
+                        || self.isCurrent(navObj.baseUrl)
+                        || self.childIsCurrent(navObj.urls);
 
                     self.data.topNav.push(self.buildNavElement(navObj, baseActive));
 
@@ -240,7 +247,8 @@ define([
                                 self.data.subNav.push(self.buildNavElement(subUrl, self.isCurrent(subUrl.url)));
                             });
 
-                            //Added to provide reference for responsive design submenus to appear in the correct location.
+                            // Added to provide reference for responsive design submenus to appear in the correct
+                            // location.
                             self.data.topNav[self.data.topNav.length - 1].subNav = self.data.subNav;
                         }
                     }

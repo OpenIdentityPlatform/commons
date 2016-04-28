@@ -167,16 +167,29 @@ require([
         givenName: 'Jack',
         sn: 'White',
         mail: 'white@test.com',
-        kbaInfo:[
-            {
-                "customQuestion":"What is my favorite open source identity company?",
-                "answer": {"$crypto":{"value":{"algorithm":"SHA-256","data":"LbOwzJnSKtSn2waBA/6Zv8AFaTwe74vHh9dyPaBOVnZFTCU/MsNWTfmbRcx2PM4d"},"type":"salted-hash"}}
-            },
-            {
-                "questionId":"1",
-                "answer": {"$crypto":{"value":{"algorithm":"SHA-256","data":"ht5QecQ11l4mnCBxa8TKRU7KZhhMrD6SSTxv1XJkbEUlRjGhw5Ss5WMC4diBgNme"},"type":"salted-hash"}}
+        kbaInfo:[{
+            "customQuestion":"What is my favorite open source identity company?",
+            "answer": {
+                "$crypto": {
+                    "value": {
+                        "algorithm": "SHA-256",
+                        "data": "LbOwzJnSKtSn2waBA/6Zv8AFaTwe74vHh9dyPaBOVnZFTCU/MsNWTfmbRcx2PM4d"
+                    },
+                    "type": "salted-hash"
+                }
             }
-        ]
+        }, {
+            "questionId":"1",
+            "answer": {
+                "$crypto": {
+                    "value": {
+                        "algorithm": "SHA-256",
+                        "data": "ht5QecQ11l4mnCBxa8TKRU7KZhhMrD6SSTxv1XJkbEUlRjGhw5Ss5WMC4diBgNme"
+                    },
+                    "type": "salted-hash"
+                }
+            }
+        }]
     });
 
     EventManager.sendEvent(Constants.EVENT_DEPENDENCIES_LOADED);

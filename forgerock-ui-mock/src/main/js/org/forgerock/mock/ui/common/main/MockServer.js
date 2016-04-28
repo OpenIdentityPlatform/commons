@@ -27,7 +27,7 @@ define([
     function init() {
 
         sinon.FakeXMLHttpRequest.useFilters = true;
-        sinon.FakeXMLHttpRequest.addFilter(function (method, url, async, username, password) {
+        sinon.FakeXMLHttpRequest.addFilter(function (method, url) {
             return (/((\.html)|(\.css)|(\.less)|(\.json))$/).test(url);
         });
 

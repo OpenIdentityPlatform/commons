@@ -109,7 +109,7 @@ define([
     };
 
     obj.convertCurrentUrlToJSON = function() {
-        var result = {}, parsedQueryParams;
+        var result = {};
 
         result.url = obj.getCurrentUrlBasePart();
         result.pathName = obj.normalizeSubPath(obj.getCurrentPathName());
@@ -149,7 +149,8 @@ define([
 
         if (_.isObject(route.defaults)) {
             if (_.isArray(originalParameters) && originalParameters.length) {
-                maxArgLength = (originalParameters.length >= route.defaults.length) ? originalParameters.length : route.defaults.length;
+                maxArgLength = (originalParameters.length >= route.defaults.length)
+                    ? originalParameters.length : route.defaults.length;
                 for (i=0;i<maxArgLength;i++) {
                     if (!_.isString(originalParameters[i]) && !_.isUndefined(route.defaults[i])) {
                         populatedParameters[i] = _.clone(route.defaults[i]);

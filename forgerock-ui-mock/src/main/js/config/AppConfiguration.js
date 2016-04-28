@@ -15,8 +15,7 @@
  */
 
 define([
-    "org/forgerock/commons/ui/common/util/Constants"
-], function (Constants) {
+], function () {
     return {
         moduleDefinition: [
             {
@@ -84,24 +83,24 @@ define([
                                 }
                             }
                         }
-                     },
-                     userBar: [
-                         {
-                             "id": "profile_link",
-                             "href": "#profile/details",
-                             "i18nKey": "common.user.profile"
-                         },
-                         {
-                             "id": "change_password",
-                             "href": "#profile/password",
-                             "i18nKey": "common.user.changePassword"
-                         },
-                         {
-                             "id": "logout_link",
-                             "href": "#logout/",
-                             "i18nKey": "common.form.logout"
-                         }
-                     ]
+                    },
+                    userBar: [
+                        {
+                            "id": "profile_link",
+                            "href": "#profile/details",
+                            "i18nKey": "common.user.profile"
+                        },
+                        {
+                            "id": "change_password",
+                            "href": "#profile/password",
+                            "i18nKey": "common.user.changePassword"
+                        },
+                        {
+                            "id": "logout_link",
+                            "href": "#logout/",
+                            "i18nKey": "common.form.logout"
+                        }
+                    ]
                 }
             },
             {

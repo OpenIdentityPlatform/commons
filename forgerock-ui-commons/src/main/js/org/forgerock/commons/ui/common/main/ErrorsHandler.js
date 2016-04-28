@@ -22,48 +22,49 @@ define([
     "org/forgerock/commons/ui/common/util/Constants"
 ], function(_, $, AbstractConfigurationAware, eventManager, constants) {
     var obj = new AbstractConfigurationAware();
-    
+
     obj.handleError = function(error, handlers) {
         var handler;
-        
+
         if(error.error && !error.status) {
             error.status = error.error;
         }
-        
+
         if (error.hasOwnProperty('responseText')) {
             try {
                 error.responseObj = $.parseJSON(error.responseText);
             } catch (parseErr) { /* Must not be JSON */ }
         }
-        
+
         if(handlers) {
             //find match in handlers
             handler = obj.matchError(error, handlers);
         }
-        
+
         if(!handler) {
             //find match in default handlers
             handler = obj.matchError(error, obj.configuration.defaultHandlers);
         }
-        
+
         if(handler) {
-            // conditional check needed here until calls to authentication?_action=reauthenticate and OpenAM authentication no longer produce 403 status
+            // conditional check needed here until calls to authentication?_action=reauthenticate and
+            // OpenAM authentication no longer produce 403 status
             if (error.hasOwnProperty("responseObj") && error.responseObj !== null &&
                 !(
                     (
-                        error.responseObj.code === 403 && 
+                        error.responseObj.code === 403 &&
                         (
                             error.responseObj.message === "SSO Token cannot be retrieved."
                         )
                     ) ||
                     (
-                        error.responseObj.error === 403 && 
+                        error.responseObj.error === 403 &&
                         (
                             error.responseObj.message === "Reauthentication failed"
                         )
                     ) ||
                     (
-                        error.responseObj.error === 409 && 
+                        error.responseObj.error === 409 &&
                         (
                             error.responseObj.message.match(/value to replace not found$/)
                         )
@@ -73,7 +74,7 @@ define([
                 if(handler.event) {
                     eventManager.sendEvent(handler.event, {handler: handler, error: error});
                 }
-                
+
                 if(handler.message) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, handler.message);
                 }
@@ -85,7 +86,8 @@ define([
     };
 
     /**
-     * If a generic field for comparison is defined on the handler, that field is then compared to the corresponding field on the error.
+     * If a generic field for comparison is defined on the handler, that field is then compared to the corresponding
+     * field on the error.
      *
      * If there is a status defined on the handler, it is compared to the status of the error.
      *
@@ -126,5 +128,4 @@ define([
     };
 
     return obj;
-});    
-
+});

@@ -54,15 +54,11 @@ define([
              */
             patch: function (key, data) {
                 var item = this.get(key),
-                    dataLength = data.length,
-                    i,
                     node,
                     pathParts;
 
                 if (item) {
-
                     _.each(data, function (patchEntry) {
-
                         pathParts = _.filter(patchEntry.field.split('/'), function (part) {
                             return part.length > 0;
                         });
@@ -115,10 +111,8 @@ define([
                 return delete localStorage[mockPrefix + key];
             }
         };
-
     } else {
-
-         return {
+        return {
             add: function () {
                 console.log('LocalStorage is not supported');
             },
@@ -135,7 +129,5 @@ define([
                 console.log('LocalStorage is not supported');
             }
         };
-
     }
-
 });

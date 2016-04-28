@@ -31,7 +31,7 @@ define([
         obj.callService(event.moduleClass, "updateConfigurationCallback", [event.configuration]);
     });
 
-    eventManager.registerListener(constants.EVENT_DEPENDENCIES_LOADED, function(event) {
+    eventManager.registerListener(constants.EVENT_DEPENDENCIES_LOADED, function() {
         obj.callService("org/forgerock/commons/ui/common/main/Configuration","sendConfigurationChangeInfo");
     });
 
@@ -85,7 +85,8 @@ define([
                 if(params) {
                     params = JSON.stringify(params);
                 }
-                console.warn("Unable to invoke serviceId=" + serviceId + " method=" + methodName + " params=" + params + " exception=" + exception);
+                console.warn("Unable to invoke serviceId=" + serviceId + " method=" + methodName
+                    + " params=" + params + " exception=" + exception);
             }
         );
     };

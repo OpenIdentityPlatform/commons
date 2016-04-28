@@ -21,16 +21,13 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/ModuleLoader",
-    "org/forgerock/commons/ui/common/main/Router"
-], function($, _, AbstractConfigurationAware, constants, eventManager, conf, ModuleLoader, Router) {
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
+], function($, _, AbstractConfigurationAware, constants, eventManager, conf, ModuleLoader) {
     var obj = new AbstractConfigurationAware();
 
     obj.initialized = false;
 
     eventManager.registerListener(constants.EVENT_READ_CONFIGURATION_REQUEST, function() {
-        var configurationDelegate;
-
         if (!conf.globalData) {
             conf.setProperty('globalData', {});
             conf.globalData.auth = {};
@@ -45,13 +42,13 @@ define([
 
             if (obj.configuration.remoteConfig === true) {
                 ModuleLoader.load(obj.configuration.delegate).then(function (configurationDelegate) {
-                     configurationDelegate.getConfiguration(function(config) {
-                         obj.processConfiguration(config);
-                         eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
-                     }, function() {
-                         obj.processConfiguration({});
-                         eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
-                     });
+                    configurationDelegate.getConfiguration(function(config) {
+                        obj.processConfiguration(config);
+                        eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
+                    }, function() {
+                        obj.processConfiguration({});
+                        eventManager.sendEvent(constants.EVENT_APP_INITIALIZED);
+                    });
                 });
             } else {
                 obj.processConfiguration(obj.configuration);
@@ -81,27 +78,27 @@ define([
     };
 
     obj.configurePage = function (route, params) {
-       var promise = $.Deferred();
+        var promise = $.Deferred();
 
-       if (obj.configuration.remoteConfig === true) {
-             ModuleLoader.load(obj.configuration.delegate).then(function (configurationDelegate) {
-                 if (typeof configurationDelegate.checkForDifferences === "function") {
-                     configurationDelegate.checkForDifferences(route, params).then(function (config) {
-                         if (config) {
-                             obj.processConfiguration(config);
-                         }
-                         promise.resolve();
-                     });
+        if (obj.configuration.remoteConfig === true) {
+            ModuleLoader.load(obj.configuration.delegate).then(function (configurationDelegate) {
+                if (typeof configurationDelegate.checkForDifferences === "function") {
+                    configurationDelegate.checkForDifferences(route, params).then(function (config) {
+                        if (config) {
+                            obj.processConfiguration(config);
+                        }
+                        promise.resolve();
+                    });
                 } else {
-                   promise.resolve();
+                    promise.resolve();
                 }
-             });
-       } else {
-             promise.resolve();
-       }
+            });
+        } else {
+            promise.resolve();
+        }
 
-       return promise;
-   };
+        return promise;
+    };
 
     return obj;
 });

@@ -46,25 +46,25 @@ define([
                 */
                 this.$el.find('.example').each(function(i, elem) {
 
-                    var snippet = $('.snippet')[i].innerHTML,
-                        myCodeMirror = new CodeMirror(elem, {
-                            value: snippet,
-                            mode: 'xml',
-                            lineNumbers: false,
-                            readOnly: true,
-                            lineWrapping: false
+                    var snippet = $('.snippet')[i].innerHTML;
+
+                    CodeMirror(elem, {
+                        value: snippet,
+                        mode: 'xml',
+                        lineNumbers: false,
+                        readOnly: true,
+                        lineWrapping: false
                     });
                 });
 
                 this.$el.find('.code').each(function() {
 
                     var $this = $(this),
-                        $code = $this.html(),
-                        myCodeMirrorJS;
+                        $code = $this.html();
 
                     $this.empty();
 
-                    myCodeMirrorJS = new CodeMirror(this, {
+                    CodeMirror(this, {
                         value: $code,
                         mode: 'javascript',
                         lineNumbers: true,

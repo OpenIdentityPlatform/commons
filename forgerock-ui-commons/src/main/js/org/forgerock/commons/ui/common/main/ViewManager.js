@@ -38,9 +38,7 @@ define([
      * Changes URL without triggering event.
      */
     obj.changeView = function(viewPath, args, callback, forceUpdate) {
-        var view,
-            decodedArgs = decodeArgs(args);
-
+        var decodedArgs = decodeArgs(args);
 
         if(obj.currentView !== viewPath || forceUpdate || !_.isEqual(obj.currentViewArgs, args)) {
             if(obj.currentDialog !== null) {

@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define([    
+define([
     "underscore",
     "placeholder",
     "org/forgerock/commons/ui/common/main/AbstractView",
@@ -22,9 +22,8 @@ define([
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function(_, placeholder, AbstractView, ModuleLoader, validatorsManager, eventManager, constants, cookieHelper, conf) {
+    "org/forgerock/commons/ui/common/util/CookieHelper"
+], function(_, placeholder, AbstractView, ModuleLoader, validatorsManager, eventManager, constants, cookieHelper) {
     var LoginView = AbstractView.extend({
         template: "templates/common/LoginTemplate.html",
         baseTemplate: "templates/common/LoginBaseTemplate.html",
@@ -44,7 +43,10 @@ define([
                 cookieHelper.deleteCookie("login");
             }
 
-            eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: this.$el.find("input[name=login]").val(), password: this.$el.find("input[name=password]").val()});
+            eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {
+                userName: this.$el.find("input[name=login]").val(),
+                password: this.$el.find("input[name=password]").val()
+            });
         },
 
         render: function(args, callback) {

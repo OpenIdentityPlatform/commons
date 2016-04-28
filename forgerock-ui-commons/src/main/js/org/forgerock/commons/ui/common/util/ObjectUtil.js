@@ -49,12 +49,12 @@ define([
                 })
                 .flatten(true)
                 .value();
-            };
+        };
 
-         return _.reduce(pointerList(originalObject), function (map, entry) {
-                  map[entry.pointer] = entry.value;
-                  return map;
-              }, {});
+        return _.reduce(pointerList(originalObject), function (map, entry) {
+            map[entry.pointer] = entry.value;
+            return map;
+        }, {});
     };
 
     /**
@@ -146,34 +146,38 @@ define([
             newPointerMap = obj.toJSONPointerMap(newObject),
             previousPointerMap = obj.toJSONPointerMap(oldObject),
             newValues = _.chain(newPointerMap)
-                         .pairs()
-                         .filter(function (p) {
-                            return previousPointerMap[p[0]] !== p[1];
-                         })
-                         .map(function (p) {
-                            var finalPathToAdd = obj.walkDefinedPath(oldObjectClosure, p[0]),
-                                operation = (obj.getValueFromPointer(oldObjectClosure, p[0]) === undefined) ? "add" : "replace";
-                            return { "operation": operation, "field": finalPathToAdd, "value": obj.getValueFromPointer(newObjectClosure, finalPathToAdd) };
-                         })
-                         // Filter out duplicates which might result from adding whole containers
-                         // Have to stringify the patch operations to do object comparisons with uniq
-                         .uniq(JSON.stringify)
-                         .value(),
+                .pairs()
+                .filter(function (p) {
+                    return previousPointerMap[p[0]] !== p[1];
+                })
+                .map(function (p) {
+                    var finalPathToAdd = obj.walkDefinedPath(oldObjectClosure, p[0]),
+                        operation = (obj.getValueFromPointer(oldObjectClosure, p[0]) === undefined) ? "add" : "replace";
+                    return {
+                        "operation": operation,
+                        "field": finalPathToAdd,
+                        "value": obj.getValueFromPointer(newObjectClosure, finalPathToAdd)
+                    };
+                })
+                // Filter out duplicates which might result from adding whole containers
+                // Have to stringify the patch operations to do object comparisons with uniq
+                .uniq(JSON.stringify)
+                .value(),
             removedValues = _.chain(previousPointerMap)
-                             .pairs()
-                             .filter(function (p) {
-                                return obj.getValueFromPointer(newObjectClosure, p[0]) === undefined;
-                             })
-                             .map(function (p) {
-                                var finalPathToRemove = obj.walkDefinedPath(newObjectClosure, p[0]);
-                                return { "operation": "remove", "field": finalPathToRemove };
-                             })
-                             // Filter out duplicates which might result from deleting whole containers
-                             // Have to stringify the patch operations to do object comparisons with uniq
-                             .uniq(JSON.stringify)
-                             .value();
+                .pairs()
+                .filter(function (p) {
+                    return obj.getValueFromPointer(newObjectClosure, p[0]) === undefined;
+                })
+                .map(function (p) {
+                    var finalPathToRemove = obj.walkDefinedPath(newObjectClosure, p[0]);
+                    return { "operation": "remove", "field": finalPathToRemove };
+                })
+                // Filter out duplicates which might result from deleting whole containers
+                // Have to stringify the patch operations to do object comparisons with uniq
+                .uniq(JSON.stringify)
+                .value();
 
-           return newValues.concat(removedValues);
+        return newValues.concat(removedValues);
     };
 
     return obj;

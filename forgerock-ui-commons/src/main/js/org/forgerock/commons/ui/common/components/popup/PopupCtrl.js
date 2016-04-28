@@ -15,7 +15,7 @@
  */
 
 define([
-	"org/forgerock/commons/ui/common/components/popup/PopupView"
+    "org/forgerock/commons/ui/common/components/popup/PopupView"
 ], function(view) {
     var obj = {};
 
@@ -36,5 +36,4 @@ define([
     };
 
     return obj;
-
-});	
+});

@@ -21,7 +21,7 @@ define([
     var obj = {};
 
     obj.init = function() {
-        $("#popup").on('mouseleave', function(event) {
+        $("#popup").on('mouseleave', function() {
             obj.hide();
         });
     };
@@ -31,7 +31,7 @@ define([
     };
 
     obj.setPositionBy = function(element) {
-        var ph, left = $(element).position().left, top = $(element).position().top, w = $(element).width(), h = $(element).height();
+        var ph, left = $(element).position().left, top = $(element).position().top, h = $(element).height();
 
         $("#popup").css('left', left);
         $("#popup").css('top', top);

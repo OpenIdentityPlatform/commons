@@ -25,15 +25,15 @@ define([
     "org/forgerock/commons/ui/common/main/SessionManager",
     "org/forgerock/commons/ui/common/main/ViewManager",
     "org/forgerock/commons/ui/common/main/AbstractView"
-], function( $, _, BootstrapDialog, UIUtils, Configuration, Constants, EventManager, SessionManager, ViewManager, AbstractView) {
+], function( $, _, BootstrapDialog, UIUtils, Configuration, Constants, EventManager, SessionManager, ViewManager,
+             AbstractView) {
     var LoginDialog = AbstractView.extend({
         template: "templates/common/LoginDialog.html",
         element: "#dialogs",
 
         render: function (options) {
             var dialogBody = $('<div id="loginDialog"></div>'),
-                authenticatedCallback = options.authenticatedCallback,
-                _this = this;
+                authenticatedCallback = options.authenticatedCallback;
 
             this.$el.find('#dialogs').append(dialogBody);
             // attaching BootstrapDialog via '#dialogs' so that it is encapsulated withing the qunit-fixture for testing
@@ -43,7 +43,7 @@ define([
                 title:  $.t("common.form.sessionExpired"),
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: dialogBody,
-                onshown: _.bind(function (dialog) {
+                onshown: _.bind(function () {
                     UIUtils.renderTemplate(
                         this.template,
                         this.$el,
@@ -65,7 +65,9 @@ define([
 
                         SessionManager.login({"userName":userName, "password":password}, function(user) {
                             Configuration.setProperty('loggedUser', user);
-                            EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
+                            EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
+                                anonymousMode: false
+                            });
                             EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedIn");
                             dialog.close();
 
