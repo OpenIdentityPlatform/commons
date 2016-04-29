@@ -46,9 +46,9 @@ Key         | Type                        | Required?  | Description
 id          | String                      | ✓          | The frURI identifier of the API Descriptor
 version     | String                      | ✓          | The version of the API.
 description | String                      |            | Short description of the API Descriptor
-definitions | [Definitions](#Definitions) |            | Locally defined schema definitions
-errors      | [Errors](#Errors)           |            | Locally defined error definitions
-paths       | [Paths](#Paths)             |            | The supported paths for this API.
+definitions | [Definitions](#definitions) |            | Locally defined schema definitions
+errors      | [Errors](#errors)           |            | Locally defined error definitions
+paths       | [Paths](#paths)             |            | The supported paths for this API.
 
 ### Definitions
 
@@ -58,7 +58,7 @@ Locally defined schema definitions, that can be referred to via JSON References.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-*           | [Schema](#Schema)           | ✓          | The schema definitions
+*           | [Schema](#schema)           | ✓          | The schema definitions
 
 ### Errors
 
@@ -68,7 +68,7 @@ Locally defined schema definitions, that can be referred to via JSON References.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-*           | [Error](#Error)             | ✓          | The error definitions
+*           | [Error](#error)             | ✓          | The error definitions
 
 ### Reference
 
@@ -82,14 +82,14 @@ $ref        | String                      | ✓          | A JSON Reference ($re
 
 ### Paths
 
-A path supported by the API being described. Paths may contain the names of Path [Parameter](#Parameter)s, contained
+A path supported by the API being described. Paths may contain the names of Path [Parameter](#parameter)s, contained
 in curly braces. Paths _must_ contain at least one _VersionedPath_.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-`*`         | [VersionedPath](#VersionedPath) |        | A mapping of path string to VersionedPath definition.
+`*`         | [VersionedPath](#versionedPath) |        | A mapping of path string to VersionedPath definition.
 
 ### VersionedPath
 
@@ -100,7 +100,7 @@ version individual API endpoints may omit this level of the Path hierarchy.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-`*`         | [Resource](#Resource)       | ✓          | The supported versions of the resources at this path. Format: `[1-9][0-9]*(\.[1-9][0-9]*)*`
+`*`         | [Resource](#resource)       | ✓          | The supported versions of the resources at this path. Format: `[1-9][0-9]*(\.[1-9][0-9]*)*`
 
 ### Resource
 
@@ -110,14 +110,14 @@ Specifies the descriptor at a given path. At least one _Operation_ (e.g., _creat
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-resourceSchema | [Schema](#Schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, or patch are supported.
-create      | [Create](#Create)           |            | The create operation description, if supported
-read        | [Read](#Read)               |            | The read operation description, if supported
-update      | [Update](#Update)           |            | The update operation description, if supported
-delete      | [Delete](#Delete)           |            | The delete operation description, if supported
-patch       | [Patch](#Patch)             |            | The patch operation description, if supported
-actions     | [Action](#Action)[]         |            | The action operation descriptions, if supported
-queries     | [Query](#Query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
+resourceSchema | [Schema](#schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, or patch are supported.
+create      | [Create](#create)           |            | The create operation description, if supported
+read        | [Read](#read)               |            | The read operation description, if supported
+update      | [Update](#update)           |            | The update operation description, if supported
+delete      | [Delete](#delete)           |            | The delete operation description, if supported
+patch       | [Patch](#patch)             |            | The patch operation description, if supported
+actions     | [Action](#action)[]         |            | The action operation descriptions, if supported
+queries     | [Query](#query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
 
 ### Operation
 
@@ -132,14 +132,14 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 description | String                      |            | A description of the operation
 supportedLocales | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation
-errors      | [Error](#Error)[]           |            | Errors known be returned by this operation
-parameters  | [Parameter](#Parameter)[]   |            | Extra parameters supported by the operation
+errors      | [Error](#error)[]           |            | Errors known be returned by this operation
+parameters  | [Parameter](#parameter)[]   |            | Extra parameters supported by the operation
 stability   | String                      |            | Stability of the endpoint. Supported values are: "internal", "stable" (default), "evolving", "deprecated", or "removed".
 
 ### Error
 
 Defines one of the possible error responses that are known to be returned by a given
-[Operation](#Operation). All standard CREST errors are defined under _frapi:common_, which is an API Descriptor
+[Operation](#operation). All standard CREST errors are defined under _frapi:common_, which is an API Descriptor
 that will always be available by default. Endpoints may overload any error _code_ and unique _description_ to define
 custom errors. CREST API clients should be prepared to handle undocumented/unexpected errors. It is a best practice to
 define a minimum Error array definition, with 500 Internal Server Error, as follows,
@@ -156,7 +156,7 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 code        | Integer                     | ✓          | Three digit error code, corresponding to HTTP status codes.
 description | String                      | ✓          | Description of what may cause an error to occur.
-schema      | [Schema](#Schema)           |            | Optional definition of a schema for the error-detail.
+schema      | [Schema](#schema)           |            | Optional definition of a schema for the error-detail.
 
 The schema for an error response is:
 
@@ -216,7 +216,7 @@ may also be used.
 
 ### Create
 
-Creates a new resource. Extends [Operation](#Operation).
+Creates a new resource. Extends [Operation](#operation).
 
 #### Properties
 
@@ -228,7 +228,7 @@ mvccSupported | boolean                   | ✓          | Whether this resource
 
 ### Read
 
-Reads the contents of an existing resource. Extends [Operation](#Operation).
+Reads the contents of an existing resource. Extends [Operation](#operation).
 
 #### Properties
 
@@ -236,7 +236,7 @@ No additional properties.
 
 ### Update
 
-Replaces the contents of an existing resource. Extends [Operation](#Operation).
+Replaces the contents of an existing resource. Extends [Operation](#operation).
 
 #### Properties
 
@@ -246,7 +246,7 @@ mvccSupported | boolean                   | ✓          | Whether this resource
 
 ### Delete
 
-Deletes a resource. Extends [Operation](#Operation).
+Deletes a resource. Extends [Operation](#operation).
 
 #### Properties
 
@@ -256,7 +256,7 @@ mvccSupported | boolean                   | ✓          | Whether this resource
 
 ### Patch
 
-Partially modifies the contents of an existing resource. Extends [Operation](#Operation).
+Partially modifies the contents of an existing resource. Extends [Operation](#operation).
 
 The content of the request-payload is a JSON array whose elements are the modifications which should be applied to the
 resource. For example,
@@ -320,19 +320,19 @@ mvccSupported | boolean                   | ✓          | Whether this resource
 
 ### Action
 
-Actions are additional operations provided by a resource container. Extends [Operation](#Operation).
+Actions are additional operations provided by a resource container. Extends [Operation](#operation).
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 name        | String                      | ✓          | The action name.
-request     | [Schema](#Schema)           |            | The schema of the request payload for this action.
-response    | [Schema](#Schema)           | ✓          | The schema of the response payload for this action.
+request     | [Schema](#schema)           |            | The schema of the request payload for this action.
+response    | [Schema](#schema)           | ✓          | The schema of the response payload for this action.
 
 ### Query
 
-Search or list the resources contained within a resource container. Extends [Operation](#Operation).
+Search or list the resources contained within a resource container. Extends [Operation](#operation).
 
 Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
 
@@ -372,7 +372,7 @@ The following example shows a resource that supports all three types of query:
 
 CREST API Descriptors use schemas to represent request/response-payloads and error responses.
 
-Supports either a [Reference](#Reference) to a defined schema, or
+Supports either a [Reference](#reference) to a defined schema, or
 [OpenAPI-extended JSON schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject)
 with the following additional extensions:
 
