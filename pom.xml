@@ -68,7 +68,6 @@
   </prerequisites>
 
   <modules>
-    <module>api-descriptor</module>
     <module>commons-bom</module>
     <module>api-descriptor</module>
     <module>audit</module>
