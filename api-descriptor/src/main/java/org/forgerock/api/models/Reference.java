@@ -20,6 +20,8 @@ import static org.forgerock.api.util.ValidationUtil.containsWhitespace;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import org.forgerock.api.ApiValidationException;
 
 /**
@@ -27,7 +29,6 @@ import org.forgerock.api.ApiValidationException;
  */
 public final class Reference {
 
-    @JsonProperty("$ref")
     private final String value;
 
     private Reference(Builder builder) {
@@ -46,6 +47,7 @@ public final class Reference {
      *
      * @return value
      */
+    @JsonValue
     public String getValue() {
         return value;
     }

@@ -27,6 +27,7 @@ import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import org.forgerock.api.ApiValidationException;
@@ -37,8 +38,8 @@ import org.forgerock.api.jackson.JacksonUtils;
  */
 public final class Schema {
 
+    @JsonProperty("$ref")
     private final Reference reference;
-
     private final JsonValue schema;
 
     /**

@@ -33,12 +33,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 /**
  * Class that represents the Resource type in API descriptor.
  */
 public final class Resource {
     private static final Logger LOGGER = LoggerFactory.getLogger(Resource.class);
 
+    @JsonProperty("$ref")
+    private final Reference reference;
     private final Schema resourceSchema;
     private final String description;
     private final Create create;
@@ -53,6 +58,7 @@ public final class Resource {
     private final Boolean mvccSupported;
 
     private Resource(Builder builder) {
+        this.reference = builder.reference;
         this.resourceSchema = builder.resourceSchema;
         this.description = builder.description;
         this.create = builder.create;
@@ -66,9 +72,9 @@ public final class Resource {
         this.items = builder.items;
         this.mvccSupported = builder.mvccSupported;
 
-        if (create == null && read == null && update == null && delete == null && patch == null
-                && isEmpty(actions) && isEmpty(queries)) {
-            throw new ApiValidationException("At least one operation required");
+        if ((create != null || read != null || update != null || delete != null || patch != null
+                || !isEmpty(actions) || !isEmpty(queries)) && reference != null) {
+            throw new ApiValidationException("Cannot have a reference as well as operations");
         }
         if (mvccSupported == null) {
             throw new ApiValidationException("mvccSupported required");
@@ -265,6 +271,14 @@ public final class Resource {
     }
 
     /**
+     * Gets the reference.
+     * @return The reference.
+     */
+    public Reference getReference() {
+        return reference;
+    }
+
+    /**
      * The varient of the annotated type. Allows the annotation processing to make assumptions about what type of
      * operations are expected from this context of the type.
      */
@@ -308,6 +322,7 @@ public final class Resource {
         private final Set<Query> queries;
         private Resource items;
         private Boolean mvccSupported;
+        public Reference reference;
 
         /**
          * Private default constructor.
@@ -315,6 +330,16 @@ public final class Resource {
         protected Builder() {
             actions = new TreeSet<>();
             queries = new TreeSet<>();
+        }
+
+        /**
+         * Set a reference.
+         * @param reference The reference.
+         * @return This builder.
+         */
+        public Builder reference(Reference reference) {
+            this.reference = reference;
+            return this;
         }
 
         /**
@@ -493,7 +518,7 @@ public final class Resource {
          */
         public Resource build() {
             if (create == null && read == null && update == null && delete == null && patch == null
-                    && actions.isEmpty() && queries.isEmpty()) {
+                    && actions.isEmpty() && queries.isEmpty() && reference == null) {
                 return null;
             }
 

@@ -24,6 +24,8 @@ import org.forgerock.guava.common.base.Strings;
 
 import org.forgerock.api.ApiValidationException;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Class that represents the Error type in API descriptor.
  */
@@ -38,6 +40,7 @@ public final class Error {
     private final Integer code;
     private final String description;
     private final Schema schema;
+    @JsonProperty("$ref")
     private final Reference reference;
 
     private Error(Builder builder) {
@@ -165,6 +168,7 @@ public final class Error {
         private Integer code;
         private String description;
         private Schema schema;
+        @JsonProperty("$ref")
         private Reference reference;
 
         private Builder() {

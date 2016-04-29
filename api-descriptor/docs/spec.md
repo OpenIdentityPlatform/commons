@@ -8,12 +8,13 @@ and other tooling.
 
 ## Status
 
-This document is a working draft, version `0.1`.
+This document is a working draft, version `0.2`.
 
 ### Revision History
 
 Version   | Description
 ---------:| -------------------
+0.2       | Adds: ability to specify common resources in `services`, collection semantics using `items`, parent-child relations using `subresources`, complex read states, complex field validation policies, and binary field support.
 0.1       | Initial version.
 
 ## Conventions
@@ -105,7 +106,8 @@ Key         | Type                        | Required?  | Description
 ### VersionedPath
 
 The optional version of the request handler at the top of a particular path. API Descriptors without the need to
-version individual API endpoints may omit this level of the Path hierarchy.
+version individual API endpoints may omit this level of the Path hierarchy. The resource may be specified using a
+[Reference](#reference).
 
 #### Properties
 
