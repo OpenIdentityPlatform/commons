@@ -20,6 +20,7 @@ import java.util.Iterator;
 
 import javax.validation.ValidationException;
 
+import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.json.JsonValue;
 
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
@@ -31,7 +32,9 @@ import org.forgerock.api.enums.WritePolicy;
 public class CrestArraySchema extends ArraySchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
         ValidatableSchema {
     private WritePolicy writePolicy;
+    private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
+    private Boolean returnOnDemand;
     private Integer propertyOrder;
 
     @Override
@@ -45,6 +48,16 @@ public class CrestArraySchema extends ArraySchema implements CrestReadWritePolic
     }
 
     @Override
+    public ReadPolicy getReadPolicy() {
+        return readPolicy;
+    }
+
+    @Override
+    public void setReadPolicy(ReadPolicy readPolicy) {
+        this.readPolicy = readPolicy;
+    }
+
+    @Override
     public Boolean getErrorOnWritePolicyFailure() {
         return errorOnWritePolicyFailure;
     }
@@ -52,6 +65,16 @@ public class CrestArraySchema extends ArraySchema implements CrestReadWritePolic
     @Override
     public void setErrorOnWritePolicyFailure(Boolean errorOnWritePolicyFailure) {
         this.errorOnWritePolicyFailure = errorOnWritePolicyFailure;
+    }
+
+    @Override
+    public Boolean getReturnOnDemand() {
+        return returnOnDemand;
+    }
+
+    @Override
+    public void setReturnOnDemand(Boolean returnOnDemand) {
+        this.returnOnDemand = returnOnDemand;
     }
 
     @Override

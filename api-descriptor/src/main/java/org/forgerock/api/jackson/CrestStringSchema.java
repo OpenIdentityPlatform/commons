@@ -29,6 +29,7 @@ import javax.mail.internet.InternetAddress;
 import javax.validation.ValidationException;
 import javax.xml.bind.DatatypeConverter;
 
+import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.guava.common.net.InetAddresses;
 import org.forgerock.guava.common.net.InternetDomainName;
 import org.forgerock.json.JsonValue;
@@ -43,7 +44,9 @@ import org.forgerock.api.enums.WritePolicy;
 class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema, EnumSchema,
         ValidatableSchema {
     private WritePolicy writePolicy;
+    private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
+    private Boolean returnOnDemand;
     private Integer propertyOrder;
     @JsonProperty
     private Map<String, List<String>> options;
@@ -59,6 +62,16 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
     }
 
     @Override
+    public ReadPolicy getReadPolicy() {
+        return readPolicy;
+    }
+
+    @Override
+    public void setReadPolicy(ReadPolicy readPolicy) {
+        this.readPolicy = readPolicy;
+    }
+
+    @Override
     public Boolean getErrorOnWritePolicyFailure() {
         return errorOnWritePolicyFailure;
     }
@@ -66,6 +79,16 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
     @Override
     public void setErrorOnWritePolicyFailure(Boolean errorOnWritePolicyFailure) {
         this.errorOnWritePolicyFailure = errorOnWritePolicyFailure;
+    }
+
+    @Override
+    public Boolean getReturnOnDemand() {
+        return returnOnDemand;
+    }
+
+    @Override
+    public void setReturnOnDemand(Boolean returnOnDemand) {
+        this.returnOnDemand = returnOnDemand;
     }
 
     @Override

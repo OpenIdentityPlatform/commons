@@ -18,6 +18,7 @@ package org.forgerock.api.jackson;
 
 import javax.validation.ValidationException;
 
+import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.json.JsonValue;
 
 import com.fasterxml.jackson.module.jsonSchema.types.BooleanSchema;
@@ -29,7 +30,9 @@ import org.forgerock.api.enums.WritePolicy;
 public class CrestBooleanSchema extends BooleanSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
         ValidatableSchema {
     private WritePolicy writePolicy;
+    private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
+    private Boolean returnOnDemand;
     private Integer propertyOrder;
 
     @Override
@@ -43,6 +46,16 @@ public class CrestBooleanSchema extends BooleanSchema implements CrestReadWriteP
     }
 
     @Override
+    public ReadPolicy getReadPolicy() {
+        return readPolicy;
+    }
+
+    @Override
+    public void setReadPolicy(ReadPolicy readPolicy) {
+        this.readPolicy = readPolicy;
+    }
+
+    @Override
     public Boolean getErrorOnWritePolicyFailure() {
         return errorOnWritePolicyFailure;
     }
@@ -50,6 +63,16 @@ public class CrestBooleanSchema extends BooleanSchema implements CrestReadWriteP
     @Override
     public void setErrorOnWritePolicyFailure(Boolean errorOnWritePolicyFailure) {
         this.errorOnWritePolicyFailure = errorOnWritePolicyFailure;
+    }
+
+    @Override
+    public Boolean getReturnOnDemand() {
+        return returnOnDemand;
+    }
+
+    @Override
+    public void setReturnOnDemand(Boolean returnOnDemand) {
+        this.returnOnDemand = returnOnDemand;
     }
 
     @Override

@@ -16,6 +16,7 @@
 
 package org.forgerock.api.jackson;
 
+import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.api.enums.WritePolicy;
 
 /**
@@ -26,24 +27,59 @@ interface CrestReadWritePoliciesSchema {
 
     /**
      * Get the write policy for the property.
+     *
      * @return The write policy.
      */
     WritePolicy getWritePolicy();
+
     /**
      * Set the write policy for the property.
+     *
      * @param policy The write policy.
      */
     void setWritePolicy(WritePolicy policy);
 
     /**
+     * Get the read policy for the property.
+     *
+     * @return The read policy.
+     */
+    ReadPolicy getReadPolicy();
+
+    /**
+     * Set the read policy for the property.
+     *
+     * @param policy The read policy.
+     */
+    void setReadPolicy(ReadPolicy policy);
+
+    /**
      * Get the error indicator for failed write policy.
+     *
      * @return Whether errors will be returned.
      */
     Boolean getErrorOnWritePolicyFailure();
+
     /**
      * Set the error indicator for failed write policy.
+     *
      * @param errorOnWritePolicyFailure Whether errors will be returned.
      */
     void setErrorOnWritePolicyFailure(Boolean errorOnWritePolicyFailure);
 
+    /**
+     * Set the return-on-demand field.
+     *
+     * @return {@code true} when a field is available, but must be explicitly requested, or {@code false} (default) when
+     * always returned.
+     */
+    Boolean getReturnOnDemand();
+
+    /**
+     * Get the return-on-demand field.
+     *
+     * @param returnOnDemand {@code true} when a field is available, but must be explicitly requested, or
+     * {@code false} (default) when always returned.
+     */
+    void setReturnOnDemand(Boolean returnOnDemand);
 }

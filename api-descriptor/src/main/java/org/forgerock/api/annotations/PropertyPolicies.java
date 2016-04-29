@@ -21,6 +21,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.api.enums.WritePolicy;
 
 /**
@@ -35,8 +36,19 @@ public @interface PropertyPolicies {
     WritePolicy write() default WritePolicy.WRITABLE;
 
     /**
+     * The read policy for the property. Defaults to {@code USER}.
+     */
+    ReadPolicy read() default ReadPolicy.USER;
+
+    /**
      * Whether breaking the declared policy will result in an error from the service. Only required when
      * {@link #write()} is not set to {@code WRITABLE}. Defaults to {@code false}.
      */
     boolean errorOnWritePolicyFailure() default false;
+
+    /**
+     * {@code true} when a field is available, but must be explicitly requested, or {@code false} (default) when
+     * always returned.
+     */
+    boolean returnOnDemand() default false;
 }

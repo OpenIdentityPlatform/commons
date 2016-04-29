@@ -24,6 +24,7 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
+import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.json.JsonValue;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,7 +37,9 @@ import org.forgerock.api.enums.WritePolicy;
 class CrestNumberSchema extends NumberSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema, EnumSchema,
         ValidatableSchema {
     private WritePolicy writePolicy;
+    private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
+    private Boolean returnOnDemand;
     private Integer propertyOrder;
     @JsonProperty
     private Map<String, List<String>> options;
@@ -52,6 +55,16 @@ class CrestNumberSchema extends NumberSchema implements CrestReadWritePoliciesSc
     }
 
     @Override
+    public ReadPolicy getReadPolicy() {
+        return readPolicy;
+    }
+
+    @Override
+    public void setReadPolicy(ReadPolicy readPolicy) {
+        this.readPolicy = readPolicy;
+    }
+
+    @Override
     public Boolean getErrorOnWritePolicyFailure() {
         return errorOnWritePolicyFailure;
     }
@@ -59,6 +72,16 @@ class CrestNumberSchema extends NumberSchema implements CrestReadWritePoliciesSc
     @Override
     public void setErrorOnWritePolicyFailure(Boolean errorOnWritePolicyFailure) {
         this.errorOnWritePolicyFailure = errorOnWritePolicyFailure;
+    }
+
+    @Override
+    public Boolean getReturnOnDemand() {
+        return returnOnDemand;
+    }
+
+    @Override
+    public void setReturnOnDemand(Boolean returnOnDemand) {
+        this.returnOnDemand = returnOnDemand;
     }
 
     @Override

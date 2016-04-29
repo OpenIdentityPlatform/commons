@@ -13,24 +13,27 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
+
 package org.forgerock.api.enums;
 
 import org.forgerock.api.models.Schema;
 
 /**
- * Enum that represents the {@link Schema} write policies.
+ * Enum that represents the {@link Schema} read policies.
  */
-public enum WritePolicy {
+public enum ReadPolicy {
     /**
-     * The property MAY be set in the create request, but not thereafter.
+     * Property is readable via client APIs and <em>visible</em> in the user-interface.
      */
-    WRITE_ON_CREATE,
+    USER,
     /**
-     * The property MAY be set only if the current value is NULL.
+     * Property is hidden from user-interface, but readable via client APIs. This is the default value if
+     * {@code ReadPolicy} is not specified.
      */
-    WRITE_ONCE,
+    CLIENT,
     /**
-     * The property can be set at any time. This is the default value if no value is specified
+     * Property is available internally, but not exposed to client APIs. Applications must actively filter this
+     * value from client API responses.
      */
-    WRITABLE;
+    SERVER
 }

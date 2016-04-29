@@ -124,7 +124,9 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
                     if (policies.write() != WritePolicy.WRITABLE) {
                         CrestReadWritePoliciesSchema schemaPolicies = (CrestReadWritePoliciesSchema) schema;
                         schemaPolicies.setWritePolicy(policies.write());
+                        schemaPolicies.setReadPolicy(policies.read());
                         schemaPolicies.setErrorOnWritePolicyFailure(policies.errorOnWritePolicyFailure());
+                        schemaPolicies.setReturnOnDemand(policies.returnOnDemand());
                     }
                 }
             }

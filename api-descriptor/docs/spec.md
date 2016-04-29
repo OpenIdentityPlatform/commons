@@ -415,8 +415,10 @@ To handle complex states we are going to introduce a new schema field.
 
 Key         | Type                        | Description
 ----------- | --------------------------- | ------------------------------------
+readPolicy  | String                      | Supported values are:<br>USER: visible in the user-interface. This is the default value if no value is specified.<br>CLIENT: hidden from user-interface, but readable via client APIs.<br>SERVER: available internally, but not exposed to client APIs.
 writePolicy | String                      | Relevant only for "properties" definitions where the readOnly flag is false. Supported values are:<br>WRITE_ON_CREATE: the property MAY be set in the create request, but not thereafter.<br>WRITE_ONCE: the property MAY be set only if the current value is NULL.<br>WRITABLE: the property can be set at any time. This is the default value if no value is specified.
 errorOnWritePolicyFailure | boolean       | Whether the application will error (or ignore) when a WRITE_ON_CREATE or WRITE_ONCE field is attempted to be updated erroneously (default: `false`).
+returnOnDemand | boolean                  | `true` when a field is available, but must be explicitly requested, or `false` (default) when always returned.
 
 #### Enumeration value descriptions
 
