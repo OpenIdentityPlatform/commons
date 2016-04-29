@@ -20,10 +20,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.forgerock.util.Reject;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import static org.forgerock.api.util.ValidationUtil.containsWhitespace;

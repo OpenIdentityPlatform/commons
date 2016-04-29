@@ -16,21 +16,11 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.http.routing.Version.version;
-import static org.forgerock.json.JsonValue.*;
-
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.api.ApiValidationException;
 
 public class ApiDescriptionTest {
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
 
     @Test(expectedExceptions = ApiValidationException.class)
     public void testFailedValidationIdMissing() {
@@ -68,56 +58,6 @@ public class ApiDescriptionTest {
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .id("frapi:test")
                 .build();
-    }
-
-    @Test
-    public void testVersionedPaths() throws JsonProcessingException {
-        final Schema schema = Schema.schema()
-                .schema(json(object()))
-                .build();
-
-        final Action action1 = Action.action()
-                .name("action1")
-                .response(schema)
-                .build();
-        final Action action2 = Action.action()
-                .name("action2")
-                .response(schema)
-                .build();
-
-        final Resource resourceV1 = Resource.resource()
-                .action(action1)
-                .mvccSupported(true)
-                .build();
-        final Resource resourceV2 = Resource.resource()
-                .action(action1)
-                .action(action2)
-                .mvccSupported(true)
-                .build();
-
-        final VersionedPath versionedPath = VersionedPath.versionedPath()
-                .put(version(1), resourceV1)
-                .put(version(2), resourceV2)
-                .build();
-
-        final Paths paths = Paths.paths()
-                .put("/testPath", versionedPath)
-                .build();
-
-        final Definitions definitions = Definitions.definitions()
-                .put("def", schema)
-                .build();
-
-        final ApiDescription apiDescription = ApiDescription.apiDescription()
-                .id("frapi:test")
-                .version("a version")
-                .description("My Description")
-                .definitions(definitions)
-                .paths(paths)
-                .build();
-
-        // TODO this JSON output is just for development purposes at the moment
-        System.out.println(OBJECT_MAPPER.writeValueAsString(apiDescription));
     }
 
 }
