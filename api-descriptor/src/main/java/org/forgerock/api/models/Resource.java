@@ -48,6 +48,7 @@ public final class Resource {
     private final Patch patch;
     private final Action[] actions;
     private final Query[] queries;
+    private final SubResources subresources;
 
     private Resource(Builder builder) {
         this.resourceSchema = builder.resourceSchema;
@@ -57,6 +58,7 @@ public final class Resource {
         this.update = builder.update;
         this.delete = builder.delete;
         this.patch = builder.patch;
+        this.subresources = builder.subresources;
         this.actions = builder.actions.toArray(new Action[builder.actions.size()]);
         this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
 
@@ -145,6 +147,15 @@ public final class Resource {
      */
     public Query[] getQueries() {
         return queries;
+    }
+
+    /**
+     * Getter of sub-resources.
+     *
+     * @return Sub-resources
+     */
+    public SubResources getSubresources() {
+        return subresources;
     }
 
     /**
@@ -275,6 +286,7 @@ public final class Resource {
         private Update update;
         private Delete delete;
         private Patch patch;
+        private SubResources subresources;
         private final Set<Action> actions;
         private final Set<Query> queries;
 
@@ -405,6 +417,17 @@ public final class Resource {
          */
         public Builder query(Query query) {
             this.queries.add(query);
+            return this;
+        }
+
+        /**
+         * Sets the sub-resources for this resource.
+         *
+         * @param subresources The sub-reosurces definition.
+         * @return Builder
+         */
+        public Builder subresources(SubResources subresources) {
+            this.subresources = subresources;
             return this;
         }
 

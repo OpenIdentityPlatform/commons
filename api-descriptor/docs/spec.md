@@ -118,6 +118,19 @@ delete      | [Delete](#delete)           |            | The delete operation de
 patch       | [Patch](#patch)             |            | The patch operation description, if supported
 actions     | [Action](#action)[]         |            | The action operation descriptions, if supported
 queries     | [Query](#query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
+subresources | [SubResources](#subresources) |         | Sub-resources of this resource. Sub-resources use the same version as their parent resource, so are not separately versioned.
+
+### SubResources
+
+Sub-resources are resources that are a component part of their parent. As such, they share the version of the parent
+from the parent's path binding. If a sub-path is separately versioned from a parent path, it should be listed as a
+separate path in the [Paths](#paths) object, rather than as a sub-resource of the resource at the parent path.
+
+#### Properties
+
+Key         | Type                        | Required?  | Description
+----------- | --------------------------- |:----------:| ------------------------------------
+`*`         | [Resource](#resource)       | ✓          | A map of sub-resource paths to resource definitions.
 
 ### Operation
 
