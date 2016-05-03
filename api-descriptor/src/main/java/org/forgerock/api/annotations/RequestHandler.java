@@ -48,6 +48,39 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface RequestHandler {
+
+    /**
+     * The service identifier.
+     * <br>
+     * If a value is provided this indicates to the API Descriptor framework that you intend to reuse
+     * the same service definition multiple times, and that it should define the service globally
+     * and bind it to paths by reference instead of by value.
+     * <br>
+     * Example:
+     *
+     * <code>
+     *   <pre>
+     * "services": {
+     *   "users:1.0": {
+     *     "type": "collection",
+     *     "resourceSchema": {
+     *       "$ref": "#/definitions/user"
+     *     },
+     *     ...
+     *   }
+     * }
+     * "paths": {
+     *   "/users": {
+     *     "1.0": {
+     *       "$ref": "#/services/users:1.0"
+     *     },
+     *   }
+     * }
+     *   </pre>
+     * </code>
+     */
+    String id() default "";
+
     /**
      * The schema for all the standard resource operations (CRUDPQ) on this endpoint. Only required if one or more
      * of those operations are supported.

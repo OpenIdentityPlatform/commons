@@ -19,9 +19,12 @@ package org.forgerock.json.resource;
 import static org.forgerock.api.models.ApiDescription.*;
 import static org.forgerock.api.models.Paths.*;
 import static org.forgerock.api.models.VersionedPath.*;
+import static org.forgerock.api.models.Resource.*;
+import static org.forgerock.api.models.Reference.*;
 
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.Services;
 import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.descriptor.Describable;
 
@@ -34,6 +37,9 @@ abstract class DescribableResourceHandler implements Describable<ApiDescription>
 
     private final Resource resource;
     private final ApiDescription definitionDescriptions;
+    private final String resourceId;
+
+    private static final String SERVICES_REFERENCE = "#/services/%s\"";
 
     DescribableResourceHandler(Class<?> type, Resource.AnnotatedTypeVariant varient) {
         // This ApiDescription can have a dummy ID and version because we are never going to expose it - it is used to
@@ -42,15 +48,26 @@ abstract class DescribableResourceHandler implements Describable<ApiDescription>
         // below.
         this.definitionDescriptions = apiDescription().id("fake:id").version("0.0").build();
         this.resource = Resource.fromAnnotatedType(type, varient, definitionDescriptions);
+        org.forgerock.api.annotations.RequestHandler annotation =
+                type.getAnnotation(org.forgerock.api.annotations.RequestHandler.class);
+        this.resourceId = annotation != null ? annotation.id() : null;
     }
 
     @Override
     public final ApiDescription api(ApiContext<ApiDescription> apiContext) {
-        return ApiDescription.<Resource>apiDescription()
+        ApiDescription.Builder builder = ApiDescription.apiDescription()
                 .definitions(definitionDescriptions.getDefinitions())
                 .errors(definitionDescriptions.getErrors())
-                .id(apiContext.getApiId())
-                .paths(paths().put("", versionedPath().put(UNVERSIONED, resource).build()).build())
-                .build();
+                .id(apiContext.getApiId());
+
+                Resource resource;
+                if (resourceId != null) {
+                    builder.services(Services.services().put(resourceId, this.resource).build());
+                    resource = resource().reference(reference().value(String.format(SERVICES_REFERENCE, resourceId)).build()).build();
+                } else {
+                    resource = this.resource;
+                }
+
+                return builder.paths(paths().put("", versionedPath().put(UNVERSIONED, resource).build()).build()).build();
     }
 }
