@@ -168,7 +168,6 @@ public final class Error {
         private Integer code;
         private String description;
         private Schema schema;
-        @JsonProperty("$ref")
         private Reference reference;
 
         private Builder() {
