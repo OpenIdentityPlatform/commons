@@ -35,7 +35,7 @@ import org.forgerock.api.enums.PatchOperation;
  * </ul>
  * The method must take the following parameters:
  * <ul>
- *     <li>A {@link org.forgerock.json.resource.PatchRequest} to be given the request.</li>
+ *     <li>A {@code org.forgerock.json.resource.PatchRequest} to be given the request.</li>
  * </ul>
  * If the annotated method is on a collection handler, it must also take the following parameters:
  * <ul>

@@ -21,6 +21,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.forgerock.api.enums.HandlerVariant;
+
 /**
  * A marker annotation to indicate that the annotated class should be interpreted as an annotated POJO CREST
  * resource.
@@ -98,4 +100,7 @@ public @interface RequestHandler {
 
     /** Parameters on service paths and/or endpoints. */
     Parameter[] parameters() default {};
+
+    /** The variant of request handler. */
+    HandlerVariant variant();
 }

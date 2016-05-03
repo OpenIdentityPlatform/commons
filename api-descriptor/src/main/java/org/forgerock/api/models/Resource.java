@@ -320,7 +320,7 @@ public final class Resource {
     }
 
     /**
-     * The varient of the annotated type. Allows the annotation processing to make assumptions about what type of
+     * The variant of the annotated type. Allows the annotation processing to make assumptions about what type of
      * operations are expected from this context of the type.
      */
     public enum AnnotatedTypeVariant {

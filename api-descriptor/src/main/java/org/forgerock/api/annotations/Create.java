@@ -34,7 +34,7 @@ import org.forgerock.api.enums.CreateSingleton;
  * </ul>
  * The method must take the following parameters:
  * <ul>
- *     <li>A {@link org.forgerock.json.resource.CreateRequest} for the request.</li>
+ *     <li>A {@code org.forgerock.json.resource.CreateRequest} for the request.</li>
  * </ul>
  * The method may also take the following parameters:
  * <ul>

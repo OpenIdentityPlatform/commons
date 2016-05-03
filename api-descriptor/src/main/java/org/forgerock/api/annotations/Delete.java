@@ -35,7 +35,7 @@ import java.lang.annotation.Target;
  * </ul>
  * The method may also take the following parameters:
  * <ul>
- *     <li>A {@link org.forgerock.json.resource.DeleteRequest} for the request.</li>
+ *     <li>A {@code org.forgerock.json.resource.DeleteRequest} for the request.</li>
  *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
  * </ul>
  */

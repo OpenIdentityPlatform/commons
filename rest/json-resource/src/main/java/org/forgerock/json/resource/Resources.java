@@ -21,10 +21,14 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.forgerock.api.annotations.Path;
+import org.forgerock.api.enums.HandlerVariant;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
@@ -155,23 +159,25 @@ public final class Resources {
      *         provided collection resource provider.
      */
     public static RequestHandler newCollection(final Object provider) {
-        boolean fromInterface = provider instanceof CollectionResourceProvider;
         // Route requests to the collection/instance using a router.
         final Router router = new Router();
+        addCollectionHandlersToRouter(provider, router, "");
+        return router;
+    }
 
+    private static void addCollectionHandlersToRouter(Object provider, Router router, String basePath) {
+        boolean fromInterface = provider instanceof CollectionResourceProvider;
         // Create a route for the collection.
         final RequestHandler collectionHandler = fromInterface
                 ? new InterfaceCollectionHandler((CollectionResourceProvider) provider)
                 : new AnnotatedCollectionHandler(provider);
-        router.addRoute(requestUriMatcher(EQUALS, ""), collectionHandler);
+        router.addRoute(requestUriMatcher(EQUALS, basePath), collectionHandler);
 
         // Create a route for the instances within the collection.
         final RequestHandler instanceHandler = fromInterface
                 ? new InterfaceCollectionInstance((CollectionResourceProvider) provider)
                 : new AnnotationCollectionInstance(provider);
-        router.addRoute(requestUriMatcher(EQUALS, "{id}"), instanceHandler);
-
-        return router;
+        router.addRoute(requestUriMatcher(EQUALS, basePath.isEmpty() ? "{id}" : basePath + "/{id}"), instanceHandler);
     }
 
     /**
@@ -201,6 +207,72 @@ public final class Resources {
      */
     public static ConnectionFactory newInternalConnectionFactory(final RequestHandler handler) {
         return new InternalConnectionFactory(handler);
+    }
+
+    /**
+     * Creates a new {@link RequestHandler} backed by the supplied provider. The provider can be an instance of an
+     * interface resource handler, and annotated resource handler or an annotated request handler. The type of the
+     * provider will be determined from the {@code org.forgerock.api.annotations.RequestHandler#variant}
+     * annotation property, or from the type of interface implemented.
+     * <p>
+     * Sub-paths that are declared using the {@code org.forgerock.api.annotations.Path} annotation will also be routed
+     * through the returned handler.
+     * <p>
+     * This method uses the same logic as {@link #newCollection(Object)}, {@link #newSingleton(Object)} and
+     * {@link #newAnnotatedRequestHandler(Object)} to create the underlying {@link RequestHandler}s.
+     * @param provider The provider instance.
+     * @return The constructed handler.
+     */
+    public static RequestHandler newHandler(Object provider) {
+        Router router = new Router();
+        Path path = provider.getClass().getAnnotation(Path.class);
+        addHandlers(provider, router, path == null ? "" : path.value());
+        return router;
+    }
+
+    private static void addHandlers(Object provider, Router router, String basePath) {
+        HandlerVariant varient = deduceHandlerVariant(provider);
+        if (varient == null) {
+            router.addRoute(requestUriMatcher(EQUALS, basePath), (RequestHandler) provider);
+        } else {
+            switch (varient) {
+            case SINGLETON_RESOURCE:
+                router.addRoute(requestUriMatcher(EQUALS, basePath), newSingleton(provider));
+                break;
+            case COLLECTION_RESOURCE:
+                addCollectionHandlersToRouter(provider, router, basePath);
+                break;
+            case REQUEST_HANDLER:
+                router.addRoute(requestUriMatcher(EQUALS, basePath), newAnnotatedRequestHandler(provider));
+            }
+        }
+        for (Method m : provider.getClass().getMethods()) {
+            Path subpathAnnotation = m.getAnnotation(Path.class);
+            if (subpathAnnotation != null) {
+                String subpath = subpathAnnotation.value().replaceAll("^/", "");
+                try {
+                    addHandlers(m.invoke(provider), router, basePath.isEmpty() ? subpath : basePath + "/" + subpath);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new IllegalArgumentException("Could not construct handler tree", e);
+                }
+            }
+        }
+    }
+
+    private static HandlerVariant deduceHandlerVariant(Object provider) {
+        org.forgerock.api.annotations.RequestHandler handler =
+                provider.getClass().getAnnotation(org.forgerock.api.annotations.RequestHandler.class);
+        if (handler != null) {
+            return handler.variant();
+        }
+        if (provider instanceof SingletonResourceProvider) {
+            return HandlerVariant.SINGLETON_RESOURCE;
+        } else if (provider instanceof CollectionResourceProvider) {
+            return HandlerVariant.COLLECTION_RESOURCE;
+        } else if (provider instanceof RequestHandler) {
+            return null;
+        }
+        throw new IllegalArgumentException("Cannot deduce provider variant");
     }
 
     /**

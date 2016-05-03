@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
  * </ul>
  * The method must take the following parameters:
  * <ul>
- *     <li>A {@link org.forgerock.json.resource.UpdateRequest} to be given the request.</li>
+ *     <li>A {@code org.forgerock.json.resource.UpdateRequest} to be given the request.</li>
  * </ul>
  * If the method is on a collection handler, it must also take the following parameters:
  * <ul>
