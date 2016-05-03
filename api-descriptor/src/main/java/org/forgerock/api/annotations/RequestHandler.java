@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A marker annotation to indicate that the annotated class should be interpretted as an annotated POJO CREST
+ * A marker annotation to indicate that the annotated class should be interpreted as an annotated POJO CREST
  * resource.
  * <p>
  * Individual operations can then be supported by either annotating a method with the relevant annotation, or
@@ -57,4 +57,9 @@ public @interface RequestHandler {
     /** Whether MVCC style requests are supported. */
     boolean mvccSupported();
 
+    /** Service title, for documentation purposes. */
+    String title() default "";
+
+    /** Service description, for documentation purposes. */
+    String description() default "";
 }

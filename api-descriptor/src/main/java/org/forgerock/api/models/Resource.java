@@ -45,6 +45,7 @@ public final class Resource {
     @JsonProperty("$ref")
     private final Reference reference;
     private final Schema resourceSchema;
+    private final String title;
     private final String description;
     private final Create create;
     private final Read read;
@@ -60,6 +61,7 @@ public final class Resource {
     private Resource(Builder builder) {
         this.reference = builder.reference;
         this.resourceSchema = builder.resourceSchema;
+        this.title = builder.title;
         this.description = builder.description;
         this.create = builder.create;
         this.read = builder.read;
@@ -88,6 +90,15 @@ public final class Resource {
      */
     public Schema getResourceSchema() {
         return resourceSchema;
+    }
+
+    /**
+     * Getter of title.
+     *
+     * @return Title
+     */
+    public String getTitle() {
+        return title;
     }
 
     /**
@@ -267,6 +278,8 @@ public final class Resource {
         }
         builder.resourceSchema(resourceSchema);
         builder.mvccSupported(requestHandler.mvccSupported());
+        builder.title(requestHandler.title());
+        builder.description(requestHandler.description());
         return builder.build();
     }
 
@@ -311,6 +324,7 @@ public final class Resource {
      */
     public final static class Builder {
         private Schema resourceSchema;
+        private String title;
         private String description;
         private Create create;
         private Read read;
@@ -351,6 +365,17 @@ public final class Resource {
          */
         public Builder resourceSchema(Schema resourceSchema) {
             this.resourceSchema = resourceSchema;
+            return this;
+        }
+
+        /**
+         * Set the title.
+         *
+         * @param title Title of the endpoint
+         * @return Builder
+         */
+        public Builder title(String title) {
+            this.title = title;
             return this;
         }
 

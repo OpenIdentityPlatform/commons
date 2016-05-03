@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ResourceTest {
 
+    private final String title = "My Title";
     private final String description = "My Description";
     public static final String TRANSLATED_DISCRIPTION_TWICE_REGEX =
             ".*(If you see this it has been translated).*(If you see this it has been translated).*";
@@ -101,6 +102,7 @@ public class ResourceTest {
     @Test
     public void testBuilderWithNonArrayMethods() {
         final Resource resource = Resource.resource()
+                .title(title)
                 .description(description)
                 .resourceSchema(schema)
                 .create(create)
@@ -124,6 +126,7 @@ public class ResourceTest {
     @Test
     public void testBuilderWithArrayMethods() {
         final Resource resource = Resource.resource()
+                .title(title)
                 .description(description)
                 .resourceSchema(schema)
                 .create(create)
@@ -142,6 +145,7 @@ public class ResourceTest {
     @Test
     public void testBuilderWithOperationsArray() {
         final Resource resource = Resource.resource()
+                .title(title)
                 .description(description)
                 .resourceSchema(schema)
                 .operations(create, read, update, delete, patch, action1, action2, query1, query2)
@@ -152,6 +156,7 @@ public class ResourceTest {
     }
 
     private void assertTestBuilder(final Resource resource) {
+        assertThat(resource.getTitle()).isEqualTo(title);
         assertThat(resource.getDescription()).isEqualTo(description);
         assertThat(resource.getResourceSchema()).isEqualTo(schema);
         assertThat(resource.getCreate()).isEqualTo(create);
