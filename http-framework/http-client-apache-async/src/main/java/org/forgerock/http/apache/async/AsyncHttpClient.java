@@ -17,6 +17,7 @@
 package org.forgerock.http.apache.async;
 
 import java.io.IOException;
+import java.util.Map;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -33,6 +34,7 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.PromiseImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * Apache HTTP Async Client based implementation.
@@ -56,7 +58,7 @@ public class AsyncHttpClient extends AbstractHttpClient {
 
         // Send request and return the configured Promise
         final PromiseImpl<Response, NeverThrowsException> promise = PromiseImpl.create();
-        client.execute(clientRequest, new FutureCallback<HttpResponse>() {
+        FutureCallback<HttpResponse> callback = new FutureCallback<HttpResponse>() {
 
             @Override
             public void completed(final HttpResponse result) {
@@ -76,7 +78,16 @@ public class AsyncHttpClient extends AbstractHttpClient {
             public void cancelled() {
                 failed(new InterruptedException("Request processing has been cancelled"));
             }
-        });
+        };
+
+        // Copy the MDC before submitting the job
+        Map<String, String> mdc = MDC.getCopyOfContextMap();
+        if (mdc != null) {
+            callback = new MdcFutureCallback(callback, mdc);
+        }
+
+        // Execute
+        client.execute(clientRequest, callback);
 
         return promise;
     }
@@ -84,5 +95,62 @@ public class AsyncHttpClient extends AbstractHttpClient {
     @Override
     public void close() throws IOException {
         client.close();
+    }
+
+    /**
+     * This callback setup the MDC when the async HTTP client hand-off response processing back to the caller.
+     * In other words, all log statements appearing before this callback is invoked will not have updated
+     * contextual information.
+     */
+    private static final class MdcFutureCallback implements FutureCallback<HttpResponse> {
+
+        private final FutureCallback<HttpResponse> delegate;
+        private final Map<String, String> mdc;
+
+        private MdcFutureCallback(final FutureCallback<HttpResponse> delegate, final Map<String, String> mdc) {
+            this.delegate = delegate;
+            this.mdc = mdc;
+        }
+
+        @Override
+        public void completed(final HttpResponse result) {
+            Map<String, String> previous = MDC.getCopyOfContextMap();
+            try {
+                MDC.setContextMap(mdc);
+                delegate.completed(result);
+            } finally {
+                restoreMdc(previous);
+            }
+        }
+
+        @Override
+        public void failed(final Exception ex) {
+            Map<String, String> previous = MDC.getCopyOfContextMap();
+            try {
+                MDC.setContextMap(mdc);
+                delegate.failed(ex);
+            } finally {
+                restoreMdc(previous);
+            }
+        }
+
+        @Override
+        public void cancelled() {
+            Map<String, String> previous = MDC.getCopyOfContextMap();
+            try {
+                MDC.setContextMap(mdc);
+                delegate.cancelled();
+            } finally {
+                restoreMdc(previous);
+            }
+        }
+
+        private void restoreMdc(Map<String, String> previous) {
+            if (previous != null) {
+                MDC.setContextMap(previous);
+            } else {
+                MDC.clear();
+            }
+        }
     }
 }
