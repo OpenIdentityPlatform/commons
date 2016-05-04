@@ -123,6 +123,8 @@ Specifies the descriptor at a given path. At least one _Operation_ (e.g., _creat
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
+title       | String                      |            | Service title used for documentation purposes
+description | String                      |            | Service description used for documentation purposes
 resourceSchema | [Schema](#schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, or patch are supported.
 create      | [Create](#create)           |            | The create operation description, if supported
 read        | [Read](#read)               |            | The read operation description, if supported
