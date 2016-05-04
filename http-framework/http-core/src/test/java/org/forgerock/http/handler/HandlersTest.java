@@ -11,172 +11,192 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.handler;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.http.protocol.Response.newResponsePromise;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
-import org.forgerock.http.session.Session;
-import org.forgerock.services.context.RootContext;
-import org.forgerock.http.session.SessionContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.util.AsyncFunction;
+import org.forgerock.http.protocol.Status;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.mockito.InOrder;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
+import org.mockito.Mockito;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
-/**
- * Tests the Handlers#chain method.
- */
+@SuppressWarnings("javadoc")
 public final class HandlersTest {
 
-    private static final Response RESPONSE = new Response();
+    private final Handler terminal = spy(new Handler() {
+        @Override
+        public Promise<Response, NeverThrowsException> handle(final Context context, final Request request) {
+            return newResponsePromise(new Response(Status.OK));
+        }
+    });
+
+    private final Handler terminal2 = spy(new Handler() {
+        @Override
+        public Promise<Response, NeverThrowsException> handle(final Context context, final Request request) {
+            return newResponsePromise(new Response(Status.NOT_FOUND));
+        }
+    });
+
+    private final Filter first = spy(new Filter() {
+        @Override
+        public Promise<Response, NeverThrowsException> filter(final Context context, final Request request,
+                final Handler next) {
+            return next.handle(context, request);
+        }
+    });
+
+    private final Filter second = spy(new Filter() {
+        @Override
+        public Promise<Response, NeverThrowsException> filter(final Context context, final Request request,
+                                                              final Handler next) {
+            return next.handle(context, request);
+        }
+    });
+
+    private final Filter doubler = spy(new Filter() {
+        @Override
+        public Promise<Response, NeverThrowsException> filter(final Context context, final Request request,
+                                                              final Handler next) {
+            next.handle(context, request);
+            next.handle(context, request);
+            return newResponsePromise(new Response(Status.NOT_FOUND));
+        }
+    });
+
+    private final Filter shortcut = spy(new Filter() {
+        @Override
+        public Promise<Response, NeverThrowsException> filter(final Context context, final Request request,
+                                                              final Handler next) {
+            return newResponsePromise(new Response(Status.TEAPOT));
+        }
+    });
+
+    private final ChainProducer producer;
+
+    private RootContext context;
+
+    private Request request;
+
+    @DataProvider
+    public static Object[][] chainOfProducers() {
+        return new Object[][]{
+                {new HandlersChainProducer()},
+        };
+    }
+
+    @Factory(dataProvider = "chainOfProducers")
+    public HandlersTest(ChainProducer producer) {
+        this.producer = producer;
+    }
+
+    @BeforeMethod
+    public void setUp() throws Exception {
+        context = new RootContext();
+        request = new Request();
+    }
 
     @Test
-    public void testFilterCanInvokeAllFiltersAndHandler() throws Exception {
-        Handler target = target();
-        Filter filter1 = mock(Filter.class);
-        doAnswer(invoke()).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
-        Filter filter2 = filter();
-        Handler chain = Handlers.chainOf(target, filter1, filter2);
-        Context context = context();
-        Request request = new Request();
+    public void shouldCreateChainWithNoFilter() throws Exception {
+        Handler chain = producer.chainOf(terminal);
 
-        // The handler will be invoked twice which is obviously unrealistic. In practice,
-        // filter1 will wrap the result handler and combine/reduce the result of the two
-        // sub-reads to produce a single read response. We won't do that here in order
-        // to keep the test simple.
         chain.handle(context, request);
 
-        InOrder inOrder = inOrder(filter1, filter2, target);
-        inOrder.verify(filter1).filter(same(context), same(request), any(Handler.class));
-        inOrder.verify(filter2).filter(same(context), same(request), any(Handler.class));
-        inOrder.verify(target).handle(context, request);
+        verify(terminal).handle(context, request);
+    }
+
+    @Test
+    public void shouldCreateChainWithOneFilter() throws Exception {
+        Handler chain = producer.chainOf(terminal, first);
+
+        chain.handle(context, request);
+
+        InOrder order = Mockito.inOrder(first, terminal);
+        order.verify(first).filter(same(context), same(request), any(Handler.class));
+        order.verify(terminal).handle(context, request);
+    }
+
+    @Test
+    public void shouldCreateChainWithTwoFilters() throws Exception {
+        Handler chain = producer.chainOf(terminal, first, second);
+
+        chain.handle(context, request);
+
+        InOrder order = Mockito.inOrder(first, second, terminal);
+        order.verify(first).filter(same(context), same(request), any(Handler.class));
+        order.verify(second).filter(same(context), same(request), any(Handler.class));
+        order.verify(terminal).handle(context, request);
     }
 
     /**
-     * Tests that a filter can call next filter multiple times. If the cursoring
-     * mechanism increments the index for each call then the first invocation
-     * will iterate to the target causing the second invocation to go direct to
+     * Tests that a filter can call next handler multiple times. If there is a cursoring
+     * mechanism that increments the index for each call then the first invocation
+     * will iterate to the target causing the second invocation to go directly to
      * the target rather than the next filter.
      */
     @Test
-    public void testFilterCanInvokeMultipleSubRequests() throws Exception {
-        Handler target = target();
-        Filter filter1 = mock(Filter.class);
-        doAnswer(invoke(2)).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
-        Filter filter2 = filter();
-        Handler chain = Handlers.chainOf(target, filter1, filter2);
-        Context context = context();
-        Request request = new Request();
+    public void shouldCallNextHandler2Times() throws Exception {
+        Handler chain = producer.chainOf(terminal, doubler);
 
-        // The handler will be invoked twice which is obviously unrealistic. In practice,
-        // filter1 will wrap the result handler and combine/reduce the result of the two
-        // sub-reads to produce a single read response. We won't do that here in order
-        // to keep the test simple.
         chain.handle(context, request);
 
-        InOrder inOrder = inOrder(filter1, filter2, target, target);
-        inOrder.verify(filter1).filter(same(context), same(request), any(Handler.class));
-        // First read of next filter
-        inOrder.verify(filter2).filter(same(context), same(request), any(Handler.class));
-        inOrder.verify(target).handle(context, request);
-
-        // Second read of next filter
-        inOrder.verify(filter2).filter(same(context), same(request), any(Handler.class));
-        inOrder.verify(target).handle(context, request);
+        InOrder order = Mockito.inOrder(doubler, terminal);
+        order.verify(doubler).filter(same(context), same(request), any(Handler.class));
+        order.verify(terminal, times(2)).handle(context, request);
     }
 
     @Test
-    public void testFilterCanStopProcessingWithResult() throws Exception {
-        Handler target = target();
-        Filter filter1 = mock(Filter.class);
-        doAnswer(new Answer<Promise<Response, NeverThrowsException>>() {
-            @Override
-            public Promise<Response, NeverThrowsException> answer(final InvocationOnMock invocation) {
-                return Promises.newResultPromise(RESPONSE);
-            }
-        }).when(filter1).filter(any(Context.class), any(Request.class), any(Handler.class));
-        Filter filter2 = filter();
-        Handler chain = Handlers.chainOf(target, filter1, filter2);
-        Context context = context();
-        Request request = new Request();
+    public void shouldAllowFiltersToBeSharedInDifferentChains() throws Exception {
+        Handler chain1 = producer.chainOf(terminal, first);
+        Handler chain2 = producer.chainOf(terminal2, first);
 
-        Response response = chain.handle(context, request).getOrThrowUninterruptibly();
+        chain1.handle(context, request);
+        chain2.handle(context, request);
 
-        InOrder inOrder = inOrder(filter1, filter2, target, target);
-        inOrder.verify(filter1).filter(same(context), same(request), any(Handler.class));
-        assertThat(response).isEqualTo(RESPONSE);
-        verifyZeroInteractions(filter2, target);
+        InOrder order = Mockito.inOrder(terminal, terminal2, first);
+        order.verify(first).filter(same(context), same(request), any(Handler.class));
+        order.verify(terminal).handle(context, request);
+        order.verify(first).filter(same(context), same(request), any(Handler.class));
+        order.verify(terminal2).handle(context, request);
     }
 
-    private Context context() {
-        Session session = mock(Session.class);
-        return new SessionContext(new RootContext(), session);
+    @Test
+    public void shouldAllowFilterToShortcutExecution() throws Exception {
+        Handler chain = producer.chainOf(terminal, shortcut);
+
+        chain.handle(context, request);
+
+        verify(shortcut).filter(same(context), same(request), any(Handler.class));
+        verifyZeroInteractions(terminal);
     }
 
-    private Filter filter() throws Exception {
-        Filter filter = mock(Filter.class);
-        doAnswer(invoke()).when(filter).filter(any(Context.class), any(Request.class), any(Handler.class));
-        return filter;
+    private interface ChainProducer {
+        Handler chainOf(Handler terminal, Filter... filters);
     }
 
-    private Answer<Promise<Response, NeverThrowsException>> invoke() {
-        return invoke(1);
-    }
-
-    private Answer<Promise<Response, NeverThrowsException>> invoke(final int count) {
-        return new Answer<Promise<Response, NeverThrowsException>>() {
-            @Override
-            public Promise<Response, NeverThrowsException> answer(final InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                final Context context = (Context) args[0];
-                final Request request = (Request) args[1];
-                final Handler next = (Handler) args[2];
-                Promise<Response, NeverThrowsException> promise = Promises.newResultPromise(new Response());
-                for (int i = 0; i < count; i++) {
-                    promise.thenAsync(
-                            new AsyncFunction<Response, Response, NeverThrowsException>() {
-                                @Override
-                                public Promise<Response, NeverThrowsException> apply(Response o) {
-                                    return next.handle(context, request);
-                                }
-                            }
-                    );
-                }
-                return promise;
-            }
-        };
-    }
-
-    private Answer<Response> result() {
-        return new Answer<Response>() {
-            @Override
-            public Response answer(final InvocationOnMock invocation) throws Throwable {
-                return RESPONSE;
-            }
-        };
-    }
-
-    private Handler target() throws Exception {
-        Handler target = mock(Handler.class);
-        doAnswer(result()).when(target).handle(any(Context.class), any(Request.class));
-        return target;
+    private static class HandlersChainProducer implements ChainProducer {
+        @Override
+        public Handler chainOf(Handler terminal, Filter... filters) {
+            return Handlers.chainOf(terminal, filters);
+        }
     }
 }

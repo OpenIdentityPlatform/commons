@@ -77,4 +77,12 @@
       <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-http-framework</url>
     </site>
   </distributionManagement>
+  <profiles>
+    <profile>
+      <id>benchmarks</id>
+      <modules>
+        <module>http-benchmarks</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
