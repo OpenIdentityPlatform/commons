@@ -44,13 +44,14 @@ public class CrestApiContext extends ApiContext<ApiDescription> {
      * Construct a new context.
      * @param parent The parent context.
      * @param idFragment The API ID fragment for this context.
+     * @param apiVersion The version of the API being described.
      */
-    public CrestApiContext(Context parent, String idFragment) {
-        super(parent, idFragment);
+    public CrestApiContext(Context parent, String idFragment, String apiVersion) {
+        super(parent, idFragment, apiVersion);
     }
 
     @Override
-    public ApiDescription withPath(ApiDescription apiDescription, String id, String path) {
+    public ApiDescription withPath(ApiDescription apiDescription, String apiId, String apiVersion, String path) {
         Paths.Builder paths = paths();
         Set<String> names = apiDescription.getPaths().getNames();
         for (String subpath : names) {
@@ -60,12 +61,13 @@ public class CrestApiContext extends ApiContext<ApiDescription> {
                 .definitions(apiDescription.getDefinitions())
                 .errors(apiDescription.getErrors())
                 .paths(paths.build())
-                .id(id)
+                .id(apiId)
+                .version(apiVersion)
                 .build();
     }
 
     @Override
-    public ApiDescription withVersion(ApiDescription apiDescription, String id, Version version) {
+    public ApiDescription withVersion(ApiDescription apiDescription, String apiId, String apiVersion, Version version) {
         Paths.Builder paths = paths();
         Set<String> names = apiDescription.getPaths().getNames();
         for (String path : names) {
@@ -80,12 +82,13 @@ public class CrestApiContext extends ApiContext<ApiDescription> {
                 .definitions(apiDescription.getDefinitions())
                 .errors(apiDescription.getErrors())
                 .paths(paths.build())
-                .id(id)
+                .id(apiId)
+                .version(apiVersion)
                 .build();
     }
 
     @Override
-    public ApiDescription merge(String id, List<ApiDescription> descriptions) {
+    public ApiDescription merge(String apiId, String apiVersion, List<ApiDescription> descriptions) {
         Paths.Builder paths = paths();
         Definitions.Builder definitions = definitions();
         Errors.Builder errors = errors();
@@ -104,12 +107,13 @@ public class CrestApiContext extends ApiContext<ApiDescription> {
                 .definitions(definitions.build())
                 .errors(errors.build())
                 .paths(paths.build())
-                .id(id)
+                .id(apiId)
+                .version(apiVersion)
                 .build();
     }
 
     @Override
     public ApiContext<ApiDescription> newChildContext(String idFragment) {
-        return new CrestApiContext(this, idFragment);
+        return new CrestApiContext(this, idFragment, getApiVersion());
     }
 }

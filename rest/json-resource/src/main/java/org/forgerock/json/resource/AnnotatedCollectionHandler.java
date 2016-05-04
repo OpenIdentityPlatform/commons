@@ -16,7 +16,9 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.api.models.ApiDescription;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
 import org.forgerock.api.annotations.Create;
@@ -40,7 +42,7 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
     private final AnnotatedActionMethods actionMethods;
 
     public AnnotatedCollectionHandler(Object requestHandler) {
-        super(requestHandler.getClass());
+        super(null);
         if (!requestHandler.getClass().isAnnotationPresent(RequestHandler.class)) {
             throw new IllegalArgumentException("RequestHandler missing from class: "
                     + requestHandler.getClass().getName());

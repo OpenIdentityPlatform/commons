@@ -16,7 +16,9 @@
 
 package org.forgerock.api.models;
 
+import static org.forgerock.api.models.Reference.reference;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
+import static org.forgerock.util.Reject.rejectStateIfTrue;
 
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.annotations.Actions;
@@ -35,13 +37,18 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 /**
  * Class that represents the Resource type in API descriptor.
+ * <p>
+ *     {@code Resource}s may be either a reference to another {@code Resource} that will be defined elsewhere in the
+ *     API Descriptor, or a described resource. If a {@link Reference} is provided, then none of the other fields may
+ *     be used, and if any of the other fields are used, a reference may not be provided.
+ * </p>
  */
 public final class Resource {
     private static final Logger LOGGER = LoggerFactory.getLogger(Resource.class);
+    private static final String SERVICES_REFERENCE = "#/services/%s";
 
     @JsonProperty("$ref")
     private final Reference reference;
@@ -83,13 +90,13 @@ public final class Resource {
                 || !isEmpty(actions) || !isEmpty(queries)) && reference != null) {
             throw new ApiValidationException("Cannot have a reference as well as operations");
         }
-        if (mvccSupported == null) {
-            throw new ApiValidationException("mvccSupported required");
+        if (mvccSupported == null && reference == null) {
+            throw new ApiValidationException("mvccSupported required for non-reference Resources");
         }
     }
 
     /**
-     * Getter of resoruce schema.
+     * Getter of resource schema.
      *
      * @return Resource schema
      */
@@ -188,6 +195,14 @@ public final class Resource {
     }
 
     /**
+     * Gets the reference.
+     * @return The reference.
+     */
+    public Reference getReference() {
+        return reference;
+    }
+
+    /**
      * Getter of items.
      *
      * @return Items
@@ -231,6 +246,33 @@ public final class Resource {
      * @return The built {@code Resource} object.
      */
     public static Resource fromAnnotatedType(Class<?> type, AnnotatedTypeVariant variant, ApiDescription descriptor) {
+        return fromAnnotatedType(type, variant, null, null, descriptor);
+    }
+
+    /**
+     * Build a {@code Resource} from an annotated request handler.
+     * @param type The annotated type.
+     * @param variant The annotated type variant.
+     * @param subResources The sub resources object to be included, if any sub-resources exist, or null.
+     * @param descriptor The root descriptor to add definitions to.
+     * @return The built {@code Resource} object.
+     */
+    public static Resource fromAnnotatedType(Class<?> type, AnnotatedTypeVariant variant, SubResources subResources,
+            ApiDescription descriptor) {
+        return fromAnnotatedType(type, variant, subResources, null, descriptor);
+    }
+
+    /**
+     * Build a {@code Resource} from an annotated request handler.
+     * @param type The annotated type.
+     * @param variant The annotated type variant.
+     * @param subResources The sub resources object to be included, if any sub-resources exist, or null.
+     * @param items The items definition for a collection variant, or null.
+     * @param descriptor The root descriptor to add definitions to.
+     * @return The built {@code Resource} object.
+     */
+    public static Resource fromAnnotatedType(Class<?> type, AnnotatedTypeVariant variant,
+            SubResources subResources, Resource items, ApiDescription descriptor) {
         Builder builder = resource();
         RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
         if (requestHandler == null) {
@@ -304,19 +346,20 @@ public final class Resource {
             builder.parameter(Parameter.fromAnnotation(parameter));
         }
 
-        builder.resourceSchema(resourceSchema);
-        builder.mvccSupported(requestHandler.mvccSupported());
-        builder.title(requestHandler.title());
-        builder.description(requestHandler.description());
-        return builder.build();
-    }
-
-    /**
-     * Gets the reference.
-     * @return The reference.
-     */
-    public Reference getReference() {
-        return reference;
+        Resource resource = builder.resourceSchema(resourceSchema)
+                .mvccSupported(requestHandler.mvccSupported())
+                .title(requestHandler.title())
+                .description(requestHandler.description())
+                .subresources(subResources)
+                .items(items)
+                .build();
+        
+        if (!requestHandler.id().isEmpty()) {
+            descriptor.getServices().addService(requestHandler.id(), resource);
+            Reference reference = reference().value(String.format(SERVICES_REFERENCE, requestHandler.id())).build();
+            resource = resource().reference(reference).build();
+        }
+        return resource;
     }
 
     /**
@@ -366,6 +409,7 @@ public final class Resource {
         private Boolean mvccSupported;
         public Reference reference;
         private final List<Parameter> parameters;
+        private boolean built = false;
 
         /**
          * Private default constructor.
@@ -382,6 +426,7 @@ public final class Resource {
          * @return This builder.
          */
         public Builder reference(Reference reference) {
+            checkState();
             this.reference = reference;
             return this;
         }
@@ -394,6 +439,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder resourceSchema(Schema resourceSchema) {
+            checkState();
             this.resourceSchema = resourceSchema;
             return this;
         }
@@ -416,6 +462,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder description(String description) {
+            checkState();
             this.description = description;
             return this;
         }
@@ -427,6 +474,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder create(Create create) {
+            checkState();
             this.create = create;
             return this;
         }
@@ -438,6 +486,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder read(Read read) {
+            checkState();
             this.read = read;
             return this;
         }
@@ -449,6 +498,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder update(Update update) {
+            checkState();
             this.update = update;
             return this;
         }
@@ -460,6 +510,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder delete(Delete delete) {
+            checkState();
             this.delete = delete;
             return this;
         }
@@ -471,6 +522,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder patch(Patch patch) {
+            checkState();
             this.patch = patch;
             return this;
         }
@@ -482,6 +534,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder actions(List<Action> actions) {
+            checkState();
             this.actions.addAll(actions);
             return this;
         }
@@ -493,6 +546,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder action(Action action) {
+            checkState();
             this.actions.add(action);
             return this;
         }
@@ -504,6 +558,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder queries(List<Query> queries) {
+            checkState();
             this.queries.addAll(queries);
             return this;
         }
@@ -515,6 +570,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder query(Query query) {
+            checkState();
             this.queries.add(query);
             return this;
         }
@@ -526,6 +582,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder subresources(SubResources subresources) {
+            checkState();
             this.subresources = subresources;
             return this;
         }
@@ -537,6 +594,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder operations(Operation... operations) {
+            checkState();
             Reject.ifNull(operations);
             for (Operation operation : operations) {
                 operation.allocateToResource(this);
@@ -551,6 +609,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder mvccSupported(boolean mvccSupported) {
+            checkState();
             this.mvccSupported = mvccSupported;
             return this;
         }
@@ -562,6 +621,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder items(Resource items) {
+            checkState();
             this.items = items;
             return this;
         }
@@ -573,6 +633,7 @@ public final class Resource {
          * @return Builder
          */
         public Builder parameters(List<Parameter> parameters) {
+            checkState();
             this.parameters.addAll(parameters);
             return this;
         }
@@ -594,12 +655,18 @@ public final class Resource {
          * @return Resource instance
          */
         public Resource build() {
+            checkState();
+            this.built = true;
             if (create == null && read == null && update == null && delete == null && patch == null
                     && actions.isEmpty() && queries.isEmpty() && reference == null) {
                 return null;
             }
 
             return new Resource(this);
+        }
+
+        private void checkState() {
+            rejectStateIfTrue(built, "Already built Resource");
         }
 
     }

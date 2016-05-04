@@ -16,6 +16,9 @@
 
 package org.forgerock.api.models;
 
+import static org.forgerock.api.models.Definitions.definitions;
+import static org.forgerock.api.models.Errors.errors;
+import static org.forgerock.api.models.Services.services;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
 import org.forgerock.api.ApiValidationException;
@@ -37,9 +40,9 @@ public final class ApiDescription {
         this.id = builder.id;
         this.version = builder.version;
         this.description = builder.description;
-        this.definitions = builder.definitions == null ? Definitions.definitions().build() : builder.definitions;
-        this.services = builder.services;
-        this.errors = builder.errors == null ? Errors.errors().build() : builder.errors;
+        this.definitions = builder.definitions == null ? definitions().build() : builder.definitions;
+        this.services = builder.services == null ? services().build() : builder.services;
+        this.errors = builder.errors == null ? errors().build() : builder.errors;
         this.paths = builder.paths;
 
         if (isEmpty(id) || isEmpty(version)) {

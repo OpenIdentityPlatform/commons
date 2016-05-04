@@ -82,6 +82,15 @@ public final class Services {
     }
 
     /**
+     * Package-local method for adding extra service definitions when computing {@link Resource} from annotations.
+     * @param id The service ID.
+     * @param resource The resource definition.
+     */
+    void addService(String id, Resource resource) {
+        services.put(id, resource);
+    }
+
+    /**
      * Builder to help construct the Services.
      */
     public static final class Builder {

@@ -215,7 +215,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
                 descriptors.add(matcher.transformApi(descriptor, context));
             }
         }
-        return context.merge(context.getApiId(), descriptors);
+        return context.merge(context.getApiId(), context.getApiVersion(), descriptors);
     }
 
 }

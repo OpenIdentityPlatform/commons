@@ -163,7 +163,7 @@ class UriRouteMatcher extends RouteMatcher<List<String>> {
 
     @Override
     public <T> T transformApi(T descriptor, ApiContext<T> context) {
-        return context.withPath(descriptor, context.getApiId(), uriTemplate);
+        return context.withPath(descriptor, context.getApiId(), context.getApiVersion(), uriTemplate);
     }
 
     @Override

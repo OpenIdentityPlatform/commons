@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
  * <p>
  * Example:
  * <code><pre>
- *     &#064;RequestHandler
+ *     &#064;RequestHandler(variant = COLLECTION_RESOURCE)
  *     &#064;Path("things")
  *     public class ThingProducer {
  *         &#064;Read
@@ -49,12 +49,12 @@ import java.lang.annotation.Target;
  *         }
  *
  *         &#064;Path("{thing}/subthing")
- *         public SubthingsProducer subthings() {
- *             return new SubthingsProducer();
+ *         public SubthingProducer subthing() {
+ *             return new SubthingProducer();
  *         }
  *     }
  *
- *     &#064;RequestHandler
+ *     &#064;RequestHandler(variant = SINGLETON_RESOURCE)
  *     public class SubthingProducer {
  *         &#064;Read
  *         public Promise&lt;ResourceResponse, ResourceException> get() {

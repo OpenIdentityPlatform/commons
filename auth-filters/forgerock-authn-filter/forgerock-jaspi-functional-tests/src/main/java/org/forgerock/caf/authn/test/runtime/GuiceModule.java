@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.caf.authn.test.runtime;
@@ -96,7 +96,7 @@ public class GuiceModule extends AbstractModule {
             throws ResourceException, ClassNotFoundException {
 
         ResourceResponse configuration = newInternalConnection(newSingleton(configurationResource))
-                .read(new RootContext(), newReadRequest("configuration"));
+                .read(new RootContext(), newReadRequest(""));
         JsonValue sessionModuleConfig = configuration.getContent().get("serverAuthContext").get("sessionModule");
         if (!sessionModuleConfig.isNull()) {
             return (AsyncServerAuthModule) injector.getInstance(
@@ -124,7 +124,7 @@ public class GuiceModule extends AbstractModule {
         List<AsyncServerAuthModule> authModules = new ArrayList<>();
 
         ResourceResponse configuration = newInternalConnection(newSingleton(configurationResource))
-                .read(new RootContext(), newReadRequest("configuration"));
+                .read(new RootContext(), newReadRequest(""));
         JsonValue authModulesConfig = configuration.getContent().get("serverAuthContext").get("authModules");
         for (JsonValue authModuleConfig : authModulesConfig) {
             authModules.add((AsyncServerAuthModule) injector.getInstance(

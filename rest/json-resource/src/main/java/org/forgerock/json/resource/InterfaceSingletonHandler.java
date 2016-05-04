@@ -16,24 +16,19 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.*;
 
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
-import org.forgerock.api.models.Resource;
-
-class InterfaceSingletonHandler extends DescribableResourceHandler implements RequestHandler {
+class InterfaceSingletonHandler implements RequestHandler {
     private final SingletonResourceProvider provider;
 
     InterfaceSingletonHandler(final SingletonResourceProvider provider) {
-        super(provider.getClass(), Resource.AnnotatedTypeVariant.SINGLETON_RESOURCE);
         this.provider = provider;
-    }
-
-    protected InterfaceSingletonHandler(Class<?> type) {
-        super(type, Resource.AnnotatedTypeVariant.SINGLETON_RESOURCE);
-        this.provider = null;
     }
 
     @Override

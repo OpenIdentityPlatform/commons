@@ -30,42 +30,48 @@ import org.forgerock.http.routing.Version;
 public abstract class ApiContext<T> extends AbstractContext implements Context {
 
     private final String idFragment;
+    private final String apiVersion;
 
     /**
      * Create a new API Description Context.
      * @param parent The parent context.
      * @param idFragment The ID fragment for this context level.
+     * @param apiVersion The version to apply to descriptors.
      */
-    public ApiContext(Context parent, String idFragment) {
+    public ApiContext(Context parent, String idFragment, String apiVersion) {
         super(parent, "ApiContext");
         this.idFragment = idFragment;
+        this.apiVersion = apiVersion;
     }
 
     /**
      * Mutate the provided descriptor to add the specified path and new id.
      * @param descriptor The descriptor to be mutated.
-     * @param id The new descriptor's ID.
+     * @param apiId The new descriptor's API ID.
+     * @param apiVersion The new descriptor's API Version.
      * @param path The path to add to the descriptor.
      * @return The new descriptor.
      */
-    public abstract T withPath(T descriptor, String id, String path);
+    public abstract T withPath(T descriptor, String apiId, String apiVersion, String path);
 
     /**
      * Mutate the provided descriptor to add the specified version and new id.
      * @param descriptor The descriptor to be mutated.
-     * @param id The new descriptor's ID.
-     * @param version The version to apply to the descriptor.
+     * @param apiId The new descriptor's API ID.
+     * @param apiVersion The new descriptor's API Version.
+     * @param version The version to apply to the resource.
      * @return The new descriptor.
      */
-    public abstract T withVersion(T descriptor, String id, Version version);
+    public abstract T withVersion(T descriptor, String apiId, String apiVersion, Version version);
 
     /**
      * Merge the provided descriptors into a single descriptor with the specified ID.
-     * @param id The new descriptor's ID.
+     * @param apiId The new descriptor's ID.
+     * @param apiVersion The version to apply to the descriptor.
      * @param descriptors The descriptors to be merged.
      * @return The merged descriptor.
      */
-    public abstract T merge(String id, List<T> descriptors);
+    public abstract T merge(String apiId, String apiVersion, List<T> descriptors);
 
     /**
      * Get the API ID for this context.
@@ -84,4 +90,12 @@ public abstract class ApiContext<T> extends AbstractContext implements Context {
      * @return The new context.
      */
     public abstract ApiContext<T> newChildContext(String idFragment);
+
+    /**
+     * Get the version of the API being described.
+     * @return The version.
+     */
+    public String getApiVersion() {
+        return apiVersion;
+    }
 }

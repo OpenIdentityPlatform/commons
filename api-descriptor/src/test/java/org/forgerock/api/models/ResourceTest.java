@@ -759,6 +759,31 @@ public class ResourceTest {
 
     }
 
+    @Test
+    public void testReferencedHandler() throws Exception {
+        ApiDescription descriptor = createApiDescription();
+        final Resource resource = fromAnnotatedType(ReferencedHandler.class, SINGLETON_RESOURCE, descriptor);
+        assertThat(resource.getReference()).isNotNull();
+        assertThat(resource.getReference().getValue()).isEqualTo("#/services/referenced");
+        final Resource referenced = descriptor.getServices().get("referenced");
+        assertThat(referenced).isNotNull();
+        assertThat(referenced.getResourceSchema()).isNotNull();
+        assertThat(referenced.getRead()).isNotNull();
+    }
+
+    @RequestHandler(id = "referenced",
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
+            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    private static final class ReferencedHandler {
+        @org.forgerock.api.annotations.Read(
+                operationDescription = @org.forgerock.api.annotations.Operation(
+                        description = "A read resource operation."
+                ))
+        public void read() {
+
+        }
+    }
+
     private static final class Request {
         public String id;
         public Integer field;

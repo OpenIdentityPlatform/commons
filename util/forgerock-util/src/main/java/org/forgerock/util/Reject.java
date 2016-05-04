@@ -208,6 +208,23 @@ public final class Reject {
         }
     }
 
+    /**
+     * Throws an {@code IllegalStateException} with a custom {@code message}
+     * if the <tt>condition</tt> parameter is true.
+     *
+     * @param condition
+     *            the condition to test
+     * @param message
+     *            a custom exception message to use
+     * @throws IllegalStateException
+     *             if {@code condition} is true
+     */
+    public static void rejectStateIfTrue(final boolean condition, final String message) {
+        if (condition) {
+            throw new IllegalStateException(message);
+        }
+    }
+
     // Prevent instantiation
     private Reject() {
         // nothing to do

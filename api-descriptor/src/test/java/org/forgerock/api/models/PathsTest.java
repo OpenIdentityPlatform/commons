@@ -50,7 +50,7 @@ public class PathsTest {
         return new Object[][]{
                 {null, null, Exception.class},
                 {null, simplePathNode, IllegalArgumentException.class},
-                {"", simplePathNode, IllegalArgumentException.class},
+                {"", simplePathNode, null},
                 {"\t", simplePathNode, IllegalArgumentException.class},
                 {"/contains space", simplePathNode, IllegalArgumentException.class},
                 {"/uniqueName", null, NullPointerException.class},
@@ -61,7 +61,7 @@ public class PathsTest {
 
     @Test(dataProvider = "putValidationData")
     public void testPut(final String name, final VersionedPath pathNode,
-            final Class<? extends Throwable> expectedException) {
+            final Class<? extends Throwable> expectedException) throws Exception {
         final Paths.Builder builder = Paths.paths();
 
         // add an entry, so that we can test for name-uniqueness
@@ -74,16 +74,18 @@ public class PathsTest {
         } catch (final Exception e) {
             if (expectedException != null) {
                 assertThat(e).isInstanceOf(expectedException);
+                return;
+            } else {
+                throw e;
             }
-            return;
         }
 
         if (expectedException != null) {
             failBecauseExceptionWasNotThrown(expectedException);
         }
 
-        assertThat(paths.get("/uniqueName")).isNotNull();
-        assertThat(paths.getNames()).contains("/uniqueName", "/notUniqueName");
+        assertThat(paths.get(name)).isNotNull();
+        assertThat(paths.getNames()).contains(name, "/notUniqueName");
         assertThat(paths.getPaths()).isNotEmpty();
     }
 

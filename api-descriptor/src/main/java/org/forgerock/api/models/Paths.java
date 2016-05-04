@@ -106,7 +106,7 @@ public final class Paths {
          * @return Builder
          */
         public Builder put(String name, VersionedPath path) {
-            if (isEmpty(name) || containsWhitespace(name)) {
+            if (name == null || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");
             }
             if (paths.containsKey(name)) {

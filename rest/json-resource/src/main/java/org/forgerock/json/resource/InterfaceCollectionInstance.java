@@ -16,24 +16,16 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
+import static org.forgerock.util.promise.Promises.*;
 
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
-import org.forgerock.api.models.Resource;
-
-class InterfaceCollectionInstance extends DescribableResourceHandler implements RequestHandler {
+class InterfaceCollectionInstance implements RequestHandler {
     private final CollectionResourceProvider provider;
 
-    InterfaceCollectionInstance(final CollectionResourceProvider provider) {
-        super(provider.getClass(), Resource.AnnotatedTypeVariant.COLLECTION_RESOURCE_INSTANCE);
+    InterfaceCollectionInstance(CollectionResourceProvider provider) {
         this.provider = provider;
-    }
-
-    protected InterfaceCollectionInstance(final Class<?> type) {
-        super(type, Resource.AnnotatedTypeVariant.COLLECTION_RESOURCE_INSTANCE);
-        this.provider = null;
     }
 
     @Override
@@ -81,4 +73,5 @@ class InterfaceCollectionInstance extends DescribableResourceHandler implements 
             final UpdateRequest request) {
         return provider.updateInstance(Resources.parentOf(context), Resources.idOf(context), request);
     }
+
 }

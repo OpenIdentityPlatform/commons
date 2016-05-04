@@ -18,22 +18,16 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.util.promise.Promises.*;
 
+import org.forgerock.api.models.ApiDescription;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
-import org.forgerock.api.models.Resource;
-
-class InterfaceCollectionHandler extends DescribableResourceHandler implements RequestHandler {
+class InterfaceCollectionHandler implements RequestHandler {
     private final CollectionResourceProvider provider;
 
     InterfaceCollectionHandler(final CollectionResourceProvider provider) {
-        super(provider.getClass(), Resource.AnnotatedTypeVariant.COLLECTION_RESOURCE_COLLECTION);
         this.provider = provider;
-    }
-
-    protected InterfaceCollectionHandler(final Class<?> type) {
-        super(type, Resource.AnnotatedTypeVariant.COLLECTION_RESOURCE_COLLECTION);
-        this.provider = null;
     }
 
     @Override

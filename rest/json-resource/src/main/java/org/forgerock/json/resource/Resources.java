@@ -16,7 +16,9 @@
 
 package org.forgerock.json.resource;
 
-import static org.forgerock.http.routing.RoutingMode.EQUALS;
+import static org.forgerock.api.models.Resource.AnnotatedTypeVariant.*;
+import static org.forgerock.api.models.SubResources.subresources;
+import static org.forgerock.http.routing.RoutingMode.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
@@ -29,6 +31,10 @@ import java.util.Map;
 
 import org.forgerock.api.annotations.Path;
 import org.forgerock.api.enums.HandlerVariant;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.SubResources;
+import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
@@ -147,40 +153,6 @@ public final class Resources {
     }
 
     /**
-     * Returns a new request handler which will forward requests on to the
-     * provided collection resource provider. Incoming requests which are not
-     * appropriate for a resource collection or resource instance will result in
-     * a bad request error being returned to the client.
-     *
-     * @param provider
-     *            The collection resource provider. Either an implementation of {@link CollectionResourceProvider} or
-     *            a POJO annotated with annotations from {@link org.forgerock.json.resource.annotations}.
-     * @return A new request handler which will forward requests on to the
-     *         provided collection resource provider.
-     */
-    public static RequestHandler newCollection(final Object provider) {
-        // Route requests to the collection/instance using a router.
-        final Router router = new Router();
-        addCollectionHandlersToRouter(provider, router, "");
-        return router;
-    }
-
-    private static void addCollectionHandlersToRouter(Object provider, Router router, String basePath) {
-        boolean fromInterface = provider instanceof CollectionResourceProvider;
-        // Create a route for the collection.
-        final RequestHandler collectionHandler = fromInterface
-                ? new InterfaceCollectionHandler((CollectionResourceProvider) provider)
-                : new AnnotatedCollectionHandler(provider);
-        router.addRoute(requestUriMatcher(EQUALS, basePath), collectionHandler);
-
-        // Create a route for the instances within the collection.
-        final RequestHandler instanceHandler = fromInterface
-                ? new InterfaceCollectionInstance((CollectionResourceProvider) provider)
-                : new AnnotationCollectionInstance(provider);
-        router.addRoute(requestUriMatcher(EQUALS, basePath.isEmpty() ? "{id}" : basePath + "/{id}"), instanceHandler);
-    }
-
-    /**
      * Creates a new connection to a {@link RequestHandler}.
      *
      * @param handler
@@ -224,39 +196,61 @@ public final class Resources {
      * @return The constructed handler.
      */
     public static RequestHandler newHandler(Object provider) {
-        Router router = new Router();
+        final DescribableResourceHandler descriptorProvider = new DescribableResourceHandler();
+        Router router = new Router() {
+            @Override
+            public ApiDescription api(ApiContext<ApiDescription> context) {
+                return descriptorProvider.api(context);
+            }
+        };
+        descriptorProvider.describes(addHandlers(provider, router, "", descriptorProvider.getDefinitionDescriptions()));
         Path path = provider.getClass().getAnnotation(Path.class);
-        addHandlers(provider, router, path == null ? "" : path.value());
+        if (path != null) {
+            Router pathRouter = new Router();
+            pathRouter.addRoute(requestUriMatcher(STARTS_WITH, path.value()), router);
+            router = pathRouter;
+        }
         return router;
     }
 
-    private static void addHandlers(Object provider, Router router, String basePath) {
-        HandlerVariant varient = deduceHandlerVariant(provider);
-        if (varient == null) {
-            router.addRoute(requestUriMatcher(EQUALS, basePath), (RequestHandler) provider);
-        } else {
-            switch (varient) {
-            case SINGLETON_RESOURCE:
-                router.addRoute(requestUriMatcher(EQUALS, basePath), newSingleton(provider));
-                break;
-            case COLLECTION_RESOURCE:
-                addCollectionHandlersToRouter(provider, router, basePath);
-                break;
-            case REQUEST_HANDLER:
-                router.addRoute(requestUriMatcher(EQUALS, basePath), newAnnotatedRequestHandler(provider));
-            }
+    private static Resource addHandlers(Object provider, Router router, String basePath,
+            ApiDescription definitions) {
+        HandlerVariant variant = deduceHandlerVariant(provider);
+        switch (variant) {
+        case SINGLETON_RESOURCE:
+            addSingletonHandlerToRouter(provider, router, basePath);
+            break;
+        case COLLECTION_RESOURCE:
+            addCollectionHandlersToRouter(provider, router, basePath);
+            break;
+        case REQUEST_HANDLER:
+            addRequestHandlerToRouter(provider, router, basePath);
+            break;
+        default:
+            return null;
         }
+
+        SubResources.Builder subResourcesBuilder = null;
         for (Method m : provider.getClass().getMethods()) {
             Path subpathAnnotation = m.getAnnotation(Path.class);
             if (subpathAnnotation != null) {
+                if (subResourcesBuilder == null) {
+                    subResourcesBuilder = subresources();
+                }
                 String subpath = subpathAnnotation.value().replaceAll("^/", "");
                 try {
-                    addHandlers(m.invoke(provider), router, basePath.isEmpty() ? subpath : basePath + "/" + subpath);
+                    Resource subResource = addHandlers(m.invoke(provider), router,
+                            basePath.isEmpty() ? subpath : basePath + "/" + subpath, definitions);
+                    if (subResource != null) {
+                        subResourcesBuilder.put(subpath, subResource);
+                    }
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new IllegalArgumentException("Could not construct handler tree", e);
                 }
             }
         }
+        SubResources subResources = subResourcesBuilder == null ? null : subResourcesBuilder.build();
+        return makeDescriptor(provider, variant, subResources, definitions);
     }
 
     private static HandlerVariant deduceHandlerVariant(Object provider) {
@@ -270,9 +264,69 @@ public final class Resources {
         } else if (provider instanceof CollectionResourceProvider) {
             return HandlerVariant.COLLECTION_RESOURCE;
         } else if (provider instanceof RequestHandler) {
-            return null;
+            return HandlerVariant.REQUEST_HANDLER;
         }
         throw new IllegalArgumentException("Cannot deduce provider variant");
+    }
+
+    private static void addRequestHandlerToRouter(Object provider, Router router, String basePath) {
+        router.addRoute(requestUriMatcher(STARTS_WITH, basePath), new AnnotatedRequestHandler(provider));
+    }
+
+    private static void addCollectionHandlersToRouter(Object provider, Router router, String basePath) {
+        boolean fromInterface = provider instanceof CollectionResourceProvider;
+        // Create a route for the collection.
+        final RequestHandler collectionHandler = fromInterface
+                ? new InterfaceCollectionHandler((CollectionResourceProvider) provider)
+                : new AnnotatedCollectionHandler(provider);
+        router.addRoute(requestUriMatcher(EQUALS, basePath), collectionHandler);
+
+        // Create a route for the instances within the collection.
+        final RequestHandler instanceHandler = fromInterface
+                ? new InterfaceCollectionInstance((CollectionResourceProvider) provider)
+                : new AnnotationCollectionInstance(provider);
+        router.addRoute(requestUriMatcher(EQUALS, basePath.isEmpty() ? "{id}" : basePath + "/{id}"), instanceHandler);
+    }
+
+    private static void addSingletonHandlerToRouter(Object provider, Router router, String basePath) {
+        router.addRoute(requestUriMatcher(EQUALS, basePath),
+                provider instanceof SingletonResourceProvider
+                        ? new InterfaceSingletonHandler((SingletonResourceProvider) provider)
+                        : new AnnotatedSingletonHandler(provider));
+    }
+
+    private static Resource makeDescriptor(Object provider, HandlerVariant variant, SubResources subResources,
+            ApiDescription definitions) {
+        switch (variant) {
+        case SINGLETON_RESOURCE:
+            return Resource.fromAnnotatedType(provider.getClass(), SINGLETON_RESOURCE, subResources, definitions);
+        case COLLECTION_RESOURCE:
+            Resource items = Resource.fromAnnotatedType(provider.getClass(), COLLECTION_RESOURCE_INSTANCE, definitions);
+            return Resource.fromAnnotatedType(provider.getClass(), COLLECTION_RESOURCE_COLLECTION, subResources, items,
+                    definitions);
+        case REQUEST_HANDLER:
+            return Resource.fromAnnotatedType(provider.getClass(), REQUEST_HANDLER, subResources, definitions);
+        default:
+            return null;
+        }
+    }
+
+    /**
+     * Returns a new request handler which will forward requests on to the
+     * provided collection resource provider. Incoming requests which are not
+     * appropriate for a resource collection or resource instance will result in
+     * a bad request error being returned to the client.
+     *
+     * @param provider
+     *            The collection resource provider. Either an implementation of {@link CollectionResourceProvider} or
+     *            a POJO annotated with annotations from {@link org.forgerock.json.resource.annotations}.
+     * @return A new request handler which will forward requests on to the
+     *         provided collection resource provider.
+     * @deprecated Use {@link #newHandler(Object)} instead.
+     */
+    @Deprecated
+    public static RequestHandler newCollection(final Object provider) {
+        return newHandler(provider);
     }
 
     /**
@@ -286,13 +340,11 @@ public final class Resources {
      *            a POJO annotated with annotations from {@link org.forgerock.json.resource.annotations}.
      * @return A new request handler which will forward requests on to the
      *         provided singleton resource provider.
+     * @deprecated Use {@link #newHandler(Object)} instead.
      */
+    @Deprecated
     public static RequestHandler newSingleton(final Object provider) {
-        if (provider instanceof SingletonResourceProvider) {
-            return new InterfaceSingletonHandler((SingletonResourceProvider) provider);
-        } else {
-            return new AnnotatedSingletonHandler(provider);
-        }
+        return newHandler(provider);
     }
 
     /**
@@ -302,12 +354,14 @@ public final class Resources {
      * @param provider
      *            The POJO annotated with annotations from {@link org.forgerock.json.resource.annotations}.
      * @return A new request handler which will forward requests on to the provided annotated POJO.
+     * @deprecated Use {@link #newHandler(Object)} instead.
      */
+    @Deprecated
     public static RequestHandler newAnnotatedRequestHandler(final Object provider) {
         Reject.ifTrue(provider instanceof RequestHandler,
                 "Refusing to create an annotated request handler using a provider that implements RequestHandler. "
                         + "Use the RequestHandler implementation directly instead");
-        return new AnnotatedRequestHandler(provider);
+        return newHandler(provider);
     }
 
     /**

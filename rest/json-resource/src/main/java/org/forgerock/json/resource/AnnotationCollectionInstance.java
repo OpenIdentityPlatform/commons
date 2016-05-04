@@ -43,7 +43,7 @@ class AnnotationCollectionInstance extends InterfaceCollectionInstance {
     private final AnnotatedActionMethods actionMethods;
 
     AnnotationCollectionInstance(Object requestHandler) {
-        super(requestHandler.getClass());
+        super(null);
         this.readMethod = AnnotatedMethod.findMethod(requestHandler, Read.class, true);
         this.updateMethod = AnnotatedMethod.findMethod(requestHandler, Update.class, true);
         this.deleteMethod = AnnotatedMethod.findMethod(requestHandler, Delete.class, true);
