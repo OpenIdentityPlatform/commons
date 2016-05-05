@@ -16,15 +16,16 @@
 
 package org.forgerock.json.resource.http.examples;
 
-import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
-
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.Router;
+import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.json.resource.descriptor.examples.handler.UserCollectionHandler;
 import org.forgerock.util.Factory;
+
+import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
 
 /**
  * Http Application implementation to demonstrate integration with the Commons HTTP Framework.
@@ -36,6 +37,10 @@ public class CrestHttpApplication implements HttpApplication {
         Router router = new Router();
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/users"), MemoryBackendHandler.getHandler());
         router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/groups"), MemoryBackendHandler.getHandler());
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/api/users"),
+                UserCollectionHandler.getUsersRouter());
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/api/admins"),
+                UserCollectionHandler.getAdminsRouter());
         return router;
     }
 

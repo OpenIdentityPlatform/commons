@@ -386,7 +386,7 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 type        | String                      | ✓          | Supported values are:`ID`, `FILTER`, `EXPRESSION`.
 pagingMode  | String[]                    |            | Supported values are:`COOKIE`, `OFFSET`. Paging is not supported if omitted.
-countPolicy | String[]                    |            | Supported values are:`ESTIMATE`, `EXACT`. Counts are not provided if omitted.
+countPolicy | String[]                    |            | Supported values are:`ESTIMATE`, `EXACT`, `NONE`. Counts are not provided if omitted.
 queryId     | String                      | `type:ID`  | Required if `type` is `ID`.
 queryableFields | String[]                | `type:FILTER` | Required if `type` is `FILTER`. Lists the fields in the `resourceSchema` that can be queried. A value of “*” can be used to state that all fields can be queried.
 supportedSortKeys | String[]              |            | The keys that may be used to sort the filter results. A value of “*” can be used to state that all keys are supported.
