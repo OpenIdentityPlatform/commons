@@ -217,8 +217,8 @@ public abstract class Operation {
             for (org.forgerock.api.annotations.Error error : operation.errors()) {
                 error(Error.fromAnnotation(error, descriptor, relativeType));
             }
-            for (org.forgerock.api.annotations.Parameter error : operation.parameters()) {
-                parameter(Parameter.fromAnnotation(error));
+            for (org.forgerock.api.annotations.Parameter parameter : operation.parameters()) {
+                parameter(Parameter.fromAnnotation(parameter));
             }
             return description(operation.description())
                     .supportedLocales(operation.locales())

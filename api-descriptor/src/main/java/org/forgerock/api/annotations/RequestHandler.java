@@ -95,4 +95,7 @@ public @interface RequestHandler {
 
     /** Service description, for documentation purposes. */
     String description() default "";
+
+    /** Parameters on service paths and/or endpoints. */
+    Parameter[] parameters() default {};
 }

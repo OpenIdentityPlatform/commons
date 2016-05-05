@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -57,6 +58,7 @@ public final class Resource {
     private final SubResources subresources;
     private final Resource items;
     private final Boolean mvccSupported;
+    private final Parameter[] parameters;
 
     private Resource(Builder builder) {
         this.reference = builder.reference;
@@ -73,6 +75,9 @@ public final class Resource {
         this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
         this.items = builder.items;
         this.mvccSupported = builder.mvccSupported;
+
+        final List<Parameter> parameters = builder.parameters;
+        this.parameters = parameters.toArray(new Parameter[parameters.size()]);
 
         if ((create != null || read != null || update != null || delete != null || patch != null
                 || !isEmpty(actions) || !isEmpty(queries)) && reference != null) {
@@ -183,12 +188,30 @@ public final class Resource {
     }
 
     /**
+     * Getter of items.
+     *
+     * @return Items
+     */
+    public Resource getItems() {
+        return items;
+    }
+
+    /**
      * Informs if MVCC is supported.
      *
      * @return {@code true} if MVCC is supported and {@code false} otherwise
      */
     public boolean isMvccSupported() {
         return mvccSupported;
+    }
+
+    /**
+     * Getter of the parameters array.
+     *
+     * @return Parameters
+     */
+    public Parameter[] getParameters() {
+        return parameters;
     }
 
     /**
@@ -276,6 +299,11 @@ public final class Resource {
         if (foundCrudpq && resourceSchema == null) {
             throw new IllegalArgumentException("CRUDPQ operation(s) defined, but no resource schema declared");
         }
+
+        for (org.forgerock.api.annotations.Parameter parameter : requestHandler.parameters()) {
+            builder.parameter(Parameter.fromAnnotation(parameter));
+        }
+
         builder.resourceSchema(resourceSchema);
         builder.mvccSupported(requestHandler.mvccSupported());
         builder.title(requestHandler.title());
@@ -337,6 +365,7 @@ public final class Resource {
         private Resource items;
         private Boolean mvccSupported;
         public Reference reference;
+        private final List<Parameter> parameters;
 
         /**
          * Private default constructor.
@@ -344,6 +373,7 @@ public final class Resource {
         protected Builder() {
             actions = new TreeSet<>();
             queries = new TreeSet<>();
+            parameters = new ArrayList<>();
         }
 
         /**
@@ -533,6 +563,28 @@ public final class Resource {
          */
         public Builder items(Resource items) {
             this.items = items;
+            return this;
+        }
+
+        /**
+         * Set multiple supported parameters.
+         *
+         * @param parameters Extra parameters supported by the resource
+         * @return Builder
+         */
+        public Builder parameters(List<Parameter> parameters) {
+            this.parameters.addAll(parameters);
+            return this;
+        }
+
+        /**
+         * Sets a single supported parameter.
+         *
+         * @param parameter Extra parameter supported by the resource
+         * @return Builder
+         */
+        public Builder parameter(Parameter parameter) {
+            this.parameters.add(parameter);
             return this;
         }
 

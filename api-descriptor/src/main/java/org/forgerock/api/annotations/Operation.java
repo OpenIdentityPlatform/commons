@@ -26,7 +26,7 @@ public @interface Operation {
     String[] locales() default {};
     /** The list of possible errors for the operation. */
     Error[] errors() default {};
-    /** The lis of additional parameters for the operation. */
+    /** Parameters on operation paths and/or endpoints. */
     Parameter[] parameters() default {};
     /** The stability state for the operation. Defaults to {@code STABLE}. */
     Stability stability() default Stability.STABLE;

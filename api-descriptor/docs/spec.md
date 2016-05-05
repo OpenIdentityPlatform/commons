@@ -134,6 +134,7 @@ queries     | [Query](#query)[]           |            | The query operation des
 subresources | [SubResources](#subresources) |         | Sub-resources of this resource. Sub-resources use the same version as their parent resource, so are not separately versioned.
 items       | [Resource](#resource)       |            | The items description in the resource. Used if the resource is a collection.
 mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
+parameters  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource
 
 ### SubResources
 
