@@ -282,10 +282,24 @@ define([
         return new Handlebars.SafeString(result);
     });
 
+    /**
+     * Use this helper around a basic select to automatically
+     * mark the option corresponding to the provided value as selected.
+     *
+     * @example JS
+     *  this.data.mimeType = "text/html";
+     *
+     * @example HTML
+     *  <select>
+     *      {{#staticSelect mimeType}}
+     *      <option value="text/html">text/html</option>
+     *      <option value="text/plain">text/plain</option>
+     *      {{/staticSelect}}
+     *  </select>
+     */
     Handlebars.registerHelper("staticSelect", function(value, options){
         var selected = $("<select />").html(options.fn(this));
-        selected.find("[value=" + value + "]").attr({"selected":"selected"});
-
+        selected.find("[value=\'" + value.replace("'", "\\'") + "\']").attr({"selected":"selected"});
         return selected.html();
     });
 

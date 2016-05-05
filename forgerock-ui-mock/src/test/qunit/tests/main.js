@@ -18,5 +18,6 @@
 define([
     "./commons/Base64",
     "./commons/ObjectUtil",
+    "./commons/UIUtils",
     "./user/AnonymousProcessView"
 ]);
