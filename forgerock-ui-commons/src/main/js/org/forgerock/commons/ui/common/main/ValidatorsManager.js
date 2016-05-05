@@ -16,7 +16,7 @@
 
 define([
     "jquery",
-    "underscore",
+    "lodash",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/ModuleLoader"
 ], function($, _, AbstractConfigurationAware, ModuleLoader) {
@@ -126,14 +126,15 @@ define([
         var dependentFields = element.attr("data-validation-dependents");
 
         if (dependentFields) {
-            return $.when.apply($, container
+            // _.toArray added here due to bug in phantomjs. Not necessary otherwise
+            return $.when.apply($, _.toArray(container
                 .find(':input')
                 .filter(function () {
                     return $.inArray($(this).attr("id"), dependentFields.split(",")) !== -1;
                 })
                 .map(function () {
                     return obj.evaluateAllValidatorsForField($(this), container);
-                }));
+                })));
         } else {
             return $.Deferred().resolve();
         }

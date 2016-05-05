@@ -16,7 +16,7 @@
 
 define([
     "jquery",
-    "underscore",
+    "lodash",
     "org/forgerock/commons/ui/common/util/ModuleLoader"
 ], function($, _, ModuleLoader) {
 

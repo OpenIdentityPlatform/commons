@@ -14,13 +14,22 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-// add new test modules here:
 define([
-    "./commons/AbstractModel",
-    "./commons/Base64",
-    "./commons/ObjectUtil",
-    "./commons/UIUtils",
-    "./commons/Queue",
-    "./commons/ValidatorsManager",
-    "./user/AnonymousProcessView"
-]);
+    "org/forgerock/commons/ui/common/util/Queue"
+], function (Queue) {
+    QUnit.module('Queue Functions');
+
+    QUnit.test("core operations", function () {
+        var q = new Queue(["a","b"]);
+
+        QUnit.equal(q.peek(), "a");
+        QUnit.equal(q.remove(), "a");
+        QUnit.equal(q.remove(), "b");
+        q.add("c");
+        QUnit.equal(q.remove(), "c");
+        QUnit.equal(q.peek(), undefined);
+        QUnit.equal(q.remove(), undefined);
+
+    });
+
+});

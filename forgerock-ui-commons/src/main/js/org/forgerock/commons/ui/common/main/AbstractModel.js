@@ -60,6 +60,14 @@ define([
          * Overrides default sync to align with ForgeRock REST API
          */
         sync: function (method, model, options) {
+            var parseResponse = function (response) {
+                if (options.parse) {
+                    model.set(model.parse(response, options));
+                    return model.toJSON();
+                } else {
+                    return response;
+                }
+            };
             switch (method) {
                 case "create":
                     return ServiceInvoker.restCall(_.extend(
@@ -67,7 +75,7 @@ define([
                             data: JSON.stringify(model.toJSON())
                         },
                         (function () {
-                            if (model.has("id")) {
+                            if (!_.isUndefined(model.id)) {
                                 return {
                                     "type": "PUT",
                                     "headers": {
@@ -83,7 +91,7 @@ define([
                             }
                         }()),
                         options
-                    ));
+                    )).then(parseResponse);
                 case "read":
                     return ServiceInvoker.restCall(_.extend(
                         {
@@ -91,14 +99,7 @@ define([
                             "type": "GET"
                         },
                         options
-                    )).then(function (response) {
-                        if (options.parse) {
-                            model.set(model.parse(response, options));
-                        } else {
-                            model.set(response);
-                        }
-                        return model.toJSON();
-                    });
+                    )).then(parseResponse);
                 case "update":
                     return ServiceInvoker.restCall(_.extend(
                         {
@@ -110,7 +111,7 @@ define([
                             }
                         },
                         options
-                    ));
+                    )).then(parseResponse);
                 case "patch":
                     return ServiceInvoker.restCall(_.extend(
                         {
@@ -123,7 +124,7 @@ define([
                             }
                         },
                         options
-                    ));
+                    )).then(parseResponse);
                 case "delete":
                     return ServiceInvoker.restCall(_.extend(
                         {
@@ -134,7 +135,7 @@ define([
                             }
                         },
                         options
-                    ));
+                    )).then(parseResponse);
             }
         },
         /**
