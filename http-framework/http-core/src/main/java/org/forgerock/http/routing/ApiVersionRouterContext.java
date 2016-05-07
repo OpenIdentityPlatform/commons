@@ -17,10 +17,11 @@
 package org.forgerock.http.routing;
 
 import static org.forgerock.http.routing.Version.version;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.AbstractContext;
 import org.forgerock.json.JsonValue;
+import org.forgerock.services.context.AbstractContext;
+import org.forgerock.services.context.Context;
 
 /**
  * A {@link Context} which is created when a request is and has been routed
@@ -96,7 +97,7 @@ public class ApiVersionRouterContext extends AbstractContext {
      */
     public DefaultVersionBehaviour getDefaultVersionBehaviour() {
         if (data.isDefined(DEFAULT_VERSION_BEHAVIOUR) && data.get(DEFAULT_VERSION_BEHAVIOUR).isNotNull()) {
-            return data.get(DEFAULT_VERSION_BEHAVIOUR).asEnum(DefaultVersionBehaviour.class);
+            return data.get(DEFAULT_VERSION_BEHAVIOUR).as(enumConstant(DefaultVersionBehaviour.class));
         } else {
             return null;
         }

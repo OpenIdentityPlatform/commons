@@ -16,6 +16,8 @@
 
 package org.forgerock.json.patch;
 
+import static org.forgerock.json.JsonValueFunctions.pointer;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -194,7 +196,7 @@ public final class JsonPatch {
             // http://tools.ietf.org/html/rfc6902#section-4.1
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).asPointer();
+                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).as(pointer());
                 JsonValue parent = parentValue(modifyPath, original);
                 if (parent == null) {
                     // patch specifies a new root object
@@ -231,7 +233,7 @@ public final class JsonPatch {
             //http://tools.ietf.org/html/rfc6902#section-4.2
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).asPointer();
+                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).as(pointer());
                 JsonValue parent = parentValue(modifyPath, original);
                 String leaf = modifyPath.leaf();
                 if (parent == null) {
@@ -253,7 +255,7 @@ public final class JsonPatch {
             //http://tools.ietf.org/html/rfc6902#section-4.3
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).asPointer();
+                JsonPointer modifyPath = operation.get(PATH_PTR).expect(String.class).as(pointer());
                 JsonValue parent = parentValue(modifyPath, original);
                 if (parent != null) {
                     // replacing a child
@@ -272,8 +274,8 @@ public final class JsonPatch {
             // http://tools.ietf.org/html/rfc6902#section-4.4
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer sourcePath = operation.get(FROM_PTR).expect(String.class).asPointer();
-                JsonPointer destPath = operation.get(PATH_PTR).expect(String.class).asPointer();
+                JsonPointer sourcePath = operation.get(FROM_PTR).expect(String.class).as(pointer());
+                JsonPointer destPath = operation.get(PATH_PTR).expect(String.class).as(pointer());
                 JsonValue sourceParent = parentValue(sourcePath, original);
                 if (sourceParent == null) {
                     throw new JsonValueException(operation, "cannot move root object");
@@ -293,8 +295,8 @@ public final class JsonPatch {
             // http://tools.ietf.org/html/rfc6902#section-4.5
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer sourcePath = operation.get(FROM_PTR).expect(String.class).asPointer();
-                JsonPointer destPath = operation.get(PATH_PTR).expect(String.class).asPointer();
+                JsonPointer sourcePath = operation.get(FROM_PTR).expect(String.class).as(pointer());
+                JsonPointer destPath = operation.get(PATH_PTR).expect(String.class).as(pointer());
                 JsonValue sourceParent = parentValue(sourcePath, original);
                 JsonValue object = sourceParent.get(sourcePath.leaf());
                 JsonValue destParent = parentValue(destPath, original);
@@ -310,7 +312,7 @@ public final class JsonPatch {
             // http://tools.ietf.org/html/rfc6902#section-4.6
             @Override
             void execute(JsonValue original, JsonValue operation, JsonPatchValueTransformer transform) {
-                JsonPointer testPath = operation.get(PATH_PTR).expect(String.class).asPointer();
+                JsonPointer testPath = operation.get(PATH_PTR).expect(String.class).as(pointer());
                 JsonValue testTarget = parentValue(testPath, original).get(testPath.leaf());
                 JsonValue testValue = new JsonValue(transform.getTransformedValue(original, operation));
 

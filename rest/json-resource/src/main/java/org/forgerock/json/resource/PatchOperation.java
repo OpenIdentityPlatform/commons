@@ -16,15 +16,16 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValueFunctions.pointer;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import static org.forgerock.json.JsonValue.*;
 
 /**
  * An individual patch operation which is to be performed against a field within
@@ -501,8 +502,8 @@ public final class PatchOperation {
                                 + "content is not a valid JSON patch");
         }
         try {
-            return new PatchOperation(json.get(FIELD_OPERATION).asString(), json.get(FIELD_FIELD).asPointer(),
-                    json.get(FIELD_FROM).asPointer(), json.get(FIELD_VALUE), json);
+            return new PatchOperation(json.get(FIELD_OPERATION).asString(), json.get(FIELD_FIELD).as(pointer()),
+                    json.get(FIELD_FROM).as(pointer()), json.get(FIELD_VALUE), json);
         } catch (final Exception e) {
             throw new BadRequestException(
                     "The request could not be processed because the provided "

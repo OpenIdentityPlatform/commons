@@ -27,6 +27,9 @@ import static org.forgerock.json.JsonValue.fieldIfNotNull;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValue.set;
+import static org.forgerock.json.JsonValueFunctions.listOf;
+import static org.forgerock.json.JsonValueFunctions.setOf;
+import static org.forgerock.json.JsonValueFunctions.url;
 import static org.testng.Assert.fail;
 
 import java.net.URL;
@@ -401,12 +404,12 @@ public class JsonValueTest {
     public void testAsURL() throws Exception {
         URL url = new URL("http://java.sun.com/index.html");
         JsonValue value = json("http://java.sun.com/index.html");
-        assertThat(value.asURL()).isEqualTo(url);
+        assertThat(value.as(url())).isEqualTo(url);
     }
 
     @Test(expectedExceptions = JsonValueException.class)
     public void testAsURLBad() throws Exception {
-        json("asdf://nowhere").asURL();
+        json("asdf://nowhere").as(url());
     }
 
     @Test
@@ -465,7 +468,7 @@ public class JsonValueTest {
         json(array(2, 3, "5", 8)).asList(Integer.class);
     }
 
-    private static final Function<JsonValue, Integer, Exception> AS_INTEGER =
+    private static final Function<JsonValue, Integer, Exception> INTEGER =
             new Function<JsonValue, Integer, Exception>() {
             @Override
             public Integer apply(JsonValue jsonValue) throws Exception {
@@ -480,18 +483,14 @@ public class JsonValueTest {
     @Test
     public void testAsListTransformFunction() throws Exception {
         final JsonValue value = json(array("2", "3", "5", "8"));
-        final List<Integer> list = value.asList(AS_INTEGER);
-        assertThat(list.size()).isEqualTo(4);
-        assertThat(list.get(0)).isEqualTo(2);
-        assertThat(list.get(1)).isEqualTo(3);
-        assertThat(list.get(2)).isEqualTo(5);
-        assertThat(list.get(3)).isEqualTo(8);
+        final List<Integer> list = value.as(listOf(INTEGER));
+        assertThat(list).containsExactly(2, 3, 5, 8);
     }
 
     @Test(expectedExceptions = Exception.class)
     public void testAsListTransformFunctionBadType() throws Exception {
         final JsonValue badValue = json(array("a", "b", "c"));
-        badValue.asList(AS_INTEGER);
+        badValue.as(listOf(INTEGER));
     }
 
     @Test
@@ -513,15 +512,14 @@ public class JsonValueTest {
     @Test
     public void testAsSetTransformFunction() throws Exception {
         final JsonValue value = json(set("2", "3", "5", "8"));
-        final Set<Integer> set = value.asSet(AS_INTEGER);
-        assertThat(set.size()).isEqualTo(4);
+        final Set<Integer> set = value.as(setOf(INTEGER));
         assertThat(set).containsOnly(2, 3, 5, 8);
     }
 
     @Test(expectedExceptions = Exception.class)
     public void testAsSetTransformFunctionBadType() throws Exception {
         final JsonValue badValue = json(set("a", "b", "c"));
-        badValue.asSet(AS_INTEGER);
+        badValue.as(setOf(INTEGER));
     }
 
     @Test
@@ -657,12 +655,7 @@ public class JsonValueTest {
 
     @Test
     public void shouldTransformJsonValue() throws Exception {
-        Number number = json("1").as(new Function<JsonValue, Number, NumberFormatException>() {
-            @Override
-            public Number apply(JsonValue value) throws NumberFormatException {
-                return new Integer(value.asString());
-            }
-        });
+        Number number = json("1").as(INTEGER);
         assertThat(number).isInstanceOf(Integer.class).isEqualTo(1);
     }
 

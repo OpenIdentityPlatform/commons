@@ -16,16 +16,52 @@
 
 package org.forgerock.json.resource.http;
 
-import static java.lang.String.*;
-import static java.util.Arrays.*;
-import static org.forgerock.http.protocol.Status.*;
-import static org.forgerock.json.resource.QueryResponse.*;
-import static org.forgerock.json.resource.ResourceException.*;
-import static org.forgerock.json.resource.ResourceResponse.*;
-import static org.forgerock.json.resource.Responses.*;
-import static org.forgerock.json.resource.http.HttpUtils.*;
-import static org.forgerock.util.Reject.*;
-import static org.forgerock.util.Utils.*;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static org.forgerock.http.protocol.Status.CREATED;
+import static org.forgerock.http.protocol.Status.NO_CONTENT;
+import static org.forgerock.http.protocol.Status.OK;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
+import static org.forgerock.json.resource.QueryResponse.FIELD_ERROR;
+import static org.forgerock.json.resource.QueryResponse.FIELD_PAGED_RESULTS_COOKIE;
+import static org.forgerock.json.resource.QueryResponse.FIELD_RESULT;
+import static org.forgerock.json.resource.QueryResponse.FIELD_TOTAL_PAGED_RESULTS;
+import static org.forgerock.json.resource.QueryResponse.FIELD_TOTAL_PAGED_RESULTS_POLICY;
+import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
+import static org.forgerock.json.resource.ResourceException.FIELD_CODE;
+import static org.forgerock.json.resource.ResourceException.FIELD_DETAIL;
+import static org.forgerock.json.resource.ResourceException.FIELD_MESSAGE;
+import static org.forgerock.json.resource.ResourceException.FIELD_REASON;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.json.resource.http.HttpUtils.DEFAULT_PROTOCOL_VERSION;
+import static org.forgerock.json.resource.http.HttpUtils.ETAG_ANY;
+import static org.forgerock.json.resource.http.HttpUtils.FIELDS_DELIMITER;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_IF_MATCH;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_IF_NONE_MATCH;
+import static org.forgerock.json.resource.http.HttpUtils.METHOD_DELETE;
+import static org.forgerock.json.resource.http.HttpUtils.METHOD_GET;
+import static org.forgerock.json.resource.http.HttpUtils.METHOD_PATCH;
+import static org.forgerock.json.resource.http.HttpUtils.METHOD_POST;
+import static org.forgerock.json.resource.http.HttpUtils.METHOD_PUT;
+import static org.forgerock.json.resource.http.HttpUtils.MIME_TYPE_APPLICATION_JSON;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_ACTION;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_FIELDS;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_PAGED_RESULTS_COOKIE;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_PAGED_RESULTS_OFFSET;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_PAGE_SIZE;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_EXPRESSION;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_FILTER;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_ID;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_SORT_KEYS;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_TOTAL_PAGED_RESULTS_POLICY;
+import static org.forgerock.json.resource.http.HttpUtils.SORT_KEYS_DELIMITER;
+import static org.forgerock.util.Reject.checkNotNull;
+import static org.forgerock.util.Utils.joinAsString;
 
 import java.io.IOException;
 import java.net.URI;
@@ -295,7 +331,7 @@ final class CrestAdapter implements RequestHandler {
 
                                   String pagedResultsCookie = content.get(FIELD_PAGED_RESULTS_COOKIE).asString();
                                   CountPolicy countPolicy = content.get(FIELD_TOTAL_PAGED_RESULTS_POLICY)
-                                                                   .asEnum(CountPolicy.class);
+                                                                   .as(enumConstant(CountPolicy.class));
                                   Integer totalPagedResults = content.get(FIELD_TOTAL_PAGED_RESULTS)
                                                                      .defaultTo(NO_COUNT)
                                                                      .asInteger();
