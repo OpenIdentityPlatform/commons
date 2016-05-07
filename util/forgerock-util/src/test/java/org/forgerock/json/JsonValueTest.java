@@ -19,6 +19,7 @@ package org.forgerock.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.assertj.core.data.Index.atIndex;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
@@ -496,7 +497,6 @@ public class JsonValueTest {
     @Test
     public void testAsSetOfType() {
         Set<Integer> set = json(set(2, 3, 5, 8)).asSet(Integer.class);
-        assertThat(set.size()).isEqualTo(4);
         assertThat(set).containsOnly(2, 3, 5, 8);
     }
 
@@ -531,7 +531,7 @@ public class JsonValueTest {
         m.put("b", "bString");
         m.put("c", "cString");
         Map<?, ?> stringMap = mapValue.asMap(String.class);
-        assertThat(stringMap.get("a") instanceof String).isTrue();
+        assertThat(stringMap.get("a")).isInstanceOf(String.class);
     }
 
     @Test(expectedExceptions = JsonValueException.class)
@@ -541,7 +541,7 @@ public class JsonValueTest {
         m.put("b", true);
         m.put("c", 4);
         Map<?, ?> stringMap = mapValue.asMap(String.class);
-        assertThat(stringMap.get("a") instanceof String).isTrue();
+        assertThat(stringMap.get("a")).isInstanceOf(String.class);
     }
 
     @Test
@@ -550,8 +550,7 @@ public class JsonValueTest {
         Map<String, Object> m = mapValue.asMap();
         m.put("a", listValue.getObject());
         Map<String, ?> stringListMap = mapValue.asMapOfList(String.class);
-        assertThat(stringListMap.get("a") instanceof List).isTrue();
-        assertThat(((List<?>) stringListMap.get("a")).get(0)).isEqualTo("String");
+        assertThat(stringListMap.get("a")).isInstanceOf(List.class).asList().contains("String", atIndex(0));
     }
 
     @Test(expectedExceptions = JsonValueException.class)
@@ -581,15 +580,9 @@ public class JsonValueTest {
         final JsonValue value = json(set()).add("one").add("two").add("three").add("four").add("five");
         String s = value.toString();
         // do our best to test containment and presence of values since sets are unordered
-        assertThat(s).startsWith("[");
-        assertThat(s).endsWith("]");
-        assertThat(s.substring(1, s.length() - 1)).doesNotContain("[");
-        assertThat(s.substring(1, s.length() - 1)).doesNotContain("]");
-        assertThat(s.contains("\"one\""));
-        assertThat(s.contains("\"two\""));
-        assertThat(s.contains("\"three\""));
-        assertThat(s.contains("\"four\""));
-        assertThat(s.contains("\"five\""));
+        assertThat(s).startsWith("[").endsWith("]");
+        assertThat(s.substring(1, s.length() - 1)).doesNotContain("[").doesNotContain("]");
+        assertThat(s).contains("\"one\"", "\"two\"", "\"three\"", "\"four\"", "\"five\"");
     }
 
     @Test
@@ -607,8 +600,7 @@ public class JsonValueTest {
         final JsonValue value = json(array()).add("2").add("3").add("5").add("2");
         assertThat(value.isList()).isTrue();
         assertThat(value.isSet()).isFalse();
-        assertThat(value.asSet().size()).isEqualTo(3); // Set has no duplicates
-        assertThat(value.asSet()).containsOnly("2", "3", "5");
+        assertThat(value.asSet()).containsOnly("2", "3", "5"); // Set has no duplicates
     }
 
     @Test
@@ -616,7 +608,6 @@ public class JsonValueTest {
         final JsonValue value = json(set()).add("2").add("3").add("5").add("8");
         assertThat(value.isList()).isFalse();
         assertThat(value.isSet()).isTrue();
-        assertThat(value.asList().size()).isEqualTo(4);
         assertThat(value.asList()).containsOnly("2", "3", "5", "8");
     }
 
