@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
@@ -58,7 +58,7 @@ public class JweHeader extends JwtSecureHeader {
      */
     @Override
     public JweAlgorithm getAlgorithm() {
-        return JweAlgorithm.valueOf(getAlgorithmString());
+        return JweAlgorithm.parseAlgorithm(getAlgorithmString());
     }
 
     /**
@@ -78,7 +78,7 @@ public class JweHeader extends JwtSecureHeader {
      * @return The Encryption Method.
      */
     public EncryptionMethod getEncryptionMethod() {
-        return EncryptionMethod.valueOf(get(ENCRYPTION_METHOD_HEADER_KEY).asString());
+        return EncryptionMethod.parseMethod(get(ENCRYPTION_METHOD_HEADER_KEY).asString());
     }
 
     /**
