@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -30,11 +30,12 @@ import org.forgerock.json.jose.jwt.JwtType;
  *
  * @since 2.0.0
  */
-public class SignedEncryptedJwtBuilder implements SignedJwtBuilder {
+public class SignedEncryptedJwtBuilder extends AbstractJwtBuilder implements SignedJwtBuilder {
 
     private final EncryptedJwtBuilder encryptedJwtBuilder;
     private final SigningHandler signingHandler;
     private final JwsAlgorithm jwsAlgorithm;
+    private final SignedEncryptedJwsHeaderBuilder headerBuilder;
 
     /**
      * Constructs a new SignedEncryptedJwtBuilder that will use the given EncryptedJwtBuilder, to build the nested
@@ -49,6 +50,7 @@ public class SignedEncryptedJwtBuilder implements SignedJwtBuilder {
         this.encryptedJwtBuilder = encryptedJwtBuilder;
         this.signingHandler = signingHandler;
         this.jwsAlgorithm = jwsAlgorithm;
+        this.headerBuilder = new SignedEncryptedJwsHeaderBuilder(this);
     }
 
     /**
@@ -56,7 +58,7 @@ public class SignedEncryptedJwtBuilder implements SignedJwtBuilder {
      */
     @Override
     public SignedJwt asJwt() {
-        JwsHeader header = new JwsHeaderBuilder(new SignedJwtBuilderImpl(signingHandler)).alg(jwsAlgorithm).build();
+        JwsHeader header = headerBuilder.alg(jwsAlgorithm).build();
         header.setType(JwtType.JWE);
         EncryptedJwt encryptedJwt = encryptedJwtBuilder.asJwt();
 
@@ -73,5 +75,10 @@ public class SignedEncryptedJwtBuilder implements SignedJwtBuilder {
     @Override
     public String build() {
         return asJwt().build();
+    }
+
+    @Override
+    public SignedEncryptedJwsHeaderBuilder headers() {
+        return headerBuilder;
     }
 }
