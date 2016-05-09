@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 package org.forgerock.http.spi;
 
@@ -29,6 +29,22 @@ import org.forgerock.util.promise.Promise;
  * {@link org.forgerock.http.Client Client}. The first available provider is
  * selected and its {@link HttpClientProvider#newHttpClient(org.forgerock.util.Options)} method
  * invoked in order to construct and configure a new {@link HttpClient}.
+ *
+ * <p>It is the responsibility of the caller to {@link org.forgerock.http.protocol.Message#close() close}
+ * the request and response messages.
+ *
+ * <pre>
+ *     {@code
+ *     HttpClient client = ...
+ *     try (Response response = client.sendAsync(...).getOrThrowUninterruptibly()) {
+ *       // consumes the response completely
+ *     }
+ *     }
+ * </pre>
+ *
+ * <p><b>Note:</b> Callers should not use try-with-resources pattern if they forward the
+ * response asynchronously (using a {@link Promise} for instance): the message
+ * would be emptied before the callbacks are applied.
  */
 public interface HttpClient extends Closeable {
 

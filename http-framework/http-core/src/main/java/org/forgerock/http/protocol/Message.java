@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -22,6 +22,26 @@ import java.io.Closeable;
 
 /**
  * Elements common to requests and responses.
+ *
+ * <p>A message is a resource container, and thus needs to be {@linkplain java.io.Closeable#close() closed} in order
+ * to free-up acquired resources.
+ *
+ * <p>Please carefully note the following regarding closing a message:
+ * the asynchronous nature of both {@link org.forgerock.http.Handler} and {@link org.forgerock.http.Filter} that produce
+ * {@linkplain org.forgerock.util.promise.Promise promises} of {@link Response} make it impossible to know,
+ * for the producer of the message, when it can be closed. Thus, the responsibility of closing the message
+ * is on the final consumer: the point after which the message is no longer used.
+ *
+ * <p>Example of such situations:
+ * <ul>
+ *     <li>In a {@link org.forgerock.http.Filter}: Production and forwarding of a new {@link Response} instance
+ *     in one of the callbacks ({@link org.forgerock.util.Function} / {@link org.forgerock.util.AsyncFunction})
+ *     attached to a promise, instead of the given {@code response} parameter.</li>
+ *     <li>When consuming/extracting something out of a {@code response} because a different type
+ *     (not {@link Response}) has to be returned.</li>
+ * </ul>
+ *
+ * @see org.forgerock.util.Utils#closeSilently(Closeable...)
  */
 public interface Message extends Closeable {
 
