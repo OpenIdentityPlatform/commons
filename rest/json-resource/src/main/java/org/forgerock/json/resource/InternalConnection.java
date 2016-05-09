@@ -23,7 +23,7 @@ import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 
-final class InternalConnection extends AbstractAsynchronousConnection implements Describable<ApiDescription> {
+final class InternalConnection extends AbstractAsynchronousConnection implements Describable<ApiDescription, Request> {
     private final RequestHandler requestHandler;
 
     InternalConnection(final RequestHandler handler) {
@@ -111,9 +111,33 @@ final class InternalConnection extends AbstractAsynchronousConnection implements
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ApiDescription api(ApiContext<ApiDescription> apiContext) {
         return requestHandler instanceof Describable
-                ? ((Describable<ApiDescription>) requestHandler).api(apiContext)
-                : ApiDescription.apiDescription().id(apiContext.getApiId()).build();
+                ? ((Describable<ApiDescription, Request>) requestHandler).api(apiContext)
+                : null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        if (requestHandler instanceof Describable) {
+            return ((Describable<ApiDescription, Request>) requestHandler).handleApiRequest(context, request);
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addDescriptorListener(Describable.Listener listener) {
+        if (requestHandler instanceof Describable) {
+            ((Describable) requestHandler).addDescriptorListener(listener);
+        }
+    }
+
+    @Override
+    public void removeDescriptorListener(Describable.Listener listener) {
+        if (requestHandler instanceof Describable) {
+            ((Describable) requestHandler).removeDescriptorListener(listener);
+        }
     }
 }

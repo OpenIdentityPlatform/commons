@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -70,11 +70,13 @@ public final class FiltersTest {
 
     @DataProvider
     public Object[][] requestTypes() {
-        final int sz = RequestType.values().length;
+        final int sz = RequestType.values().length - 1;
         final Object[][] args = new Object[sz][1];
         for (int i = 0; i < sz; i++) {
-            args[i] = new Object[1];
-            args[i][0] = RequestType.values()[i];
+            if (RequestType.values()[i] != RequestType.API) {
+                args[i] = new Object[1];
+                args[i][0] = RequestType.values()[i];
+            }
         }
         return args;
     }

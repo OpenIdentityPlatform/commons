@@ -207,7 +207,7 @@ public final class ResourcesTest {
     public void testCollectionResourceProvider(String resourcePath, String expectedId)
             throws Exception {
         CollectionResourceProvider collection = mock(CollectionResourceProvider.class);
-        RequestHandler handler = Resources.newCollection(collection);
+        RequestHandler handler = Resources.newHandler(collection);
         Connection connection = Resources.newInternalConnection(handler);
         ReadRequest read = Requests.newReadRequest(resourcePath);
         Promise<ResourceResponse, ResourceException> resultPromise =

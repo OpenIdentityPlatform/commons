@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.activation.DataSource;
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -144,6 +145,8 @@ public final class HttpUtils {
     public static final String PARAM_SORT_KEYS = param(QueryRequest.FIELD_SORT_KEYS);
     /** The policy used for counting total paged results. */
     public static final String PARAM_TOTAL_PAGED_RESULTS_POLICY = param(QueryRequest.FIELD_TOTAL_PAGED_RESULTS_POLICY);
+    /** Request the CREST API Descriptor. */
+    public static final String PARAM_CREST_API = param("crestapi");
 
     /** Protocol Version 1. */
     public static final Version PROTOCOL_VERSION_1 = version(1);
@@ -321,6 +324,8 @@ public final class HttpUtils {
                     || hasParameter(request, PARAM_QUERY_EXPRESSION)
                     || hasParameter(request, PARAM_QUERY_FILTER)) {
                 return RequestType.QUERY;
+            } else if (hasParameter(request, PARAM_CREST_API)) {
+                return RequestType.API;
             } else {
                 return RequestType.READ;
             }

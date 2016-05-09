@@ -86,6 +86,11 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler, ApiD
         return this;
     }
 
+    @Override
+    protected RouteMatcher<Request> uriMatcher(RoutingMode mode, String pattern) {
+        return requestUriMatcher(mode, pattern);
+    }
+
     /**
      * Adds a new route to this router for the provided collection resource
      * provider. New routes may be added while this router is processing
@@ -115,7 +120,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler, ApiD
      */
     public RouteMatcher<Request> addRoute(UriTemplate uriTemplate, CollectionResourceProvider provider) {
         RouteMatcher<Request> routeMatcher = requestUriMatcher(STARTS_WITH, uriTemplate.template);
-        addRoute(routeMatcher, newCollection(provider));
+        addRoute(routeMatcher, newHandler(provider));
         return routeMatcher;
     }
 
@@ -134,7 +139,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler, ApiD
      */
     public RouteMatcher<Request> addRoute(UriTemplate uriTemplate, SingletonResourceProvider provider) {
         RouteMatcher<Request> routeMatcher = requestUriMatcher(EQUALS, uriTemplate.template);
-        addRoute(routeMatcher, newSingleton(provider));
+        addRoute(routeMatcher, newHandler(provider));
         return routeMatcher;
     }
 
@@ -181,7 +186,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler, ApiD
      * remove the route at a later point.
      */
     public RouteMatcher<Request> addRoute(Version version, CollectionResourceProvider provider) {
-        return addRoute(version, newCollection(provider));
+        return addRoute(version, newHandler(provider));
     }
 
     /**
@@ -196,7 +201,7 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler, ApiD
      * remove the route at a later point.
      */
     public RouteMatcher<Request> addRoute(Version version, SingletonResourceProvider provider) {
-        return addRoute(version, newSingleton(provider));
+        return addRoute(version, newHandler(provider));
     }
 
     /**

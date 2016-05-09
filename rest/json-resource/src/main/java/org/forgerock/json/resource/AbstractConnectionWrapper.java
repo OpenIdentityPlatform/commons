@@ -21,6 +21,7 @@ import java.util.Collection;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -31,7 +32,8 @@ import org.forgerock.util.promise.Promise;
  * @param <C>
  *            The type of wrapped connection.
  */
-public abstract class AbstractConnectionWrapper<C extends Connection> implements Connection {
+public abstract class AbstractConnectionWrapper<C extends Connection>
+        implements Connection, Describable<ApiDescription, Request> {
     /**
      * The wrapped connection.
      */
@@ -228,7 +230,34 @@ public abstract class AbstractConnectionWrapper<C extends Connection> implements
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public ApiDescription api(ApiContext<ApiDescription> apiContext) {
-        return connection.api(apiContext);
+        if (connection instanceof Describable) {
+            return ((Describable<ApiDescription, Request>) connection).api(apiContext);
+        }
+        return null;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        if (connection instanceof Describable) {
+            return ((Describable<ApiDescription, Request>) connection).handleApiRequest(context, request);
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addDescriptorListener(Describable.Listener listener) {
+        if (connection instanceof Describable) {
+            ((Describable) connection).addDescriptorListener(listener);
+        }
+    }
+
+    @Override
+    public void removeDescriptorListener(Describable.Listener listener) {
+        if (connection instanceof Describable) {
+            ((Describable) connection).removeDescriptorListener(listener);
+        }
     }
 }

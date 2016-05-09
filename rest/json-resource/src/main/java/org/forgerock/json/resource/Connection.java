@@ -19,16 +19,14 @@ package org.forgerock.json.resource;
 import java.io.Closeable;
 import java.util.Collection;
 
-import org.forgerock.api.models.ApiDescription;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
 /**
  * A client connection to a JSON resource provider over which read and update
  * requests may be performed.
  */
-public interface Connection extends Closeable, Describable<ApiDescription> {
+public interface Connection extends Closeable {
 
     /**
      * Performs an action against a specific resource, or set of resources. Bulk

@@ -17,16 +17,33 @@
 package org.forgerock.services.routing;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import org.forgerock.services.context.Context;
+import java.util.Collections;
+import java.util.List;
+
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.routing.RouteMatchers;
+import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.http.routing.Version;
+import org.forgerock.services.context.ApiContext;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Pair;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,9 +55,9 @@ public class AbstractRouterTest {
     @Mock
     private Context context;
     @Mock
-    private Handler routeOneHandler;
+    private DescribedHandler routeOneHandler;
     @Mock
-    private Handler routeTwoHandler;
+    private DescribedHandler routeTwoHandler;
     @Mock
     private RouteMatcher<Request> routeOneMatcher;
     @Mock
@@ -49,13 +66,22 @@ public class AbstractRouterTest {
     private RouteMatch routeOneRouteMatch;
     @Mock
     private RouteMatch routeTwoRouteMatch;
+    private Answer<Object> transformApiAnswer = new Answer<Object>() {
+        @Override
+        public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
+            return invocationOnMock.getArguments()[0];
+        }
+    };
 
+    @SuppressWarnings("unchecked")
     @BeforeMethod
     public void setup() {
         router = new TestAbstractRouter();
 
         request = new Request();
         MockitoAnnotations.initMocks(this);
+        when(routeOneMatcher.transformApi(any(), any(ApiContext.class))).thenAnswer(transformApiAnswer);
+        when(routeTwoMatcher.transformApi(any(), any(ApiContext.class))).thenAnswer(transformApiAnswer);
     }
 
     @Test
@@ -312,6 +338,149 @@ public class AbstractRouterTest {
                 entry(routeTwoMatcher, routeTwoHandler));
     }
 
+    @Test
+    public void shouldSubscribeToApiChanges() {
+        // When
+        router.addRoute(routeOneMatcher, routeOneHandler);
+
+        // Then
+        verify(routeOneHandler).addDescriptorListener(any(Describable.Listener.class));
+    }
+
+    @Test
+    public void shouldNotifyOnRouterDescribableAddition() {
+        // Given
+        Describable.Listener listener = mock(Describable.Listener.class);
+        router.addDescriptorListener(listener);
+
+        // When
+        router.addRoute(routeOneMatcher, routeOneHandler);
+
+        // Then
+        verify(listener).notifyDescriptorChange();
+    }
+
+    @Test
+    public void shouldNotifyOnRouterDescribableRemoval() {
+        // Given
+        router.addRoute(routeOneMatcher, routeOneHandler);
+        Describable.Listener listener = mock(Describable.Listener.class);
+        router.addDescriptorListener(listener);
+
+        // When
+        router.addRoute(routeOneMatcher, mock(Handler.class));
+
+        // Then
+        verify(listener).notifyDescriptorChange();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldFetchDescriptorsOnceContextProvided() {
+        // Given
+        router.addRoute(routeOneMatcher, routeOneHandler);
+        router.addRoute(routeTwoMatcher, routeTwoHandler);
+        given(routeOneHandler.api(any(ApiContext.class))).willReturn("one");
+        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
+
+        // When
+        String api = router.api(new StringApiContext());
+
+        // Then
+        verify(routeOneHandler).api(any(ApiContext.class));
+        verify(routeTwoHandler).api(any(ApiContext.class));
+        assertThat(api).isEqualTo("[one, two]");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldRouteApiRequest() throws Exception {
+        // Given
+        router.addRoute(routeOneMatcher, new TestAbstractRouter().setDefaultRoute(routeOneHandler));
+        router.addRoute(routeTwoMatcher, routeTwoHandler);
+        given(routeOneHandler.api(any(ApiContext.class))).willReturn("one");
+        given(routeOneHandler.handleApiRequest(context, request)).willReturn("one");
+        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
+        router.api(new StringApiContext());
+
+        given(routeOneMatcher.evaluate(context, request)).willReturn(routeOneRouteMatch);
+        given(routeTwoMatcher.evaluate(context, request)).willReturn(routeTwoRouteMatch);
+
+        setupRouteMatch(routeOneRouteMatch, routeTwoRouteMatch, true);
+        setupRouteMatch(routeTwoRouteMatch, routeOneRouteMatch, false);
+
+        // When
+        String api = router.handleApiRequest(context, request);
+
+        // Then
+        assertThat(api).isEqualTo("one");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void shouldHandleApiRequest() throws Exception {
+        // Given
+        router.addRoute(routeOneMatcher, new TestAbstractRouter().setDefaultRoute(routeOneHandler));
+        router.addRoute(routeTwoMatcher, routeTwoHandler);
+        given(routeOneHandler.api(any(ApiContext.class))).willReturn("one");
+        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
+        router.api(new StringApiContext());
+
+        given(routeOneMatcher.evaluate(context, request)).willReturn(null);
+        given(routeTwoMatcher.evaluate(context, request)).willReturn(null);
+
+        // When
+        String api = router.handleApiRequest(context, request.setUri(""));
+
+        // Then
+        assertThat(api).isEqualTo("[[one], two]");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldRouteApiRequestToDefaultIfNoneMatch() throws Exception {
+        // Given
+        router.addRoute(routeOneMatcher, new TestAbstractRouter().setDefaultRoute(routeOneHandler));
+        router.setDefaultRoute(routeTwoHandler);
+        given(routeOneHandler.api(any(ApiContext.class))).willReturn("one");
+        given(routeOneHandler.handleApiRequest(context, request)).willReturn("one");
+        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
+        given(routeTwoHandler.handleApiRequest(context, request)).willReturn("two");
+        router.api(new StringApiContext());
+
+        given(routeOneMatcher.evaluate(context, request)).willReturn(null);
+
+        // When
+        String api = router.handleApiRequest(context, request);
+
+        // Then
+        assertThat(api).isEqualTo("two");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(expectedExceptions = UnsupportedOperationException.class)
+    public void shouldThrowExceptionForNoApiSupport() throws Exception {
+        // Given
+        router.addRoute(routeOneMatcher, mock(Handler.class));
+        router.addRoute(routeTwoMatcher, routeTwoHandler);
+        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
+        router.api(new StringApiContext());
+
+        given(routeOneMatcher.evaluate(context, request)).willReturn(routeOneRouteMatch);
+        given(routeTwoMatcher.evaluate(context, request)).willReturn(routeTwoRouteMatch);
+
+        setupRouteMatch(routeOneRouteMatch, routeTwoRouteMatch, true);
+        setupRouteMatch(routeTwoRouteMatch, routeOneRouteMatch, false);
+
+        request.setUri("/test");
+
+        // When
+        String api = router.handleApiRequest(context, request);
+
+        // Then
+        assertThat(api).isEqualTo("one");
+    }
+
     private void setupRouteMatch(RouteMatch thisRouteMatch, RouteMatch thatRouteMatch,
             boolean isThisRouteBetter) throws IncomparableRouteMatchException {
         if (thisRouteMatch != null) {
@@ -332,13 +501,14 @@ public class AbstractRouterTest {
         }
     }
 
-    private static final class TestAbstractRouter extends AbstractRouter<TestAbstractRouter, Request, Handler, Void> {
+    private static final class TestAbstractRouter extends AbstractRouter<TestAbstractRouter, Request, Handler, String>
+            implements Handler {
 
         protected TestAbstractRouter() {
             super();
         }
 
-        protected TestAbstractRouter(AbstractRouter<TestAbstractRouter, Request, Handler, Void> router) {
+        protected TestAbstractRouter(AbstractRouter<TestAbstractRouter, Request, Handler, String> router) {
             super(router);
         }
 
@@ -346,11 +516,53 @@ public class AbstractRouterTest {
         protected TestAbstractRouter getThis() {
             return this;
         }
+
+        @Override
+        protected RouteMatcher<Request> uriMatcher(RoutingMode mode, String pattern) {
+            return RouteMatchers.requestUriMatcher(mode, pattern);
+        }
+
+        @Override
+        public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
+            throw new UnsupportedOperationException();
+        }
     }
 
     private static abstract class RouteMatchA implements RouteMatch {
     }
 
     private static abstract class RouteMatchB implements RouteMatch {
+    }
+
+    private interface DescribedHandler extends Handler, Describable<String, Request> {
+
+    }
+
+    private class StringApiContext extends ApiContext<String> {
+
+        public StringApiContext() {
+            super(new RootContext(), "", "");
+        }
+
+        @Override
+        public String withPath(String descriptor, String apiId, String path) {
+            return descriptor;
+        }
+
+        @Override
+        public String withVersion(String descriptor, String apiId, Version version) {
+            return descriptor;
+        }
+
+        @Override
+        public String merge(String apiId, List<String> descriptors) {
+            Collections.sort(descriptors);
+            return descriptors.toString();
+        }
+
+        @Override
+        public ApiContext<String> newChildContext(String idFragment) {
+            return new StringApiContext();
+        }
     }
 }

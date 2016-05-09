@@ -85,6 +85,11 @@ public final class Router extends AbstractRouter<Router, Request, Handler, Void>
     }
 
     @Override
+    protected RouteMatcher<Request> uriMatcher(RoutingMode mode, String pattern) {
+        return RouteMatchers.requestUriMatcher(mode, pattern);
+    }
+
+    @Override
     public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
         try {
             Pair<Context, Handler> bestMatch = getBestRoute(context, request);

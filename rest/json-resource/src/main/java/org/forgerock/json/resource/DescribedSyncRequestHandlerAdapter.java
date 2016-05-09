@@ -18,26 +18,43 @@ package org.forgerock.json.resource;
 
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.services.context.ApiContext;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 
 /**
  * Version of {@link SynchronousRequestHandlerAdapter} that exposes a described handler.
  */
 public class DescribedSyncRequestHandlerAdapter extends SynchronousRequestHandlerAdapter
-        implements Describable<ApiDescription> {
+        implements Describable<ApiDescription, Request> {
 
-    private final Describable<ApiDescription> described;
+    private final Describable<ApiDescription, Request> described;
 
+    @SuppressWarnings("unchecked")
     DescribedSyncRequestHandlerAdapter(SynchronousRequestHandler syncHandler) {
         super(syncHandler);
         if (!(syncHandler instanceof Describable)) {
             throw new IllegalArgumentException("Handler must be Describable");
         }
-        this.described = (Describable<ApiDescription>) syncHandler;
+        this.described = (Describable<ApiDescription, Request>) syncHandler;
     }
 
     @Override
     public ApiDescription api(ApiContext<ApiDescription> apiContext) {
         return described.api(apiContext);
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        return described.handleApiRequest(context, request);
+    }
+
+    @Override
+    public void addDescriptorListener(Describable.Listener listener) {
+        described.addDescriptorListener(listener);
+    }
+
+    @Override
+    public void removeDescriptorListener(Describable.Listener listener) {
+        described.removeDescriptorListener(listener);
     }
 }

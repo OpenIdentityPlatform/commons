@@ -35,13 +35,13 @@ import org.forgerock.api.models.ApiDescription;
  * is thread safe and supports updates to the list of filters and the target
  * request handler while actively processing requests.
  */
-public final class FilterChain implements RequestHandler, Describable<ApiDescription> {
+public final class FilterChain implements RequestHandler, Describable<ApiDescription, Request> {
     /*
      * A request handler which represents the current position in the filter
      * chain. Maintains a reference to the filter chain which was in use at the
      * time when the cursor was created.
      */
-    private final class Cursor implements RequestHandler, Describable<ApiDescription> {
+    private final class Cursor implements RequestHandler, Describable<ApiDescription, Request> {
         private final int pos;
         private final Filter[] snapshot;
 
@@ -125,7 +125,22 @@ public final class FilterChain implements RequestHandler, Describable<ApiDescrip
         }
 
         @Override
-        public ApiDescription api(ApiContext context) {
+        public ApiDescription api(ApiContext<ApiDescription> context) {
+            throw new UnsupportedOperationException("API resolution should skip filters");
+        }
+
+        @Override
+        public ApiDescription handleApiRequest(Context context, Request request) {
+            throw new UnsupportedOperationException("API resolution should skip filters");
+        }
+
+        @Override
+        public void addDescriptorListener(Describable.Listener listener) {
+            throw new UnsupportedOperationException("API resolution should skip filters");
+        }
+
+        @Override
+        public void removeDescriptorListener(Describable.Listener listener) {
             throw new UnsupportedOperationException("API resolution should skip filters");
         }
 
@@ -140,7 +155,6 @@ public final class FilterChain implements RequestHandler, Describable<ApiDescrip
         private Cursor next() {
             return new Cursor(snapshot, pos + 1);
         }
-
     }
 
     private final List<Filter> filters = new CopyOnWriteArrayList<>();
@@ -252,11 +266,35 @@ public final class FilterChain implements RequestHandler, Describable<ApiDescrip
         return new Cursor().handleUpdate(context, request);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public ApiDescription api(ApiContext<ApiDescription> context) {
         return target instanceof Describable
-                ? ((Describable<ApiDescription>) target).api(context)
-                : ApiDescription.apiDescription().id(context.getApiId()).build();
+                ? ((Describable<ApiDescription, Request>) target).api(context)
+                : null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        if (target instanceof Describable) {
+            return ((Describable<ApiDescription, Request>) target).handleApiRequest(context, request);
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void addDescriptorListener(Describable.Listener listener) {
+        if (target instanceof Describable) {
+            ((Describable) target).addDescriptorListener(listener);
+        }
+    }
+
+    @Override
+    public void removeDescriptorListener(Describable.Listener listener) {
+        if (target instanceof Describable) {
+            ((Describable) target).removeDescriptorListener(listener);
+        }
     }
 
     /**

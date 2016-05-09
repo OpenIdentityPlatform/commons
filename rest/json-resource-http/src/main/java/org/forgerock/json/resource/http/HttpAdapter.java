@@ -11,24 +11,28 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
 
+import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Reject.*;
+import static org.forgerock.util.promise.Promises.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.Handler;
 import org.forgerock.http.header.AcceptLanguageHeader;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Form;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
@@ -54,6 +58,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.i18n.PreferredLocales;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -171,6 +176,8 @@ final class HttpAdapter implements Handler {
                 return doAction(context, request);
             case QUERY:
                 return doQuery(context, request);
+            case API:
+                return doApiRequest(context, request);
             default:
                 throw new NotSupportedException("Operation " + requestType + " not supported");
             }
@@ -549,15 +556,26 @@ final class HttpAdapter implements Handler {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private Promise<Response, NeverThrowsException> doApiRequest(Context context,
+            final org.forgerock.http.protocol.Request req) {
+        try {
+            Connection connection = connectionFactory.getConnection();
+            if (!(connection instanceof Describable)) {
+                throw new NotSupportedException();
+            }
+            Request request = newApiRequest(getResourcePath(context, req));
+            context = prepareRequest(context, req, request);
+            ApiDescription api = ((Describable<ApiDescription, Request>) connection).handleApiRequest(context, request);
+            return newResultPromise(new Response().setStatus(Status.OK).setEntity(api));
+        } catch (Exception e) {
+            return fail(req, e);
+        }
+    }
+
     private Promise<Response, NeverThrowsException> doRequest(Context context, org.forgerock.http.protocol.Request req,
             Response resp, Request request) throws Exception {
-        Context ctx = newRequestContext(context, req);
-        final AcceptLanguageHeader acceptLanguageHeader = req.getHeaders().get(AcceptLanguageHeader.class);
-        if (acceptLanguageHeader != null) {
-            request.setPreferredLocales(acceptLanguageHeader.getLocales());
-        } else {
-            request.setPreferredLocales(new PreferredLocales(null));
-        }
+        Context ctx = prepareRequest(context, req, request);
         final RequestRunner runner = new RequestRunner(ctx, request, req, resp);
         return connectionFactory.getConnectionAsync()
                 .thenAsync(new AsyncFunction<Connection, Response, NeverThrowsException>() {
@@ -571,6 +589,16 @@ final class HttpAdapter implements Handler {
                         return runner.handleError(error);
                     }
                 });
+    }
+
+    private Context prepareRequest(Context context, org.forgerock.http.protocol.Request req, Request request)
+            throws ResourceException, org.forgerock.http.header.MalformedHeaderException {
+        Context ctx = newRequestContext(context, req);
+        final AcceptLanguageHeader acceptLanguageHeader = req.getHeaders().get(AcceptLanguageHeader.class);
+        request.setPreferredLocales(acceptLanguageHeader != null
+                ? acceptLanguageHeader.getLocales()
+                : new PreferredLocales(null));
+        return ctx;
     }
 
     /**

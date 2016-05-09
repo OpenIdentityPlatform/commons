@@ -48,30 +48,27 @@ public abstract class ApiContext<T> extends AbstractContext implements Context {
      * Mutate the provided descriptor to add the specified path and new id.
      * @param descriptor The descriptor to be mutated.
      * @param apiId The new descriptor's API ID.
-     * @param apiVersion The new descriptor's API Version.
      * @param path The path to add to the descriptor.
      * @return The new descriptor.
      */
-    public abstract T withPath(T descriptor, String apiId, String apiVersion, String path);
+    public abstract T withPath(T descriptor, String apiId, String path);
 
     /**
      * Mutate the provided descriptor to add the specified version and new id.
      * @param descriptor The descriptor to be mutated.
      * @param apiId The new descriptor's API ID.
-     * @param apiVersion The new descriptor's API Version.
      * @param version The version to apply to the resource.
      * @return The new descriptor.
      */
-    public abstract T withVersion(T descriptor, String apiId, String apiVersion, Version version);
+    public abstract T withVersion(T descriptor, String apiId, Version version);
 
     /**
      * Merge the provided descriptors into a single descriptor with the specified ID.
      * @param apiId The new descriptor's ID.
-     * @param apiVersion The version to apply to the descriptor.
      * @param descriptors The descriptors to be merged.
      * @return The merged descriptor.
      */
-    public abstract T merge(String apiId, String apiVersion, List<T> descriptors);
+    public abstract T merge(String apiId, List<T> descriptors);
 
     /**
      * Get the API ID for this context.

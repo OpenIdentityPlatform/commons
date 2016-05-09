@@ -51,7 +51,7 @@ public class CrestApiContext extends ApiContext<ApiDescription> {
     }
 
     @Override
-    public ApiDescription withPath(ApiDescription apiDescription, String apiId, String apiVersion, String path) {
+    public ApiDescription withPath(ApiDescription apiDescription, String apiId, String path) {
         Paths.Builder paths = paths();
         Set<String> names = apiDescription.getPaths().getNames();
         for (String subpath : names) {
@@ -62,12 +62,12 @@ public class CrestApiContext extends ApiContext<ApiDescription> {
                 .errors(apiDescription.getErrors())
                 .paths(paths.build())
                 .id(apiId)
-                .version(apiVersion)
+                .version(getApiVersion())
                 .build();
     }
 
     @Override
-    public ApiDescription withVersion(ApiDescription apiDescription, String apiId, String apiVersion, Version version) {
+    public ApiDescription withVersion(ApiDescription apiDescription, String apiId, Version version) {
         Paths.Builder paths = paths();
         Set<String> names = apiDescription.getPaths().getNames();
         for (String path : names) {
@@ -83,12 +83,12 @@ public class CrestApiContext extends ApiContext<ApiDescription> {
                 .errors(apiDescription.getErrors())
                 .paths(paths.build())
                 .id(apiId)
-                .version(apiVersion)
+                .version(getApiVersion())
                 .build();
     }
 
     @Override
-    public ApiDescription merge(String apiId, String apiVersion, List<ApiDescription> descriptions) {
+    public ApiDescription merge(String apiId, List<ApiDescription> descriptions) {
         Paths.Builder paths = paths();
         Definitions.Builder definitions = definitions();
         Errors.Builder errors = errors();
@@ -108,7 +108,7 @@ public class CrestApiContext extends ApiContext<ApiDescription> {
                 .errors(errors.build())
                 .paths(paths.build())
                 .id(apiId)
-                .version(apiVersion)
+                .version(getApiVersion())
                 .build();
     }
 

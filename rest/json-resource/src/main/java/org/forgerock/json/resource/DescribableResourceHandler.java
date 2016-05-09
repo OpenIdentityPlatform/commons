@@ -19,19 +19,23 @@ package org.forgerock.json.resource;
 import static org.forgerock.api.models.ApiDescription.*;
 import static org.forgerock.api.models.Paths.*;
 import static org.forgerock.api.models.VersionedPath.*;
+import static org.forgerock.util.Reject.*;
 
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Resource;
 import org.forgerock.services.context.ApiContext;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
-import org.forgerock.util.Reject;
 
 /**
  * A resource handler that implements describable for a possibly annotated type. This class should be used by internal
  * CREST {@link RequestHandler}s that are wrapping a type that uses (or may use) annotations to describe its API - for
  * example, the Interface handlers and Annotated handlers that the {@link Resources} class uses.
+ * <p>
+ * Note that this class does not support the API changing once it has been defined.
+ * </p>
  */
-final class DescribableResourceHandler implements Describable<ApiDescription> {
+final class DescribableResourceHandler implements Describable<ApiDescription, Request> {
 
     private final ApiDescription definitionDescriptions;
     private ApiDescription api;
@@ -50,7 +54,7 @@ final class DescribableResourceHandler implements Describable<ApiDescription> {
     }
 
     void describes(Resource resource) {
-        Reject.rejectStateIfTrue(this.resource != null, "Already described API");
+        rejectStateIfTrue(this.resource != null, "Already described API");
         if (resource != null) {
             this.resource = resource;
         }
@@ -58,7 +62,7 @@ final class DescribableResourceHandler implements Describable<ApiDescription> {
 
     @Override
     public final ApiDescription api(ApiContext<ApiDescription> apiContext) {
-        Reject.rejectStateIfTrue(resource == null, "Not yet described API");
+        rejectStateIfTrue(resource == null, "Not yet described API");
         if (api == null) {
             api = ApiDescription.apiDescription()
                     .definitions(definitionDescriptions.getDefinitions())
@@ -69,5 +73,21 @@ final class DescribableResourceHandler implements Describable<ApiDescription> {
                     .build();
         }
         return api;
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        rejectStateIfTrue(api == null, "Not ready for API Descriptor requests");
+        return api;
+    }
+
+    @Override
+    public void addDescriptorListener(Describable.Listener listener) {
+        // No-op: change to API not supported.
+    }
+
+    @Override
+    public void removeDescriptorListener(Describable.Listener listener) {
+        // No-op: change to API not supported.
     }
 }

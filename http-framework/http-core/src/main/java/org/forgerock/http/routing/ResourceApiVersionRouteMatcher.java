@@ -128,7 +128,7 @@ class ResourceApiVersionRouteMatcher extends RouteMatcher<Version> {
 
     @Override
     public <T> T transformApi(T descriptor, ApiContext<T> context) {
-        return context.withVersion(descriptor, context.getApiId(), context.getApiVersion(), routeVersion);
+        return context.withVersion(descriptor, context.getApiId(), routeVersion);
     }
 
     @Override

@@ -21,7 +21,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
@@ -46,10 +48,14 @@ import org.forgerock.util.Pair;
  * @param <D> The type of descriptor object that the APIs supported by this router can be described using.
  */
 public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H, D>
-        implements Describable<D> {
+        implements Describable<D, R>, Describable.Listener {
 
     private final Map<RouteMatcher<R>, H> routes = new ConcurrentHashMap<>();
+    private final RouteMatcher<R> thisRouterUriMatcher = uriMatcher(RoutingMode.EQUALS, "");
+    private List<Describable.Listener> apiListeners = new CopyOnWriteArrayList<>();
     private volatile H defaultRoute;
+    private ApiContext<D> apiContext;
+    private D api;
 
     /**
      * Creates a new abstract router with no routes defined.
@@ -95,8 +101,13 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
      */
     public final T addAllRoutes(T router) {
         if (this != router) {
+            boolean descriptorChanged = false;
             for (Map.Entry<RouteMatcher<R>, H> route : router.getRoutes().entrySet()) {
-                addRoute(route.getKey(), route.getValue());
+                H handler = route.getValue();
+                descriptorChanged |= updateApiDescriptor(routes.put(route.getKey(), handler), handler);
+            }
+            if (descriptorChanged) {
+                notifyDescriptorChange();
             }
         }
         return getThis();
@@ -115,7 +126,25 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
      * @return This router instance.
      */
     public final T addRoute(RouteMatcher<R> matcher, H handler) {
-        routes.put(matcher, handler);
+        return updateApiDescriptorAndNotify(routes.put(matcher, handler), handler);
+    }
+
+    private boolean updateApiDescriptor(H oldHandler, H newHandler) {
+        boolean oldHandlerDescribable = oldHandler instanceof Describable;
+        boolean newHandlerDescribable = newHandler instanceof Describable;
+        if (oldHandlerDescribable) {
+            ((Describable) oldHandler).removeDescriptorListener(this);
+        }
+        if (newHandlerDescribable) {
+            ((Describable) newHandler).addDescriptorListener(this);
+        }
+        return oldHandlerDescribable || newHandlerDescribable;
+    }
+
+    private T updateApiDescriptorAndNotify(H oldHandler, H newHandler) {
+        if (updateApiDescriptor(oldHandler, newHandler)) {
+            notifyDescriptorChange();
+        }
         return getThis();
     }
 
@@ -127,8 +156,9 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
      * @return This router instance.
      */
     public final T setDefaultRoute(H handler) {
+        H oldDefault = this.defaultRoute;
         this.defaultRoute = handler;
-        return getThis();
+        return updateApiDescriptorAndNotify(oldDefault, handler);
     }
 
     /**
@@ -149,6 +179,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
      */
     public final T removeAllRoutes() {
         routes.clear();
+        api = null;
         return getThis();
     }
 
@@ -162,8 +193,14 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
     @SafeVarargs
     public final boolean removeRoute(RouteMatcher<R>... routes) {
         boolean isModified = false;
+        boolean apiDescriptorModified = false;
         for (RouteMatcher<R> route : routes) {
-            isModified |= this.routes.remove(route) != null;
+            H removed = this.routes.remove(route);
+            isModified |= removed != null;
+            apiDescriptorModified |= updateApiDescriptor(removed, null);
+        }
+        if (apiDescriptorModified) {
+            notifyDescriptorChange();
         }
         return isModified;
     }
@@ -197,25 +234,91 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
             return Pair.of(bestMatch.decorateContext(context), handler);
         }
 
-        handler = defaultRoute;
-        if (handler != null) {
-            return Pair.of(context, handler);
+        if (defaultRoute != null) {
+            return Pair.of(context, defaultRoute);
         }
         return null;
     }
 
     @Override
-    public D api(ApiContext<D> context) {
+    public synchronized D api(ApiContext<D> context) {
+        if (apiContext == null) {
+            this.apiContext = context;
+            updateApi();
+        }
+        return this.api;
+    }
+
+    @SuppressWarnings("unchecked")
+    private void updateApi() {
+        if (apiContext == null) {
+            return;
+        }
         List<D> descriptors = new ArrayList<>(routes.size());
         for (Map.Entry<RouteMatcher<R>, H> route : routes.entrySet()) {
             H handler = route.getValue();
             if (handler instanceof Describable) {
                 RouteMatcher<R> matcher = route.getKey();
-                D descriptor = ((Describable<D>) handler).api(context.newChildContext(matcher.idFragment()));
-                descriptors.add(matcher.transformApi(descriptor, context));
+                D descriptor = ((Describable<D, R>) handler).api(apiContext.newChildContext(matcher.idFragment()));
+                descriptors.add(matcher.transformApi(descriptor, apiContext));
             }
         }
-        return context.merge(context.getApiId(), context.getApiVersion(), descriptors);
+        if (defaultRoute instanceof Describable) {
+            RouteMatcher<R> matcher =  uriMatcher(RoutingMode.STARTS_WITH, "*");
+            D descriptor = ((Describable<D, R>) defaultRoute).api(apiContext.newChildContext(matcher.idFragment()));
+            descriptors.add(matcher.transformApi(descriptor, apiContext));
+        }
+        this.api = descriptors.isEmpty() ? null : apiContext.merge(apiContext.getApiId(), descriptors);
     }
 
+    /**
+     * Create a URI matcher suitable for the request type {@code <R>}.
+     * @param mode The routing mode.
+     * @param pattern The pattern.
+     * @return The matcher.
+     */
+    protected abstract RouteMatcher<R> uriMatcher(RoutingMode mode, String pattern);
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public D handleApiRequest(Context context, R request) {
+        try {
+            Pair<Context, H> bestRoute = getBestRoute(context, request);
+            H handler = bestRoute == null ? null : bestRoute.getSecond();
+            if (handler == null) {
+                handler = defaultRoute;
+            }
+            if (handler instanceof Describable) {
+                return ((Describable<D, R>) handler).handleApiRequest(context, request);
+            }
+        } catch (IncomparableRouteMatchException e) {
+            throw new IllegalStateException(e);
+        }
+        if (thisRouterUriMatcher.evaluate(context, request) != null) {
+            return this.api;
+        }
+        throw new UnsupportedOperationException();
+    }
+
+    private void notifyListeners() {
+        for (Describable.Listener listener : apiListeners) {
+            listener.notifyDescriptorChange();
+        }
+    }
+
+    @Override
+    public void addDescriptorListener(Describable.Listener listener) {
+        apiListeners.add(listener);
+    }
+
+    @Override
+    public void removeDescriptorListener(Describable.Listener listener) {
+        apiListeners.remove(listener);
+    }
+
+    @Override
+    public void notifyDescriptorChange() {
+        updateApi();
+        notifyListeners();
+    }
 }

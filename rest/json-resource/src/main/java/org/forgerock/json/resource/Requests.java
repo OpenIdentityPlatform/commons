@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource;
@@ -662,6 +662,24 @@ public final class Requests {
         }
     }
 
+    private static final class ApiRequestImpl extends AbstractRequestImpl<Request> implements Request {
+
+        @Override
+        protected Request getThis() {
+            return this;
+        }
+
+        @Override
+        public <R, P> R accept(RequestVisitor<R, P> v, P p) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public RequestType getRequestType() {
+            return RequestType.API;
+        }
+    }
+
     /**
      * Returns a copy of the provided action request.
      *
@@ -1285,6 +1303,15 @@ public final class Requests {
     public static UpdateRequest newUpdateRequest(final ResourcePath resourceContainer,
             final String resourceId, final JsonValue newContent) {
         return newUpdateRequest(resourceContainer.child(resourceId), newContent);
+    }
+
+    /**
+     * Returns a new API request with the provided path.
+     * @param path The path.
+     * @return The request.
+     */
+    public static Request newApiRequest(final ResourcePath path) {
+        return new ApiRequestImpl().setResourcePath(path);
     }
 
     private static JsonValue copyJsonValue(final JsonValue value) {
