@@ -19,16 +19,8 @@ package org.forgerock.jaspi.modules.session.jwt;
 import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_SESSION_ID_KEY;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 
-import javax.security.auth.Subject;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.auth.message.AuthStatus;
-import javax.security.auth.message.MessageInfo;
-import javax.security.auth.message.callback.CallerPrincipalCallback;
 import java.io.IOException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import java.security.Key;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,6 +28,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.security.auth.Subject;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+import javax.security.auth.message.AuthStatus;
+import javax.security.auth.message.MessageInfo;
+import javax.security.auth.message.callback.CallerPrincipalCallback;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
@@ -311,7 +310,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
         KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
 
-        RSAPrivateKey privateKey = (RSAPrivateKey) keystoreManager.getPrivateKey(keyAlias, privateKeyPassword);
+        Key privateKey = keystoreManager.getPrivateKey(keyAlias, privateKeyPassword);
 
         EncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, EncryptedJwt.class);
         jwt.decrypt(privateKey);
@@ -371,7 +370,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
         KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
 
-        RSAPublicKey publicKey = (RSAPublicKey) keystoreManager.getPublicKey(keyAlias);
+        Key publicKey = keystoreManager.getPublicKey(keyAlias);
 
         String jwtString = rebuildEncryptedJwt((EncryptedJwt) jwt, publicKey);
 
@@ -389,7 +388,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
      * @param publicKey The public key.
      * @return The Session Jwt.
      */
-    protected String rebuildEncryptedJwt(EncryptedJwt jwt, RSAPublicKey publicKey) {
+    protected String rebuildEncryptedJwt(EncryptedJwt jwt, Key publicKey) {
         return new EncryptedJwt((JweHeader) jwt.getHeader(), jwt.getClaimsSet(), publicKey).build();
     }
 
@@ -459,7 +458,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
         KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
 
-        RSAPublicKey publicKey = (RSAPublicKey) keystoreManager.getPublicKey(keyAlias);
+        Key publicKey = keystoreManager.getPublicKey(keyAlias);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());

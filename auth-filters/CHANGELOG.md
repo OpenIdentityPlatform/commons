@@ -1,3 +1,9 @@
+# 20.0.0
+## Changes
+
+### Bugfix
+* CAF-242 Forward Port: Remove cast to RSA key
+
 # 3.1.6
 
 ## Changes

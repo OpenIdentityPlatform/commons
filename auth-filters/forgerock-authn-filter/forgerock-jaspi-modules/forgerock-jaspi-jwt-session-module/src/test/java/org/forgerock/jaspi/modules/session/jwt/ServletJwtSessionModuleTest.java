@@ -23,6 +23,14 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.security.Key;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -35,15 +43,6 @@ import javax.security.auth.message.callback.CallerPrincipalCallback;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-import java.security.Key;
-import java.security.interfaces.RSAPublicKey;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.json.jose.builders.EncryptedJwtBuilder;
@@ -75,7 +74,7 @@ public class ServletJwtSessionModuleTest {
 
         jwtSessionModule = new ServletJwtSessionModule(jwtBuilderFactory) {
             @Override
-            protected String rebuildEncryptedJwt(EncryptedJwt jwt, RSAPublicKey publicKey) {
+            protected String rebuildEncryptedJwt(EncryptedJwt jwt, Key publicKey) {
                 return "REBUILT_ENCRYPTED_JWT";
             }
         };
