@@ -68,6 +68,18 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <configuration>
@@ -88,8 +100,9 @@
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
-                                <Import-Package>javax.annotation;resolution:=optional,org.forgerock.guava.common.base;version="${project.version}",org.forgerock.guava.common.hash;version="${project.version}",org.forgerock.guava.common.io;version="${project.version}",org.forgerock.guava.common.primitives;version="${project.version}",org.forgerock.guava.common.collect;version="${project.version}",org.forgerock.guava.common.escape;version="${project.version}"</Import-Package>
-                                <Export-Package>org.forgerock.guava.common.net;version="${project.version}"</Export-Package>
+                                <Bundle-Version>${parsedVersion.osgiVersion}</Bundle-Version>
+                                <Import-Package>javax.annotation;resolution:=optional,org.forgerock.guava.common.base;version="${parsedVersion.osgiVersion}",org.forgerock.guava.common.hash;version="${parsedVersion.osgiVersion}",org.forgerock.guava.common.io;version="${parsedVersion.osgiVersion}",org.forgerock.guava.common.primitives;version="${parsedVersion.osgiVersion}",org.forgerock.guava.common.collect;version="${parsedVersion.osgiVersion}",org.forgerock.guava.common.escape;version="${parsedVersion.osgiVersion}"</Import-Package>
+                                <Export-Package>org.forgerock.guava.common.net;version="${parsedVersion.osgiVersion}"</Export-Package>
                             </manifestEntries>
                         </transformer>
                     </transformers>

@@ -44,6 +44,18 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>parse-version</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <configuration>
@@ -64,8 +76,9 @@
                     <transformers>
                         <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
+                                <Bundle-Version>${parsedVersion.osgiVersion}</Bundle-Version>
                                 <Import-Package>javax.annotation;resolution:=optional</Import-Package>
-                                <Export-Package>org.forgerock.guava.common.base;uses:="javax.annotation";version="${project.version}"</Export-Package>
+                                <Export-Package>org.forgerock.guava.common.base;uses:="javax.annotation";version="${parsedVersion.osgiVersion}"</Export-Package>
                             </manifestEntries>
                         </transformer>
                     </transformers>
