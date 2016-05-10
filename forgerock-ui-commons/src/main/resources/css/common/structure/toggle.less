@@ -17,18 +17,19 @@
 /*
  Animation
 */
-.checkbox-slider--b input+span:before {
+.checkbox-slider input+span:before {
   transition: background .2s ease-out;
   box-shadow: none;
 }
 
-.checkbox-slider--b input:not(:checked)+span:after {
+.checkbox-slider input:not(:checked)+span:after {
   animation: popOut ease-in 0s normal;
 }
 
-.checkbox-slider--b input:checked+span:after {
+.checkbox-slider input:checked+span:after {
   animation: popIn ease-in 0s normal;
 }
+
 
 /*
   Adjust colors
