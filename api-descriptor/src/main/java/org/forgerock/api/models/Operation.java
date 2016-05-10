@@ -28,7 +28,7 @@ public abstract class Operation {
 
     private final String description;
     private final String[] supportedLocales;
-    private final Error[] errors;
+    private final ApiError[] apiErrors;
     private final Parameter[] parameters;
     private final Stability stability;
 
@@ -42,8 +42,8 @@ public abstract class Operation {
         this.supportedLocales = builder.supportedLocales;
         this.stability = builder.stability;
 
-        final List<Error> errors = builder.errors;
-        this.errors = errors.toArray(new Error[errors.size()]);
+        final List<ApiError> apiErrors = builder.apiErrors;
+        this.apiErrors = apiErrors.toArray(new ApiError[apiErrors.size()]);
 
         final List<Parameter> parameters = builder.parameters;
         this.parameters = parameters.toArray(new Parameter[parameters.size()]);
@@ -68,12 +68,12 @@ public abstract class Operation {
     }
 
     /**
-     * Getter of the errors array.
+     * Getter of the error array.
      *
-     * @return Errors
+     * @return ApiError array
      */
-    public Error[] getErrors() {
-        return errors;
+    public ApiError[] getApiErrors() {
+        return apiErrors;
     }
 
     /**
@@ -109,7 +109,7 @@ public abstract class Operation {
 
         private String description;
         private String[] supportedLocales;
-        private final List<Error> errors;
+        private final List<ApiError> apiErrors;
         private final List<Parameter> parameters;
         private Stability stability;
 
@@ -117,7 +117,7 @@ public abstract class Operation {
          * Creates a new Builder.
          */
         protected Builder() {
-            errors = new ArrayList<>();
+            apiErrors = new ArrayList<>();
             parameters = new ArrayList<>();
         }
 
@@ -153,22 +153,22 @@ public abstract class Operation {
         /**
          * Set multiple supported errors.
          *
-         * @param errors What errors may be returned by this operation
+         * @param apiErrors What errors may be returned by this operation
          * @return Builder
          */
-        public T errors(List<Error> errors) {
-            this.errors.addAll(errors);
+        public T errors(List<ApiError> apiErrors) {
+            this.apiErrors.addAll(apiErrors);
             return self();
         }
 
         /**
          * Sets a single supported error.
          *
-         * @param error An error that may be returned by this operation
+         * @param apiError An error that may be returned by this operation
          * @return Builder
          */
-        public T error(Error error) {
-            this.errors.add(error);
+        public T error(ApiError apiError) {
+            this.apiErrors.add(apiError);
             return self();
         }
 
@@ -214,8 +214,8 @@ public abstract class Operation {
          */
         public T detailsFromAnnotation(org.forgerock.api.annotations.Operation operation,
                 ApiDescription descriptor, Class<?> relativeType) {
-            for (org.forgerock.api.annotations.Error error : operation.errors()) {
-                error(Error.fromAnnotation(error, descriptor, relativeType));
+            for (org.forgerock.api.annotations.ApiError apiApiError : operation.errors()) {
+                error(ApiError.fromAnnotation(apiApiError, descriptor, relativeType));
             }
             for (org.forgerock.api.annotations.Parameter parameter : operation.parameters()) {
                 parameter(Parameter.fromAnnotation(parameter));

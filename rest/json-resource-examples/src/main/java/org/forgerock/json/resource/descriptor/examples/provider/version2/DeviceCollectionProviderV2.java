@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.descriptor.examples.provider.version2;
 
 import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Parameter;
 import org.forgerock.api.annotations.RequestHandler;
@@ -80,16 +81,16 @@ public class DeviceCollectionProviderV2 extends DeviceCollectionProviderV1 {
                     + "api-dictionary-example#device_action_rollout_operation_description",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication"),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     code = 501,
                     description = "Action `rollOut` reached. As it is an example "
                             + "service it has not been implemented.")}),

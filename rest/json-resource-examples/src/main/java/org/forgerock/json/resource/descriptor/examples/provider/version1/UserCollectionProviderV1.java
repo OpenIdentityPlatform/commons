@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.descriptor.examples.provider.version1;
 
 import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Delete;
 import org.forgerock.api.annotations.Operation;
@@ -105,12 +106,12 @@ public class UserCollectionProviderV1 {
             description = Translator.TRANSLATION_KEY_PREFIX + "api-dictionary-example#user_query_operation_description",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}),
@@ -139,12 +140,12 @@ public class UserCollectionProviderV1 {
                     + "api-dictionary-example#user_create_operation_description",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}))
@@ -169,16 +170,16 @@ public class UserCollectionProviderV1 {
             description = "User read operation",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication"),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     code = 404,
                     description = "User not found")}))
     public Promise<ResourceResponse, ResourceException> read(Context context, String id, ReadRequest request) {
@@ -202,12 +203,12 @@ public class UserCollectionProviderV1 {
             description = "User update opreation",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}))
@@ -232,12 +233,12 @@ public class UserCollectionProviderV1 {
             description = "User delete opreation",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}))
@@ -262,12 +263,12 @@ public class UserCollectionProviderV1 {
             description = "User patch operation",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}))
@@ -292,16 +293,16 @@ public class UserCollectionProviderV1 {
             description = "Reset user password",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication"),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     code = 501,
                     description = "Action `resetPassword` reached. "
                             + "As it is an example service it has not been implemented.")}),

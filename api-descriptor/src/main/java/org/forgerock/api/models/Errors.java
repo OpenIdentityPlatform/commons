@@ -29,46 +29,46 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
- * Class that represents API descriptor {@link Error} errors.
+ * Class that represents API descriptor {@link ApiError} errors.
  */
 public final class Errors {
 
     /**
-     * {@link Error} {@code Map}-entry {@link Comparator}, which sorts by code and description.
+     * {@link ApiError} {@code Map}-entry {@link Comparator}, which sorts by code and description.
      */
     public static final ErrorEntryComparator ERROR_ENTRY_COMPARATOR = new ErrorEntryComparator();
 
-    private final Map<String, Error> errors;
+    private final Map<String, ApiError> errors;
 
     private Errors(Builder builder) {
         this.errors = builder.errors;
     }
 
     /**
-     * Gets a {@code Map} of error-names to {@link Error}s.
+     * Gets a {@code Map} of error-names to {@link ApiError}s.
      *
-     * @return {@code Map} of error-names to {@link Error}s.
+     * @return {@code Map} of error-names to {@link ApiError}s.
      */
     @JsonValue
-    public Map<String, Error> getErrors() {
+    public Map<String, ApiError> getErrors() {
         return errors;
     }
 
     /**
-     * Gets the {@link Error} for a given Error-name.
+     * Gets the {@link ApiError} for a given ApiError-name.
      *
-     * @param name Error name
-     * @return {@link Error} or {@code null} if does-not-exist.
+     * @param name ApiError name
+     * @return {@link ApiError} or {@code null} if does-not-exist.
      */
     @JsonIgnore
-    public Error get(String name) {
+    public ApiError get(String name) {
         return errors.get(name);
     }
 
     /**
-     * Returns all {@link Error} names.
+     * Returns all {@link ApiError} names.
      *
-     * @return All {@link Error} names.
+     * @return All {@link ApiError} names.
      */
     @JsonIgnore
     public Set<String> getNames() {
@@ -81,18 +81,18 @@ public final class Errors {
      * the resource descriptions.
      *
      * @param id The error id.
-     * @param error The error definition.
-     * @see Error#fromAnnotation(org.forgerock.api.annotations.Error, ApiDescription, Class)
+     * @param apiError The error definition.
+     * @see ApiError#fromAnnotation(org.forgerock.api.annotations.ApiError, ApiDescription, Class)
      */
-    void addError(String id, Error error) {
-        if (error.getReference() != null) {
-            throw new IllegalArgumentException("Cannot define a error using a reference");
+    void addError(String id, ApiError apiError) {
+        if (apiError.getReference() != null) {
+            throw new IllegalArgumentException("Cannot define an apiError using a reference");
         }
-        Error defined = errors.get(id);
-        if (defined != null && !defined.equals(error)) {
-            throw new IllegalArgumentException("Trying to redefine already defined error, " + id);
+        ApiError defined = errors.get(id);
+        if (defined != null && !defined.equals(apiError)) {
+            throw new IllegalArgumentException("Trying to redefine already defined apiError, " + id);
         }
-        errors.put(id, error);
+        errors.put(id, apiError);
     }
 
     /**
@@ -109,7 +109,7 @@ public final class Errors {
      */
     public static final class Builder {
 
-        private final Map<String, Error> errors = new HashMap<>();
+        private final Map<String, ApiError> errors = new HashMap<>();
 
         /**
          * Private default constructor.
@@ -118,20 +118,20 @@ public final class Errors {
         }
 
         /**
-         * Adds a {@link Error}.
+         * Adds a {@link ApiError}.
          *
          * @param name Error name
-         * @param error {@link Error}
+         * @param apiError {@link ApiError}
          * @return Builder
          */
-        public Builder put(String name, Error error) {
+        public Builder put(String name, ApiError apiError) {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");
             }
             if (errors.containsKey(name)) {
                 throw new IllegalStateException("name not unique");
             }
-            errors.put(name, Reject.checkNotNull(error));
+            errors.put(name, Reject.checkNotNull(apiError));
             return this;
         }
 
@@ -146,15 +146,16 @@ public final class Errors {
     }
 
     /**
-     * {@link Error} {@code Map}-entry {@link Comparator}, which sorts by code and description. This {@code Comparator}
-     * does not handle {@code null} values or duplicates, because those conditions should never occur in practice.
+     * {@link ApiError} {@code Map}-entry {@link Comparator}, which sorts by code and description.
+     * This {@code Comparator} does not handle {@code null} values or duplicates,
+     * because those conditions should never occur in practice.
      * <p>
      * This class is thread-safe.
      * </p>
      */
-    private static class ErrorEntryComparator implements Comparator<Map.Entry<String, Error>> {
+    private static class ErrorEntryComparator implements Comparator<Map.Entry<String, ApiError>> {
         @Override
-        public int compare(final Map.Entry<String, Error> o1, final Map.Entry<String, Error> o2) {
+        public int compare(final Map.Entry<String, ApiError> o1, final Map.Entry<String, ApiError> o2) {
             final int codeCompare = Integer.compare(o1.getValue().getCode(), o2.getValue().getCode());
             if (codeCompare == 0) {
                 return o1.getValue().getDescription().compareTo(o2.getValue().getDescription());

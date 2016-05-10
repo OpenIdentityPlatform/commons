@@ -27,12 +27,12 @@ import org.forgerock.api.ApiValidationException;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Class that represents the Error type in API descriptor.
+ * Class that represents the ApiError type in API descriptor.
  */
-public final class Error {
+public final class ApiError {
 
     /**
-     * {@link Error} {@link Comparator}, which sorts by code and description.
+     * {@link ApiError} {@link Comparator}, which sorts by code and description.
      */
     public static final ErrorComparator ERROR_COMPARATOR = new ErrorComparator();
 
@@ -43,7 +43,7 @@ public final class Error {
     @JsonProperty("$ref")
     private final Reference reference;
 
-    private Error(Builder builder) {
+    private ApiError(Builder builder) {
         this.code = builder.code;
         this.description = builder.description;
         this.schema = builder.schema;
@@ -102,18 +102,18 @@ public final class Error {
             return false;
         }
 
-        Error error = (Error) o;
+        ApiError apiError = (ApiError) o;
 
-        if (code != null ? !code.equals(error.code) : error.code != null) {
+        if (code != null ? !code.equals(apiError.code) : apiError.code != null) {
             return false;
         }
-        if (description != null ? !description.equals(error.description) : error.description != null) {
+        if (description != null ? !description.equals(apiError.description) : apiError.description != null) {
             return false;
         }
-        if (schema != null ? !schema.equals(error.schema) : error.schema != null) {
+        if (schema != null ? !schema.equals(apiError.schema) : apiError.schema != null) {
             return false;
         }
-        return reference != null ? reference.equals(error.reference) : error.reference == null;
+        return reference != null ? reference.equals(apiError.reference) : apiError.reference == null;
 
     }
 
@@ -126,41 +126,42 @@ public final class Error {
     }
 
     /**
-     * New error builder.
+     * New apiError builder.
      *
      * @return Builder
      */
-    public static Builder error() {
+    public static Builder apiError() {
         return new Builder();
     }
 
     /**
-     * Builds an Error object from the data in the annotation. If the {@code error} has an {@code id} defined, the
-     * error will be defined in the top-level {@code descriptor}, and a reference to that definition will be returned.
+     * Builds an ApiError object from the data in the annotation. If the {@code ApiError} has an {@code id} defined, the
+     * ApiError will be defined in the top-level {@code descriptor}, and a reference to that definition will be
+     * returned.
      *
-     * @param error The annotation that holds the data
+     * @param apiError The annotation that holds the data
      * @param descriptor The root descriptor, for adding definitions to.
      * @param relativeType The type relative to which schema resources should be resolved.
-     * @return Error instance
+     * @return ApiError instance
      */
-    public static Error fromAnnotation(org.forgerock.api.annotations.Error error, ApiDescription descriptor,
-            Class<?> relativeType) {
-        Error errorDefinition = error()
-                .description(error.description())
-                .code(error.code())
-                .schema(Schema.fromAnnotation(error.detailSchema(), descriptor, relativeType))
+    public static ApiError fromAnnotation(org.forgerock.api.annotations.ApiError apiError,
+                                          ApiDescription descriptor, Class<?> relativeType) {
+        ApiError apiErrorDefinition = apiError()
+                .description(apiError.description())
+                .code(apiError.code())
+                .schema(Schema.fromAnnotation(apiError.detailSchema(), descriptor, relativeType))
                 .build();
-        if (!Strings.isNullOrEmpty(error.id())) {
-            // we've got an id for this error, so define it at the top level and return a reference.
-            descriptor.getErrors().addError(error.id(), errorDefinition);
-            return error().reference(Reference.reference().value("#/errors/" + error.id()).build()).build();
+        if (!Strings.isNullOrEmpty(apiError.id())) {
+            // we've got an id for this apiApiError, so define it at the top level and return a reference.
+            descriptor.getErrors().addError(apiError.id(), apiErrorDefinition);
+            return apiError().reference(Reference.reference().value("#/errors/" + apiError.id()).build()).build();
         } else {
-            return errorDefinition;
+            return apiErrorDefinition;
         }
     }
 
     /**
-     * Builder for the Error.
+     * Builder for the ApiError.
      */
     public static final class Builder {
 
@@ -176,7 +177,7 @@ public final class Error {
         /**
          * Set the error code.
          *
-         * @param code The error code.
+         * @param code The apiError code.
          * @return This builder.
          */
         public Builder code(Integer code) {
@@ -187,7 +188,7 @@ public final class Error {
         /**
          * Set the error description.
          *
-         * @param description Error description
+         * @param description ApiError description
          * @return This builder.
          */
         public Builder description(String description) {
@@ -198,7 +199,7 @@ public final class Error {
         /**
          * Set the schema.
          *
-         * @param schema Error schema
+         * @param schema ApiError schema
          * @return This builder.
          */
         public Builder schema(Schema schema) {
@@ -218,25 +219,25 @@ public final class Error {
         }
 
         /**
-         * Builds the Error.
+         * Builds the ApiError.
          *
-         * @return Error instance
+         * @return ApiError instance
          */
-        public Error build() {
-            return new Error(this);
+        public ApiError build() {
+            return new ApiError(this);
         }
     }
 
     /**
-     * {@link Error} {@link Comparator}, which sorts by code and description. This {@code Comparator} does not handle
+     * {@link ApiError} {@link Comparator}, which sorts by code and description. This {@code Comparator} does not handle
      * {@code null} values or duplicates, because those conditions should never occur in practice.
      * <p>
      * This class is thread-safe.
      * </p>
      */
-    private static class ErrorComparator implements Comparator<Error> {
+    private static class ErrorComparator implements Comparator<ApiError> {
         @Override
-        public int compare(final Error o1, final Error o2) {
+        public int compare(final ApiError o1, final ApiError o2) {
             final int codeCompare = o1.code.compareTo(o2.code);
             if (codeCompare == 0) {
                 return o1.description.compareTo(o2.description);

@@ -19,7 +19,7 @@ package org.forgerock.api.annotations;
 /**
  * Details of an error that could be returned.
  */
-public @interface Error {
+public @interface ApiError {
     /**
      * An identifier for this error condition. If specified, this error will be defined at the top-level and
      * referenced when used. If not specified, this error will be declared inline.
@@ -29,6 +29,6 @@ public @interface Error {
     int code();
     /** A description of the error condition, and what may have caused it. */
     String description();
-    /** The schema for the error detail, if relevent. */
+    /** The schema for the error detail, if relevant. */
     Schema detailSchema() default @Schema;
 }

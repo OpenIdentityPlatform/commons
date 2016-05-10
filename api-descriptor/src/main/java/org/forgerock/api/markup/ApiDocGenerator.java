@@ -56,8 +56,8 @@ import org.forgerock.api.markup.asciidoc.AsciiDoc;
 import org.forgerock.api.markup.asciidoc.AsciiDocTable;
 import org.forgerock.api.models.Action;
 import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.ApiError;
 import org.forgerock.api.models.Create;
-import org.forgerock.api.models.Error;
 import org.forgerock.api.models.Operation;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Patch;
@@ -558,7 +558,7 @@ public final class ApiDocGenerator {
 
             outputParameters(operation.getParameters(), parameters, namespace, operationDoc);
             outputResourceEntity(resource, responseOnly, operationDoc);
-            outputErrors(operation.getErrors(), operationDoc);
+            outputErrors(operation.getApiErrors(), operationDoc);
 
             parentDoc.horizontalRule();
 
@@ -660,7 +660,7 @@ public final class ApiDocGenerator {
             operationDoc.rawText(blockDoc.toString());
         }
 
-        outputErrors(action.getErrors(), operationDoc);
+        outputErrors(action.getApiErrors(), operationDoc);
 
         final String filename = namespace + ADOC_EXTENSION;
         if (inMemoryMode) {
@@ -801,7 +801,7 @@ public final class ApiDocGenerator {
         // TODO determine if this needs to be formatted differently here
         outputResourceEntity(resource, true, operationDoc);
 
-        outputErrors(query.getErrors(), operationDoc);
+        outputErrors(query.getApiErrors(), operationDoc);
 
         final String filename = namespace + ADOC_EXTENSION;
         if (inMemoryMode) {
@@ -1007,17 +1007,17 @@ public final class ApiDocGenerator {
     /**
      * Outputs operation errors.
      *
-     * @param errors Operation errors or {@code null}/empty for pass-through
+     * @param apiErrors Operation errors or {@code null}/empty for pass-through
      * @param doc AsciiDoc to write to
      */
-    private void outputErrors(final Error[] errors, final AsciiDoc doc) throws IOException {
-        if (!isEmpty(errors)) {
+    private void outputErrors(final ApiError[] apiErrors, final AsciiDoc doc) throws IOException {
+        if (!isEmpty(apiErrors)) {
             doc.blockTitle("Errors");
             final AsciiDocTable table = doc.tableStart()
                     .headers("Code", "Description")
                     .columnWidths(1, 10);
-            Arrays.sort(errors, Error.ERROR_COMPARATOR);
-            for (final Error error : errors) {
+            Arrays.sort(apiErrors, ApiError.ERROR_COMPARATOR);
+            for (final ApiError error : apiErrors) {
                 table.columnCell(String.valueOf(error.getCode()), MONO_CELL);
                 if (error.getSchema() == null) {
                     table.columnCell(error.getDescription());

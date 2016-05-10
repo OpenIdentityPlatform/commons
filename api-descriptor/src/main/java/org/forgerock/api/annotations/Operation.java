@@ -25,7 +25,7 @@ public @interface Operation {
     /** The list of supported locales for the operation. */
     String[] locales() default {};
     /** The list of possible errors for the operation. */
-    Error[] errors() default {};
+    ApiError[] errors() default {};
     /** Parameters on operation paths and/or endpoints. */
     Parameter[] parameters() default {};
     /** The stability state for the operation. Defaults to {@code STABLE}. */

@@ -16,54 +16,6 @@
 
 package org.forgerock.api.transform;
 
-import static java.lang.Boolean.*;
-import static java.util.Collections.*;
-import static org.forgerock.api.markup.asciidoc.AsciiDoc.*;
-import static org.forgerock.api.util.PathUtil.*;
-import static org.forgerock.api.util.ValidationUtil.*;
-import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.Reject.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import org.forgerock.api.enums.CountPolicy;
-import org.forgerock.api.enums.PagingMode;
-import org.forgerock.api.enums.ParameterSource;
-import org.forgerock.api.enums.PatchOperation;
-import org.forgerock.api.enums.QueryType;
-import org.forgerock.api.enums.Stability;
-import org.forgerock.api.markup.asciidoc.AsciiDoc;
-import org.forgerock.api.models.Action;
-import org.forgerock.api.models.ApiDescription;
-import org.forgerock.api.models.Create;
-import org.forgerock.api.models.Definitions;
-import org.forgerock.api.models.Delete;
-import org.forgerock.api.models.Error;
-import org.forgerock.api.models.Parameter;
-import org.forgerock.api.models.Patch;
-import org.forgerock.api.models.Paths;
-import org.forgerock.api.models.Query;
-import org.forgerock.api.models.Read;
-import org.forgerock.api.models.Reference;
-import org.forgerock.api.models.Resource;
-import org.forgerock.api.models.Schema;
-import org.forgerock.api.models.SubResources;
-import org.forgerock.api.models.Update;
-import org.forgerock.api.models.VersionedPath;
-import org.forgerock.api.util.ReferenceResolver;
-import org.forgerock.http.routing.Version;
-import org.forgerock.json.JsonValue;
-import org.forgerock.util.annotations.VisibleForTesting;
-
 import io.swagger.models.ArrayModel;
 import io.swagger.models.Info;
 import io.swagger.models.Model;
@@ -99,6 +51,59 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.models.properties.UUIDProperty;
+import org.forgerock.api.enums.CountPolicy;
+import org.forgerock.api.enums.PagingMode;
+import org.forgerock.api.enums.ParameterSource;
+import org.forgerock.api.enums.PatchOperation;
+import org.forgerock.api.enums.QueryType;
+import org.forgerock.api.enums.Stability;
+import org.forgerock.api.markup.asciidoc.AsciiDoc;
+import org.forgerock.api.models.Action;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.ApiError;
+import org.forgerock.api.models.Create;
+import org.forgerock.api.models.Definitions;
+import org.forgerock.api.models.Delete;
+import org.forgerock.api.models.Parameter;
+import org.forgerock.api.models.Patch;
+import org.forgerock.api.models.Paths;
+import org.forgerock.api.models.Query;
+import org.forgerock.api.models.Read;
+import org.forgerock.api.models.Reference;
+import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.Schema;
+import org.forgerock.api.models.SubResources;
+import org.forgerock.api.models.Update;
+import org.forgerock.api.models.VersionedPath;
+import org.forgerock.api.util.ReferenceResolver;
+import org.forgerock.http.routing.Version;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.annotations.VisibleForTesting;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import static java.lang.Boolean.TRUE;
+import static java.util.Collections.unmodifiableList;
+import static org.forgerock.api.markup.asciidoc.AsciiDoc.normalizeName;
+import static org.forgerock.api.util.PathUtil.buildPath;
+import static org.forgerock.api.util.PathUtil.buildPathParameters;
+import static org.forgerock.api.util.PathUtil.mergeParameters;
+import static org.forgerock.api.util.ValidationUtil.isEmpty;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.fieldIfNotNull;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.util.Reject.checkNotNull;
 
 /**
  * Transforms an {@link ApiDescription} into an OpenAPI/Swagger model.
@@ -780,7 +785,7 @@ public class OpenApiTransformer {
         applyOperationParameters(mergeParameters(new ArrayList<>(parameters), operationModel.getParameters()),
                 operation);
         applyOperationRequestPayload(requestPayload, operation);
-        applyOperationResponsePayloads(responsePayload, operationModel.getErrors(), operation);
+        applyOperationResponsePayloads(responsePayload, operationModel.getApiErrors(), operation);
         return operation;
     }
 
@@ -961,10 +966,10 @@ public class OpenApiTransformer {
      * Defines response-payloads, which may be a combination of success and error responses, for a Swagger operation.
      *
      * @param schema Success-response JSON schema
-     * @param errorResponses Error responses
+     * @param apiErrorResponses ApiError responses
      * @param operation Swagger operation
      */
-    private void applyOperationResponsePayloads(final Schema schema, final Error[] errorResponses,
+    private void applyOperationResponsePayloads(final Schema schema, final ApiError[] apiErrorResponses,
             final Operation operation) {
         final Map<String, Response> responses = new HashMap<>();
         if (schema != null) {
@@ -988,32 +993,33 @@ public class OpenApiTransformer {
             responses.put("200", response);
         }
 
-        if (!isEmpty(errorResponses)) {
-            // sort by error codes, so that same-codes can be merged together, because Swagger cannot overload codes
-            Arrays.sort(errorResponses, Error.ERROR_COMPARATOR);
-            final int n = errorResponses.length;
+        if (!isEmpty(apiErrorResponses)) {
+            // sort by apiError codes, so that same-codes can be merged together, because Swagger cannot overload codes
+            Arrays.sort(apiErrorResponses, ApiError.ERROR_COMPARATOR);
+            final int n = apiErrorResponses.length;
             for (int i = 0; i < n; ++i) {
-                final Error error;
-                if (errorResponses[i].getReference() != null) {
-                    error = referenceResolver.getError(errorResponses[i].getReference());
-                    if (error == null) {
+
+                final ApiError apiError;
+                if (apiErrorResponses[i].getReference() != null) {
+                    apiError = referenceResolver.getError(apiErrorResponses[i].getReference());
+                    if (apiError == null) {
                         throw new TransformerException("Error reference not found in global error definitions");
                     }
                 } else {
-                    error = errorResponses[i];
+                    apiError = apiErrorResponses[i];
                 }
 
-                // for a given error-code, create a bulleted-list of descriptions, if there is more than one to merge
-                final int code = error.getCode();
+                // for a given apiError-code, create a bulleted-list of descriptions, if there is more than one to merge
+                final int code = apiError.getCode();
                 final List<String> descriptions = new ArrayList<>();
-                if (error.getDescription() != null) {
-                    descriptions.add(error.getDescription());
+                if (apiError.getDescription() != null) {
+                    descriptions.add(apiError.getDescription());
                 }
                 for (int k = i + 1; k < n; ++k) {
-                    if (errorResponses[k].getCode() == code) {
+                    if (apiErrorResponses[k].getCode() == code) {
                         // TODO build composite schema with detailsSchema??? errors[k].getSchema();
-                        if (errorResponses[k].getDescription() != null) {
-                            descriptions.add(errorResponses[k].getDescription());
+                        if (apiErrorResponses[k].getDescription() != null) {
+                            descriptions.add(apiErrorResponses[k].getDescription());
                         }
                         ++i;
                     }
@@ -1034,9 +1040,9 @@ public class OpenApiTransformer {
                 }
 
                 Object errorCause = null;
-                if (error.getSchema() != null && error.getSchema().getSchema() != null) {
+                if (apiError.getSchema() != null && apiError.getSchema().getSchema() != null) {
                     // TODO support detailsSchema reference
-                    errorCause = error.getSchema().getSchema();
+                    errorCause = apiError.getSchema().getSchema();
                 }
 
                 final JsonValue errorJsonSchema = json(object(
@@ -1046,22 +1052,23 @@ public class OpenApiTransformer {
                                 field("code", object(
                                         field("type", "integer"),
                                         field("title", "Code"),
-                                        field("description", "3-digit error code, corresponding to HTTP status codes.")
+                                        field("description", "3-digit apiError code,"
+                                                + " corresponding to HTTP status codes.")
                                 )),
                                 field("message", object(
                                         field("type", "string"),
                                         field("title", "Message"),
-                                        field("description", "Error message.")
+                                        field("description", "ApiError message.")
                                 )),
                                 field("reason", object(
                                         field("type", "string"),
                                         field("title", "Reason"),
-                                        field("description", "Short description corresponding to error code.")
+                                        field("description", "Short description corresponding to apiError code.")
                                 )),
                                 field("detail", object(
                                         field("type", "string"),
                                         field("title", "Detail"),
-                                        field("description", "Detailed error message.")
+                                        field("description", "Detailed apiError message.")
                                 )),
                                 fieldIfNotNull("cause", errorCause)
                         ))

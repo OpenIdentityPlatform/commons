@@ -17,6 +17,7 @@
 package org.forgerock.json.resource.descriptor.examples.provider.version1;
 
 import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.ApiError;
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Delete;
 import org.forgerock.api.annotations.Operation;
@@ -101,13 +102,13 @@ public class DeviceCollectionProviderV1 {
             description = Translator.TRANSLATION_KEY_PREFIX
                     + "api-dictionary-example#device_query_operation_description",
             locales = {"en-GB", "en-US"},
-            errors =
-                {@org.forgerock.api.annotations.Error(
+            errors = {
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}),
@@ -134,12 +135,12 @@ public class DeviceCollectionProviderV1 {
         @Operation(
             description = "Create new device",
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}))
@@ -164,16 +165,16 @@ public class DeviceCollectionProviderV1 {
             description = "Read one device",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication"),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     code = 404,
                     description = "Device not found")}))
     public Promise<ResourceResponse, ResourceException> read(Context context, String id, ReadRequest request) {
@@ -197,12 +198,12 @@ public class DeviceCollectionProviderV1 {
             description = "Update a device",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}))
@@ -227,12 +228,12 @@ public class DeviceCollectionProviderV1 {
             description = "Delete a device",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}))
@@ -257,12 +258,12 @@ public class DeviceCollectionProviderV1 {
             description = "Patch a device",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication")}))
@@ -287,16 +288,16 @@ public class DeviceCollectionProviderV1 {
             description = "Mark device as stolen",
             locales = {"en-GB", "en-US"},
             errors = {
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "badRequest",
                     code = 400,
                     description = "Indicates that the request could not be understood by "
                             + "the resource due to malformed syntax."),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     id = "unauthorized",
                     code = 401,
                     description = "Unauthorized - Missing or bad authentication"),
-                @org.forgerock.api.annotations.Error(
+                @ApiError(
                     code = 501,
                     description = "Action `markAsStolen` reached. As it is an example "
                             + "service it has not been implemented.")}),

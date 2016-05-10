@@ -183,7 +183,7 @@ public class ResourceTest {
         assertThat(resource.getActions()).hasSize(1);
         Action action = resource.getActions()[0];
         assertThat(action.getName()).isEqualTo("myAction");
-        assertThat(action.getErrors()).isEmpty();
+        assertThat(action.getApiErrors()).isEmpty();
         assertThat(action.getParameters()).isEmpty();
         assertThat(descriptor.getErrors().getErrors()).isEmpty();
         assertThat(descriptor.getDefinitions().getDefinitions()).isEmpty();
@@ -230,8 +230,8 @@ public class ResourceTest {
         Resource resource = Resource.fromAnnotatedType(ReferencedErrorHandler.class, SINGLETON_RESOURCE, descriptor);
         assertThat(resource.getRead()).isNotNull();
         assertThat(resource.isMvccSupported()).isTrue();
-        assertThat(resource.getRead().getErrors()).hasSize(1);
-        assertThat(resource.getRead().getErrors()[0].getReference().getValue()).isEqualTo("#/errors/frapi:myerror");
+        assertThat(resource.getRead().getApiErrors()).hasSize(1);
+        assertThat(resource.getRead().getApiErrors()[0].getReference().getValue()).isEqualTo("#/errors/frapi:myerror");
         assertThat(descriptor.getErrors().getErrors()).hasSize(1).containsKeys("frapi:myerror");
     }
 
@@ -243,7 +243,7 @@ public class ResourceTest {
         @org.forgerock.api.annotations.Read(
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "A read resource operation.",
-                        errors = @org.forgerock.api.annotations.Error(id = "frapi:myerror", code = 500,
+                        errors = @org.forgerock.api.annotations.ApiError(id = "frapi:myerror", code = 500,
                                 description = "Our bad.")
                 ))
         public void read() {
@@ -261,7 +261,7 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Create create = resource.getCreate();
         assertThat(create.getDescription()).isEqualTo("A create resource operation.");
-        assertThat(create.getErrors()).hasSize(2);
+        assertThat(create.getApiErrors()).hasSize(2);
         assertThat(create.getParameters()).hasSize(1);
         assertThat(create.getSupportedLocales()).hasSize(2);
         assertThat(create.getStability()).isEqualTo(Stability.EVOLVING);
@@ -277,9 +277,9 @@ public class ResourceTest {
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "A create resource operation.",
                         errors = {
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 403, description = "You're forbidden from creating these resources"),
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 400
                                                 , description = "You can't create these resources using too much jam")
                         },
@@ -319,7 +319,7 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Read read = resource.getRead();
         assertThat(read.getDescription()).isEqualTo("A read resource operation.");
-        assertThat(read.getErrors()).hasSize(0);
+        assertThat(read.getApiErrors()).hasSize(0);
         assertThat(read.getParameters()).hasSize(0);
         assertThat(read.getSupportedLocales()).hasSize(0);
         assertThat(read.getStability()).isEqualTo(Stability.STABLE);
@@ -348,7 +348,7 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Update update = resource.getUpdate();
         assertThat(update.getDescription()).isEqualTo("An update resource operation.");
-        assertThat(update.getErrors()).hasSize(0);
+        assertThat(update.getApiErrors()).hasSize(0);
         assertThat(update.getParameters()).hasSize(0);
         assertThat(update.getSupportedLocales()).hasSize(0);
         assertThat(update.getStability()).isEqualTo(Stability.STABLE);
@@ -376,7 +376,7 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Delete delete = resource.getDelete();
         assertThat(delete.getDescription()).isEqualTo("A delete resource operation.");
-        assertThat(delete.getErrors()).hasSize(0);
+        assertThat(delete.getApiErrors()).hasSize(0);
         assertThat(delete.getParameters()).hasSize(0);
         assertThat(delete.getSupportedLocales()).hasSize(0);
         assertThat(delete.getStability()).isEqualTo(Stability.STABLE);
@@ -404,7 +404,7 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Patch patch = resource.getPatch();
         assertThat(patch.getDescription()).isEqualTo("A patch resource operation.");
-        assertThat(patch.getErrors()).hasSize(0);
+        assertThat(patch.getApiErrors()).hasSize(0);
         assertThat(patch.getParameters()).hasSize(0);
         assertThat(patch.getSupportedLocales()).hasSize(0);
         assertThat(patch.getStability()).isEqualTo(Stability.STABLE);
@@ -441,7 +441,7 @@ public class ResourceTest {
         assertThat(resource.getActions()).hasSize(2);
         Action action1 = resource.getActions()[0];
         assertThat(action1.getDescription()).isEqualTo("An action resource operation.");
-        assertThat(action1.getErrors()).hasSize(2);
+        assertThat(action1.getApiErrors()).hasSize(2);
         assertThat(action1.getParameters()).hasSize(1);
         assertThat(action1.getSupportedLocales()).hasSize(2);
         assertThat(action1.getStability()).isEqualTo(Stability.EVOLVING);
@@ -451,7 +451,7 @@ public class ResourceTest {
 
         Action action2 = resource.getActions()[1];
         assertThat(action2.getDescription()).isEqualTo("An action resource operation.");
-        assertThat(action2.getErrors()).hasSize(2);
+        assertThat(action2.getApiErrors()).hasSize(2);
         assertThat(action2.getParameters()).hasSize(1);
         assertThat(action2.getSupportedLocales()).hasSize(2);
         assertThat(action2.getStability()).isEqualTo(Stability.EVOLVING);
@@ -470,9 +470,9 @@ public class ResourceTest {
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "An action resource operation.",
                         errors = {
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 403, description = "Action forbidden"),
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 400, description = "Malformed action request")
                         },
                         parameters = {
@@ -493,9 +493,9 @@ public class ResourceTest {
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "An action resource operation.",
                         errors = {
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 403, description = "Action forbidden"),
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 400, description = "Malformed action request")
                         },
                         parameters = {
@@ -520,9 +520,9 @@ public class ResourceTest {
                         operationDescription = @org.forgerock.api.annotations.Operation(
                                 description = "An action resource operation.",
                                 errors = {
-                                        @org.forgerock.api.annotations.Error
+                                        @org.forgerock.api.annotations.ApiError
                                                 (code = 403, description = "Action forbidden"),
-                                        @org.forgerock.api.annotations.Error
+                                        @org.forgerock.api.annotations.ApiError
                                                 (code = 400, description = "Malformed action request")
                                 },
                                 parameters = {
@@ -540,9 +540,9 @@ public class ResourceTest {
                         operationDescription = @org.forgerock.api.annotations.Operation(
                                 description = "An action resource operation.",
                                 errors = {
-                                        @org.forgerock.api.annotations.Error
+                                        @org.forgerock.api.annotations.ApiError
                                                 (code = 403, description = "Action forbidden"),
-                                        @org.forgerock.api.annotations.Error
+                                        @org.forgerock.api.annotations.ApiError
                                                 (code = 400, description = "Malformed action request")
                                 },
                                 parameters = {
@@ -574,7 +574,7 @@ public class ResourceTest {
         assertThat(resource.getQueries()).hasSize(2);
         Query query1 = resource.getQueries()[0];
         assertThat(query1.getDescription()).isEqualTo("A query resource operation.");
-        assertThat(query1.getErrors()).hasSize(2);
+        assertThat(query1.getApiErrors()).hasSize(2);
         assertThat(query1.getParameters()).hasSize(1);
         assertThat(query1.getSupportedLocales()).hasSize(2);
         assertThat(query1.getStability()).isEqualTo(Stability.EVOLVING);
@@ -591,7 +591,7 @@ public class ResourceTest {
 
         Query query2 = resource.getQueries()[1];
         assertThat(query2.getDescription()).isEqualTo("A query resource operation.");
-        assertThat(query2.getErrors()).hasSize(2);
+        assertThat(query2.getApiErrors()).hasSize(2);
         assertThat(query2.getParameters()).hasSize(1);
         assertThat(query2.getSupportedLocales()).hasSize(2);
         assertThat(query2.getStability()).isEqualTo(Stability.EVOLVING);
@@ -616,9 +616,9 @@ public class ResourceTest {
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "A query resource operation.",
                         errors = {
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 403, description = "Query forbidden"),
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 400, description = "Malformed query request")
                         },
                         parameters = {
@@ -641,9 +641,9 @@ public class ResourceTest {
                 operationDescription = @org.forgerock.api.annotations.Operation(
                         description = "A query resource operation.",
                         errors = {
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 403, description = "Query forbidden"),
-                                @org.forgerock.api.annotations.Error
+                                @org.forgerock.api.annotations.ApiError
                                         (code = 400, description = "Malformed query request")
                         },
                         parameters = {
@@ -673,9 +673,9 @@ public class ResourceTest {
                         operationDescription = @org.forgerock.api.annotations.Operation(
                                 description = "A query resource operation.",
                                 errors = {
-                                        @org.forgerock.api.annotations.Error
+                                        @org.forgerock.api.annotations.ApiError
                                                 (code = 403, description = "Query forbidden"),
-                                        @org.forgerock.api.annotations.Error
+                                        @org.forgerock.api.annotations.ApiError
                                                 (code = 400, description = "Malformed query request")
                                 },
                                 parameters = {
@@ -696,9 +696,9 @@ public class ResourceTest {
                         operationDescription = @org.forgerock.api.annotations.Operation(
                                 description = "A query resource operation.",
                                 errors = {
-                                        @org.forgerock.api.annotations.Error
+                                        @org.forgerock.api.annotations.ApiError
                                                 (code = 403, description = "Query forbidden"),
-                                        @org.forgerock.api.annotations.Error
+                                        @org.forgerock.api.annotations.ApiError
                                                 (code = 400, description = "Malformed query request")
                                 },
                                 parameters = {
@@ -725,7 +725,7 @@ public class ResourceTest {
 
         final Read readLocal = Read.read()
                 .description(i18nDescription)
-                .error(Error.error().code(12).description(i18nDescription).build())
+                .error(ApiError.apiError().code(12).description(i18nDescription).build())
                 .build();
 
         final Resource resource = Resource.resource()

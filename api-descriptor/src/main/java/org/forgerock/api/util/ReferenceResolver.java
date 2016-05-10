@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.api.models.ApiDescription;
-import org.forgerock.api.models.Error;
+import org.forgerock.api.models.ApiError;
 import org.forgerock.api.models.Reference;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.Schema;
@@ -109,12 +109,12 @@ public class ReferenceResolver {
     }
 
     /**
-     * Gets and {@link org.forgerock.api.models.Errors} {@link Error} by JSON reference.
+     * Gets and {@link org.forgerock.api.models.Errors} {@link ApiError} by JSON reference.
      *
      * @param reference JSON reference
-     * @return {@link Error} or {@code null} if not found
+     * @return {@link ApiError} or {@code null} if not found
      */
-    public Error getError(final Reference reference) {
+    public ApiError getError(final Reference reference) {
         final int nameStart = reference.getValue().indexOf(ERRORS_REF);
         if (nameStart != -1) {
             final String name = reference.getValue().substring(nameStart + ERRORS_REF.length());

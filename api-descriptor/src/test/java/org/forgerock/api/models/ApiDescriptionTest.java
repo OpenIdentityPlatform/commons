@@ -24,13 +24,13 @@ public class ApiDescriptionTest {
 
     @Test(expectedExceptions = ApiValidationException.class)
     public void testFailedValidationIdMissing() {
-        final Error error = Error.error()
+        final ApiError apiError = ApiError.apiError()
                 .code(500)
-                .description("Unexpected error")
+                .description("Unexpected apiError")
                 .build();
 
         final Errors errors = Errors.errors()
-                .put("internalServerError", error)
+                .put("internalServerError", apiError)
                 .build();
 
         final ApiDescription apiDescription = ApiDescription.apiDescription()

@@ -41,10 +41,10 @@ import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.enums.Stability;
 import org.forgerock.api.models.Action;
 import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.ApiError;
 import org.forgerock.api.models.Create;
 import org.forgerock.api.models.Definitions;
 import org.forgerock.api.models.Delete;
-import org.forgerock.api.models.Error;
 import org.forgerock.api.models.Errors;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Patch;
@@ -103,14 +103,14 @@ public final class ApiTestUtil {
                 .build();
 
         final String[] supportedLocales = new String[]{"en"};
-        final Error notFoundError = Error.error()
+        final ApiError notFoundApiError = ApiError.apiError()
                 .code(404)
-                .description("Custom not-found error.")
+                .description("Custom not-found apiError.")
                 .schema(errorDetailSchema)
                 .build();
-        final Error anotherNotFoundError = Error.error()
+        final ApiError anotherNotFoundApiError = ApiError.apiError()
                 .code(404)
-                .description("Another custom not-found error, for testing error-code overloading.")
+                .description("Another custom not-found apiError, for testing apiError-code overloading.")
                 .schema(errorDetailSchema)
                 .build();
         final Parameter parameter1 = Parameter.parameter()
@@ -145,8 +145,8 @@ public final class ApiTestUtil {
                 .description("Default description for read.")
                 .supportedLocales(supportedLocales)
                 .stability(Stability.STABLE)
-                .error(notFoundError)
-                .error(anotherNotFoundError)
+                .error(notFoundApiError)
+                .error(anotherNotFoundApiError)
                 .parameter(parameter1)
                 .parameter(parameter2)
                 .build();
@@ -238,8 +238,9 @@ public final class ApiTestUtil {
                 .build();
 
         final Errors errors = Errors.errors()
-                .put("notFound", Error.error().code(404).description("Not Found").build())
-                .put("internalServerError", Error.error().code(500).description("Internal Server Error").build())
+                .put("notFound", ApiError.apiError().code(404).description("Not Found").build())
+                .put("internalServerError", ApiError.apiError().code(500)
+                        .description("Internal Server ApiError").build())
                 .build();
 
         final VersionedPath versionedPath;
@@ -287,7 +288,7 @@ public final class ApiTestUtil {
                                 ))
                         )))))
                 .build();
-        final Error notFoundError = Error.error()
+        final ApiError notFoundError = ApiError.apiError()
                 .code(404)
                 .description("Custom not-found error.")
                 .schema(errorDetailSchema)

@@ -80,7 +80,7 @@ Locally defined schema definitions, that can be referred to via JSON References.
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-*           | [Error](#error)             | ✓          | The error definitions
+*           | [ApiError](#apiError)       | ✓          | The error definitions
 
 ### Reference
 
@@ -182,17 +182,17 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 description | String                      |            | A description of the operation
 supportedLocales | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation
-errors      | [Error](#error)[]           |            | Errors known be returned by this operation
+errors      | [ApiError](#apiError)[]     |            | Errors known be returned by this operation
 parameters  | [Parameter](#parameter)[]   |            | Extra parameters supported by the operation
 stability   | String                      |            | Stability of the endpoint. Supported values are: "internal", "stable" (default), "evolving", "deprecated", or "removed".
 
-### Error
+### ApiError
 
 Defines one of the possible error responses that are known to be returned by a given
 [Operation](#operation). All standard CREST errors are defined under _frapi:common_, which is an API Descriptor
 that will always be available by default. Endpoints may overload any error _code_ and unique _description_ to define
 custom errors. CREST API clients should be prepared to handle undocumented/unexpected errors. It is a best practice to
-define a minimum Error array definition, with 500 Internal Server Error, as follows,
+define a minimum ApiError array definition, with 500 Internal Server Error, as follows,
 
 ```
 "errors" : [

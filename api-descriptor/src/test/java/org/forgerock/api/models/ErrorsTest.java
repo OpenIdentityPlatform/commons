@@ -24,37 +24,38 @@ import org.testng.annotations.Test;
 
 public class ErrorsTest {
 
-    private Error internalServerError;
+    private ApiError internalServerApiError;
 
     @BeforeClass
     public void beforeClass() {
-        internalServerError = Error.error().code(500).description("Internal Service Error").build();
+        internalServerApiError = ApiError.apiError().code(500).description("Internal Service Error").build();
     }
 
     @DataProvider(name = "putValidationData")
     public Object[][] putValidationData() {
         return new Object[][]{
                 {null, null, Exception.class},
-                {null, internalServerError, IllegalArgumentException.class},
-                {"", internalServerError, IllegalArgumentException.class},
-                {"\t", internalServerError, IllegalArgumentException.class},
-                {"contains space", internalServerError, IllegalArgumentException.class},
+                {null, internalServerApiError, IllegalArgumentException.class},
+                {"", internalServerApiError, IllegalArgumentException.class},
+                {"\t", internalServerApiError, IllegalArgumentException.class},
+                {"contains space", internalServerApiError, IllegalArgumentException.class},
                 {"uniqueName", null, NullPointerException.class},
-                {"notUniqueName", internalServerError, IllegalStateException.class},
-                {"uniqueName", internalServerError, null},
+                {"notUniqueName", internalServerApiError, IllegalStateException.class},
+                {"uniqueName", internalServerApiError, null},
         };
     }
 
     @Test(dataProvider = "putValidationData")
-    public void testPut(final String name, final Error error, final Class<? extends Throwable> expectedException) {
+    public void testPut(final String name, final ApiError apiError,
+                        final Class<? extends Throwable> expectedException) {
         final Errors.Builder builder = Errors.errors();
 
-        // add an error, so that we can test for name-uniqueness (error values do NOT need to be unique)
-        builder.put("notUniqueName", internalServerError);
+        // add an apiError, so that we can test for name-uniqueness (apiError values do NOT need to be unique)
+        builder.put("notUniqueName", internalServerApiError);
 
         final Errors errors;
         try {
-            builder.put(name, error);
+            builder.put(name, apiError);
             errors = builder.build();
         } catch (final Exception e) {
             if (expectedException != null) {

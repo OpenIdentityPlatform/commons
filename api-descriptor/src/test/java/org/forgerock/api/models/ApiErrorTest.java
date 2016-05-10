@@ -23,7 +23,7 @@ import org.forgerock.api.ApiValidationException;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class ErrorTest {
+public class ApiErrorTest {
 
     @DataProvider(name = "buildValidationData")
     public Object[][] buildValidationData() {
@@ -38,8 +38,8 @@ public class ErrorTest {
     @Test(dataProvider = "buildValidationData")
     public void testBuildValidation(final Integer code, final String description,
             final Class<? extends Throwable> expectedException) {
-        final Error.Builder builder = Error.error();
-        final Error error;
+        final ApiError.Builder builder = ApiError.apiError();
+        final ApiError apiError;
         try {
             if (code != null) {
                 builder.code(code);
@@ -47,7 +47,7 @@ public class ErrorTest {
             if (description != null) {
                 builder.description(description);
             }
-            error = builder.build();
+            apiError = builder.build();
         } catch (final Exception e) {
             if (expectedException != null) {
                 assertThat(e).isInstanceOf(expectedException);
@@ -59,9 +59,9 @@ public class ErrorTest {
             failBecauseExceptionWasNotThrown(expectedException);
         }
 
-        assertThat(error.getCode()).isEqualTo(code);
-        assertThat(error.getDescription()).isEqualTo(description);
-        assertThat(error.getSchema()).isNull();
+        assertThat(apiError.getCode()).isEqualTo(code);
+        assertThat(apiError.getDescription()).isEqualTo(description);
+        assertThat(apiError.getSchema()).isNull();
     }
 
     @Test
@@ -70,13 +70,13 @@ public class ErrorTest {
                 .type(Object.class)
                 .build();
 
-        final Error error = Error.error()
+        final ApiError apiError = ApiError.apiError()
                 .code(500)
                 .description("my description")
                 .schema(schema)
                 .build();
 
-        assertThat(error.getSchema()).isNotNull();
+        assertThat(apiError.getSchema()).isNotNull();
     }
 
 }

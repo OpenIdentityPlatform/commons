@@ -35,8 +35,8 @@ public class ReadTest {
 
     private final String description = "My Description";
     private final String[] supportedLocales = new String[]{"en"};
-    private Error internalServerError;
-    private Error notFoundError;
+    private ApiError internalServerApiError;
+    private ApiError notFoundApiError;
     private Parameter parameter1;
     private Parameter parameter2;
 
@@ -45,13 +45,13 @@ public class ReadTest {
         final Schema schema = Schema.schema()
                 .schema(json(object()))
                 .build();
-        notFoundError = Error.error()
+        notFoundApiError = ApiError.apiError()
                 .code(404)
                 .description("Not Found")
                 .build();
-        internalServerError = Error.error()
+        internalServerApiError = ApiError.apiError()
                 .code(500)
-                .description("Internal Service Error")
+                .description("Internal Service ApiError")
                 .build();
         parameter1 = Parameter.parameter()
                 .name("param1")
@@ -71,8 +71,8 @@ public class ReadTest {
                 .description(description)
                 .supportedLocales(supportedLocales)
                 .stability(Stability.STABLE)
-                .error(notFoundError)
-                .errors(Arrays.asList(internalServerError))
+                .error(notFoundApiError)
+                .errors(Arrays.asList(internalServerApiError))
                 .parameter(parameter1)
                 .parameters(Arrays.asList(parameter2))
                 .build();
@@ -86,7 +86,7 @@ public class ReadTest {
         assertThat(read.getDescription()).isEqualTo(description);
         assertThat(read.getSupportedLocales()).contains(supportedLocales);
         assertThat(read.getStability()).isEqualTo(Stability.STABLE);
-        assertThat(read.getErrors()).hasSize(2).contains(internalServerError, notFoundError);
+        assertThat(read.getApiErrors()).hasSize(2).contains(internalServerApiError, notFoundApiError);
         assertThat(read.getParameters()).hasSize(2).contains(parameter1, parameter2);
     }
 
