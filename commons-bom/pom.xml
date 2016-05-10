@@ -484,13 +484,25 @@
 
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-handler-syslog</artifactId>
+                <artifactId>forgerock-audit-handler-elasticsearch</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-audit-handler-jdbc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-handler-jms</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-handler-syslog</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
