@@ -20,6 +20,7 @@ import static java.util.Arrays.asList;
 import static org.forgerock.api.models.ApiDescription.apiDescription;
 import static org.forgerock.api.models.Create.create;
 import static org.forgerock.api.models.Definitions.definitions;
+import static org.forgerock.api.models.Items.items;
 import static org.forgerock.api.models.Paths.paths;
 import static org.forgerock.api.models.Query.query;
 import static org.forgerock.api.models.Reference.reference;
@@ -349,11 +350,7 @@ public final class ApiTestUtil {
                         .pagingMode(PagingMode.COOKIE, PagingMode.OFFSET)
                         .countPolicy(CountPolicy.NONE)
                         .build())
-                .items(resource()
-                        .resourceSchema(schema()
-                                .reference(reference().value("#/definitions/user").build())
-                                .build())
-                        .mvccSupported(true)
+                .items(items()
                         .create(create().mode(CreateMode.ID_FROM_CLIENT).build())
                         .read(Read.read().build())
                         .update(Update.update().build())
@@ -388,11 +385,7 @@ public final class ApiTestUtil {
                         .pagingMode(PagingMode.COOKIE, PagingMode.OFFSET)
                         .countPolicy(CountPolicy.NONE)
                         .build())
-                .items(resource()
-                        .resourceSchema(schema()
-                                .reference(reference().value("#/definitions/device").build())
-                                .build())
-                        .mvccSupported(true)
+                .items(items()
                         .create(create().mode(CreateMode.ID_FROM_CLIENT).build())
                         .read(Read.read().build())
                         .update(Update.update().build())

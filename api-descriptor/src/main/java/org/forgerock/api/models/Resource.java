@@ -63,7 +63,7 @@ public final class Resource {
     private final Action[] actions;
     private final Query[] queries;
     private final SubResources subresources;
-    private final Resource items;
+    private final Items items;
     private final Boolean mvccSupported;
     private final Parameter[] parameters;
 
@@ -82,9 +82,7 @@ public final class Resource {
         this.queries = builder.queries.toArray(new Query[builder.queries.size()]);
         this.items = builder.items;
         this.mvccSupported = builder.mvccSupported;
-
-        final List<Parameter> parameters = builder.parameters;
-        this.parameters = parameters.toArray(new Parameter[parameters.size()]);
+        this.parameters = builder.parameters.toArray(new Parameter[builder.parameters.size()]);
 
         if ((create != null || read != null || update != null || delete != null || patch != null
                 || !isEmpty(actions) || !isEmpty(queries)) && reference != null) {
@@ -207,7 +205,7 @@ public final class Resource {
      *
      * @return Items
      */
-    public Resource getItems() {
+    public Items getItems() {
         return items;
     }
 
@@ -272,7 +270,7 @@ public final class Resource {
      * @return The built {@code Resource} object.
      */
     public static Resource fromAnnotatedType(Class<?> type, AnnotatedTypeVariant variant,
-            SubResources subResources, Resource items, ApiDescription descriptor) {
+            SubResources subResources, Items items, ApiDescription descriptor) {
         Builder builder = resource();
         RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
         if (requestHandler == null) {
@@ -405,7 +403,7 @@ public final class Resource {
         private SubResources subresources;
         private final Set<Action> actions;
         private final Set<Query> queries;
-        private Resource items;
+        private Items items;
         private Boolean mvccSupported;
         public Reference reference;
         private final List<Parameter> parameters;
@@ -615,12 +613,12 @@ public final class Resource {
         }
 
         /**
-         * Adds items Resource.
+         * Adds items-resource.
          *
-         * @param items The Resource definition of the collection items
+         * @param items The definition of the collection items
          * @return Builder
          */
-        public Builder items(Resource items) {
+        public Builder items(Items items) {
             checkState();
             this.items = items;
             return this;

@@ -84,6 +84,7 @@ import org.forgerock.api.models.Definitions;
 import org.forgerock.api.models.Delete;
 import org.forgerock.api.models.Error;
 import org.forgerock.api.models.Errors;
+import org.forgerock.api.models.Items;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Patch;
 import org.forgerock.api.models.Paths;
@@ -341,10 +342,9 @@ public class OpenApiTransformer {
             final List<Parameter> parameters, final Map<String, Path> pathMap, final Swagger swagger,
             final ReferenceResolver referenceResolver) {
         if (resource.getItems() != null) {
-            Resource itemsResource = resource.getItems();
-            if (itemsResource.getReference() != null) {
-                itemsResource = referenceResolver.getService(itemsResource.getReference());
-            }
+            // an items-resource inherits some fields from its parent, so build combined resource
+            final Resource itemsResource = resource.getItems().asResource(resource.isMvccSupported(),
+                    resource.getResourceSchema());
 
             // assume there is an "id" path-parameter
             final List<Parameter> itemsParameters = mergeParameters(new ArrayList<>(parameters),

@@ -134,9 +134,28 @@ patch       | [Patch](#patch)             |            | The patch operation des
 actions     | [Action](#action)[]         |            | The action operation descriptions, if supported
 queries     | [Query](#query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
 subresources | [SubResources](#subresources) |         | Sub-resources of this resource. Sub-resources use the same version as their parent resource, so are not separately versioned.
-items       | [Resource](#resource)       |            | The items description in the resource. Used if the resource is a collection.
+items       | [Items](#items)             |            | The items description in the resource. Used if the resource is a collection.
 mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
 parameters  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource
+
+### Items
+
+Descriptor for collection operations. At least one _Operation_ (e.g., _create_) is required.
+
+#### Properties
+
+Key         | Type                        | Required?  | Description
+----------- | --------------------------- |:----------:| ------------------------------------
+title       | String                      |            | Service title used for documentation purposes
+description | String                      |            | Service description used for documentation purposes
+create      | [Create](#create)           |            | The create operation description, if supported
+read        | [Read](#read)               |            | The read operation description, if supported
+update      | [Update](#update)           |            | The update operation description, if supported
+delete      | [Delete](#delete)           |            | The delete operation description, if supported
+patch       | [Patch](#patch)             |            | The patch operation description, if supported
+actions     | [Action](#action)[]         |            | The action operation descriptions, if supported
+parameters  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource
+
 
 ### SubResources
 

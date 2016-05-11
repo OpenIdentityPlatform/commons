@@ -32,6 +32,7 @@ import java.util.Map;
 import org.forgerock.api.annotations.Path;
 import org.forgerock.api.enums.HandlerVariant;
 import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.Items;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.SubResources;
 import org.forgerock.services.context.ApiContext;
@@ -301,7 +302,7 @@ public final class Resources {
         case SINGLETON_RESOURCE:
             return Resource.fromAnnotatedType(provider.getClass(), SINGLETON_RESOURCE, subResources, definitions);
         case COLLECTION_RESOURCE:
-            Resource items = Resource.fromAnnotatedType(provider.getClass(), COLLECTION_RESOURCE_INSTANCE, definitions);
+            final Items items = Items.fromAnnotatedType(provider.getClass(), definitions);
             return Resource.fromAnnotatedType(provider.getClass(), COLLECTION_RESOURCE_COLLECTION, subResources, items,
                     definitions);
         case REQUEST_HANDLER:
