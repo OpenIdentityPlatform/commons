@@ -72,6 +72,7 @@ import java.util.Map;
 
 import org.forgerock.http.Handler;
 import org.forgerock.http.MutableUri;
+import org.forgerock.http.protocol.Responses;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -100,7 +101,6 @@ import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
-import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -137,14 +137,6 @@ import org.forgerock.util.promise.Promise;
 final class CrestAdapter implements RequestHandler {
 
     private static final Status NOT_MODIFIED = Status.valueOf(304, "Not Modified");
-    private static final Function<NeverThrowsException, ResourceResponse, ResourceException> NO_OP_ON_EXCEPTION =
-        new Function<NeverThrowsException, ResourceResponse, ResourceException>() {
-            @Override
-            public ResourceResponse apply(NeverThrowsException value) throws ResourceException {
-                // Should not happen
-                return null;
-            }
-        };
 
     private final Handler handler;
     private final URI baseUri;
@@ -195,13 +187,7 @@ final class CrestAdapter implements RequestHandler {
                                   throw createResourceException(response, content);
                               }
                           }
-                      }, new Function<NeverThrowsException, ActionResponse, ResourceException>() {
-                          @Override
-                          public ActionResponse apply(NeverThrowsException value) throws ResourceException {
-                              // Should not happen
-                              return null;
-                          }
-                      });
+                      }, Responses.<ActionResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -250,7 +236,7 @@ final class CrestAdapter implements RequestHandler {
                                   throw createResourceException(response, content);
                               }
                           }
-                      }, NO_OP_ON_EXCEPTION);
+                      }, Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -263,7 +249,8 @@ final class CrestAdapter implements RequestHandler {
 
         // Expect OK
         return handler.handle(context, httpRequest)
-                      .then(buildCrestResponse(asList(Status.OK)), NO_OP_ON_EXCEPTION);
+                      .then(buildCrestResponse(asList(Status.OK)),
+                            Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -283,7 +270,8 @@ final class CrestAdapter implements RequestHandler {
 
         // Expect OK
         return handler.handle(context, httpRequest)
-                      .then(buildCrestResponse(asList(Status.OK)), NO_OP_ON_EXCEPTION);
+                      .then(buildCrestResponse(asList(Status.OK)),
+                            Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -347,13 +335,7 @@ final class CrestAdapter implements RequestHandler {
                                   throw createResourceException(response, content);
                               }
                           }
-                      }, new Function<NeverThrowsException, QueryResponse, ResourceException>() {
-                          @Override
-                          public QueryResponse apply(NeverThrowsException value) throws ResourceException {
-                              // Should not happen
-                              return null;
-                          }
-                      });
+                      }, Responses.<QueryResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -365,7 +347,8 @@ final class CrestAdapter implements RequestHandler {
 
         // Expect OK or NOT_MODIFIED(304)
         return handler.handle(context, httpRequest)
-                      .then(buildCrestResponse(asList(Status.OK, NOT_MODIFIED)), NO_OP_ON_EXCEPTION);
+                      .then(buildCrestResponse(asList(Status.OK, NOT_MODIFIED)),
+                            Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -381,7 +364,8 @@ final class CrestAdapter implements RequestHandler {
 
         // Only expect OK
         return handler.handle(context, httpRequest)
-                      .then(buildCrestResponse(asList(Status.OK)), NO_OP_ON_EXCEPTION);
+                      .then(buildCrestResponse(asList(Status.OK)),
+                            Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
     }
 
     private static Function<Response, ResourceResponse, ResourceException> buildCrestResponse(

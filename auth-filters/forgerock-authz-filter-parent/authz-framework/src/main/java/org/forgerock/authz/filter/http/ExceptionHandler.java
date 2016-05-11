@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.http;
 
+import static org.forgerock.http.protocol.Responses.newInternalServerError;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.authz.filter.api.AuthorizationContext;
@@ -23,7 +24,6 @@ import org.forgerock.authz.filter.http.api.HttpAuthorizationModule;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.Status;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -65,7 +65,7 @@ class ExceptionHandler implements AsyncFunction<Exception, Response, NeverThrows
     @Override
     public Promise<Response, NeverThrowsException> apply(Exception e) {
         logger.error("Authorization failed", e);
-        Response response = new Response(Status.INTERNAL_SERVER_ERROR);
+        Response response = newInternalServerError();
         response.setEntity(responseHandler.getJsonErrorResponse(e.getMessage(), null).getObject());
         return newResultPromise(response);
     }

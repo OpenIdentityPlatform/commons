@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -31,6 +31,7 @@ import java.util.Set;
 
 import org.forgerock.http.Client;
 import org.forgerock.http.Handler;
+import org.forgerock.http.protocol.Responses;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
@@ -153,14 +154,7 @@ public class RestOAuth2AccessTokenValidator implements OAuth2AccessTokenValidato
                             throw new OAuth2Exception(e.getMessage(), e);
                         }
                     }
-                }, new Function<NeverThrowsException, AccessTokenValidationResponse, OAuth2Exception>() {
-                    @Override
-                    public AccessTokenValidationResponse apply(NeverThrowsException e) {
-                        //This can never happen but the exception handler is needed
-                        // to change the types of the returned Promise.
-                        throw new IllegalStateException("HTTP Client threw a NeverThrowsException?!");
-                    }
-                });
+                }, Responses.<AccessTokenValidationResponse, OAuth2Exception>noopExceptionFunction());
     }
 
     /**

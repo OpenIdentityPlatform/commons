@@ -39,6 +39,7 @@ import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.protocol.Responses;
 import org.forgerock.http.apache.async.AsyncHttpClientProvider;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -60,7 +61,6 @@ import org.forgerock.util.Function;
 import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
 import org.forgerock.util.encode.Base64;
-import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
@@ -209,7 +209,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                         }
                     }
             },
-                    ElasticsearchAuditEventHandler.<QueryResponse>noopException());
+                    Responses.<QueryResponse, ResourceException>noopExceptionFunction());
         } catch (URISyntaxException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
@@ -244,7 +244,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                         throw new InternalServerErrorException(e.getMessage(), e);
                     }
                 }
-        }, ElasticsearchAuditEventHandler.<ResourceResponse>noopException());
+        }, Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -291,7 +291,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                         return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
                                 event);
                     }
-            }, ElasticsearchAuditEventHandler.<ResourceResponse>noopException());
+            }, Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
         } catch (Exception e) {
             final String error = String.format("Unable to create audit entry for topic=%s, _id=%s", topic, resourceId);
             LOGGER.error(error, e);
@@ -495,15 +495,5 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         } catch (HttpApplicationException e) {
             throw new RuntimeException("Error while building default HTTP Client", e);
         }
-    }
-
-    // TODO Could be moved in a CHF as we will need this at different places
-    private static <V> Function<NeverThrowsException, V, ResourceException> noopException() {
-        return new Function<NeverThrowsException, V, ResourceException>() {
-            @Override
-            public V apply(NeverThrowsException value) throws ResourceException {
-                return null; // Will never happen
-            }
-        };
     }
 }

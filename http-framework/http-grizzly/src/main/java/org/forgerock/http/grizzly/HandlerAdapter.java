@@ -15,6 +15,7 @@
  */
 package org.forgerock.http.grizzly;
 
+import static org.forgerock.http.protocol.Responses.newInternalServerError;
 import static org.forgerock.http.io.IO.*;
 import static org.forgerock.util.Utils.*;
 
@@ -30,7 +31,6 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
-import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.session.SessionContext;
 import org.forgerock.http.util.CaseInsensitiveSet;
@@ -118,7 +118,7 @@ final class HandlerAdapter extends HttpHandler {
                 public void handleRuntimeException(RuntimeException e) {
                     LOGGER.error("RuntimeException caught", e);
                     writeResponse(
-                            new org.forgerock.http.protocol.Response(Status.INTERNAL_SERVER_ERROR).setCause(e),
+                            newInternalServerError(e),
                             response, sessionContext);
                 }
             })
@@ -215,8 +215,7 @@ final class HandlerAdapter extends HttpHandler {
         public Promise<org.forgerock.http.protocol.Response, NeverThrowsException> handle(Context context,
                 org.forgerock.http.protocol.Request request) {
             return org.forgerock.http.protocol.Response
-                    .newResponsePromise(new org.forgerock.http.protocol.Response(Status.INTERNAL_SERVER_ERROR)
-                                                                       .setCause(cause));
+                    .newResponsePromise(newInternalServerError(cause));
         }
     }
 }

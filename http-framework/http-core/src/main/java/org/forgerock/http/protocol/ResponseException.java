@@ -11,9 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 package org.forgerock.http.protocol;
+
+import static org.forgerock.http.protocol.Responses.newInternalServerError;
 
 /**
  * An HTTP Framework Exception that can be used by filters/handlers to simplify
@@ -67,7 +69,7 @@ public class ResponseException extends Exception {
      * @param cause Error cause
      */
     public ResponseException(String message, Throwable cause) {
-        this(new Response(Status.INTERNAL_SERVER_ERROR).setEntity(message),
+        this(newInternalServerError().setEntity(message),
              message,
              cause,
              true);

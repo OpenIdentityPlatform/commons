@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.selfservice.stages.captcha;
 
@@ -19,6 +19,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.selfservice.core.util.RequirementsBuilder.newEmptyObject;
 
 import org.forgerock.http.Client;
+import org.forgerock.http.protocol.Responses;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
@@ -110,13 +111,7 @@ public final class CaptchaStage implements ProgressStage<CaptchaStageConfig> {
                                 }
                             }
                         },
-                        new Function<NeverThrowsException, JsonValue, NeverThrowsException>() {
-                            @Override
-                            public JsonValue apply(NeverThrowsException e) {
-                                // return null on Exceptions
-                                return null;
-                            }
-                        })
+                        Responses.<JsonValue, NeverThrowsException>noopExceptionFunction())
                 .getOrThrowUninterruptibly();
     }
 

@@ -12,12 +12,13 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.servlet;
 
 import static java.util.Collections.*;
+import static org.forgerock.http.protocol.Responses.newInternalServerError;
 import static org.forgerock.http.handler.Handlers.chainOf;
 import static org.forgerock.http.io.IO.*;
 import static org.forgerock.util.Utils.*;
@@ -231,7 +232,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 @Override
                 public void handleRuntimeException(RuntimeException e) {
                     log("RuntimeException caught", e);
-                    writeResponse(request, new Response(Status.INTERNAL_SERVER_ERROR), resp, sessionContext, sync);
+                    writeResponse(request, newInternalServerError(), resp, sessionContext, sync);
                 }
             });
 
@@ -247,7 +248,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
             // Servlet specification indicates that it's the responsibility of the Servlet implementer to call
             // AsyncContext.complete()
             log("Throwable caught", throwable);
-            writeResponse(request, new Response(Status.INTERNAL_SERVER_ERROR), resp, sessionContext, sync);
+            writeResponse(request, newInternalServerError(), resp, sessionContext, sync);
         }
 
         try {
