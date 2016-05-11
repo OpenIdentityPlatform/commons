@@ -35,6 +35,16 @@ import org.forgerock.util.Reject;
  */
 public class AsciiDocTable {
 
+    /**
+     * <em>Small</em> column-width for use with {@link #columnWidths(int...)}.
+     */
+    public static final int COLUMN_WIDTH_SMALL = 1;
+
+    /**
+     * <em>Medium</em> column-width (2x {@link #COLUMN_WIDTH_SMALL}) for use with {@link #columnWidths(int...)}.
+     */
+    public static final int COLUMN_WIDTH_MEDIUM = 2;
+
     private static final Pattern TABLE_CELL_SYMBOL_PATTERN = Pattern.compile("\\|");
 
     private final AsciiDoc asciiDoc;
@@ -66,6 +76,17 @@ public class AsciiDocTable {
         }
         this.title = title;
         return this;
+    }
+
+    /**
+     * Sets the column headers, where blank entries can be null/empty, but the length of the headers array must
+     * be equal to the number of columns in the table.
+     *
+     * @param columnHeaders Column headers
+     * @return Table builder
+     */
+    public AsciiDocTable headers(final List<String> columnHeaders) {
+        return headers(columnHeaders.toArray(new String[columnHeaders.size()]));
     }
 
     /**
@@ -125,6 +146,21 @@ public class AsciiDocTable {
      * @param columnWidths An entry for each column-per row in value range [1,99]
      * @return Table builder
      */
+    public AsciiDocTable columnWidths(final List<Integer> columnWidths) {
+        final int[] array = new int[columnWidths.size()];
+        for (int i = 0; i < array.length; ++i) {
+            array[i] = columnWidths.get(i);
+        }
+        return columnWidths(array);
+    }
+
+    /**
+     * Sets the widths for all columns-per-row, which can be a proportional integer (the default is 1) or a
+     * percentage (1 to 99).
+     *
+     * @param columnWidths An entry for each column-per row in value range [1,99]
+     * @return Table builder
+     */
     public AsciiDocTable columnWidths(final int... columnWidths) {
         if (columnWidths == null || columnWidths.length == 0) {
             throw new AsciiDocException("columnWidths required");
@@ -152,9 +188,6 @@ public class AsciiDocTable {
      * @return Table builder
      */
     public AsciiDocTable columnCell(final String columnCell) {
-        if (this.columnsPerRow == null) {
-            throw new AsciiDocException("columnsPerRow not yet defined");
-        }
         cells.add(TABLE_CELL + normalizeColumnCell(columnCell));
         return this;
     }
@@ -167,9 +200,6 @@ public class AsciiDocTable {
      * @return Table builder
      */
     public AsciiDocTable columnCell(final String columnCell, final AsciiDocTableColumnStyles style) {
-        if (this.columnsPerRow == null) {
-            throw new AsciiDocException("columnsPerRow not yet defined");
-        }
         cells.add(style.toString() + TABLE_CELL + normalizeColumnCell(columnCell));
         return this;
     }

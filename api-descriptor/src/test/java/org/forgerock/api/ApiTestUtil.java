@@ -269,6 +269,30 @@ public final class ApiTestUtil {
     }
 
     public static ApiDescription createUserAndDeviceExampleApiDescription() {
+        // propertyOrder fields allow for testing explicit property-order
+        final Schema errorDetailSchema = schema()
+                .schema(json(object(
+                        field("type", "object"),
+                        field("properties", object(
+                                field("subCode", object(
+                                        field("type", "integer")
+                                )),
+                                field("reason", object(
+                                        field("type", "string"),
+                                        field("propertyOrder", 100)
+                                )),
+                                field("message", object(
+                                        field("type", "string"),
+                                        field("propertyOrder", 10)
+                                ))
+                        )))))
+                .build();
+        final Error notFoundError = Error.error()
+                .code(404)
+                .description("Custom not-found error.")
+                .schema(errorDetailSchema)
+                .build();
+
         final Schema userSchema = schema()
                 .schema(json(object(
                         field("type", "object"),
@@ -352,7 +376,9 @@ public final class ApiTestUtil {
                         .build())
                 .items(items()
                         .create(create().mode(CreateMode.ID_FROM_CLIENT).build())
-                        .read(Read.read().build())
+                        .read(Read.read()
+                                .error(notFoundError)
+                                .build())
                         .update(Update.update().build())
                         .delete(Delete.delete().build())
                         .patch(Patch.patch().operations(PatchOperation.ADD).build())

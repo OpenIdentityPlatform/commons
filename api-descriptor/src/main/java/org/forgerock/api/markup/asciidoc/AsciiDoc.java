@@ -41,6 +41,14 @@ public final class AsciiDoc {
     // TODO http://asciidoctor.org/docs/user-manual/#preventing-substitutions
 
     /**
+     * Regex for finding <a href="http://asciidoctor.org/docs/user-manual/#include-directive">Include</a>-directives,
+     * where group 1 contains the path-value.
+     *
+     * @see #include(String...)
+     */
+    public static final Pattern INCLUDE_PATTERN = Pattern.compile("include[:]{2}([^\\[]+)\\[\\]");
+
+    /**
      * Underscore-character is used as the namespace-part delimiter.
      */
     private static final String NAMESPACE_DELIMITER = "_";
@@ -602,11 +610,13 @@ public final class AsciiDoc {
         for (int i = 1; i < parts.length; ++i) {
             s += NAMESPACE_DELIMITER + parts[i].toLowerCase(Locale.ROOT);
         }
+        final String normalized;
         final Matcher m = POSIX_FILENAME_REPLACEMENT_PATTERN.matcher(s);
-        if (!m.find()) {
-            return s;
+        if (m.find()) {
+            normalized = m.replaceAll(NAMESPACE_DELIMITER);
+        } else {
+            normalized = s;
         }
-        final String normalized = m.replaceAll(NAMESPACE_DELIMITER);
         final Matcher mm = SQUASH_UNDERSCORES_PATTERN.matcher(normalized);
         return mm.find() ? mm.replaceAll(NAMESPACE_DELIMITER) : normalized;
     }

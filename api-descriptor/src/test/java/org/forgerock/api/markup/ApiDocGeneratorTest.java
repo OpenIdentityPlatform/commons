@@ -18,6 +18,7 @@ package org.forgerock.api.markup;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.api.markup.asciidoc.AsciiDoc.normalizeName;
 
 import java.io.IOException;
 import java.nio.file.FileVisitResult;
@@ -28,6 +29,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Arrays;
 
 import org.forgerock.api.ApiTestUtil;
+import org.forgerock.api.markup.asciidoc.AsciiDoc;
 import org.forgerock.api.models.ApiDescription;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -35,9 +37,7 @@ import org.testng.annotations.Test;
 
 public class ApiDocGeneratorTest {
 
-    private static final String API_DESCRIPTION_PATH = "frapi_test_index_description.adoc";
     private static final String CUSTOM_API_DESCRIPTION = "\n\nCustom API description.\n\n";
-    private static final String DEFAULT_API_DESCRIPTION = "Default API description.";
 
     private Path inputDirPath;
     private Path outputDirPath;
@@ -70,48 +70,60 @@ public class ApiDocGeneratorTest {
     }
 
     @Test
+    public void testExecuteWithUserDeviceExample() throws Exception {
+        final ApiDescription apiDescription = ApiTestUtil.createUserAndDeviceExampleApiDescription();
+        final String content = ApiDocGenerator.execute("Users and Devices API", apiDescription, null, null);
+
+        assertThat(content).isNotEmpty();
+        assertThat(AsciiDoc.INCLUDE_PATTERN.matcher(content).find()).isFalse();
+    }
+
+    @Test
     public void testExecuteWithUnversionedPaths() throws Exception {
         final Path testOutputDirPath = outputDirPath.resolve("testExecute");
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(false);
-        final ApiDocGenerator apiDocGenerator = new ApiDocGenerator(testOutputDirPath);
-        apiDocGenerator.execute(apiDescription);
+        ApiDocGenerator.execute("Example API Without Resource Versions", apiDescription, null, null, testOutputDirPath);
 
         // check for output-dir for default API description file
-        final Path outputApiDescriptionPath = testOutputDirPath.resolve(API_DESCRIPTION_PATH);
+        final Path outputApiDescriptionPath = testOutputDirPath.resolve(normalizeName(apiDescription.getId(),
+                "index_description.adoc"));
         final String outputApiDescription = new String(Files.readAllBytes(outputApiDescriptionPath), UTF_8);
-        assertThat(outputApiDescription).contains(DEFAULT_API_DESCRIPTION);
+        assertThat(outputApiDescription).contains(apiDescription.getDescription());
     }
 
     @Test
     public void testExecuteWithVersionedPaths() throws Exception {
         final Path testOutputDirPath = outputDirPath.resolve("testExecuteWithVersionedPaths");
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(true);
-        final ApiDocGenerator apiDocGenerator = new ApiDocGenerator(outputDirPath.resolve(testOutputDirPath));
-        apiDocGenerator.execute(apiDescription);
+        ApiDocGenerator.execute("Example API With Resource Versions", apiDescription, null, null, testOutputDirPath);
 
         // check for output-dir for default API description file
-        final Path outputApiDescriptionPath = testOutputDirPath.resolve(API_DESCRIPTION_PATH);
+        final Path outputApiDescriptionPath = testOutputDirPath.resolve(normalizeName(apiDescription.getId(),
+                "index_description.adoc"));
         final String outputApiDescription = new String(Files.readAllBytes(outputApiDescriptionPath), UTF_8);
-        assertThat(outputApiDescription).contains(DEFAULT_API_DESCRIPTION);
+        assertThat(outputApiDescription).contains(apiDescription.getDescription());
     }
 
     @Test
     public void testExecuteWithInputOverrides() throws Exception {
+        final ApiDescription apiDescription = ApiTestUtil.createApiDescription(false);
+
         // create description file in input-dir
         final Path testInputDirPath = inputDirPath.resolve("testExecuteWithInputOverrides");
         Files.createDirectory(testInputDirPath);
-        final Path inputApiDescriptionPath = testInputDirPath.resolve(API_DESCRIPTION_PATH);
+        final Path inputApiDescriptionPath = testInputDirPath.resolve(normalizeName(apiDescription.getId(),
+                "index_description.adoc"));
         Files.createFile(inputApiDescriptionPath);
         Files.write(inputApiDescriptionPath, CUSTOM_API_DESCRIPTION.getBytes(UTF_8));
 
         // write API descriptor files to output-dir
-        final ApiDescription apiDescription = ApiTestUtil.createApiDescription(false);
         final Path testOutputDirPath = outputDirPath.resolve("testExecuteWithInputOverrides");
-        final ApiDocGenerator apiDocGenerator = new ApiDocGenerator(testInputDirPath, testOutputDirPath);
-        apiDocGenerator.execute(apiDescription);
+        ApiDocGenerator.execute("Example API With AsciiDoc Overrides", apiDescription, null, testInputDirPath,
+                testOutputDirPath);
 
         // check for input-dir description file in output-dir
-        final Path outputApiDescriptionPath = testOutputDirPath.resolve(API_DESCRIPTION_PATH);
+        final Path outputApiDescriptionPath = testOutputDirPath.resolve(normalizeName(apiDescription.getId(),
+                "index_description.adoc"));
         final String outputApiDescription = new String(Files.readAllBytes(outputApiDescriptionPath), UTF_8);
         assertThat(outputApiDescription).isEqualTo(CUSTOM_API_DESCRIPTION);
     }

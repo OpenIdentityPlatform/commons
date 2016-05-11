@@ -16,10 +16,14 @@
 
 package org.forgerock.api.markup;
 
+import static java.util.Collections.unmodifiableList;
 import static org.forgerock.api.markup.asciidoc.AsciiDoc.asciiDoc;
 import static org.forgerock.api.markup.asciidoc.AsciiDoc.normalizeName;
+import static org.forgerock.api.markup.asciidoc.AsciiDocTable.COLUMN_WIDTH_MEDIUM;
+import static org.forgerock.api.markup.asciidoc.AsciiDocTable.COLUMN_WIDTH_SMALL;
 import static org.forgerock.api.markup.asciidoc.AsciiDocTableColumnStyles.ASCII_DOC_CELL;
 import static org.forgerock.api.markup.asciidoc.AsciiDocTableColumnStyles.MONO_CELL;
+import static org.forgerock.api.util.PathUtil.*;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 import static org.forgerock.util.Reject.checkNotNull;
 
@@ -31,9 +35,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +49,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.forgerock.api.enums.CountPolicy;
 import org.forgerock.api.enums.CreateMode;
 import org.forgerock.api.enums.PagingMode;
+import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.Stability;
 import org.forgerock.api.markup.asciidoc.AsciiDoc;
@@ -48,34 +57,43 @@ import org.forgerock.api.markup.asciidoc.AsciiDocTable;
 import org.forgerock.api.models.Action;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Create;
-import org.forgerock.api.models.Definitions;
-import org.forgerock.api.models.Delete;
 import org.forgerock.api.models.Error;
-import org.forgerock.api.models.Errors;
+import org.forgerock.api.models.Operation;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Patch;
 import org.forgerock.api.models.Paths;
 import org.forgerock.api.models.Query;
-import org.forgerock.api.models.Read;
+import org.forgerock.api.models.Reference;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.Schema;
-import org.forgerock.api.models.Update;
+import org.forgerock.api.models.SubResources;
 import org.forgerock.api.models.VersionedPath;
+import org.forgerock.api.util.ReferenceResolver;
 import org.forgerock.http.routing.Version;
-import org.forgerock.json.JsonValue;
 
 /**
  * Generates static AsciiDoc documentation for CREST API Descriptors.
- * <p>
- * This class is not thread-safe.
- * </p>
  */
-public class ApiDocGenerator {
+public final class ApiDocGenerator {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
             .enable(SerializationFeature.INDENT_OUTPUT);
+
+    enum CrestMethod {
+        CREATE, READ, UPDATE, DELETE, PATCH, ACTION, QUERY
+    }
+
+    /**
+     * Regex pattern that matches services names with format,
+     * <ul>
+     * <li>name:1</li>
+     * <li>name:1.0</li>
+     * </ul>
+     * Where match group 1 contains the {@code name} and group 2 contains the version.
+     */
+    private static final Pattern SERVICE_NAME_PATTERN = Pattern.compile("^([^:]+)[:](\\d(?:\\.\\d)?)$");
 
     /**
      * {@code .adoc} file extension for generated AsciiDoc files.
@@ -83,57 +101,109 @@ public class ApiDocGenerator {
     private static final String ADOC_EXTENSION = ".adoc";
 
     /**
+     * {@code true} when there is no {@link #outputDirPath filesystem} to write to, and we must build the complete
+     * AsciiDoc as a string.
+     */
+    private final boolean inMemoryMode;
+
+    /**
      * Root output directory.
      */
     private final Path outputDirPath;
 
     /**
-     * Optional input directory.
+     * Optional input directory or {@code null}.
      */
     private final Path inputDirPath;
 
     /**
-     * Map of dynamically generated schema anchors (keys) to {@link JsonValue} instances, for all {@link Schema}s
-     * not found in {@link ApiDescription#getDefinitions()}.
+     * Group doc sections by path-name, version, resource-ADOC-filename.
      */
-    private final Map<String, JsonValue> schemaMap = new HashMap<>();
+    private final Map<String, Map<Version, String>> pathTree;
 
     /**
-     * Constructor that sets the root output directory for AsciiDoc files, which will be created if it does not exist.
-     *
-     * @param outputDirPath Root output directory
+     * Lookup map of rendered AsciiDoc string, for in-memory mode, from filename (key) to AsciiDoc (value).
      */
-    public ApiDocGenerator(final Path outputDirPath) {
-        this(null, outputDirPath);
-    }
+    private final Map<String, String> adocMap;
+
+    /**
+     * Entries from {@link ApiDescription#getServices()} that have been referenced, whereas unreferenced services
+     * will be listed under the {@code <undefined>} path in the documentation.
+     */
+    private final Set<Resource> referencedServices;
+
+    private final ApiDescription apiDescription;
+
+    private final ReferenceResolver referenceResolver;
 
     /**
      * Constructor that sets the root output directory for AsciiDoc files, which will be created if it does not exist,
      * and an input directory used for overriding AsciiDoc files (e.g., descriptions).
      *
      * @param inputDirPath Input directory or {@code null}
-     * @param outputDirPath Root output directory
+     * @param outputDirPath Root output directory or {@code null} for in-memory mode
      */
-    public ApiDocGenerator(final Path inputDirPath, final Path outputDirPath) {
+    private ApiDocGenerator(final ApiDescription apiDescription, final List<ApiDescription> externalApiDescriptions,
+            final Path inputDirPath, final Path outputDirPath) {
+
+        pathTree = new HashMap<>();
+        adocMap = new HashMap<>();
+        referencedServices = new HashSet<>();
+        this.apiDescription = checkNotNull(apiDescription, "apiDescription required");
         this.inputDirPath = inputDirPath;
-        this.outputDirPath = checkNotNull(outputDirPath, "outputDirPath required");
-        if (outputDirPath.equals(inputDirPath)) {
+        this.outputDirPath = outputDirPath;
+        inMemoryMode = outputDirPath == null;
+
+        if (outputDirPath != null && outputDirPath.equals(inputDirPath)) {
             throw new ApiDocGeneratorException("inputDirPath and outputDirPath can not be equal");
+        }
+
+        referenceResolver = new ReferenceResolver(apiDescription);
+        if (externalApiDescriptions != null) {
+            referenceResolver.registerAll(externalApiDescriptions);
         }
     }
 
     /**
-     * Generates AsciiDoc documentation for a CREST API Descriptor.
+     * Generates AsciiDoc documentation for a CREST API Descriptor, to an output-directory.
      *
+     * @param title API title
      * @param apiDescription API Description
+     * @param externalApiDescriptions External CREST API Descriptions, for resolving {@link Reference}s, or {@code null}
+     * @param inputDirPath Input directory or {@code null} if not overriding ADOC files
+     * @param outputDirPath Root output directory
      */
-    public void execute(final ApiDescription apiDescription) {
+    public static void execute(final String title, final ApiDescription apiDescription,
+            final List<ApiDescription> externalApiDescriptions, final Path inputDirPath, final Path outputDirPath) {
+
+        final ApiDocGenerator thisInstance = new ApiDocGenerator(apiDescription, externalApiDescriptions,
+                inputDirPath, outputDirPath);
+        thisInstance.doExecute(title);
+    }
+
+    /**
+     * Generates AsciiDoc documentation for a CREST API Descriptor, to a {@code String}.
+     *
+     * @param title API title
+     * @param apiDescription API Description
+     * @param externalApiDescriptions External CREST API Descriptions, for resolving {@link Reference}s, or {@code null}
+     * @param inputDirPath Input directory or {@code null} if not overriding ADOC files
+     * @return Resulting AsciiDoc markup as a {@code String}
+     */
+    public static String execute(final String title, final ApiDescription apiDescription,
+            final List<ApiDescription> externalApiDescriptions, final Path inputDirPath) {
+
+        final ApiDocGenerator thisInstance = new ApiDocGenerator(apiDescription, externalApiDescriptions,
+                inputDirPath, null);
+        final String rootFilename = thisInstance.doExecute(title);
+        return thisInstance.toString(rootFilename);
+    }
+
+    private String doExecute(final String title) {
         final String namespace = apiDescription.getId();
         try {
-            final String pathsFilename = outputPaths(apiDescription.getPaths(), namespace);
-            final String errorsFilename = outputErrors(apiDescription.getErrors(), namespace);
-            final String definitionsFilename = outputDefinitions(apiDescription.getDefinitions(), namespace);
-            outputRoot(apiDescription, pathsFilename, definitionsFilename, errorsFilename, namespace);
+            final String pathsFilename = outputPaths(namespace);
+            return outputRoot(checkNotNull(title, "title is required"), pathsFilename, namespace);
         } catch (IOException e) {
             throw new ApiDocGeneratorException("Unable to output doc file", e);
         }
@@ -142,22 +212,20 @@ public class ApiDocGenerator {
     /**
      * Outputs a top-level AsciiDoc file that imports all other second-level files generated by this class.
      *
-     * @param apiDescription API Description
+     * @param title API title
      * @param pathsFilename Paths file-path suitable for AsciiDoc import-statement
-     * @param definitionsFilename Definitions-file path suitable for AsciiDoc import-statement
-     * @param errorsFilename Errors-file path suitable for AsciiDoc import-statement
      * @param parentNamespace Parent namespace
      * @return File path suitable for AsciiDoc import-statement
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputRoot(final ApiDescription apiDescription, final String pathsFilename,
-            final String definitionsFilename, final String errorsFilename,
-            final String parentNamespace) throws IOException {
+    private String outputRoot(final String title, final String pathsFilename, final String parentNamespace)
+            throws IOException {
         final String namespace = normalizeName(parentNamespace, "index");
 
         final AsciiDoc pathsDoc = asciiDoc()
-                .documentTitle("API Descriptor")
-                .rawParagraph(asciiDoc().rawText("*ID:* ").mono(apiDescription.getId()).toString())
+                .documentTitle(title)
+                .rawParagraph(asciiDoc().rawText("*API ID:* ").mono(apiDescription.getId()).toString())
+                .rawParagraph(asciiDoc().rawText("*API Version:* ").mono(apiDescription.getVersion()).toString())
                 .rawLine(":toc: left")
                 .rawLine(":toclevels: 5")
                 .newline();
@@ -168,15 +236,13 @@ public class ApiDocGenerator {
         if (pathsFilename != null) {
             pathsDoc.include(pathsFilename);
         }
-        if (definitionsFilename != null) {
-            pathsDoc.include(definitionsFilename);
-        }
-        if (errorsFilename != null) {
-            pathsDoc.include(errorsFilename);
-        }
 
         final String filename = namespace + ADOC_EXTENSION;
-        pathsDoc.toFile(outputDirPath, filename);
+        if (inMemoryMode) {
+            adocMap.put(filename, pathsDoc.toString());
+        } else {
+            pathsDoc.toFile(outputDirPath, filename);
+        }
         return filename;
     }
 
@@ -200,7 +266,11 @@ public class ApiDocGenerator {
             if (!isEmpty(defaultDescription)) {
                 blockDoc.rawParagraph(defaultDescription);
             }
-            blockDoc.toFile(outputDirPath, filename);
+            if (inMemoryMode) {
+                adocMap.put(filename, blockDoc.toString());
+            } else {
+                blockDoc.toFile(outputDirPath, filename);
+            }
         }
         return filename;
     }
@@ -209,330 +279,344 @@ public class ApiDocGenerator {
      * Outputs an AsciiDoc file for each path, which imports a file for each version under that path, and another
      * file that imports each path.
      *
-     * @param paths Versioned paths
      * @param parentNamespace Parent namespace
      * @return File path suitable for AsciiDoc import-statement
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputPaths(final Paths paths, final String parentNamespace)
-            throws IOException {
+    private String outputPaths(final String parentNamespace) throws IOException {
         final String allPathsDocNamespace = normalizeName(parentNamespace, "paths");
         final AsciiDoc allPathsDoc = asciiDoc()
                 .sectionTitle1("Paths");
 
+        final Paths paths = apiDescription.getPaths();
         final List<String> pathNames = new ArrayList<>(paths.getNames());
         Collections.sort(pathNames);
         for (final String pathName : pathNames) {
             // path
             final String pathDocNamespace = normalizeName(allPathsDocNamespace, pathName);
-            final AsciiDoc pathDoc = asciiDoc()
-                    .sectionTitle2(asciiDoc().mono(pathName).toString());
 
             final VersionedPath versionedPath = paths.get(pathName);
             final List<Version> versions = new ArrayList<>(versionedPath.getVersions());
-            if (versions.size() == 1 && VersionedPath.UNVERSIONED.equals(versions.get(0))) {
-                // resources are unversioned, so do not output version in docs
-                final Resource resource = versionedPath.get(VersionedPath.UNVERSIONED);
-                final String resourceImport = outputResource(resource, 3, pathDocNamespace);
-                pathDoc.include(resourceImport);
+            Collections.sort(versions);
 
-                // output path-file
-                final String pathDocFilename = pathDocNamespace + ADOC_EXTENSION;
-                pathDoc.toFile(outputDirPath, pathDocFilename);
-
-                // include path-file
-                allPathsDoc.include(pathDocFilename);
-            } else {
-                Collections.sort(versions);
-                for (final Version version : versions) {
+            for (final Version version : versions) {
+                final String versionDocNamespace;
+                if (VersionedPath.UNVERSIONED.equals(version)) {
+                    versionDocNamespace = pathDocNamespace;
+                } else {
                     // version
                     final String versionName = version.toString();
-                    final String versionDocNamespace = normalizeName(pathDocNamespace, versionName);
-                    final AsciiDoc versionDoc = asciiDoc()
-                            .sectionTitle3(asciiDoc().mono(versionName).toString());
-
-                    // resource
-                    final String resourceImport = outputResource(versionedPath.get(version), 4, versionDocNamespace);
-                    versionDoc.include(resourceImport);
-
-                    // output version-file
-                    final String versionDocFilename = versionDocNamespace + ADOC_EXTENSION;
-                    versionDoc.toFile(outputDirPath, versionDocFilename);
-
-                    // include version-file
-                    pathDoc.include(versionDocFilename);
+                    versionDocNamespace = normalizeName(pathDocNamespace, versionName);
                 }
 
-                // output path-file
-                final String pathDocFilename = pathDocNamespace + ADOC_EXTENSION;
-                pathDoc.toFile(outputDirPath, pathDocFilename);
+                // resource path
+                Resource resource = versionedPath.get(version);
+                if (resource.getReference() != null) {
+                    resource = referenceResolver.getService(resource.getReference());
+                    referencedServices.add(resource);
+                }
+                final String resourceFilename = outputResource(pathName, version, resource,
+                        Collections.<Parameter>emptyList(), versionDocNamespace);
+                addPathResource(pathName, version, resourceFilename);
+            }
+        }
 
-                // include path-file
-                allPathsDoc.include(pathDocFilename);
+        outputUndefinedServices(allPathsDocNamespace);
+
+        // output paths and versions by traversing pathTree
+        final List<String> pathKeys = new ArrayList<>(pathTree.keySet());
+        Collections.sort(pathKeys);
+        for (final String pathKey : pathKeys) {
+            allPathsDoc.sectionTitle2(asciiDoc().mono(pathKey).toString());
+
+            final Map<Version, String> versionMap = pathTree.get(pathKey);
+            for (final Map.Entry<Version, String> entry : versionMap.entrySet()) {
+                if (!VersionedPath.UNVERSIONED.equals(entry.getKey())) {
+                    allPathsDoc.sectionTitle3(asciiDoc().mono(entry.getKey().toString()).toString());
+                }
+                allPathsDoc.include(entry.getValue());
             }
         }
 
         // output all-paths-file
         final String filename = allPathsDocNamespace + ADOC_EXTENSION;
-        allPathsDoc.toFile(outputDirPath, filename);
+        if (inMemoryMode) {
+            adocMap.put(filename, allPathsDoc.toString());
+        } else {
+            allPathsDoc.toFile(outputDirPath, filename);
+        }
         return filename;
     }
 
     /**
-     * Outputs an AsciiDoc file for the resource and each operation, and a file that imports each of those files.
+     * Search for unreferenced services, and add them to the documentation under the {@code <undefined>} path.
      *
-     * @param resource Resource
-     * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
      * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputResource(final Resource resource, final int sectionLevel, final String parentNamespace)
-            throws IOException {
+    private void outputUndefinedServices(final String parentNamespace) throws IOException {
+        //
+        if (!apiDescription.getServices().getNames().isEmpty()) {
+            for (final String name : apiDescription.getServices().getNames()) {
+                final Resource resource = apiDescription.getServices().get(name);
+                if (!referencedServices.contains(resource)) {
+                    // parse service version, from end of name, if provided
+                    final Matcher m = SERVICE_NAME_PATTERN.matcher(name);
+                    final String serviceName;
+                    final Version serviceVersion;
+                    if (m.matches()) {
+                        serviceName = m.group(1);
+                        serviceVersion = Version.version(m.group(2));
+                    } else {
+                        serviceName = name;
+                        serviceVersion = VersionedPath.UNVERSIONED;
+                    }
+
+                    final String pathDocNamespace = normalizeName(parentNamespace, "<undefined>");
+                    final String versionDocNamespace;
+                    if (VersionedPath.UNVERSIONED.equals(serviceVersion)) {
+                        versionDocNamespace = pathDocNamespace;
+                    } else {
+                        // version
+                        final String versionName = serviceVersion.toString();
+                        versionDocNamespace = normalizeName(pathDocNamespace, versionName);
+                    }
+
+                    final String pathName = "<undefined>/" + serviceName;
+                    final String resourceFilename = outputResource(pathName, serviceVersion, resource,
+                            Collections.<Parameter>emptyList(), versionDocNamespace);
+                    addPathResource(pathName, serviceVersion, resourceFilename);
+                }
+            }
+        }
+    }
+
+    private String outputResource(final String pathName, final Version version, final Resource resource,
+            final List<Parameter> parameters, final String parentNamespace) throws IOException {
+        final boolean unversioned = VersionedPath.UNVERSIONED.equals(version);
+        final int sectionLevel = unversioned ? 3 : 4;
+
         final String namespace = normalizeName(parentNamespace, "resource");
         final AsciiDoc resourceDoc = asciiDoc();
-
-        outputMvccSupport(resource.isMvccSupported(), resourceDoc);
 
         final String descriptionFilename = outputDescriptionBlock(resource.getDescription(), namespace);
         resourceDoc.include(descriptionFilename);
 
-        String resourceAnchor = null;
-        if (resource.getResourceSchema() != null) {
-            resourceAnchor = resolveSchemaAnchor(resource.getResourceSchema(), namespace);
-        }
+        outputOperation(CrestMethod.CREATE, resource, sectionLevel, parameters, namespace, resourceDoc);
+        outputOperation(CrestMethod.READ, resource, sectionLevel, parameters, namespace, resourceDoc);
+        outputOperation(CrestMethod.UPDATE, resource, sectionLevel, parameters, namespace, resourceDoc);
+        outputOperation(CrestMethod.DELETE, resource, sectionLevel, parameters, namespace, resourceDoc);
+        outputOperation(CrestMethod.PATCH, resource, sectionLevel, parameters, namespace, resourceDoc);
 
-        if (resource.getCreate() != null) {
-            final String filename = outputCreateOperation(resource.getCreate(), sectionLevel, resourceAnchor,
-                    namespace);
-            resourceDoc.horizontalRule()
-                    .include(filename);
-        }
+        outputActionOperations(resource, sectionLevel, parameters, namespace, resourceDoc);
+        outputQueryOperations(resource, sectionLevel, parameters, namespace, resourceDoc);
 
-        if (resource.getRead() != null) {
-            final String filename = outputReadOperation(resource.getRead(), sectionLevel, resourceAnchor, namespace);
-            resourceDoc.horizontalRule()
-                    .include(filename);
-        }
+        // collections path
+        outputItems(version, resource, parameters, pathName, parentNamespace);
 
-        if (resource.getUpdate() != null) {
-            final String filename = outputUpdateOperation(resource.getUpdate(), sectionLevel, resourceAnchor,
-                    namespace);
-            resourceDoc.horizontalRule()
-                    .include(filename);
-        }
+        // sub-resource paths
+        outputSubResources(version, resource, parameters, pathName, parentNamespace);
 
-        if (resource.getDelete() != null) {
-            final String filename = outputDeleteOperation(resource.getDelete(), sectionLevel, resourceAnchor,
-                    namespace);
-            resourceDoc.horizontalRule()
-                    .include(filename);
+        // output resource-file
+        final String resourceFilename = namespace + ADOC_EXTENSION;
+        if (inMemoryMode) {
+            adocMap.put(resourceFilename, resourceDoc.toString());
+        } else {
+            resourceDoc.toFile(outputDirPath, resourceFilename);
         }
+        return resourceFilename;
+    }
 
-        if (resource.getPatch() != null) {
-            final String filename = outputPatchOperation(resource.getPatch(), sectionLevel, resourceAnchor, namespace);
-            resourceDoc.horizontalRule()
-                    .include(filename);
+    private void outputItems(final Version version, final Resource resource, final List<Parameter> parameters,
+            final String parentPathName, final String parentNamespace) throws IOException {
+        if (resource.getItems() != null) {
+            final String itemsPathName = parentPathName + "/{id}";
+            final String itemsPathDocNamespace = normalizeName(parentNamespace, itemsPathName);
+
+            final Resource itemsResource = resource.getItems().asResource(resource.isMvccSupported(),
+                    resource.getResourceSchema());
+
+            // assume there is an "id" path-parameter
+            final List<Parameter> itemsParameters = mergeParameters(new ArrayList<>(parameters),
+                    resource.getParameters());
+            itemsParameters.add(Parameter.parameter()
+                    .name("id")
+                    .type("string")
+                    .source(ParameterSource.PATH)
+                    .required(true)
+                    .build());
+
+            final String resourceFilename = outputResource(parentPathName, version,
+                    itemsResource, itemsParameters, itemsPathDocNamespace);
+            addPathResource(itemsPathName, version, resourceFilename);
         }
+    }
 
-        if (!isEmpty(resource.getActions())) {
-            final String filename = outputActionOperations(resource.getActions(), sectionLevel, namespace);
-            resourceDoc.include(filename);
+    private void outputSubResources(final Version version, final Resource resource, final List<Parameter> parameters,
+            final String parentPathName, final String parentNamespace)
+            throws IOException {
+        if (resource.getSubresources() != null) {
+            final SubResources subResources = resource.getSubresources();
+            final List<String> subPathNames = new ArrayList<>(subResources.getNames());
+            Collections.sort(subPathNames);
+
+            for (final String name : subPathNames) {
+                final String subPathName = buildPath(parentPathName, name);
+
+                // create path-parameters, for any path-variables found in subPathName
+                final List<Parameter> subresourcesParameters = unmodifiableList(mergeParameters(
+                        new ArrayList<>(parameters), buildPathParameters(subPathName)));
+
+                final String subPathDocNamespace = normalizeName(parentNamespace, subPathName);
+
+                Resource subResource = subResources.get(name);
+                if (subResource.getReference() != null) {
+                    subResource = referenceResolver.getService(subResource.getReference());
+                    referencedServices.add(subResource);
+                }
+
+                final String resourceFilename = outputResource(subPathName, version,
+                        subResource, subresourcesParameters, subPathDocNamespace);
+                addPathResource(subPathName, version, resourceFilename);
+            }
         }
-
-        if (!isEmpty(resource.getQueries())) {
-            final String filename = outputQueryOperations(resource.getQueries(), sectionLevel, resourceAnchor,
-                    namespace);
-            resourceDoc.include(filename);
-        }
-
-        final String filename = namespace + ADOC_EXTENSION;
-        resourceDoc.toFile(outputDirPath, filename);
-        return filename;
     }
 
     /**
-     * Outputs an AsciiDoc file for a {@link Create}-operation, and a file that imports each of those files.
+     * Outputs an AsciiDoc file for various CREST operations, and a file that imports each of those files.
      *
-     * @param create Create operation
+     * @param crestMethod CREST operation-method
+     * @param resource Resource
      * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
-     * @param resourceAnchor AsciiDoc anchor to a resource schema or {@code null} if not defined
+     * @param parameters Inherited CREST operation parameters
      * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
+     * @param parentDoc Parent AsciiDoc
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputCreateOperation(final Create create, final int sectionLevel, final String resourceAnchor,
-            final String parentNamespace) throws IOException {
-        final String namespace = normalizeName(parentNamespace, "create");
-        final AsciiDoc operationDoc = asciiDoc()
-                .sectionTitle("Create", sectionLevel);
+    private void outputOperation(final CrestMethod crestMethod, final Resource resource, final int sectionLevel,
+            final List<Parameter> parameters, final String parentNamespace, final AsciiDoc parentDoc)
+            throws IOException {
 
-        final String descriptionFilename = outputDescriptionBlock(create.getDescription(), namespace);
-        operationDoc.include(descriptionFilename);
+        final Operation operation;
+        final boolean responseOnly;
+        final String displayName;
+        switch (crestMethod) {
+        case CREATE:
+            displayName = "Create";
+            responseOnly = false;
+            operation = resource.getCreate();
+            break;
+        case READ:
+            displayName = "Read";
+            responseOnly = true;
+            operation = resource.getRead();
+            break;
+        case UPDATE:
+            displayName = "Update";
+            responseOnly = false;
+            operation = resource.getUpdate();
+            break;
+        case DELETE:
+            displayName = "Delete";
+            responseOnly = true;
+            operation = resource.getDelete();
+            break;
+        case PATCH:
+            displayName = "Patch";
+            responseOnly = true;
+            operation = resource.getPatch();
+            break;
+        default:
+            // this method only handles a subset of CREST methods
+            throw new ApiDocGeneratorException("Unsupported CREST method: " + crestMethod);
+        }
 
-        outputStability(create.getStability(), operationDoc);
-        outputParameters(create.getParameters(), namespace, operationDoc);
-        outputResourceEntity(resourceAnchor, false, operationDoc);
-        outputCreateMode(create.getMode(), operationDoc);
-        outputSingletonStatus(create.isSingleton(), operationDoc);
-        outputErrors(create.getErrors(), namespace, operationDoc);
+        if (operation != null) {
+            final String namespace = normalizeName(parentNamespace, displayName);
+            final AsciiDoc operationDoc = asciiDoc()
+                    .sectionTitle(displayName, sectionLevel);
 
-        final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
+            final String descriptionFilename = outputDescriptionBlock(operation.getDescription(), namespace);
+            operationDoc.include(descriptionFilename);
 
-    /**
-     * Outputs an AsciiDoc file for a {@link Read}-operation, and a file that imports each of those files.
-     *
-     * @param read Read operation
-     * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
-     * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
-     * @throws IOException Unable to output AsciiDoc file
-     */
-    private String outputReadOperation(final Read read, final int sectionLevel, final String resourceAnchor,
-            final String parentNamespace) throws IOException {
-        final String namespace = normalizeName(parentNamespace, "read");
-        final AsciiDoc operationDoc = asciiDoc()
-                .sectionTitle("Read", sectionLevel);
+            final List<String> headers = new ArrayList<>();
+            final List<Integer> columnWidths = new ArrayList<>();
+            final AsciiDocTable table = operationDoc.tableStart();
+            outputStability(operation.getStability(), table, headers, columnWidths);
+            outputMvccSupport(resource.isMvccSupported(), table, headers, columnWidths);
+            if (crestMethod == CrestMethod.CREATE) {
+                final Create create = resource.getCreate();
+                outputCreateMode(create.getMode(), table, headers, columnWidths);
+                outputSingletonStatus(create.isSingleton(), table, headers, columnWidths);
+            } else if (crestMethod == CrestMethod.PATCH) {
+                final Patch patch = resource.getPatch();
+                outputSupportedPatchOperations(patch.getOperations(), table, headers, columnWidths);
+            }
+            table.headers(headers)
+                    .columnWidths(columnWidths)
+                    .tableEnd();
 
-        final String descriptionFilename = outputDescriptionBlock(read.getDescription(), namespace);
-        operationDoc.include(descriptionFilename);
+            outputParameters(operation.getParameters(), parameters, namespace, operationDoc);
+            outputResourceEntity(resource, responseOnly, operationDoc);
+            outputErrors(operation.getErrors(), operationDoc);
 
-        outputStability(read.getStability(), operationDoc);
-        outputParameters(read.getParameters(), namespace, operationDoc);
-        outputResourceEntity(resourceAnchor, true, operationDoc);
-        outputErrors(read.getErrors(), namespace, operationDoc);
+            parentDoc.horizontalRule();
 
-        final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
-
-    /**
-     * Outputs an AsciiDoc file for a {@link Update}-operation, and a file that imports each of those files.
-     *
-     * @param update Update operation
-     * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
-     * @param resourceAnchor AsciiDoc anchor to a resource schema or {@code null} if not defined
-     * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
-     * @throws IOException Unable to output AsciiDoc file
-     */
-    private String outputUpdateOperation(final Update update, final int sectionLevel, final String resourceAnchor,
-            final String parentNamespace) throws IOException {
-        final String namespace = normalizeName(parentNamespace, "update");
-        final AsciiDoc operationDoc = asciiDoc()
-                .sectionTitle("Update", sectionLevel);
-
-        final String descriptionFilename = outputDescriptionBlock(update.getDescription(), namespace);
-        operationDoc.include(descriptionFilename);
-
-        outputStability(update.getStability(), operationDoc);
-        outputParameters(update.getParameters(), namespace, operationDoc);
-        outputResourceEntity(resourceAnchor, false, operationDoc);
-        outputErrors(update.getErrors(), namespace, operationDoc);
-
-        final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
-
-    /**
-     * Outputs an AsciiDoc file for a {@link Delete}-operation, and a file that imports each of those files.
-     *
-     * @param delete Delete operation
-     * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
-     * @param resourceAnchor AsciiDoc anchor to a resource schema or {@code null} if not defined
-     * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
-     * @throws IOException Unable to output AsciiDoc file
-     */
-    private String outputDeleteOperation(final Delete delete, final int sectionLevel, final String resourceAnchor,
-            final String parentNamespace) throws IOException {
-        final String namespace = normalizeName(parentNamespace, "delete");
-        final AsciiDoc operationDoc = asciiDoc()
-                .sectionTitle("Delete", sectionLevel);
-
-        final String descriptionFilename = outputDescriptionBlock(delete.getDescription(), namespace);
-        operationDoc.include(descriptionFilename);
-
-        outputStability(delete.getStability(), operationDoc);
-        outputParameters(delete.getParameters(), namespace, operationDoc);
-        outputResourceEntity(resourceAnchor, true, operationDoc);
-        outputErrors(delete.getErrors(), namespace, operationDoc);
-
-        final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
-
-    /**
-     * Outputs an AsciiDoc file for a {@link Patch}-operation, and a file that imports each of those files.
-     *
-     * @param patch Patch operation
-     * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
-     * @param resourceAnchor AsciiDoc anchor to a resource schema or {@code null} if not defined
-     * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
-     * @throws IOException Unable to output AsciiDoc file
-     */
-    private String outputPatchOperation(final Patch patch, final int sectionLevel, final String resourceAnchor,
-            final String parentNamespace) throws IOException {
-        final String namespace = normalizeName(parentNamespace, "patch");
-        final AsciiDoc operationDoc = asciiDoc()
-                .sectionTitle("Patch", sectionLevel);
-
-        final String descriptionFilename = outputDescriptionBlock(patch.getDescription(), namespace);
-        operationDoc.include(descriptionFilename);
-
-        outputStability(patch.getStability(), operationDoc);
-        outputParameters(patch.getParameters(), namespace, operationDoc);
-        outputResourceEntity(resourceAnchor, true, operationDoc);
-        outputSupportedPatchOperations(patch.getOperations(), operationDoc);
-        outputErrors(patch.getErrors(), namespace, operationDoc);
-
-        final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
-        return filename;
+            if (inMemoryMode) {
+                parentDoc.rawText(operationDoc.toString());
+            } else {
+                final String filename = namespace + ADOC_EXTENSION;
+                operationDoc.toFile(outputDirPath, filename);
+                parentDoc.include(filename);
+            }
+        }
     }
 
     /**
      * Outputs an AsciiDoc file for {@link Action}-operations, and a file that imports each of those files.
      *
-     * @param actions Action operations
+     * @param resource Resource
      * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
+     * @param parameters Inherited CREST operation parameters
      * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
+     * @param parentDoc Parent AsciiDoc
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputActionOperations(final Action[] actions, final int sectionLevel, final String parentNamespace)
+    private void outputActionOperations(final Resource resource, final int sectionLevel,
+            final List<Parameter> parameters, final String parentNamespace, final AsciiDoc parentDoc)
             throws IOException {
-        final String namespace = normalizeName(parentNamespace, "action");
-        final AsciiDoc operationDoc = asciiDoc();
+        if (!isEmpty(resource.getActions())) {
+            final String namespace = normalizeName(parentNamespace, "action");
+            final AsciiDoc operationDoc = asciiDoc();
 
-        for (final Action action : actions) {
-            final String filename = outputActionOperation(action, sectionLevel, namespace);
-            operationDoc.include(filename);
+            for (final Action action : resource.getActions()) {
+                final String filename = outputActionOperation(resource, action, sectionLevel, parameters, namespace);
+                operationDoc.include(filename);
+            }
+
+            if (inMemoryMode) {
+                parentDoc.rawText(operationDoc.toString());
+            } else {
+                final String filename = namespace + ADOC_EXTENSION;
+                operationDoc.toFile(outputDirPath, filename);
+                parentDoc.include(filename);
+            }
         }
-
-        final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
-        return filename;
     }
 
     /**
      * Outputs an AsciiDoc file a single {@link Action}-operation, and a file for that action.
      *
+     * @param resource Resource
      * @param action Action operation
      * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
+     * @param parameters Inherited CREST operation parameters
      * @param parentNamespace Parent namespace
      * @return File path suitable for AsciiDoc import-statement
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputActionOperation(final Action action, final int sectionLevel, final String parentNamespace)
-            throws IOException {
+    private String outputActionOperation(final Resource resource, final Action action, final int sectionLevel,
+            final List<Parameter> parameters, final String parentNamespace) throws IOException {
         final String namespace = normalizeName(parentNamespace, action.getName());
         final AsciiDoc operationDoc = asciiDoc()
                 .horizontalRule()
@@ -541,140 +625,190 @@ public class ApiDocGenerator {
         final String descriptionFilename = outputDescriptionBlock(action.getDescription(), namespace);
         operationDoc.include(descriptionFilename);
 
-        outputStability(action.getStability(), operationDoc);
-        outputParameters(action.getParameters(), namespace, operationDoc);
+        final List<String> headers = new ArrayList<>();
+        final List<Integer> columnWidths = new ArrayList<>();
+        final AsciiDocTable table = operationDoc.tableStart();
+        outputStability(action.getStability(), table, headers, columnWidths);
+        outputMvccSupport(resource.isMvccSupported(), table, headers, columnWidths);
+        table.headers(headers)
+                .columnWidths(columnWidths)
+                .tableEnd();
+
+        outputParameters(action.getParameters(), parameters, namespace, operationDoc);
 
         if (action.getRequest() != null) {
-            final String schemaAnchor = resolveSchemaAnchor(action.getRequest(), namespace);
+            final Schema schema = action.getRequest().getReference() == null
+                    ? action.getRequest()
+                    : referenceResolver.getDefinition(action.getRequest().getReference());
+
             final AsciiDoc blockDoc = asciiDoc()
                     .blockTitle("Request Entity")
-                    .rawText("This operation takes a request body described ")
-                    .link(schemaAnchor, "here")
-                    .rawText(".");
-            operationDoc.rawParagraph(blockDoc.toString());
+                    .rawParagraph("This operation takes a request resource that conforms to the following schema:")
+                    .listingBlock(OBJECT_MAPPER.writeValueAsString(schema.getSchema().getObject()), "json");
+            operationDoc.rawText(blockDoc.toString());
         }
 
         if (action.getResponse() != null) {
-            final String schemaAnchor = resolveSchemaAnchor(action.getResponse(), namespace);
+            final Schema schema = action.getResponse().getReference() == null
+                    ? action.getResponse()
+                    : referenceResolver.getDefinition(action.getResponse().getReference());
+
             final AsciiDoc blockDoc = asciiDoc()
                     .blockTitle("Response Entity")
-                    .rawText("This operation returns a response body described ")
-                    .link(schemaAnchor, "here")
-                    .rawText(".");
-            operationDoc.rawParagraph(blockDoc.toString());
+                    .rawParagraph("This operation returns a response resource that conforms to the following schema:")
+                    .listingBlock(OBJECT_MAPPER.writeValueAsString(schema.getSchema().getObject()), "json");
+            operationDoc.rawText(blockDoc.toString());
         }
 
-        outputErrors(action.getErrors(), namespace, operationDoc);
+        outputErrors(action.getErrors(), operationDoc);
 
         final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
+        if (inMemoryMode) {
+            adocMap.put(filename, operationDoc.toString());
+        } else {
+            operationDoc.toFile(outputDirPath, filename);
+        }
         return filename;
     }
 
     /**
-     * Outputs an AsciiDoc file for {@link Query}-operations, and a file that imports each of those files.
+     * Outputs an AsciiDoc file for a group of {@link Query}-operations, and a file that imports each of those files.
      *
-     * @param queries Query operations
+     * @param resource Resource
      * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
+     * @param parameters Inherited CREST operation parameters
+     * @param parentNamespace Parent namespace
+     * @param parentDoc Parent AsciiDoc
+     * @throws IOException Unable to output AsciiDoc file
+     */
+    private void outputQueryOperations(final Resource resource, final int sectionLevel,
+            final List<Parameter> parameters, final String parentNamespace,
+            final AsciiDoc parentDoc) throws IOException {
+        if (!isEmpty(resource.getQueries())) {
+            final String namespace = normalizeName(parentNamespace, "query");
+            final AsciiDoc operationDoc = asciiDoc();
+
+            for (final Query query : resource.getQueries()) {
+                final String filename = outputQueryOperation(resource, query, sectionLevel, parameters,
+                        namespace);
+                operationDoc.include(filename);
+            }
+
+            final String filename = namespace + ADOC_EXTENSION;
+            if (inMemoryMode) {
+                adocMap.put(filename, operationDoc.toString());
+            } else {
+                operationDoc.toFile(outputDirPath, filename);
+            }
+            parentDoc.include(filename);
+        }
+    }
+
+    /**
+     * Outputs an AsciiDoc file for a single {@link Query}-operation.
+     *
+     * @param resource Resource
+     * @param query Query operation
+     * @param sectionLevel Starting <a href="http://asciidoctor.org/docs/user-manual/#sections">section</a>-level
+     * @param parameters Inherited CREST operation parameters
      * @param parentNamespace Parent namespace
      * @return File path suitable for AsciiDoc import-statement
      * @throws IOException Unable to output AsciiDoc file
      */
-    private String outputQueryOperations(final Query[] queries, final int sectionLevel, final String resourceAnchor,
-            final String parentNamespace) throws IOException {
-        final String namespace = normalizeName(parentNamespace, "query");
-        final AsciiDoc operationDoc = asciiDoc();
-
-        for (final Query query : queries) {
-            final String filename = outputQueryOperation(query, sectionLevel, resourceAnchor, namespace);
-            operationDoc.include(filename);
-        }
-
-        final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
-
-    private String outputQueryOperation(final Query query, final int sectionLevel, final String resourceAnchor,
-            final String parentNamespace) throws IOException {
+    private String outputQueryOperation(final Resource resource, final Query query, final int sectionLevel,
+            final List<Parameter> parameters, final String parentNamespace) throws IOException {
         final String namespace;
         final AsciiDoc operationDoc = asciiDoc()
                 .horizontalRule();
-        // @Checkstyle:off
+
         switch (query.getType()) {
-            case ID:
-                namespace = normalizeName(parentNamespace, "id", query.getQueryId());
-                operationDoc.sectionTitle(asciiDoc().rawText("Query by ID: ").mono(query.getQueryId()).toString(),
-                        sectionLevel);
-                break;
-            case FILTER:
-                namespace = normalizeName(parentNamespace, "filter");
-                operationDoc.sectionTitle("Query by Filter", sectionLevel);
-                break;
-            case EXPRESSION:
-                namespace = normalizeName(parentNamespace, "expression");
-                operationDoc.sectionTitle("Query by Expression", sectionLevel);
-                break;
-            default:
-                throw new ApiDocGeneratorException("Unsupported QueryType: " + query.getType());
+        case ID:
+            namespace = normalizeName(parentNamespace, "id", query.getQueryId());
+            operationDoc.sectionTitle(asciiDoc().rawText("Query by ID: ").mono(query.getQueryId()).toString(),
+                    sectionLevel);
+            break;
+        case FILTER:
+            namespace = normalizeName(parentNamespace, "filter");
+            operationDoc.sectionTitle("Query by Filter", sectionLevel);
+            break;
+        case EXPRESSION:
+            namespace = normalizeName(parentNamespace, "expression");
+            operationDoc.sectionTitle("Query by Expression", sectionLevel);
+            break;
+        default:
+            throw new ApiDocGeneratorException("Unsupported QueryType: " + query.getType());
         }
-        // @Checkstyle:on
 
         final String descriptionFilename = outputDescriptionBlock(query.getDescription(), namespace);
         operationDoc.include(descriptionFilename);
 
-        outputStability(query.getStability(), operationDoc);
-        outputParameters(query.getParameters(), namespace, operationDoc);
+        final List<String> headers = new ArrayList<>();
+        final List<Integer> columnWidths = new ArrayList<>();
+        final AsciiDocTable table = operationDoc.tableStart();
+        outputStability(query.getStability(), table, headers, columnWidths);
+        outputMvccSupport(resource.isMvccSupported(), table, headers, columnWidths);
 
         if (!isEmpty(query.getQueryableFields())) {
-            final AsciiDoc blockDoc = asciiDoc()
-                    .blockTitle("Queryable Fields");
+            headers.add(asciiDoc().link("query-queryable-fields", "Queryable Fields").toString());
+            columnWidths.add(COLUMN_WIDTH_MEDIUM);
+
+            final AsciiDoc blockDoc = asciiDoc();
             for (final String field : query.getQueryableFields()) {
                 blockDoc.unorderedList1(asciiDoc().mono(field).toString());
             }
-            operationDoc.rawParagraph(blockDoc.toString());
+            table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
         }
 
         if (!isEmpty(query.getPagingMode())) {
-            final AsciiDoc blockDoc = asciiDoc()
-                    .blockTitle("Paging Modes");
+            headers.add(asciiDoc().link("query-paging-modes", "Paging Modes").toString());
+            columnWidths.add(COLUMN_WIDTH_MEDIUM);
+
+            final AsciiDoc blockDoc = asciiDoc();
             for (final PagingMode pagingMode : query.getPagingMode()) {
                 blockDoc.unorderedList1(asciiDoc().mono(pagingMode.toString()).toString());
             }
-            operationDoc.rawParagraph(blockDoc.toString());
+            table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
         }
 
         if (!isEmpty(query.getCountPolicies())) {
-            final AsciiDoc blockDoc = asciiDoc()
-                    .blockTitle("Page Count Policies");
+            headers.add(asciiDoc().link("query-page-count-policies", "Page Count Policies").toString());
+            columnWidths.add(COLUMN_WIDTH_MEDIUM);
+
+            final AsciiDoc blockDoc = asciiDoc();
             for (final CountPolicy countPolicy : query.getCountPolicies()) {
                 blockDoc.unorderedList1(asciiDoc().mono(countPolicy.toString()).toString());
             }
-            operationDoc.rawParagraph(blockDoc.toString());
+            table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
         }
 
         if (!isEmpty(query.getSupportedSortKeys())) {
-            final AsciiDoc blockDoc = asciiDoc()
-                    .blockTitle("Supported Sort Keys");
+            headers.add(asciiDoc().link("query-sort-keys", "Supported Sort Keys").toString());
+            columnWidths.add(COLUMN_WIDTH_MEDIUM);
+
+            final AsciiDoc blockDoc = asciiDoc();
             for (final String sortKey : query.getSupportedSortKeys()) {
                 blockDoc.unorderedList1(asciiDoc().mono(sortKey).toString());
             }
-            operationDoc.rawParagraph(blockDoc.toString());
+            table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
         }
 
-        if (resourceAnchor != null) {
-            final AsciiDoc blockDoc = asciiDoc()
-                    .blockTitle("Resource Entity")
-                    .rawText("This operation returns a result structure described ")
-                    .link(resourceAnchor, "here")
-                    .rawText(".");
-            operationDoc.rawParagraph(blockDoc.toString());
-        }
+        table.headers(headers)
+                .columnWidths(columnWidths)
+                .tableEnd();
 
-        outputErrors(query.getErrors(), namespace, operationDoc);
+        outputParameters(query.getParameters(), parameters, namespace, operationDoc);
+
+        // TODO determine if this needs to be formatted differently here
+        outputResourceEntity(resource, true, operationDoc);
+
+        outputErrors(query.getErrors(), operationDoc);
 
         final String filename = namespace + ADOC_EXTENSION;
-        operationDoc.toFile(outputDirPath, filename);
+        if (inMemoryMode) {
+            adocMap.put(filename, operationDoc.toString());
+        } else {
+            operationDoc.toFile(outputDirPath, filename);
+        }
         return filename;
     }
 
@@ -682,53 +816,64 @@ public class ApiDocGenerator {
      * Outputs operation stability.
      *
      * @param stability Operation stability or {@code null} to use default {@link Stability#STABLE}
-     * @param doc AsciiDoc to write to
+     * @param table AsciiDoc table to write to
+     * @param headers Table headers, which will have an entry added
+     * @param columnWidths Relative table column-widths (range [1,99]), which will have an entry added
      */
-    private static void outputStability(Stability stability, final AsciiDoc doc) {
+    private static void outputStability(Stability stability, final AsciiDocTable table, final List<String> headers,
+            final List<Integer> columnWidths) {
         if (stability == null) {
             stability = Stability.STABLE;
         }
-        final String s = asciiDoc()
-                .rawText("Interface Stability: ").link(stability.name())
-                .toString();
-        doc.rawParagraph(s);
+
+        headers.add(asciiDoc().link("interface-stability-definitions", "Stability").toString());
+        columnWidths.add(COLUMN_WIDTH_SMALL);
+
+        table.columnCell(stability.name());
     }
 
     /**
      * Outputs MVCC support.
      *
      * @param mvccSupported MVCC support flag
-     * @param doc AsciiDoc to write to
+     * @param table AsciiDoc table to write to
+     * @param headers Table headers, which will have an entry added
+     * @param columnWidths Relative table column-widths (range [1,99]), which will have an entry added
      */
-    private static void outputMvccSupport(final boolean mvccSupported, final AsciiDoc doc) {
-        if (mvccSupported) {
-            final AsciiDoc blockDoc = asciiDoc()
-                    .blockTitle("Support For MVCC")
-                    .rawText("This service supports MVCC.");
-            doc.rawParagraph(blockDoc.toString());
-        }
+    private static void outputMvccSupport(final boolean mvccSupported, final AsciiDocTable table,
+            final List<String> headers, final List<Integer> columnWidths) {
+        headers.add(asciiDoc().link("MVCC", "MVCC").toString());
+        columnWidths.add(COLUMN_WIDTH_SMALL);
+
+        // ✓ or ⃠
+        table.columnCell(mvccSupported ? "\u2713" : "\u20E0");
     }
 
     /**
-     * Outputs a link to an operation's resource schema.
+     * Outputs an operation's resource schema.
      *
-     * @param resourceAnchor AsciiDoc anchor to a resource schema or {@code null} if not defined
+     * @param resource Resource
      * @param responseOnly {@code true} when resource is sent only in response and {@code false} for request/response
      * @param doc AsciiDoc to write to
      */
-    private static void outputResourceEntity(final String resourceAnchor, final boolean responseOnly,
-            final AsciiDoc doc) {
-        if (resourceAnchor != null) {
+    private void outputResourceEntity(final Resource resource, final boolean responseOnly, final AsciiDoc doc)
+            throws IOException {
+        if (resource.getResourceSchema() != null) {
+            final Schema schema = resource.getResourceSchema().getReference() == null
+                    ? resource.getResourceSchema()
+                    : referenceResolver.getDefinition(resource.getResourceSchema().getReference());
             final AsciiDoc blockDoc = asciiDoc()
                     .blockTitle("Resource Entity");
             if (responseOnly) {
-                blockDoc.rawText("This operation returns a response resource described ");
+                blockDoc.rawParagraph(
+                        "This operation returns a response resource that conforms to the following schema:");
             } else {
-                blockDoc.rawText("This operation takes a request body and returns a response resource described ");
+                blockDoc.rawParagraph("This operation takes a request body and returns a response resource that "
+                        + "conforms to the following schema:");
             }
-            blockDoc.link(resourceAnchor, "here")
-                    .rawText(".");
-            doc.rawParagraph(blockDoc.toString());
+            blockDoc.listingBlock(OBJECT_MAPPER.writeValueAsString(schema.getSchema().getObject()), "json");
+
+            doc.rawText(blockDoc.toString());
         }
     }
 
@@ -736,27 +881,32 @@ public class ApiDocGenerator {
      * Outputs singleton status for {@link Create} operation.
      *
      * @param isSingleton Singleton status
-     * @param doc AsciiDoc to write to
+     * @param table AsciiDoc table to write to
+     * @param headers Table headers, which will have an entry added
+     * @param columnWidths Relative table column-widths (range [1,99]), which will have an entry added
      */
-    private static void outputSingletonStatus(final boolean isSingleton, final AsciiDoc doc) {
-        if (isSingleton) {
-            final AsciiDoc blockDoc = asciiDoc()
-                    .blockTitle("Singleton")
-                    .rawText("This resource is a singleton.");
-            doc.rawParagraph(blockDoc.toString());
-        }
+    private static void outputSingletonStatus(final boolean isSingleton, final AsciiDocTable table,
+            final List<String> headers, final List<Integer> columnWidths) {
+        headers.add(asciiDoc().link("create-singleton", "Singleton").toString());
+        columnWidths.add(COLUMN_WIDTH_SMALL);
+
+        // ✓ or ⃠
+        table.columnCell(isSingleton ? "\u2713" : "\u20E0");
     }
 
     /**
      * Outputs operation parameters.
      *
-     * @param parameters Operation parameters or {@code null}/empty for pass-through
+     * @param operationParameters Operation parameters or {@code null}/empty for pass-through
+     * @param inheritedParameters Inherited CREST operation parameters
      * @param parentNamespace Parent namespace
      * @param doc AsciiDoc to write to
      */
-    private void outputParameters(final Parameter[] parameters, final String parentNamespace, final AsciiDoc doc)
+    private void outputParameters(final Parameter[] operationParameters, final List<Parameter> inheritedParameters,
+            final String parentNamespace, final AsciiDoc doc)
             throws IOException {
-        if (isEmpty(parameters)) {
+        final List<Parameter> parameters = mergeParameters(new ArrayList<>(inheritedParameters), operationParameters);
+        if (parameters.isEmpty()) {
             return;
         }
         final String parametersNamespace = normalizeName(parentNamespace, "parameters");
@@ -797,7 +947,7 @@ public class ApiDocGenerator {
             table.columnCell(parameter.getName(), MONO_CELL)
                     .columnCell(parameter.getType(), MONO_CELL)
                     .columnCell(asciiDoc().include(descriptionFilename).toString(), ASCII_DOC_CELL)
-                    .columnCell(parameter.isRequired() ? "✓" : null)
+                    .columnCell(parameter.isRequired() ? "\u2713" : null)
                     .columnCell(parameter.getSource().name(), MONO_CELL)
                     .columnCell(enumValuesContent, ASCII_DOC_CELL)
                     .rowEnd();
@@ -809,224 +959,84 @@ public class ApiDocGenerator {
      * Outputs create-mode for a {@link Create} operation.
      *
      * @param createMode Create-mode
-     * @param doc AsciiDoc to write to
+     * @param table AsciiDoc table to write to
+     * @param headers Table headers, which will have an entry added
+     * @param columnWidths Relative table column-widths (range [1,99]), which will have an entry added
      */
-    private static void outputCreateMode(final CreateMode createMode, final AsciiDoc doc) {
-        final AsciiDoc idConstraintDoc = asciiDoc()
-                .blockTitle("Identifier Constraints");
-        // @Checkstyle:off
+    private static void outputCreateMode(final CreateMode createMode, final AsciiDocTable table,
+            final List<String> headers, final List<Integer> columnWidths) {
+        headers.add("Resource ID");
+        columnWidths.add(COLUMN_WIDTH_MEDIUM);
+
+        final AsciiDoc doc = asciiDoc();
+
         switch (createMode) {
-            case ID_FROM_CLIENT:
-                idConstraintDoc.rawText("The identifier is accepted from your client. "
-                        + "If the identifier is specified in the path parameter, "
-                        + "it must match the identifier you supply in the resource.");
-                break;
-            case ID_FROM_SERVER:
-                idConstraintDoc.rawText("The identifier is provided by the server. Do not supply an identifier.");
-                break;
-            default:
-                throw new ApiDocGeneratorException("Unsupported CreateMode: " + createMode);
+        case ID_FROM_CLIENT:
+            doc.rawText("Assigned by client");
+            break;
+        case ID_FROM_SERVER:
+            doc.rawText("Assigned by server (do not supply)");
+            break;
+        default:
+            throw new ApiDocGeneratorException("Unsupported CreateMode: " + createMode);
         }
-        // @Checkstyle:on
-        doc.rawParagraph(idConstraintDoc.toString());
+
+        table.columnCell(doc.toString());
     }
 
     /**
      * Outputs supported patch-operations for a {@link Patch} operation.
      *
      * @param patchOperations Supported patch-operations
-     * @param doc AsciiDoc to write to
+     * @param table AsciiDoc table to write to
+     * @param headers Table headers, which will have an entry added
+     * @param columnWidths Relative table column-widths (range [1,99]), which will have an entry added
      */
-    private static void outputSupportedPatchOperations(final PatchOperation[] patchOperations, final AsciiDoc doc) {
-        final AsciiDoc blockDoc = asciiDoc()
-                .blockTitle("Supported Patch Operations");
+    private static void outputSupportedPatchOperations(final PatchOperation[] patchOperations,
+            final AsciiDocTable table, final List<String> headers, final List<Integer> columnWidths) {
+        headers.add(asciiDoc().link("patch-operations", "Patch Operations").toString());
+        columnWidths.add(COLUMN_WIDTH_MEDIUM);
+
+        final AsciiDoc blockDoc = asciiDoc();
         for (final PatchOperation patchOperation : patchOperations) {
             blockDoc.unorderedList1(patchOperation.name());
         }
-        doc.rawParagraph(blockDoc.toString());
-    }
-
-    /**
-     * Outputs an {@link Error}, without an AsciiDoc anchor, because this error will not be linked-to directly.
-     *
-     * @param error Error
-     * @param parentNamespace Parent-namespace
-     * @param doc AsciiDoc to write to
-     */
-    private void outputError(final Error error, final String parentNamespace, final AsciiDoc doc) {
-        outputError(error, null, parentNamespace, doc);
-    }
-
-    /**
-     * Outputs an {@link Error}, with optional AsciiDoc anchor.
-     *
-     * @param error Error
-     * @param errorAnchor AsciiDoc anchor, for the error, or {@code null}
-     * @param parentNamespace Parent-namespace
-     * @param doc AsciiDoc to write to
-     */
-    private void outputError(final Error error, final String errorAnchor, final String parentNamespace,
-            final AsciiDoc doc) {
-        final AsciiDoc errorDoc = asciiDoc();
-        if (!isEmpty(errorAnchor)) {
-            errorDoc.anchor(errorAnchor);
-        }
-        errorDoc.mono(String.valueOf(error.getCode()))
-                .rawText(" " + error.getDescription());
-        if (error.getSchema() != null) {
-            final String resourceAnchor = resolveSchemaAnchor(error.getSchema(), parentNamespace);
-            errorDoc.listContinuation()
-                    .rawLine(asciiDoc()
-                            .rawText("This error returns an error-detail described ")
-                            .link(resourceAnchor, "here")
-                            .rawText(".")
-                            .toString());
-        }
-        doc.unorderedList1(errorDoc.toString());
+        table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
     }
 
     /**
      * Outputs operation errors.
      *
      * @param errors Operation errors or {@code null}/empty for pass-through
-     * @param parentNamespace Parent namespace
      * @param doc AsciiDoc to write to
      */
-    private void outputErrors(final Error[] errors, final String parentNamespace, final AsciiDoc doc) {
-        if (isEmpty(errors)) {
-            return;
-        }
-        doc.blockTitle("Errors");
-        Arrays.sort(errors, Error.ERROR_COMPARATOR);
-        for (int i = 0; i < errors.length; ++i) {
-            final String namespace = normalizeName(parentNamespace, "error", String.valueOf(i));
-            outputError(errors[i], namespace, doc);
-        }
-    }
+    private void outputErrors(final Error[] errors, final AsciiDoc doc) throws IOException {
+        if (!isEmpty(errors)) {
+            doc.blockTitle("Errors");
+            final AsciiDocTable table = doc.tableStart()
+                    .headers("Code", "Description")
+                    .columnWidths(1, 10);
+            Arrays.sort(errors, Error.ERROR_COMPARATOR);
+            for (final Error error : errors) {
+                table.columnCell(String.valueOf(error.getCode()), MONO_CELL);
+                if (error.getSchema() == null) {
+                    table.columnCell(error.getDescription());
+                } else {
+                    final Schema schema = error.getSchema().getReference() == null
+                            ? error.getSchema()
+                            : referenceResolver.getDefinition(error.getSchema().getReference());
 
-    /**
-     * Outputs an AsciiDoc file for each schema definition, and a file that imports all schema definitions.
-     *
-     * @param definitions Schema definitions
-     * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
-     * @throws IOException Unable to output AsciiDoc file
-     */
-    private String outputDefinitions(final Definitions definitions, final String parentNamespace) throws IOException {
-        if (definitions == null) {
-            return null;
-        }
-
-        final String definitionsNamespace = normalizeName(parentNamespace, "definitions");
-        final AsciiDoc definitionsDoc = asciiDoc()
-                .sectionTitle1("Definitions");
-
-        // named schema definitions
-        final Set<String> definitionNames = definitions.getNames();
-        for (final String name : definitionNames) {
-            final Schema schema = definitions.get(name);
-            if (schema.getSchema() != null) {
-                // namespace must follow exact format as a valid API Descriptor JSON Reference to a definition object
-                final String namespace = normalizeName(definitionsNamespace, name);
-                definitionsDoc.newline()
-                        .anchor(namespace)
-                        .blockTitle(name);
-
-                final String descriptionFilename = outputDescriptionBlock(null, namespace);
-                definitionsDoc.include(descriptionFilename);
-
-                final String schemaFilename = outputJsonSchema(schema.getSchema(), namespace);
-                definitionsDoc.include(schemaFilename);
+                    final AsciiDoc blockDoc = asciiDoc()
+                            .rawParagraph(error.getDescription())
+                            .rawParagraph("This error may contain an underlying `cause` that conforms to the following "
+                                    + "schema:")
+                            .listingBlock(OBJECT_MAPPER.writeValueAsString(schema.getSchema().getObject()), "json");
+                    table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
+                }
+                table.rowEnd();
             }
+            table.tableEnd();
         }
-
-        // all other schema definitions
-        final Set<String> generatedNames = schemaMap.keySet();
-        for (final String namespace : generatedNames) {
-            definitionsDoc.newline()
-                    .anchor(namespace)
-                    .blockTitle(namespace);
-
-            final String descriptionFilename = outputDescriptionBlock(null, namespace);
-            definitionsDoc.include(descriptionFilename);
-
-            final String filename = outputJsonSchema(schemaMap.get(namespace), namespace);
-            definitionsDoc.include(filename);
-        }
-
-        final String filename = definitionsNamespace + ADOC_EXTENSION;
-        definitionsDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
-
-    /**
-     * Outputs an AsciiDoc file for a JSON schema definition.
-     *
-     * @param schema Schema as a {@link JsonValue}
-     * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
-     * @throws IOException Unable to output AsciiDoc file
-     */
-    private String outputJsonSchema(final JsonValue schema, final String parentNamespace)
-            throws IOException {
-        final String jsonSchemaNamespace = normalizeName(parentNamespace, "jsonSchema");
-        final AsciiDoc jsonSchemaDoc = asciiDoc()
-                .listingBlock(OBJECT_MAPPER.writeValueAsString(schema.getObject()), "json");
-
-        final String filename = jsonSchemaNamespace + ADOC_EXTENSION;
-        jsonSchemaDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
-
-    /**
-     * Outputs an AsciiDoc file containing all defined errors.
-     *
-     * @param errors Errors
-     * @param parentNamespace Parent namespace
-     * @return File path suitable for AsciiDoc import-statement
-     * @throws IOException Unable to output AsciiDoc file
-     */
-    private String outputErrors(final Errors errors, final String parentNamespace) throws IOException {
-        if (errors == null) {
-            return null;
-        }
-
-        final String errorsNamespace = normalizeName(parentNamespace, "errors");
-        final AsciiDoc errorsDoc = asciiDoc()
-                .sectionTitle1("Errors");
-
-        final List<Map.Entry<String, Error>> errorEntries = new ArrayList<>(errors.getErrors().entrySet());
-        Collections.sort(errorEntries, Errors.ERROR_ENTRY_COMPARATOR);
-
-        for (final Map.Entry<String, Error> errorEntry : errorEntries) {
-            // namespace for named errors will resolve via JSON References
-            final String namespace = normalizeName(errorsNamespace, errorEntry.getKey());
-            outputError(errorEntry.getValue(), namespace, namespace, errorsDoc);
-        }
-
-        final String filename = errorsNamespace + ADOC_EXTENSION;
-        errorsDoc.toFile(outputDirPath, filename);
-        return filename;
-    }
-
-    /**
-     * Resolves a valid AsciiDoc anchor to the Schema in the Definitions section.
-     *
-     * @param schema Schema definition
-     * @param parentNamespace Parent namespace
-     * @return AsciiDoc anchor to the Schema definition
-     */
-    private String resolveSchemaAnchor(final Schema schema, final String parentNamespace) {
-        final String anchor;
-        if (schema.getReference() != null) {
-            // JSON Reference should normalize to appropriate spot in Definitions
-            anchor = normalizeName(schema.getReference().getValue());
-        } else {
-            // register the schema, so that it will be included in Definitions section
-            anchor = normalizeName(parentNamespace, "resourceSchema");
-            schemaMap.put(anchor, schema.getSchema());
-        }
-        return anchor;
     }
 
     /**
@@ -1048,6 +1058,44 @@ public class ApiDocGenerator {
             }
         }
         return false;
+    }
+
+    /**
+     * Add resource-file to path tree.
+     *
+     * @param pathName Full endpoint path.
+     * @param version Resource version.
+     * @param resourceFilename Resource ADOC filename.
+     */
+    private void addPathResource(final String pathName, final Version version, final String resourceFilename) {
+        if (!pathTree.containsKey(pathName)) {
+            pathTree.put(pathName, new LinkedHashMap<Version, String>());
+        }
+        final Map<Version, String> versionTree = pathTree.get(pathName);
+        if (!versionTree.containsKey(version)) {
+            versionTree.put(version, resourceFilename);
+        }
+    }
+
+    /**
+     * Merges AsciiDoc include-statements, to build AsciiDoc string. This method is only invoked when
+     * {@link #inMemoryMode} is {@code true}.
+     *
+     * @param rootFilename Name of root AsciiDoc file
+     * @return AsciiDoc string
+     */
+    private String toString(final String rootFilename) {
+        if (!inMemoryMode) {
+            throw new ApiDocGeneratorException("Expected inMemoryMode");
+        }
+        String s = adocMap.get(checkNotNull(rootFilename));
+        final Matcher m = AsciiDoc.INCLUDE_PATTERN.matcher(s);
+        while (m.find()) {
+            final String content = adocMap.get(m.group(1));
+            s = m.replaceFirst(isEmpty(content) ? "" : Matcher.quoteReplacement(content));
+            m.reset(s);
+        }
+        return s;
     }
 
 }
