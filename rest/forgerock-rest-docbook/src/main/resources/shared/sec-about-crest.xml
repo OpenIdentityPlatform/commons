@@ -457,7 +457,7 @@ Accept: application/json
   <title>Patch</title>
 
   <para>
-   To patch a resource, run an HTTP PATCH with the following parameters:
+   To patch a resource, send an HTTP PATCH request with the following parameters:
   </para>
 
   <itemizedlist>
@@ -470,26 +470,28 @@ Accept: application/json
    <listitem>
     <para><literal>value</literal></para>
    </listitem>
+   <listitem>
+    <para><literal>from</literal> (optional with copy and move operations)</para>
+   </listitem>
   </itemizedlist>
 
   <para>
-   You can include these parameters in the <command>--data</command> for
-   a PATCH request, or in a JSON PATCH file. If successful, you'll see a
-   JSON response similar to:
+   You can include these parameters in the payload for a PATCH request, or in
+   a JSON PATCH file. If successful, you'll see a JSON response similar to:
   </para>
 
   <programlisting language="http">
-   PATCH /users/some-id HTTP/1.1
-   Host: example.com
-   Accept: application/json
-   Content-Length: ...
-   Content-Type: application/json
-   If-Match: <replaceable>_rev</replaceable>
-   { <replaceable>JSON resource</replaceable> }
+PATCH /users/some-id HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+If-Match: <replaceable>_rev</replaceable>
+{ <replaceable>JSON array of patch operations</replaceable> }
   </programlisting>
 
   <para>
-   You can set up PATCH operations on three types of targets:
+   PATCH operations apply to three types of targets:
   </para>
 
   <itemizedlist>
@@ -519,36 +521,13 @@ Accept: application/json
    for the <literal>field</literal> and <literal>value</literal>:
   </para>
 
-  <note>
-   <para>
-    Some of these ForgeRock PATCH <literal>operations</literal> are not yet
-    supported on one or more ForgeRock products. For details, see the official
-    documentation for each product.
-   </para>
-  </note>
-
   <section xml:id="crest-patch-add">
    <title>Patch Operation: Add</title>
 
    <para>
     The <literal>add</literal> operation ensures that the target field contains
-    the value provided, creating parent fields as necessary. The following
-    example add operation adds the
-    <literal>"/startDate" : { "searchable" : true }</literal> value
-    to the <literal>/resourceMapping/genericMapping/updates/properties</literal>
-    field, creating parent fields such as <literal>updates/</literal>, if they
-    do not already exist.
+    the value provided, creating parent fields as necessary.
    </para>
-
-   <programlisting language="javascript">{
-    "operation" : "add",
-    "field" : "/resourceMapping/genericMapping/updates/properties",
-    "value" : {
-        "/startDate" : {
-            "searchable" : true
-        }
-    }
-}</programlisting>
 
    <para>
     If the target field is single-valued, then the value you include in the
@@ -591,6 +570,34 @@ Accept: application/json
     </listitem>
    </itemizedlist>
 
+   <para>
+    As an example, start with the following list semantic array resource:
+   </para>
+
+   <programlisting language="javascript">{
+    "fruits" : [ "orange", "apple" ]
+}</programlisting>
+
+   <para>
+    The following add operation includes the pineapple to the end of the list of
+    fruits, as indicated by the <literal>-</literal> at the end of the
+    <literal>fruits</literal> array.
+   </para>
+
+   <programlisting language="javascript">{
+    "operation" : "add",
+    "field" : "/fruits/-",
+    "value" : "pineapple"
+}</programlisting>
+
+   <para>
+    The following is the resulting resource:
+   </para>
+
+   <programlisting language="javascript">{
+    "fruits" : [ "orange", "apple", "pineapple" ]
+}</programlisting>
+
   </section>
 
   <section xml:id="crest-patch-copy">
@@ -611,11 +618,13 @@ Accept: application/json
    </para>
 
 
-   <programlisting language="javascript">{
+   <programlisting language="javascript">[
+  {
     "operation" : "copy",
     "field" : "/hot/potato",
     "value" : "/hot/tamale"
-}</programlisting>
+  }
+]</programlisting>
 
    <para>
     If the source and value are configured as arrays, the result depends
@@ -637,11 +646,13 @@ Accept: application/json
     <literal>/user/payment</literal>.
    </para>
 
-   <programlisting language="javascript">{
+   <programlisting language="javascript">[
+  {
     "operation" : "increment",
     "field" : "/user/payment",
     "value" : "1000"
-}</programlisting>
+  }
+]</programlisting>
 
    <para>
     Since the <literal>value</literal> of the <literal>increment</literal> is
@@ -667,17 +678,19 @@ Accept: application/json
     operation on the target value, <literal>/hot/tamale</literal>.
    </para>
 
-   <programlisting language="javascript">{
+   <programlisting language="javascript">[
+  {
     "operation" : "move",
     "field" : "/hot/potato",
     "value" : "/hot/tamale"
-}</programlisting>
+  }
+]</programlisting>
 
    <para>
     To apply a <literal>move</literal> operation on an array, you need a
     compatible single-value, list semantic array, or set semantic array on
-    both the source and the target. For details, see the criteria described in
-    <xref linkend="crest-patch-add" />.
+    both the source and the target. For details, see the criteria described
+    in <xref linkend="crest-patch-add" />.
    </para>
 
   </section>
@@ -690,14 +703,20 @@ Accept: application/json
     longer contains the value provided. If the remove operation does not include
     a value, the operation removes the field. The following
     <literal>remove</literal> deletes the value of the
-    <literal>rolesPropName</literal> field, along with the field.
+    <literal>phoneNumber</literal>, along with the field.
    </para>
 
-   <programlisting language="javascript">{
+   <programlisting language="javascript">[
+  {
     "operation" : "remove",
-    "field" : "objects/0/schema/properties/effectiveRoles/rolesPropName",
-    "value" : ""
-},</programlisting>
+    "field" : "phoneNumber"
+  }
+]</programlisting>
+
+   <para>
+    If the object has more than one <literal>phoneNumber</literal>, those
+    values are stored as an array.
+   </para>
 
    <itemizedlist>
     <para>
@@ -707,15 +726,16 @@ Accept: application/json
     <listitem>
      <para>
       <emphasis role="bold">List semantic arrays</emphasis>: A
-      <literal>remove</literal> operation deletes provided array of values,
-      once, from the target list. In other words, to remove two instances of
-      the same value on the target, you must include the same value twice
-      in the <literal>remove</literal> operation.
+      <literal>remove</literal> operation deletes the specified element in the
+      array. For example, the following operation removes the first phone
+      number, based on its array index (zero-based):
      </para>
-     <para>
-      <literal>remove</literal> operations on a specific index, or an exact
-      value, are allowed on list semantic arrays.
-     </para>
+     <programlisting language="javascript">[
+   {
+      "operation" : "remove",
+      "field" : "/phoneNumber/0"
+   }
+]</programlisting>
     </listitem>
     <listitem>
      <para>
@@ -745,11 +765,64 @@ Accept: application/json
     new value of <literal>+1 408 555 9999</literal>.
    </para>
 
-   <programlisting language="javascript">{
+   <programlisting language="javascript">[
+  {
     "operation" : "replace",
-    "field" : "/contactInformation/telephoneNumber",
+    "field" : "/telephoneNumber",
     "value" : "+1 408 555 9999"
-},</programlisting>
+  }
+]</programlisting>
+
+   <para>
+    A PATCH replace operation on a list semantic array works in the same
+    fashion as a PATCH remove operation. The following example demonstrates
+    how the effect of both operations. Start with the following resource:
+   </para>
+
+   <programlisting language="javascript">{
+    "fruits" : [ "apple", "orange", "kiwi", "lime" ],
+}</programlisting>
+
+   <para>
+    Apply the following operations on that resource:
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "operation" : "remove",
+    "field" : "/fruits/0",
+    "value" : ""
+  },
+  {
+    "operation" : "replace",
+    "field" : "/fruits/1",
+    "value" : "pineapple"
+  }
+]</programlisting>
+
+   <para>
+    The PATCH operations are applied sequentially. The <literal>remove</literal>
+    operation removes the first member of that resource, based on its array
+    index, (<literal>fruits/0</literal>), with the following result:
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "fruits" : [ "orange", "kiwi", "lime" ],
+  }
+]</programlisting>
+
+   <para>
+    The second PATCH operation, a <literal>replace</literal>, is applied on the
+    second member (<literal>fruits/1</literal>) of the intermediate resource,
+    with the following result:
+   </para>
+
+   <programlisting>[
+  {
+    "fruits" : [ "orange", "pineapple", "lime" ],
+  }
+]</programlisting>
 
   </section>
 
@@ -760,21 +833,22 @@ Accept: application/json
     The <literal>transform</literal> operation changes the value of a field
     based on a script or some other data transformation command. The following
     <literal>transform</literal> operation takes the value from the field
-    named <literal>/objects</literal>, applies the script as shown, and then
-    uses the result to run a <literal>replace</literal> operation on the
-    noted <literal>field</literal>.
+    named <literal>/objects</literal>, and applies the
+    <filename>something.js</filename> script as shown:
    </para>
 
-   <programlisting language="javascript">{
+   <programlisting language="javascript">[
+  {
     "operation" : "transform",
     "field" : "/objects",
     "value" : {
-        "script" : {
-            "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').remove(content, 'user', 'onCreate.file');"
-        }
+      "script" : {
+        "type" : "text/javascript",
+        "file" : "something.js"
+      }
     }
-},</programlisting>
+  },
+]</programlisting>
   </section>
 
   <section xml:id="crest-patch-limitations">
@@ -787,11 +861,24 @@ Accept: application/json
     </para>
 
     <para>
-     For example, the Java Development Kit HTTP client
-     does not support PATCH as a valid HTTP method.
-     Instead, the method <literal>HttpURLConnection.setRequestMethod("PATCH")</literal>
+     For example, the Java Development Kit HTTP client does not support
+     PATCH as a valid HTTP method. Instead, the method
+     <literal>HttpURLConnection.setRequestMethod("PATCH")</literal>
      throws <literal>ProtocolException</literal>.
     </para>
+
+   <variablelist>
+    <title>Parameters</title>
+
+    <para>
+     You can use the following parameters.
+     Other parameters might depend on the specific action implementation:
+    </para>
+
+    <xinclude:include href="varlistentry-pretty-print.xml" />
+
+    <xinclude:include href="varlistentry-fields.xml" />
+   </variablelist>
 
   </section>
 
