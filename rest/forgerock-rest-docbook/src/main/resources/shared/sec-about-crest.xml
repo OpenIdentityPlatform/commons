@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright 2015 ForgeRock AS.
+  Copyright 2015-2016 ForgeRock AS.
 -->
  <section xml:id="sec-about-crest"
           xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en"
@@ -457,49 +457,344 @@ Accept: application/json
   <title>Patch</title>
 
   <para>
-   To patch a resource, send an HTTP PATCH request
-   including the patch for the resource as the payload.
-   Optionally set the <literal>If-Match</literal> header to the revision
-   if the patch should only operate on that version of the resource.
-   Accept a JSON response:
+   To patch a resource, run an HTTP PATCH with the following parameters:
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <para><literal>operation</literal></para>
+   </listitem>
+   <listitem>
+    <para><literal>field</literal></para>
+   </listitem>
+   <listitem>
+    <para><literal>value</literal></para>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   You can include these parameters in the <command>--data</command> for
+   a PATCH request, or in a JSON PATCH file. If successful, you'll see a
+   JSON response similar to:
   </para>
 
   <programlisting language="http">
-PATCH /users/some-id HTTP/1.1
-Host: example.com
-Accept: application/json
-Content-Length: ...
-Content-Type: application/json
-If-Match: <replaceable>_rev</replaceable>
-{ <replaceable>JSON resource</replaceable> }
+   PATCH /users/some-id HTTP/1.1
+   Host: example.com
+   Accept: application/json
+   Content-Length: ...
+   Content-Type: application/json
+   If-Match: <replaceable>_rev</replaceable>
+   { <replaceable>JSON resource</replaceable> }
   </programlisting>
+
+  <para>
+   You can set up PATCH operations on three types of targets:
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <para>
+     <emphasis role="bold">single-valued</emphasis>, such as an object,
+     string, boolean, or number.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <emphasis role="bold">list semantics array</emphasis>, where the
+     elements are ordered, and duplicates are allowed.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <emphasis role="bold">set semantics array</emphasis>, where the elements
+     are not ordered, and duplicates are not allowed.
+    </para>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   ForgeRock PATCH supports several different <literal>operations</literal>.
+   The following sections show each of these operations, along with options
+   for the <literal>field</literal> and <literal>value</literal>:
+  </para>
 
   <note>
    <para>
-    Some HTTP client libraries do not support the HTTP PATCH operation.
-    Make sure that the library you use supports HTTP PATCH
-    before using this REST operation.
-   </para>
-
-   <para>
-    For example, the Java Development Kit HTTP client
-    does not support PATCH as a valid HTTP method.
-    Instead, the method <literal>HttpURLConnection.setRequestMethod("PATCH")</literal>
-    throws <literal>ProtocolException</literal>.
+    Some of these ForgeRock PATCH <literal>operations</literal> are not yet
+    supported on one or more ForgeRock products. For details, see the official
+    documentation for each product.
    </para>
   </note>
 
-  <variablelist>
-   <title>Parameters</title>
+  <section xml:id="crest-patch-add">
+   <title>Patch Operation: Add</title>
 
    <para>
-    You can use the following parameters:
+    The <literal>add</literal> operation ensures that the target field contains
+    the value provided, creating parent fields as necessary. The following
+    example add operation adds the
+    <literal>"/startDate" : { "searchable" : true }</literal> value
+    to the <literal>/resourceMapping/genericMapping/updates/properties</literal>
+    field, creating parent fields such as <literal>updates/</literal>, if they
+    do not already exist.
    </para>
 
-   <xinclude:include href="varlistentry-pretty-print.xml" />
+   <programlisting language="javascript">{
+    "operation" : "add",
+    "field" : "/resourceMapping/genericMapping/updates/properties",
+    "value" : {
+        "/startDate" : {
+            "searchable" : true
+        }
+    }
+}</programlisting>
 
-   <xinclude:include href="varlistentry-fields.xml" />
-  </variablelist>
+   <para>
+    If the target field is single-valued, then the value you include in the
+    PATCH replaces the value of the target. Examples of a single-valued field
+    include: object, string, boolean, or number.
+   </para>
+
+   <itemizedlist>
+    <para>
+     An <literal>add</literal> operation has different results on two standard
+     types of arrays:
+    </para>
+    <listitem>
+     <itemizedlist>
+      <para>
+       <emphasis role="bold">List semantic arrays</emphasis>: you can run
+       any of these <literal>add</literal> operations on that type of array:
+      </para>
+      <listitem>
+       <para>
+        If you <literal>add</literal> an array of values, the PATCH operation
+        appends it to the existing list of values.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        If you <literal>add</literal> a single value, specify an ordinal
+        element in the target array, or use the <literal>{-}</literal> special
+        index to add that value to the end of the list.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+    <listitem>
+     <para>
+      <emphasis role="bold">Set semantic arrays</emphasis>: The list of values
+      included in a patch are merged with the existing set of values. Any
+      duplicates within the array are removed.
+     </para>
+    </listitem>
+   </itemizedlist>
+
+  </section>
+
+  <section xml:id="crest-patch-copy">
+   <title>Patch Operation: Copy</title>
+
+   <para>
+    The copy operation takes one or more existing values from the source field.
+    It then adds those same values on the target field. Once the values are
+    known, it is equivalent to performing an <literal>add</literal> operation
+    on the target.
+   </para>
+
+   <para>
+    The following <literal>copy</literal> operation takes the value from the
+    source named <literal>/hot/potato</literal>, and then runs a
+    <literal>replace</literal> operation on the target value,
+    <literal>/hot/tamale</literal>.
+   </para>
+
+
+   <programlisting language="javascript">{
+    "operation" : "copy",
+    "field" : "/hot/potato",
+    "value" : "/hot/tamale"
+}</programlisting>
+
+   <para>
+    If the source and value are configured as arrays, the result depends
+    on whether the array has list semantics or set semantics, as described in
+    <xref linkend="crest-patch-add" />.
+   </para>
+
+  </section>
+
+  <section xml:id="crest-patch-increment">
+   <title>Patch Operation: Increment</title>
+
+   <para>
+    The <literal>increment</literal> operation changes the value or values of
+    the target field by the amount you specify. The value that you include
+    must be one number, and may be positive or negative. The value of the
+    target field must accept numbers. The following <literal>increment</literal>
+    operation adds <literal>1000</literal> to the target value of
+    <literal>/user/payment</literal>.
+   </para>
+
+   <programlisting language="javascript">{
+    "operation" : "increment",
+    "field" : "/user/payment",
+    "value" : "1000"
+}</programlisting>
+
+   <para>
+    Since the <literal>value</literal> of the <literal>increment</literal> is
+    a single number, arrays do not apply.
+   </para>
+
+  </section>
+
+  <section xml:id="crest-patch-move">
+   <title>Patch Operation: Move</title>
+
+   <para>
+    The move operation removes existing values on the source field. It
+    then adds those same values on the target field. It is equivalent to
+    performing a <literal>remove</literal> operation on the source, followed
+    by an <literal>add</literal> operation with the same values, on the target.
+   </para>
+
+   <para>
+    The following <literal>move</literal> operation is equivalent to a
+    <literal>remove</literal> operation on the source named
+    <literal>/hot/potato</literal>, followed by a <literal>replace</literal>
+    operation on the target value, <literal>/hot/tamale</literal>.
+   </para>
+
+   <programlisting language="javascript">{
+    "operation" : "move",
+    "field" : "/hot/potato",
+    "value" : "/hot/tamale"
+}</programlisting>
+
+   <para>
+    To apply a <literal>move</literal> operation on an array, you need a
+    compatible single-value, list semantic array, or set semantic array on
+    both the source and the target. For details, see the criteria described in
+    <xref linkend="crest-patch-add" />.
+   </para>
+
+  </section>
+
+  <section xml:id="crest-patch-remove">
+   <title>Patch Operation: Remove</title>
+
+   <para>
+    The <literal>remove</literal> operation ensures that the target field no
+    longer contains the value provided. If the remove operation does not include
+    a value, the operation removes the field. The following
+    <literal>remove</literal> deletes the value of the
+    <literal>rolesPropName</literal> field, along with the field.
+   </para>
+
+   <programlisting language="javascript">{
+    "operation" : "remove",
+    "field" : "objects/0/schema/properties/effectiveRoles/rolesPropName",
+    "value" : ""
+},</programlisting>
+
+   <itemizedlist>
+    <para>
+     A <literal>remove</literal> operation has different results on two standard
+     types of arrays:
+    </para>
+    <listitem>
+     <para>
+      <emphasis role="bold">List semantic arrays</emphasis>: A
+      <literal>remove</literal> operation deletes provided array of values,
+      once, from the target list. In other words, to remove two instances of
+      the same value on the target, you must include the same value twice
+      in the <literal>remove</literal> operation.
+     </para>
+     <para>
+      <literal>remove</literal> operations on a specific index, or an exact
+      value, are allowed on list semantic arrays.
+     </para>
+    </listitem>
+    <listitem>
+     <para>
+      <emphasis role="bold">Set semantic arrays</emphasis>: The list of values
+      included in a patch are removed from the existing array.
+     </para>
+    </listitem>
+   </itemizedlist>
+
+  </section>
+
+  <section xml:id="crest-patch-replace">
+   <title>Patch Operation: Replace</title>
+
+   <para>
+    The <literal>replace</literal> operation removes any existing value(s) of
+    the targeted field, and replaces them with the provided value(s). It is
+    essentially equivalent to a <literal>remove</literal> followed by a
+    <literal>add</literal> operation. If the arrays are used, the criteria is
+    based on <xref linkend="crest-patch-add" />. However, indexed updates are
+    not allowed, even when the target is an array.
+   </para>
+
+   <para>
+    The following <literal>replace</literal> operation removes the existing
+    <literal>telephoneNumber</literal> value for the user, and then adds the
+    new value of <literal>+1 408 555 9999</literal>.
+   </para>
+
+   <programlisting language="javascript">{
+    "operation" : "replace",
+    "field" : "/contactInformation/telephoneNumber",
+    "value" : "+1 408 555 9999"
+},</programlisting>
+
+  </section>
+
+  <section xml:id="crest-patch-transform">
+   <title>Patch Operation: Transform</title>
+
+   <para>
+    The <literal>transform</literal> operation changes the value of a field
+    based on a script or some other data transformation command. The following
+    <literal>transform</literal> operation takes the value from the field
+    named <literal>/objects</literal>, applies the script as shown, and then
+    uses the result to run a <literal>replace</literal> operation on the
+    noted <literal>field</literal>.
+   </para>
+
+   <programlisting language="javascript">{
+    "operation" : "transform",
+    "field" : "/objects",
+    "value" : {
+        "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'user', 'onCreate.file');"
+        }
+    }
+},</programlisting>
+  </section>
+
+  <section xml:id="crest-patch-limitations">
+   <title>Patch Operation Limitations</title>
+
+    <para>
+     Some HTTP client libraries do not support the HTTP PATCH operation.
+     Make sure that the library you use supports HTTP PATCH
+     before using this REST operation.
+    </para>
+
+    <para>
+     For example, the Java Development Kit HTTP client
+     does not support PATCH as a valid HTTP method.
+     Instead, the method <literal>HttpURLConnection.setRequestMethod("PATCH")</literal>
+     throws <literal>ProtocolException</literal>.
+    </para>
+
+  </section>
+
  </section>
 
  <section xml:id="about-crest-action">
