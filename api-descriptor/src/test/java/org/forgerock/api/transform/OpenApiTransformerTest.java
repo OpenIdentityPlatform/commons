@@ -77,8 +77,7 @@ public class OpenApiTransformerTest {
     @Test
     public void testUserAndDevicesExample() throws Exception {
         final ApiDescription apiDescription = ApiTestUtil.createUserAndDeviceExampleApiDescription();
-        final OpenApiTransformer transformer = new OpenApiTransformer();
-        final Swagger swagger = transformer.transform("Users and Devices API", "localhost:8080", "/", false,
+        final Swagger swagger = OpenApiTransformer.execute("Users and Devices API", "localhost:8080", "/", false,
                 apiDescription, null);
 
         assertThat(swagger.getTags()).containsOnly(
@@ -125,8 +124,8 @@ public class OpenApiTransformerTest {
     @Test
     public void testTransformWithUnversionedPaths() throws Exception {
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(false);
-        final OpenApiTransformer transformer = new OpenApiTransformer();
-        final Swagger swagger = transformer.transform("My Title", "localhost:8080", "/", false, apiDescription, null);
+        final Swagger swagger = OpenApiTransformer.execute("My Title", "localhost:8080", "/", false, apiDescription,
+                null);
 
         assertThat(swagger.getTags()).containsOnly(new Tag().name("Resource title"));
         assertThat(swagger.getPaths()).containsOnlyKeys(
@@ -144,8 +143,8 @@ public class OpenApiTransformerTest {
     @Test
     public void testTransformWithVersionedPaths() throws Exception {
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(true);
-        final OpenApiTransformer transformer = new OpenApiTransformer();
-        final Swagger swagger = transformer.transform("My Title", "localhost:8080", "/", false, apiDescription, null);
+        final Swagger swagger = OpenApiTransformer.execute("My Title", "localhost:8080", "/", false, apiDescription,
+                null);
 
         // decorate Swagger object with application-specific features like auth headers, after this class completes
         final HeaderParameter usernameHeader = new HeaderParameter();
@@ -227,9 +226,10 @@ public class OpenApiTransformerTest {
                 .version("2.0")
                 .description("My Description")
                 .build();
-        final OpenApiTransformer transformer = new OpenApiTransformer();
+        final OpenApiTransformer transformer = new OpenApiTransformer("Test", "localhost:8080", "/", false,
+                apiDescription, null);
 
-        final Info info = transformer.buildInfo("My Title", apiDescription);
+        final Info info = transformer.buildInfo("My Title");
 
         assertThat(info).isEqualTo(new Info()
                 .title("My Title")
@@ -242,12 +242,18 @@ public class OpenApiTransformerTest {
         final Definitions definitions = Definitions.definitions()
                 .put("myDef", Schema.schema().schema(json(object(field("type", "object")))).build())
                 .build();
-        final OpenApiTransformer transformer = new OpenApiTransformer();
-        final Swagger swagger = new Swagger();
+        final ApiDescription apiDescription = ApiDescription.apiDescription()
+                .id("frapi:test")
+                .version("2.0")
+                .description("My Description")
+                .definitions(definitions)
+                .build();
+        final OpenApiTransformer transformer = new OpenApiTransformer("Test", "localhost:8080", "/", false,
+                apiDescription, null);
 
-        transformer.buildDefinitions(definitions, swagger);
+        transformer.buildDefinitions();
 
-        assertThat(swagger.getDefinitions()).containsEntry("myDef", new ModelImpl().type("object"));
+        assertThat(transformer.swagger.getDefinitions()).containsEntry("myDef", new ModelImpl().type("object"));
     }
 
     @DataProvider(name = "buildModelData")

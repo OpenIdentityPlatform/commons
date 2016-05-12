@@ -48,7 +48,6 @@ import org.forgerock.api.models.Create;
 import org.forgerock.api.models.Definitions;
 import org.forgerock.api.models.Delete;
 import org.forgerock.api.models.Error;
-import org.forgerock.api.models.Errors;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Patch;
 import org.forgerock.api.models.Paths;
@@ -57,7 +56,6 @@ import org.forgerock.api.models.Read;
 import org.forgerock.api.models.Reference;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.Schema;
-import org.forgerock.api.models.Services;
 import org.forgerock.api.models.SubResources;
 import org.forgerock.api.models.Update;
 import org.forgerock.api.models.VersionedPath;
@@ -127,6 +125,54 @@ public class OpenApiTransformer {
 
     static final String DEFINITIONS_REF = "#/definitions/";
 
+    @VisibleForTesting
+    final Swagger swagger;
+
+    private final ReferenceResolver referenceResolver;
+
+    private final ApiDescription apiDescription;
+
+    /**
+     * Default constructor that is only used by unit tests.
+     */
+    @VisibleForTesting
+    OpenApiTransformer() {
+        swagger = null;
+        referenceResolver = null;
+        apiDescription = null;
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param title API title
+     * @param host Hostname or IP address, with optional port
+     * @param basePath Base-path on host
+     * @param secure {@code true} when host is using HTTPS and {@code false} when using HTTP
+     * @param apiDescription CREST API Descriptor
+     * @param externalApiDescriptions External CREST API Descriptions, for resolving {@link Reference}s, or {@code null}
+     */
+    @VisibleForTesting
+    OpenApiTransformer(final String title, final String host, final String basePath, final boolean secure,
+            final ApiDescription apiDescription, final List<ApiDescription> externalApiDescriptions) {
+        this.apiDescription = checkNotNull(apiDescription, "apiDescription required");
+
+        swagger = new Swagger()
+                .scheme(secure ? Scheme.HTTPS : Scheme.HTTP)
+                .host(host)
+                .basePath(basePath)
+                .consumes("application/json")
+                .consumes("text/plain")
+                .consumes("multipart/form-data")
+                .produces("application/json")
+                .info(buildInfo(title));
+
+        referenceResolver = new ReferenceResolver(apiDescription);
+        if (externalApiDescriptions != null) {
+            referenceResolver.registerAll(externalApiDescriptions);
+        }
+    }
+
     /**
      * Transforms an {@link ApiDescription} into a {@code Swagger} model.
      *
@@ -138,36 +184,29 @@ public class OpenApiTransformer {
      * @param externalApiDescriptions External CREST API Descriptions, for resolving {@link Reference}s, or {@code null}
      * @return {@code Swagger} model
      */
-    public Swagger transform(final String title, final String host, final String basePath, final boolean secure,
+    public static Swagger execute(final String title, final String host, final String basePath, final boolean secure,
             final ApiDescription apiDescription, final List<ApiDescription> externalApiDescriptions) {
-        final Swagger swagger = new Swagger()
-                .scheme(secure ? Scheme.HTTPS : Scheme.HTTP)
-                .host(host)
-                .basePath(basePath)
-                .consumes("application/json")
-                .consumes("text/plain")
-                .consumes("multipart/form-data")
-                .produces("application/json")
-                .info(buildInfo(title, apiDescription));
+        final OpenApiTransformer transformer = new OpenApiTransformer(title, host, basePath, secure, apiDescription,
+                externalApiDescriptions);
+        return transformer.doExecute();
+    }
 
-        final ReferenceResolver referenceResolver = new ReferenceResolver(apiDescription);
-        if (externalApiDescriptions != null) {
-            referenceResolver.registerAll(externalApiDescriptions);
-        }
-
-        buildParameters(swagger);
-        buildPaths(apiDescription.getPaths(), apiDescription.getServices(), apiDescription.getErrors(), swagger,
-                referenceResolver);
-        buildDefinitions(apiDescription.getDefinitions(), swagger);
+    /**
+     * Do the work to transform an {@link ApiDescription} into a {@code Swagger} model.
+     *
+     * @return {@code Swagger} model
+     */
+    private Swagger doExecute() {
+        buildParameters();
+        buildPaths();
+        buildDefinitions();
         return swagger;
     }
 
     /**
      * Build globally-defined parameters, which are referred to by-reference.
-     *
-     * @param swagger Swagger model
      */
-    private void buildParameters(final Swagger swagger) {
+    private void buildParameters() {
         // _fields
         final QueryParameter fieldsParameter = new QueryParameter();
         fieldsParameter.setName(PARAMETER_FIELDS);
@@ -220,14 +259,9 @@ public class OpenApiTransformer {
 
     /**
      * Traverse CREST API Descriptor paths, to build the Swagger model.
-     *
-     * @param paths CREST paths
-     * @param services CREST services
-     * @param errors Global error definitions
-     * @param swagger Swagger model
      */
-    private void buildPaths(final Paths paths, final Services services, final Errors errors, final Swagger swagger,
-            final ReferenceResolver referenceResolver) {
+    private void buildPaths() {
+        final Paths paths = apiDescription.getPaths();
         if (paths != null) {
             final Map<String, Path> pathMap = new LinkedHashMap<>();
             final List<String> pathNames = new ArrayList<>(paths.getNames());
@@ -250,8 +284,8 @@ public class OpenApiTransformer {
                     if (resource.getReference() != null) {
                         resource = referenceResolver.getService(resource.getReference());
                     }
-                    buildResourcePaths(resource, pathName, null, versionName, services, errors,
-                            Collections.<Parameter>emptyList(), pathMap, swagger, referenceResolver);
+                    buildResourcePaths(resource, pathName, null, versionName, Collections.<Parameter>emptyList(),
+                            pathMap);
                 }
             }
             swagger.setPaths(pathMap);
@@ -267,16 +301,11 @@ public class OpenApiTransformer {
      * @param pathName Resource path-name
      * @param parentTag Tag for grouping operations together by resource/version or {@code null} if there is no parent
      * @param resourceVersion Resource version-name or empty-string
-     * @param services CREST services
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
-     * @param swagger Swagger model
      */
     private void buildResourcePaths(final Resource resource, final String pathName, final String parentTag,
-            final String resourceVersion, final Services services, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap, final Swagger swagger,
-            final ReferenceResolver referenceResolver) {
+            final String resourceVersion, final List<Parameter> parameters, final Map<String, Path> pathMap) {
         // always show version at end of paths, inside the URL fragment
         final boolean hasResourceVersion = !isEmpty(resourceVersion);
         final String pathNamespace = hasResourceVersion
@@ -302,26 +331,24 @@ public class OpenApiTransformer {
                 mergeParameters(new ArrayList<>(parameters), resource.getParameters()));
 
         // create Swagger operations from CREST operations
-        buildCreate(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema, errors,
-                operationParameters, pathMap, referenceResolver);
-        buildRead(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema, errors,
-                operationParameters, pathMap, referenceResolver);
-        buildUpdate(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema, errors,
-                operationParameters, pathMap, referenceResolver);
-        buildDelete(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema, errors,
-                operationParameters, pathMap, referenceResolver);
-        buildPatch(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema, errors,
-                operationParameters, pathMap, referenceResolver);
-        buildActions(resource, pathName, pathNamespace, tag, resourceVersion, errors,
-                operationParameters, pathMap, referenceResolver);
-        buildQueries(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema, errors,
-                operationParameters, pathMap, referenceResolver);
+        buildCreate(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema,
+                operationParameters, pathMap);
+        buildRead(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema,
+                operationParameters, pathMap);
+        buildUpdate(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema,
+                operationParameters, pathMap);
+        buildDelete(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema,
+                operationParameters, pathMap);
+        buildPatch(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema,
+                operationParameters, pathMap);
+        buildActions(resource, pathName, pathNamespace, tag, resourceVersion,
+                operationParameters, pathMap);
+        buildQueries(resource, pathName, pathNamespace, tag, resourceVersion, resourceSchema,
+                operationParameters, pathMap);
 
         // create collection-items and sub-resources
-        buildItems(resource, pathName, tag, resourceVersion, services, errors, parameters, pathMap, swagger,
-                referenceResolver);
-        buildSubResources(resource, pathName, resourceVersion, services, errors, parameters, pathMap, swagger,
-                referenceResolver);
+        buildItems(resource, pathName, tag, resourceVersion, parameters, pathMap);
+        buildSubResources(resource, pathName, resourceVersion, parameters, pathMap);
     }
 
     /**
@@ -331,16 +358,11 @@ public class OpenApiTransformer {
      * @param pathName Resource path-name
      * @param parentTag Tag for grouping operations together by resource/version or {@code null} if there is no parent
      * @param resourceVersion Resource version-name or empty-string
-     * @param services CREST services
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
-     * @param swagger Swagger model
      */
     private void buildItems(final Resource resource, final String pathName, final String parentTag,
-            final String resourceVersion, final Services services, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap, final Swagger swagger,
-            final ReferenceResolver referenceResolver) {
+            final String resourceVersion, final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getItems() != null) {
             // an items-resource inherits some fields from its parent, so build combined resource
             final Resource itemsResource = resource.getItems().asResource(resource.isMvccSupported(),
@@ -357,8 +379,8 @@ public class OpenApiTransformer {
                     .build());
 
             final String itemsPath = buildPath(pathName, "/{id}");
-            buildResourcePaths(itemsResource, itemsPath, parentTag, resourceVersion, services, errors,
-                    unmodifiableList(itemsParameters), pathMap, swagger, referenceResolver);
+            buildResourcePaths(itemsResource, itemsPath, parentTag, resourceVersion,
+                    unmodifiableList(itemsParameters), pathMap);
         }
     }
 
@@ -368,16 +390,11 @@ public class OpenApiTransformer {
      * @param resource CREST resource
      * @param pathName Resource path-name
      * @param resourceVersion Resource version-name or empty-string
-     * @param services CREST services
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
-     * @param swagger Swagger model
      */
     private void buildSubResources(final Resource resource, final String pathName,
-            final String resourceVersion, final Services services, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap, final Swagger swagger,
-            final ReferenceResolver referenceResolver) {
+            final String resourceVersion, final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getSubresources() != null) {
             // recursively build sub-resources
             final SubResources subResources = resource.getSubresources();
@@ -393,8 +410,8 @@ public class OpenApiTransformer {
                 if (subResource.getReference() != null) {
                     subResource = referenceResolver.getService(subResource.getReference());
                 }
-                buildResourcePaths(subResource, subPathName, null, resourceVersion, services, errors,
-                        unmodifiableList(subresourcesParameters), pathMap, swagger, referenceResolver);
+                buildResourcePaths(subResource, subPathName, null, resourceVersion,
+                        unmodifiableList(subresourcesParameters), pathMap);
             }
         }
     }
@@ -408,14 +425,12 @@ public class OpenApiTransformer {
      * @param tag Tag for grouping operations together by resource/version
      * @param resourceVersion Resource version-name or empty-string
      * @param resourceSchema Resource schema or {@code null}
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildCreate(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap,
-            final ReferenceResolver referenceResolver) {
+            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getCreate() != null) {
             final Create create = resource.getCreate();
             switch (create.getMode()) {
@@ -423,7 +438,7 @@ public class OpenApiTransformer {
                 final String createPutNamespace = normalizeName(pathNamespace, "create", "put");
                 final String createPutPathFragment = normalizeName(resourceVersion, "create", "put");
                 final Operation putOperation = buildOperation(create, createPutNamespace, resourceSchema,
-                        resourceSchema, errors, parameters, referenceResolver);
+                        resourceSchema, parameters);
                 putOperation.setSummary("Create with Client-Assigned ID");
 
                 if (resource.isMvccSupported()) {
@@ -436,7 +451,7 @@ public class OpenApiTransformer {
                 final String createPostNamespace = normalizeName(pathNamespace, "create", "post");
                 final String createPostPathFragment = normalizeName(resourceVersion, "create", "post");
                 final Operation postOperation = buildOperation(create, createPostNamespace, resourceSchema,
-                        resourceSchema, errors, parameters, referenceResolver);
+                        resourceSchema, parameters);
                 postOperation.setSummary("Create with Server-Assigned ID");
 
                 addOperation(postOperation, "post", pathName, createPostPathFragment, resourceVersion, tag,
@@ -457,21 +472,18 @@ public class OpenApiTransformer {
      * @param tag Tag for grouping operations together by resource/version
      * @param resourceVersion Resource version-name or empty-string
      * @param resourceSchema Resource schema or {@code null}
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildRead(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap,
-            final ReferenceResolver referenceResolver) {
+            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getRead() != null) {
             final String operationNamespace = normalizeName(pathNamespace, "read");
             final String operationPathFragment = normalizeName(resourceVersion, "read");
             final Read read = resource.getRead();
 
-            final Operation operation = buildOperation(read, operationNamespace, null, resourceSchema, errors,
-                    parameters, referenceResolver);
+            final Operation operation = buildOperation(read, operationNamespace, null, resourceSchema, parameters);
             operation.setSummary("Read");
             operation.addParameter(new RefParameter(PARAMETER_MIME_TYPE));
 
@@ -492,21 +504,19 @@ public class OpenApiTransformer {
      * @param tag Tag for grouping operations together by resource/version
      * @param resourceVersion Resource version-name or empty-string
      * @param resourceSchema Resource schema or {@code null}
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildUpdate(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap,
-            final ReferenceResolver referenceResolver) {
+            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getUpdate() != null) {
             final String operationNamespace = normalizeName(pathNamespace, "update");
             final String operationPathFragment = normalizeName(resourceVersion, "update");
             final Update update = resource.getUpdate();
 
             final Operation operation = buildOperation(update, operationNamespace, resourceSchema, resourceSchema,
-                    errors, parameters, referenceResolver);
+                    parameters);
             operation.setSummary("Update");
 
             if (resource.isMvccSupported()) {
@@ -526,21 +536,19 @@ public class OpenApiTransformer {
      * @param tag Tag for grouping operations together by resource/version
      * @param resourceVersion Resource version-name or empty-string
      * @param resourceSchema Resource schema or {@code null}
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildDelete(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap,
-            final ReferenceResolver referenceResolver) {
+            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getDelete() != null) {
             final String operationNamespace = normalizeName(pathNamespace, "delete");
             final String operationPathFragment = normalizeName(resourceVersion, "delete");
             final Delete delete = resource.getDelete();
 
-            final Operation operation = buildOperation(delete, operationNamespace, null, resourceSchema, errors,
-                    parameters, referenceResolver);
+            final Operation operation = buildOperation(delete, operationNamespace, null, resourceSchema,
+                    parameters);
             operation.setSummary("Delete");
 
             if (resource.isMvccSupported()) {
@@ -560,14 +568,12 @@ public class OpenApiTransformer {
      * @param tag Tag for grouping operations together by resource/version
      * @param resourceVersion Resource version-name or empty-string
      * @param resourceSchema Resource schema or {@code null}
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildPatch(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap,
-            final ReferenceResolver referenceResolver) {
+            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getPatch() != null) {
             final String operationNamespace = normalizeName(pathNamespace, "patch");
             final String operationPathFragment = normalizeName(resourceVersion, "patch");
@@ -575,7 +581,7 @@ public class OpenApiTransformer {
 
             final Schema requestSchema = buildPatchRequestPayload(patch.getOperations());
             final Operation operation = buildOperation(patch, operationNamespace, requestSchema, resourceSchema,
-                    errors, parameters, referenceResolver);
+                    parameters);
             operation.setSummary("Update via Patch Operations");
 
             if (resource.isMvccSupported()) {
@@ -594,14 +600,12 @@ public class OpenApiTransformer {
      * @param pathNamespace Unique path-namespace
      * @param tag Tag for grouping operations together by resource/version
      * @param resourceVersion Resource version-name or empty-string
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildActions(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap,
-            final ReferenceResolver referenceResolver) {
+            final String tag, final String resourceVersion, final List<Parameter> parameters,
+            final Map<String, Path> pathMap) {
         if (!isEmpty(resource.getActions())) {
             final String operationNamespace = normalizeName(pathNamespace, "action");
             final String operationPathFragment = normalizeName(resourceVersion, "action");
@@ -610,7 +614,7 @@ public class OpenApiTransformer {
                 final String actionPathFragment = normalizeName(operationPathFragment, action.getName());
 
                 final Operation operation = buildOperation(action, actionNamespace, action.getRequest(),
-                        action.getResponse(), errors, parameters, referenceResolver);
+                        action.getResponse(), parameters);
                 operation.setSummary("Action: " + action.getName());
 
                 final QueryParameter actionParameter = new QueryParameter();
@@ -634,14 +638,12 @@ public class OpenApiTransformer {
      * @param tag Tag for grouping operations together by resource/version
      * @param resourceVersion Resource version-name or empty-string
      * @param resourceSchema Resource schema or {@code null}
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildQueries(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema, final Errors errors,
-            final List<Parameter> parameters, final Map<String, Path> pathMap,
-            final ReferenceResolver referenceResolver) {
+            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (!isEmpty(resource.getQueries())) {
             final String operationNamespace = normalizeName(pathNamespace, "query");
             final String operationPathFragment = normalizeName(resourceVersion, "query");
@@ -700,8 +702,7 @@ public class OpenApiTransformer {
                     responsePayload = resourceSchema;
                 }
 
-                final Operation operation = buildOperation(query, queryNamespace, null, responsePayload, errors,
-                        parameters, referenceResolver);
+                final Operation operation = buildOperation(query, queryNamespace, null, responsePayload, parameters);
                 operation.setSummary(summary);
                 operation.addParameter(queryParameter);
 
@@ -766,13 +767,12 @@ public class OpenApiTransformer {
      * @param operationNamespace Unique operation-namespace
      * @param requestPayload Request payload or {@code null}
      * @param responsePayload Response payload
-     * @param errors Global error definitions
      * @param parameters CREST operation parameters
      * @return Swagger operation
      */
     private Operation buildOperation(final org.forgerock.api.models.Operation operationModel,
             final String operationNamespace, final Schema requestPayload, final Schema responsePayload,
-            final Errors errors, final List<Parameter> parameters, final ReferenceResolver referenceResolver) {
+            final List<Parameter> parameters) {
         final Operation operation = new Operation();
         operation.setOperationId(operationNamespace);
         applyOperationDescription(operationModel.getDescription(), operation);
@@ -780,8 +780,7 @@ public class OpenApiTransformer {
         applyOperationParameters(mergeParameters(new ArrayList<>(parameters), operationModel.getParameters()),
                 operation);
         applyOperationRequestPayload(requestPayload, operation);
-        applyOperationResponsePayloads(responsePayload, operationModel.getErrors(), errors, operation,
-                referenceResolver);
+        applyOperationResponsePayloads(responsePayload, operationModel.getErrors(), operation);
         return operation;
     }
 
@@ -963,11 +962,10 @@ public class OpenApiTransformer {
      *
      * @param schema Success-response JSON schema
      * @param errorResponses Error responses
-     * @param errors Global error definitions
      * @param operation Swagger operation
      */
-    private void applyOperationResponsePayloads(final Schema schema, final Error[] errorResponses, final Errors errors,
-            final Operation operation, final ReferenceResolver referenceResolver) {
+    private void applyOperationResponsePayloads(final Schema schema, final Error[] errorResponses,
+            final Operation operation) {
         final Map<String, Response> responses = new HashMap<>();
         if (schema != null) {
             final Response response = new Response();
@@ -997,9 +995,6 @@ public class OpenApiTransformer {
             for (int i = 0; i < n; ++i) {
                 final Error error;
                 if (errorResponses[i].getReference() != null) {
-                    if (errors == null) {
-                        throw new TransformerException("Global error definitions not provided for error reference");
-                    }
                     error = referenceResolver.getError(errorResponses[i].getReference());
                     if (error == null) {
                         throw new TransformerException("Error reference not found in global error definitions");
@@ -1090,7 +1085,7 @@ public class OpenApiTransformer {
      * @return JSON schema for request-payload
      */
     @VisibleForTesting
-    protected Schema buildPatchRequestPayload(final PatchOperation[] patchOperations) {
+    Schema buildPatchRequestPayload(final PatchOperation[] patchOperations) {
         // see org.forgerock.json.resource.PatchOperation#PatchOperation
         final List<Object> enumArray = new ArrayList<>(patchOperations.length);
         for (final PatchOperation op : patchOperations) {
@@ -1119,11 +1114,10 @@ public class OpenApiTransformer {
      * Builds Swagger info-model, which describes the API (e.g., title, version, description).
      *
      * @param title API title
-     * @param apiDescription API description model
      * @return Info model
      */
     @VisibleForTesting
-    protected Info buildInfo(final String title, final ApiDescription apiDescription) {
+    Info buildInfo(final String title) {
         // TODO set other Info fields
         final Info info = new Info();
         info.setTitle(checkNotNull(title));
@@ -1134,12 +1128,10 @@ public class OpenApiTransformer {
 
     /**
      * Converts global CREST schema definitions into glabal Swagger schema definitions.
-     *
-     * @param definitions Global CREST schema-definitions
-     * @param swagger Swagger model
      */
     @VisibleForTesting
-    protected void buildDefinitions(final Definitions definitions, final Swagger swagger) {
+    void buildDefinitions() {
+        final Definitions definitions = apiDescription.getDefinitions();
         if (definitions != null) {
             final Map<String, Model> definitionMap = new HashMap<>();
 
@@ -1162,7 +1154,7 @@ public class OpenApiTransformer {
      * @return Swagger schema model
      */
     @VisibleForTesting
-    protected Model buildModel(final JsonValue schema) {
+    Model buildModel(final JsonValue schema) {
         final ModelImpl model;
         final String type = schema.get("type").asString();
         switch (type) {
@@ -1251,7 +1243,7 @@ public class OpenApiTransformer {
      * @return Swagger named-properties map
      */
     @VisibleForTesting
-    protected Map<String, Property> buildProperties(final JsonValue schema) {
+    Map<String, Property> buildProperties(final JsonValue schema) {
         if (schema != null && schema.isNotNull()) {
             final JsonValue properties = schema.get("properties");
             if (properties.isNotNull()) {
@@ -1310,7 +1302,7 @@ public class OpenApiTransformer {
      * @return Swagger property representing the JSON Schema
      */
     @VisibleForTesting
-    protected Property buildProperty(final JsonValue schema) {
+    Property buildProperty(final JsonValue schema) {
         if (schema == null || schema.isNull()) {
             return null;
         }
@@ -1517,7 +1509,7 @@ public class OpenApiTransformer {
      * @return JSON reference segment or {@code null}
      */
     @VisibleForTesting
-    protected String getDefinitionsReference(final Reference reference) {
+    String getDefinitionsReference(final Reference reference) {
         if (reference != null) {
             return getDefinitionsReference(reference.getValue());
         }
@@ -1532,7 +1524,7 @@ public class OpenApiTransformer {
      * @return JSON reference segment or {@code null}
      */
     @VisibleForTesting
-    protected String getDefinitionsReference(final String reference) {
+    String getDefinitionsReference(final String reference) {
         if (!isEmpty(reference)) {
             final int start = reference.indexOf(DEFINITIONS_REF);
             if (start != -1) {
