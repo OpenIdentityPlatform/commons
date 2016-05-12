@@ -26,7 +26,8 @@ import org.forgerock.json.jose.jws.JwsHeader;
  *
  * @since 2.0.0
  */
-public class SignedEncryptedJwsHeaderBuilder extends JwtSecureHeaderBuilder<SignedEncryptedJwtBuilder, SignedEncryptedJwsHeaderBuilder> {
+public class SignedEncryptedJwsHeaderBuilder
+        extends JwtSecureHeaderBuilder<SignedEncryptedJwtBuilder, SignedEncryptedJwsHeaderBuilder> {
 
     /**
      * Constructs a new JwsHeaderBuilder, parented by the given JwtBuilder.
