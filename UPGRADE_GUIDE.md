@@ -37,3 +37,15 @@ Both OpenAM and OpenIDM need to provide a path to a `KBADelegate`, which can be 
 * Updating to Handlebars 4
 
 The path to the new version of handlebars (4.0.5) will need to be adjusted in the root main.js.
+
+## 12.x -> 13.x
+
+The entries for form2js and js2form must be adjusted to match the new version. Previously it was listed like so:
+
+    js2form: "libs/js2form-2.0",
+    form2js: "libs/form2js-2.0",
+
+Now they must be specified like so:
+
+    js2form: "libs/js2form-2.0-769718a",
+    form2js: "libs/form2js-2.0-769718a",
