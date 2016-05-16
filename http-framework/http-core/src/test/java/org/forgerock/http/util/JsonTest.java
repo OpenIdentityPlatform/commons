@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -20,15 +20,18 @@ import static java.lang.Long.*;
 import static java.util.Arrays.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.util.Json.*;
+import static org.forgerock.json.JsonValue.*;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -333,5 +336,11 @@ public class JsonTest {
         map.put("one", "one");
         map.put("object", new Object());
         checkJsonCompatibility("map", map);
+    }
+
+    @Test
+    public void shouldWriteJsonValueObject() throws Exception {
+        JsonValue value = json(object(field("key", "value")));
+        assertThat(new String(Json.writeJson(value), StandardCharsets.UTF_8)).isEqualTo("{\"key\":\"value\"}");
     }
 }

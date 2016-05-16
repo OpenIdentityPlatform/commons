@@ -12,15 +12,13 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
 
-import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
-import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_SINGLE_QUOTES;
-import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS;
-import static java.lang.String.format;
+import static com.fasterxml.jackson.core.JsonParser.Feature.*;
+import static java.lang.String.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +29,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 
 /**
@@ -43,16 +43,33 @@ public final class Json {
     /** Non strict object mapper / data binder used to read json configuration files/data. */
     private static final ObjectMapper LENIENT_MAPPER;
     static {
-        LENIENT_MAPPER = new ObjectMapper();
+        LENIENT_MAPPER = new ObjectMapper().registerModule(new JsonValueModule());
         LENIENT_MAPPER.configure(ALLOW_COMMENTS, true);
         LENIENT_MAPPER.configure(ALLOW_SINGLE_QUOTES, true);
         LENIENT_MAPPER.configure(ALLOW_UNQUOTED_CONTROL_CHARS, true);
     }
 
     /** Strict object mapper / data binder used to read json configuration files/data. */
-    private static final ObjectMapper STRICT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper STRICT_MAPPER = new ObjectMapper()
+            .registerModule(new JsonValueModule());
 
     /**
+     * Jackson Module that uses a mixin to make sure that a {@link org.forgerock.json.JsonValue} instance is
+     * serialized using its {@code #getObject()} value only.
+      */
+    public static class JsonValueModule extends SimpleModule {
+        @Override
+        public void setupModule(SetupContext context) {
+            context.setMixInAnnotations(org.forgerock.json.JsonValue.class, JsonValueMixin.class);
+        }
+    }
+
+    private static abstract class JsonValueMixin {
+        @JsonValue
+        public abstract String getObject();
+    }
+
+        /**
      * Private constructor for utility class.
      */
     private Json() { }
