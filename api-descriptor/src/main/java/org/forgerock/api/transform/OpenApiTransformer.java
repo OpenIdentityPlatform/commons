@@ -16,13 +16,13 @@
 
 package org.forgerock.api.transform;
 
-import static java.lang.Boolean.TRUE;
-import static java.util.Collections.unmodifiableList;
-import static org.forgerock.api.markup.asciidoc.AsciiDoc.normalizeName;
+import static java.lang.Boolean.*;
+import static java.util.Collections.*;
+import static org.forgerock.api.markup.asciidoc.AsciiDoc.*;
 import static org.forgerock.api.util.PathUtil.*;
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
+import static org.forgerock.api.util.ValidationUtil.*;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.Reject.checkNotNull;
+import static org.forgerock.util.Reject.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +34,37 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import org.forgerock.api.enums.CountPolicy;
+import org.forgerock.api.enums.PagingMode;
+import org.forgerock.api.enums.ParameterSource;
+import org.forgerock.api.enums.PatchOperation;
+import org.forgerock.api.enums.QueryType;
+import org.forgerock.api.enums.Stability;
+import org.forgerock.api.markup.asciidoc.AsciiDoc;
+import org.forgerock.api.models.Action;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.Create;
+import org.forgerock.api.models.Definitions;
+import org.forgerock.api.models.Delete;
+import org.forgerock.api.models.Error;
+import org.forgerock.api.models.Errors;
+import org.forgerock.api.models.Parameter;
+import org.forgerock.api.models.Patch;
+import org.forgerock.api.models.Paths;
+import org.forgerock.api.models.Query;
+import org.forgerock.api.models.Read;
+import org.forgerock.api.models.Reference;
+import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.Schema;
+import org.forgerock.api.models.Services;
+import org.forgerock.api.models.SubResources;
+import org.forgerock.api.models.Update;
+import org.forgerock.api.models.VersionedPath;
+import org.forgerock.api.util.ReferenceResolver;
+import org.forgerock.http.routing.Version;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.annotations.VisibleForTesting;
 
 import io.swagger.models.ArrayModel;
 import io.swagger.models.Info;
@@ -70,37 +101,6 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.models.properties.UUIDProperty;
-import org.forgerock.api.enums.CountPolicy;
-import org.forgerock.api.enums.PagingMode;
-import org.forgerock.api.enums.ParameterSource;
-import org.forgerock.api.enums.PatchOperation;
-import org.forgerock.api.enums.QueryType;
-import org.forgerock.api.enums.Stability;
-import org.forgerock.api.markup.asciidoc.AsciiDoc;
-import org.forgerock.api.models.Action;
-import org.forgerock.api.models.ApiDescription;
-import org.forgerock.api.models.Create;
-import org.forgerock.api.models.Definitions;
-import org.forgerock.api.models.Delete;
-import org.forgerock.api.models.Error;
-import org.forgerock.api.models.Errors;
-import org.forgerock.api.models.Items;
-import org.forgerock.api.models.Parameter;
-import org.forgerock.api.models.Patch;
-import org.forgerock.api.models.Paths;
-import org.forgerock.api.models.Query;
-import org.forgerock.api.models.Read;
-import org.forgerock.api.models.Reference;
-import org.forgerock.api.models.Resource;
-import org.forgerock.api.models.Schema;
-import org.forgerock.api.models.Services;
-import org.forgerock.api.models.SubResources;
-import org.forgerock.api.models.Update;
-import org.forgerock.api.models.VersionedPath;
-import org.forgerock.api.util.ReferenceResolver;
-import org.forgerock.http.routing.Version;
-import org.forgerock.json.JsonValue;
-import org.forgerock.util.annotations.VisibleForTesting;
 
 /**
  * Transforms an {@link ApiDescription} into an OpenAPI/Swagger model.
@@ -325,7 +325,7 @@ public class OpenApiTransformer {
     }
 
     /**
-     * Builds {@link Resource} collection-items;
+     * Builds {@link Resource} collection-items.
      *
      * @param resource CREST resource
      * @param pathName Resource path-name
@@ -363,7 +363,7 @@ public class OpenApiTransformer {
     }
 
     /**
-     * Builds {@link Resource} sub-resources;
+     * Builds {@link Resource} sub-resources.
      *
      * @param resource CREST resource
      * @param pathName Resource path-name

@@ -288,9 +288,7 @@ public class ResourceTest {
                                         (name = "id", type = "string", description = "Identifier for the created")
                         },
                         locales = {"en-GB", "en-US"},
-                        stability = Stability.EVOLVING
-                )
-        )
+                        stability = Stability.EVOLVING))
         public void create() {
 
         }
@@ -306,9 +304,7 @@ public class ResourceTest {
     private static final class ResourceSchemaRequiredAnnotatedHandler {
         @org.forgerock.api.annotations.Create(
                 operationDescription = @org.forgerock.api.annotations.Operation(
-                        description = "A create resource operation."
-                )
-        )
+                        description = "A create resource operation."))
         public void create() {
 
         }
@@ -365,9 +361,7 @@ public class ResourceTest {
     private static final class UpdateAnnotatedHandler {
         @org.forgerock.api.annotations.Update(
                 operationDescription = @org.forgerock.api.annotations.Operation(
-                        description = "An update resource operation."
-                )
-        )
+                        description = "An update resource operation."))
         public void update() {
 
         }
@@ -395,9 +389,7 @@ public class ResourceTest {
     private static final class DeleteAnnotatedHandler {
         @org.forgerock.api.annotations.Delete(
                 operationDescription = @org.forgerock.api.annotations.Operation(
-                        description = "A delete resource operation."
-                )
-        )
+                        description = "A delete resource operation."))
         public void delete() {
 
         }

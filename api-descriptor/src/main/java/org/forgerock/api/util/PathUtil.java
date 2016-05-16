@@ -29,7 +29,7 @@ import org.forgerock.api.models.Parameter;
 /**
  * Utilities for working with API Description paths and path-parameters.
  */
-public class PathUtil {
+public final class PathUtil {
 
     /**
      * Pattern for replacing multiple forward-slashes with a single forward-slash.

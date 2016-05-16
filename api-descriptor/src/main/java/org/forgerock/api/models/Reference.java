@@ -16,13 +16,11 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.util.ValidationUtil.containsWhitespace;
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
+import static org.forgerock.api.util.ValidationUtil.*;
 
 import org.forgerock.api.ApiValidationException;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Class that represents the Reference type in API descriptor.

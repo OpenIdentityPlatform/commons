@@ -80,5 +80,5 @@ public class PathUtilTest {
         assertThat(mergedParameters).hasSize(1);
         assertThat(mergedParameters.get(0).isRequired()).isFalse();
     }
-    
+
 }

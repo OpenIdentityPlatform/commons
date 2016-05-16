@@ -16,19 +16,18 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.util.ValidationUtil.containsWhitespace;
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
+import static org.forgerock.api.util.ValidationUtil.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
 import org.forgerock.api.ApiValidationException;
-
 import org.forgerock.http.routing.Version;
 import org.forgerock.util.Reject;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Class that represents the Paths type in API descriptor.

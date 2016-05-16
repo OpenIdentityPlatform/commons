@@ -79,7 +79,8 @@ public final class Query extends Operation implements Comparable<Query> {
 
     /**
      * Getter of the supported paging policies.
-     * If the array is empty, this means that the query does not support any form of count policy, and no value for count policy should be specified
+     * If the array is empty, this means that the query does not support any form of count policy, and no value for
+     * count policy should be specified.
      *
      * @return Supported paging policy enums
      */
@@ -247,7 +248,8 @@ public final class Query extends Operation implements Comparable<Query> {
 
         /**
          * Set the supported page count policies.
-         * If the array is empty, this means that the query does not support any form of count policy, and no value for count policy should be specified
+         * If the array is empty, this means that the query does not support any form of count policy, and no value
+         * for count policy should be specified.
          *
          * @param countPolicy Array of supported paging mode policies
          * @return Builder

@@ -18,10 +18,7 @@ package org.forgerock.json.resource;
 
 import static org.forgerock.util.promise.Promises.*;
 
-import org.forgerock.api.models.ApiDescription;
-import org.forgerock.services.context.ApiContext;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
 class InterfaceSingletonHandler implements RequestHandler {

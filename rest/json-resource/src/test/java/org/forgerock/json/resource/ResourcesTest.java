@@ -223,6 +223,7 @@ public final class ResourcesTest {
     @DataProvider
     public Object[][] annotatedRequestHandlerData() {
         // @formatter:off
+        // @Checkstyle:off
         return new Object[][]{
             // Class                      |               Type| Create| Read | Update| Delete| Patch| RAction| CAction| Query|
             { AnnotationSingleton.class,    SINGLETON_RESOURCE,  false,  true,   true,  false,  true,    true,   false, false},
@@ -233,6 +234,7 @@ public final class ResourcesTest {
             { ConventionCollection.class,  COLLECTION_RESOURCE,   true,  true,   true,   true,  true,   false,   false,  true},
             { AnnotationRequestHandler.class,  REQUEST_HANDLER,   true,  true,   true,   true,  true,    true,    true,  true},
         };
+        // @Checkstyle:on
         // @formatter:on
     }
 

@@ -16,14 +16,11 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.api.models.ApiDescription;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.descriptor.Describable;
-import org.forgerock.util.promise.Promise;
-
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Query;
 import org.forgerock.api.annotations.RequestHandler;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Exposes an annotated POJO as collection methods {@link org.forgerock.json.resource.RequestHandler} by

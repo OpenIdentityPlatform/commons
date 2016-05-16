@@ -16,18 +16,9 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.models.Reference.reference;
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
-import static org.forgerock.util.Reject.rejectStateIfTrue;
-
-import org.forgerock.api.ApiValidationException;
-import org.forgerock.api.annotations.Actions;
-import org.forgerock.api.annotations.Queries;
-import org.forgerock.api.annotations.RequestHandler;
-
-import org.forgerock.util.Reject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.forgerock.api.models.Reference.*;
+import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.util.Reject.*;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -35,6 +26,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+
+import org.forgerock.api.ApiValidationException;
+import org.forgerock.api.annotations.Actions;
+import org.forgerock.api.annotations.Queries;
+import org.forgerock.api.annotations.RequestHandler;
+import org.forgerock.util.Reject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -351,7 +350,7 @@ public final class Resource {
                 .subresources(subResources)
                 .items(items)
                 .build();
-        
+
         if (!requestHandler.id().isEmpty()) {
             descriptor.getServices().addService(requestHandler.id(), resource);
             Reference reference = reference().value(String.format(SERVICES_REFERENCE, requestHandler.id())).build();
@@ -405,7 +404,7 @@ public final class Resource {
         private final Set<Query> queries;
         private Items items;
         private Boolean mvccSupported;
-        public Reference reference;
+        private Reference reference;
         private final List<Parameter> parameters;
         private boolean built = false;
 

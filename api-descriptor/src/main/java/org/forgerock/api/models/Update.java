@@ -16,8 +16,6 @@
 
 package org.forgerock.api.models;
 
-import org.forgerock.api.ApiValidationException;
-
 /**
  * Class that represents the Create Operation type in API descriptor.
  *

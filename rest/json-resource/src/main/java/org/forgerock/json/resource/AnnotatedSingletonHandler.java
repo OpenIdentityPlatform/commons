@@ -16,15 +16,12 @@
 
 package org.forgerock.json.resource;
 
-import org.forgerock.api.models.ApiDescription;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.descriptor.Describable;
-import org.forgerock.util.promise.Promise;
-
 import org.forgerock.api.annotations.Patch;
 import org.forgerock.api.annotations.Read;
 import org.forgerock.api.annotations.RequestHandler;
 import org.forgerock.api.annotations.Update;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Exposes an annotated POJO as an instance {@link org.forgerock.json.resource.RequestHandler} by looking for annotated
