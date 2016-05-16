@@ -11,16 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.servlet.example;
 
+import static io.swagger.models.Scheme.HTTP;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.http.DescribedHttpApplication;
+import org.forgerock.http.swagger.SwaggerApiProducer;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
@@ -33,6 +37,9 @@ import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
+import io.swagger.models.Info;
+import io.swagger.models.Swagger;
+
 /**
  * Example single {@link HttpApplication} deployment which registers a
  * {@link Handler} that returns the application name and matched portion of
@@ -42,7 +49,7 @@ import org.forgerock.util.promise.Promise;
  * {@code HttpApplication} deployments and can be set for multiple
  * {@code HttpApplication} deployments.</p>
  */
-public class ExampleHttpApplication implements HttpApplication {
+public class ExampleHttpApplication implements DescribedHttpApplication {
 
     private final String applicationName;
 
@@ -78,5 +85,10 @@ public class ExampleHttpApplication implements HttpApplication {
     @Override
     public void stop() {
 
+    }
+
+    @Override
+    public ApiProducer<Swagger> getApiProducer() {
+        return new SwaggerApiProducer(new Info().title("Example HTTP Application"), "/servlet", "localhost", HTTP);
     }
 }

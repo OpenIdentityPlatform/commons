@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
@@ -86,8 +86,10 @@ public final class AcceptApiVersionHeader extends Header {
 
     /** The name of this header. */
     public static final String NAME = "Accept-API-Version";
-    private static final String PROTOCOL = "protocol";
-    private static final String RESOURCE = "resource";
+    /** The name of the protocol value component. */
+    public static final String PROTOCOL = "protocol";
+    /** The name of the resource value component. */
+    public static final String RESOURCE = "resource";
     private static final String EQUALS = "=";
 
     /**

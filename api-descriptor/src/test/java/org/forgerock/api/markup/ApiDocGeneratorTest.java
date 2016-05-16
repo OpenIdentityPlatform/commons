@@ -72,7 +72,7 @@ public class ApiDocGeneratorTest {
     @Test
     public void testExecuteWithUserDeviceExample() throws Exception {
         final ApiDescription apiDescription = ApiTestUtil.createUserAndDeviceExampleApiDescription();
-        final String content = ApiDocGenerator.execute("Users and Devices API", apiDescription, null, null);
+        final String content = ApiDocGenerator.execute("Users and Devices API", apiDescription, null);
 
         assertThat(content).isNotEmpty();
         assertThat(AsciiDoc.INCLUDE_PATTERN.matcher(content).find()).isFalse();
@@ -82,7 +82,7 @@ public class ApiDocGeneratorTest {
     public void testExecuteWithUnversionedPaths() throws Exception {
         final Path testOutputDirPath = outputDirPath.resolve("testExecute");
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(false);
-        ApiDocGenerator.execute("Example API Without Resource Versions", apiDescription, null, null, testOutputDirPath);
+        ApiDocGenerator.execute("Example API Without Resource Versions", apiDescription, null, testOutputDirPath);
 
         // check for output-dir for default API description file
         final Path outputApiDescriptionPath = testOutputDirPath.resolve(normalizeName(apiDescription.getId(),
@@ -95,7 +95,7 @@ public class ApiDocGeneratorTest {
     public void testExecuteWithVersionedPaths() throws Exception {
         final Path testOutputDirPath = outputDirPath.resolve("testExecuteWithVersionedPaths");
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(true);
-        ApiDocGenerator.execute("Example API With Resource Versions", apiDescription, null, null, testOutputDirPath);
+        ApiDocGenerator.execute("Example API With Resource Versions", apiDescription, null, testOutputDirPath);
 
         // check for output-dir for default API description file
         final Path outputApiDescriptionPath = testOutputDirPath.resolve(normalizeName(apiDescription.getId(),
@@ -118,7 +118,7 @@ public class ApiDocGeneratorTest {
 
         // write API descriptor files to output-dir
         final Path testOutputDirPath = outputDirPath.resolve("testExecuteWithInputOverrides");
-        ApiDocGenerator.execute("Example API With AsciiDoc Overrides", apiDescription, null, testInputDirPath,
+        ApiDocGenerator.execute("Example API With AsciiDoc Overrides", apiDescription, testInputDirPath,
                 testOutputDirPath);
 
         // check for input-dir description file in output-dir

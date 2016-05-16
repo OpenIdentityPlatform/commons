@@ -16,7 +16,8 @@
 
 package org.forgerock.json.resource.descriptor.examples.handler;
 
-import org.forgerock.http.Handler;
+import static org.forgerock.http.routing.Version.*;
+
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Resources;
@@ -25,12 +26,9 @@ import org.forgerock.json.resource.descriptor.examples.provider.version1.DeviceC
 import org.forgerock.json.resource.descriptor.examples.provider.version1.UserCollectionProviderV1;
 import org.forgerock.json.resource.descriptor.examples.provider.version2.DeviceCollectionProviderV2;
 import org.forgerock.json.resource.descriptor.examples.provider.version2.UserCollectionProviderV2;
-import org.forgerock.json.resource.http.CrestHttp;
-
-import static org.forgerock.http.routing.Version.version;
 
 /**
- * Default in-memory {@link Handler}.
+ * Default in-memory handler.
  */
 public final class UserCollectionHandler {
 
@@ -52,21 +50,21 @@ public final class UserCollectionHandler {
      * Creates the route to the different user provider versions.
      * @return The User handler with the routes.
      */
-    public static Handler getUsersRouter() {
+    public static Router getUsersRouter() {
         Router usersRouter = new Router();
         usersRouter.addRoute(version(1), userCollProvV1);
         usersRouter.addRoute(version(2), userCollProvV2);
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(usersRouter));
+        return usersRouter;
     }
 
     /**
      * Creates the route to the different admin provier version (At the moment it supports only version 1.0).
      * @return The Admin handler with the routes.
      */
-    public static Handler getAdminsRouter() {
+    public static Router getAdminsRouter() {
         Router adminsRouter = new Router();
         adminsRouter.addRoute(version(1), userCollProvV1);
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(adminsRouter));
+        return adminsRouter;
     }
 
 }

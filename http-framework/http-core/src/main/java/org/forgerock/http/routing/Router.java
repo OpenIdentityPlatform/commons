@@ -22,6 +22,7 @@ import static org.forgerock.http.routing.RouteMatchers.getRemainingRequestUri;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import org.forgerock.http.Handler;
+import org.forgerock.http.handler.DescribableHandler;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.ResponseException;
@@ -33,6 +34,8 @@ import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+
+import io.swagger.models.Swagger;
 
 /**
  * A router which routes requests based on route matchers. Each route is
@@ -60,7 +63,7 @@ import org.forgerock.util.promise.Promise;
  * @see UriRouteMatcher
  * @see RouteMatchers
  */
-public final class Router extends AbstractRouter<Router, Request, Handler, Void> implements Handler {
+public final class Router extends AbstractRouter<Router, Request, Handler, Swagger> implements DescribableHandler {
 
     /**
      * Creates a new router with no routes defined.

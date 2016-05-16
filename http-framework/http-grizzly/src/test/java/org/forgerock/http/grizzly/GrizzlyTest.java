@@ -15,36 +15,248 @@
  */
 package org.forgerock.http.grizzly;
 
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static io.swagger.models.Scheme.*;
+import static java.lang.String.*;
+import static java.util.Arrays.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.http.grizzly.GrizzlySupport.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.assertj.core.api.SoftAssertionError;
+import org.assertj.core.api.SoftAssertions;
+import org.forgerock.http.Client;
+import org.forgerock.http.DescribedHttpApplication;
+import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
-import org.forgerock.http.bindings.BindingTest;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.handler.HttpClientHandler;
+import org.forgerock.http.header.CookieHeader;
+import org.forgerock.http.header.SetCookieHeader;
+import org.forgerock.http.protocol.Cookie;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
+import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.http.session.Session;
+import org.forgerock.http.session.SessionContext;
+import org.forgerock.http.swagger.SwaggerApiProducer;
+import org.forgerock.http.ApiProducer;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
 import org.glassfish.grizzly.PortRange;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-public class GrizzlyTest extends BindingTest {
+import io.swagger.models.Info;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
+
+public class GrizzlyTest {
 
     private HttpServer server;
 
-    @Override
-    protected void createServer() {
+    @BeforeMethod
+    public void setUp() {
         server = HttpServer.createSimpleServer(null, new PortRange(6000, 7000));
     }
 
-    @Override
-    protected void stopServer() throws Exception {
+    @AfterMethod
+    public void tearDown() {
         server.shutdownNow();
     }
 
-    @Override
-    protected int startServer() throws Exception {
-        server.start();
-        return server.getListeners().iterator().next().getPort();
-    }
-
-    @Override
-    protected void addApplication(HttpApplication application) throws Exception {
+    @Test
+    public void testHttpApplicationLifecycle() throws IOException, HttpApplicationException {
+        final DescribedHttpApplication application = mock(DescribedHttpApplication.class);
         server.getServerConfiguration().addHttpHandler(newGrizzlyHttpHandler(application));
+        verify(application).getBufferFactory();
+        verifyNoMoreInteractions(application);
+
+        server.start();
+        verify(application).start();
+        verify(application).getApiProducer();
+        verifyNoMoreInteractions(application);
+
+        server.shutdownNow();
+        verify(application).stop();
+        verifyNoMoreInteractions(application);
     }
 
+    @Test
+    public void testAnswerWith500IfHttpApplicationFailedToStart() throws Exception {
+        final HttpApplication application = mock(HttpApplication.class);
+        server.getServerConfiguration().addHttpHandler(newGrizzlyHttpHandler(application));
+
+        when(application.start()).thenThrow(new HttpApplicationException("Unable to start the HttpApplication"));
+        server.start();
+
+        try (final HttpClientHandler handler = new HttpClientHandler()) {
+            final Client client = new Client(handler);
+            final Request request = new Request()
+                    .setMethod("GET")
+                    .setUri(format("http://localhost:%d/test", server.getListeners().iterator().next().getPort()));
+            final Response response = client.send(request).get();
+            assertThat(response.getStatus()).isEqualTo(Status.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Test
+    public void testRequest() throws Exception {
+        server.getServerConfiguration().addHttpHandler(newGrizzlyHttpHandler(new TestHandler(), null));
+        server.start();
+
+        try (final HttpClientHandler handler = new HttpClientHandler()) {
+            final Client client = new Client(handler);
+            final Request request = new Request()
+                    .setMethod("POST")
+                    .setUri(format("http://localhost:%d/test", server.getListeners().iterator().next().getPort()));
+            request.getHeaders().add("X-WhateverHeader", "Whatever Value");
+            request.getEntity().setString("Hello");
+
+            final Response response = client.send(request).get();
+            assertThat(response.getEntity().toString()).isEqualTo("HELLO");
+            assertThat(response.getHeaders().get("X-WhateverHeader").getFirstValue()).isEqualTo("Whatever Value");
+        }
+    }
+
+    @Test
+    public void testRequestApi() throws Exception {
+        server.getServerConfiguration().addHttpHandler(newGrizzlyHttpHandler(new TestHandler(), null,
+                new SwaggerApiProducer(new Info(), "", "", asList(HTTP, HTTPS))));
+        server.start();
+
+        try (final HttpClientHandler handler = new HttpClientHandler()) {
+            final Client client = new Client(handler);
+            final Request request = new Request()
+                    .setMethod("GET")
+                    .setUri(format("http://localhost:%d/test?_api", server.getListeners().iterator().next().getPort()));
+            request.getHeaders().add("X-WhateverHeader", "Whatever Value");
+
+            final Response response = client.send(request).get();
+            assertThat(json(response.getEntity().getJson())).isObject()
+                    .hasArray("paths/test/post/produces").containsOnly("text/plain");
+        }
+    }
+
+    @Test
+    public void testSession() throws Exception {
+        server.getServerConfiguration().addHttpHandler(newGrizzlyHttpHandler(new TestSessionHandler(), null));
+        server.start();
+
+        try (final HttpClientHandler handler = new HttpClientHandler()) {
+            final Client client = new Client(handler);
+            final Request populate = new Request()
+                .setMethod("POST")
+                .setUri(format("http://localhost:%d/populate", server.getListeners().iterator().next().getPort()));
+
+            Response response = client.send(populate).get();
+            assertThat(response.getStatus()).isEqualTo(Status.OK);
+            final List<Cookie> sessionCookie = response.getHeaders().get(SetCookieHeader.class).getCookies();
+
+            final Request check = new Request()
+                    .setMethod("POST")
+                    .setUri(format("http://localhost:%d/check", server.getListeners().iterator().next().getPort()));
+            check.getHeaders().put(new CookieHeader(sessionCookie));
+
+            response = client.send(check).get();
+            assertThat(response.getEntity().toString()).isEqualTo("OK");
+        }
+    }
+
+    private final class TestHandler implements Handler, Describable<Swagger, Request> {
+        @Override
+        public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
+            final int httpServerPort = server.getListeners().iterator().next().getPort();
+            final SoftAssertions softly = new SoftAssertions();
+            try {
+                softly.assertThat(request.getMethod()).isEqualTo("POST");
+                softly.assertThat(request.getUri().getPath()).isEqualTo("/test");
+                softly.assertThat(request.getEntity().toString()).isEqualTo("Hello");
+                softly.assertThat(request.getHeaders().get("X-WhateverHeader").getFirstValue())
+                    .isEqualTo("Whatever Value");
+                softly.assertThat(context.asContext(UriRouterContext.class)).isNotNull();
+                softly.assertThat(context.asContext(UriRouterContext.class).getMatchedUri()).isEmpty();
+                softly.assertThat(context.asContext(UriRouterContext.class).getOriginalUri().toString())
+                    .isEqualTo(format("http://localhost:%d/test", httpServerPort));
+                softly.assertThat(context.asContext(SessionContext.class)).isNotNull();
+                softly.assertThat(context.asContext(SessionContext.class).getSession()).isNotNull();
+                softly.assertThat(context.asContext(org.forgerock.services.context.ClientContext.class)).isNotNull();
+                softly.assertThat(context.asContext(org.forgerock.services.context.ClientContext.class).getLocalPort())
+                    .isEqualTo(httpServerPort);
+                softly.assertAll();
+
+                final Response response = new Response(Status.OK);
+                response.getHeaders().addAll(request.getHeaders().asMapOfHeaders());
+                response.setEntity(request.getEntity().toString().toUpperCase());
+                return Response.newResponsePromise(response);
+            } catch (SoftAssertionError e) {
+                return Response
+                        .newResponsePromise(new Response(Status.INTERNAL_SERVER_ERROR)
+                                .setEntity(e.getMessage()).setCause(new Exception(e)));
+            }
+        }
+
+        @Override
+        public Swagger api(ApiProducer<Swagger> context) {
+            return null;
+        }
+
+        @Override
+        public Swagger handleApiRequest(Context context, Request request) {
+            return new Swagger().path("test", new Path().post(new Operation().produces("text/plain")));
+        }
+
+        @Override
+        public void addDescriptorListener(Describable.Listener listener) {
+
+        }
+
+        @Override
+        public void removeDescriptorListener(Describable.Listener listener) {
+
+        }
+    }
+
+    private final class TestSessionHandler implements Handler {
+        @Override
+        public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
+            final Session session = context.asContext(SessionContext.class).getSession();
+            try {
+                if (request.getUri().toASCIIString().endsWith("/populate")) {
+                    assertThat(session.isEmpty()).isTrue();
+                    assertThat(session.size()).isEqualTo(0);
+                    assertThat(session.containsKey("sessionKey")).isFalse();
+                    assertThat(session.containsValue("sessionValue")).isFalse();
+                    assertThat(session.put("sessionKey", "sessionValue")).isNull();
+                } else if (request.getUri().toASCIIString().endsWith("/check")) {
+                    assertThat(session.get("sessionKey")).isEqualTo("sessionValue");
+                    assertThat(session.isEmpty()).isFalse();
+                    assertThat(session.size()).isEqualTo(1);
+                    assertThat(session.containsKey("sessionKey")).isTrue();
+                    assertThat(session.containsValue("sessionValue")).isTrue();
+                } else {
+                    fail("Unsupported URI: " + request.getUri().toString());
+                }
+
+                final Response response = new Response(Status.OK);
+                response.setEntity("OK");
+                return Response.newResponsePromise(response);
+            } catch (AssertionError e) {
+                return Response
+                        .newResponsePromise(new Response(Status.INTERNAL_SERVER_ERROR)
+                                .setEntity(e.getMessage()).setCause(new Exception(e)));
+            }
+        }
+    }
 }

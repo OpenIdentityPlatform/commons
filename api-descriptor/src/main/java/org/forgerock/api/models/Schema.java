@@ -16,61 +16,43 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.util.ValidationUtil.*;
 import static org.forgerock.api.jackson.JacksonUtils.*;
 import static org.forgerock.json.JsonValue.*;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
+import org.forgerock.api.jackson.JacksonUtils;
 import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import org.forgerock.api.ApiValidationException;
-import org.forgerock.api.jackson.JacksonUtils;
 
 /**
  * Class that represents the Schema type in API descriptor.
  */
-public final class Schema {
+public abstract class Schema {
 
-    @JsonProperty("$ref")
-    private final Reference reference;
-    private final JsonValue schema;
-
-    /**
-     * Private contstructor of the Schema.
-     *
-     * @param builder Builder.
-     */
-    private Schema(Builder builder) {
-        this.reference = builder.reference;
-        this.schema = builder.schema;
-
-        if (!isSingleNonNull(schema, reference)) {
-            throw new ApiValidationException("reference or a schema required, but not both");
-        }
+    private Schema() {
+        // This class only has two private inner sub-classes, so constructor is private.
     }
 
     /**
      * Getter for reference. May be null if the schema is specified here.
      * @return The reference.
      */
-    public Reference getReference() {
-        return reference;
-    }
+    public abstract Reference getReference();
 
     /**
      * Obtain the schema definition if it is not a reference.
      * @return The schema.
      */
-    public JsonValue getSchema() {
-        return schema;
-    }
+    public abstract JsonValue getSchema();
 
     @Override
     public boolean equals(Object o) {
@@ -82,20 +64,18 @@ public final class Schema {
         }
 
         Schema schema1 = (Schema) o;
-
-        return reference != null
-                ? reference.equals(schema1.reference)
-                : schema1.reference == null
-                && (schema != null && schema1.schema != null
-                ? schema.getObject().equals(schema1.schema.getObject())
-                : schema1.schema == schema);
-
+        JsonValue jsonSchema = getSchema();
+        JsonValue jsonSchema2 = schema1.getSchema();
+        return Objects.equals(getReference(), schema1.getReference())
+                && jsonSchema != null && jsonSchema2 != null
+                        ? Objects.equals(jsonSchema.getObject(), jsonSchema2.getObject())
+                        : jsonSchema == jsonSchema2;
     }
 
     @Override
     public int hashCode() {
-        int result = reference != null ? reference.hashCode() : 0;
-        result = 31 * result + (schema != null ? schema.getObject().hashCode() : 0);
+        int result = getReference() != null ? getReference().hashCode() : 0;
+        result = 31 * result + (getSchema() != null ? getSchema().getObject().hashCode() : 0);
         return result;
     }
 
@@ -223,7 +203,49 @@ public final class Schema {
          * @return Schema instance.
          */
         public Schema build() {
-            return new Schema(this);
+            return reference == null ? new SchemaSchema(schema) : new ReferenceSchema(reference);
+        }
+    }
+
+    private static final class ReferenceSchema extends Schema {
+
+        private final Reference reference;
+
+        private ReferenceSchema(Reference reference) {
+            this.reference = reference;
+        }
+
+        @Override
+        @JsonProperty("$ref")
+        public Reference getReference() {
+            return reference;
+        }
+
+        @Override
+        @JsonIgnore
+        public JsonValue getSchema() {
+            return null;
+        }
+    }
+
+    private static final class SchemaSchema extends Schema {
+
+        private final JsonValue schema;
+
+        private SchemaSchema(JsonValue schema) {
+            this.schema = schema;
+        }
+
+        @Override
+        @JsonIgnore
+        public Reference getReference() {
+            return null;
+        }
+
+        @Override
+        @com.fasterxml.jackson.annotation.JsonValue
+        public JsonValue getSchema() {
+            return schema;
         }
     }
 

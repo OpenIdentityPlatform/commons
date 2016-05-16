@@ -42,6 +42,7 @@
         <servlet-api.version>3.0.1</servlet-api.version>
         <slf4j.version>1.7.12</slf4j.version>
         <testng.version>6.9.4</testng.version>
+        <swagger-models.version>1.5.8</swagger-models.version>
     </properties>
 
     <repositories>
@@ -537,6 +538,17 @@
                 <version>${servlet-api.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${swagger-models.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.swagger</groupId>
+                        <artifactId>swagger-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>

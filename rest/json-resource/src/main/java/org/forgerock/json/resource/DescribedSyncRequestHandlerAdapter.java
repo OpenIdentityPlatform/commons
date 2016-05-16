@@ -17,7 +17,7 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.api.models.ApiDescription;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 
@@ -39,8 +39,8 @@ public class DescribedSyncRequestHandlerAdapter extends SynchronousRequestHandle
     }
 
     @Override
-    public ApiDescription api(ApiContext<ApiDescription> apiContext) {
-        return described.api(apiContext);
+    public ApiDescription api(ApiProducer<ApiDescription> producer) {
+        return described.api(producer);
     }
 
     @Override

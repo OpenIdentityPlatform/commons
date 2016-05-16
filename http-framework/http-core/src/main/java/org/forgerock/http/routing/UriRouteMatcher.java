@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.IncomparableRouteMatchException;
 import org.forgerock.services.routing.RouteMatch;
@@ -162,8 +162,8 @@ class UriRouteMatcher extends RouteMatcher<List<String>> {
     }
 
     @Override
-    public <T> T transformApi(T descriptor, ApiContext<T> context) {
-        return context.withPath(descriptor, context.getApiId(), uriTemplate);
+    public <D> D transformApi(D descriptor, ApiProducer<D> producer) {
+        return descriptor != null ? producer.withPath(descriptor, uriTemplate) : null;
     }
 
     @Override

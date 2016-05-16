@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
-import org.forgerock.api.CrestApiContext;
+import org.forgerock.api.CrestApiProducer;
 import org.forgerock.api.annotations.Action;
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Delete;
@@ -755,7 +755,7 @@ public final class ResourcesTest {
         Router router = (Router) Resources.newHandler(thingsProvider);
 
         // When
-        ApiDescription api = router.api(new CrestApiContext(new RootContext(), "frapi:test", "1.0"));
+        ApiDescription api = router.api(new CrestApiProducer("frapi:test", "1.0"));
 
         // Then
         assertThat(api.getPaths().getNames()).containsOnly("things");

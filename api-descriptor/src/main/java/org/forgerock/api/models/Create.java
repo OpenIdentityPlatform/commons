@@ -20,6 +20,7 @@ import static org.forgerock.api.enums.CreateMode.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.enums.CreateMode;
@@ -63,6 +64,27 @@ public final class Create extends Operation {
      */
     public boolean isSingleton() {
         return singleton;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        Create create = (Create) o;
+        return singleton == create.singleton
+                && mode == create.mode;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), mode, singleton);
     }
 
     /**

@@ -40,10 +40,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.filter.TransactionIdInboundFilter;
+import org.forgerock.http.handler.DescribableHandler;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
@@ -51,18 +53,23 @@ import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.session.Session;
 import org.forgerock.http.session.SessionContext;
+import org.forgerock.http.swagger.SwaggerUtils;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.http.util.Uris;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RequestAuditContext;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.promise.RuntimeExceptionHandler;
+
+import io.swagger.models.Swagger;
 
 /**
  * <p>
@@ -100,8 +107,9 @@ public final class HttpFrameworkServlet extends HttpServlet {
     private ServletVersionAdapter adapter;
     private HttpApplication application;
     private Factory<Buffer> storage;
-    private Handler handler;
+    private DescribableHandler handler;
     private ServletRoutingBase routingBase;
+    private boolean apiDescribed = false;
 
     /**
      * Default constructor for use via web.xml declaration.
@@ -120,6 +128,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void init() throws ServletException {
         adapter = getAdapter(getServletContext());
         routingBase = selectRoutingBase(getServletConfig());
@@ -133,10 +142,16 @@ public final class HttpFrameworkServlet extends HttpServlet {
             storage = newTemporaryStorage(tmpDir);
         }
         try {
-            handler = chainOf(application.start(), new TransactionIdInboundFilter());
+            Handler handler = application.start();
+            this.handler = chainOf(handler, new TransactionIdInboundFilter());
+            if (application instanceof DescribedHttpApplication) {
+                ApiProducer<Swagger> apiProducer = ((DescribedHttpApplication) application).getApiProducer();
+                apiDescribed = true;
+                this.handler.api(apiProducer);
+            }
         } catch (HttpApplicationException e) {
             LOGGER.error("Error while starting the application.", e);
-            handler = internalServerErrorHandler(e);
+            handler = asDescribableHandler(internalServerErrorHandler(e));
         }
     }
 
@@ -219,6 +234,11 @@ public final class HttpFrameworkServlet extends HttpServlet {
 
         Context context = createClientContext(attributesContext, req);
 
+        if (apiDescribed && SwaggerUtils.isApiRequest(request)) {
+            writeApi(resp, request, context);
+            return;
+        }
+
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
         try {
@@ -258,6 +278,13 @@ public final class HttpFrameworkServlet extends HttpServlet {
         } catch (InterruptedException e) {
             throw new ServletException("Awaiting asynchronous request was interrupted.", e);
         }
+    }
+
+    private void writeApi(HttpServletResponse resp, Request request, Context context) {
+        Describable<Swagger, Request> handler =
+                (Describable<Swagger, Request>) this.handler;
+        Response chfResponse = SwaggerUtils.request(handler, request, context);
+        writeResponse(chfResponse, resp, context.asContext(SessionContext.class));
     }
 
     private Request createRequest(HttpServletRequest req) throws IOException, URISyntaxException {

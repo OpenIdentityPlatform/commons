@@ -58,7 +58,7 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
  */
 @RequestHandler(
         id = "users:1.0",
-        title = "Users version 1.0",
+        title = "Users",
         description = "This example version 1.0 user service represents a Users resource with CQ operations "
                 + "on the users collection and CRUDPA operations available for the user item. "
                 + "Action is to reset the password. "

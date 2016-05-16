@@ -16,26 +16,26 @@
 
 package org.forgerock.services.descriptor;
 
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 
 /**
  * A routing component (a CHF {@link org.forgerock.http.Handler} or CREST {@code RequestHandler}) can describe its API
  * by implementing this interface.
- * @param <T> The type of API Descriptor object that will be the result of the description. For example, for CREST this
+ * @param <D> The type of API Descriptor object that will be the result of the description. For example, for CREST this
  *           would be the {@code ApiDescription} class from the api-descriptor module.
  * @param <R> The type of request that will be presented to get API descriptions.
  */
-public interface Describable<T, R> {
+public interface Describable<D, R> {
     /**
      * Provide the API description for the component. This method should perform the heavy-lifting of computing the
      * API descriptor, and should be expected to be called rarely. Upstream handlers should call this method in order to
      * compose all of their downstream API Descriptors into a single descriptor.
      *
-     * @param context The API context that provides information about the
+     * @param producer The API producer that provides general information to be built into the descriptor.
      * @return The description object.
      */
-    T api(ApiContext<T> context);
+    D api(ApiProducer<D> producer);
 
     /**
      * Handle a request for the API Descriptor. This method should not do any computation, but should return the
@@ -46,7 +46,7 @@ public interface Describable<T, R> {
      * @throws IllegalStateException When the request cannot be routed to an acceptable handler.
      * @throws UnsupportedOperationException When there is no API Descriptor available for the request.
      */
-    T handleApiRequest(Context context, R request);
+    D handleApiRequest(Context context, R request);
 
     /**
      * Add a listener for API Descriptor changes. The described object should call all the listeners.

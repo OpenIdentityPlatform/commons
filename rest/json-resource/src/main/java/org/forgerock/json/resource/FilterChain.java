@@ -23,7 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
@@ -125,7 +125,7 @@ public final class FilterChain implements RequestHandler, Describable<ApiDescrip
         }
 
         @Override
-        public ApiDescription api(ApiContext<ApiDescription> context) {
+        public ApiDescription api(ApiProducer<ApiDescription> producer) {
             throw new UnsupportedOperationException("API resolution should skip filters");
         }
 
@@ -268,9 +268,9 @@ public final class FilterChain implements RequestHandler, Describable<ApiDescrip
 
     @SuppressWarnings("unchecked")
     @Override
-    public ApiDescription api(ApiContext<ApiDescription> context) {
+    public ApiDescription api(ApiProducer<ApiDescription> producer) {
         return target instanceof Describable
-                ? ((Describable<ApiDescription, Request>) target).api(context)
+                ? ((Describable<ApiDescription, Request>) target).api(producer)
                 : null;
     }
 
@@ -278,7 +278,8 @@ public final class FilterChain implements RequestHandler, Describable<ApiDescrip
     @Override
     public ApiDescription handleApiRequest(Context context, Request request) {
         if (target instanceof Describable) {
-            return ((Describable<ApiDescription, Request>) target).handleApiRequest(context, request);
+            return ((Describable<ApiDescription, Request>) target)
+                    .handleApiRequest(context, request);
         }
         throw new UnsupportedOperationException();
     }

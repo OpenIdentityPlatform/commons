@@ -24,6 +24,7 @@
   <artifactId>json-resource-examples</artifactId>
   <name>JSON Resource examples</name>
   <description>Examples showing how to develop client applications and resource providers</description>
+  <packaging>war</packaging>
   <dependencies>
       <dependency>
           <groupId>org.forgerock.http</groupId>

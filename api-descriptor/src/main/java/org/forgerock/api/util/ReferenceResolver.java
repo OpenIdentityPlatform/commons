@@ -17,7 +17,6 @@
 package org.forgerock.api.util;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.forgerock.api.models.ApiDescription;
@@ -74,7 +73,7 @@ public class ReferenceResolver {
      *
      * @param apiDescriptions List of  {@link ApiDescription}s to register, which have not previously been registered
      */
-    public void registerAll(final List<ApiDescription> apiDescriptions) {
+    public void registerAll(final ApiDescription... apiDescriptions) {
         for (final ApiDescription item : apiDescriptions) {
             register(item);
         }

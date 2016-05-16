@@ -39,7 +39,6 @@
 
     <properties>
         <rhino.version>1.7.7.1</rhino.version>
-        <swagger-models.version>1.5.8</swagger-models.version>
     </properties>
 
     <build>
@@ -79,13 +78,6 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-models</artifactId>
-            <version>${swagger-models.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.swagger</groupId>
-                    <artifactId>swagger-annotations</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- test -->

@@ -17,13 +17,12 @@
 package org.forgerock.api.models;
 
 import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.util.Reject.*;
 
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import org.forgerock.util.Reject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -128,10 +127,10 @@ public final class Errors {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");
             }
-            if (errors.containsKey(name)) {
+            if (errors.containsKey(name) && !errors.get(name).equals(apiError)) {
                 throw new IllegalStateException("name not unique");
             }
-            errors.put(name, Reject.checkNotNull(apiError));
+            errors.put(name, checkNotNull(apiError));
             return this;
         }
 

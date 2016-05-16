@@ -18,6 +18,8 @@ package org.forgerock.api.models;
 
 import static org.forgerock.api.util.ValidationUtil.*;
 
+import java.util.Objects;
+
 import org.forgerock.api.ApiValidationException;
 
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -48,6 +50,23 @@ public final class Reference {
     @JsonValue
     public String getValue() {
         return value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Reference reference = (Reference) o;
+        return Objects.equals(value, reference.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 
     /**

@@ -17,13 +17,14 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.api.models.ApiDescription;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 
-final class InternalConnection extends AbstractAsynchronousConnection implements Describable<ApiDescription, Request> {
+final class InternalConnection extends AbstractAsynchronousConnection
+        implements Describable<ApiDescription, Request> {
     private final RequestHandler requestHandler;
 
     InternalConnection(final RequestHandler handler) {
@@ -112,9 +113,9 @@ final class InternalConnection extends AbstractAsynchronousConnection implements
 
     @Override
     @SuppressWarnings("unchecked")
-    public ApiDescription api(ApiContext<ApiDescription> apiContext) {
+    public ApiDescription api(ApiProducer<ApiDescription> producer) {
         return requestHandler instanceof Describable
-                ? ((Describable<ApiDescription, Request>) requestHandler).api(apiContext)
+                ? ((Describable<ApiDescription, Request>) requestHandler).api(producer)
                 : null;
     }
 
@@ -122,7 +123,8 @@ final class InternalConnection extends AbstractAsynchronousConnection implements
     @SuppressWarnings("unchecked")
     public ApiDescription handleApiRequest(Context context, Request request) {
         if (requestHandler instanceof Describable) {
-            return ((Describable<ApiDescription, Request>) requestHandler).handleApiRequest(context, request);
+            return ((Describable<ApiDescription, Request>) requestHandler)
+                    .handleApiRequest(context, request);
         }
         throw new UnsupportedOperationException();
     }

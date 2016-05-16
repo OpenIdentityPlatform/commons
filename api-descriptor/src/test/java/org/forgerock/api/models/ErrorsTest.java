@@ -17,31 +17,35 @@
 package org.forgerock.api.models;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.forgerock.api.models.ApiError.*;
 
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ErrorsTest {
 
-    private ApiError internalServerApiError;
+    private static final ApiError INTERNAL_SERVER_ERROR = apiError().code(500).description("Internal Service Error")
+            .build();
 
-    @BeforeClass
-    public void beforeClass() {
-        internalServerApiError = ApiError.apiError().code(500).description("Internal Service Error").build();
-    }
+    private static final ApiError OTHER_EQUAL_ERROR = apiError().code(500).description("Internal Service Error")
+            .build();
+
+    private static final ApiError OTHER_NON_EQUAL_ERROR = apiError().code(501).description("Not Supported Error")
+            .build();
 
     @DataProvider(name = "putValidationData")
     public Object[][] putValidationData() {
         return new Object[][]{
                 {null, null, Exception.class},
-                {null, internalServerApiError, IllegalArgumentException.class},
-                {"", internalServerApiError, IllegalArgumentException.class},
-                {"\t", internalServerApiError, IllegalArgumentException.class},
-                {"contains space", internalServerApiError, IllegalArgumentException.class},
+                {null, INTERNAL_SERVER_ERROR, IllegalArgumentException.class},
+                {"", INTERNAL_SERVER_ERROR, IllegalArgumentException.class},
+                {"\t", INTERNAL_SERVER_ERROR, IllegalArgumentException.class},
+                {"contains space", INTERNAL_SERVER_ERROR, IllegalArgumentException.class},
                 {"uniqueName", null, NullPointerException.class},
-                {"notUniqueName", internalServerApiError, IllegalStateException.class},
-                {"uniqueName", internalServerApiError, null},
+                {"notUniqueName", INTERNAL_SERVER_ERROR, null},
+                {"notUniqueName", OTHER_EQUAL_ERROR, null},
+                {"notUniqueName", OTHER_NON_EQUAL_ERROR, IllegalStateException.class},
+                {"uniqueName", INTERNAL_SERVER_ERROR, null},
         };
     }
 
@@ -51,7 +55,7 @@ public class ErrorsTest {
         final Errors.Builder builder = Errors.errors();
 
         // add an apiError, so that we can test for name-uniqueness (apiError values do NOT need to be unique)
-        builder.put("notUniqueName", internalServerApiError);
+        builder.put("notUniqueName", INTERNAL_SERVER_ERROR);
 
         final Errors errors;
         try {
@@ -60,16 +64,17 @@ public class ErrorsTest {
         } catch (final Exception e) {
             if (expectedException != null) {
                 assertThat(e).isInstanceOf(expectedException);
+                return;
             }
-            return;
+            throw e;
         }
 
         if (expectedException != null) {
             failBecauseExceptionWasNotThrown(expectedException);
         }
 
-        assertThat(errors.get("uniqueName")).isNotNull();
-        assertThat(errors.getNames()).contains("uniqueName", "notUniqueName");
+        assertThat(errors.get(name)).isNotNull();
+        assertThat(errors.getNames()).contains(name, "notUniqueName");
         assertThat(errors.getErrors()).isNotEmpty();
     }
 

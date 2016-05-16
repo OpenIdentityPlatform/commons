@@ -18,6 +18,9 @@ package org.forgerock.api.models;
 
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.enums.PatchOperation;
 
@@ -49,6 +52,26 @@ public final class Patch extends Operation {
      */
     public PatchOperation[] getOperations() {
         return operations;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        Patch patch = (Patch) o;
+        return Arrays.equals(operations, patch.operations);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), operations);
     }
 
     /**

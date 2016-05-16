@@ -19,6 +19,8 @@ package org.forgerock.api.models;
 import static org.forgerock.api.util.ValidationUtil.*;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Objects;
 
 import org.forgerock.guava.common.base.Strings;
 
@@ -115,12 +117,38 @@ public final class Query extends Operation implements Comparable<Query> {
         return supportedSortKeys;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        Query query = (Query) o;
+        return type == query.type
+                && Arrays.equals(pagingMode, query.pagingMode)
+                && Arrays.equals(countPolicies, query.countPolicies)
+                && Objects.equals(queryId, query.queryId)
+                && Arrays.equals(queryableFields, query.queryableFields)
+                && Arrays.equals(supportedSortKeys, query.supportedSortKeys);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), type, pagingMode, countPolicies, queryId, queryableFields,
+                supportedSortKeys);
+    }
+
     /**
      * Creates a new builder for Query.
      *
      * @return New builder instance
      */
-    public static final Builder query() {
+    public static Builder query() {
         return new Builder();
     }
 

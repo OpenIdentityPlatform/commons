@@ -18,6 +18,9 @@ package org.forgerock.api.models;
 
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.enums.ParameterSource;
@@ -138,6 +141,30 @@ public final class Parameter {
     @JsonProperty("options/enum_titles")
     public String[] getEnumTitles() {
         return enumTitles;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Parameter parameter = (Parameter) o;
+        return required == parameter.required
+                && Objects.equals(name, parameter.name)
+                && Objects.equals(type, parameter.type)
+                && Objects.equals(defaultValue, parameter.defaultValue)
+                && Objects.equals(description, parameter.description)
+                && source == parameter.source
+                && Arrays.equals(enumValues, parameter.enumValues)
+                && Arrays.equals(enumTitles, parameter.enumTitles);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, type, defaultValue, description, source, required, enumValues, enumTitles);
     }
 
     /**

@@ -28,7 +28,7 @@ import org.forgerock.json.resource.descriptor.examples.provider.version1.UserCol
  */
 @RequestHandler(
         id = "users:2.0",
-        title = "Users version 2.0",
+        title = "Users",
         description = "Users example service version 2.0 has the same features as the 1.0 but the subresource "
                 + "is pointing to the devices service version 2.0",
         resourceSchema = @Schema(fromType = User.class),

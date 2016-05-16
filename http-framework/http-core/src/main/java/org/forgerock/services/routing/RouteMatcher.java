@@ -16,7 +16,7 @@
 
 package org.forgerock.services.routing;
 
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 
 /**
@@ -66,9 +66,9 @@ public abstract class RouteMatcher<R> {
     /**
      * Transform the API Descriptor as appropriate for the parent router's view of the child routes.
      * @param descriptor The descriptor to be mutated.
-     * @param context The API Descriptor context.
-     * @param <T> The type of descriptor object.
+     * @param producer The API Descriptor producer.
+     * @param <D> The type of descriptor object.
      * @return The new descriptor object.
      */
-    public abstract <T> T transformApi(T descriptor, ApiContext<T> context);
+    public abstract <D> D transformApi(D descriptor, ApiProducer<D> producer);
 }

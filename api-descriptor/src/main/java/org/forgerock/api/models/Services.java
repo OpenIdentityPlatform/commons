@@ -16,16 +16,15 @@
 
 package org.forgerock.api.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
-import org.forgerock.util.Reject;
+import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.util.Reject.*;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import static org.forgerock.api.util.ValidationUtil.containsWhitespace;
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Class that represents API descriptor's Service {@link Resource} definitions.
@@ -112,11 +111,11 @@ public final class Services {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");
             }
-            if (services.containsKey(name)) {
+            if (services.containsKey(name) && !services.get(name).equals(resource)) {
                 throw new IllegalStateException("name not unique");
             }
 
-            services.put(name, Reject.checkNotNull(resource));
+            services.put(name, checkNotNull(resource));
             return this;
         }
 

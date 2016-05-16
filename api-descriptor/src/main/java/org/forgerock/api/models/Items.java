@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -158,6 +159,33 @@ public final class Items {
      */
     public Parameter[] getParameters() {
         return parameters;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Items items = (Items) o;
+        return Objects.equals(title, items.title)
+                && Objects.equals(description, items.description)
+                && Objects.equals(create, items.create)
+                && Objects.equals(read, items.read)
+                && Objects.equals(update, items.update)
+                && Objects.equals(delete, items.delete)
+                && Objects.equals(patch, items.patch)
+                && Arrays.equals(actions, items.actions)
+//                && Arrays.equals(subresources, items.subresources)
+                && Arrays.equals(parameters, items.parameters);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(title, description, create, read, update, delete, patch, actions, parameters);
+//      return Objects.hash(title, description, create, read, update, delete, patch, actions, parameters, subresources);
     }
 
     /**

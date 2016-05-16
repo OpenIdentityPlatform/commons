@@ -18,30 +18,30 @@ package org.forgerock.api.models;
 
 import static org.assertj.core.api.Assertions.*;
 
-import org.testng.annotations.BeforeClass;
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class DefinitionsTest {
 
-    private Schema objectSchema;
+    private static final Schema OBJECT_SCHEMA = Schema.schema().type(Object.class).build();
+    private static final Schema OTHER_EQUAL_SCHEMA = Schema.schema().type(Object.class).build();
+    private static final Schema OTHER_NON_EQUAL_SCHEMA = Schema.schema().type(JsonValue.class).build();
 
-    @BeforeClass
-    public void beforeClass() {
-        objectSchema = Schema.schema().type(Object.class).build();
-    }
 
     @DataProvider(name = "putValidationData")
     public Object[][] putValidationData() {
         return new Object[][]{
                 {null, null, Exception.class},
-                {null, objectSchema, IllegalArgumentException.class},
-                {"", objectSchema, IllegalArgumentException.class},
-                {"\t", objectSchema, IllegalArgumentException.class},
-                {"contains space", objectSchema, IllegalArgumentException.class},
+                {null, OBJECT_SCHEMA, IllegalArgumentException.class},
+                {"", OBJECT_SCHEMA, IllegalArgumentException.class},
+                {"\t", OBJECT_SCHEMA, IllegalArgumentException.class},
+                {"contains space", OBJECT_SCHEMA, IllegalArgumentException.class},
                 {"uniqueName", null, NullPointerException.class},
-                {"notUniqueName", objectSchema, IllegalStateException.class},
-                {"uniqueName", objectSchema, null},
+                {"notUniqueName", OBJECT_SCHEMA, null},
+                {"notUniqueName", OTHER_EQUAL_SCHEMA, null},
+                {"notUniqueName", OTHER_NON_EQUAL_SCHEMA, IllegalStateException.class},
+                {"uniqueName", OBJECT_SCHEMA, null},
         };
     }
 
@@ -50,7 +50,7 @@ public class DefinitionsTest {
         final Definitions.Builder builder = Definitions.definitions();
 
         // add an entry, so that we can test for name-uniqueness
-        builder.put("notUniqueName", objectSchema);
+        builder.put("notUniqueName", OBJECT_SCHEMA);
 
         final Definitions definitions;
         try {
@@ -59,16 +59,17 @@ public class DefinitionsTest {
         } catch (final Exception e) {
             if (expectedException != null) {
                 assertThat(e).isInstanceOf(expectedException);
+                return;
             }
-            return;
+            throw e;
         }
 
         if (expectedException != null) {
             failBecauseExceptionWasNotThrown(expectedException);
         }
 
-        assertThat(definitions.get("uniqueName")).isNotNull();
-        assertThat(definitions.getNames()).contains("uniqueName", "notUniqueName");
+        assertThat(definitions.get(name)).isNotNull();
+        assertThat(definitions.getNames()).contains(name, "notUniqueName");
         assertThat(definitions.getDefinitions()).isNotEmpty();
     }
 

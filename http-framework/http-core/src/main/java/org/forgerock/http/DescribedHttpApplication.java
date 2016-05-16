@@ -11,26 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.http.examples;
+package org.forgerock.http;
 
-import org.forgerock.http.Handler;
-import org.forgerock.json.resource.MemoryBackend;
-import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.http.CrestHttp;
+import io.swagger.models.Swagger;
 
 /**
- * Default in-memory {@link Handler}.
+ * An {@link HttpApplication} that produces OpenAPI API Descriptors.
  */
-final class MemoryBackendHandler {
-
-    private MemoryBackendHandler() {
-    }
-
-    static Handler getHandler() {
-        return CrestHttp.newHttpHandler(Resources.newInternalConnectionFactory(
-                Resources.newCollection(new MemoryBackend())));
-    }
+public interface DescribedHttpApplication extends HttpApplication {
+    /**
+     * Provides the OpenAPI descriptor producer with which to produce the API.
+     * @return Non-null producer.
+     */
+    ApiProducer<Swagger> getApiProducer();
 }

@@ -23,7 +23,8 @@ import static org.forgerock.util.Reject.*;
 
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Resource;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.guava.common.base.Optional;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 
@@ -39,7 +40,7 @@ final class DescribableResourceHandler implements Describable<ApiDescription, Re
 
     private final ApiDescription definitionDescriptions;
     private ApiDescription api;
-    private Resource resource;
+    private Optional<Resource> resource;
 
     DescribableResourceHandler() {
         // This ApiDescription can have a dummy ID and version because we are never going to expose it - it is used to
@@ -55,22 +56,19 @@ final class DescribableResourceHandler implements Describable<ApiDescription, Re
 
     void describes(Resource resource) {
         rejectStateIfTrue(this.resource != null, "Already described API");
-        if (resource != null) {
-            this.resource = resource;
-        }
+        this.resource = Optional.fromNullable(resource);
     }
 
     @Override
-    public final ApiDescription api(ApiContext<ApiDescription> apiContext) {
+    public final ApiDescription api(ApiProducer<ApiDescription> producer) {
         rejectStateIfTrue(resource == null, "Not yet described API");
-        if (api == null) {
-            api = ApiDescription.apiDescription()
+        if (api == null && resource.isPresent()) {
+            api = producer.addApiInfo(ApiDescription.apiDescription().id("fake:id").version("0.0")
                     .definitions(definitionDescriptions.getDefinitions())
                     .errors(definitionDescriptions.getErrors())
-                    .id(apiContext.getApiId())
-                    .version(apiContext.getApiVersion())
-                    .paths(paths().put("", versionedPath().put(UNVERSIONED, resource).build()).build())
-                    .build();
+                    .services(definitionDescriptions.getServices())
+                    .paths(paths().put("", versionedPath().put(UNVERSIONED, resource.get()).build()).build())
+                    .build());
         }
         return api;
     }

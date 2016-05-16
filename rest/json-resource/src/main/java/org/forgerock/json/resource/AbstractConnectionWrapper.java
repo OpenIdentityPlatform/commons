@@ -19,7 +19,7 @@ package org.forgerock.json.resource;
 import java.util.Collection;
 
 import org.forgerock.api.models.ApiDescription;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
@@ -231,9 +231,9 @@ public abstract class AbstractConnectionWrapper<C extends Connection>
 
     @Override
     @SuppressWarnings("unchecked")
-    public ApiDescription api(ApiContext<ApiDescription> apiContext) {
+    public ApiDescription api(ApiProducer<ApiDescription> producer) {
         if (connection instanceof Describable) {
-            return ((Describable<ApiDescription, Request>) connection).api(apiContext);
+            return ((Describable<ApiDescription, Request>) connection).api(producer);
         }
         return null;
     }
@@ -242,7 +242,8 @@ public abstract class AbstractConnectionWrapper<C extends Connection>
     @SuppressWarnings("unchecked")
     public ApiDescription handleApiRequest(Context context, Request request) {
         if (connection instanceof Describable) {
-            return ((Describable<ApiDescription, Request>) connection).handleApiRequest(context, request);
+            return ((Describable<ApiDescription, Request>) connection)
+                    .handleApiRequest(context, request);
         }
         throw new UnsupportedOperationException();
     }

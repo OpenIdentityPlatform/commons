@@ -18,6 +18,7 @@ package org.forgerock.json.resource.http;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.api.models.ApiDescription.*;
+import static org.forgerock.json.resource.Applications.simpleCrestApplication;
 import static org.forgerock.util.promise.Promises.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.*;
@@ -49,7 +50,7 @@ public class HttpAdapterTest {
     @BeforeMethod
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        adapter = new HttpAdapter(new ConnectionFactory() {
+        adapter = new HttpAdapter(simpleCrestApplication(new ConnectionFactory() {
             @Override
             public void close() {
 
@@ -64,7 +65,7 @@ public class HttpAdapterTest {
             public Promise<Connection, ResourceException> getConnectionAsync() {
                 return newResultPromise((Connection) connection);
             }
-        });
+        }, "frapi:test", "1.0"), null);
     }
 
     @Test

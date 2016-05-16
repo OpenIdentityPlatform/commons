@@ -19,16 +19,19 @@ package org.forgerock.api.models;
 import static org.forgerock.api.util.ValidationUtil.*;
 
 import java.util.Comparator;
+import java.util.Objects;
 
 import org.forgerock.guava.common.base.Strings;
 
 import org.forgerock.api.ApiValidationException;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Class that represents the ApiError type in API descriptor.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class ApiError {
 
     /**
@@ -62,7 +65,7 @@ public final class ApiError {
      *
      * @return Code
      */
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 
@@ -101,28 +104,16 @@ public final class ApiError {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         ApiError apiError = (ApiError) o;
-
-        if (code != null ? !code.equals(apiError.code) : apiError.code != null) {
-            return false;
-        }
-        if (description != null ? !description.equals(apiError.description) : apiError.description != null) {
-            return false;
-        }
-        if (schema != null ? !schema.equals(apiError.schema) : apiError.schema != null) {
-            return false;
-        }
-        return reference != null ? reference.equals(apiError.reference) : apiError.reference == null;
-
+        return Objects.equals(code, apiError.code)
+                && Objects.equals(description, apiError.description)
+                && Objects.equals(schema, apiError.schema)
+                && Objects.equals(reference, apiError.reference);
     }
 
     @Override
     public int hashCode() {
-        int result = code != null ? code.hashCode() : 0;
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (reference != null ? reference.hashCode() : 0);
-        return result;
+        return Objects.hash(code, description, schema, reference);
     }
 
     /**
@@ -238,6 +229,14 @@ public final class ApiError {
     private static class ErrorComparator implements Comparator<ApiError> {
         @Override
         public int compare(final ApiError o1, final ApiError o2) {
+            if (o1.getReference() != null) {
+                return o2.getReference() != null
+                        ? o1.getReference().getValue().compareTo(o2.getReference().getValue())
+                        : 1;
+            }
+            if (o2.getReference() != null) {
+                return -1;
+            }
             final int codeCompare = o1.code.compareTo(o2.code);
             if (codeCompare == 0) {
                 return o1.description.compareTo(o2.description);

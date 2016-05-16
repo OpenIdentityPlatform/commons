@@ -22,7 +22,7 @@ import org.forgerock.http.Filter;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.util.Paths;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.RouteMatch;
 import org.forgerock.services.routing.RouteMatcher;
@@ -151,8 +151,8 @@ public final class RouteMatchers {
         }
 
         @Override
-        public <T> T transformApi(T descriptor, ApiContext<T> context) {
-            return delegate.transformApi(descriptor, context);
+        public <T> T transformApi(T descriptor, ApiProducer<T> producer) {
+            return delegate.transformApi(descriptor, producer);
         }
 
         @Override
@@ -249,8 +249,8 @@ public final class RouteMatchers {
         }
 
         @Override
-        public <T> T transformApi(T descriptor, ApiContext<T> context) {
-            return delegate.transformApi(descriptor, context);
+        public <T> T transformApi(T descriptor, ApiProducer<T> producer) {
+            return delegate.transformApi(descriptor, producer);
         }
 
         @Override

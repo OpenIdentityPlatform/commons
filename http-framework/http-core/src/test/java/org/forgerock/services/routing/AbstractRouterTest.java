@@ -33,9 +33,8 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.routing.RouteMatchers;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.routing.Version;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -80,8 +79,8 @@ public class AbstractRouterTest {
 
         request = new Request();
         MockitoAnnotations.initMocks(this);
-        when(routeOneMatcher.transformApi(any(), any(ApiContext.class))).thenAnswer(transformApiAnswer);
-        when(routeTwoMatcher.transformApi(any(), any(ApiContext.class))).thenAnswer(transformApiAnswer);
+        when(routeOneMatcher.transformApi(any(), any(ApiProducer.class))).thenAnswer(transformApiAnswer);
+        when(routeTwoMatcher.transformApi(any(), any(ApiProducer.class))).thenAnswer(transformApiAnswer);
     }
 
     @Test
@@ -380,15 +379,15 @@ public class AbstractRouterTest {
         // Given
         router.addRoute(routeOneMatcher, routeOneHandler);
         router.addRoute(routeTwoMatcher, routeTwoHandler);
-        given(routeOneHandler.api(any(ApiContext.class))).willReturn("one");
-        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
+        given(routeOneHandler.api(any(ApiProducer.class))).willReturn("one");
+        given(routeTwoHandler.api(any(ApiProducer.class))).willReturn("two");
 
         // When
-        String api = router.api(new StringApiContext());
+        String api = router.api(new StringApiProducer());
 
         // Then
-        verify(routeOneHandler).api(any(ApiContext.class));
-        verify(routeTwoHandler).api(any(ApiContext.class));
+        verify(routeOneHandler).api(any(ApiProducer.class));
+        verify(routeTwoHandler).api(any(ApiProducer.class));
         assertThat(api).isEqualTo("[one, two]");
     }
 
@@ -398,13 +397,13 @@ public class AbstractRouterTest {
         // Given
         router.addRoute(routeOneMatcher, new TestAbstractRouter().setDefaultRoute(routeOneHandler));
         router.addRoute(routeTwoMatcher, routeTwoHandler);
-        given(routeOneHandler.api(any(ApiContext.class))).willReturn("one");
-        given(routeOneHandler.handleApiRequest(context, request)).willReturn("one");
-        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
-        router.api(new StringApiContext());
+        given(routeOneHandler.api(any(ApiProducer.class))).willReturn("one");
+        given(routeOneHandler.handleApiRequest(any(Context.class), eq(request))).willReturn("one");
+        given(routeTwoHandler.api(any(ApiProducer.class))).willReturn("two");
+        router.api(new StringApiProducer());
 
-        given(routeOneMatcher.evaluate(context, request)).willReturn(routeOneRouteMatch);
-        given(routeTwoMatcher.evaluate(context, request)).willReturn(routeTwoRouteMatch);
+        given(routeOneMatcher.evaluate(any(Context.class), eq(request))).willReturn(routeOneRouteMatch);
+        given(routeTwoMatcher.evaluate(any(Context.class), eq(request))).willReturn(routeTwoRouteMatch);
 
         setupRouteMatch(routeOneRouteMatch, routeTwoRouteMatch, true);
         setupRouteMatch(routeTwoRouteMatch, routeOneRouteMatch, false);
@@ -422,9 +421,9 @@ public class AbstractRouterTest {
         // Given
         router.addRoute(routeOneMatcher, new TestAbstractRouter().setDefaultRoute(routeOneHandler));
         router.addRoute(routeTwoMatcher, routeTwoHandler);
-        given(routeOneHandler.api(any(ApiContext.class))).willReturn("one");
-        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
-        router.api(new StringApiContext());
+        given(routeOneHandler.api(any(ApiProducer.class))).willReturn("one");
+        given(routeTwoHandler.api(any(ApiProducer.class))).willReturn("two");
+        router.api(new StringApiProducer());
 
         given(routeOneMatcher.evaluate(context, request)).willReturn(null);
         given(routeTwoMatcher.evaluate(context, request)).willReturn(null);
@@ -442,11 +441,11 @@ public class AbstractRouterTest {
         // Given
         router.addRoute(routeOneMatcher, new TestAbstractRouter().setDefaultRoute(routeOneHandler));
         router.setDefaultRoute(routeTwoHandler);
-        given(routeOneHandler.api(any(ApiContext.class))).willReturn("one");
+        given(routeOneHandler.api(any(ApiProducer.class))).willReturn("one");
         given(routeOneHandler.handleApiRequest(context, request)).willReturn("one");
-        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
+        given(routeTwoHandler.api(any(ApiProducer.class))).willReturn("two");
         given(routeTwoHandler.handleApiRequest(context, request)).willReturn("two");
-        router.api(new StringApiContext());
+        router.api(new StringApiProducer());
 
         given(routeOneMatcher.evaluate(context, request)).willReturn(null);
 
@@ -463,8 +462,8 @@ public class AbstractRouterTest {
         // Given
         router.addRoute(routeOneMatcher, mock(Handler.class));
         router.addRoute(routeTwoMatcher, routeTwoHandler);
-        given(routeTwoHandler.api(any(ApiContext.class))).willReturn("two");
-        router.api(new StringApiContext());
+        given(routeTwoHandler.api(any(ApiProducer.class))).willReturn("two");
+        router.api(new StringApiProducer());
 
         given(routeOneMatcher.evaluate(context, request)).willReturn(routeOneRouteMatch);
         given(routeTwoMatcher.evaluate(context, request)).willReturn(routeTwoRouteMatch);
@@ -501,7 +500,8 @@ public class AbstractRouterTest {
         }
     }
 
-    private static final class TestAbstractRouter extends AbstractRouter<TestAbstractRouter, Request, Handler, String>
+    private static final class TestAbstractRouter
+            extends AbstractRouter<TestAbstractRouter, Request, Handler, String>
             implements Handler {
 
         protected TestAbstractRouter() {
@@ -538,31 +538,32 @@ public class AbstractRouterTest {
 
     }
 
-    private class StringApiContext extends ApiContext<String> {
-
-        public StringApiContext() {
-            super(new RootContext(), "", "");
-        }
+    private class StringApiProducer implements ApiProducer<String> {
 
         @Override
-        public String withPath(String descriptor, String apiId, String path) {
+        public String withPath(String descriptor, String path) {
             return descriptor;
         }
 
         @Override
-        public String withVersion(String descriptor, String apiId, Version version) {
+        public String withVersion(String descriptor, Version version) {
             return descriptor;
         }
 
         @Override
-        public String merge(String apiId, List<String> descriptors) {
+        public String merge(List<String> descriptors) {
             Collections.sort(descriptors);
             return descriptors.toString();
         }
 
         @Override
-        public ApiContext<String> newChildContext(String idFragment) {
-            return new StringApiContext();
+        public String addApiInfo(String descriptor) {
+            return descriptor;
+        }
+
+        @Override
+        public ApiProducer<String> newChildProducer(String idFragment) {
+            return new StringApiProducer();
         }
     }
 }

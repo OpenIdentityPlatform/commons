@@ -17,6 +17,8 @@ package org.forgerock.http.grizzly;
 
 import static org.forgerock.http.Applications.simpleHttpApplication;
 
+import org.forgerock.http.ApiProducer;
+import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
@@ -24,6 +26,8 @@ import org.forgerock.http.io.Buffer;
 import org.forgerock.util.Factory;
 import org.glassfish.grizzly.http.server.HttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
+
+import io.swagger.models.Swagger;
 
 /**
  * Provides the Grizzly HTTP library support to the common HTTP Framework.
@@ -48,7 +52,8 @@ public final class GrizzlySupport {
 
     /**
      * Create a new Grizzly {@link HttpHandler} from the given common HTTP Framework {@link Handler}. All the operations
-     * performed on the Grizzly {@link HttpHandler} will be forwarded to the common HTTP Framework {@link Handler}
+     * performed on the Grizzly {@link HttpHandler} will be forwarded to the common HTTP Framework {@link Handler}. No
+     * API Description will be exposed.
      *
      * @param handler
      *            The {@link HttpHandler} to wrap.
@@ -59,5 +64,56 @@ public final class GrizzlySupport {
      */
     public static HttpHandler newGrizzlyHttpHandler(Handler handler, Factory<Buffer> storage) {
         return new HandlerAdapter(simpleHttpApplication(handler, storage));
+    }
+
+    /**
+     * Create a new Grizzly {@link HttpHandler} from the given common HTTP Framework {@link Handler}. All the operations
+     * performed on the Grizzly {@link HttpHandler} will be forwarded to the common HTTP Framework {@link Handler}.
+     *
+     * @param handler
+     *            The {@link HttpHandler} to wrap.
+     * @param storage
+     *            The {@link Factory} that will create temporary storage {@link Buffer}s to handle the processing of
+     *            requests. If {@code null}, a default buffer factory will be used.
+     * @param apiProducer
+     *            The {@link ApiProducer} to use to expose an OpenAPI API Description.
+     * @return A Grizzly {@link HttpHandler} ready to be added to an {@link HttpServer}
+     */
+    public static HttpHandler newGrizzlyHttpHandler(Handler handler, Factory<Buffer> storage,
+            ApiProducer<Swagger> apiProducer) {
+        return new HandlerAdapter(new SimpleHttpApplication(handler, storage, apiProducer));
+    }
+
+    private static final class SimpleHttpApplication implements DescribedHttpApplication {
+
+        private final Handler handler;
+        private final Factory<Buffer> storage;
+        private final ApiProducer<Swagger> apiContext;
+
+        SimpleHttpApplication(Handler handler, Factory<Buffer> storage, ApiProducer<Swagger> apiContext) {
+            this.handler = handler;
+            this.storage = storage;
+            this.apiContext = apiContext;
+        }
+
+        @Override
+        public Handler start() throws HttpApplicationException {
+            return handler;
+        }
+
+        @Override
+        public Factory<Buffer> getBufferFactory() {
+            return storage;
+        }
+
+        @Override
+        public void stop() {
+            // Nothing to do
+        }
+
+        @Override
+        public ApiProducer<Swagger> getApiProducer() {
+            return apiContext;
+        }
     }
 }

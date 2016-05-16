@@ -41,7 +41,7 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
  */
 @RequestHandler(
         id = "devices:2.0",
-        title = "User devices version 2.0",
+        title = "User devices",
         description = "Devices 1.0 example service has the CQ operations on the collection and CRUDPA operations "
                 + "on the items where the Action is to mark the device as stolen. This service is the subresource "
                 + "of the Users v1.0 items.",
@@ -49,7 +49,7 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
         mvccSupported = true,
         variant = HandlerVariant.COLLECTION_RESOURCE,
         parameters = {
-                @Parameter(name = "uid",
+                @Parameter(name = "userId",
                         type = "string",
                         description = "The uid of the User record, the parent of the device")
         })

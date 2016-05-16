@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.forgerock.http.routing.RoutingMode;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Pair;
@@ -54,7 +54,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
     private final RouteMatcher<R> thisRouterUriMatcher = uriMatcher(RoutingMode.EQUALS, "");
     private List<Describable.Listener> apiListeners = new CopyOnWriteArrayList<>();
     private volatile H defaultRoute;
-    private ApiContext<D> apiContext;
+    private ApiProducer<D> apiProducer;
     private D api;
 
     /**
@@ -241,9 +241,9 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
     }
 
     @Override
-    public synchronized D api(ApiContext<D> context) {
-        if (apiContext == null) {
-            this.apiContext = context;
+    public synchronized D api(ApiProducer<D> producer) {
+        if (apiProducer == null) {
+            this.apiProducer = producer;
             updateApi();
         }
         return this.api;
@@ -251,7 +251,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
 
     @SuppressWarnings("unchecked")
     private void updateApi() {
-        if (apiContext == null) {
+        if (apiProducer == null) {
             return;
         }
         List<D> descriptors = new ArrayList<>(routes.size());
@@ -259,16 +259,14 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
             H handler = route.getValue();
             if (handler instanceof Describable) {
                 RouteMatcher<R> matcher = route.getKey();
-                D descriptor = ((Describable<D, R>) handler).api(apiContext.newChildContext(matcher.idFragment()));
-                descriptors.add(matcher.transformApi(descriptor, apiContext));
+                D descriptor = ((Describable<D, R>) handler).api(apiProducer.newChildProducer(matcher.idFragment()));
+                descriptors.add(matcher.transformApi(descriptor, apiProducer));
             }
         }
         if (defaultRoute instanceof Describable) {
-            RouteMatcher<R> matcher =  uriMatcher(RoutingMode.STARTS_WITH, "*");
-            D descriptor = ((Describable<D, R>) defaultRoute).api(apiContext.newChildContext(matcher.idFragment()));
-            descriptors.add(matcher.transformApi(descriptor, apiContext));
+            descriptors.add(((Describable<D, R>) defaultRoute).api(apiProducer));
         }
-        this.api = descriptors.isEmpty() ? null : apiContext.merge(apiContext.getApiId(), descriptors);
+        this.api = descriptors.isEmpty() ? null : apiProducer.merge(descriptors);
     }
 
     /**
@@ -283,13 +281,16 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
     @SuppressWarnings("unchecked")
     public D handleApiRequest(Context context, R request) {
         try {
+            Context nextContext = context;
             Pair<Context, H> bestRoute = getBestRoute(context, request);
             H handler = bestRoute == null ? null : bestRoute.getSecond();
             if (handler == null) {
                 handler = defaultRoute;
+            } else {
+                nextContext = bestRoute.getFirst();
             }
             if (handler instanceof Describable) {
-                return ((Describable<D, R>) handler).handleApiRequest(context, request);
+                return ((Describable<D, R>) handler).handleApiRequest(nextContext, request);
             }
         } catch (IncomparableRouteMatchException e) {
             throw new IllegalStateException(e);

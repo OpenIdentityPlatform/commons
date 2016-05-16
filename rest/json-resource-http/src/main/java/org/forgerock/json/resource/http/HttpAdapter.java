@@ -16,6 +16,8 @@
 
 package org.forgerock.json.resource.http;
 
+import static org.forgerock.http.HttpApplication.*;
+import static org.forgerock.json.resource.Applications.*;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.http.HttpUtils.*;
 import static org.forgerock.util.Reject.*;
@@ -25,8 +27,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.forgerock.api.CrestApiProducer;
 import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.transform.OpenApiTransformer;
+import org.forgerock.guava.common.base.Optional;
 import org.forgerock.http.Handler;
 import org.forgerock.http.header.AcceptLanguageHeader;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -35,6 +41,7 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
+import org.forgerock.http.swagger.SwaggerUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
@@ -44,6 +51,7 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.CrestApplication;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
@@ -57,12 +65,16 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.http.ApiProducer;
+import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.i18n.PreferredLocales;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+
+import io.swagger.models.Swagger;
 
 /**
  * HTTP adapter from HTTP calls to JSON resource calls. This class can be
@@ -96,10 +108,16 @@ import org.forgerock.util.promise.Promise;
  * {@link CrestHttp} class contained within this package to build HTTP
  * Handlers since it provides support for these HTTP methods.
  */
-final class HttpAdapter implements Handler {
+final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.http.protocol.Request>,
+        Describable.Listener {
 
     private final ConnectionFactory connectionFactory;
     private final HttpContextFactory contextFactory;
+    private final String apiId;
+    private final String apiVersion;
+    private Swagger descriptor;
+    private final List<Describable.Listener> apiListeners = new CopyOnWriteArrayList<>();
+    private ApiProducer<Swagger> apiProducer;
 
     /**
      * Creates a new HTTP adapter with the provided connection factory and a
@@ -107,7 +125,9 @@ final class HttpAdapter implements Handler {
      *
      * @param connectionFactory
      *            The connection factory.
+     * @deprecated Use {@link CrestHttp#newHttpHandler(CrestApplication)} instead.
      */
+    @Deprecated
     public HttpAdapter(ConnectionFactory connectionFactory) {
         this(connectionFactory, (HttpContextFactory) null);
     }
@@ -121,14 +141,12 @@ final class HttpAdapter implements Handler {
      * @param parentContext
      *            The parent request context which should be used as the parent
      *            context of each request context.
+     * @deprecated Use {@link CrestHttp#newHttpHandler(CrestApplication, Context)} instead.
      */
+    @SuppressWarnings("deprecation")
+    @Deprecated
     public HttpAdapter(ConnectionFactory connectionFactory, final Context parentContext) {
-        this(connectionFactory, new HttpContextFactory() {
-            @Override
-            public Context createContext(Context parent, org.forgerock.http.protocol.Request request) {
-                return parentContext;
-            }
-        });
+        this(connectionFactory, staticContextFactory(parentContext));
     }
 
     /**
@@ -141,12 +159,42 @@ final class HttpAdapter implements Handler {
      *            The context factory which will be used to obtain the parent
      *            context of each request context, or {@code null} if the
      *            {@link SecurityContextFactory} should be used.
+     * @deprecated Use {@link #HttpAdapter(CrestApplication, HttpContextFactory)} instead
      */
     @SuppressWarnings("deprecation")
+    @Deprecated
     public HttpAdapter(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
+        this(simpleCrestApplication(connectionFactory, null, null), contextFactory);
+    }
+
+    /**
+     * Creates a new HTTP adapter with the provided connection factory and
+     * context factory.
+     *
+     * @param application
+     *            The CREST application.
+     * @param contextFactory
+     *            The context factory which will be used to obtain the parent
+     *            context of each request context, or {@code null} if the
+     *            {@link SecurityContextFactory} should be used.
+     */
+    @SuppressWarnings("deprecation")
+    public HttpAdapter(CrestApplication application, HttpContextFactory contextFactory) {
         this.contextFactory = contextFactory != null ? contextFactory : SecurityContextFactory
                 .getHttpServletContextFactory();
-        this.connectionFactory = checkNotNull(connectionFactory);
+        this.connectionFactory = checkNotNull(application.getConnectionFactory());
+        this.apiId = application.getApiId();
+        this.apiVersion = application.getApiVersion();
+
+        try {
+            Optional<Describable<ApiDescription, Request>> describable = getDescribableConnection();
+            if (describable.isPresent()) {
+                describable.get().addDescriptorListener(this);
+            }
+        } catch (ResourceException e) {
+            LOGGER.warn("Could not create connection", e);
+        }
+
     }
 
     /**
@@ -560,16 +608,31 @@ final class HttpAdapter implements Handler {
     private Promise<Response, NeverThrowsException> doApiRequest(Context context,
             final org.forgerock.http.protocol.Request req) {
         try {
-            Connection connection = connectionFactory.getConnection();
-            if (!(connection instanceof Describable)) {
+            Optional<Describable<ApiDescription, Request>> describable = getDescribableConnection();
+            if (!describable.isPresent()) {
                 throw new NotSupportedException();
             }
             Request request = newApiRequest(getResourcePath(context, req));
             context = prepareRequest(context, req, request);
-            ApiDescription api = ((Describable<ApiDescription, Request>) connection).handleApiRequest(context, request);
+            ApiDescription api = describable.get().handleApiRequest(context, request);
             return newResultPromise(new Response().setStatus(Status.OK).setEntity(api));
         } catch (Exception e) {
             return fail(req, e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Optional<Describable<ApiDescription, Request>> getDescribableConnection()
+            throws ResourceException {
+        if (apiId == null || apiVersion == null) {
+            LOGGER.warn("CREST API Descriptor API ID and Version are not set. Not describing.");
+            return Optional.absent();
+        }
+        Connection connection = connectionFactory.getConnection();
+        if (connection instanceof Describable) {
+            return Optional.of((Describable<ApiDescription, Request>) connection);
+        } else {
+            return Optional.absent();
         }
     }
 
@@ -691,4 +754,49 @@ final class HttpAdapter implements Handler {
         }
     }
 
+    @Override
+    public Swagger api(ApiProducer<Swagger> producer) {
+        this.apiProducer = producer;
+        updateDescriptor();
+        return descriptor;
+    }
+
+    private void updateDescriptor() {
+        try {
+            Optional<Describable<ApiDescription, Request>> describable = getDescribableConnection();
+            if (describable.isPresent()) {
+                ApiDescription api = describable.get().api(new CrestApiProducer(apiId, apiVersion));
+                if (api != null) {
+                    descriptor = apiProducer.addApiInfo(OpenApiTransformer.execute(api));
+                }
+            }
+        } catch (ResourceException e) {
+            throw new IllegalStateException("Cannot get connection", e);
+        }
+    }
+
+    @Override
+    public Swagger handleApiRequest(Context context, org.forgerock.http.protocol.Request request) {
+        return descriptor != null
+                ? SwaggerUtils.clone(descriptor).host(context.asContext(ClientContext.class).getLocalAddress())
+                : null;
+    }
+
+    @Override
+    public void addDescriptorListener(Listener listener) {
+        apiListeners.add(listener);
+    }
+
+    @Override
+    public void removeDescriptorListener(Listener listener) {
+        apiListeners.remove(listener);
+    }
+
+    @Override
+    public void notifyDescriptorChange() {
+        updateDescriptor();
+        for (Listener listener : apiListeners) {
+            listener.notifyDescriptorChange();
+        }
+    }
 }

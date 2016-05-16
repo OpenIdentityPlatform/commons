@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
@@ -20,6 +20,7 @@ import static org.forgerock.json.resource.http.HttpUtils.*;
 
 import java.net.URI;
 
+import org.forgerock.json.resource.CrestApplication;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
@@ -49,7 +50,10 @@ public final class CrestHttp {
      * @param connectionFactory
      *            The connection factory.
      * @return A CREST HTTP {@code Handler}.
+     * @deprecated Use {@link #newHttpHandler(CrestApplication)} instead.
      */
+    @Deprecated
+    @SuppressWarnings("deprecation")
     public static Handler newHttpHandler(ConnectionFactory connectionFactory) {
         Reject.ifNull(connectionFactory);
         return Handlers.chainOf(new HttpAdapter(connectionFactory), newOptionsFilter());
@@ -66,7 +70,10 @@ public final class CrestHttp {
      *            The parent request context which should be used as the parent
      *            context of each request context.
      * @return A HTTP Handler.
+     * @deprecated Use {@link #newHttpHandler(CrestApplication)} instead.
      */
+    @Deprecated
+    @SuppressWarnings("deprecation")
     public static Handler newHttpHandler(ConnectionFactory connectionFactory, Context parentContext) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(parentContext);
@@ -83,7 +90,10 @@ public final class CrestHttp {
      *            The context factory which will be used to obtain the parent
      *            context of each request context.
      * @return A HTTP Handler.
+     * @deprecated Use {@link #newHttpHandler(CrestApplication)} instead.
      */
+    @Deprecated
+    @SuppressWarnings("deprecation")
     public static Handler newHttpHandler(ConnectionFactory connectionFactory, HttpContextFactory contextFactory) {
         Reject.ifNull(connectionFactory);
         Reject.ifNull(contextFactory);
@@ -95,10 +105,48 @@ public final class CrestHttp {
      *
      * @param handler The {@link RequestHandler}.
      * @return A HTTP Handler.
+     * @deprecated Use {@link #newHttpHandler(CrestApplication)} instead.
      */
+    @Deprecated
+    @SuppressWarnings("deprecation")
     public static Handler newHttpHandler(RequestHandler handler) {
         Reject.ifNull(handler);
         return Handlers.chainOf(new HttpAdapter(Resources.newInternalConnectionFactory(handler)), newOptionsFilter());
+    }
+
+    /**
+     * Creates a new JSON resource HTTP handler with the provided CREST request handler.
+     *
+     * @param application The application.
+     * @return The handler
+     */
+    public static Handler newHttpHandler(CrestApplication application) {
+        Reject.ifNull(application);
+        return Handlers.chainOf(new HttpAdapter(application, null), newOptionsFilter());
+    }
+
+    /**
+     * Creates a new JSON resource HTTP handler with the provided CREST request handler.
+     *
+     * @param application The application.
+     * @param factory A factory for creating parent HTTP Contexts.
+     * @return The handler
+     */
+    public static Handler newHttpHandler(CrestApplication application, HttpContextFactory factory) {
+        Reject.ifNull(application);
+        return Handlers.chainOf(new HttpAdapter(application, factory), newOptionsFilter());
+    }
+
+    /**
+     * Creates a new JSON resource HTTP handler with the provided CREST request handler.
+     *
+     * @param application The application.
+     * @param context The parent context to use for all contexts.
+     * @return The handler
+     */
+    public static Handler newHttpHandler(CrestApplication application, Context context) {
+        Reject.ifNull(application);
+        return Handlers.chainOf(new HttpAdapter(application, staticContextFactory(context)), newOptionsFilter());
     }
 
     /**

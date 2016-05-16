@@ -35,7 +35,7 @@ import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Items;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.SubResources;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
@@ -200,8 +200,8 @@ public final class Resources {
         final DescribableResourceHandler descriptorProvider = new DescribableResourceHandler();
         Router router = new Router() {
             @Override
-            public ApiDescription api(ApiContext<ApiDescription> context) {
-                return descriptorProvider.api(context);
+            public ApiDescription api(ApiProducer<ApiDescription> producer) {
+                return descriptorProvider.api(producer);
             }
         };
         descriptorProvider.describes(addHandlers(provider, router, "", descriptorProvider.getDefinitionDescriptions()));

@@ -18,7 +18,7 @@ package org.forgerock.http.routing;
 
 import java.util.Objects;
 
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.IncomparableRouteMatchException;
 import org.forgerock.services.routing.RouteMatch;
@@ -127,8 +127,8 @@ class ResourceApiVersionRouteMatcher extends RouteMatcher<Version> {
     }
 
     @Override
-    public <T> T transformApi(T descriptor, ApiContext<T> context) {
-        return context.withVersion(descriptor, context.getApiId(), routeVersion);
+    public <T> T transformApi(T descriptor, ApiProducer<T> producer) {
+        return descriptor != null ? producer.withVersion(descriptor, routeVersion) : null;
     }
 
     @Override

@@ -20,6 +20,7 @@ import static org.forgerock.api.util.ValidationUtil.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.forgerock.util.Reject;
@@ -66,6 +67,23 @@ public final class SubResources {
     @JsonIgnore
     public Set<String> getNames() {
         return subResources.keySet();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SubResources that = (SubResources) o;
+        return Objects.equals(subResources, that.subResources);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(subResources);
     }
 
     /**

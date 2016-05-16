@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.http;
@@ -23,8 +23,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Configuration class to configure the {@code HttpApplication} instance.
- *
- * <p>The implementation of this class will be loaded using the {@link java.util.ServiceLoader} framework.</p>
+ * <p>
+ *     If the application should expose OpenAPI API Descriptors, the {@link DescribedHttpApplication} interface should
+ *     be used instead of this one.
+ * </p>
+ * <p>
+ *     The implementation of this class will be loaded using the {@link java.util.ServiceLoader} framework.
+ * </p>
  */
 public interface HttpApplication {
 
@@ -62,4 +67,5 @@ public interface HttpApplication {
      * resources.</p>
      */
     void stop();
+
 }

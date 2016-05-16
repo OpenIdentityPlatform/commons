@@ -61,6 +61,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -941,5 +942,14 @@ public final class HttpUtils {
         }
         byteArrayOutputStream.flush();
         return byteArrayOutputStream.toByteArray();
+    }
+
+    static HttpContextFactory staticContextFactory(final Context parentContext) {
+        return new HttpContextFactory() {
+            @Override
+            public Context createContext(Context parent, org.forgerock.http.protocol.Request request) {
+                return parentContext;
+            }
+        };
     }
 }

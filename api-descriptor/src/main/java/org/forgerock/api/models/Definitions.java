@@ -17,12 +17,11 @@
 package org.forgerock.api.models;
 
 import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.util.Reject.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import org.forgerock.util.Reject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -122,11 +121,11 @@ public final class Definitions {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");
             }
-            if (definitions.containsKey(name)) {
+            if (definitions.containsKey(name) && !definitions.get(name).equals(schema)) {
                 throw new IllegalStateException("name not unique");
             }
 
-            definitions.put(name, Reject.checkNotNull(schema));
+            definitions.put(name, checkNotNull(schema));
             return this;
         }
 

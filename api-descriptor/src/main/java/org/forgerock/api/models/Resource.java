@@ -24,6 +24,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -35,6 +36,7 @@ import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -45,6 +47,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *     be used, and if any of the other fields are used, a reference may not be provided.
  * </p>
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class Resource {
     private static final Logger LOGGER = LoggerFactory.getLogger(Resource.class);
     private static final String SERVICES_REFERENCE = "#/services/%s";
@@ -59,11 +62,14 @@ public final class Resource {
     private final Update update;
     private final Delete delete;
     private final Patch patch;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final Action[] actions;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final Query[] queries;
     private final SubResources subresources;
     private final Items items;
     private final Boolean mvccSupported;
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private final Parameter[] parameters;
 
     private Resource(Builder builder) {
@@ -213,7 +219,7 @@ public final class Resource {
      *
      * @return {@code true} if MVCC is supported and {@code false} otherwise
      */
-    public boolean isMvccSupported() {
+    public Boolean isMvccSupported() {
         return mvccSupported;
     }
 
@@ -224,6 +230,38 @@ public final class Resource {
      */
     public Parameter[] getParameters() {
         return parameters;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Resource resource = (Resource) o;
+        return Objects.equals(reference, resource.reference)
+                && Objects.equals(resourceSchema, resource.resourceSchema)
+                && Objects.equals(title, resource.title)
+                && Objects.equals(description, resource.description)
+                && Objects.equals(create, resource.create)
+                && Objects.equals(read, resource.read)
+                && Objects.equals(update, resource.update)
+                && Objects.equals(delete, resource.delete)
+                && Objects.equals(patch, resource.patch)
+                && Arrays.equals(actions, resource.actions)
+                && Arrays.equals(queries, resource.queries)
+                && Objects.equals(subresources, resource.subresources)
+                && Objects.equals(items, resource.items)
+                && Objects.equals(mvccSupported, resource.mvccSupported)
+                && Arrays.equals(parameters, resource.parameters);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(reference, resourceSchema, title, description, create, read, update, delete, patch, actions,
+                queries, subresources, items, mvccSupported, parameters);
     }
 
     /**
@@ -655,7 +693,8 @@ public final class Resource {
             checkState();
             this.built = true;
             if (create == null && read == null && update == null && delete == null && patch == null
-                    && actions.isEmpty() && queries.isEmpty() && reference == null) {
+                    && actions.isEmpty() && queries.isEmpty() && reference == null && items == null
+                    && subresources == null) {
                 return null;
             }
 

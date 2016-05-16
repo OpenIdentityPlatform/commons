@@ -20,6 +20,7 @@ import static org.forgerock.api.util.ValidationUtil.containsWhitespace;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 import org.forgerock.guava.common.base.Strings;
 
@@ -78,6 +79,29 @@ public final class Action extends Operation implements Comparable<Action> {
      */
     public Schema getResponse() {
         return response;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        Action action = (Action) o;
+        return super.equals(o)
+                && Objects.equals(name, action.name)
+                && Objects.equals(request, action.request)
+                && Objects.equals(response, action.response);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), name, request, response);
     }
 
     /**

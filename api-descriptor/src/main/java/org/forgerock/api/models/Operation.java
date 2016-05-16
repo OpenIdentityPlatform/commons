@@ -17,7 +17,9 @@
 package org.forgerock.api.models;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import org.forgerock.api.enums.Stability;
 
@@ -92,6 +94,27 @@ public abstract class Operation {
      */
     public Stability getStability() {
         return stability;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Operation operation = (Operation) o;
+        return Objects.equals(description, operation.description)
+                && Arrays.equals(supportedLocales, operation.supportedLocales)
+                && Arrays.equals(apiErrors, operation.apiErrors)
+                && Arrays.equals(parameters, operation.parameters)
+                && stability == operation.stability;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, supportedLocales, apiErrors, parameters, stability);
     }
 
     /**

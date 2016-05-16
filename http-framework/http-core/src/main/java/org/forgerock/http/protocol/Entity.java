@@ -68,7 +68,7 @@ public final class Entity implements Closeable {
      */
 
     /** The Content-Type used when setting the entity to JSON. */
-    static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=UTF-8";
+    public static final String APPLICATION_JSON_CHARSET_UTF_8 = "application/json; charset=UTF-8";
 
     /** Default content stream. */
     private static final BranchingInputStream EMPTY_STREAM = IO

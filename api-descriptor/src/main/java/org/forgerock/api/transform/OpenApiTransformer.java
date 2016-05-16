@@ -16,6 +16,54 @@
 
 package org.forgerock.api.transform;
 
+import static java.lang.Boolean.*;
+import static java.util.Collections.*;
+import static org.forgerock.api.markup.asciidoc.AsciiDoc.*;
+import static org.forgerock.api.util.PathUtil.*;
+import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.util.Reject.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
+import org.forgerock.api.enums.CountPolicy;
+import org.forgerock.api.enums.PagingMode;
+import org.forgerock.api.enums.ParameterSource;
+import org.forgerock.api.enums.PatchOperation;
+import org.forgerock.api.enums.QueryType;
+import org.forgerock.api.enums.Stability;
+import org.forgerock.api.markup.asciidoc.AsciiDoc;
+import org.forgerock.api.models.Action;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.ApiError;
+import org.forgerock.api.models.Create;
+import org.forgerock.api.models.Definitions;
+import org.forgerock.api.models.Delete;
+import org.forgerock.api.models.Parameter;
+import org.forgerock.api.models.Patch;
+import org.forgerock.api.models.Paths;
+import org.forgerock.api.models.Query;
+import org.forgerock.api.models.Read;
+import org.forgerock.api.models.Reference;
+import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.Schema;
+import org.forgerock.api.models.SubResources;
+import org.forgerock.api.models.Update;
+import org.forgerock.api.models.VersionedPath;
+import org.forgerock.api.util.ReferenceResolver;
+import org.forgerock.http.routing.Version;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.annotations.VisibleForTesting;
+
 import io.swagger.models.ArrayModel;
 import io.swagger.models.Info;
 import io.swagger.models.Model;
@@ -51,59 +99,6 @@ import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
 import io.swagger.models.properties.StringProperty;
 import io.swagger.models.properties.UUIDProperty;
-import org.forgerock.api.enums.CountPolicy;
-import org.forgerock.api.enums.PagingMode;
-import org.forgerock.api.enums.ParameterSource;
-import org.forgerock.api.enums.PatchOperation;
-import org.forgerock.api.enums.QueryType;
-import org.forgerock.api.enums.Stability;
-import org.forgerock.api.markup.asciidoc.AsciiDoc;
-import org.forgerock.api.models.Action;
-import org.forgerock.api.models.ApiDescription;
-import org.forgerock.api.models.ApiError;
-import org.forgerock.api.models.Create;
-import org.forgerock.api.models.Definitions;
-import org.forgerock.api.models.Delete;
-import org.forgerock.api.models.Parameter;
-import org.forgerock.api.models.Patch;
-import org.forgerock.api.models.Paths;
-import org.forgerock.api.models.Query;
-import org.forgerock.api.models.Read;
-import org.forgerock.api.models.Reference;
-import org.forgerock.api.models.Resource;
-import org.forgerock.api.models.Schema;
-import org.forgerock.api.models.SubResources;
-import org.forgerock.api.models.Update;
-import org.forgerock.api.models.VersionedPath;
-import org.forgerock.api.util.ReferenceResolver;
-import org.forgerock.http.routing.Version;
-import org.forgerock.json.JsonValue;
-import org.forgerock.util.annotations.VisibleForTesting;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-
-import static java.lang.Boolean.TRUE;
-import static java.util.Collections.unmodifiableList;
-import static org.forgerock.api.markup.asciidoc.AsciiDoc.normalizeName;
-import static org.forgerock.api.util.PathUtil.buildPath;
-import static org.forgerock.api.util.PathUtil.buildPathParameters;
-import static org.forgerock.api.util.PathUtil.mergeParameters;
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.fieldIfNotNull;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.util.Reject.checkNotNull;
 
 /**
  * Transforms an {@link ApiDescription} into an OpenAPI/Swagger model.
@@ -159,7 +154,7 @@ public class OpenApiTransformer {
      */
     @VisibleForTesting
     OpenApiTransformer(final String title, final String host, final String basePath, final boolean secure,
-            final ApiDescription apiDescription, final List<ApiDescription> externalApiDescriptions) {
+            final ApiDescription apiDescription, final ApiDescription... externalApiDescriptions) {
         this.apiDescription = checkNotNull(apiDescription, "apiDescription required");
 
         swagger = new Swagger()
@@ -190,8 +185,25 @@ public class OpenApiTransformer {
      * @return {@code Swagger} model
      */
     public static Swagger execute(final String title, final String host, final String basePath, final boolean secure,
-            final ApiDescription apiDescription, final List<ApiDescription> externalApiDescriptions) {
+            final ApiDescription apiDescription, final ApiDescription... externalApiDescriptions) {
         final OpenApiTransformer transformer = new OpenApiTransformer(title, host, basePath, secure, apiDescription,
+                externalApiDescriptions);
+        return transformer.doExecute();
+    }
+
+    /**
+     * Transforms an {@link ApiDescription} into a {@code Swagger} model.
+     * <p>
+     *     Note: The returned descriptor does not contain an {@code Info} object, a base path, a host or a scheme, as
+     *     these will all depend on the deployment and/or request.
+     * </p>
+     *
+     * @param apiDescription CREST API Descriptor
+     * @param externalApiDescriptions External CREST API Descriptions, for resolving {@link Reference}s, or {@code null}
+     * @return {@code Swagger} model
+     */
+    public static Swagger execute(ApiDescription apiDescription, ApiDescription... externalApiDescriptions) {
+        final OpenApiTransformer transformer = new OpenApiTransformer(null, null, null, false, apiDescription,
                 externalApiDescriptions);
         return transformer.doExecute();
     }
@@ -285,16 +297,24 @@ public class OpenApiTransformer {
                         versionName = version.toString();
                     }
 
-                    Resource resource = versionedPath.get(version);
-                    if (resource.getReference() != null) {
-                        resource = referenceResolver.getService(resource.getReference());
-                    }
+                    Resource resource = resolveResourceReference(versionedPath.get(version));
                     buildResourcePaths(resource, pathName, null, versionName, Collections.<Parameter>emptyList(),
                             pathMap);
                 }
             }
             swagger.setPaths(pathMap);
         }
+    }
+
+    private Resource resolveResourceReference(Resource resource) {
+        Reference resourceReference = resource.getReference();
+        if (resourceReference != null) {
+            resource = referenceResolver.getService(resourceReference);
+            if (resource == null) {
+                throw new TransformerException("Unresolvable reference: " + resourceReference.getValue());
+            }
+        }
+        return resource;
     }
 
     /**
@@ -411,10 +431,7 @@ public class OpenApiTransformer {
                         buildPathParameters(name));
 
                 final String subPathName = buildPath(pathName, name);
-                Resource subResource = subResources.get(name);
-                if (subResource.getReference() != null) {
-                    subResource = referenceResolver.getService(subResource.getReference());
-                }
+                Resource subResource = resolveResourceReference(subResources.get(name));
                 buildResourcePaths(subResource, subPathName, null, resourceVersion,
                         unmodifiableList(subresourcesParameters), pathMap);
             }
@@ -998,14 +1015,7 @@ public class OpenApiTransformer {
             // resolve error references before sorting
             final List<ApiError> resolvedErrors = new ArrayList<>(apiErrorResponses.length);
             for (final ApiError error : apiErrorResponses) {
-                if (error.getReference() != null) {
-                    final ApiError resolved = referenceResolver.getError(error.getReference());
-                    if (resolved != null && resolved.getReference() == null) {
-                        resolvedErrors.add(resolved);
-                    }
-                } else {
-                    resolvedErrors.add(error);
-                }
+                resolvedErrors.add(resolveErrorReference(error));
             }
             Collections.sort(resolvedErrors, ApiError.ERROR_COMPARATOR);
 
@@ -1090,6 +1100,16 @@ public class OpenApiTransformer {
         operation.setResponses(responses);
     }
 
+    private ApiError resolveErrorReference(ApiError apiError) {
+        if (apiError.getReference() != null) {
+            apiError = referenceResolver.getError(apiError.getReference());
+            if (apiError == null) {
+                throw new TransformerException("Error reference not found in global error definitions");
+            }
+        }
+        return apiError;
+    }
+
     /**
      * Builds a request-payload for a patch-operation.
      *
@@ -1132,7 +1152,7 @@ public class OpenApiTransformer {
     Info buildInfo(final String title) {
         // TODO set other Info fields
         final Info info = new Info();
-        info.setTitle(checkNotNull(title));
+        info.setTitle(title);
         info.setVersion(apiDescription.getVersion());
         info.description(apiDescription.getDescription());
         return info;

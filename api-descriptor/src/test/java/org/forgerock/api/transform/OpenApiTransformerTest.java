@@ -77,8 +77,7 @@ public class OpenApiTransformerTest {
     @Test
     public void testUserAndDevicesExample() throws Exception {
         final ApiDescription apiDescription = ApiTestUtil.createUserAndDeviceExampleApiDescription();
-        final Swagger swagger = OpenApiTransformer.execute("Users and Devices API", "localhost:8080", "/", false,
-                apiDescription, null);
+        final Swagger swagger = OpenApiTransformer.execute(apiDescription);
 
         assertThat(swagger.getTags()).containsOnly(
                 new Tag().name("User Service v1.0"),
@@ -124,8 +123,7 @@ public class OpenApiTransformerTest {
     @Test
     public void testTransformWithUnversionedPaths() throws Exception {
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(false);
-        final Swagger swagger = OpenApiTransformer.execute("My Title", "localhost:8080", "/", false, apiDescription,
-                null);
+        final Swagger swagger = OpenApiTransformer.execute(apiDescription);
 
         assertThat(swagger.getTags()).containsOnly(new Tag().name("Resource title"));
         assertThat(swagger.getPaths()).containsOnlyKeys(
@@ -143,8 +141,7 @@ public class OpenApiTransformerTest {
     @Test
     public void testTransformWithVersionedPaths() throws Exception {
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(true);
-        final Swagger swagger = OpenApiTransformer.execute("My Title", "localhost:8080", "/", false, apiDescription,
-                null);
+        final Swagger swagger = OpenApiTransformer.execute(apiDescription);
 
         // decorate Swagger object with application-specific features like auth headers, after this class completes
         final HeaderParameter usernameHeader = new HeaderParameter();
@@ -227,7 +224,7 @@ public class OpenApiTransformerTest {
                 .description("My Description")
                 .build();
         final OpenApiTransformer transformer = new OpenApiTransformer("Test", "localhost:8080", "/", false,
-                apiDescription, null);
+                apiDescription);
 
         final Info info = transformer.buildInfo("My Title");
 
@@ -249,7 +246,7 @@ public class OpenApiTransformerTest {
                 .definitions(definitions)
                 .build();
         final OpenApiTransformer transformer = new OpenApiTransformer("Test", "localhost:8080", "/", false,
-                apiDescription, null);
+                apiDescription);
 
         transformer.buildDefinitions();
 

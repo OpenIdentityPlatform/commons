@@ -142,8 +142,8 @@ public final class ApiDocGenerator {
      * @param inputDirPath Input directory or {@code null}
      * @param outputDirPath Root output directory or {@code null} for in-memory mode
      */
-    private ApiDocGenerator(final ApiDescription apiDescription, final List<ApiDescription> externalApiDescriptions,
-            final Path inputDirPath, final Path outputDirPath) {
+    private ApiDocGenerator(final ApiDescription apiDescription, final Path inputDirPath, final Path outputDirPath,
+            final ApiDescription... externalApiDescriptions) {
 
         pathTree = new HashMap<>();
         adocMap = new HashMap<>();
@@ -158,9 +158,7 @@ public final class ApiDocGenerator {
         }
 
         referenceResolver = new ReferenceResolver(apiDescription);
-        if (externalApiDescriptions != null) {
-            referenceResolver.registerAll(externalApiDescriptions);
-        }
+        referenceResolver.registerAll(externalApiDescriptions);
     }
 
     /**
@@ -173,10 +171,10 @@ public final class ApiDocGenerator {
      * @param outputDirPath Root output directory
      */
     public static void execute(final String title, final ApiDescription apiDescription,
-            final List<ApiDescription> externalApiDescriptions, final Path inputDirPath, final Path outputDirPath) {
+            final Path inputDirPath, final Path outputDirPath, final ApiDescription... externalApiDescriptions) {
 
-        final ApiDocGenerator thisInstance = new ApiDocGenerator(apiDescription, externalApiDescriptions,
-                inputDirPath, outputDirPath);
+        final ApiDocGenerator thisInstance = new ApiDocGenerator(apiDescription, inputDirPath, outputDirPath,
+                externalApiDescriptions);
         thisInstance.doExecute(title);
     }
 
@@ -190,10 +188,10 @@ public final class ApiDocGenerator {
      * @return Resulting AsciiDoc markup as a {@code String}
      */
     public static String execute(final String title, final ApiDescription apiDescription,
-            final List<ApiDescription> externalApiDescriptions, final Path inputDirPath) {
+            final Path inputDirPath, final ApiDescription... externalApiDescriptions) {
 
-        final ApiDocGenerator thisInstance = new ApiDocGenerator(apiDescription, externalApiDescriptions,
-                inputDirPath, null);
+        final ApiDocGenerator thisInstance = new ApiDocGenerator(apiDescription, inputDirPath, null,
+                externalApiDescriptions);
         final String rootFilename = thisInstance.doExecute(title);
         return thisInstance.toString(rootFilename);
     }

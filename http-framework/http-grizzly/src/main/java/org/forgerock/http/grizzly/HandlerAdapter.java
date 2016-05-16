@@ -28,19 +28,23 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.session.SessionContext;
+import org.forgerock.http.swagger.SwaggerUtils;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.http.util.Uris;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RequestAuditContext;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.promise.RuntimeExceptionHandler;
@@ -50,6 +54,8 @@ import org.glassfish.grizzly.http.server.Response;
 import org.glassfish.grizzly.http.server.util.Globals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.swagger.models.Swagger;
 
 /**
  * A Grizzly implementation which provides integration between the Grizzly API and the common HTTP Framework.
@@ -68,6 +74,7 @@ final class HandlerAdapter extends HttpHandler {
     private final HttpApplication httpApplication;
     private final Factory<Buffer> storage;
     private Handler chfHandler;
+    private Describable<Swagger, org.forgerock.http.protocol.Request> describedHandler;
 
     HandlerAdapter(HttpApplication httpApplication) {
         this.httpApplication = httpApplication;
@@ -78,10 +85,19 @@ final class HandlerAdapter extends HttpHandler {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void start() {
         super.start();
         try {
             chfHandler = httpApplication.start();
+            if (httpApplication instanceof DescribedHttpApplication) {
+                ApiProducer<Swagger> apiProducer = ((DescribedHttpApplication) httpApplication).getApiProducer();
+                if (apiProducer != null && chfHandler instanceof Describable) {
+                    describedHandler =
+                            (Describable<Swagger, org.forgerock.http.protocol.Request>) chfHandler;
+                    describedHandler.api(apiProducer);
+                }
+            }
         } catch (HttpApplicationException e) {
             LOGGER.error("Error while starting the application.", e);
             chfHandler = internalServerErrorHandler(e);
@@ -104,29 +120,38 @@ final class HandlerAdapter extends HttpHandler {
         final AttributesContext attributesContext = new AttributesContext(new RequestAuditContext(uriRouterContext));
         final ClientContext context = createClientContext(attributesContext, request);
 
-        response.suspend();
-        chfHandler.handle(context, chfRequest)
-            .thenOnResult(new ResultHandler<org.forgerock.http.protocol.Response>() {
-                @Override
-                public void handleResult(org.forgerock.http.protocol.Response chfResponse) {
-                    writeResponse(chfResponse, response, sessionContext);
-                }
-            })
-            .thenOnRuntimeException(new RuntimeExceptionHandler() {
-                @Override
-                public void handleRuntimeException(RuntimeException e) {
-                    LOGGER.error("RuntimeException caught", e);
-                    writeResponse(
-                            newInternalServerError(e),
-                            response, sessionContext);
-                }
-            })
-            .thenAlways(new Runnable() {
-                @Override
-                public void run() {
-                    response.resume();
-                }
-            });
+        if (describedHandler != null && SwaggerUtils.isApiRequest(chfRequest)) {
+            writeApi(response, chfRequest, context);
+        } else {
+            response.suspend();
+            chfHandler.handle(context, chfRequest)
+                    .thenOnResult(new ResultHandler<org.forgerock.http.protocol.Response>() {
+                        @Override
+                        public void handleResult(org.forgerock.http.protocol.Response chfResponse) {
+                            writeResponse(chfResponse, response, sessionContext);
+                        }
+                    })
+                    .thenOnRuntimeException(new RuntimeExceptionHandler() {
+                        @Override
+                        public void handleRuntimeException(RuntimeException e) {
+                            LOGGER.error("RuntimeException caught", e);
+                            writeResponse(
+                                    newInternalServerError(e),
+                                    response, sessionContext);
+                        }
+                    })
+                    .thenAlways(new Runnable() {
+                        @Override
+                        public void run() {
+                            response.resume();
+                        }
+                    });
+        }
+    }
+
+    private void writeApi(Response response, org.forgerock.http.protocol.Request chfRequest, Context context) {
+        org.forgerock.http.protocol.Response chfResponse = SwaggerUtils.request(describedHandler, chfRequest, context);
+        writeResponse(chfResponse, response, context.asContext(SessionContext.class));
     }
 
     private void writeResponse(final org.forgerock.http.protocol.Response chfResponse, final Response grizzlyResponse,

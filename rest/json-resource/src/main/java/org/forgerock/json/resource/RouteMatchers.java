@@ -25,7 +25,7 @@ import java.util.List;
 import org.forgerock.http.routing.ResourceApiVersionBehaviourManager;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.routing.Version;
-import org.forgerock.services.context.ApiContext;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.routing.RouteMatch;
 import org.forgerock.services.routing.RouteMatcher;
@@ -132,8 +132,8 @@ public final class RouteMatchers {
         }
 
         @Override
-        public <T> T transformApi(T t, ApiContext<T> apiContext) {
-            return delegate.transformApi(t, apiContext);
+        public <T> T transformApi(T t, ApiProducer<T> apiProducer) {
+            return delegate.transformApi(t, apiProducer);
         }
 
         @Override
@@ -183,8 +183,8 @@ public final class RouteMatchers {
         }
 
         @Override
-        public <T> T transformApi(T t, ApiContext<T> apiContext) {
-            return delegate.transformApi(t, apiContext);
+        public <T> T transformApi(T t, ApiProducer<T> apiProducer) {
+            return delegate.transformApi(t, apiProducer);
         }
 
         @Override
