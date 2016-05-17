@@ -106,7 +106,8 @@ public class MarkdownReader {
     }
 
     private String getKeyTransformed(String key) {
-        return (key.trim().equals(JSON_REF_KEY)) ? JSON_REF_SCHEMA_KEY : key.trim();
+        String keyNormalized = key.replace("`", "");
+        return (keyNormalized.trim().equals(JSON_REF_KEY)) ? JSON_REF_SCHEMA_KEY : keyNormalized.trim();
     }
 
     private static String toFullyQualifiedClassname(String className) {

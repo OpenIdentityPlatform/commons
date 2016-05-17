@@ -1,19 +1,32 @@
 # CREST API Descriptor
 
 [CREST](https://stash.forgerock.org/projects/COMMONS/repos/forgerock-rest) is ForgeRock's
-standard library for exposing RESTful web services from a product. This document describes
-the description options available for services that are implemented using CREST to describe
-themselves to clients such as static documentation generators, live documentation websites
-and other tooling.
+standard library for exposing RESTful web services.
+
+This document specifies an API descriptor that describes CREST APIs
+in a standard format that developers can read and tools can consume.
+API descriptors enable clients such as static documentation generators,
+live documentation websites, and other tooling.
+
+When consuming a CREST API descriptor,
+the fundamental assumption is that the consumer knows CREST.
+Therefore, an API descriptor specifies
+which CRUDPAQ operations a resource supports,
+whether a resource supports MVCC,
+whether a create operation calls for a server-assigned or client-assigned ID,
+and what patch operations can be used with a resource that supports patch.
+An API descriptor does not describe CREST itself, however,
+nor does it describe how CREST binds to a transport protocol such as HTTP.
 
 ## Status
 
-This document is a working draft, version `0.2`.
+This document is a working draft, version `0.2.1`.
 
 ### Revision History
 
 Version   | Description
 ---------:| -------------------
+0.2.1     | Clarify explanations.
 0.2       | Adds: ability to specify common resources in `services`, collection semantics using `items`, parent-child relations using `subresources`, complex read states, complex field validation policies, and binary field support.
 0.1       | Initial version.
 
@@ -30,31 +43,47 @@ In this document the following type names are used:
 * frURI - A ForgeRock API Descriptor URI. These start with the `frapi:` scheme, and are
  followed by colon-separated heirarchical component IDs to make a unique identifier. For
  example: `frapi:openam:identities`, which could be used in a JSON Reference:
- `frapi:openam:/:identities#/definitions/xyz`
+ `frapi:openam:/:identities#/definitions/user`
 
 ## Specification
 
-### ApiDescription (top level)
+### ApiDescription (Top-Level Object)
 
-At the top level, the API is described by providing a collection of schema definitions and
-a Paths object that describes what paths are available in the application. The top-level must contain at least one
-of _definitions_, _errors_, or _paths_.
+At the top level, the API is described as a collection of
+schema definitions, service definitions, errors,
+and paths (endpoints) available in the application.
+
+The API documented by an ApiDescription is simply
+a set of CREST web services exposed to consumers.
+An ApiDescription MAY cover a single endpoint or an entire product.
+An ApiDescription does not necessarily represent
+a single, coherent library of services for a specific purpose.
+
+The top-level MUST contain at least one of
+_definitions_, _errors_, _paths_, or _services_.
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| -------------------------------------
-id          | String                      | ✓          | The frURI identifier of the API Descriptor
-version     | String                      | ✓          | The version of the API.
-description | String                      |            | Short description of the API Descriptor
-definitions | [Definitions](#definitions) |            | Locally defined schema definitions
-services    | [Services](#services)       |            | Locally defined service definitions
-errors      | [Errors](#errors)           |            | Locally defined error definitions
-paths       | [Paths](#paths)             |            | The supported paths for this API.
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| -------------------------------------
+`id`          | String                      | ✓          | The frURI identifier of the API Descriptor
+`version`     | String                      | ✓          | The version of the API
+`description` | String                      |            | Human-readable description of the API for documentation purposes
+`definitions` | [Definitions](#definitions) |            | Locally defined, extended JSON schema for resources
+`services`    | [Services](#services)       |            | Locally defined CREST services that can be exposed at a path
+`errors`      | [Errors](#errors)           |            | Locally defined errors
+`paths`       | [Paths](#paths)             |            | Paths (endpoints) exposed by the API
+
+The top-level `version` and `description` properties apply to the _entire API_.
+
+Individual request handlers MAY be versioned separately,
+as described in [VersionedPath](#versionedPath).
+
+* * *
 
 ### Definitions
 
-Locally defined schema definitions, that can be referred to via JSON References.
+Map of locally defined extended JSON schema, that can be referred to via [JSON References](#references).
 
 #### Properties
 
@@ -62,9 +91,16 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 *           | [Schema](#schema)           | ✓          | The schema definitions
 
+* * *
+
 ### Services
 
-Locally defined service definitions, that can be referred to via JSON References.
+Map of locally defined service definitions, that can be referred to via [JSON References](#references).
+
+A service definition describes resources and operations they support,
+independently of the path (endpoint) where the resource is exposed.
+Service definitions are useful when the path depends on configuration,
+and when multiple paths can expose the same web service.
 
 #### Properties
 
@@ -72,9 +108,11 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 *           | [Resource](#resource)       | ✓          | The service definitions
 
+* * *
+
 ### Errors
 
-Locally defined schema definitions, that can be referred to via JSON References.
+Map of locally defined errors, that can be referred to via [JSON References](#references).
 
 #### Properties
 
@@ -82,115 +120,157 @@ Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
 *           | [ApiError](#apiError)       | ✓          | The error definitions
 
+* * *
+
 ### Reference
 
-Use JSON Reference syntax to refer to schemas defined locally or externally.
+JSON Reference syntax referring to schemas, service definitions, and errors
+that are defined locally or externally.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-$ref        | String                      | ✓          | A JSON Reference ($ref) to the required object. The URI should be an frURI type, or a URL.
+`$ref`      | String                      | ✓          | A JSON Reference (`$ref`) to the required object. The URI should be an frURI type, or a URL.
+
+* * *
 
 ### Paths
 
-A path supported by the API being described. Paths may contain the names of Path [Parameter](#parameter)s, contained
-in curly braces. Paths _must_ contain at least one _VersionedPath_.
+Map of paths (endpoints) supported by the API being described.
+
+Paths MAY include path [parameter](#parameter)s contained in curly braces,
+for example, `/users/{userId}/devices/{deviceId}`.
+
+Paths MUST contain at least one _VersionedPath_.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-`*`         | [VersionedPath](#versionedPath) |        | A mapping of path string to VersionedPath definition.
+*           | [VersionedPath](#versionedPath) |        | A mapping of path strings to VersionedPath definitions.
+
+* * *
 
 ### VersionedPath
 
-The optional version of the request handler at the top of a particular path. API Descriptors without the need to
-version individual API endpoints may omit this level of the Path hierarchy. The resource may be specified using a
-[Reference](#reference).
+Optional version of the request handler at the top of a particular path.
+
+When all request handlers share the same version defined at the top-level,
+API descriptors MAY omit this level of the Path hierarchy.
+
+The resource MAY be specified using a [Reference](#reference).
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-`*`         | [Resource](#resource)       | ✓          | The supported versions of the resources at this path. Format: `[1-9][0-9]*(\.[1-9][0-9]*)*`
+*           | [Resource](#resource)       | ✓          | The supported versions of the resources at this path.<br>Format: `[1-9][0-9]*(\.[1-9][0-9]*)*`
+
+Only _N_ and _N.N_ formats are supported for a version number key.
+
+The reserved value `0.0` means "unversioned".
+If `0.0` is used it MUST be the only VersionedPath entry for a path.
+
+* * *
 
 ### Resource
 
-Specifies the descriptor at a given path. At least one _Operation_ (e.g., _create_) is required.
+The resource accessible at a given path and also the CREST operations it supports.
+
+Collection resources have `items` that are all of the same type.
+For example, each item in a collection of users is a user.
+In a collection that supports create, the `items` are the resources to create.
+In a collection that supports queries, the `items` are the items
+in the `result` array of the response resource.
+
+Resources can have `subresources` that support their own CREST operations,
+and that are versioned with the resource.
+For example, a subscriber has subscriptions.
+
+A resource MUST define at least one CRUDPAQ [Operation](#operation).
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-title       | String                      |            | Service title used for documentation purposes
-description | String                      |            | Service description used for documentation purposes
-resourceSchema | [Schema](#schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, or patch are supported.
-create      | [Create](#create)           |            | The create operation description, if supported
-read        | [Read](#read)               |            | The read operation description, if supported
-update      | [Update](#update)           |            | The update operation description, if supported
-delete      | [Delete](#delete)           |            | The delete operation description, if supported
-patch       | [Patch](#patch)             |            | The patch operation description, if supported
-actions     | [Action](#action)[]         |            | The action operation descriptions, if supported
-queries     | [Query](#query)[]           |            | The query operation descriptions, if supported. Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
-subresources | [SubResources](#subresources) |         | Sub-resources of this resource. Sub-resources use the same version as their parent resource, so are not separately versioned.
-items       | [Items](#items)             |            | The items description in the resource. Used if the resource is a collection.
-mvccSupported | boolean                   | ✓          | Whether this resource supports MVCC create.
-parameters  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`title`       | String                      |            | Human-readable string used as a title in documentation.
+`description` | String                      |            | Human-readable description for documentation purposes.
+`resourceSchema` | [Schema](#schema)        |            | The schema of the resource for this path. Required when any of create, read, update, delete, or patch are supported.
+`create`      | [Create](#create)           |            | Specifies the create operation that the resource supports.
+`read`        | [Read](#read)               |            | Specifies the read operation that the resource supports.
+`update`      | [Update](#update)           |            | Specifies the update operation that the resource supports.
+`delete`      | [Delete](#delete)           |            | Specifies the delete operation that the resource supports.
+`patch`       | [Patch](#patch)             |            | Specifies the patch operation that the resource supports.
+`actions`     | [Action](#action)[]         |            | Specifies the action operations that the resource supports.
+`queries`     | [Query](#query)[]           |            | Specifies the query operations that the resource supports.<br>Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
+`subresources` | [SubResources](#subresources) |         | Sub-resources of this resource.<br>Sub-resources use the same version as their parent resource, so are not separately versioned.
+`items`       | [Items](#items)             |            | Descriptor for the items in a collection.<br>Defined only when the resource is a collection.
+`mvccSupported` | boolean                   | ✓          | Whether this resource supports MVCC operations.
+`parameters`  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource.
+
+* * *
 
 ### Items
 
-Descriptor for collection operations. At least one _Operation_ (e.g., _create_) is required.
+The resource type and operations support on the items of a collection.
+
+An item MUST define at least one CRUDPA [Operation](#operation).
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-title       | String                      |            | Service title used for documentation purposes
-description | String                      |            | Service description used for documentation purposes
-create      | [Create](#create)           |            | The create operation description, if supported
-read        | [Read](#read)               |            | The read operation description, if supported
-update      | [Update](#update)           |            | The update operation description, if supported
-delete      | [Delete](#delete)           |            | The delete operation description, if supported
-patch       | [Patch](#patch)             |            | The patch operation description, if supported
-actions     | [Action](#action)[]         |            | The action operation descriptions, if supported
-parameters  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`title`       | String                      |            | Human-readable string used as a title in documentation.
+`description` | String                      |            | Human-readable description for documentation purposes.
+`create`      | [Create](#create)           |            | Specifies the create operation that the resource supports.
+`read`        | [Read](#read)               |            | Specifies the read operation that the resource supports.
+`update`      | [Update](#update)           |            | Specifies the update operation that the resource supports.
+`delete`      | [Delete](#delete)           |            | Specifies the delete operation that the resource supports.
+`patch`       | [Patch](#patch)             |            | Specifies the patch operation that the resource supports.
+`actions`     | [Action](#action)[]         |            | Specifies the action operations that the resource supports.
+`parameters`  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource.
 
+* * *
 
 ### SubResources
 
 Sub-resources are resources that are a component part of their parent. As such, they share the version of the parent
-from the parent's path binding. If a sub-path is separately versioned from a parent path, it should be listed as a
+from the parent's path binding. If a sub-path is separately versioned from a parent path, it MUST be listed as a
 separate path in the [Paths](#paths) object, rather than as a sub-resource of the resource at the parent path.
 
 #### Properties
 
 Key         | Type                        | Required?  | Description
 ----------- | --------------------------- |:----------:| ------------------------------------
-`*`         | [Resource](#resource)       | ✓          | A map of sub-resource paths to resource definitions.
+*           | [Resource](#resource)       | ✓          | A mapping of sub-resource paths to resource definitions.
+
+* * *
 
 ### Operation
 
-A basic operation type for operations without any special features. This is the supertype of
-the supported operations in the CREST contract.
+A basic operation type for operations without any special features.
 
-_Read_ operations are defined at this level, and are used to read existing resources.
+This is the supertype for all CRUDPAQ operations:
+All operations inherit these properties.
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-description | String                      |            | A description of the operation
-supportedLocales | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation
-errors      | [ApiError](#apiError)[]     |            | Errors known be returned by this operation
-parameters  | [Parameter](#parameter)[]   |            | Extra parameters supported by the operation
-stability   | String                      |            | Stability of the endpoint. Supported values are: "internal", "stable" (default), "evolving", "deprecated", or "removed".
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`description` | String                      |            | Human-readable description for documentation purposes.
+`supportedLocales` | String[]               |            | [Locale codes](https://en.wikipedia.org/wiki/Language_localisation#Language_tags_and_codes) supported by the operation.
+`errors`      | [ApiError](#apiError)[]     |            | Errors known to be returned by this operation.
+`parameters`  | [Parameter](#parameter)[]   |            | Extra parameters supported by this operation.
+`stability`   | String                      |            | Interface stability for this operation. Supported values are: `internal`, `stable` (default), `evolving`, `deprecated`, and `removed`.
+
+* * *
 
 ### ApiError
 
 Defines one of the possible error responses that are known to be returned by a given
-[Operation](#operation). All standard CREST errors are defined under _frapi:common_, which is an API Descriptor
-that will always be available by default. Endpoints may overload any error _code_ and unique _description_ to define
+[Operation](#operation). All standard CREST errors are defined under `frapi:common`, which is an API Descriptor
+that will always be available by default. Endpoints MAY overload any error _code_ and unique _description_ to define
 custom errors. CREST API clients should be prepared to handle undocumented/unexpected errors. It is a best practice to
 define a minimum ApiError array definition, with 500 Internal Server Error, as follows,
 
@@ -202,109 +282,102 @@ define a minimum ApiError array definition, with 500 Internal Server Error, as f
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-code        | Integer                     | ✓          | Three digit error code, corresponding to HTTP status codes.
-description | String                      | ✓          | Description of what may cause an error to occur.
-schema      | [Schema](#schema)           |            | Optional definition of a schema for the error-detail.
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`code`        | Integer                     | ✓          | Three-digit error code, corresponding to an HTTP status code.
+`description` | String                      | ✓          | Description of what may cause an error to occur.
+`schema`      | [Schema](#schema)           |            | Schema for the error detail.
 
-The schema for an error response is:
-
-```
-{
-  "type" : "object",
-  "required" : [ "code", "message" ],
-  "properties" : {
-    "code" : {
-      "type" : "integer",
-      "title" : "Code",
-      "description" : "3-digit error code, corresponding to HTTP status codes."
-    },
-    "message" : {
-      "type" : "string",
-      "title" : "Message",
-      "description" : "Error message."
-    },
-    "reason" : {
-      "type" : "string",
-      "title" : "Reason",
-      "description" : "Short description corresponding to error code."
-    },
-    "detail" : {
-      "type" : "string",
-      "title" : "Detail",
-      "description" : "Detailed error message."
-    },
-    "cause" : {
-      "$ref" : "frapi:error:default"
-    }
-  }
-}
-```
+* * *
 
 ### Parameter
 
-Defines an _ADDITIONAL_ parameter for an operation, separate from a _resourceSchema_ request-payload,
-or a _PATH_ parameter, surrounded by curly braces in the Path.
+Defines either an additional parameter for an operation
+that is not part of the request payload,
+or a path parameter expressed as a value surrounded by curly braces in a path.
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-name        | String                      | ✓          | The name of the parameter
-type        | String                      | ✓          | The semantics/format of the parameter: `string`, `number`, `boolean`, and array variants
-defaultValue | String                     |            | The default value, if applicable
-description | String                      |            | The description of the parameter
-source      | String                      | ✓          | Where the parameter comes from. Supported values are: PATH or ADDITIONAL
-required    | boolean                     |            | Whether the parameter is required
-enumValues  | String[]                    |            | One or more values that must match
-enumTitles  | String[]                    |            | `options/enum_titles` - string descriptions in the same order as the enum values.
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`name`        | String                      | ✓          | The name of the parameter.
+`type`        | String                      | ✓          | The semantics/format of the parameter: `string`, `number`, `boolean`, and array variants.
+`source`      | String                      | ✓          | Where the parameter comes from.<br>Supported values are: `ADDITIONAL` or `PATH`.
+`defaultValue` | String                     |            | The default value, if applicable.
+`description` | String                      |            | The description of the parameter.
+`required`    | boolean                     |            | Whether the parameter is required. (default: `false`)
+`enumValues`  | String[]                    |            | One or more values that must match.
+`enumTitles`  | String[]                    |            | `options/enum_titles` - string descriptions in the same order as the enum values.
 
 Other appropriate fields as described in the
 [JSON Schema Validation](http://json-schema.org/latest/json-schema-validation.html) spec
 may also be used.
 
+* * *
+
 ### Create
 
-Creates a new resource. Extends [Operation](#operation).
+Indicates that creating a new resource is supported.
+
+Extends [Operation](#operation).
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-mode        | String                      | ✓          | Supported values are: `ID_FROM_CLIENT`, `ID_FROM_SERVER`.
-singleton   | boolean                     |            | Specifies that create operates on a singleton as opposed to a collection.
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`mode`        | String                      | ✓          | Supported values are: `ID_FROM_CLIENT`, `ID_FROM_SERVER`.
+`singleton`   | boolean                     |            | Specifies that create operates on a singleton as opposed to a collection.
+
+* * *
 
 ### Read
 
-Reads the contents of an existing resource. Extends [Operation](#operation).
+Indicates that reading the contents of an existing resource is supported.
+
+Extends [Operation](#operation).
 
 #### Properties
 
 No additional properties.
+
+* * *
 
 ### Update
 
-Replaces the contents of an existing resource. Extends [Operation](#operation).
+Indicates that replacing the contents of an existing resource is supported.
+
+Extends [Operation](#operation).
 
 #### Properties
 
 No additional properties.
+
+* * *
 
 ### Delete
 
-Deletes a resource. Extends [Operation](#operation).
+Indicates that deleting a resource is supported.
+
+Extends [Operation](#operation).
 
 #### Properties
 
 No additional properties.
 
+* * *
+
 ### Patch
 
-Partially modifies the contents of an existing resource. Extends [Operation](#operation).
+Indicates that partially modifying the contents of an existing resource is supported.
 
-The content of the request-payload is a JSON array whose elements are the modifications which should be applied to the
-resource. For example,
+Extends [Operation](#operation).
+
+Note that CREST has its own definition for the patch request payload.
+The content of the request payload is a JSON array
+whose elements are the modification operations to apply to the resource.
+
+The following example adds the value `admin` to the `roles` field,
+and removes `valueToBeRemoved` from `field/subfield`:
 
 ```
 [
@@ -320,76 +393,86 @@ resource. For example,
   }
 ]
 ```
-The Schema for the Patch request-payload is the following, but note that the semantics differ based on the
-_resourceSchema_ and Patch-operation being performed:
+
+The request payload items' properties depend on the patch operation.
+The request payload values depend on the resource schema.
+Given these dependencies, a patch request payload has the following schema:
 
 ```
 {
-   "type":"array",
-   "items":{
-      "type":"object",
-      "properties":{
-         "operation":{
-            "type":"string",
-            "enum":[
-               "add",
-               "remove",
-               "replace",
-               "increment",
-               "move",
-               "copy",
-               "transform"
-            ],
-            "required":true
-         },
-         "field":{
-            "type":"string"
-         },
-         "from":{
-            "type":"string"
-         },
-         "value":{
-            "type":"string"
-         }
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "operation": {
+        "type": "string",
+        "enum": [
+          "add",
+          "remove",
+          "replace",
+          "increment",
+          "move",
+          "copy",
+          "transform"
+        ],
+        "required": true
+      },
+      "field": {
+        "type": "string"
+      },
+      "from": {
+        "type": "string"
+      },
+      "value": {
+        "type": "string"
       }
-   }
+    }
+  }
 }
 ```
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-operations  | String[]                    | ✓          | Set of supported patch operations. Supported values are:`ADD`, `REMOVE`, `REPLACE`, `INCREMENT`, `MOVE`, `COPY`, `TRANSFORM`.
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`operations`  | String[]                    | ✓          | Set of supported patch operations.<br>Supported values are:<ul><li>`ADD`</li><li>`REMOVE`</li><li>`REPLACE`</li><li>`INCREMENT`</li><li>`MOVE`</li><li>`COPY`</li><li>`TRANSFORM`</li></ul>
+
+* * *
 
 ### Action
 
-Actions are additional operations provided by a resource container. Extends [Operation](#operation).
+Indicates that one or more additional action operations on the resource are supported.
+
+Extends [Operation](#operation).
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-name        | String                      | ✓          | The action name.
-request     | [Schema](#schema)           |            | The schema of the request payload for this action.
-response    | [Schema](#schema)           | ✓          | The schema of the response payload for this action.
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`name`        | String                      | ✓          | The action name.
+`response`    | [Schema](#schema)           | ✓          | The schema of the response payload for this action.
+`request`     | [Schema](#schema)           |            | The schema of the request payload for this action.
+
+* * *
 
 ### Query
 
-Search or list the resources contained within a resource container. Extends [Operation](#operation).
+Indicates that searching or listing the resources in this resource container is supported.
+
+Extends [Operation](#operation).
 
 Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
 
 #### Properties
 
-Key         | Type                        | Required?  | Description
------------ | --------------------------- |:----------:| ------------------------------------
-type        | String                      | ✓          | Supported values are:`ID`, `FILTER`, `EXPRESSION`.
-pagingMode  | String[]                    |            | Supported values are:`COOKIE`, `OFFSET`. Paging is not supported if omitted.
-countPolicy | String[]                    |            | Supported values are:`ESTIMATE`, `EXACT`, `NONE`. Counts are not provided if omitted.
-queryId     | String                      | `type:ID`  | Required if `type` is `ID`.
-queryableFields | String[]                | `type:FILTER` | Required if `type` is `FILTER`. Lists the fields in the `resourceSchema` that can be queried. A value of “*” can be used to state that all fields can be queried.
-supportedSortKeys | String[]              |            | The keys that may be used to sort the filter results. A value of “*” can be used to state that all keys are supported.
+Key           | Type                        | Required?  | Description
+------------- | --------------------------- |:----------:| ------------------------------------
+`type`        | String                      | ✓          | Supported values are:`ID`, `FILTER`, `EXPRESSION`.
+`pagingMode`  | String[]                    |            | Supported values are:`COOKIE`, `OFFSET`.<br>Paging is not supported if omitted.
+`countPolicy` | String[]                    |            | Supported values are:`ESTIMATE`, `EXACT`, `NONE`.<br>Counts are not provided if omitted.
+`queryId`     | String                      | `type:ID`  | Required if `type` is `ID`.
+`queryableFields` | String[]                | `type:FILTER` | Required if `type` is `FILTER`.<br>Lists the fields in the `resourceSchema` that can be queried.<br>`*` means all fields can be queried.
+`supportedSortKeys` | String[]              |            | The keys that may be used to sort the filter results.<br>`*` means all keys are supported.
 
 The following example shows a resource that supports all three types of query:
 
@@ -398,10 +481,10 @@ The following example shows a resource that supports all three types of query:
   "/openidm/managed/user": {
     "queries": [{
       "type": "EXPRESSION",
-      "description": "Return the results of a SQL query. For example, `_queryExpression=select+%2A+from+managed_user`"
+      "description": "Return the results of an SQL query such as `_queryExpression=select+%2A+from+managed_user`"
     }, {
       "type": "FILTER",
-      "description": "Return resources matching the filter. TODO get explanation of query filters from Javadoc.",
+      "description": "Return resources matching the filter.",
       "queryableFields": ["*"]
     }, {
       "type": "ID",
@@ -412,49 +495,54 @@ The following example shows a resource that supports all three types of query:
 }
 ```
 
+* * *
+
 ### Schema
 
-CREST API Descriptors use schemas to represent request/response-payloads and error responses.
+API descriptors use schemas to represent
+request payloads, response resources, and error responses.
 
-Supports either a [Reference](#reference) to a defined schema, or
+API descriptors support using either a [Reference](#reference) to a defined schema, or
 [OpenAPI-extended JSON schema](https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject)
-with the following additional extensions:
+with additional extensions for the following use cases:
 
-#### Ordering of fields
+#### Field Order
 
-In order to specify the order that fields in an object ought to be displayed in a UI, an
-extra field can be added to properties definitions:
-
-##### Properties
-
-Key         | Type                        | Description
------------ | --------------------------- | ------------------------------------
-propertyOrder | number                    | The number that is specified can be used to compare the order of different properties. See also https://github.com/jdorn/json-editor/issues/110
-
-#### Complex read/write states
-
-To handle complex states we are going to introduce a new schema field.
+To specify the order of fields displayed in a UI.
 
 ##### Properties
 
-Key         | Type                        | Description
------------ | --------------------------- | ------------------------------------
-readPolicy  | String                      | Supported values are:<br>USER: visible in the user-interface. This is the default value if no value is specified.<br>CLIENT: hidden from user-interface, but readable via client APIs.<br>SERVER: available internally, but not exposed to client APIs.
-writePolicy | String                      | Relevant only for "properties" definitions where the readOnly flag is false. Supported values are:<br>WRITE_ON_CREATE: the property MAY be set in the create request, but not thereafter.<br>WRITE_ONCE: the property MAY be set only if the current value is NULL.<br>WRITABLE: the property can be set at any time. This is the default value if no value is specified.
-errorOnWritePolicyFailure | boolean       | Whether the application will error (or ignore) when a WRITE_ON_CREATE or WRITE_ONCE field is attempted to be updated erroneously (default: `false`).
-returnOnDemand | boolean                  | `true` when a field is available, but must be explicitly requested, or `false` (default) when always returned.
+Key             | Type                        | Description
+--------------- | --------------------------- | ------------------------------------
+`propertyOrder` | number                      | The number that is specified can be used to compare the order of different properties.<br>See also https://github.com/jdorn/json-editor/issues/110
 
-#### Enumeration value descriptions
+#### Complex Read/Write States
 
-Enum titles are not supported officially in JSON enum type. The representation that we
-already use in existing projects comes from
+To clarify read/write states more complex than `readOnly`.
+
+##### Properties
+
+Key           | Type                        | Description
+------------- | --------------------------- | ------------------------------------
+`readPolicy`  | String                      | Supported values are:<ul><li>`USER`: visible in the user-interface. (default)</li><li>`CLIENT`: hidden from user-interface, but readable via client APIs.</li><li>`SERVER`: available internally, but not exposed to client APIs.</li></ul>
+`writePolicy` | String                      | Relevant only for "properties" definitions where `readOnly` is false.<br>Supported values are:<ul><li>`WRITE_ON_CREATE`: the property MAY be set in the create request, but not thereafter.</li><li>`WRITE_ONCE`: the property MAY be set only if the current value is NULL.</li><li>`WRITABLE`: the property can be set at any time. (default)</li></ul>
+`errorOnWritePolicyFailure` | boolean       | Whether the application will return an error (or ignore) when a `WRITE_ON_CREATE` or `WRITE_ONCE` field is attempted to be updated erroneously (default: `false`).
+`returnOnDemand` | boolean                  | `true` when a field is available, but must be explicitly requested.<br>`false` (default) when always returned.
+
+#### Enumeration Value Descriptions
+
+To assign titles/descriptions to enumeration values.
+
+Enum titles are not supported officially for the JSON enum type.
+
+This representation is already used in existing projects, and comes from
 [JSON Editor](https://github.com/jdorn/json-editor/issues/240#issuecomment-53990339).
 
 ##### Properties
 
 Key Path    | Type                        | Description
 ----------- | --------------------------- | ------------------------------------
-options/enum_titles | String[]            | String descriptions in the same order as the enum values.
+`options/enum_titles` | String[]          | String descriptions in the same order as the enum values.
 
 ##### Example
 
@@ -469,6 +557,8 @@ options/enum_titles | String[]            | String descriptions in the same orde
 ```
 
 
+* * *
+
 ## References
 
 1. [OpenAPI Specification, v2.0](
@@ -480,6 +570,6 @@ http://json-schema.org/latest/json-schema-core.html)
 1. [JSON Schema: interactive and non interactive validation, draft-00](
 http://json-schema.org/latest/json-schema-validation.html)
 
-***
+* * *
 
 Copyright 2016 ForgeRock AS.
