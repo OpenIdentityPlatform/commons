@@ -19,6 +19,7 @@ package org.forgerock.http.protocol;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
 
 import java.net.URISyntaxException;
 
@@ -49,6 +50,12 @@ public class FormTest {
         assertThat(f).containsEntry("nullKey", singletonList((String) null));
     }
 
+    @Test
+    public void fromEmptyQueryString() {
+        Form f = new Form().fromQueryString("");
+        assertThat(f).isEmpty();
+    }
+
     /**
      * Check the behaviour of serializing null parameter values in queries and forms. Anything is permitted in queries,
      * but forms are bound to the form encoding specified for form submission.
@@ -57,9 +64,19 @@ public class FormTest {
     @Test
     public void nullParameterValues() {
         Form f = new Form();
+        f.add("", "invalid");
+        f.add("foo", "bar");
         f.add("a", null);
-        assertThat(f.toQueryString()).isEqualTo("a");
-        assertThat(f.toFormString()).isEqualTo("");
+        f.add("bar", "foo");
+        assertThat(f.toQueryString()).isEqualTo("foo=bar&a&bar=foo");
+        assertThat(f.toFormString()).isEqualTo("foo=bar&bar=foo");
+    }
+
+    @Test
+    public void nullParameters() {
+        Form f = new Form().fromQueryString("foo=bar&&bar=foo");
+        assertThat(f).containsExactly(entry("foo", singletonList("bar")),
+                                      entry("bar", singletonList("foo")));
     }
 
     @Test

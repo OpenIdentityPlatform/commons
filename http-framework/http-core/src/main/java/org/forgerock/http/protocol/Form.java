@@ -90,8 +90,10 @@ public class Form extends MultiValueMap<String, String> {
     public Form fromQueryString(final String s) {
         for (String param : s.split("&")) {
             String[] nv = param.split("=", 2);
-            add(urlDecodeQueryParameterNameOrValue(nv[0]),
-                    nv.length == 1 ? null : urlDecodeQueryParameterNameOrValue(nv[1]));
+            if (!nv[0].isEmpty()) {
+                add(urlDecodeQueryParameterNameOrValue(nv[0]),
+                        nv.length == 1 ? null : urlDecodeQueryParameterNameOrValue(nv[1]));
+            }
         }
         return this;
     }
@@ -116,14 +118,16 @@ public class Form extends MultiValueMap<String, String> {
     public String toFormString() {
         StringBuilder sb = new StringBuilder();
         for (String name : keySet()) {
-            for (String value : get(name)) {
-                if (sb.length() > 0) {
-                    sb.append('&');
-                }
-                if (value != null) {
-                    sb.append(formEncodeParameterNameOrValue(name))
-                            .append('=')
-                            .append(formEncodeParameterNameOrValue(value));
+            if (!name.isEmpty()) {
+                for (String value : get(name)) {
+                    if (value != null) {
+                        if (sb.length() > 0) {
+                            sb.append('&');
+                        }
+                        sb.append(formEncodeParameterNameOrValue(name))
+                                .append('=')
+                                .append(formEncodeParameterNameOrValue(value));
+                    }
                 }
             }
         }
@@ -138,13 +142,15 @@ public class Form extends MultiValueMap<String, String> {
     public String toQueryString() {
         StringBuilder sb = new StringBuilder();
         for (String name : keySet()) {
-            for (String value : get(name)) {
-                if (sb.length() > 0) {
-                    sb.append('&');
-                }
-                sb.append(urlEncodeQueryParameterNameOrValue(name));
-                if (value != null) {
-                    sb.append('=').append(urlEncodeQueryParameterNameOrValue(value));
+            if (!name.isEmpty()) {
+                for (String value : get(name)) {
+                    if (sb.length() > 0) {
+                        sb.append('&');
+                    }
+                    sb.append(urlEncodeQueryParameterNameOrValue(name));
+                    if (value != null) {
+                        sb.append('=').append(urlEncodeQueryParameterNameOrValue(value));
+                    }
                 }
             }
         }
