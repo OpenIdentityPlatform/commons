@@ -51,7 +51,7 @@
     </dependency>
     <dependency>
       <groupId>org.forgerock.http</groupId>
-      <artifactId>chf-client-apache-sync</artifactId>
+      <artifactId>binding-test-utils</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

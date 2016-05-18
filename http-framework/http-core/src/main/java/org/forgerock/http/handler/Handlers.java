@@ -16,6 +16,9 @@
 
 package org.forgerock.http.handler;
 
+import static org.forgerock.http.protocol.Response.*;
+import static org.forgerock.http.protocol.Responses.*;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
@@ -96,4 +99,19 @@ public final class Handlers {
         }
         return result;
     }
+
+    /**
+     * A common HTTP Framework {@link Handler} responding 500 Internal Server Error.
+     * @param cause The cause of the internal server error.
+     * @return The handler.
+     */
+    public static Handler internalServerErrorHandler(final Exception cause) {
+        return new Handler() {
+            @Override
+            public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
+                return newResponsePromise(newInternalServerError(cause));
+            }
+        };
+    }
+
 }
