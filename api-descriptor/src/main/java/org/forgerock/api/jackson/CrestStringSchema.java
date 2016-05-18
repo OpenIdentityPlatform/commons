@@ -17,18 +17,19 @@
 package org.forgerock.api.jackson;
 
 import static org.forgerock.api.jackson.JacksonUtils.*;
+import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.validation.ValidationException;
 import javax.xml.bind.DatatypeConverter;
 
+import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat;
 import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.guava.common.net.InetAddresses;
 import org.forgerock.guava.common.net.InternetDomainName;
@@ -42,12 +43,13 @@ import org.forgerock.api.enums.WritePolicy;
  * An extension to the Jackson {@code StringSchema} that includes the custom CREST JSON Schema attributes.
  */
 class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema, EnumSchema,
-        ValidatableSchema {
+        ValidatableSchema, PropertyFormatSchema {
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
     private Boolean returnOnDemand;
     private Integer propertyOrder;
+    private String propertyFormat;
     @JsonProperty
     private Map<String, List<String>> options;
 
@@ -118,77 +120,90 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
         }
         String s = object.asString();
         validateEnum(enums, s);
-        if (format != null) {
+        if (!isEmpty(propertyFormat)) {
             validateFormat(s);
         }
     }
 
-    private static final Pattern TIME_PATTERN = Pattern.compile("^\\d\\d:\\d\\d:\\d\\d$");
-
-    private void validateFormat(String s) {
-        // @Checkstyle:off
-        switch (format) {
-            case DATE_TIME:
-                try {
-                    DatatypeConverter.parseDateTime(s);
-                } catch (IllegalArgumentException e) {
-                    throw new ValidationException("Expected date-time format, but got " + s, e);
-                }
-                return;
-            case REGEX:
-                if (!s.matches(getPattern())) {
-                    throw new ValidationException("Expected " + getPattern() + " format, but got " + s);
-                }
-                return;
-            case EMAIL:
-                try {
-                    new InternetAddress(s).validate();
-                } catch (AddressException e) {
-                    throw new ValidationException("Expected email, but got " + s, e);
-                }
-                return;
-            case HOST_NAME:
-                if (!InternetDomainName.isValid(s)) {
-                    throw new ValidationException("Expected host-name, but got " + s);
-                }
-                return;
-            case IP_ADDRESS:
-                if (!InetAddresses.isInetAddress(s) || s.indexOf(':') != -1) {
-                    throw new ValidationException("Expected ipv4, but got " + s);
-                }
-                return;
-            case IPV6:
-                if (!InetAddresses.isInetAddress(s) || s.indexOf(':') == -1) {
-                    throw new ValidationException("Expected ipv6, but got " + s);
-                }
-                return;
-            case TIME:
-                if (!TIME_PATTERN.matcher(s).matches()) {
-                    throw new ValidationException("Expected time format, but got " + s);
-                }
-                return;
-            case DATE:
-                try {
-                    DatatypeConverter.parseDate(s);
-                } catch (IllegalArgumentException e) {
-                    throw new ValidationException("Expected date-time format, but got " + s, e);
-                }
-                return;
-            case URI:
-                try {
-                    URI.create(s);
-                } catch (IllegalArgumentException e) {
-                    throw new ValidationException("Expected URI format, but got " + s, e);
-                }
-                return;
-            case UTC_MILLISEC:
-                throw new ValidationException("String cannot be of format " + format);
-            case PHONE:
-            case STYLE:
-            case COLOR:
-                // phone, style and color no longer supported by JSON Schema Validation, so we don't try and validate
-                // them - see http://json-schema.org/latest/json-schema-validation.html#anchor145
+    /**
+     * Validates a subset of known {@code format} values, but allows unknown values to pass-through, according to
+     * JSON Schema v4 spec.
+     *
+     * @param s Value to validate
+     * @throws ValidationException Indicates that {@code s} does not conform to a known JSON Schema format.
+     */
+    private void validateFormat(final String s) throws ValidationException {
+        switch (propertyFormat) {
+        case "date-time":
+            // http://tools.ietf.org/html/rfc3339#section-5.6
+            try {
+                DatatypeConverter.parseDateTime(s);
+            } catch (IllegalArgumentException e) {
+                throw new ValidationException("Expected date-time format, but got " + s, e);
+            }
+            return;
+        case "date":
+        case "full-date":
+            // NOTE: supported by OpenAPI, but not defined by JSON Schema v4 spec
+            // http://tools.ietf.org/html/rfc3339#section-5.6
+            try {
+                DatatypeConverter.parseDate(s);
+            } catch (IllegalArgumentException e) {
+                throw new ValidationException("Expected date/full-date format, but got " + s, e);
+            }
+            return;
+        case "email":
+            // http://tools.ietf.org/html/rfc5322#section-3.4.1
+            try {
+                new InternetAddress(s).validate();
+            } catch (AddressException e) {
+                throw new ValidationException("Expected email, but got " + s, e);
+            }
+            return;
+        case "hostname":
+            // http://tools.ietf.org/html/rfc1034#section-3.1
+            if (!InternetDomainName.isValid(s)) {
+                throw new ValidationException("Expected host-name, but got " + s);
+            }
+            return;
+        case "ipv4":
+            // http://tools.ietf.org/html/rfc2673#section-3.2
+            if (!InetAddresses.isInetAddress(s) || s.indexOf(':') != -1) {
+                throw new ValidationException("Expected ipv4, but got " + s);
+            }
+            return;
+        case "ipv6":
+            // http://tools.ietf.org/html/rfc2373#section-2.2
+            if (!InetAddresses.isInetAddress(s) || s.indexOf(':') == -1) {
+                throw new ValidationException("Expected ipv6, but got " + s);
+            }
+            return;
+        case "uri":
+            // http://tools.ietf.org/html/rfc3986
+            try {
+                URI.create(s);
+            } catch (IllegalArgumentException e) {
+                throw new ValidationException("Expected URI format, but got " + s, e);
+            }
+            return;
         }
-        // @Checkstyle:on
+    }
+
+    // This method overrides the superclass' definition of "format" via JsonProperty annotation
+    @JsonProperty("format")
+    @Override
+    public String getPropertyFormat() {
+        return propertyFormat;
+    }
+
+    @Override
+    public void setPropertyFormat(String propertyFormat) {
+        this.propertyFormat = propertyFormat;
+    }
+
+    @Override
+    public void setFormat(JsonValueFormat format) {
+        // we are replacing this method, because JsonValueFormat is not JSON Schema v4 compliant, nor extensible
+        throw new IllegalStateException("setFormat(JsonValueFormat) replaced by setPropertyFormat(String)");
     }
 }

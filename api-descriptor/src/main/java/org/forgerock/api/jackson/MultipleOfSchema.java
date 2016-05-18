@@ -16,21 +16,22 @@
 
 package org.forgerock.api.jackson;
 
-import javax.validation.ValidationException;
-
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import org.forgerock.json.JsonValue;
-
 /**
- * A {@link JsonSchema} implementation that supports validation rules.
+ * Interface defining support for {@code multipleOf} JSON Schema field.
  */
-interface ValidatableSchema {
+public interface MultipleOfSchema {
 
     /**
-     * Validates {@link JsonSchema} according to some set of validation rules.
+     * Gets {@code multipleOf} JSON Schema field.
      *
-     * @param object JSON to validate
-     * @throws ValidationException Indicates that JSON does not conform to a known JSON Schema format.
+     * @return Non-negative number or {@code null}
      */
-    void validate(JsonValue object) throws ValidationException;
+    Double getMultipleOf();
+
+    /**
+     * Sets {@code multipleOf} JSON Schema field.
+     *
+     * @param multipleOf Non-negative number or {@code null}
+     */
+    void setMultipleOf(Double multipleOf);
 }

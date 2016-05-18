@@ -18,6 +18,7 @@ package org.forgerock.api.jackson;
 
 import javax.validation.ValidationException;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.json.JsonValue;
 
@@ -90,5 +91,17 @@ public class CrestBooleanSchema extends BooleanSchema implements CrestReadWriteP
         if (!object.isBoolean()) {
             throw new ValidationException("Expected boolean, but got " + object.getObject());
         }
+    }
+
+    /**
+     * Gets read-only property. This method overrides the superclass' definition of "readOnly" being all lower-case,
+     * via the {@code JsonProperty} annotation.
+     *
+     * @return {@code true} if property is read-only, otherwise {@code false} or {@code null}
+     */
+    @JsonProperty("readOnly")
+    @Override
+    public Boolean getReadonly() {
+        return super.getReadonly();
     }
 }

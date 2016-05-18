@@ -14,23 +14,21 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-package org.forgerock.api.jackson;
+package org.forgerock.api.annotations;
 
-import javax.validation.ValidationException;
-
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import org.forgerock.json.JsonValue;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * A {@link JsonSchema} implementation that supports validation rules.
+ * Annotation to mark a JSON Schema array-items as unique.
  */
-interface ValidatableSchema {
-
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.FIELD, ElementType.METHOD})
+public @interface UniqueItems {
     /**
-     * Validates {@link JsonSchema} according to some set of validation rules.
-     *
-     * @param object JSON to validate
-     * @throws ValidationException Indicates that JSON does not conform to a known JSON Schema format.
+     * The unique-items value of the property.
      */
-    void validate(JsonValue object) throws ValidationException;
+    boolean value() default true;
 }

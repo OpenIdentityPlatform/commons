@@ -16,21 +16,23 @@
 
 package org.forgerock.api.jackson;
 
-import javax.validation.ValidationException;
-
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import org.forgerock.json.JsonValue;
-
 /**
- * A {@link JsonSchema} implementation that supports validation rules.
+ * Extension interface for CREST subclasses of Jackson's {@code JsonSchema} to specify a property as <em>required</em>
+ * or optional.
  */
-interface ValidatableSchema {
+public interface RequiredSchema {
 
     /**
-     * Validates {@link JsonSchema} according to some set of validation rules.
+     * Get <em>required</em> field.
      *
-     * @param object JSON to validate
-     * @throws ValidationException Indicates that JSON does not conform to a known JSON Schema format.
+     * @return {@code true} if property is required and {@code false} if optional
      */
-    void validate(JsonValue object) throws ValidationException;
+    Boolean isRequired();
+
+    /**
+     * Set <em>required</em> field.
+     *
+     * @param required {@code true} if property is required and {@code false} if optional
+     */
+    void setRequired(Boolean required);
 }

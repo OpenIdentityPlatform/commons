@@ -16,21 +16,22 @@
 
 package org.forgerock.api.jackson;
 
-import javax.validation.ValidationException;
-
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
-import org.forgerock.json.JsonValue;
-
 /**
- * A {@link JsonSchema} implementation that supports validation rules.
+ * Interface defining support for {@code format} JSON Schema field.
  */
-interface ValidatableSchema {
+interface PropertyFormatSchema {
 
     /**
-     * Validates {@link JsonSchema} according to some set of validation rules.
+     * Gets {@code format} JSON Schema field.
      *
-     * @param object JSON to validate
-     * @throws ValidationException Indicates that JSON does not conform to a known JSON Schema format.
+     * @return Property format or {@code null}
      */
-    void validate(JsonValue object) throws ValidationException;
+    String getPropertyFormat();
+
+    /**
+     * Sets {@code format} JSON Schema field.
+     *
+     * @param propertyFormat Property format or {@code null}
+     */
+    void setPropertyFormat(String propertyFormat);
 }
