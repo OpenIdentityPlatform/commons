@@ -29,7 +29,6 @@ import javax.mail.internet.InternetAddress;
 import javax.validation.ValidationException;
 import javax.xml.bind.DatatypeConverter;
 
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat;
 import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.guava.common.net.InetAddresses;
 import org.forgerock.guava.common.net.InternetDomainName;
@@ -193,7 +192,11 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
     @JsonProperty("format")
     @Override
     public String getPropertyFormat() {
-        return propertyFormat;
+        if (!isEmpty(propertyFormat)) {
+            return propertyFormat;
+        }
+        // fallback to old behavior
+        return format == null ? null : format.toString();
     }
 
     @Override
@@ -201,9 +204,4 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
         this.propertyFormat = propertyFormat;
     }
 
-    @Override
-    public void setFormat(JsonValueFormat format) {
-        // we are replacing this method, because JsonValueFormat is not JSON Schema v4 compliant, nor extensible
-        throw new IllegalStateException("setFormat(JsonValueFormat) replaced by setPropertyFormat(String)");
-    }
 }

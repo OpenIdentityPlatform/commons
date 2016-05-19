@@ -17,6 +17,7 @@
 package org.forgerock.api.jackson;
 
 import static org.forgerock.api.jackson.JacksonUtils.*;
+import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -25,7 +26,6 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
-import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat;
 import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.json.JsonValue;
 
@@ -147,18 +147,16 @@ class CrestNumberSchema extends NumberSchema implements CrestReadWritePoliciesSc
     @JsonProperty("format")
     @Override
     public String getPropertyFormat() {
-        return propertyFormat;
+        if (!isEmpty(propertyFormat)) {
+            return propertyFormat;
+        }
+        // fallback to old behavior
+        return format == null ? null : format.toString();
     }
 
     @Override
     public void setPropertyFormat(String propertyFormat) {
         this.propertyFormat = propertyFormat;
-    }
-
-    @Override
-    public void setFormat(JsonValueFormat format) {
-        // we are replacing this method, because JsonValueFormat is not JSON Schema v4 compliant, nor extensible
-        throw new IllegalStateException("setFormat(JsonValueFormat) replaced by setPropertyFormat(String)");
     }
 
     // This method overrides the superclass' definition of "minimum" via JsonProperty annotation
@@ -185,15 +183,4 @@ class CrestNumberSchema extends NumberSchema implements CrestReadWritePoliciesSc
         this.propertyMaximum = propertyMaximum;
     }
 
-    @Override
-    public void setMaximum(Double maximum) {
-        // we are replacing this method, because Double is too constrained a value-type
-        throw new IllegalStateException("setMaximum(Double) replaced by setPropertyMaximum(BigDecimal)");
-    }
-
-    @Override
-    public void setMinimum(Double minimum) {
-        // we are replacing this method, because Double is too constrained a value-type
-        throw new IllegalStateException("setMinimum(Double) replaced by setPropertyMinimum(BigDecimal)");
-    }
 }
