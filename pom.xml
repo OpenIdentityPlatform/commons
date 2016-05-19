@@ -71,7 +71,6 @@
     <module>commons-bom</module>
     <module>audit</module>
     <module>auth-filters</module>
-    <module>guava</module>
     <module>http-framework</module>
     <module>json-crypto</module>
     <module>json-patch</module>
