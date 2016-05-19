@@ -124,20 +124,6 @@ public final class Handlers {
     }
 
     /**
-     * A common HTTP Framework {@link Handler} responding 500 Internal Server Error.
-     * @param cause The cause of the internal server error.
-     * @return The handler.
-     */
-    public static Handler internalServerErrorHandler(final Exception cause) {
-        return new Handler() {
-            @Override
-            public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
-                return newResponsePromise(newInternalServerError(cause));
-            }
-        };
-    }
-
-    /**
      * Adapts a {@link Handler} to a {@link DescribableHandler} without adding support for API Descriptions if it is
      * not already implemented.
      * @param handler The handler.
@@ -221,4 +207,19 @@ public final class Handlers {
 
         }
     }
+
+    /**
+     * A common HTTP Framework {@link Handler} responding 500 Internal Server Error.
+     * @param cause The cause of the internal server error.
+     * @return The handler.
+     */
+    public static Handler internalServerErrorHandler(final Exception cause) {
+        return new Handler() {
+            @Override
+            public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
+                return newResponsePromise(newInternalServerError(cause));
+            }
+        };
+    }
+
 }

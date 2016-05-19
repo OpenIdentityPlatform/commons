@@ -15,10 +15,10 @@
  */
 package org.forgerock.http.grizzly;
 
+import static org.forgerock.http.Applications.describedHttpApplication;
 import static org.forgerock.http.Applications.simpleHttpApplication;
 
 import org.forgerock.http.ApiProducer;
-import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
@@ -63,7 +63,7 @@ public final class GrizzlySupport {
      * @return A Grizzly {@link HttpHandler} ready to be added to an {@link HttpServer}
      */
     public static HttpHandler newGrizzlyHttpHandler(Handler handler, Factory<Buffer> storage) {
-        return new HandlerAdapter(simpleHttpApplication(handler, storage));
+        return newGrizzlyHttpHandler(simpleHttpApplication(handler, storage));
     }
 
     /**
@@ -71,7 +71,7 @@ public final class GrizzlySupport {
      * performed on the Grizzly {@link HttpHandler} will be forwarded to the common HTTP Framework {@link Handler}.
      *
      * @param handler
-     *            The {@link HttpHandler} to wrap.
+     *            The {@link Handler} to wrap.
      * @param storage
      *            The {@link Factory} that will create temporary storage {@link Buffer}s to handle the processing of
      *            requests. If {@code null}, a default buffer factory will be used.
@@ -81,39 +81,7 @@ public final class GrizzlySupport {
      */
     public static HttpHandler newGrizzlyHttpHandler(Handler handler, Factory<Buffer> storage,
             ApiProducer<Swagger> apiProducer) {
-        return new HandlerAdapter(new SimpleHttpApplication(handler, storage, apiProducer));
+        return newGrizzlyHttpHandler(describedHttpApplication(handler, storage, apiProducer));
     }
 
-    private static final class SimpleHttpApplication implements DescribedHttpApplication {
-
-        private final Handler handler;
-        private final Factory<Buffer> storage;
-        private final ApiProducer<Swagger> apiContext;
-
-        SimpleHttpApplication(Handler handler, Factory<Buffer> storage, ApiProducer<Swagger> apiContext) {
-            this.handler = handler;
-            this.storage = storage;
-            this.apiContext = apiContext;
-        }
-
-        @Override
-        public Handler start() throws HttpApplicationException {
-            return handler;
-        }
-
-        @Override
-        public Factory<Buffer> getBufferFactory() {
-            return storage;
-        }
-
-        @Override
-        public void stop() {
-            // Nothing to do
-        }
-
-        @Override
-        public ApiProducer<Swagger> getApiProducer() {
-            return apiContext;
-        }
-    }
 }

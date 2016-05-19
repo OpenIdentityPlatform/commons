@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.forgerock.http.ApiProducer;
 import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
@@ -38,7 +39,6 @@ import org.forgerock.http.session.SessionContext;
 import org.forgerock.http.swagger.SwaggerUtils;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.http.util.Uris;
-import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
@@ -93,8 +93,7 @@ final class HandlerAdapter extends HttpHandler {
             if (httpApplication instanceof DescribedHttpApplication) {
                 ApiProducer<Swagger> apiProducer = ((DescribedHttpApplication) httpApplication).getApiProducer();
                 if (apiProducer != null && chfHandler instanceof Describable) {
-                    describedHandler =
-                            (Describable<Swagger, org.forgerock.http.protocol.Request>) chfHandler;
+                    describedHandler = (Describable<Swagger, org.forgerock.http.protocol.Request>) chfHandler;
                     describedHandler.api(apiProducer);
                 }
             }

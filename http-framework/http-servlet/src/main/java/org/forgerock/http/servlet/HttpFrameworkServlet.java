@@ -17,12 +17,15 @@
 
 package org.forgerock.http.servlet;
 
-import static java.util.Collections.*;
-import static org.forgerock.http.HttpApplication.*;
-import static org.forgerock.http.handler.Handlers.*;
-import static org.forgerock.http.io.IO.*;
-import static org.forgerock.http.protocol.Responses.*;
-import static org.forgerock.util.Utils.*;
+import static java.util.Collections.list;
+import static org.forgerock.http.HttpApplication.LOGGER;
+import static org.forgerock.http.handler.Handlers.asDescribableHandler;
+import static org.forgerock.http.handler.Handlers.chainOf;
+import static org.forgerock.http.handler.Handlers.internalServerErrorHandler;
+import static org.forgerock.http.io.IO.newBranchingInputStream;
+import static org.forgerock.http.io.IO.newTemporaryStorage;
+import static org.forgerock.http.protocol.Responses.newInternalServerError;
+import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,6 +43,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.forgerock.http.ApiProducer;
 import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
@@ -56,7 +60,6 @@ import org.forgerock.http.session.SessionContext;
 import org.forgerock.http.swagger.SwaggerUtils;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.http.util.Uris;
-import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
@@ -144,7 +147,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         try {
             Handler handler = application.start();
             this.handler = chainOf(handler, new TransactionIdInboundFilter());
-            if (application instanceof DescribedHttpApplication) {
+            if (application instanceof DescribedHttpApplication && handler instanceof Describable) {
                 ApiProducer<Swagger> apiProducer = ((DescribedHttpApplication) application).getApiProducer();
                 apiDescribed = true;
                 this.handler.api(apiProducer);

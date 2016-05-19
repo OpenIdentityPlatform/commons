@@ -16,16 +16,28 @@
 
 package org.forgerock.http.bindings;
 
-import static java.lang.String.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.http.Applications.*;
-import static org.mockito.Mockito.*;
+import static io.swagger.models.Scheme.HTTP;
+import static io.swagger.models.Scheme.HTTPS;
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.forgerock.http.Applications.describedHttpApplication;
+import static org.forgerock.http.Applications.simpleHttpApplication;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.assertj.core.api.SoftAssertionError;
 import org.assertj.core.api.SoftAssertions;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.http.Client;
+import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
@@ -39,13 +51,20 @@ import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.session.Session;
 import org.forgerock.http.session.SessionContext;
+import org.forgerock.http.swagger.SwaggerApiProducer;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import io.swagger.models.Info;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Swagger;
 
 /**
  * A test class for CHF bindings.
@@ -96,6 +115,26 @@ public abstract class BindingTest {
     public final void tearDown() throws Exception {
         stopServer();
         port = 0;
+    }
+
+    /**
+     * Test the application lifecycle for a described application.
+     * @throws Exception In case of failure.
+     */
+    @Test
+    public void testDescribedHttpApplicationLifecycle() throws Exception {
+        final DescribedHttpApplication application = mock(DescribedHttpApplication.class);
+        when(application.start()).thenReturn(mock(DescribableHandler.class));
+        addApplication(application);
+        port = startServer();
+        verify(application).getBufferFactory();
+        verify(application).start();
+        verify(application).getApiProducer();
+        verifyNoMoreInteractions(application);
+
+        stopServer();
+        verify(application).stop();
+        verifyNoMoreInteractions(application);
     }
 
     /**
@@ -163,6 +202,35 @@ public abstract class BindingTest {
     }
 
     /**
+     * Test an API request.
+     * @throws Exception In case of failure.
+     */
+    @Test
+    public void testRequestApi() throws Exception {
+        HttpApplication application = describedHttpApplication(new TestHandler(), null,
+                new SwaggerApiProducer(new Info(), "", "", asList(HTTP, HTTPS)));
+        addApplication(application);
+
+        port = startServer();
+
+        try (final HttpClientHandler handler = new HttpClientHandler()) {
+            final Client client = new Client(handler);
+            final Request request = new Request()
+                    .setMethod("GET")
+                    .setUri(format("http://localhost:%d/test?_api", port));
+            request.getHeaders().add("X-WhateverHeader", "Whatever Value");
+
+            final Response response = client.send(request).get();
+            assertThat(json(response.getEntity().getJson())).isObject()
+                    .hasObject("paths")
+                    .hasObject("test")
+                    .hasObject("post")
+                    .hasArray("produces")
+                    .containsExactly("text/plain");
+        }
+    }
+
+    /**
      * Test the session.
      * @throws Exception In case of failure.
      */
@@ -192,7 +260,7 @@ public abstract class BindingTest {
         }
     }
 
-    private final class TestHandler implements Handler {
+    private final class TestHandler implements Handler, Describable<Swagger, Request> {
 
         @Override
         public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
@@ -225,6 +293,25 @@ public abstract class BindingTest {
             }
         }
 
+        @Override
+        public Swagger api(ApiProducer<Swagger> producer) {
+            return null;
+        }
+
+        @Override
+        public Swagger handleApiRequest(Context context, Request request) {
+            return new Swagger().path("test", new Path().post(new Operation().produces("text/plain")));
+        }
+
+        @Override
+        public void addDescriptorListener(Listener listener) {
+
+        }
+
+        @Override
+        public void removeDescriptorListener(Listener listener) {
+
+        }
     }
 
     private final class TestSessionHandler implements Handler {
@@ -257,5 +344,9 @@ public abstract class BindingTest {
                                 .setEntity(e.getMessage()).setCause(new Exception(e)));
             }
         }
+    }
+
+    interface DescribableHandler extends Handler, Describable<Swagger, Request> {
+        // for mocking
     }
 }
