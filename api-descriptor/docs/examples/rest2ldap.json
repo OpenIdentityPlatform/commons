@@ -252,8 +252,9 @@
         "$ref": "#/definitions/dynamically-generated-group-schema"
       },
       "create": {
-        "stability": "evolving",
+        "stability": "EVOLVING",
         "mode": "ID_FROM_SERVER",
+        "singleton" : false,
         "errors": [
           {
             "$ref": "frapi:common#/errors/badRequest"
@@ -289,7 +290,7 @@
       },
       "queries": [
         {
-          "stability": "evolving",
+          "stability": "EVOLVING",
           "type": "FILTER",
           "queryableFields": [
             "_id",
@@ -300,7 +301,7 @@
             "COOKIE",
             "OFFSET"
           ],
-          "supportedPagingCountPolicies": [
+          "countPolicy": [
             "NONE"
           ],
           "description": "Return resources matching the filter.",
@@ -331,9 +332,11 @@
       ]
     },
     "items": {
+      "mvccSupported": true,
       "create": {
-        "stability": "evolving",
+        "stability": "EVOLVING",
         "mode": "ID_FROM_CLIENT",
+        "singleton" : false,
         "errors": [
           {
             "$ref": "frapi:common#/errors/badRequest"
@@ -368,7 +371,7 @@
         ]
       },
       "read": {
-        "stability": "evolving",
+        "stability": "EVOLVING",
         "errors": [
           {
             "$ref": "frapi:common#/errors/badRequest"
@@ -400,7 +403,7 @@
         ]
       },
       "update": {
-        "stability": "evolving",
+        "stability": "EVOLVING",
         "errors": [
           {
             "$ref": "frapi:common#/errors/badRequest"
@@ -438,7 +441,7 @@
         ]
       },
       "delete": {
-        "stability": "evolving",
+        "stability": "EVOLVING",
         "errors": [
           {
             "$ref": "frapi:common#/errors/badRequest"
@@ -476,7 +479,10 @@
         ]
       },
       "patch": {
-        "stability": "evolving",
+        "stability": "EVOLVING",
+        "operations" : [
+          "ADD"
+        ],
         "errors": [
           {
             "$ref": "frapi:common#/errors/badRequest"
@@ -521,8 +527,9 @@
         "$ref": "#/definitions/dynamically-generated-user-schema"
       },
       "create": {
-        "stability": "evolving",
+        "stability": "EVOLVING",
         "mode": "ID_FROM_SERVER",
+        "singleton" : false,
         "errors": [
           {
             "$ref": "frapi:common#/errors/badRequest"
@@ -558,7 +565,7 @@
       },
       "queries": [
         {
-          "stability": "evolving",
+          "stability": "EVOLVING",
           "type": "FILTER",
           "queryableFields": [
             "_id",
@@ -574,7 +581,7 @@
             "COOKIE",
             "OFFSET"
           ],
-          "supportedPagingCountPolicies": [
+          "countPolicy": [
             "NONE"
           ],
           "description": "Return resources matching the filter.",
@@ -604,9 +611,16 @@
         }
       ],
       "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
         "create": {
-          "stability": "evolving",
+          "stability": "EVOLVING",
           "mode": "ID_FROM_CLIENT",
+          "singleton" : false,
           "errors": [
             {
               "$ref": "frapi:common#/errors/badRequest"
@@ -641,7 +655,7 @@
           ]
         },
         "read": {
-          "stability": "evolving",
+          "stability": "EVOLVING",
           "errors": [
             {
               "$ref": "frapi:common#/errors/badRequest"
@@ -673,7 +687,7 @@
           ]
         },
         "update": {
-          "stability": "evolving",
+          "stability": "EVOLVING",
           "errors": [
             {
               "$ref": "frapi:common#/errors/badRequest"
@@ -711,7 +725,7 @@
           ]
         },
         "delete": {
-          "stability": "evolving",
+          "stability": "EVOLVING",
           "errors": [
             {
               "$ref": "frapi:common#/errors/badRequest"
@@ -749,7 +763,7 @@
           ]
         },
         "patch": {
-          "stability": "evolving",
+          "stability": "EVOLVING",
           "operations": [
             "ADD",
             "REMOVE",
@@ -794,9 +808,9 @@
         },
         "actions": [
           {
-            "stability": "evolving",
+            "stability": "EVOLVING",
             "name": "modifyPassword",
-            "description": "Modify or generate a user password. This action requires a secure transport protocol.",
+            "description": "Modify or generate a user password. This action requires HTTPS.",
             "request": {
               "$ref": "#/definitions/passwordModifyRequest"
             },

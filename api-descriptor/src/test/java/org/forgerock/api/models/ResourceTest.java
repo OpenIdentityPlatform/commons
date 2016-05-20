@@ -184,10 +184,10 @@ public class ResourceTest {
         assertThat(resource.getActions()).hasSize(1);
         Action action = resource.getActions()[0];
         assertThat(action.getName()).isEqualTo("myAction");
-        assertThat(action.getApiErrors()).isEmpty();
-        assertThat(action.getParameters()).isEmpty();
-        assertThat(descriptor.getErrors().getErrors()).isEmpty();
-        assertThat(descriptor.getDefinitions().getDefinitions()).isEmpty();
+        assertThat(action.getApiErrors()).isNull();
+        assertThat(action.getParameters()).isNull();
+        assertThat(descriptor.getErrors()).isNull();
+        assertThat(descriptor.getDefinitions()).isNull();
         assertThat(resource.isMvccSupported()).isTrue();
     }
 
@@ -317,8 +317,8 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Read read = resource.getRead();
         assertThat(read.getDescription()).isEqualTo("A read resource operation.");
-        assertThat(read.getApiErrors()).hasSize(0);
-        assertThat(read.getParameters()).hasSize(0);
+        assertThat(read.getApiErrors()).isNull();
+        assertThat(read.getParameters()).isNull();
         assertThat(read.getSupportedLocales()).hasSize(0);
         assertThat(read.getStability()).isEqualTo(Stability.STABLE);
     }
@@ -345,8 +345,8 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Update update = resource.getUpdate();
         assertThat(update.getDescription()).isEqualTo("An update resource operation.");
-        assertThat(update.getApiErrors()).hasSize(0);
-        assertThat(update.getParameters()).hasSize(0);
+        assertThat(update.getApiErrors()).isNull();
+        assertThat(update.getParameters()).isNull();
         assertThat(update.getSupportedLocales()).hasSize(0);
         assertThat(update.getStability()).isEqualTo(Stability.STABLE);
     }
@@ -372,8 +372,8 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Delete delete = resource.getDelete();
         assertThat(delete.getDescription()).isEqualTo("A delete resource operation.");
-        assertThat(delete.getApiErrors()).hasSize(0);
-        assertThat(delete.getParameters()).hasSize(0);
+        assertThat(delete.getApiErrors()).isNull();
+        assertThat(delete.getParameters()).isNull();
         assertThat(delete.getSupportedLocales()).hasSize(0);
         assertThat(delete.getStability()).isEqualTo(Stability.STABLE);
     }
@@ -399,8 +399,8 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
         Patch patch = resource.getPatch();
         assertThat(patch.getDescription()).isEqualTo("A patch resource operation.");
-        assertThat(patch.getApiErrors()).hasSize(0);
-        assertThat(patch.getParameters()).hasSize(0);
+        assertThat(patch.getApiErrors()).isNull();
+        assertThat(patch.getParameters()).isNull();
         assertThat(patch.getSupportedLocales()).hasSize(0);
         assertThat(patch.getStability()).isEqualTo(Stability.STABLE);
         assertThat(patch.getOperations()).hasSize(2);
@@ -574,7 +574,7 @@ public class ResourceTest {
         assertThat(query1.getStability()).isEqualTo(Stability.EVOLVING);
         assertThat(query1.getType()).isEqualTo(QueryType.ID);
         assertThat(query1.getQueryId()).isEqualTo("query1");
-        assertThat(query1.getCountPolicies()[0]).isEqualTo(CountPolicy.ESTIMATE);
+        assertThat(query1.getCountPolicy()[0]).isEqualTo(CountPolicy.ESTIMATE);
         assertThat(query1.getPagingMode()[0]).isEqualTo(PagingMode.COOKIE);
         assertThat(query1.getPagingMode()[1]).isEqualTo(PagingMode.OFFSET);
         assertThat(query1.getQueryableFields()[0]).isEqualTo("field1");
@@ -591,7 +591,7 @@ public class ResourceTest {
         assertThat(query2.getStability()).isEqualTo(Stability.EVOLVING);
         assertThat(query2.getType()).isEqualTo(QueryType.ID);
         assertThat(query2.getQueryId()).isEqualTo("query2");
-        assertThat(query2.getCountPolicies()[0]).isEqualTo(CountPolicy.NONE);
+        assertThat(query2.getCountPolicy()[0]).isEqualTo(CountPolicy.NONE);
         assertThat(query2.getPagingMode()[0]).isEqualTo(PagingMode.COOKIE);
         assertThat(query2.getPagingMode()[1]).isEqualTo(PagingMode.OFFSET);
         assertThat(query2.getQueryableFields()[0]).isEqualTo("field1");

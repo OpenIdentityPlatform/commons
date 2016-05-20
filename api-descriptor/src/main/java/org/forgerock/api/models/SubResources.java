@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.util.Reject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Sub-resources of a resource are declared here.
  */
+@JsonDeserialize(builder = SubResources.Builder.class)
 public final class SubResources {
     private final Map<String, Resource> subResources;
 
@@ -115,6 +118,7 @@ public final class SubResources {
          * @param resource {@link Resource}
          * @return Builder
          */
+        @JsonAnySetter
         public Builder put(String path, Resource resource) {
             if (isEmpty(path) || containsWhitespace(path)) {
                 throw new IllegalArgumentException("path required and may not contain whitespace");

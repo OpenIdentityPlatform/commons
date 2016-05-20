@@ -121,6 +121,8 @@ public class MarkdownReader {
             fullyQualified = Integer.class.getName();
         } else if (className.startsWith("String")) {
             fullyQualified = String.class.getName();
+        } else if (className.startsWith("boolean")) {
+            fullyQualified = Boolean.class.getName();
         } else {
             fullyQualified = className;
         }

@@ -21,15 +21,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.api.enums.Stability;
 
 /**
  * Class that represents the Operation type in API descriptor.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class Operation {
 
     private final String description;
     private final String[] supportedLocales;
+    @JsonProperty("errors")
     private final ApiError[] apiErrors;
     private final Parameter[] parameters;
     private final Stability stability;
@@ -75,7 +79,7 @@ public abstract class Operation {
      * @return ApiError array
      */
     public ApiError[] getApiErrors() {
-        return apiErrors;
+        return apiErrors.length == 0 ? null : apiErrors;
     }
 
     /**
@@ -84,7 +88,7 @@ public abstract class Operation {
      * @return Parameters
      */
     public Parameter[] getParameters() {
-        return parameters;
+        return parameters.length == 0 ? null : parameters;
     }
 
     /**
@@ -157,6 +161,7 @@ public abstract class Operation {
          * @param description A description of the endpoint
          * @return Builder
          */
+        @JsonProperty("description")
         public T description(String description) {
             this.description = description;
             return self();
@@ -168,6 +173,7 @@ public abstract class Operation {
          * @param supportedlocales Locales codes supported by the operation
          * @return Builder
          */
+        @JsonProperty("supportedLocales")
         public T supportedLocales(String... supportedlocales) {
             this.supportedLocales = supportedlocales;
             return self();
@@ -179,6 +185,7 @@ public abstract class Operation {
          * @param apiErrors What errors may be returned by this operation
          * @return Builder
          */
+        @JsonProperty("errors")
         public T errors(List<ApiError> apiErrors) {
             this.apiErrors.addAll(apiErrors);
             return self();
@@ -201,6 +208,7 @@ public abstract class Operation {
          * @param parameters Extra parameters supported by the operation
          * @return Builder
          */
+        @JsonProperty("parameters")
         public T parameters(List<Parameter> parameters) {
             this.parameters.addAll(parameters);
             return self();
@@ -223,6 +231,7 @@ public abstract class Operation {
          * @param stability Stability
          * @return Builder
          */
+        @JsonProperty("stability")
         public T stability(Stability stability) {
             this.stability = stability;
             return self();

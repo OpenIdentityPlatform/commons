@@ -16,10 +16,13 @@
 
 package org.forgerock.api.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Class that represents the Read Operation type in API descriptor.
  *
  */
+@JsonDeserialize(builder = Read.Builder.class)
 public final class Read extends Operation {
 
     /**

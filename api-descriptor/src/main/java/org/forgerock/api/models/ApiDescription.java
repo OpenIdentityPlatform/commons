@@ -21,11 +21,18 @@ import static org.forgerock.api.models.Errors.errors;
 import static org.forgerock.api.models.Services.services;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 
 /**
  * Class that represents the ApiDescription type in API descriptor.
  */
+@JsonDeserialize(builder = ApiDescription.Builder.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class ApiDescription {
 
     private final String id;
@@ -83,7 +90,26 @@ public final class ApiDescription {
      * @return Definitions map
      */
     public Definitions getDefinitions() {
-        return definitions;
+        return definitions.getDefinitions().isEmpty() ? null : definitions;
+    }
+
+    /**
+     * This allows the models package to mutate the schema defined here. This is used when processing
+     * annotations on resources that may reference schemas using an id, so those schemas need to be defined here
+     * rather than in-line in the resource descriptions.
+     *
+     * @param id The definition id.
+     * @param schema The definition.
+     */
+    void addDefinition(String id, Schema schema) {
+        if (schema.getReference() != null) {
+            throw new IllegalArgumentException("Cannot define a schema using a reference");
+        }
+        Schema defined = definitions.get(id);
+        if (defined != null && !defined.equals(schema)) {
+            throw new IllegalArgumentException("Trying to redefine already defined schema, " + id);
+        }
+        definitions.getDefinitions().put(id, schema);
     }
 
     /**
@@ -92,7 +118,27 @@ public final class ApiDescription {
      * @return Services map
      */
     public Services getServices() {
-        return services;
+        return services.getServices().isEmpty() ? null : services;
+    }
+
+    /**
+     * This allows the models package to mutate the resources defined here. This is used when processing
+     * annotations on resources that may reference resources using an id, so those services need to be defined here
+     * rather than in-line in the resource descriptions.
+     *
+     * @param id The resource id.
+     * @param resource The resource definition.
+     * @see Resource#fromAnnotatedType(Class, Resource.AnnotatedTypeVariant, ApiDescription)
+     */
+    void addService(String id, Resource resource) {
+        if (resource.getReference() != null) {
+            throw new IllegalArgumentException("Cannot define a resource using a reference");
+        }
+        Resource defined = services.get(id);
+        if (defined != null && !defined.equals(resource)) {
+            throw new IllegalArgumentException("Trying to redefine already defined resource, " + id);
+        }
+        services.getServices().put(id, resource);
     }
 
     /**
@@ -101,7 +147,27 @@ public final class ApiDescription {
      * @return Errors map
      */
     public Errors getErrors() {
-        return errors;
+        return errors.getErrors().isEmpty() ? null : errors;
+    }
+
+    /**
+     * This allows the models package to mutate the errors defined here. This is used when processing annotations on
+     * resources that may reference errors using an id, so those errors need to be defined here rather than in-line in
+     * the resource descriptions.
+     *
+     * @param id The error id.
+     * @param apiError The error definition.
+     * @see ApiError#fromAnnotation(org.forgerock.api.annotations.ApiError, ApiDescription, Class)
+     */
+    void addError(String id, ApiError apiError) {
+        if (apiError.getReference() != null) {
+            throw new IllegalArgumentException("Cannot define an apiError using a reference");
+        }
+        ApiError defined = errors.get(id);
+        if (defined != null && !defined.equals(apiError)) {
+            throw new IllegalArgumentException("Trying to redefine already defined apiError, " + id);
+        }
+        errors.getErrors().put(id, apiError);
     }
 
     /**
@@ -120,6 +186,29 @@ public final class ApiDescription {
      */
     public static Builder apiDescription() {
         return new Builder();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ApiDescription that = (ApiDescription) o;
+        return Objects.equals(id, that.id)
+                && Objects.equals(version, that.version)
+                && Objects.equals(description, that.description)
+                && Objects.equals(definitions, that.definitions)
+                && Objects.equals(services, that.services)
+                && Objects.equals(errors, that.errors)
+                && Objects.equals(paths, that.paths);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, version, description, definitions, services, errors, paths);
     }
 
     /**
@@ -147,6 +236,7 @@ public final class ApiDescription {
          * @param id ApiDescription id
          * @return Builder
          */
+        @JsonProperty("id")
         public Builder id(String id) {
             this.id = id;
             return this;
@@ -158,6 +248,7 @@ public final class ApiDescription {
          * @param description Description of API Description
          * @return Builder
          */
+        @JsonProperty("description")
         public Builder description(String description) {
             this.description = description;
             return this;
@@ -169,6 +260,7 @@ public final class ApiDescription {
          * @param definitions Definitions for this API Description
          * @return Builder
          */
+        @JsonProperty("definitions")
         public Builder definitions(Definitions definitions) {
             this.definitions = definitions;
             return this;
@@ -181,6 +273,7 @@ public final class ApiDescription {
          * @param services Services for this API Description
          * @return Builder
          */
+        @JsonProperty("services")
         public Builder services(Services services) {
             this.services = services;
             return this;
@@ -192,6 +285,7 @@ public final class ApiDescription {
          * @param errors Errors for this API Description
          * @return Builder
          */
+        @JsonProperty("errors")
         public Builder errors(Errors errors) {
             this.errors = errors;
             return this;
@@ -203,6 +297,7 @@ public final class ApiDescription {
          * @param paths Paths
          * @return Builder
          */
+        @JsonProperty("paths")
         public Builder paths(Paths paths) {
             this.paths = paths;
             return this;
@@ -214,6 +309,7 @@ public final class ApiDescription {
          * @param version The version.
          * @return This builder.
          */
+        @JsonProperty("version")
         public Builder version(String version) {
             this.version = version;
             return this;

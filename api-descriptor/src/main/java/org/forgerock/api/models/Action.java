@@ -22,6 +22,9 @@ import static org.forgerock.api.util.ValidationUtil.isEmpty;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.guava.common.base.Strings;
 
 import org.forgerock.api.ApiValidationException;
@@ -29,6 +32,8 @@ import org.forgerock.api.ApiValidationException;
 /**
  * Class that represents the Action operation type in API descriptor.
  */
+@JsonDeserialize(builder = Action.Builder.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class Action extends Operation implements Comparable<Action> {
 
     private final String name;
@@ -182,6 +187,7 @@ public final class Action extends Operation implements Comparable<Action> {
          * @param name Action name
          * @return Builder
          */
+        @JsonProperty("name")
         public Builder name(String name) {
             this.name = name;
             return this;
@@ -193,6 +199,7 @@ public final class Action extends Operation implements Comparable<Action> {
          * @param request Action request
          * @return Builder
          */
+        @JsonProperty("request")
         public Builder request(Schema request) {
             this.request = request;
             return this;
@@ -204,6 +211,7 @@ public final class Action extends Operation implements Comparable<Action> {
          * @param response Action resopnse
          * @return Builder
          */
+        @JsonProperty("response")
         public Builder response(Schema response) {
             this.response = response;
             return this;

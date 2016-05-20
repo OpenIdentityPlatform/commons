@@ -27,17 +27,21 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.annotations.Actions;
 import org.forgerock.api.annotations.CollectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * Class that represents the Items type in API descriptor.
  */
+@JsonDeserialize(builder = Items.Builder.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public final class Items {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Items.class);
@@ -117,7 +121,7 @@ public final class Items {
      * @return Actions
      */
     public Action[] getActions() {
-        return actions;
+        return actions.length == 0 ? null : actions;
     }
 
     /**
@@ -280,6 +284,7 @@ public final class Items {
          * @param create The create operation description, if supported
          * @return Builder
          */
+        @JsonProperty("create")
         public Builder create(Create create) {
             checkState();
             this.create = create;
@@ -292,6 +297,7 @@ public final class Items {
          * @param read The read operation description, if supported
          * @return Builder
          */
+        @JsonProperty("read")
         public Builder read(Read read) {
             checkState();
             this.read = read;
@@ -304,6 +310,7 @@ public final class Items {
          * @param update The update operation description, if supported
          * @return Builder
          */
+        @JsonProperty("update")
         public Builder update(Update update) {
             checkState();
             this.update = update;
@@ -316,6 +323,7 @@ public final class Items {
          * @param delete The delete operation description, if supported
          * @return Builder
          */
+        @JsonProperty("delete")
         public Builder delete(Delete delete) {
             checkState();
             this.delete = delete;
@@ -328,6 +336,7 @@ public final class Items {
          * @param patch The patch operation description, if supported
          * @return Builder
          */
+        @JsonProperty("patch")
         public Builder patch(Patch patch) {
             checkState();
             this.patch = patch;
@@ -340,6 +349,7 @@ public final class Items {
          * @param actions The list of action operation descriptions, if supported
          * @return Builder
          */
+        @JsonProperty("actions")
         public Builder actions(List<Action> actions) {
             checkState();
             this.actions.addAll(actions);
@@ -364,6 +374,7 @@ public final class Items {
          * @param pathParameter The path parameter definition.
          * @return Builder
          */
+        @JsonProperty("pathParameter")
         public Builder pathParameter(Parameter pathParameter) {
             checkState();
             this.pathParameter = pathParameter;
@@ -376,6 +387,7 @@ public final class Items {
          * @param subresources The sub-reosurces definition.
          * @return Builder
          */
+        @JsonProperty("subresources")
         public Builder subresources(SubResources subresources) {
             checkState();
             this.subresources = subresources;

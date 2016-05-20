@@ -59,9 +59,11 @@ import org.forgerock.api.models.Query;
 import org.forgerock.api.models.Reference;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.Schema;
+import org.forgerock.api.models.Services;
 import org.forgerock.api.models.SubResources;
 import org.forgerock.api.models.VersionedPath;
 import org.forgerock.api.util.ReferenceResolver;
+import org.forgerock.api.util.ValidationUtil;
 import org.forgerock.http.routing.Version;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -351,7 +353,8 @@ public final class ApiDocGenerator {
      */
     private void outputUndefinedServices(final String parentNamespace) throws IOException {
         //
-        if (!apiDescription.getServices().getNames().isEmpty()) {
+        Services services = apiDescription.getServices();
+        if (services != null && !services.getNames().isEmpty()) {
             for (final String name : apiDescription.getServices().getNames()) {
                 final Resource resource = apiDescription.getServices().get(name);
                 if (!referencedServices.contains(resource)) {
@@ -761,12 +764,12 @@ public final class ApiDocGenerator {
             table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
         }
 
-        if (!isEmpty(query.getCountPolicies())) {
+        if (!isEmpty(query.getCountPolicy())) {
             headers.add(asciiDoc().link("query-page-count-policies", "Page Count Policies").toString());
             columnWidths.add(COLUMN_WIDTH_MEDIUM);
 
             final AsciiDoc blockDoc = asciiDoc();
-            for (final CountPolicy countPolicy : query.getCountPolicies()) {
+            for (final CountPolicy countPolicy : query.getCountPolicy()) {
                 blockDoc.unorderedList1(asciiDoc().mono(countPolicy.toString()).toString());
             }
             table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
@@ -938,7 +941,7 @@ public final class ApiDocGenerator {
             table.columnCell(parameter.getName(), MONO_CELL)
                     .columnCell(parameter.getType(), MONO_CELL)
                     .columnCell(asciiDoc().include(descriptionFilename).toString(), ASCII_DOC_CELL)
-                    .columnCell(parameter.isRequired() ? "&#10003;" : null)
+                    .columnCell(ValidationUtil.nullToFalse(parameter.isRequired()) ? "&#10003;" : null)
                     .columnCell(parameter.getSource().name(), MONO_CELL)
                     .columnCell(enumValuesContent, ASCII_DOC_CELL)
                     .rowEnd();

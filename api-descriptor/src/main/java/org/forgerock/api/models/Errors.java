@@ -22,7 +22,11 @@ import static org.forgerock.util.Reject.*;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -30,6 +34,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Class that represents API descriptor {@link ApiError} errors.
  */
+@JsonDeserialize(builder = Errors.Builder.class)
 public final class Errors {
 
     /**
@@ -74,24 +79,21 @@ public final class Errors {
         return errors.keySet();
     }
 
-    /**
-     * This allows the models package to mutate the errors defined here. This is used when processing annotations on
-     * resources that may reference errors using an id, so those errors need to be defined here rather than in-line in
-     * the resource descriptions.
-     *
-     * @param id The error id.
-     * @param apiError The error definition.
-     * @see ApiError#fromAnnotation(org.forgerock.api.annotations.ApiError, ApiDescription, Class)
-     */
-    void addError(String id, ApiError apiError) {
-        if (apiError.getReference() != null) {
-            throw new IllegalArgumentException("Cannot define an apiError using a reference");
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
         }
-        ApiError defined = errors.get(id);
-        if (defined != null && !defined.equals(apiError)) {
-            throw new IllegalArgumentException("Trying to redefine already defined apiError, " + id);
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
-        errors.put(id, apiError);
+        Errors errors1 = (Errors) o;
+        return Objects.equals(errors, errors1.errors);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(errors);
     }
 
     /**
@@ -123,6 +125,7 @@ public final class Errors {
          * @param apiError {@link ApiError}
          * @return Builder
          */
+        @JsonAnySetter
         public Builder put(String name, ApiError apiError) {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");

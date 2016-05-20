@@ -16,10 +16,13 @@
 
 package org.forgerock.api.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Class that represents the Create Operation type in API descriptor.
  *
  */
+@JsonDeserialize(builder = Update.Builder.class)
 public final class Update extends Operation {
 
     /**

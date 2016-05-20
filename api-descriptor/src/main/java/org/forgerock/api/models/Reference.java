@@ -16,17 +16,21 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.api.util.ValidationUtil.containsWhitespace;
+import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
 import java.util.Objects;
 
 import org.forgerock.api.ApiValidationException;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Class that represents the Reference type in API descriptor.
  */
+@JsonDeserialize(builder = Reference.Builder.class)
 public final class Reference {
 
     private final String value;
@@ -88,12 +92,18 @@ public final class Reference {
         private Builder() {
         }
 
+        @JsonCreator
+        private Builder(String value) {
+            this.value = value;
+        }
+
         /**
          * Setter for Reference-value.
          *
          * @param value Reference-value
          * @return Builder
          */
+        @JsonCreator
         public Builder value(String value) {
             this.value = value;
             return this;

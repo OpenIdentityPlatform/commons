@@ -22,16 +22,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.enums.CreateMode;
 
 /**
  * Class that represents the Create Operation type in API descriptor.
  */
+@JsonDeserialize(builder = Create.Builder.class)
 public final class Create extends Operation {
 
     private final CreateMode mode;
-    private final boolean singleton;
+    private final Boolean singleton;
 
     /**
      * Protected contstructor of the Create.
@@ -62,29 +65,8 @@ public final class Create extends Operation {
      *
      * @return {@code true} if operation creates singleton resources and {@code false} otherwise
      */
-    public boolean isSingleton() {
+    public Boolean isSingleton() {
         return singleton;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-        Create create = (Create) o;
-        return singleton == create.singleton
-                && mode == create.mode;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), mode, singleton);
     }
 
     /**
@@ -128,13 +110,34 @@ public final class Create extends Operation {
                 .build();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        Create create = (Create) o;
+        return mode == create.mode
+                && Objects.equals(singleton, create.singleton);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), mode, singleton);
+    }
+
     /**
      * Builder for the Create.
      */
     public static final class Builder extends Operation.Builder<Builder> {
 
         private CreateMode mode;
-        private boolean singleton;
+        private Boolean singleton = false;
 
         private Builder() {
             super();
@@ -147,6 +150,7 @@ public final class Create extends Operation {
          * @param mode Create-mode
          * @return Builder
          */
+        @JsonProperty("mode")
         public Builder mode(CreateMode mode) {
             this.mode = mode;
             return this;
@@ -158,7 +162,8 @@ public final class Create extends Operation {
          * @param singleton Specifies that create operates on a singleton as opposed to a collection.
          * @return Builder
          */
-        public Builder singleton(boolean singleton) {
+        @JsonProperty("singleton")
+        public Builder singleton(Boolean singleton) {
             this.singleton = singleton;
             return this;
         }

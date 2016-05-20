@@ -21,7 +21,11 @@ import static org.forgerock.util.Reject.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -29,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Class that represents API descriptor {@link Schema} definitions.
  */
+@JsonDeserialize(builder = Definitions.Builder.class)
 public final class Definitions {
 
     private final Map<String, Schema> definitions;
@@ -77,24 +82,21 @@ public final class Definitions {
         return new Builder();
     }
 
-    /**
-     * This allows the models package to mutate the schemas defined here. This is used when processing annotations on
-     * resources that may reference schemas using an id, so those schemas need to be defined here rather than in-line in
-     * the resource descriptions.
-     *
-     * @param id The schema id.
-     * @param schema The schema definition.
-     * @see Schema#fromAnnotation(org.forgerock.api.annotations.Schema, ApiDescription, Class)
-     */
-    void addDefinition(String id, Schema schema) {
-        if (schema.getReference() != null) {
-            throw new IllegalArgumentException("Cannot define a schema using a reference");
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
         }
-        Schema defined = definitions.get(id);
-        if (defined != null && !defined.equals(schema)) {
-            throw new IllegalArgumentException("Trying to redefine already defined schema, " + id);
+        if (o == null || getClass() != o.getClass()) {
+            return false;
         }
-        definitions.put(id, schema);
+        Definitions that = (Definitions) o;
+        return Objects.equals(definitions, that.definitions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(definitions);
     }
 
     /**
@@ -117,6 +119,7 @@ public final class Definitions {
          * @param schema {@link Schema}
          * @return Builder
          */
+        @JsonAnySetter
         public Builder put(String name, Schema schema) {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");

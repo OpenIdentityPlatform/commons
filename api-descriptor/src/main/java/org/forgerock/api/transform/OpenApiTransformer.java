@@ -16,14 +16,20 @@
 
 package org.forgerock.api.transform;
 
-import static java.lang.Boolean.*;
-import static java.util.Arrays.*;
-import static java.util.Collections.*;
-import static org.forgerock.api.markup.asciidoc.AsciiDoc.*;
-import static org.forgerock.api.util.PathUtil.*;
-import static org.forgerock.api.util.ValidationUtil.*;
-import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.Reject.*;
+import static java.lang.Boolean.TRUE;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
+import static org.forgerock.api.markup.asciidoc.AsciiDoc.normalizeName;
+import static org.forgerock.api.util.PathUtil.buildPath;
+import static org.forgerock.api.util.PathUtil.buildPathParameters;
+import static org.forgerock.api.util.PathUtil.mergeParameters;
+import static org.forgerock.api.util.ValidationUtil.isEmpty;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.fieldIfNotNull;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,6 +66,7 @@ import org.forgerock.api.models.SubResources;
 import org.forgerock.api.models.Update;
 import org.forgerock.api.models.VersionedPath;
 import org.forgerock.api.util.ReferenceResolver;
+import org.forgerock.api.util.ValidationUtil;
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.annotations.VisibleForTesting;
@@ -752,8 +759,8 @@ public class OpenApiTransformer {
                 totalPagedResultsPolicyParameter.setName("_totalPagedResultsPolicy");
                 totalPagedResultsPolicyParameter.setType("string");
                 final List<String> totalPagedResultsPolicyValues = new ArrayList<>();
-                if (query.getCountPolicies() != null) {
-                    for (final CountPolicy countPolicy : query.getCountPolicies()) {
+                if (query.getCountPolicy() != null) {
+                    for (final CountPolicy countPolicy : query.getCountPolicy()) {
                         totalPagedResultsPolicyValues.add(countPolicy.name());
                     }
                 } else {
@@ -927,7 +934,7 @@ public class OpenApiTransformer {
                 operationParameter.setName(parameter.getName());
                 operationParameter.setType(parameter.getType());
                 operationParameter.setDescription(parameter.getDescription());
-                operationParameter.setRequired(parameter.isRequired());
+                operationParameter.setRequired(ValidationUtil.nullToFalse(parameter.isRequired()));
                 if (!isEmpty(parameter.getEnumValues())) {
                     operationParameter.setEnum(asList(parameter.getEnumValues()));
 

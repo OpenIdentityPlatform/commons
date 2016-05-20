@@ -54,14 +54,11 @@
       "mvccSupported" : false,
       "actions" : [
         {
-          "name" : "getChangedWatchedFields",
-          "request" : {
-            "$ref" : "#/definitions/changedFieldsRequest"
-          },
+          "name" : "availableHandlers",
+          "description" : "List all available audit handlers and their configuration schemas.",
           "response" : {
-            "$ref" : "#/definitions/changedFieldsResponse"
+            "$ref" : "#/definitions/availableHandlers"
           },
-          "stability" : "INTERNAL",
           "errors" : [
             {"$ref" : "frapi:common#/errors/internalServerError"}
           ]
@@ -80,11 +77,14 @@
           ]
         },
         {
-          "name" : "availableHandlers",
-          "description" : "List all available audit handlers and their configuration schemas.",
-          "response" : {
-            "$ref" : "#/definitions/availableHandlers"
+          "name" : "getChangedWatchedFields",
+          "request" : {
+            "$ref" : "#/definitions/changedFieldsRequest"
           },
+          "response" : {
+            "$ref" : "#/definitions/changedFieldsResponse"
+          },
+          "stability" : "INTERNAL",
           "errors" : [
             {"$ref" : "frapi:common#/errors/internalServerError"}
           ]
@@ -136,7 +136,8 @@
       ],
       "create" : {
         "description" : "Publish audit event.",
-        "supportedModes" : [ "ID_FROM_SERVER" ],
+        "mode" : "ID_FROM_SERVER",
+        "singleton" : false,
         "errors" : [
           {"$ref" : "frapi:common#/errors/badRequest"},
           {"$ref" : "frapi:common#/errors/forbidden"},
@@ -148,13 +149,19 @@
           {"$ref" : "frapi:common#/errors/gatewayTimeout"}
         ]
       },
-      "query" : [
+      "queries" : [
         {
           "type" : "FILTER",
           "description" : "Query audit events via Elasticsearch Audit Event Handler.",
           "pagingMode" : [ "OFFSET", "COOKIE" ],
-          "countPolicies" : [ "EXACT" ],
-          "queryableFields" : [ "*" ],
+          "countPolicy" : [ "EXACT" ],
+          "queryableFields" : [
+            "eventName",
+            "timestamp",
+            "transactionId",
+            "userId",
+            "trackingIds"
+          ],
           "errors" : [
             {"$ref" : "frapi:common#/errors/badRequest"},
             {"$ref" : "frapi:common#/errors/forbidden"},
@@ -168,14 +175,14 @@
         }
       ],
       "items" : {
-        "parameters" : [
+        "pathParameter" :
           {
             "name" : "id",
             "type" : "string",
             "source" : "PATH",
             "required" : true
           }
-        ],
+        ,
         "read" : {
           "description" : "Read audit event by `topic` and resource-`id`.",
           "errors" : [
@@ -194,7 +201,7 @@
   },
   "paths" : {
     "/audit" : {
-      "0" : {
+      "0.0" : {
         "$ref" : "#/services/audit:0"
       }
     }

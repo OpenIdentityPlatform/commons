@@ -21,13 +21,17 @@ import static org.forgerock.api.util.ValidationUtil.isEmpty;
 import java.util.Arrays;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.enums.ParameterSource;
 
 /**
  * Class that represents the Parameter type in API descriptor.
  */
+@JsonDeserialize(builder = Parameter.Builder.class)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class Parameter {
 
     private final String name;
@@ -35,7 +39,7 @@ public final class Parameter {
     private final String defaultValue; //Todo String?
     private final String description;
     private final ParameterSource source;
-    private final boolean required;
+    private final Boolean required;
     private final String[] enumValues;
     private final String[] enumTitles;
 
@@ -119,7 +123,7 @@ public final class Parameter {
      *
      * @return Required
      */
-    public boolean isRequired() {
+    public Boolean isRequired() {
         return required;
     }
 
@@ -204,7 +208,7 @@ public final class Parameter {
         private String defaultValue;
         private String description;
         private ParameterSource source;
-        private boolean required;
+        private Boolean required;
         private String[] enumValues;
         private String[] enumTitles;
 
@@ -217,6 +221,7 @@ public final class Parameter {
          * @param name Parameter name
          * @return Builder
          */
+        @JsonProperty("name")
         public Builder name(String name) {
             this.name = name;
             return this;
@@ -228,6 +233,7 @@ public final class Parameter {
          * @param enumValues Enum-values
          * @return Builder
          */
+        @JsonProperty("enum")
         public Builder enumValues(String... enumValues) {
             this.enumValues = enumValues;
             return this;
@@ -239,6 +245,7 @@ public final class Parameter {
          * @param enumTitles Enum-titles
          * @return Builder
          */
+        @JsonProperty("options/enum_titles")
         public Builder enumTitles(String... enumTitles) {
             this.enumTitles = enumTitles;
             return this;
@@ -250,6 +257,7 @@ public final class Parameter {
          * @param type Parameter type
          * @return Builder
          */
+        @JsonProperty("type")
         public Builder type(String type) {
             this.type = type;
             return this;
@@ -261,6 +269,7 @@ public final class Parameter {
          * @param defaultValue If exists, the default value
          * @return builder
          */
+        @JsonProperty("defaultValue")
         public Builder defaultValue(String defaultValue) {
             this.defaultValue = defaultValue;
             return this;
@@ -272,6 +281,7 @@ public final class Parameter {
          * @param description The description of the parameter
          * @return builder
          */
+        @JsonProperty("description")
         public Builder description(String description) {
             this.description = description;
             return this;
@@ -283,6 +293,7 @@ public final class Parameter {
          * @param source Where the parameter comes from. May be: PATH or ADDITIONAL
          * @return builder
          */
+        @JsonProperty("source")
         public Builder source(ParameterSource source) {
             this.source = source;
             return this;
@@ -294,7 +305,8 @@ public final class Parameter {
          * @param required Whether the parameter is required
          * @return builder
          */
-        public Builder required(boolean required) {
+        @JsonProperty("required")
+        public Builder required(Boolean required) {
             this.required = required;
             return this;
         }

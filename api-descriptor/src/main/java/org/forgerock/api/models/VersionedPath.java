@@ -18,8 +18,11 @@ package org.forgerock.api.models;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.http.routing.Version;
 import org.forgerock.util.Reject;
@@ -30,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Class that represents versioned {@link Resource}s on an API descriptor path.
  */
+@JsonDeserialize(builder = VersionedPath.Builder.class)
 public final class VersionedPath {
 
     /**
@@ -106,6 +110,23 @@ public final class VersionedPath {
         paths.put(v, Reject.checkNotNull(resource));
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        VersionedPath that = (VersionedPath) o;
+        return Objects.equals(paths, that.paths);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paths);
+    }
+
     /**
      * Builder to help construct the VersionedPath.
      */
@@ -132,6 +153,18 @@ public final class VersionedPath {
             }
             paths.put(Reject.checkNotNull(version), Reject.checkNotNull(resource));
             return this;
+        }
+
+        /**
+         * Adds a resource-version.
+         *
+         * @param version Resource-version as string
+         * @param resource {@link Resource}
+         * @return Builder
+         */
+        @JsonAnySetter
+        public Builder put(String version, Resource resource) {
+            return put(Version.version(version), resource);
         }
 
         /**

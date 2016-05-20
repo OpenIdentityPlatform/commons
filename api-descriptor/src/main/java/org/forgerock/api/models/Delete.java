@@ -16,10 +16,13 @@
 
 package org.forgerock.api.models;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * Class that represents the Delete operation type in API descriptor.
  *
  */
+@JsonDeserialize(builder = Delete.Builder.class)
 public final class Delete extends Operation {
 
     /**

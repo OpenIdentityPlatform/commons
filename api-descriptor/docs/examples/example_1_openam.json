@@ -1,4 +1,7 @@
 {
+    "id": "example:1-openam.json",
+    "description": "OPENAM 1 example",
+    "version": "1.0.0",
     "definitions": {
         "frapi:openam:restsms:services:audit": {
             "title": "OpenAM Audit Service schema",
@@ -208,23 +211,24 @@
     "paths":{
         "/realm-config/services":{
             "1.0":{
+                "mvccSupported": false,
                 "actions":[
                     {
-                        "id":"getAllTypes",
+                        "name":"getAllTypes",
                         "description":"Get all the types that are children of this endpoint",
                         "response":{
                             "$ref":"frapi:openam:restsms:service:typeresults"
                         }
                     },
                     {
-                        "id":"getCreatableTypes",
+                        "name":"getCreatableTypes",
                         "description":"Get all the types that are children of this endpoint that can be created",
                         "response":{
                             "$ref":"frapi:openam:restsms:service:typeresults"
                         }
                     },
                     {
-                        "id":"nextdescendents",
+                        "name":"nextdescendents",
                         "description":"Get all the types that are children of this endpoint",
                         "response":{
                             "type":"object",
@@ -255,53 +259,44 @@
         },
         "/realm-config/services/audit":{
             "1.0":{
+                "mvccSupported": false,
                 "resourceSchema":{
                     "$ref":"frapi:openam:restsms:services:audit"
                 },
                 "create":{
                     "mode":"ID_FROM_CLIENT",
-                    "mvccSupported":false
+                    "singleton": false
                 },
                 "read":{
-
                 },
                 "update":{
-                    "mvccSupported":false
                 },
                 "delete":{
-                    "mvccSupported":false
                 },
                 "actions":[
                     {
-                        "id":"template",
-                        "description":"Get a template for this service",
-                        "response":{
-                            "$ref":"frapi:openam:restsms:services:audit"
-                        }
-                    },
-                    {
-                        "id":"getType",
-                        "description":"Get the type of this endpoint",
-                        "response":{
-                            "$ref":"frapi:openam:restsms:service:type"
-                        }
-                    },
-                    {
-                        "id":"getAllTypes",
+                        "name":"getAllTypes",
                         "description":"Get all the types that are children of this endpoint",
                         "response":{
                             "$ref":"frapi:openam:restsms:service:type"
                         }
                     },
                     {
-                        "id":"getCreatableTypes",
+                        "name":"getCreatableTypes",
                         "description":"Get all the types that are children of this endpoint that can be created",
                         "response":{
                             "$ref":"frapi:openam:restsms:service:type"
                         }
                     },
                     {
-                        "id":"nextdescendents",
+                        "name":"getType",
+                        "description":"Get the type of this endpoint",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    },
+                    {
+                        "name":"nextdescendents",
                         "description":"Get all the types that are children of this endpoint",
                         "response":{
                             "type":"object",
@@ -329,39 +324,47 @@
                                 }
                             }
                         }
+                    },
+                    {
+                        "name":"template",
+                        "description":"Get a template for this service",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:services:audit"
+                        }
                     }
                 ]
             }
         },
         "/realm-config/services/audit/CSV":{
             "1.0":{
+                "mvccSupported":false,
                 "resourceSchema":{
                     "$ref":"frapi:openam:restsms:services:audit:csv"
                 },
                 "actions":[
                     {
-                        "id":"getType",
-                        "description":"Get the type description for this endpoint",
-                        "response":{
-                            "$ref":"frapi:openam:restsms:service:type"
-                        }
-                    },
-                    {
-                        "id":"getAllTypes",
+                        "name":"getAllTypes",
                         "description":"Get all the types that are children of this endpoint",
                         "response":{
                             "$ref":"frapi:openam:restsms:service:type"
                         }
                     },
                     {
-                        "id":"getCreatableTypes",
+                        "name":"getCreatableTypes",
                         "description":"Get all the types that are children of this endpoint that can be created",
                         "response":{
                             "$ref":"frapi:openam:restsms:service:type"
                         }
                     },
                     {
-                        "id":"nextdescendents",
+                        "name":"getType",
+                        "description":"Get the type description for this endpoint",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    },
+                    {
+                        "name":"nextdescendents",
                         "description":"Get all the types that are children of this endpoint",
                         "response":{
                             "$ref":"frapi:openam:restsms:service:type"
@@ -372,9 +375,13 @@
                     {
                         "type":"FILTER",
                         "queryableFields":[
-
+                            "enabled",
+                            "topics",
+                            "location"
                         ],
-                        "pagingMode":"NOT_SUPPORTED",
+                        "pagingMode": [
+                            "OFFSET"
+                        ],
                         "description":"Allows query of the CSV instances - the only supported query is `true`."
                     }
                 ]
@@ -382,6 +389,7 @@
         },
         "/realm-config/services/audit/CSV/{id}":{
             "1.0":{
+                "mvccSupported":false,
                 "resourceSchema":{
                     "$ref":"frapi:openam:restsms:services:audit:csv"
                 },
@@ -395,17 +403,14 @@
                             "required":true
                         }
                     ],
-                    "mode":"STATIC_ID_FROM_SERVER",
-                    "mvccSupported":false
+                    "mode":"ID_FROM_SERVER",
+                    "singleton": false
                 },
                 "read":{
-
                 },
                 "update":{
-                    "mvccSupported":false
                 },
                 "delete":{
-                    "mvccSupported":false
                 }
             }
         }

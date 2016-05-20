@@ -117,11 +117,12 @@
       "create": {
         "mode": "ID_FROM_SERVER",
         "description": "User create operation",
-        "locales": [
+        "singleton" : false,
+        "supportedLocales": [
           "en-GB",
           "en-US"
         ],
-        "error": [
+        "errors": [
           {
             "$ref": "#/errors/badRequest"
           },
@@ -138,19 +139,19 @@
             "name",
             "password"
           ],
-          "pagingModes": [
+          "pagingMode": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicies": [
+          "countPolicy": [
             "NONE"
           ],
           "description": "Query the user collection",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -161,14 +162,21 @@
         }
       ],
       "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
         "create": {
           "mode": "ID_FROM_CLIENT",
           "description": "User create operation",
-          "locales": [
+          "singleton" : false,
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -179,11 +187,11 @@
         },
         "read": {
           "description": "User read operation",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -198,11 +206,11 @@
         },
         "update": {
           "description": "User update operation",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -213,11 +221,11 @@
         },
         "delete": {
           "description": "User delete operation",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -228,11 +236,15 @@
         },
         "patch": {
           "description": "User patch operation",
-          "locales": [
+          "operations": [
+            "ADD",
+            "REMOVE"
+          ],
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -245,11 +257,11 @@
           {
             "name": "resetPassword",
             "description": "Reset user password",
-            "locales": [
+            "supportedLocales": [
               "en-GB",
               "en-US"
             ],
-            "error": [
+            "errors": [
               {
                 "$ref": "#/errors/badRequest"
               },
@@ -279,11 +291,12 @@
       "create": {
         "mode": "ID_FROM_SERVER",
         "description": "User create operation",
-        "locales": [
+        "singleton" : false,
+        "supportedLocales": [
           "en-GB",
           "en-US"
         ],
-        "error": [
+        "errors": [
           {
             "$ref": "#/errors/badRequest"
           },
@@ -300,19 +313,19 @@
             "name",
             "password"
           ],
-          "pagingModes": [
+          "pagingMode": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicies": [
+          "countPolicy": [
             "NONE"
           ],
           "description": "Query the user collection",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -323,14 +336,21 @@
         }
       ],
       "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
         "create": {
           "mode": "ID_FROM_CLIENT",
           "description": "User create operation",
-          "locales": [
+          "singleton" : false,
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -341,11 +361,11 @@
         },
         "read": {
           "description": "User read operation",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -360,11 +380,11 @@
         },
         "update": {
           "description": "User update operation",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -375,11 +395,11 @@
         },
         "delete": {
           "description": "User delete operation",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -390,11 +410,15 @@
         },
         "patch": {
           "description": "User patch operation",
-          "locales": [
+          "operations": [
+            "ADD",
+            "REMOVE"
+          ],
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -407,11 +431,11 @@
           {
             "name": "resetPassword",
             "description": "Reset user password",
-            "locales": [
+            "supportedLocales": [
               "en-GB",
               "en-US"
             ],
-            "error": [
+            "errors": [
               {
                 "$ref": "#/errors/badRequest"
               },
@@ -441,11 +465,12 @@
       "create": {
         "mode": "ID_FROM_SERVER",
         "description": "Device create operation",
-        "locales": [
+        "singleton" : false,
+        "supportedLocales": [
           "en-GB",
           "en-US"
         ],
-        "error": [
+        "errors": [
           {
             "$ref": "#/errors/badRequest"
           },
@@ -464,19 +489,19 @@
             "rollOutDate",
             "stolen"
           ],
-          "pagingModes": [
+          "pagingMode": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicies": [
+          "countPolicy": [
             "NONE"
           ],
           "description": "Query the device collection",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -487,14 +512,21 @@
         }
       ],
       "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
         "create": {
           "mode": "ID_FROM_CLIENT",
           "description": "Create new device",
-          "locales": [
+          "singleton" : false,
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -505,11 +537,11 @@
         },
         "read": {
           "description": "Read one device",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -524,11 +556,11 @@
         },
         "update": {
           "description": "Update a device",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -539,11 +571,11 @@
         },
         "delete": {
           "description": "Delete a device",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -554,11 +586,15 @@
         },
         "patch": {
           "description": "Patch a device",
-          "locales": [
+          "operations": [
+            "ADD",
+            "REMOVE"
+          ],
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -571,11 +607,11 @@
           {
             "name": "markAsStolen",
             "description": "Mark device as stolen",
-            "locales": [
+            "supportedLocales": [
               "en-GB",
               "en-US"
             ],
-            "error": [
+            "errors": [
               {
                 "$ref": "#/errors/badRequest"
               },
@@ -600,11 +636,12 @@
       "create": {
         "mode": "ID_FROM_SERVER",
         "description": "Device create operation",
-        "locales": [
+        "singleton" : false,
+        "supportedLocales": [
           "en-GB",
           "en-US"
         ],
-        "error": [
+        "errors": [
           {
             "$ref": "#/errors/badRequest"
           },
@@ -623,19 +660,19 @@
             "rollOutDate",
             "stolen"
           ],
-          "pagingModes": [
+          "pagingMode": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicies": [
+          "countPolicy": [
             "NONE"
           ],
           "description": "Query the device collection",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -646,14 +683,21 @@
         }
       ],
       "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
         "create": {
           "mode": "ID_FROM_CLIENT",
           "description": "Create new device",
-          "locales": [
+          "singleton" : false,
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -664,11 +708,11 @@
         },
         "read": {
           "description": "Read one device",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -683,11 +727,11 @@
         },
         "update": {
           "description": "Update a device",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -698,11 +742,11 @@
         },
         "delete": {
           "description": "Delete a device",
-          "locales": [
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -713,11 +757,15 @@
         },
         "patch": {
           "description": "Patch a device",
-          "locales": [
+          "operations": [
+            "ADD",
+            "REMOVE"
+          ],
+          "supportedLocales": [
             "en-GB",
             "en-US"
           ],
-          "error": [
+          "errors": [
             {
               "$ref": "#/errors/badRequest"
             },
@@ -730,11 +778,11 @@
           {
             "name": "markAsStolen",
             "description": "Mark device as stolen",
-            "locales": [
+            "supportedLocales": [
               "en-GB",
               "en-US"
             ],
-            "error": [
+            "errors": [
               {
                 "$ref": "#/errors/badRequest"
               },
@@ -750,11 +798,11 @@
           {
             "name": "rollOut",
             "description": "Rollout the device",
-            "locales": [
+            "supportedLocales": [
               "en-GB",
               "en-US"
             ],
-            "error": [
+            "errors": [
               {
                 "$ref": "#/errors/badRequest"
               },

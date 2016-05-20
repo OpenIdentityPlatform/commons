@@ -21,12 +21,15 @@ import static org.forgerock.api.util.ValidationUtil.isEmpty;
 import java.util.Arrays;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.enums.PatchOperation;
 
 /**
  * Class that represents the Patch operation type in API descriptor.
  */
+@JsonDeserialize(builder = Patch.Builder.class)
 public final class Patch extends Operation {
 
     private final PatchOperation[] operations;
@@ -108,7 +111,6 @@ public final class Patch extends Operation {
                 .build();
     }
 
-
     /**
      * Builder to help construct the Patch.
      */
@@ -126,6 +128,7 @@ public final class Patch extends Operation {
          * @param operations Supported Patch-operations
          * @return Builder
          */
+        @JsonProperty("operations")
         public Builder operations(PatchOperation... operations) {
             this.operations = operations;
             return this;

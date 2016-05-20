@@ -28,6 +28,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.annotations.Actions;
 import org.forgerock.api.annotations.CollectionProvider;
@@ -39,7 +41,6 @@ import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -50,6 +51,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *     be used, and if any of the other fields are used, a reference may not be provided.
  * </p>
  */
+@JsonDeserialize(builder = Resource.Builder.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public final class Resource {
     private static final Logger LOGGER = LoggerFactory.getLogger(Resource.class);
@@ -400,7 +402,7 @@ public final class Resource {
                 .build();
 
         if (!handler.id().isEmpty()) {
-            descriptor.getServices().addService(handler.id(), resource);
+            descriptor.addService(handler.id(), resource);
             Reference reference = reference().value(String.format(SERVICES_REFERENCE, handler.id())).build();
             resource = resource().reference(reference).build();
         }
@@ -492,6 +494,7 @@ public final class Resource {
          * @param reference The reference.
          * @return This builder.
          */
+        @JsonProperty("$ref")
         public Builder reference(Reference reference) {
             checkState();
             this.reference = reference;
@@ -505,6 +508,7 @@ public final class Resource {
          * Required when any of create, read, update, delete, patch are supported
          * @return Builder
          */
+        @JsonProperty("resourceSchema")
         public Builder resourceSchema(Schema resourceSchema) {
             checkState();
             this.resourceSchema = resourceSchema;
@@ -517,6 +521,7 @@ public final class Resource {
          * @param title Title of the endpoint
          * @return Builder
          */
+        @JsonProperty("title")
         public Builder title(String title) {
             this.title = title;
             return this;
@@ -528,6 +533,7 @@ public final class Resource {
          * @param description A description of the endpoint
          * @return Builder
          */
+        @JsonProperty("description")
         public Builder description(String description) {
             checkState();
             this.description = description;
@@ -540,6 +546,7 @@ public final class Resource {
          * @param create The create operation description, if supported
          * @return Builder
          */
+        @JsonProperty("create")
         public Builder create(Create create) {
             checkState();
             this.create = create;
@@ -552,6 +559,7 @@ public final class Resource {
          * @param read The read operation description, if supported
          * @return Builder
          */
+        @JsonProperty("read")
         public Builder read(Read read) {
             checkState();
             this.read = read;
@@ -564,6 +572,7 @@ public final class Resource {
          * @param update The update operation description, if supported
          * @return Builder
          */
+        @JsonProperty("update")
         public Builder update(Update update) {
             checkState();
             this.update = update;
@@ -576,6 +585,7 @@ public final class Resource {
          * @param delete The delete operation description, if supported
          * @return Builder
          */
+        @JsonProperty("delete")
         public Builder delete(Delete delete) {
             checkState();
             this.delete = delete;
@@ -588,6 +598,7 @@ public final class Resource {
          * @param patch The patch operation description, if supported
          * @return Builder
          */
+        @JsonProperty("patch")
         public Builder patch(Patch patch) {
             checkState();
             this.patch = patch;
@@ -600,6 +611,7 @@ public final class Resource {
          * @param actions The list of action operation descriptions, if supported
          * @return Builder
          */
+        @JsonProperty("actions")
         public Builder actions(List<Action> actions) {
             checkState();
             this.actions.addAll(actions);
@@ -624,6 +636,7 @@ public final class Resource {
          * @param queries The list or query operation descriptions, if supported
          * @return Builder
          */
+        @JsonProperty("queries")
         public Builder queries(List<Query> queries) {
             checkState();
             this.queries.addAll(queries);
@@ -648,6 +661,7 @@ public final class Resource {
          * @param subresources The sub-reosurces definition.
          * @return Builder
          */
+        @JsonProperty("subresources")
         public Builder subresources(SubResources subresources) {
             checkState();
             this.subresources = subresources;
@@ -660,6 +674,7 @@ public final class Resource {
          * @param operations One or more Operations
          * @return Builder
          */
+        @JsonProperty("operations")
         public Builder operations(Operation... operations) {
             checkState();
             Reject.ifNull(operations);
@@ -675,7 +690,8 @@ public final class Resource {
          * @param mvccSupported Whether this resource supports MVCC
          * @return Builder
          */
-        public Builder mvccSupported(boolean mvccSupported) {
+        @JsonProperty("mvccSupported")
+        public Builder mvccSupported(Boolean mvccSupported) {
             checkState();
             this.mvccSupported = mvccSupported;
             return this;
@@ -687,6 +703,7 @@ public final class Resource {
          * @param items The definition of the collection items
          * @return Builder
          */
+        @JsonProperty("items")
         public Builder items(Items items) {
             checkState();
             this.items = items;
@@ -699,6 +716,7 @@ public final class Resource {
          * @param parameters Extra parameters supported by the resource
          * @return Builder
          */
+        @JsonProperty("parameters")
         public Builder parameters(List<Parameter> parameters) {
             checkState();
             this.parameters.addAll(parameters);

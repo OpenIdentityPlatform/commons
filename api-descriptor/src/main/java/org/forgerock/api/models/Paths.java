@@ -20,8 +20,11 @@ import static org.forgerock.api.util.ValidationUtil.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.http.routing.Version;
 import org.forgerock.util.Reject;
@@ -32,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * Class that represents the Paths type in API descriptor.
  */
+@JsonDeserialize(builder = Paths.Builder.class)
 public final class Paths {
 
     private final Map<String, VersionedPath> paths;
@@ -84,6 +88,23 @@ public final class Paths {
         return new Builder();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Paths paths1 = (Paths) o;
+        return Objects.equals(paths, paths1.paths);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(paths);
+    }
+
     /**
      * Builder to help construct the Paths.
      */
@@ -104,6 +125,7 @@ public final class Paths {
          * @param path Path
          * @return Builder
          */
+        @JsonAnySetter
         public Builder put(String name, VersionedPath path) {
             if (name == null || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");

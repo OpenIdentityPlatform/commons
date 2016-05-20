@@ -16,22 +16,23 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
 import java.util.Comparator;
 import java.util.Objects;
 
-import org.forgerock.guava.common.base.Strings;
-
 import org.forgerock.api.ApiValidationException;
+import org.forgerock.guava.common.base.Strings;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Class that represents the ApiError type in API descriptor.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize(builder = ApiError.Builder.class)
 public final class ApiError {
 
     /**
@@ -144,7 +145,7 @@ public final class ApiError {
                 .build();
         if (!Strings.isNullOrEmpty(apiError.id())) {
             // we've got an id for this apiApiError, so define it at the top level and return a reference.
-            descriptor.getErrors().addError(apiError.id(), apiErrorDefinition);
+            descriptor.addError(apiError.id(), apiErrorDefinition);
             return apiError().reference(Reference.reference().value("#/errors/" + apiError.id()).build()).build();
         } else {
             return apiErrorDefinition;
@@ -171,6 +172,7 @@ public final class ApiError {
          * @param code The apiError code.
          * @return This builder.
          */
+        @JsonProperty("code")
         public Builder code(Integer code) {
             this.code = code;
             return this;
@@ -182,6 +184,7 @@ public final class ApiError {
          * @param description ApiError description
          * @return This builder.
          */
+        @JsonProperty("description")
         public Builder description(String description) {
             this.description = description;
             return this;
@@ -193,6 +196,7 @@ public final class ApiError {
          * @param schema ApiError schema
          * @return This builder.
          */
+        @JsonProperty("schema")
         public Builder schema(Schema schema) {
             this.schema = schema;
             return this;
@@ -204,6 +208,7 @@ public final class ApiError {
          * @param reference The reference.
          * @return This builder.
          */
+        @JsonProperty("$ref")
         public Builder reference(Reference reference) {
             this.reference = reference;
             return this;

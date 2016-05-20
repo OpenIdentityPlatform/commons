@@ -100,17 +100,25 @@ public class CrestApiProducer implements ApiProducer<ApiDescription> {
         Services.Builder services = services();
         for (ApiDescription description : descriptions) {
             if (description != null) {
-                for (String definition : description.getDefinitions().getNames()) {
-                    definitions.put(definition, description.getDefinitions().get(definition));
+                if (description.getDefinitions() != null) {
+                    for (String definition : description.getDefinitions().getNames()) {
+                        definitions.put(definition, description.getDefinitions().get(definition));
+                    }
                 }
-                for (String error : description.getErrors().getNames()) {
-                    errors.put(error, description.getErrors().get(error));
+                if (description.getErrors() != null) {
+                    for (String error : description.getErrors().getNames()) {
+                        errors.put(error, description.getErrors().get(error));
+                    }
                 }
-                for (String service : description.getServices().getNames()) {
-                    services.put(service, description.getServices().get(service));
+                if (description.getServices() != null) {
+                    for (String service : description.getServices().getNames()) {
+                        services.put(service, description.getServices().get(service));
+                    }
                 }
-                for (String path : description.getPaths().getNames()) {
-                    paths.merge(path, description.getPaths().get(path));
+                if (description.getPaths() != null) {
+                    for (String path : description.getPaths().getNames()) {
+                        paths.merge(path, description.getPaths().get(path));
+                    }
                 }
             }
         }

@@ -143,9 +143,19 @@ public class SchemaTest {
         Method method = null;
         for (Method m : methods) {
             if (m.getName().equals(key)) {
-                method = m;
+                if (method == null) {
+                    method = m;
+                } else {
+                    method = filterOutJsonAnySetterMethod(method, m);
+                }
             }
         }
         return method;
+    }
+
+    private Method filterOutJsonAnySetterMethod(Method storedMethod, Method newMethod) {
+        return storedMethod.getAnnotations() == null || storedMethod.getAnnotations().length == 0
+                ? storedMethod
+                : newMethod;
     }
 }

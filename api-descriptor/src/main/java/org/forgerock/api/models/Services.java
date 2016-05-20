@@ -18,19 +18,20 @@ package org.forgerock.api.models;
 
 import static org.forgerock.api.util.ValidationUtil.*;
 import static org.forgerock.util.Reject.*;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
-
-import org.forgerock.util.Reject;
-
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Class that represents API descriptor's Service {@link Resource} definitions.
  */
+@JsonDeserialize(builder = Services.Builder.class)
 public final class Services {
 
     private final Map<String, Resource> services;
@@ -76,17 +77,26 @@ public final class Services {
      *
      * @return Builder
      */
+
     public static Builder services() {
         return new Builder();
     }
 
-    /**
-     * Package-local method for adding extra service definitions when computing {@link Resource} from annotations.
-     * @param id The service ID.
-     * @param resource The resource definition.
-     */
-    void addService(String id, Resource resource) {
-        services.put(id, Reject.checkNotNull(resource));
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Services services1 = (Services) o;
+        return Objects.equals(services, services1.services);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(services);
     }
 
     /**
@@ -109,6 +119,7 @@ public final class Services {
          * @param resource {@link Resource}
          * @return Builder
          */
+        @JsonAnySetter
         public Builder put(String name, Resource resource) {
             if (isEmpty(name) || containsWhitespace(name)) {
                 throw new IllegalArgumentException("name required and may not contain whitespace");

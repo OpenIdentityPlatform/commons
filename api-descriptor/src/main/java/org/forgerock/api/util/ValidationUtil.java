@@ -80,4 +80,14 @@ public final class ValidationUtil {
         }
         return found;
     }
+
+    /**
+     * Returns false if the given Boolean parameter is {@code null}.
+     *
+     * @param boolVal boolean parameter to check
+     * @return {@code false} if the parameter is null, and the parameter itself otherwise
+     */
+    public static boolean nullToFalse(Boolean boolVal) {
+        return (boolVal == null) ? false : boolVal;
+    }
 }

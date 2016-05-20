@@ -16,11 +16,14 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.jackson.JacksonUtils.*;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.api.jackson.JacksonUtils.OBJECT_MAPPER;
+import static org.forgerock.api.jackson.JacksonUtils.schemaFor;
+import static org.forgerock.json.JsonValue.json;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.forgerock.api.jackson.JacksonUtils;
@@ -28,14 +31,17 @@ import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 
 /**
  * Class that represents the Schema type in API descriptor.
  */
+@JsonDeserialize(builder = Schema.Builder.class)
 public abstract class Schema {
 
     private Schema() {
@@ -64,19 +70,20 @@ public abstract class Schema {
         }
 
         Schema schema1 = (Schema) o;
-        JsonValue jsonSchema = getSchema();
-        JsonValue jsonSchema2 = schema1.getSchema();
         return Objects.equals(getReference(), schema1.getReference())
-                && jsonSchema != null && jsonSchema2 != null
-                        ? Objects.equals(jsonSchema.getObject(), jsonSchema2.getObject())
-                        : jsonSchema == jsonSchema2;
+                && isSchemaPropertyMatches(schema1);
+
+    }
+
+    private boolean isSchemaPropertyMatches(Schema schema1) {
+        return getSchema() != null && schema1.getSchema() != null
+                ? getSchema().getObject().equals(schema1.getSchema().getObject())
+                : schema1.getSchema() == getSchema();
     }
 
     @Override
     public int hashCode() {
-        int result = getReference() != null ? getReference().hashCode() : 0;
-        result = 31 * result + (getSchema() != null ? getSchema().getObject().hashCode() : 0);
-        return result;
+        return Objects.hash(getReference(), getSchema());
     }
 
     /**
@@ -136,7 +143,7 @@ public abstract class Schema {
         }
         if (!Strings.isNullOrEmpty(id)) {
             // we've got an id for this schema, so define it at the top level and return a reference.
-            descriptor.getDefinitions().addDefinition(id, builder.build());
+            descriptor.addDefinition(id, builder.build());
             return schema().reference(Reference.reference().value("#/definitions/" + id).build()).build();
         } else {
             return builder.build();
@@ -150,6 +157,7 @@ public abstract class Schema {
 
         private JsonValue schema;
         private Reference reference;
+        private Map<String, Object> jsonValueObject = new HashMap<>();
 
         /**
          * Private default constructor.
@@ -161,6 +169,7 @@ public abstract class Schema {
          * @param reference The reference.
          * @return This builder.
          */
+        @JsonProperty("$ref")
         public Builder reference(Reference reference) {
             Reject.ifNull(reference);
             this.reference = reference;
@@ -175,6 +184,18 @@ public abstract class Schema {
         public Builder schema(JsonValue schema) {
             Reject.ifNull(schema);
             this.schema = schema;
+            return this;
+        }
+
+        /**
+         * Sets the schema by json key-value pairs.
+         * @param key json parameter name
+         * @param value json parametr value
+         * @return This builder.
+         */
+        @JsonAnySetter
+        public Builder schema(String key, Object value) {
+            jsonValueObject.put(key, value);
             return this;
         }
 
@@ -203,6 +224,9 @@ public abstract class Schema {
          * @return Schema instance.
          */
         public Schema build() {
+            if (!jsonValueObject.isEmpty()) {
+                schema(json(jsonValueObject));
+            }
             return reference == null ? new SchemaSchema(schema) : new ReferenceSchema(reference);
         }
     }
@@ -248,5 +272,4 @@ public abstract class Schema {
             return schema;
         }
     }
-
 }
