@@ -11,16 +11,25 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.handler;
 
+import static org.forgerock.http.protocol.Response.*;
+import static org.forgerock.http.protocol.Responses.*;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Utility methods for creating common types of handlers.
@@ -29,6 +38,24 @@ public final class Handlers {
 
     private Handlers() {
         // Prevent instantiation.
+    }
+
+    /**
+     * Creates a "filtered handler" instance.
+     *
+     * <p>It will invoke the {@code first} filter, giving it the {@code handler} handler as {@code next}.
+     *
+     * @param handler The filtered instance
+     * @param filter the filter to apply
+     * @return a new {@link Handler} instance that filters the given {@code handler}.
+     */
+    public static Handler filtered(final Handler handler, final Filter filter) {
+        return new Handler() {
+            @Override
+            public Promise<Response, NeverThrowsException> handle(final Context context, final Request request) {
+                return filter.filter(context, request, handler);
+            }
+        };
     }
 
     /**
@@ -58,7 +85,33 @@ public final class Handlers {
      * @see #chainOf(Handler, Filter...)
      */
     public static Handler chainOf(final Handler handler, final List<Filter> filters) {
-        return new Chain(handler, filters, 0);
+        if (filters.isEmpty()) {
+            return handler;
+        }
+
+        // Create a cons-list structure:
+        //   Given [A, B, C, D] filters and a H handler
+        //   Build a (A . (B . (C . (D . H)))) handler chain
+        Handler result = handler;
+        ListIterator<Filter> i = filters.listIterator(filters.size());
+        while (i.hasPrevious()) {
+            result = filtered(result, i.previous());
+        }
+        return result;
+    }
+
+    /**
+     * A common HTTP Framework {@link Handler} responding 500 Internal Server Error.
+     * @param cause The cause of the internal server error.
+     * @return The handler.
+     */
+    public static Handler internalServerErrorHandler(final Exception cause) {
+        return new Handler() {
+            @Override
+            public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
+                return newResponsePromise(newInternalServerError(cause));
+            }
+        };
     }
 
 }

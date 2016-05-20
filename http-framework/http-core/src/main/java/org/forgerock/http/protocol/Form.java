@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
@@ -90,9 +90,8 @@ public class Form extends MultiValueMap<String, String> {
     public Form fromQueryString(final String s) {
         for (String param : s.split("&")) {
             String[] nv = param.split("=", 2);
-            if (nv.length == 2) {
-                add(urlDecodeQueryParameterNameOrValue(nv[0]), urlDecodeQueryParameterNameOrValue(nv[1]));
-            }
+            add(urlDecodeQueryParameterNameOrValue(nv[0]),
+                    nv.length == 1 ? null : urlDecodeQueryParameterNameOrValue(nv[1]));
         }
         return this;
     }
@@ -121,9 +120,11 @@ public class Form extends MultiValueMap<String, String> {
                 if (sb.length() > 0) {
                     sb.append('&');
                 }
-                sb.append(formEncodeParameterNameOrValue(name))
-                    .append('=')
-                    .append(formEncodeParameterNameOrValue(value));
+                if (value != null) {
+                    sb.append(formEncodeParameterNameOrValue(name))
+                            .append('=')
+                            .append(formEncodeParameterNameOrValue(value));
+                }
             }
         }
         return sb.toString();
@@ -141,9 +142,10 @@ public class Form extends MultiValueMap<String, String> {
                 if (sb.length() > 0) {
                     sb.append('&');
                 }
-                sb.append(urlEncodeQueryParameterNameOrValue(name))
-                    .append('=')
-                    .append(urlEncodeQueryParameterNameOrValue(value));
+                sb.append(urlEncodeQueryParameterNameOrValue(name));
+                if (value != null) {
+                    sb.append('=').append(urlEncodeQueryParameterNameOrValue(value));
+                }
             }
         }
         return sb.toString();

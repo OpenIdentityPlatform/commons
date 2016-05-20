@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.filter;
@@ -19,13 +19,13 @@ package org.forgerock.http.filter;
 import java.util.Arrays;
 import java.util.List;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
-import org.forgerock.http.session.SessionManager;
 import org.forgerock.http.handler.Handlers;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.session.SessionManager;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
@@ -37,6 +37,17 @@ public final class Filters {
     private Filters() {
         // Prevent instantiation.
     }
+
+    /**
+     * Shared, stateless and immutable empty filter singleton (no-op).
+     * It just forwards the request and return the next's response.
+     */
+    private static final Filter EMPTY_FILTER = new Filter() {
+        @Override
+        public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
+            return next.handle(context, request);
+        }
+    };
 
     /**
      * Creates a {@link Filter} which handles HTTP OPTIONS method requests.
@@ -80,10 +91,40 @@ public final class Filters {
      * @see #chainOf(Filter...)
      */
     public static Filter chainOf(final List<Filter> filters) {
+
+        // Create a cons-list structure recursively:
+        //   Given [A, B, C, D] filters
+        //   Build a (A . (B . (C . D))) filter chain
+
+        if (filters.isEmpty()) {
+            return EMPTY_FILTER;
+        }
+
+        if (filters.size() == 1) {
+            return filters.get(0);
+        }
+
+        return combine(filters.get(0),
+                       chainOf(filters.subList(1, filters.size())));
+    }
+
+    /**
+     * Combine 2 filters together in a composite filter ({@literal filter#1 + filter#2 -> filter(filter#1 >
+     * filter#2)}).
+     *
+     * <p>When the composite filter is invoked, it first invokes the {@code first} filter, providing it with a dedicated
+     * "next handler" instance.
+     *
+     * <p>This "next handler" instance, when called, invokes the {@code second} filter and provides it with the
+     * "original" {@code next} handler.
+     */
+    private static Filter combine(final Filter first, final Filter second) {
         return new Filter() {
             @Override
             public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
-                return Handlers.chainOf(next, filters).handle(context, request);
+                // Execute first filter, that hand-off to the second filter
+                // that in turns is provided with the original next handler
+                return first.filter(context, request, Handlers.filtered(next, second));
             }
         };
     }

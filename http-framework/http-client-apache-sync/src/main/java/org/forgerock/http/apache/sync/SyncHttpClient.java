@@ -13,10 +13,12 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.apache.sync;
+
+import static org.forgerock.http.protocol.Responses.newInternalServerError;
 
 import java.io.IOException;
 
@@ -27,7 +29,6 @@ import org.forgerock.http.apache.AbstractHttpClient;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
-import org.forgerock.http.protocol.Status;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -61,7 +62,7 @@ final class SyncHttpClient extends AbstractHttpClient {
             Response response = createResponse(clientResponse);
             return Promises.newResultPromise(response);
         } catch (final IOException e) {
-            return Promises.newResultPromise(new Response().setStatus(Status.INTERNAL_SERVER_ERROR));
+            return Promises.newResultPromise(newInternalServerError(e));
         }
     }
 

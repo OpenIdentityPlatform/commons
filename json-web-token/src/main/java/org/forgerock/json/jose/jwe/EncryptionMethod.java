@@ -16,6 +16,8 @@
 
 package org.forgerock.json.jose.jwe;
 
+import java.util.Locale;
+
 import org.forgerock.json.jose.exceptions.JweException;
 
 /**
@@ -130,7 +132,7 @@ public enum EncryptionMethod {
      */
     public static EncryptionMethod parseMethod(String method) {
         try {
-            return EncryptionMethod.valueOf(method.toUpperCase().replaceAll("-", "_"));
+            return EncryptionMethod.valueOf(method.toUpperCase(Locale.ROOT).replaceAll("-", "_"));
         } catch (IllegalArgumentException e) {
             for (EncryptionMethod encryptionMethod : EncryptionMethod.values()) {
                 if (encryptionMethod.getName().equalsIgnoreCase(method)) {

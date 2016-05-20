@@ -15,7 +15,9 @@
  */
 package org.forgerock.http.grizzly;
 
+import static org.forgerock.http.handler.Handlers.*;
 import static org.forgerock.http.io.IO.*;
+import static org.forgerock.http.protocol.Responses.*;
 import static org.forgerock.util.Utils.*;
 
 import java.io.File;
@@ -30,7 +32,6 @@ import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.io.Buffer;
-import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.session.SessionContext;
 import org.forgerock.http.util.CaseInsensitiveSet;
@@ -41,8 +42,6 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RequestAuditContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Factory;
-import org.forgerock.util.promise.NeverThrowsException;
-import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.promise.RuntimeExceptionHandler;
 import org.glassfish.grizzly.http.server.HttpHandler;
@@ -85,7 +84,7 @@ final class HandlerAdapter extends HttpHandler {
             chfHandler = httpApplication.start();
         } catch (HttpApplicationException e) {
             LOGGER.error("Error while starting the application.", e);
-            chfHandler = new InternalServerErrorHandler(e);
+            chfHandler = internalServerErrorHandler(e);
         }
     }
 
@@ -118,7 +117,7 @@ final class HandlerAdapter extends HttpHandler {
                 public void handleRuntimeException(RuntimeException e) {
                     LOGGER.error("RuntimeException caught", e);
                     writeResponse(
-                            new org.forgerock.http.protocol.Response(Status.INTERNAL_SERVER_ERROR).setCause(e),
+                            newInternalServerError(e),
                             response, sessionContext);
                 }
             })
@@ -203,20 +202,4 @@ final class HandlerAdapter extends HttpHandler {
                             .build();
     }
 
-    /** A common HTTP Framework {@link Handler} responding 500 Internal Server Error. */
-    private static final class InternalServerErrorHandler implements Handler {
-        private final Exception cause;
-
-        public InternalServerErrorHandler(Exception cause) {
-            this.cause = cause;
-        }
-
-        @Override
-        public Promise<org.forgerock.http.protocol.Response, NeverThrowsException> handle(Context context,
-                org.forgerock.http.protocol.Request request) {
-            return org.forgerock.http.protocol.Response
-                    .newResponsePromise(new org.forgerock.http.protocol.Response(Status.INTERNAL_SERVER_ERROR)
-                                                                       .setCause(cause));
-        }
-    }
 }

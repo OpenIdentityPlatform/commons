@@ -289,7 +289,7 @@ public class Duration implements Comparable<Duration> {
         if (isUnlimited() || isZero()) {
             return this;
         }
-        return new Duration(targetUnit.convert(number, unit), targetUnit);
+        return new Duration(to(targetUnit), targetUnit);
     }
 
     /**
@@ -302,7 +302,10 @@ public class Duration implements Comparable<Duration> {
      * @see TimeUnit#convert(long, TimeUnit)
      */
     public long to(TimeUnit targetUnit) {
-        return convertTo(targetUnit).getValue();
+        if (isUnlimited()) {
+            return number;
+        }
+        return targetUnit.convert(number, unit);
     }
 
     /**

@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -175,21 +175,19 @@ public final class Uris {
         StringBuilder builder = new StringBuilder(rawQuery.length() + 8);
         for (String param : rawQuery.split("&")) {
             String[] nv = param.split("=", 2);
-            if (nv.length == 2) {
-                try {
-                    if (builder.length() > 0) {
-                        builder.append('&');
-                    }
-
-                    String name = urlDecodeQueryParameterNameOrValue(nv[0]);
+            if (builder.length() > 0) {
+                builder.append('&');
+            }
+            try {
+                String name = urlDecodeQueryParameterNameOrValue(nv[0]);
+                builder.append(urlEncodeQueryParameterNameOrValue(name));
+                if (nv.length == 2) {
                     String value = urlDecodeQueryParameterNameOrValue(nv[1]);
-
-                    builder.append(urlEncodeQueryParameterNameOrValue(name))
-                           .append('=')
+                    builder.append('=')
                            .append(urlEncodeQueryParameterNameOrValue(value));
-                } catch (Exception e) {
-                    throw new URISyntaxException(rawQuery, "The URL query string could not be decoded");
                 }
+            } catch (Exception e) {
+                throw new URISyntaxException(rawQuery, "The URL query string could not be decoded");
             }
         }
         return builder.toString();

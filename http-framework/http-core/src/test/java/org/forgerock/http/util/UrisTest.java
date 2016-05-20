@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
@@ -31,7 +31,7 @@ public class UrisTest {
 
     @Test
     public void toURIandBack() throws Exception {
-        URI u1 = Uris.create("a", "b", "c", 4, "/e%3D", "x=%3D", "g%3D");
+        URI u1 = Uris.create("a", "b", "c", 4, "/e%3D", "x=%3D&nullvalue", "g%3D");
         URI u2 = Uris.create(u1.getScheme(), u1.getRawUserInfo(), u1.getHost(),
                              u1.getPort(), u1.getRawPath(), u1.getRawQuery(), u1.getRawFragment());
         assertThat(u1).isEqualTo(u2);
@@ -58,10 +58,11 @@ public class UrisTest {
         Form form = new Form();
         form.add("goto", "http://some.url");
         form.add("state", "1234567890");
+        form.add("nullvalue", null);
         URI withQuery = Uris.withQuery(uri, form);
         // Form uses LinkedHashMap so parameter order is guaranteed.
         assertThat(withQuery.toString()).isEqualTo(
-                "https://doot.doot.doo.org/all/good/things?goto=http://some.url&state=1234567890#breakdance");
+                "https://doot.doot.doo.org/all/good/things?goto=http://some.url&state=1234567890&nullvalue#breakdance");
     }
 
     @Test

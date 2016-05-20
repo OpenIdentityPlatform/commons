@@ -78,6 +78,12 @@ public enum JweAlgorithm implements Algorithm {
                 return alg;
             }
         }
+        // Compatibility fix: previous version of that library used to issue a wrong
+        // (non-standard) algorithm name. When reconstructing old JWTs, we have to recognize
+        // these old values ('RSAES_PKCS1_V1_5')
+        if (RSAES_PKCS1_V1_5.name().equals(algorithm)) {
+            return RSAES_PKCS1_V1_5;
+        }
         throw new JweException("Unknown Encryption Algorithm, " + algorithm);
     }
 

@@ -19,6 +19,7 @@ package org.forgerock.jaspi.modules.session.openam;
 import static java.lang.String.format;
 import static javax.security.auth.message.AuthStatus.*;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
+import static org.forgerock.http.protocol.Responses.noopExceptionFunction;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
@@ -379,15 +380,9 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
     }
 
     private Function<NeverThrowsException, AuthStatus, AuthenticationException> onUserRequestFailure() {
-        return new Function<NeverThrowsException, AuthStatus, AuthenticationException>() {
-            @Override
-            public AuthStatus apply(NeverThrowsException e) {
-                //This can never happen but the exception handler is needed
-                // to change the types of the returned Promise.
-                throw new IllegalStateException(
-                        "HTTP Client threw a NeverThrowsException?!");
-            }
-        };
+        //This can never happen but the exception handler is needed
+        // to change the types of the returned Promise.
+        return noopExceptionFunction();
     }
 
     private String normalizeRealm(String realm) {

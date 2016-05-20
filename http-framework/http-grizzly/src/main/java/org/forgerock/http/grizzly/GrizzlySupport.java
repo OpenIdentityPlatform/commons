@@ -15,6 +15,8 @@
  */
 package org.forgerock.http.grizzly;
 
+import static org.forgerock.http.Applications.simpleHttpApplication;
+
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
@@ -56,32 +58,6 @@ public final class GrizzlySupport {
      * @return A Grizzly {@link HttpHandler} ready to be added to an {@link HttpServer}
      */
     public static HttpHandler newGrizzlyHttpHandler(Handler handler, Factory<Buffer> storage) {
-        return new HandlerAdapter(new SimpleHttpApplication(handler, storage));
-    }
-
-    private static final class SimpleHttpApplication implements HttpApplication {
-
-        private final Handler handler;
-        private final Factory<Buffer> storage;
-
-        SimpleHttpApplication(Handler handler, Factory<Buffer> storage) {
-            this.handler = handler;
-            this.storage = storage;
-        }
-
-        @Override
-        public Handler start() throws HttpApplicationException {
-            return handler;
-        }
-
-        @Override
-        public Factory<Buffer> getBufferFactory() {
-            return storage;
-        }
-
-        @Override
-        public void stop() {
-            // Nothing to do
-        }
+        return new HandlerAdapter(simpleHttpApplication(handler, storage));
     }
 }

@@ -39,4 +39,10 @@ public class JweAlgorithmTest {
     public void parseShouldReturnSpecCompliantName(JweAlgorithm algorithm, String specCompliantName) {
         assertThat(JweAlgorithm.parseAlgorithm(specCompliantName)).isEqualTo(algorithm);
     }
+
+    @Test
+    public void parseShouldAcceptBackwardCompatibleAlgValue() {
+        assertThat(JweAlgorithm.parseAlgorithm("RSAES_PKCS1_V1_5"))
+                .isEqualTo(JweAlgorithm.RSAES_PKCS1_V1_5);
+    }
 }

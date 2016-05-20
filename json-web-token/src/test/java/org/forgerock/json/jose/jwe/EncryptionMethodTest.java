@@ -40,4 +40,9 @@ public class EncryptionMethodTest {
     public void parseShouldAcceptSpecCompliantName(EncryptionMethod encryptionMethod, String specCompliantName) {
         assertThat(EncryptionMethod.parseMethod(specCompliantName)).isEqualTo(encryptionMethod);
     }
+
+    @Test(dataProvider = "specCompliantNames")
+    public void parseShouldAcceptBackwardCompatibleEncryptionMethods(EncryptionMethod method, String ignored) {
+        assertThat(EncryptionMethod.parseMethod(method.name())).isEqualTo(method);
+    }
 }

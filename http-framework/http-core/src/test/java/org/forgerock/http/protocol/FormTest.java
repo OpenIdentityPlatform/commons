@@ -12,11 +12,12 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.protocol;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URISyntaxException;
@@ -42,16 +43,36 @@ public class FormTest {
 
     @Test
     public void fromQueryString() {
-        Form f = new Form().fromQueryString("x=%3D+%20%2B&y=z");
+        Form f = new Form().fromQueryString("x=%3D+%20%2B&y=z&nullKey");
         assertThat(f.get("x").get(0)).isEqualTo("=  +");
         assertThat(f.get("y").get(0)).isEqualTo("z");
+        assertThat(f).containsEntry("nullKey", singletonList((String) null));
+    }
+
+    /**
+     * Check the behaviour of serializing null parameter values in queries and forms. Anything is permitted in queries,
+     * but forms are bound to the form encoding specified for form submission.
+     * @see <a href="https://tools.ietf.org/html/rfc1866#section-8.2">Specification of form encoding (section 8.2.1)</a>
+     */
+    @Test
+    public void nullParameterValues() {
+        Form f = new Form();
+        f.add("a", null);
+        assertThat(f.toQueryString()).isEqualTo("a");
+        assertThat(f.toFormString()).isEqualTo("");
+    }
+
+    @Test
+    public void mixedNullAndValueQueryParameters() {
+        assertThat(new Form().fromQueryString("a&a=1").get("a")).containsExactly(null, "1");
+        assertThat(new Form().fromQueryString("a&a=1&a").get("a")).containsExactly(null, "1", null);
     }
 
     @Test
     public void fromQueryStringAndBack() {
-        String s1 = "x=*+%20%2B&y=?";
+        String s1 = "x=*+%20%2B&y=?&nullKey";
         String s2 = new Form().fromQueryString(s1).toQueryString();
-        assertThat(s2).isEqualTo("x=*%20%20%2B&y=?");
+        assertThat(s2).isEqualTo("x=*%20%20%2B&y=?&nullKey");
     }
 
     @Test

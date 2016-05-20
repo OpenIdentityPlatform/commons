@@ -44,6 +44,7 @@
     <module>http-client-apache-sync</module>
     <module>http-client-apache-async</module>
     <module>http-examples</module>
+    <module>binding-test-utils</module>
   </modules>
   <build>
     <plugins>
@@ -68,6 +69,11 @@
         <version>0.5.1</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupId>org.forgerock.http</groupId>
+        <artifactId>binding-test-utils</artifactId>
+        <version>${project.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   <distributionManagement>
@@ -77,4 +83,12 @@
       <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-http-framework</url>
     </site>
   </distributionManagement>
+  <profiles>
+    <profile>
+      <id>benchmarks</id>
+      <modules>
+        <module>http-benchmarks</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
