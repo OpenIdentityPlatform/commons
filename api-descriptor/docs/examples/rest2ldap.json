@@ -1,5 +1,6 @@
 {
   "id": "frapi:opendj:rest2ldap",
+  "version": "3.0.0",
   "description": "RESTful access to directory data",
   "definitions": {
     "meta": {
@@ -8,12 +9,12 @@
       "properties": {
         "created": {
           "type": "string",
-          "format": "date",
+          "format": "date-time",
           "title": "Creation Date"
         },
         "lastModified": {
           "type": "string",
-          "format": "date",
+          "format": "date-time",
           "title": "Modification Date"
         }
       }
@@ -40,7 +41,10 @@
       "title": "Default SCIM-like group",
       "description": "The group resource is purely a mapping to LDAP and fully configurable. This represents the default mapping.",
       "type": "object",
-      "required": ["_id", "displayName"],
+      "required": [
+        "_id",
+        "displayName"
+      ],
       "properties": {
         "schemas": {
           "type": "array",
@@ -89,7 +93,10 @@
       "title": "Default SCIM-like user",
       "description": "The user resource is purely a mapping to LDAP and fully configurable. This represents the default mapping.",
       "type": "object",
-      "required": ["_id", "displayName"],
+      "required": [
+        "_id",
+        "displayName"
+      ],
       "properties": {
         "schemas": {
           "type": "array",
@@ -119,8 +126,7 @@
         },
         "userName": {
           "type": "string",
-          "format": "email",
-          "title": "Relatively Unique Identifier"
+          "title": "Relatively Unique Identifier (mail address)"
         },
         "name": {
           "type": "object",
@@ -142,12 +148,10 @@
           "properties": {
             "emailAddress": {
               "type": "string",
-              "format": "email",
               "title": "Email Address"
             },
             "telephoneNumber": {
               "type": "string",
-              "format": "phone",
               "title": "Phone Number"
             }
           }
@@ -172,43 +176,54 @@
     },
     "passwordModifyRequest": {
       "title": "Password modification request payload",
-      "oneOf": [{
-        "description": "To modify a password, supply the old password and new password.",
-        "type": "object",
-        "required": ["oldPassword", "newPassword"],
-        "properties": {
-          "oldPassword": {
-            "name": "Old Password",
-            "type": "string",
-            "description": "Current password as a UTF-8 string."
-          },
-          "newPassword": {
-            "name": "New Password",
-            "type": "string",
-            "description": "New password as a UTF-8 string."
+      "oneOf": [
+        {
+          "description": "To modify a password, supply the old password and new password.",
+          "type": "object",
+          "required": [
+            "oldPassword",
+            "newPassword"
+          ],
+          "properties": {
+            "oldPassword": {
+              "name": "Old Password",
+              "type": "string",
+              "description": "Current password as a UTF-8 string.",
+              "format": "password"
+            },
+            "newPassword": {
+              "name": "New Password",
+              "type": "string",
+              "description": "New password as a UTF-8 string.",
+              "format": "password"
+            }
           }
+        },
+        {
+          "description": "Users can reset their own passwords. Administrators with the OpenDJ `pwd-reset` privilege can reset others' passwords. To reset a password, supply an empty request payload.",
+          "type": "object",
+          "properties": {}
         }
-      }, {
-        "description": "Users can reset their own passwords. Administrators with the OpenDJ `pwd-reset` privilege can reset others' passwords. To reset a password, supply an empty request payload.",
-        "type": "object",
-        "properties": {}
-      }]
+      ]
     },
     "passwordModifyResponse": {
       "title": "Password modification response resource",
-      "oneOf": [{
-        "type": "object",
-        "properties": {
-          "generatedPassword": {
-            "type": "string",
-            "description": "If the new password was not provided in the request, this value is set in the response."
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "generatedPassword": {
+              "type": "string",
+              "description": "If the new password was not provided in the request, this value is set in the response."
+            }
           }
+        },
+        {
+          "type": "object",
+          "description": "If the new password was provided in the request, the response is empty.",
+          "properties": {}
         }
-      }, {
-        "type": "object",
-        "description": "If the new password was provided in the request, the response is empty.",
-        "properties": {}
-      }]
+      ]
     }
   },
   "errors": {
@@ -229,511 +244,621 @@
       "description": "The request exceeded an administrative limit."
     }
   },
-  "paths": {
-    "/groups": {
+  "services": {
+    "groups:0.0": {
+      "description": "SCIM-like groups",
+      "mvccSupported": true,
       "resourceSchema": {
         "$ref": "#/definitions/dynamically-generated-group-schema"
       },
       "create": {
         "stability": "evolving",
         "mode": "ID_FROM_SERVER",
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
+        "errors": [
+          {
+            "$ref": "frapi:common#/errors/badRequest"
+          },
+          {
+            "$ref": "frapi:common#/errors/unauthorized"
+          },
+          {
+            "$ref": "frapi:common#/errors/forbidden"
+          },
+          {
+            "$ref": "frapi:common#/errors/notFound"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestTimeout"
+          },
+          {
+            "$ref": "frapi:common#/errors/versionMismatch"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestEntityTooLarge"
+          },
+          {
+            "$ref": "#/errors/adminLimitExceeded"
+          },
+          {
+            "$ref": "frapi:common#/errors/internalServerError"
+          },
+          {
+            "$ref": "frapi:common#/errors/unavailable"
+          }
+        ]
       },
-      "queries": [{
-        "stability": "evolving",
-        "type": "FILTER",
-        "queryableFields": [
-          "_id",
-          "displayName",
-          "members/_id"
-        ],
-        "pagingMode": ["COOKIE", "OFFSET"],
-        "supportedPagingCountPolicies": ["NONE"],
-        "description": "Return resources matching the filter. TODO get explanation of query filters from Javadoc.",
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      }]
+      "queries": [
+        {
+          "stability": "evolving",
+          "type": "FILTER",
+          "queryableFields": [
+            "_id",
+            "displayName",
+            "members/_id"
+          ],
+          "pagingMode": [
+            "COOKIE",
+            "OFFSET"
+          ],
+          "supportedPagingCountPolicies": [
+            "NONE"
+          ],
+          "description": "Return resources matching the filter.",
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/badRequest"
+            },
+            {
+              "$ref": "frapi:common#/errors/unauthorized"
+            },
+            {
+              "$ref": "frapi:common#/errors/forbidden"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestTimeout"
+            },
+            {
+              "$ref": "#/errors/adminLimitExceeded"
+            },
+            {
+              "$ref": "frapi:common#/errors/internalServerError"
+            },
+            {
+              "$ref": "frapi:common#/errors/unavailable"
+            }
+          ]
+        }
+      ]
     },
-    "/groups/{id}": {
-      "resourceSchema": {
-        "$ref": "#/definitions/dynamically-generated-group-schema"
-      },
+    "items": {
       "create": {
         "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "A unique identifier for the group.",
-          "source": "PATH",
-          "required": true
-        }],
         "mode": "ID_FROM_CLIENT",
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
+        "errors": [
+          {
+            "$ref": "frapi:common#/errors/badRequest"
+          },
+          {
+            "$ref": "frapi:common#/errors/unauthorized"
+          },
+          {
+            "$ref": "frapi:common#/errors/forbidden"
+          },
+          {
+            "$ref": "frapi:common#/errors/notFound"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestTimeout"
+          },
+          {
+            "$ref": "frapi:common#/errors/versionMismatch"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestEntityTooLarge"
+          },
+          {
+            "$ref": "#/errors/adminLimitExceeded"
+          },
+          {
+            "$ref": "frapi:common#/errors/internalServerError"
+          },
+          {
+            "$ref": "frapi:common#/errors/unavailable"
+          }
+        ]
       },
       "read": {
         "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "A unique identifier for the group.",
-          "source": "PATH",
-          "required": true
-        }],
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
+        "errors": [
+          {
+            "$ref": "frapi:common#/errors/badRequest"
+          },
+          {
+            "$ref": "frapi:common#/errors/unauthorized"
+          },
+          {
+            "$ref": "frapi:common#/errors/forbidden"
+          },
+          {
+            "$ref": "frapi:common#/errors/notFound"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestTimeout"
+          },
+          {
+            "$ref": "#/errors/readFoundMultipleEntries"
+          },
+          {
+            "$ref": "#/errors/adminLimitExceeded"
+          },
+          {
+            "$ref": "frapi:common#/errors/internalServerError"
+          },
+          {
+            "$ref": "frapi:common#/errors/unavailable"
+          }
+        ]
       },
       "update": {
         "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "The unique identifier for the group.",
-          "source": "PATH",
-          "required": true
-        }],
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
+        "errors": [
+          {
+            "$ref": "frapi:common#/errors/badRequest"
+          },
+          {
+            "$ref": "frapi:common#/errors/unauthorized"
+          },
+          {
+            "$ref": "frapi:common#/errors/forbidden"
+          },
+          {
+            "$ref": "frapi:common#/errors/notFound"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestTimeout"
+          },
+          {
+            "$ref": "frapi:common#/errors/versionMismatch"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestEntityTooLarge"
+          },
+          {
+            "$ref": "#/errors/readFoundMultipleEntries"
+          },
+          {
+            "$ref": "#/errors/adminLimitExceeded"
+          },
+          {
+            "$ref": "frapi:common#/errors/internalServerError"
+          },
+          {
+            "$ref": "frapi:common#/errors/unavailable"
+          }
+        ]
       },
       "delete": {
         "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "The unique identifier for the group.",
-          "source": "PATH",
-          "required": true
-        }],
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
+        "errors": [
+          {
+            "$ref": "frapi:common#/errors/badRequest"
+          },
+          {
+            "$ref": "frapi:common#/errors/unauthorized"
+          },
+          {
+            "$ref": "frapi:common#/errors/forbidden"
+          },
+          {
+            "$ref": "frapi:common#/errors/notFound"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestTimeout"
+          },
+          {
+            "$ref": "frapi:common#/errors/versionMismatch"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestEntityTooLarge"
+          },
+          {
+            "$ref": "#/errors/readFoundMultipleEntries"
+          },
+          {
+            "$ref": "#/errors/adminLimitExceeded"
+          },
+          {
+            "$ref": "frapi:common#/errors/internalServerError"
+          },
+          {
+            "$ref": "frapi:common#/errors/unavailable"
+          }
+        ]
       },
       "patch": {
         "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "The unique identifier for the group.",
-          "source": "PATH",
-          "required": true
-        }],
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
+        "errors": [
+          {
+            "$ref": "frapi:common#/errors/badRequest"
+          },
+          {
+            "$ref": "frapi:common#/errors/unauthorized"
+          },
+          {
+            "$ref": "frapi:common#/errors/forbidden"
+          },
+          {
+            "$ref": "frapi:common#/errors/notFound"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestTimeout"
+          },
+          {
+            "$ref": "frapi:common#/errors/versionMismatch"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestEntityTooLarge"
+          },
+          {
+            "$ref": "#/errors/readFoundMultipleEntries"
+          },
+          {
+            "$ref": "#/errors/adminLimitExceeded"
+          },
+          {
+            "$ref": "frapi:common#/errors/internalServerError"
+          },
+          {
+            "$ref": "frapi:common#/errors/unavailable"
+          }
+        ]
+      }
+    },
+    "users:0.0": {
+      "description": "SCIM-like users",
+      "mvccSupported": true,
+      "resourceSchema": {
+        "$ref": "#/definitions/dynamically-generated-user-schema"
+      },
+      "create": {
+        "stability": "evolving",
+        "mode": "ID_FROM_SERVER",
+        "errors": [
+          {
+            "$ref": "frapi:common#/errors/badRequest"
+          },
+          {
+            "$ref": "frapi:common#/errors/unauthorized"
+          },
+          {
+            "$ref": "frapi:common#/errors/forbidden"
+          },
+          {
+            "$ref": "frapi:common#/errors/notFound"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestTimeout"
+          },
+          {
+            "$ref": "frapi:common#/errors/versionMismatch"
+          },
+          {
+            "$ref": "frapi:common#/errors/requestEntityTooLarge"
+          },
+          {
+            "$ref": "#/errors/adminLimitExceeded"
+          },
+          {
+            "$ref": "frapi:common#/errors/internalServerError"
+          },
+          {
+            "$ref": "frapi:common#/errors/unavailable"
+          }
+        ]
+      },
+      "queries": [
+        {
+          "stability": "evolving",
+          "type": "FILTER",
+          "queryableFields": [
+            "_id",
+            "displayName",
+            "userName",
+            "name/givenName",
+            "name/familyName",
+            "contactInformation/emailAddress",
+            "contactInformation/telephoneNumber",
+            "groups/_id"
+          ],
+          "pagingMode": [
+            "COOKIE",
+            "OFFSET"
+          ],
+          "supportedPagingCountPolicies": [
+            "NONE"
+          ],
+          "description": "Return resources matching the filter.",
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/badRequest"
+            },
+            {
+              "$ref": "frapi:common#/errors/unauthorized"
+            },
+            {
+              "$ref": "frapi:common#/errors/forbidden"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestTimeout"
+            },
+            {
+              "$ref": "#/errors/adminLimitExceeded"
+            },
+            {
+              "$ref": "frapi:common#/errors/internalServerError"
+            },
+            {
+              "$ref": "frapi:common#/errors/unavailable"
+            }
+          ]
+        }
+      ],
+      "items": {
+        "create": {
+          "stability": "evolving",
+          "mode": "ID_FROM_CLIENT",
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/badRequest"
+            },
+            {
+              "$ref": "frapi:common#/errors/unauthorized"
+            },
+            {
+              "$ref": "frapi:common#/errors/forbidden"
+            },
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestTimeout"
+            },
+            {
+              "$ref": "frapi:common#/errors/versionMismatch"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestEntityTooLarge"
+            },
+            {
+              "$ref": "#/errors/adminLimitExceeded"
+            },
+            {
+              "$ref": "frapi:common#/errors/internalServerError"
+            },
+            {
+              "$ref": "frapi:common#/errors/unavailable"
+            }
+          ]
+        },
+        "read": {
+          "stability": "evolving",
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/badRequest"
+            },
+            {
+              "$ref": "frapi:common#/errors/unauthorized"
+            },
+            {
+              "$ref": "frapi:common#/errors/forbidden"
+            },
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestTimeout"
+            },
+            {
+              "$ref": "#/errors/readFoundMultipleEntries"
+            },
+            {
+              "$ref": "#/errors/adminLimitExceeded"
+            },
+            {
+              "$ref": "frapi:common#/errors/internalServerError"
+            },
+            {
+              "$ref": "frapi:common#/errors/unavailable"
+            }
+          ]
+        },
+        "update": {
+          "stability": "evolving",
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/badRequest"
+            },
+            {
+              "$ref": "frapi:common#/errors/unauthorized"
+            },
+            {
+              "$ref": "frapi:common#/errors/forbidden"
+            },
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestTimeout"
+            },
+            {
+              "$ref": "frapi:common#/errors/versionMismatch"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestEntityTooLarge"
+            },
+            {
+              "$ref": "#/errors/readFoundMultipleEntries"
+            },
+            {
+              "$ref": "#/errors/adminLimitExceeded"
+            },
+            {
+              "$ref": "frapi:common#/errors/internalServerError"
+            },
+            {
+              "$ref": "frapi:common#/errors/unavailable"
+            }
+          ]
+        },
+        "delete": {
+          "stability": "evolving",
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/badRequest"
+            },
+            {
+              "$ref": "frapi:common#/errors/unauthorized"
+            },
+            {
+              "$ref": "frapi:common#/errors/forbidden"
+            },
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestTimeout"
+            },
+            {
+              "$ref": "frapi:common#/errors/versionMismatch"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestEntityTooLarge"
+            },
+            {
+              "$ref": "#/errors/readFoundMultipleEntries"
+            },
+            {
+              "$ref": "#/errors/adminLimitExceeded"
+            },
+            {
+              "$ref": "frapi:common#/errors/internalServerError"
+            },
+            {
+              "$ref": "frapi:common#/errors/unavailable"
+            }
+          ]
+        },
+        "patch": {
+          "stability": "evolving",
+          "operations": [
+            "ADD",
+            "REMOVE",
+            "REPLACE",
+            "INCREMENT"
+          ],
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/badRequest"
+            },
+            {
+              "$ref": "frapi:common#/errors/unauthorized"
+            },
+            {
+              "$ref": "frapi:common#/errors/forbidden"
+            },
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestTimeout"
+            },
+            {
+              "$ref": "frapi:common#/errors/versionMismatch"
+            },
+            {
+              "$ref": "frapi:common#/errors/requestEntityTooLarge"
+            },
+            {
+              "$ref": "#/errors/readFoundMultipleEntries"
+            },
+            {
+              "$ref": "#/errors/adminLimitExceeded"
+            },
+            {
+              "$ref": "frapi:common#/errors/internalServerError"
+            },
+            {
+              "$ref": "frapi:common#/errors/unavailable"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "stability": "evolving",
+            "name": "modifyPassword",
+            "description": "Modify or generate a user password. This action requires a secure transport protocol.",
+            "request": {
+              "$ref": "#/definitions/passwordModifyRequest"
+            },
+            "response": {
+              "$ref": "#/definitions/passwordModifyResponse"
+            },
+            "errors": [
+              {
+                "$ref": "frapi:common#/errors/badRequest"
+              },
+              {
+                "$ref": "frapi:common#/errors/unauthorized"
+              },
+              {
+                "$ref": "#/errors/passwordModifyRequiresHttps"
+              },
+              {
+                "$ref": "#/errors/passwordModifyRequiresAuthn"
+              },
+              {
+                "$ref": "frapi:common#/errors/forbidden"
+              },
+              {
+                "$ref": "frapi:common#/errors/notFound"
+              },
+              {
+                "$ref": "frapi:common#/errors/requestTimeout"
+              },
+              {
+                "$ref": "frapi:common#/errors/versionMismatch"
+              },
+              {
+                "$ref": "frapi:common#/errors/requestEntityTooLarge"
+              },
+              {
+                "$ref": "#/errors/readFoundMultipleEntries"
+              },
+              {
+                "$ref": "#/errors/adminLimitExceeded"
+              },
+              {
+                "$ref": "frapi:common#/errors/internalServerError"
+              },
+              {
+                "$ref": "frapi:common#/errors/unavailable"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/groups": {
+      "0.0": {
+        "$ref": "#/services/groups:0.0"
       }
     },
     "/users": {
-      "resourceSchema": {
-        "$ref": "#/definitions/dynamically-generated-user-schema"
-      },
-      "create": {
-        "stability": "evolving",
-        "mode": "ID_FROM_SERVER",
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      },
-      "queries": [{
-        "stability": "evolving",
-        "type": "FILTER",
-        "queryableFields": [
-          "_id",
-          "displayName",
-          "userName",
-          "name/givenName",
-          "name/familyName",
-          "contactInformation/emailAddress",
-          "contactInformation/telephoneNumber",
-          "groups/_id"
-        ],
-        "pagingMode": ["COOKIE", "OFFSET"],
-        "supportedPagingCountPolicies": ["NONE"],
-        "description": "Return resources matching the filter. TODO get explanation of query filters from Javadoc.",
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      }]
-    },
-    "/users/{id}": {
-      "resourceSchema": {
-        "$ref": "#/definitions/dynamically-generated-user-schema"
-      },
-      "create": {
-        "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "A unique identifier for the user.",
-          "source": "PATH",
-          "required": true
-        }],
-        "mode": "ID_FROM_CLIENT",
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      },
-      "read": {
-        "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "The unique identifier for the user.",
-          "source": "PATH",
-          "required": true
-        }],
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      },
-      "update": {
-        "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "The unique identifier for the user.",
-          "source": "PATH",
-          "required": true
-        }],
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      },
-      "delete": {
-        "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "The unique identifier for the user.",
-          "source": "PATH",
-          "required": true
-        }],
-        "mvccSupported": true,
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      },
-      "patch": {
-        "stability": "evolving",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "The unique identifier for the user.",
-          "source": "PATH",
-          "required": true
-        }],
-        "mvccSupported": true,
-        "operations": ["ADD", "REMOVE", "REPLACE", "INCREMENT"],
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      },
-      "actions": [{
-        "stability": "evolving",
-        "id": "modifyPassword",
-        "description": "Modify or generate a user password. This action requires HTTPS.",
-        "parameters": [{
-          "name": "id",
-          "type": "string",
-          "description": "The unique identifier for the user.",
-          "source": "PATH",
-          "required": true
-        }],
-        "request": {
-          "$ref": "#/definitions/passwordModifyRequest"
-        },
-        "response": {
-          "$ref": "#/definitions/passwordModifyResponse"
-        },
-        "errors": [{
-          "$ref": "frapi:common#/errors/badRequest"
-        }, {
-          "$ref": "frapi:common#/errors/unauthorized"
-        }, {
-          "$ref": "#/errors/passwordModifyRequiresHttps"
-        }, {
-          "$ref": "#/errors/passwordModifyRequiresAuthn"
-        }, {
-          "$ref": "frapi:common#/errors/forbidden"
-        }, {
-          "$ref": "frapi:common#/errors/notFound"
-        }, {
-          "$ref": "frapi:common#/errors/requestTimeout"
-        }, {
-          "$ref": "frapi:common#/errors/versionMismatch"
-        }, {
-          "$ref": "frapi:common#/errors/requestEntityTooLarge"
-        }, {
-          "$ref": "#/errors/readFoundMultipleEntries"
-        }, {
-          "$ref": "#/errors/adminLimitExceeded"
-        }, {
-          "$ref": "frapi:common#/errors/internalServerError"
-        }, {
-          "$ref": "frapi:common#/errors/unavailable"
-        }]
-      }]
+      "0.0": {
+        "$ref": "#/services/users:0.0"
+      }
     }
   }
 }
