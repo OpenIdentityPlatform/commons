@@ -56,6 +56,10 @@ define([
 
             msg.messages.hideMessages();
             ModuleLoader.load(viewPath).then(function (view) {
+                // For ES6 modules, we require that the view is the default export.
+                if (view.__esModule) {
+                    view = view.default;
+                }
                 if(view.init) {
                     view.init();
                 } else {
