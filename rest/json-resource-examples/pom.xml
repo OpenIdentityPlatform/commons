@@ -47,6 +47,17 @@
       <groupId>org.forgerock.commons.guava</groupId>
       <artifactId>forgerock-guava-base</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.forgerock.commons</groupId>
+      <artifactId>openapi-war-overlay</artifactId>
+      <version>${project.version}</version>
+      <type>war</type>
+    </dependency>
+    <dependency>
+      <groupId>org.asciidoctor</groupId>
+      <artifactId>asciidoctorj</artifactId>
+      <version>1.5.4</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -81,6 +92,12 @@
             </goals>
             <configuration>
               <classifier>servlet</classifier>
+              <overlays>
+                <overlay>
+                  <groupId>org.forgerock.commons</groupId>
+                  <artifactId>openapi-war-overlay</artifactId>
+                </overlay>
+              </overlays>
             </configuration>
           </execution>
         </executions>

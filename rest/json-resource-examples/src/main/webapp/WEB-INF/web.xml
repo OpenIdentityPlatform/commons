@@ -30,4 +30,15 @@
         <servlet-name>CREST HTTP Application</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+
+    <servlet>
+        <servlet-name>OpenAPIAssetsServlet</servlet-name>
+        <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>OpenAPIAssetsServlet</servlet-name>
+        <url-pattern>/openapi/*</url-pattern>
+    </servlet-mapping>
+
 </web-app>

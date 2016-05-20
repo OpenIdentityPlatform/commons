@@ -16,17 +16,40 @@
 
 package org.forgerock.json.resource.descriptor.examples.model;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
+
+import org.forgerock.api.annotations.Description;
+import org.forgerock.api.annotations.Title;
 
 /**
  * Bean type class for Device object.
  */
+@Title("Device")
+@Description("Device entity")
 public class Device {
 
+    @NotNull
+    @Title("Device ID")
+    @Description("Unique device identifier")
     private final String did;
+
+    @NotNull
+    @Title("Device name")
+    @Description("The device's name")
     private final String name;
+
+    @NotNull
+    @Title("Device type")
+    @Description("The device's type")
     private final String type;
+
+    @Title("Stolen flag")
+    @Description("Set to true if the device has been stolen")
     private boolean stolen;
+
+    @Title("Roll-out date")
+    @Description("Device roll-out date")
     private Date rollOutDate;
 
     /**

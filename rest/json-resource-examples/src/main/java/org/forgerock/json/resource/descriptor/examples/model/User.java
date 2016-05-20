@@ -16,17 +16,39 @@
 
 package org.forgerock.json.resource.descriptor.examples.model;
 
+import javax.validation.constraints.NotNull;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.forgerock.api.annotations.Description;
+import org.forgerock.api.annotations.Title;
+import org.forgerock.api.annotations.UniqueItems;
 
 /**
  * User bean.
  */
+@Title("User")
+@Description("User with device sub-resources")
 public final class User {
 
+    @NotNull
+    @Title("User ID")
+    @Description("Unique user identifier")
     private final String uid;
+
+    @NotNull
+    @Title("User name")
+    @Description("The user name")
     private final String name;
+
+    @NotNull
+    @Title("Password")
+    @Description("Password of the user")
     private String password;
+
+    @Title("Devices")
+    @Description("Devices belonging to this user")
+    @UniqueItems
     private Set<Device> devices = new HashSet<>();
 
     /**
