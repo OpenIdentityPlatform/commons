@@ -73,6 +73,24 @@
   background: @base-theme-color;
 }
 
+.checkbox-slider-primary.checkbox-slider--b input:not(:checked) + span:before,
+.checkbox-slider-primary.checkbox-slider--b-flat input:not(:checked) + span:before {
+    background: #737373;
+}
+
+.checkbox-slider-primary.checkbox-slider--b input[disabled] + span:before,
+.checkbox-slider-primary.checkbox-slider--b-flat input[disabled] + span:before {
+    background: #D5D5D5;
+    cursor: not-allowed;
+}
+
+.checkbox-slider-primary.checkbox-slider--b input[disabled] + span:after,
+.checkbox-slider-primary.checkbox-slider--b-flat input[disabled] + span:after {
+    background: #BDBDBD;
+    border: solid #D5D5D5 2px;
+    cursor: not-allowed;
+}
+
 /*
   Fixed default bootstrap styles
 */
