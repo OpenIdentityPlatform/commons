@@ -16,6 +16,7 @@
 
 // add new test modules here:
 define([
+    "./commons/AbstractCollection",
     "./commons/AbstractModel",
     "./commons/Base64",
     "./commons/form2js",

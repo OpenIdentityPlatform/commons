@@ -32,6 +32,20 @@ define([
     return BackbonePaginator.extend({
         model: AbstractModel,
         /**
+           this setPageSize overrides the default implementation in BackbonePaginator so that it
+           can be called without necessarily triggering a .fetch()
+           @param {number} pageSize - number of records to fetch, per page
+           @param {object} options - any options necessary to provide
+           @param {boolean} options.fetch - if false, will suppress the fetch call and instead merely update the state
+        */
+        setPageSize : function (pageSize, options) {
+            if (_.isObject(options) && options.fetch === false) {
+                this.state.pageSize = pageSize;
+            } else {
+                return BackbonePaginator.prototype.setPageSize.call(this, pageSize, options);
+            }
+        },
+        /**
             The only two type values supported here are offset and cookie. If anything else is
             passed in, it will default to offset.
         */
