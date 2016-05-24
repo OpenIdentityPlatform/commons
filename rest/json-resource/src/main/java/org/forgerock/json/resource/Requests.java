@@ -123,7 +123,7 @@ public final class Requests {
             if (isReservedParameter(name)) {
                 throw new BadRequestException("Unrecognized request parameter '" + name + "'");
             }
-            parameters.put(notNull(name), notNull(value));
+            parameters.put(notNull(name), value);
             return getThis();
         }
 
