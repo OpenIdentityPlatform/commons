@@ -32,7 +32,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -846,7 +845,7 @@ public final class ApiDocGenerator {
         columnWidths.add(COLUMN_WIDTH_SMALL);
 
         // ✓ or ⃠
-        table.columnCell(mvccSupported ? "\u2713" : "\u20E0");
+        table.columnCell(mvccSupported ? "&#10003;" : "&#8416;");
     }
 
     /**
@@ -891,7 +890,7 @@ public final class ApiDocGenerator {
         columnWidths.add(COLUMN_WIDTH_SMALL);
 
         // ✓ or ⃠
-        table.columnCell(isSingleton ? "\u2713" : "\u20E0");
+        table.columnCell(isSingleton ? "&#10003;" : "&#8416;");
     }
 
     /**
@@ -947,7 +946,7 @@ public final class ApiDocGenerator {
             table.columnCell(parameter.getName(), MONO_CELL)
                     .columnCell(parameter.getType(), MONO_CELL)
                     .columnCell(asciiDoc().include(descriptionFilename).toString(), ASCII_DOC_CELL)
-                    .columnCell(parameter.isRequired() ? "\u2713" : null)
+                    .columnCell(parameter.isRequired() ? "&#10003;" : null)
                     .columnCell(parameter.getSource().name(), MONO_CELL)
                     .columnCell(enumValuesContent, ASCII_DOC_CELL)
                     .rowEnd();
@@ -1016,8 +1015,22 @@ public final class ApiDocGenerator {
             final AsciiDocTable table = doc.tableStart()
                     .headers("Code", "Description")
                     .columnWidths(1, 10);
-            Arrays.sort(apiErrors, ApiError.ERROR_COMPARATOR);
+
+            // resolve error references before sorting
+            final List<ApiError> resolvedErrors = new ArrayList<>(apiErrors.length);
             for (final ApiError error : apiErrors) {
+                if (error.getReference() != null) {
+                    final ApiError resolved = referenceResolver.getError(error.getReference());
+                    if (resolved != null && resolved.getReference() == null) {
+                        resolvedErrors.add(resolved);
+                    }
+                } else {
+                    resolvedErrors.add(error);
+                }
+            }
+            Collections.sort(resolvedErrors, ApiError.ERROR_COMPARATOR);
+
+            for (final ApiError error : resolvedErrors) {
                 table.columnCell(String.valueOf(error.getCode()), MONO_CELL);
                 if (error.getSchema() == null) {
                     table.columnCell(error.getDescription());

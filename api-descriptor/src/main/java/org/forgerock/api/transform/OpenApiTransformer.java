@@ -995,19 +995,23 @@ public class OpenApiTransformer {
 
         if (!isEmpty(apiErrorResponses)) {
             // sort by apiError codes, so that same-codes can be merged together, because Swagger cannot overload codes
-            Arrays.sort(apiErrorResponses, ApiError.ERROR_COMPARATOR);
-            final int n = apiErrorResponses.length;
-            for (int i = 0; i < n; ++i) {
-
-                final ApiError apiError;
-                if (apiErrorResponses[i].getReference() != null) {
-                    apiError = referenceResolver.getError(apiErrorResponses[i].getReference());
-                    if (apiError == null) {
-                        throw new TransformerException("Error reference not found in global error definitions");
+            // resolve error references before sorting
+            final List<ApiError> resolvedErrors = new ArrayList<>(apiErrorResponses.length);
+            for (final ApiError error : apiErrorResponses) {
+                if (error.getReference() != null) {
+                    final ApiError resolved = referenceResolver.getError(error.getReference());
+                    if (resolved != null && resolved.getReference() == null) {
+                        resolvedErrors.add(resolved);
                     }
                 } else {
-                    apiError = apiErrorResponses[i];
+                    resolvedErrors.add(error);
                 }
+            }
+            Collections.sort(resolvedErrors, ApiError.ERROR_COMPARATOR);
+
+            final int n = resolvedErrors.size();
+            for (int i = 0; i < n; ++i) {
+                final ApiError apiError = resolvedErrors.get(i);
 
                 // for a given apiError-code, create a bulleted-list of descriptions, if there is more than one to merge
                 final int code = apiError.getCode();
@@ -1016,10 +1020,11 @@ public class OpenApiTransformer {
                     descriptions.add(apiError.getDescription());
                 }
                 for (int k = i + 1; k < n; ++k) {
-                    if (apiErrorResponses[k].getCode() == code) {
-                        // TODO build composite schema with detailsSchema??? errors[k].getSchema();
-                        if (apiErrorResponses[k].getDescription() != null) {
-                            descriptions.add(apiErrorResponses[k].getDescription());
+                    final ApiError error = resolvedErrors.get(k);
+                    if (error.getCode() == code) {
+                        // TODO build composite schema with detailsSchema??? error.getSchema();
+                        if (error.getDescription() != null) {
+                            descriptions.add(error.getDescription());
                         }
                         ++i;
                     }
