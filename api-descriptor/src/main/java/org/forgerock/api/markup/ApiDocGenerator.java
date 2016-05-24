@@ -16,16 +16,13 @@
 
 package org.forgerock.api.markup;
 
-import static java.util.Collections.unmodifiableList;
-import static org.forgerock.api.markup.asciidoc.AsciiDoc.asciiDoc;
-import static org.forgerock.api.markup.asciidoc.AsciiDoc.normalizeName;
-import static org.forgerock.api.markup.asciidoc.AsciiDocTable.COLUMN_WIDTH_MEDIUM;
-import static org.forgerock.api.markup.asciidoc.AsciiDocTable.COLUMN_WIDTH_SMALL;
-import static org.forgerock.api.markup.asciidoc.AsciiDocTableColumnStyles.ASCII_DOC_CELL;
-import static org.forgerock.api.markup.asciidoc.AsciiDocTableColumnStyles.MONO_CELL;
+import static java.util.Collections.*;
+import static org.forgerock.api.markup.asciidoc.AsciiDoc.*;
+import static org.forgerock.api.markup.asciidoc.AsciiDocTable.*;
+import static org.forgerock.api.markup.asciidoc.AsciiDocTableColumnStyles.*;
 import static org.forgerock.api.util.PathUtil.*;
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
-import static org.forgerock.util.Reject.checkNotNull;
+import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.util.Reject.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,13 +39,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.forgerock.api.enums.CountPolicy;
 import org.forgerock.api.enums.CreateMode;
 import org.forgerock.api.enums.PagingMode;
-import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.Stability;
 import org.forgerock.api.markup.asciidoc.AsciiDoc;
@@ -57,6 +50,7 @@ import org.forgerock.api.models.Action;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.ApiError;
 import org.forgerock.api.models.Create;
+import org.forgerock.api.models.Items;
 import org.forgerock.api.models.Operation;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Patch;
@@ -69,6 +63,10 @@ import org.forgerock.api.models.SubResources;
 import org.forgerock.api.models.VersionedPath;
 import org.forgerock.api.util.ReferenceResolver;
 import org.forgerock.http.routing.Version;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Generates static AsciiDoc documentation for CREST API Descriptors.
@@ -426,22 +424,17 @@ public final class ApiDocGenerator {
 
     private void outputItems(final Version version, final Resource resource, final List<Parameter> parameters,
             final String parentPathName, final String parentNamespace) throws IOException {
-        if (resource.getItems() != null) {
-            final String itemsPathName = parentPathName + "/{id}";
+        Items items = resource.getItems();
+        if (items != null) {
+            Parameter pathParameter = items.getPathParameter();
+            final String itemsPathName = parentPathName + "/{" + pathParameter.getName() + "}";
             final String itemsPathDocNamespace = normalizeName(parentNamespace, itemsPathName);
 
-            final Resource itemsResource = resource.getItems().asResource(resource.isMvccSupported(),
-                    resource.getResourceSchema());
+            final Resource itemsResource = items.asResource(resource.isMvccSupported(),
+                    resource.getResourceSchema(), resource.getTitle(), resource.getDescription());
 
-            // assume there is an "id" path-parameter
-            final List<Parameter> itemsParameters = mergeParameters(new ArrayList<>(parameters),
-                    resource.getParameters());
-            itemsParameters.add(Parameter.parameter()
-                    .name("id")
-                    .type("string")
-                    .source(ParameterSource.PATH)
-                    .required(true)
-                    .build());
+            final List<Parameter> itemsParameters = mergeParameters(mergeParameters(new ArrayList<>(parameters),
+                    resource.getParameters()), pathParameter);
 
             final String resourceFilename = outputResource(parentPathName, version,
                     itemsResource, itemsParameters, itemsPathDocNamespace);

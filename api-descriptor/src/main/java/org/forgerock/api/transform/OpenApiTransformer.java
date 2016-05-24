@@ -17,6 +17,7 @@
 package org.forgerock.api.transform;
 
 import static java.lang.Boolean.*;
+import static java.util.Arrays.*;
 import static java.util.Collections.*;
 import static org.forgerock.api.markup.asciidoc.AsciiDoc.*;
 import static org.forgerock.api.util.PathUtil.*;
@@ -25,7 +26,6 @@ import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.util.Reject.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -37,7 +37,6 @@ import java.util.Set;
 
 import org.forgerock.api.enums.CountPolicy;
 import org.forgerock.api.enums.PagingMode;
-import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.enums.Stability;
@@ -257,7 +256,7 @@ public class OpenApiTransformer {
         putIfNoneMatchParameter.setName(PARAMETER_IF_NONE_MATCH);
         putIfNoneMatchParameter.setType("string");
         putIfNoneMatchParameter.required(true);
-        putIfNoneMatchParameter.setEnum(Arrays.asList("*"));
+        putIfNoneMatchParameter.setEnum(asList("*"));
         swagger.addParameter(PARAMETER_IF_NONE_MATCH_ANY_ONLY, putIfNoneMatchParameter);
 
         // READ-operation IF-NONE-MATCH cannot have * value
@@ -391,19 +390,13 @@ public class OpenApiTransformer {
         if (resource.getItems() != null) {
             // an items-resource inherits some fields from its parent, so build combined resource
             final Resource itemsResource = resource.getItems().asResource(resource.isMvccSupported(),
-                    resource.getResourceSchema());
+                    resource.getResourceSchema(), resource.getTitle(), resource.getDescription());
 
-            // assume there is an "id" path-parameter
-            final List<Parameter> itemsParameters = mergeParameters(new ArrayList<>(parameters),
-                    resource.getParameters());
-            itemsParameters.add(Parameter.parameter()
-                    .name("id")
-                    .type("string")
-                    .source(ParameterSource.PATH)
-                    .required(true)
-                    .build());
+            Parameter pathParameter = resource.getItems().getPathParameter();
+            List<Parameter> itemsParameters = mergeParameters(mergeParameters(new ArrayList<>(parameters),
+                    resource.getParameters()), pathParameter);
 
-            final String itemsPath = buildPath(pathName, "/{id}");
+            final String itemsPath = buildPath(pathName, "/{" + pathParameter.getName() + "}");
             buildResourcePaths(itemsResource, itemsPath, parentTag, resourceVersion,
                     unmodifiableList(itemsParameters), pathMap);
         }
@@ -642,7 +635,7 @@ public class OpenApiTransformer {
                 final QueryParameter actionParameter = new QueryParameter();
                 actionParameter.setName("_action");
                 actionParameter.setType("string");
-                actionParameter.setEnum(Arrays.asList(action.getName()));
+                actionParameter.setEnum(asList(action.getName()));
                 actionParameter.setRequired(true);
                 operation.addParameter(actionParameter);
 
@@ -683,7 +676,7 @@ public class OpenApiTransformer {
                     queryParameter = new QueryParameter();
                     queryParameter.setName("_queryId");
                     queryParameter.setType("string");
-                    queryParameter.setEnum(Arrays.asList(query.getQueryId()));
+                    queryParameter.setEnum(asList(query.getQueryId()));
                     queryParameter.setRequired(true);
                     break;
                 case FILTER:
@@ -772,7 +765,7 @@ public class OpenApiTransformer {
                     sortKeysParameter.setName("_sortKeys");
                     sortKeysParameter.setType("string");
                     if (!isEmpty(query.getSupportedSortKeys())) {
-                        sortKeysParameter.setEnum(Arrays.asList(query.getSupportedSortKeys()));
+                        sortKeysParameter.setEnum(asList(query.getSupportedSortKeys()));
                     }
                     operation.addParameter(sortKeysParameter);
                 }
@@ -933,12 +926,12 @@ public class OpenApiTransformer {
                 operationParameter.setDescription(parameter.getDescription());
                 operationParameter.setRequired(parameter.isRequired());
                 if (!isEmpty(parameter.getEnumValues())) {
-                    operationParameter.setEnum(Arrays.asList(parameter.getEnumValues()));
+                    operationParameter.setEnum(asList(parameter.getEnumValues()));
 
                     if (!isEmpty(parameter.getEnumTitles())) {
                         // enum_titles only provided with enum values
                         operationParameter.getVendorExtensions().put("x-enum_titles",
-                                Arrays.asList(parameter.getEnumTitles()));
+                                asList(parameter.getEnumTitles()));
                     }
                 }
 

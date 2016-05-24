@@ -16,23 +16,24 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.util.ValidationUtil.isEmpty;
-import static org.forgerock.util.Reject.rejectStateIfTrue;
+import static org.forgerock.api.enums.ParameterSource.*;
+import static org.forgerock.api.util.ValidationUtil.*;
+import static org.forgerock.util.Reject.*;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.annotations.Actions;
-import org.forgerock.api.annotations.RequestHandler;
+import org.forgerock.api.annotations.CollectionProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
  * Class that represents the Items type in API descriptor.
@@ -41,52 +42,28 @@ public final class Items {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Items.class);
 
-    private final String title;
-    private final String description;
     private final Create create;
     private final Read read;
     private final Update update;
     private final Delete delete;
     private final Patch patch;
     private final Action[] actions;
-    //private final SubResources subresources;
-    private final Parameter[] parameters;
+    private final SubResources subresources;
+    private final Parameter pathParameter;
 
     private Items(Builder builder) {
-        this.title = builder.title;
-        this.description = builder.description;
         this.create = builder.create;
         this.read = builder.read;
         this.update = builder.update;
         this.delete = builder.delete;
         this.patch = builder.patch;
-        //this.subresources = builder.subresources;
+        this.subresources = builder.subresources;
+        this.pathParameter = builder.pathParameter;
         this.actions = builder.actions.toArray(new Action[builder.actions.size()]);
-
-        final List<Parameter> parameters = builder.parameters;
-        this.parameters = parameters.toArray(new Parameter[parameters.size()]);
 
         if (create == null && read == null && update == null && delete == null && patch == null && isEmpty(actions)) {
             throw new ApiValidationException("At least one operation required");
         }
-    }
-
-    /**
-     * Getter of title.
-     *
-     * @return Title
-     */
-    public String getTitle() {
-        return title;
-    }
-
-    /**
-     * Getter of description.
-     *
-     * @return Description
-     */
-    public String getDescription() {
-        return description;
     }
 
     /**
@@ -143,22 +120,22 @@ public final class Items {
         return actions;
     }
 
-//    /**
-//     * Getter of sub-resources.
-//     *
-//     * @return Sub-resources
-//     */
-//    public SubResources getSubresources() {
-//        return subresources;
-//    }
+    /**
+     * Getter of sub-resources.
+     *
+     * @return Sub-resources
+     */
+    public SubResources getSubresources() {
+        return subresources;
+    }
 
     /**
-     * Getter of the parameters array.
+     * Get the path parameter.
      *
-     * @return Parameters
+     * @return The path parameter.
      */
-    public Parameter[] getParameters() {
-        return parameters;
+    public Parameter getPathParameter() {
+        return pathParameter;
     }
 
     @Override
@@ -170,22 +147,19 @@ public final class Items {
             return false;
         }
         Items items = (Items) o;
-        return Objects.equals(title, items.title)
-                && Objects.equals(description, items.description)
-                && Objects.equals(create, items.create)
+        return Objects.equals(create, items.create)
                 && Objects.equals(read, items.read)
                 && Objects.equals(update, items.update)
                 && Objects.equals(delete, items.delete)
                 && Objects.equals(patch, items.patch)
                 && Arrays.equals(actions, items.actions)
-//                && Arrays.equals(subresources, items.subresources)
-                && Arrays.equals(parameters, items.parameters);
+                && Objects.equals(subresources, items.subresources)
+                && Objects.equals(pathParameter, items.pathParameter);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(title, description, create, read, update, delete, patch, actions, parameters);
-//      return Objects.hash(title, description, create, read, update, delete, patch, actions, parameters, subresources);
+        return Objects.hash(create, read, update, delete, patch, actions, pathParameter, subresources);
     }
 
     /**
@@ -193,22 +167,23 @@ public final class Items {
      *
      * @param mvccSupported {@code true} when MVCC is supported and {@code false} otherwise
      * @param resourceSchema Resource-{@link Schema} or {@code null}
+     * @param title The resource title.
+     * @param description The resource description.
      * @return New {@link Resource}
      */
     @JsonIgnore
-    public Resource asResource(final boolean mvccSupported, final Schema resourceSchema) {
+    public Resource asResource(boolean mvccSupported, Schema resourceSchema, String title, String description) {
         return Resource.resource()
                 .mvccSupported(mvccSupported)
                 .resourceSchema(resourceSchema)
-                .title(getTitle())
-                .description(getDescription())
+                .title(title)
+                .description(description)
                 .create(getCreate())
                 .read(getRead())
                 .update(getUpdate())
                 .delete(getDelete())
                 .patch(getPatch())
                 .actions(Arrays.asList(getActions()))
-                .parameters(Arrays.asList(getParameters()))
                 .build();
     }
 
@@ -226,18 +201,20 @@ public final class Items {
      *
      * @param type The annotated type.
      * @param descriptor The root descriptor to add definitions to.
+     * @param subResources The sub resources.
      * @return The built {@code Items} object.
      */
-    public static Items fromAnnotatedType(final Class<?> type, final ApiDescription descriptor) {
+    public static Items fromAnnotatedType(Class<?> type, ApiDescription descriptor, SubResources subResources) {
         final Builder builder = items();
-        final RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
-        if (requestHandler == null) {
+        final CollectionProvider provider = type.getAnnotation(CollectionProvider.class);
+        if (provider == null) {
             LOGGER.warn("Asked for Items for annotated type, but type does not have required RequestHandler"
                     + " annotation. Returning null for " + type);
             return null;
         }
+        builder.pathParameter(Parameter.fromAnnotation(provider.pathParam()));
 
-        for (final Method m : type.getDeclaredMethods()) {
+        for (final Method m : type.getMethods()) {
             org.forgerock.api.annotations.Action action = m.getAnnotation(org.forgerock.api.annotations.Action.class);
             if (action != null) {
                 builder.actions.add(Action.fromAnnotation(action, m, descriptor, type));
@@ -272,33 +249,22 @@ public final class Items {
             }
         }
 
-        for (org.forgerock.api.annotations.Parameter parameter : requestHandler.parameters()) {
-            builder.parameter(Parameter.fromAnnotation(parameter));
-        }
-
-        final Items items = builder
-                .title(requestHandler.title())
-                .description(requestHandler.description())
-                //.subresources(subResources)
-                .build();
-
-        return items;
+        return builder.subresources(subResources).build();
     }
 
     /**
      * Builder to help construct the {@code Items}.
      */
     public final static class Builder {
-        private String title;
-        private String description;
         private Create create;
         private Read read;
         private Update update;
         private Delete delete;
         private Patch patch;
-        //private SubResources subresources;
+        private SubResources subresources;
+        private Parameter pathParameter = Parameter.parameter().name("id").type("string").source(PATH).required(true)
+                .build();
         private final Set<Action> actions;
-        private final List<Parameter> parameters;
         private boolean built = false;
 
         /**
@@ -306,30 +272,6 @@ public final class Items {
          */
         protected Builder() {
             actions = new TreeSet<>();
-            parameters = new ArrayList<>();
-        }
-
-        /**
-         * Set the title.
-         *
-         * @param title Title of the endpoint
-         * @return Builder
-         */
-        public Builder title(String title) {
-            this.title = title;
-            return this;
-        }
-
-        /**
-         * Set the description.
-         *
-         * @param description A description of the endpoint
-         * @return Builder
-         */
-        public Builder description(String description) {
-            checkState();
-            this.description = description;
-            return this;
         }
 
         /**
@@ -416,38 +358,27 @@ public final class Items {
             return this;
         }
 
-//        /**
-//         * Sets the sub-resources for this resource.
-//         *
-//         * @param subresources The sub-reosurces definition.
-//         * @return Builder
-//         */
-//        public Builder subresources(SubResources subresources) {
-//            checkState();
-//            this.subresources = subresources;
-//            return this;
-//        }
-
         /**
-         * Set multiple supported parameters.
+         * Sets the path parameter for this resource.
          *
-         * @param parameters Extra parameters supported by the resource
+         * @param pathParameter The path parameter definition.
          * @return Builder
          */
-        public Builder parameters(List<Parameter> parameters) {
+        public Builder pathParameter(Parameter pathParameter) {
             checkState();
-            this.parameters.addAll(parameters);
+            this.pathParameter = pathParameter;
             return this;
         }
 
         /**
-         * Sets a single supported parameter.
+         * Sets the sub-resources for this resource.
          *
-         * @param parameter Extra parameter supported by the resource
+         * @param subresources The sub-reosurces definition.
          * @return Builder
          */
-        public Builder parameter(Parameter parameter) {
-            this.parameters.add(parameter);
+        public Builder subresources(SubResources subresources) {
+            checkState();
+            this.subresources = subresources;
             return this;
         }
 
@@ -460,7 +391,7 @@ public final class Items {
             checkState();
             this.built = true;
             if (create == null && read == null && update == null && delete == null && patch == null
-                    && actions.isEmpty()) {
+                    && actions.isEmpty() && subresources == null) {
                 return null;
             }
 

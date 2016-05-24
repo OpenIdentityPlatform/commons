@@ -16,6 +16,7 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.api.annotations.CollectionProvider;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
@@ -26,8 +27,7 @@ import org.forgerock.api.annotations.Update;
 
 /**
  * Exposes an annotated POJO as collection instance methods {@link org.forgerock.json.resource.RequestHandler} by
- * looking for annotated and/or conventionally-named methods (as per
- * {@link org.forgerock.api.annotations.RequestHandler}).
+ * looking for annotated and/or conventionally-named methods (as per {@link CollectionProvider}).
  * <p>
  * This class will handle the requests to the collection's instance-level endpoint, so only Read, Update, Delete,
  * Patch and Action are implemented - the remaining methods delegate to the {@link InterfaceCollectionInstance} for
@@ -44,6 +44,10 @@ class AnnotationCollectionInstance extends InterfaceCollectionInstance {
 
     AnnotationCollectionInstance(Object requestHandler) {
         super(null);
+        if (!requestHandler.getClass().isAnnotationPresent(CollectionProvider.class)) {
+            throw new IllegalArgumentException("CollectionProvider missing from class: "
+                    + requestHandler.getClass().getName());
+        }
         this.readMethod = AnnotatedMethod.findMethod(requestHandler, Read.class, true);
         this.updateMethod = AnnotatedMethod.findMethod(requestHandler, Update.class, true);
         this.deleteMethod = AnnotatedMethod.findMethod(requestHandler, Delete.class, true);

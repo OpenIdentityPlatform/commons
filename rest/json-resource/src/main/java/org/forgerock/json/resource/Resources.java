@@ -16,12 +16,13 @@
 
 package org.forgerock.json.resource;
 
+import static org.forgerock.api.models.Parameter.*;
 import static org.forgerock.api.models.Resource.AnnotatedTypeVariant.*;
-import static org.forgerock.api.models.SubResources.subresources;
+import static org.forgerock.api.models.SubResources.*;
 import static org.forgerock.http.routing.RoutingMode.*;
-import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
+import static org.forgerock.json.resource.Responses.*;
+import static org.forgerock.json.resource.RouteMatchers.*;
+import static org.forgerock.util.promise.Promises.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,17 +30,21 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.forgerock.api.annotations.CollectionProvider;
 import org.forgerock.api.annotations.Path;
-import org.forgerock.api.enums.HandlerVariant;
+import org.forgerock.api.annotations.SingletonProvider;
+import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Items;
+import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.SubResources;
 import org.forgerock.http.ApiProducer;
-import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.services.context.AbstractContext;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
@@ -215,14 +220,19 @@ public final class Resources {
     }
 
     private static Resource addHandlers(Object provider, Router router, String basePath,
-            ApiDescription definitions) {
+            ApiDescription definitions, Parameter... pathParameters) {
         HandlerVariant variant = deduceHandlerVariant(provider);
+        Parameter[] nextPathParameters = pathParameters;
         switch (variant) {
         case SINGLETON_RESOURCE:
             addSingletonHandlerToRouter(provider, router, basePath);
             break;
         case COLLECTION_RESOURCE:
-            addCollectionHandlersToRouter(provider, router, basePath);
+            nextPathParameters = new Parameter[pathParameters.length + 1];
+            System.arraycopy(pathParameters, 0, nextPathParameters, 0, pathParameters.length);
+            nextPathParameters[pathParameters.length] = addCollectionHandlersToRouter(provider, router, basePath);
+            String pathParameter = nextPathParameters[pathParameters.length].getName();
+            basePath = (basePath.isEmpty() ? "" : basePath + "/") + "{" + pathParameter + "}";
             break;
         case REQUEST_HANDLER:
             addRequestHandlerToRouter(provider, router, basePath);
@@ -241,7 +251,7 @@ public final class Resources {
                 String subpath = subpathAnnotation.value().replaceAll("^/", "");
                 try {
                     Resource subResource = addHandlers(m.invoke(provider), router,
-                            basePath.isEmpty() ? subpath : basePath + "/" + subpath, definitions);
+                            basePath.isEmpty() ? subpath : basePath + "/" + subpath, definitions, nextPathParameters);
                     if (subResource != null) {
                         subResourcesBuilder.put(subpath, subResource);
                     }
@@ -251,21 +261,21 @@ public final class Resources {
             }
         }
         SubResources subResources = subResourcesBuilder == null ? null : subResourcesBuilder.build();
-        return makeDescriptor(provider, variant, subResources, definitions);
+        return makeDescriptor(provider, variant, subResources, definitions, pathParameters);
     }
 
     private static HandlerVariant deduceHandlerVariant(Object provider) {
+        Class<?> type = provider.getClass();
         org.forgerock.api.annotations.RequestHandler handler =
                 provider.getClass().getAnnotation(org.forgerock.api.annotations.RequestHandler.class);
-        if (handler != null) {
-            return handler.variant();
-        }
-        if (provider instanceof SingletonResourceProvider) {
-            return HandlerVariant.SINGLETON_RESOURCE;
-        } else if (provider instanceof CollectionResourceProvider) {
-            return HandlerVariant.COLLECTION_RESOURCE;
-        } else if (provider instanceof RequestHandler) {
+        if (handler != null || provider instanceof RequestHandler) {
             return HandlerVariant.REQUEST_HANDLER;
+        } else if (type.getAnnotation(SingletonProvider.class) != null
+                || provider instanceof SingletonResourceProvider) {
+            return HandlerVariant.SINGLETON_RESOURCE;
+        } else if (type.getAnnotation(CollectionProvider.class) != null
+                || provider instanceof CollectionResourceProvider) {
+            return HandlerVariant.COLLECTION_RESOURCE;
         }
         throw new IllegalArgumentException("Cannot deduce provider variant");
     }
@@ -274,7 +284,7 @@ public final class Resources {
         router.addRoute(requestUriMatcher(STARTS_WITH, basePath), new AnnotatedRequestHandler(provider));
     }
 
-    private static void addCollectionHandlersToRouter(Object provider, Router router, String basePath) {
+    private static Parameter addCollectionHandlersToRouter(Object provider, Router router, String basePath) {
         boolean fromInterface = provider instanceof CollectionResourceProvider;
         // Create a route for the collection.
         final RequestHandler collectionHandler = fromInterface
@@ -283,10 +293,21 @@ public final class Resources {
         router.addRoute(requestUriMatcher(EQUALS, basePath), collectionHandler);
 
         // Create a route for the instances within the collection.
-        final RequestHandler instanceHandler = fromInterface
+        RequestHandler instanceHandler = fromInterface
                 ? new InterfaceCollectionInstance((CollectionResourceProvider) provider)
                 : new AnnotationCollectionInstance(provider);
-        router.addRoute(requestUriMatcher(EQUALS, basePath.isEmpty() ? "{id}" : basePath + "/{id}"), instanceHandler);
+        CollectionProvider providerAnnotation = provider.getClass().getAnnotation(CollectionProvider.class);
+        Parameter pathParameter;
+        if (providerAnnotation != null) {
+            pathParameter = Parameter.fromAnnotation(providerAnnotation.pathParam());
+        } else {
+            pathParameter = parameter().name("id").type("string").source(ParameterSource.PATH).required(true).build();
+        }
+        String pathParam = pathParameter.getName();
+        instanceHandler = new FilterChain(instanceHandler, new CollectionInstanceIdContextFilter(pathParam));
+        router.addRoute(requestUriMatcher(EQUALS, (basePath.isEmpty() ? "" : basePath + "/") + "{" + pathParam + "}"),
+                instanceHandler);
+        return pathParameter;
     }
 
     private static void addSingletonHandlerToRouter(Object provider, Router router, String basePath) {
@@ -297,16 +318,17 @@ public final class Resources {
     }
 
     private static Resource makeDescriptor(Object provider, HandlerVariant variant, SubResources subResources,
-            ApiDescription definitions) {
+            ApiDescription definitions, Parameter[] pathParameters) {
+        Class<?> type = provider.getClass();
         switch (variant) {
         case SINGLETON_RESOURCE:
-            return Resource.fromAnnotatedType(provider.getClass(), SINGLETON_RESOURCE, subResources, definitions);
+            return Resource.fromAnnotatedType(type, SINGLETON_RESOURCE, subResources, definitions, pathParameters);
         case COLLECTION_RESOURCE:
-            final Items items = Items.fromAnnotatedType(provider.getClass(), definitions);
-            return Resource.fromAnnotatedType(provider.getClass(), COLLECTION_RESOURCE_COLLECTION, subResources, items,
-                    definitions);
+            final Items items = Items.fromAnnotatedType(type, definitions, subResources);
+            return Resource.fromAnnotatedType(type, COLLECTION_RESOURCE_COLLECTION, items,
+                    definitions, pathParameters);
         case REQUEST_HANDLER:
-            return Resource.fromAnnotatedType(provider.getClass(), REQUEST_HANDLER, subResources, definitions);
+            return Resource.fromAnnotatedType(type, REQUEST_HANDLER, subResources, definitions, pathParameters);
         default:
             return null;
         }
@@ -412,7 +434,8 @@ public final class Resources {
     }
 
     static String idOf(final Context context) {
-        return context.asContext(UriRouterContext.class).getUriTemplateVariables().get("id");
+        String idFieldName = context.asContext(IdFieldContext.class).getIdFieldName();
+        return context.asContext(UriRouterContext.class).getUriTemplateVariables().get(idFieldName);
     }
 
     static ResourceException newBadRequestException(final String fs, final Object... args) {
@@ -426,14 +449,97 @@ public final class Resources {
 
     // Strips off the unwanted leaf routing context which was added when routing
     // requests to a collection.
-    static Context parentOf(final Context context) {
+    static Context parentOf(Context context) {
+        if (context instanceof IdFieldContext) {
+            context = context.getParent();
+        }
         assert context instanceof UriRouterContext;
         return context.getParent();
+    }
+
+    private static class IdFieldContext extends AbstractContext {
+
+        private static final String ID_FIELD_NAME = "IdFieldName";
+
+        protected IdFieldContext(Context parent, String idFieldName) {
+            super(parent, "IdField");
+            this.data.put(ID_FIELD_NAME, idFieldName);
+        }
+
+        protected IdFieldContext(JsonValue data, ClassLoader loader) {
+            super(data, loader);
+        }
+
+        String getIdFieldName() {
+            return this.data.get(ID_FIELD_NAME).asString();
+        }
+    }
+
+    private static final class CollectionInstanceIdContextFilter implements Filter {
+
+        private final String idFieldName;
+
+        private CollectionInstanceIdContextFilter(String idFieldName) {
+            this.idFieldName = idFieldName;
+        }
+
+        @Override
+        public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest request,
+                RequestHandler next) {
+            return next.handleAction(new IdFieldContext(context, idFieldName), request);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest request,
+                RequestHandler next) {
+            return next.handleCreate(new IdFieldContext(context, idFieldName), request);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest request,
+                RequestHandler next) {
+            return next.handleDelete(new IdFieldContext(context, idFieldName), request);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest request,
+                RequestHandler next) {
+            return next.handlePatch(new IdFieldContext(context, idFieldName), request);
+        }
+
+        @Override
+        public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest request,
+                QueryResourceHandler handler, RequestHandler next) {
+            return next.handleQuery(new IdFieldContext(context, idFieldName), request, handler);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest request,
+                RequestHandler next) {
+            return next.handleRead(new IdFieldContext(context, idFieldName), request);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest request,
+                RequestHandler next) {
+            return next.handleUpdate(new IdFieldContext(context, idFieldName), request);
+        }
+    }
+
+    /**
+     * Enumeration of the possible CREST handler variants.
+     */
+    enum HandlerVariant {
+        /** A singleton resource handler. */
+        SINGLETON_RESOURCE,
+        /** A collection resource handler. */
+        COLLECTION_RESOURCE,
+        /** A plain request handler. */
+        REQUEST_HANDLER
     }
 
     // Prevent instantiation.
     private Resources() {
         // Nothing to do.
     }
-
 }

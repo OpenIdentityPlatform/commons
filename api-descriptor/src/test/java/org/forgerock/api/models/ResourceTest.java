@@ -25,11 +25,12 @@ import static org.forgerock.json.JsonValue.*;
 import java.util.Locale;
 
 import org.forgerock.api.annotations.Actions;
+import org.forgerock.api.annotations.CollectionProvider;
+import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Queries;
-import org.forgerock.api.annotations.RequestHandler;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.api.enums.CountPolicy;
 import org.forgerock.api.enums.CreateMode;
-import org.forgerock.api.enums.HandlerVariant;
 import org.forgerock.api.enums.PagingMode;
 import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.QueryType;
@@ -190,7 +191,7 @@ public class ResourceTest {
         assertThat(resource.isMvccSupported()).isTrue();
     }
 
-    @RequestHandler(mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(mvccSupported = true))
     private static final class SimpleAnnotatedHandler {
         @org.forgerock.api.annotations.Action(
                 operationDescription = @org.forgerock.api.annotations.Operation)
@@ -210,10 +211,9 @@ public class ResourceTest {
         assertThat(descriptor.getDefinitions().getDefinitions()).hasSize(1).containsKeys("frapi:response");
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = IdentifiedResponse.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = IdentifiedResponse.class),
+            mvccSupported = true))
     private static final class ReferencedSchemaHandler {
         @org.forgerock.api.annotations.Read(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -235,10 +235,9 @@ public class ResourceTest {
         assertThat(descriptor.getErrors().getErrors()).hasSize(1).containsKeys("frapi:myerror");
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = IdentifiedResponse.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = IdentifiedResponse.class),
+            mvccSupported = true))
     private static final class ReferencedErrorHandler {
         @org.forgerock.api.annotations.Read(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -268,10 +267,9 @@ public class ResourceTest {
         assertThat(create.getMode()).isEqualTo(CreateMode.ID_FROM_SERVER);
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = Response.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @CollectionProvider(details = @Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
+            mvccSupported = true))
     private static final class CreateAnnotatedHandler {
         @org.forgerock.api.annotations.Create(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -300,7 +298,7 @@ public class ResourceTest {
         fromAnnotatedType(ResourceSchemaRequiredAnnotatedHandler.class, SINGLETON_RESOURCE, descriptor);
     }
 
-    @RequestHandler(mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(mvccSupported = true))
     private static final class ResourceSchemaRequiredAnnotatedHandler {
         @org.forgerock.api.annotations.Create(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -325,10 +323,9 @@ public class ResourceTest {
         assertThat(read.getStability()).isEqualTo(Stability.STABLE);
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = Response.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
+            mvccSupported = true))
     private static final class ReadAnnotatedHandler {
         @org.forgerock.api.annotations.Read(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -354,10 +351,9 @@ public class ResourceTest {
         assertThat(update.getStability()).isEqualTo(Stability.STABLE);
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = Response.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
+            mvccSupported = true))
     private static final class UpdateAnnotatedHandler {
         @org.forgerock.api.annotations.Update(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -382,10 +378,9 @@ public class ResourceTest {
         assertThat(delete.getStability()).isEqualTo(Stability.STABLE);
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = Response.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
+            mvccSupported = true))
     private static final class DeleteAnnotatedHandler {
         @org.forgerock.api.annotations.Delete(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -412,10 +407,9 @@ public class ResourceTest {
         assertThat(patch.getOperations()).contains(PatchOperation.INCREMENT, PatchOperation.TRANSFORM);
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = Response.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
+            mvccSupported = true))
     private static final class PatchAnnotatedHandler {
         @org.forgerock.api.annotations.Patch(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -464,7 +458,7 @@ public class ResourceTest {
         return ApiDescription.apiDescription().id("frapi:test").version("1.0").build();
     }
 
-    @RequestHandler(mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(mvccSupported = true))
     private static final class ActionAnnotatedHandler {
         @org.forgerock.api.annotations.Action(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -513,7 +507,7 @@ public class ResourceTest {
         }
     }
 
-    @RequestHandler(mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(mvccSupported = true))
     private static final class ActionsAnnotatedHandler {
         @Actions({
                 @org.forgerock.api.annotations.Action(
@@ -607,10 +601,9 @@ public class ResourceTest {
         assertThat(query2.getSupportedSortKeys()[2]).isEqualTo("key3");
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = Response.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @CollectionProvider(details = @Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
+            mvccSupported = true))
     private static final class QueryAnnotatedHandler {
         @org.forgerock.api.annotations.Query(
                 operationDescription = @org.forgerock.api.annotations.Operation(
@@ -663,10 +656,9 @@ public class ResourceTest {
         }
     }
 
-    @RequestHandler(
-            resourceSchema = @org.forgerock.api.annotations.Schema(
-                    fromType = Response.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+    @CollectionProvider(details = @Handler(
+            resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
+            mvccSupported = true))
     private static final class QueriesAnnotatedHandler {
         @Queries({
                 @org.forgerock.api.annotations.Query(
@@ -763,9 +755,9 @@ public class ResourceTest {
         assertThat(referenced.getRead()).isNotNull();
     }
 
-    @RequestHandler(id = "referenced",
+    @SingletonProvider(@Handler(id = "referenced",
             resourceSchema = @org.forgerock.api.annotations.Schema(fromType = Response.class),
-            mvccSupported = true, variant = HandlerVariant.SINGLETON_RESOURCE)
+            mvccSupported = true))
     private static final class ReferencedHandler {
         @org.forgerock.api.annotations.Read(
                 operationDescription = @org.forgerock.api.annotations.Operation(

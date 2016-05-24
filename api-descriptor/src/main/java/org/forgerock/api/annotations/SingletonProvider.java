@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 package org.forgerock.api.annotations;
@@ -22,29 +22,26 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates an CREST delete method on an annotated POJO. This annotation can only be used on
- * collection resource request handlers.
+ * A marker annotation to indicate that the annotated class should be interpreted as an annotated CREST
+ * singleton provider resource.
  * <p>
- * The annotated method's return type must be:
+ * Individual operations can then be supported by either annotating a method with the relevant annotation, or
+ * by naming the method according to the following convention:
  * <ul>
- *     <li>A {@code Promise<Resource, ? extends ResourceException>} promise.</li>
+ *     <li>{@code read} for read methods.</li>
+ *     <li>{@code update} for update methods.</li>
+ *     <li>{@code patch} for patch methods.</li>
  * </ul>
- * The method should take the following parameters:
- * <ul>
- *     <li>A string parameter for the instance identifier.</li>
- * </ul>
- * The method may also take the following parameters:
- * <ul>
- *     <li>A {@code org.forgerock.json.resource.DeleteRequest} for the request.</li>
- *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
- * </ul>
- * @see RequestHandler
- * @see SingletonProvider
- * @see CollectionProvider
+ * Note that action methods do not have a convention and MUST be annotated using the {@link Action} annotation.
+ *
+ * @see Read
+ * @see Update
+ * @see Patch
+ * @see Action
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Delete {
-    /** Describe the standard operation details of this action. */
-    Operation operationDescription();
+@Target(ElementType.TYPE)
+public @interface SingletonProvider {
+    /** The details of the handler. */
+    Handler value();
 }

@@ -16,16 +16,15 @@
 
 package org.forgerock.json.resource;
 
+import org.forgerock.api.annotations.CollectionProvider;
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Query;
-import org.forgerock.api.annotations.RequestHandler;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
  * Exposes an annotated POJO as collection methods {@link org.forgerock.json.resource.RequestHandler} by
- * looking for annotated and/or conventionally-named methods (as per
- * {@link org.forgerock.api.annotations.RequestHandler}).
+ * looking for annotated and/or conventionally-named methods (as per {@link CollectionProvider}).
  * <p>
  * This class will handle the requests to the collection-level endpoint, so only Create, Query and Action
  * are implemented - the remaining methods delegate to the {@link InterfaceCollectionHandler} for
@@ -40,8 +39,8 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
 
     public AnnotatedCollectionHandler(Object requestHandler) {
         super(null);
-        if (!requestHandler.getClass().isAnnotationPresent(RequestHandler.class)) {
-            throw new IllegalArgumentException("RequestHandler missing from class: "
+        if (!requestHandler.getClass().isAnnotationPresent(CollectionProvider.class)) {
+            throw new IllegalArgumentException("CollectionProvider missing from class: "
                     + requestHandler.getClass().getName());
         }
         this.createMethod = AnnotatedMethod.findMethod(requestHandler, Create.class, false);

@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates an CREST read method on a {@link RequestHandler}-annotated POJO. This annotation can be used on
+ * Indicates an CREST read method on an annotated POJO. This annotation can be used on
  * methods in both singleton and collection resource request handlers.
  * <p>
  * The annotated method's return type must be:
@@ -38,6 +38,9 @@ import java.lang.annotation.Target;
  *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
  *     <li>A {@code org.forgerock.json.resource.ReadRequest} to be given the request.</li>
  * </ul>
+ * @see RequestHandler
+ * @see SingletonProvider
+ * @see CollectionProvider
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

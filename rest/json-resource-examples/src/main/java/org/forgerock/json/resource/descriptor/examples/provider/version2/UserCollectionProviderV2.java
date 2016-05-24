@@ -16,9 +16,10 @@
 
 package org.forgerock.json.resource.descriptor.examples.provider.version2;
 
-import org.forgerock.api.annotations.RequestHandler;
+import org.forgerock.api.annotations.CollectionProvider;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Parameter;
 import org.forgerock.api.annotations.Schema;
-import org.forgerock.api.enums.HandlerVariant;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.descriptor.examples.model.User;
 import org.forgerock.json.resource.descriptor.examples.provider.version1.UserCollectionProviderV1;
@@ -26,14 +27,14 @@ import org.forgerock.json.resource.descriptor.examples.provider.version1.UserCol
 /**
  * Example collection provider class with API descriptor annotations.
  */
-@RequestHandler(
+@CollectionProvider(details = @Handler(
         id = "users:2.0",
         title = "Users",
         description = "Users example service version 2.0 has the same features as the 1.0 but the subresource "
                 + "is pointing to the devices service version 2.0",
         resourceSchema = @Schema(fromType = User.class),
-        mvccSupported = true,
-        variant = HandlerVariant.COLLECTION_RESOURCE)
+        mvccSupported = true),
+        pathParam = @Parameter(name = "userId", type = "string", description = "The user ID from the path"))
 public class UserCollectionProviderV2 extends UserCollectionProviderV1 {
 
     /**

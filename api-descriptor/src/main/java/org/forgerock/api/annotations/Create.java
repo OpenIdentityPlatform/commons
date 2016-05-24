@@ -25,7 +25,7 @@ import org.forgerock.api.enums.CreateMode;
 import org.forgerock.api.enums.CreateSingleton;
 
 /**
- * Indicates an CREST create method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
+ * Indicates an CREST create method on an annotated POJO. This annotation can only be used on
  * collection resource request handlers.
  * <p>
  * The annotated method's return type must be:
@@ -40,6 +40,9 @@ import org.forgerock.api.enums.CreateSingleton;
  * <ul>
  *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
  * </ul>
+ * @see RequestHandler
+ * @see SingletonProvider
+ * @see CollectionProvider
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

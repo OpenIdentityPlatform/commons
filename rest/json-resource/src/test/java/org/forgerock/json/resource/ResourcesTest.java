@@ -18,7 +18,7 @@ package org.forgerock.json.resource;
 
 import static java.util.Collections.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.api.enums.HandlerVariant.*;
+import static org.forgerock.json.resource.Resources.HandlerVariant.*;
 import static org.forgerock.api.models.VersionedPath.UNVERSIONED;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.*;
@@ -41,16 +41,18 @@ import java.util.Map;
 import org.assertj.core.api.Assertions;
 import org.forgerock.api.CrestApiProducer;
 import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.CollectionProvider;
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Delete;
+import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Patch;
 import org.forgerock.api.annotations.Path;
 import org.forgerock.api.annotations.Query;
 import org.forgerock.api.annotations.Read;
 import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.api.annotations.Update;
-import org.forgerock.api.enums.HandlerVariant;
 import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Resource;
@@ -563,22 +565,17 @@ public final class ResourcesTest {
     }
 
     @Path("test")
-    @org.forgerock.api.annotations.RequestHandler(
-            resourceSchema = @Schema(fromType = SchemaType.class),
-            mvccSupported = true, variant = SINGLETON_RESOURCE)
+    @SingletonProvider(@Handler(resourceSchema = @Schema(fromType = SchemaType.class), mvccSupported = true))
     public static final class NoMethodsSingleton {
     }
 
     @Path("test")
-    @org.forgerock.api.annotations.RequestHandler(
-            resourceSchema = @Schema(fromType = SchemaType.class),
-            mvccSupported = true, variant = COLLECTION_RESOURCE)
+    @CollectionProvider(details = @Handler(resourceSchema = @Schema(fromType = SchemaType.class), mvccSupported = true))
     public static final class NoMethodsCollection {
     }
 
     @Path("test")
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class),
-            variant = COLLECTION_RESOURCE, mvccSupported = true)
+    @CollectionProvider(details = @Handler(resourceSchema = @Schema(fromType = SchemaType.class), mvccSupported = true))
     public static final class AnnotationCollection {
         @Create(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myCreate(CreateRequest request) {
@@ -623,8 +620,7 @@ public final class ResourcesTest {
     }
 
     @Path("test")
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class),
-            variant = SINGLETON_RESOURCE, mvccSupported = true)
+    @SingletonProvider(@Handler(resourceSchema = @Schema(fromType = SchemaType.class), mvccSupported = true))
     public static final class AnnotationSingleton {
         @Read(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myRead() {
@@ -649,8 +645,8 @@ public final class ResourcesTest {
     }
 
     @Path("test")
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class),
-            variant = REQUEST_HANDLER, mvccSupported = true)
+    @org.forgerock.api.annotations.RequestHandler(@Handler(mvccSupported = true,
+            resourceSchema = @Schema(fromType = SchemaType.class)))
     public static final class AnnotationRequestHandler {
         @Create(operationDescription = @Operation)
         public Promise<ResourceResponse, ResourceException> myCreate(CreateRequest request) {
@@ -687,8 +683,7 @@ public final class ResourcesTest {
     }
 
     @Path("test")
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class),
-            variant = COLLECTION_RESOURCE, mvccSupported = true)
+    @CollectionProvider(details = @Handler(resourceSchema = @Schema(fromType = SchemaType.class), mvccSupported = true))
     public static final class ConventionCollection {
         public Promise<ResourceResponse, ResourceException> create(CreateRequest request) {
             return newResultPromise(newResourceResponse("create", "1", json(object(field("result", "read")))));
@@ -711,8 +706,7 @@ public final class ResourcesTest {
     }
 
     @Path("test")
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class),
-            variant = SINGLETON_RESOURCE, mvccSupported = true)
+    @SingletonProvider(@Handler(resourceSchema = @Schema(fromType = SchemaType.class), mvccSupported = true))
     public static final class ConventionSingleton {
         public Promise<ResourceResponse, ResourceException> read() {
             return newResultPromise(newResourceResponse("read", "1", json(object(field("result", "read")))));
@@ -761,16 +755,15 @@ public final class ResourcesTest {
         assertThat(api.getPaths().getNames()).containsOnly("things");
         Resource thingsResource = api.getPaths().get("things").get(UNVERSIONED);
         assertThat(thingsResource.getItems()).isNotNull();
-        assertThat(thingsResource.getSubresources().getNames()).containsOnly("{thing}/subthing");
-        Resource subthingResource = thingsResource.getSubresources().get("{thing}/subthing");
+        assertThat(thingsResource.getItems().getSubresources().getNames()).containsOnly("subthing");
+        Resource subthingResource = thingsResource.getItems().getSubresources().get("subthing");
         assertThat(subthingResource.getRead()).isNotNull();
         assertThat(subthingResource.getItems()).isNull();
         assertThat(subthingResource.getSubresources()).isNull();
     }
 
     @Path("things")
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class),
-            variant = COLLECTION_RESOURCE, mvccSupported = true)
+    @CollectionProvider(details = @Handler(resourceSchema = @Schema(fromType = SchemaType.class), mvccSupported = true))
     private static final class ThingsProvider {
         private final SubthingProvider subthingProvider;
         private int getCalls = 0;
@@ -792,14 +785,13 @@ public final class ResourcesTest {
             return null;
         }
 
-        @Path("{thing}/subthing")
+        @Path("subthing")
         public SubthingProvider subthing() {
             return subthingProvider;
         }
     }
 
-    @org.forgerock.api.annotations.RequestHandler(resourceSchema = @Schema(fromType = SchemaType.class),
-            variant = SINGLETON_RESOURCE, mvccSupported = true)
+    @SingletonProvider(@Handler(resourceSchema = @Schema(fromType = SchemaType.class), mvccSupported = true))
     private static final class SubthingProvider {
         private int getCalls = 0;
         @Read(operationDescription = @Operation)

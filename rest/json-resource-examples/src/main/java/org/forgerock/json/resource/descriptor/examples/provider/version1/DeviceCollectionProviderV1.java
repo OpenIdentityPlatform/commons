@@ -16,20 +16,22 @@
 
 package org.forgerock.json.resource.descriptor.examples.provider.version1;
 
+import static org.forgerock.util.promise.Promises.*;
+
 import org.forgerock.api.annotations.Action;
 import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.CollectionProvider;
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Delete;
+import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Parameter;
 import org.forgerock.api.annotations.Patch;
 import org.forgerock.api.annotations.Query;
 import org.forgerock.api.annotations.Read;
-import org.forgerock.api.annotations.RequestHandler;
 import org.forgerock.api.annotations.Schema;
 import org.forgerock.api.annotations.Update;
 import org.forgerock.api.enums.CountPolicy;
-import org.forgerock.api.enums.HandlerVariant;
 import org.forgerock.api.enums.PagingMode;
 import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.util.Translator;
@@ -51,12 +53,10 @@ import org.forgerock.json.resource.descriptor.examples.model.Device;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-
 /**
  * Example device collection provider with API descriptor annotations.
  */
-@RequestHandler(
+@CollectionProvider(details = @Handler(
         id = "devices:1.0",
         title = "User devices",
         description = "Devices 1.0 example service has the CQ operations on the collection and CRUDPA operations "
@@ -64,12 +64,11 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
                 + "of the Users v1.0 items.",
         resourceSchema = @Schema(fromType = Device.class),
         mvccSupported = true,
-        variant = HandlerVariant.COLLECTION_RESOURCE,
         parameters = {
                 @Parameter(name = "userId",
                         type = "string",
                         description = "The uid of the User record, the parent of the device")
-        })
+        }), pathParam = @Parameter(name = "deviceId", type = "string", description = "The device ID from the path"))
 public class DeviceCollectionProviderV1 {
 
     /**

@@ -23,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.forgerock.util.Reject;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -84,7 +86,7 @@ public final class Services {
      * @param resource The resource definition.
      */
     void addService(String id, Resource resource) {
-        services.put(id, resource);
+        services.put(id, Reject.checkNotNull(resource));
     }
 
     /**

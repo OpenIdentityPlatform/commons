@@ -16,20 +16,23 @@
 
 package org.forgerock.json.resource.descriptor.examples.provider.version1;
 
+import static org.forgerock.util.promise.Promises.*;
+
 import org.forgerock.api.annotations.Action;
 import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.CollectionProvider;
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Delete;
+import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Parameter;
 import org.forgerock.api.annotations.Patch;
 import org.forgerock.api.annotations.Path;
 import org.forgerock.api.annotations.Query;
 import org.forgerock.api.annotations.Read;
-import org.forgerock.api.annotations.RequestHandler;
 import org.forgerock.api.annotations.Schema;
 import org.forgerock.api.annotations.Update;
 import org.forgerock.api.enums.CountPolicy;
-import org.forgerock.api.enums.HandlerVariant;
 import org.forgerock.api.enums.PagingMode;
 import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.util.Translator;
@@ -51,12 +54,10 @@ import org.forgerock.json.resource.descriptor.examples.model.User;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-
 /**
  * Example collection provider class with API descriptor annotations.
  */
-@RequestHandler(
+@CollectionProvider(details = @Handler(
         id = "users:1.0",
         title = "Users",
         description = "This example version 1.0 user service represents a Users resource with CQ operations "
@@ -65,8 +66,8 @@ import static org.forgerock.util.promise.Promises.newExceptionPromise;
                 + "Items can have devices version 1.0 subresources. "
                 + "This service is populated by the /users endpoint and the /admins endpoint",
         resourceSchema = @Schema(fromType = User.class),
-        mvccSupported = true,
-        variant = HandlerVariant.COLLECTION_RESOURCE)
+        mvccSupported = true),
+        pathParam = @Parameter(name = "userId", type = "string", description = "The user ID from the path"))
 public class UserCollectionProviderV1 {
 
     /**
@@ -318,7 +319,7 @@ public class UserCollectionProviderV1 {
      * User devices provider.
      * @return User devices provider
      */
-    @Path("{userId}/devices")
+    @Path("/devices")
     public DeviceCollectionProviderV1 devices() {
         return deviceCollectionProvider;
     }

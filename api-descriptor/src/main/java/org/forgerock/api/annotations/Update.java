@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates an CREST update method on a {@link RequestHandler}-annotated POJO. This annotation can be used on
+ * Indicates an CREST update method on an annotated POJO. This annotation can be used on
  * methods in both singleton and collection resource request handlers.
  * <p>
  * The annotated method's return type must be:
@@ -41,6 +41,9 @@ import java.lang.annotation.Target;
  * <ul>
  *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
  * </ul>
+ * @see RequestHandler
+ * @see SingletonProvider
+ * @see CollectionProvider
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

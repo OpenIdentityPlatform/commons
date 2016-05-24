@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
 import org.forgerock.api.enums.PatchOperation;
 
 /**
- * Indicates an CREST patch method on a {@link RequestHandler}-annotated POJO. This annotation can be used on
+ * Indicates an CREST patch method on an annotated POJO. This annotation can be used on
  * methods in both singleton and collection resource request handlers.
  * <p>
  * The annotated method's return type must be:
@@ -45,6 +45,9 @@ import org.forgerock.api.enums.PatchOperation;
  * <ul>
  *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
  * </ul>
+ * @see RequestHandler
+ * @see SingletonProvider
+ * @see CollectionProvider
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

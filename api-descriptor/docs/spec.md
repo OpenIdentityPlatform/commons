@@ -184,9 +184,11 @@ In a collection that supports create, the `items` are the resources to create.
 In a collection that supports queries, the `items` are the items
 in the `result` array of the response resource.
 
-Resources can have `subresources` that support their own CREST operations,
+Resources can have either `items` or `subresources` that support their own CREST operations,
 and that are versioned with the resource.
 For example, a subscriber has subscriptions.
+A resource cannot have both `items` _and_ `subresources` -
+if a resource has an [`items`](#items) then the `subresources` are declared on that node.
 
 A resource MUST define at least one CRUDPAQ [Operation](#operation).
 
@@ -204,7 +206,7 @@ Key           | Type                        | Required?  | Description
 `patch`       | [Patch](#patch)             |            | Specifies the patch operation that the resource supports.
 `actions`     | [Action](#action)[]         |            | Specifies the action operations that the resource supports.
 `queries`     | [Query](#query)[]           |            | Specifies the query operations that the resource supports.<br>Resource queries arrays can include up to one query filter operation, one query expression operation, and multiple queries by ID.
-`subresources` | [SubResources](#subresources) |         | Sub-resources of this resource.<br>Sub-resources use the same version as their parent resource, so are not separately versioned.
+`subresources` | [SubResources](#subresources) |         | Sub-resources of this resource.<br>Sub-resources use the same version as their parent resource, so are not separately versioned.<br>This field should not be used when the `items` field is used - sub-resources should be added to `items/subresources` instead.
 `items`       | [Items](#items)             |            | Descriptor for the items in a collection.<br>Defined only when the resource is a collection.
 `mvccSupported` | boolean                   | ✓          | Whether this resource supports MVCC operations.
 `parameters`  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource.
@@ -221,15 +223,14 @@ An item MUST define at least one CRUDPA [Operation](#operation).
 
 Key           | Type                        | Required?  | Description
 ------------- | --------------------------- |:----------:| ------------------------------------
-`title`       | String                      |            | Human-readable string used as a title in documentation.
-`description` | String                      |            | Human-readable description for documentation purposes.
 `create`      | [Create](#create)           |            | Specifies the create operation that the resource supports.
 `read`        | [Read](#read)               |            | Specifies the read operation that the resource supports.
 `update`      | [Update](#update)           |            | Specifies the update operation that the resource supports.
 `delete`      | [Delete](#delete)           |            | Specifies the delete operation that the resource supports.
 `patch`       | [Patch](#patch)             |            | Specifies the patch operation that the resource supports.
 `actions`     | [Action](#action)[]         |            | Specifies the action operations that the resource supports.
-`parameters`  | [Parameter](#parameter)[]   |            | Extra parameters supported by the resource.
+`pathParameter` | [Parameter](#parameter)   |            | The path parameter for the item instances.
+`subresources` | [SubResources](#subresources) |         | Sub-resources of this collection resource.<br>Sub-resources use the same version as their parent resource, so are not separately versioned.
 
 * * *
 

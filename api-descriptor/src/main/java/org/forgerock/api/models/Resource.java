@@ -30,8 +30,11 @@ import java.util.TreeSet;
 
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.annotations.Actions;
+import org.forgerock.api.annotations.CollectionProvider;
+import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Queries;
 import org.forgerock.api.annotations.RequestHandler;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -290,33 +293,37 @@ public final class Resource {
      * @param variant The annotated type variant.
      * @param subResources The sub resources object to be included, if any sub-resources exist, or null.
      * @param descriptor The root descriptor to add definitions to.
+     * @param extraParameters Extra parameters not from the resource annotation.
      * @return The built {@code Resource} object.
      */
     public static Resource fromAnnotatedType(Class<?> type, AnnotatedTypeVariant variant, SubResources subResources,
-            ApiDescription descriptor) {
-        return fromAnnotatedType(type, variant, subResources, null, descriptor);
+            ApiDescription descriptor, Parameter... extraParameters) {
+        return fromAnnotatedType(type, variant, subResources, null, descriptor, extraParameters);
     }
 
     /**
      * Build a {@code Resource} from an annotated request handler.
      * @param type The annotated type.
      * @param variant The annotated type variant.
-     * @param subResources The sub resources object to be included, if any sub-resources exist, or null.
      * @param items The items definition for a collection variant, or null.
      * @param descriptor The root descriptor to add definitions to.
+     * @param extraParameters Extra parameters not from the resource annotation.
      * @return The built {@code Resource} object.
      */
     public static Resource fromAnnotatedType(Class<?> type, AnnotatedTypeVariant variant,
-            SubResources subResources, Items items, ApiDescription descriptor) {
+            Items items, ApiDescription descriptor, Parameter... extraParameters) {
+        return fromAnnotatedType(type, variant, null, items, descriptor, extraParameters);
+    }
+
+    private static Resource fromAnnotatedType(Class<?> type, AnnotatedTypeVariant variant,
+            SubResources subResources, Items items, ApiDescription descriptor, Parameter... extraParameters) {
         Builder builder = resource();
-        RequestHandler requestHandler = type.getAnnotation(RequestHandler.class);
-        if (requestHandler == null) {
-            LOGGER.warn("Asked for Resource for annotated type, but type does not have required RequestHandler"
-                    + " annotation. Returning null for " + type);
+        Handler handler = findHandlerAnnotation(variant, type);
+        if (handler == null) {
             return null;
         }
         boolean foundCrudpq = false;
-        for (Method m : type.getDeclaredMethods()) {
+        for (Method m : type.getMethods()) {
             boolean instanceMethod = Arrays.asList(m.getParameterTypes()).indexOf(String.class) > -1;
             org.forgerock.api.annotations.Action action = m.getAnnotation(org.forgerock.api.annotations.Action.class);
             if (action != null && instanceMethod == variant.actionRequiresId) {
@@ -372,29 +379,54 @@ public final class Resource {
                 }
             }
         }
-        Schema resourceSchema = Schema.fromAnnotation(requestHandler.resourceSchema(), descriptor, type);
+        Schema resourceSchema = Schema.fromAnnotation(handler.resourceSchema(), descriptor, type);
         if (foundCrudpq && resourceSchema == null) {
             throw new IllegalArgumentException("CRUDPQ operation(s) defined, but no resource schema declared");
         }
 
-        for (org.forgerock.api.annotations.Parameter parameter : requestHandler.parameters()) {
+        for (org.forgerock.api.annotations.Parameter parameter : handler.parameters()) {
             builder.parameter(Parameter.fromAnnotation(parameter));
+        }
+        for (Parameter param : extraParameters) {
+            builder.parameter(param);
         }
 
         Resource resource = builder.resourceSchema(resourceSchema)
-                .mvccSupported(requestHandler.mvccSupported())
-                .title(requestHandler.title())
-                .description(requestHandler.description())
+                .mvccSupported(handler.mvccSupported())
+                .title(handler.title())
+                .description(handler.description())
                 .subresources(subResources)
                 .items(items)
                 .build();
 
-        if (!requestHandler.id().isEmpty()) {
-            descriptor.getServices().addService(requestHandler.id(), resource);
-            Reference reference = reference().value(String.format(SERVICES_REFERENCE, requestHandler.id())).build();
+        if (!handler.id().isEmpty()) {
+            descriptor.getServices().addService(handler.id(), resource);
+            Reference reference = reference().value(String.format(SERVICES_REFERENCE, handler.id())).build();
             resource = resource().reference(reference).build();
         }
         return resource;
+    }
+
+    private static Handler findHandlerAnnotation(AnnotatedTypeVariant variant, Class<?> type) {
+        switch (variant) {
+        case SINGLETON_RESOURCE:
+            if (type.getAnnotation(SingletonProvider.class) != null) {
+                return type.getAnnotation(SingletonProvider.class).value();
+            }
+            break;
+        case REQUEST_HANDLER:
+            if (type.getAnnotation(RequestHandler.class) != null) {
+                return type.getAnnotation(RequestHandler.class).value();
+            }
+            break;
+        default:
+            if (type.getAnnotation(CollectionProvider.class) != null) {
+                return type.getAnnotation(CollectionProvider.class).details();
+            }
+        }
+        LOGGER.warn("Asked for Resource for annotated type, but type does not have required RequestHandler"
+                + " annotation. Returning null for " + type);
+        return null;
     }
 
     /**

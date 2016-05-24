@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 package org.forgerock.api.annotations;
@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * A marker annotation to indicate that the annotated class should be interpreted as an annotated CREST
- * request handler.
+ * collection provider resource.
  * <p>
  * Individual operations can then be supported by either annotating a method with the relevant annotation, or
  * by naming the method according to the following convention:
@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  *     <li>{@code update} for update methods.</li>
  *     <li>{@code delete} for delete methods.</li>
  *     <li>{@code patch} for patch methods.</li>
- *     <li>{@code query} for query methods.</li>
+ *     <li>{@code query} for generic query methods.</li>
  * </ul>
  * Note that action methods do not have a convention and MUST be annotated using the {@link Action} annotation.
  *
@@ -48,7 +48,9 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface RequestHandler {
+public @interface CollectionProvider {
+    /** The name of the path parameter to use in the path descriptors. */
+    Parameter pathParam() default @Parameter(name = "id", type = "string");
     /** The details of the handler. */
-    Handler value();
+    Handler details();
 }

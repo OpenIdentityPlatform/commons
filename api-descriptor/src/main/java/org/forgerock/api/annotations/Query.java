@@ -26,7 +26,7 @@ import org.forgerock.api.enums.PagingMode;
 import org.forgerock.api.enums.QueryType;
 
 /**
- * Indicates an CREST query method on a {@link RequestHandler}-annotated POJO. This annotation can only be used on
+ * Indicates an CREST query method on an annotated POJO. This annotation can only be used on
  * collection resource request handlers.
  * <p>
  * The annotated method's return type must be:
@@ -42,6 +42,9 @@ import org.forgerock.api.enums.QueryType;
  * <ul>
  *     <li>A {@link org.forgerock.services.context.Context} to be given the context.</li>
  * </ul>
+ * @see RequestHandler
+ * @see SingletonProvider
+ * @see CollectionProvider
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
