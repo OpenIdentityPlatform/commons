@@ -47,6 +47,7 @@ import com.fasterxml.jackson.module.jsonSchema.types.NumberSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.SimpleTypeSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.StringSchema;
 import org.forgerock.api.annotations.Default;
+import org.forgerock.api.annotations.Description;
 import org.forgerock.api.annotations.EnumTitle;
 import org.forgerock.api.annotations.Format;
 import org.forgerock.api.annotations.MultipleOf;
@@ -91,7 +92,24 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
 
     @Override
     public JsonObjectFormatVisitor expectObjectFormat(JavaType convertedType) {
-        return new ObjectVisitorDecorator((ObjectVisitor) super.expectObjectFormat(convertedType)) {
+        final ObjectVisitor objectVisitor = (ObjectVisitor) super.expectObjectFormat(convertedType);
+        final Class<?> clazz = convertedType.getRawClass();
+
+        // look for type/class-level annotations
+        if (schema instanceof SimpleTypeSchema) {
+            final Title title = clazz.getAnnotation(Title.class);
+            if (title != null && !isEmpty(title.value())) {
+                ((SimpleTypeSchema) schema).setTitle(title.value());
+            }
+        }
+
+        final Description description = clazz.getAnnotation(Description.class);
+        if (description != null && !isEmpty(description.value())) {
+            schema.setDescription(description.value());
+        }
+
+        // look for field/parameter/method-level annotations
+        return new ObjectVisitorDecorator(objectVisitor) {
             @Override
             public JsonSchema getSchema() {
                 return super.getSchema();
@@ -116,6 +134,7 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
                 addNumberExclusiveMaximum(writer, schema);
                 addReadOnly(writer, schema);
                 addTitle(writer, schema);
+                addDescription(writer, schema);
                 addDefault(writer, schema);
                 addUniqueItems(writer, schema);
                 addMultipleOf(writer, schema);
@@ -262,6 +281,13 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
                 }
             }
 
+            private void addDescription(BeanProperty writer, JsonSchema schema) {
+                Description description = annotationFor(writer, Description.class);
+                if (description != null && !isEmpty(description.value())) {
+                    schema.setDescription(description.value());
+                }
+            }
+
             private void addDefault(BeanProperty writer, JsonSchema schema) {
                 Default defaultAnnotation = annotationFor(writer, Default.class);
                 if (defaultAnnotation != null && !isEmpty(defaultAnnotation.value())) {
@@ -330,6 +356,14 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
                 return null;
             }
 
+            /**
+             * Looks for annotations at the field/method/parameter-level of a Java class.
+             *
+             * @param writer Jackson {@code BeanProperty} representing the object-instance to scan for annotations
+             * @param type Annotation class to find
+             * @param <T> Annotation type to find
+             * @return Annotation or {@code null}
+             */
             private <T extends Annotation> T annotationFor(BeanProperty writer, Class<T> type) {
                 return writer.getMember().getAnnotation(type);
             }

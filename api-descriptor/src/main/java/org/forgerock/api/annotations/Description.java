@@ -22,13 +22,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation to define JSON Schema property's title.
+ * Annotation to define JSON Schema property's description. This annotation is equal to
+ * {@link com.fasterxml.jackson.annotation.JsonPropertyDescription}, but has the added benefit of being scoped
+ * as a {@link ElementType#TYPE} annotation, for describing an entire class-model.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD, ElementType.METHOD, ElementType.TYPE})
-public @interface Title {
+public @interface Description {
     /**
-     * The title of the property.
+     * The description of the property.
      */
     String value();
 }

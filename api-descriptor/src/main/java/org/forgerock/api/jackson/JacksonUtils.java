@@ -25,6 +25,7 @@ import javax.validation.ValidationException;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonValueFormat;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 
@@ -35,9 +36,12 @@ public final class JacksonUtils {
 
     /**
      * A public static {@code ObjectMapper} instance, so that they do not have to be instantiated all over the place,
-     * as they are expensive to construct.
+     * as they are expensive to construct. Note that the {@code SerializationFeature.WRITE_DATES_AS_TIMESTAMPS}
+     * option is <em>disabled</em>, so that dates will be in JSON Schema v4 format (e.g., "type":"string",
+     * "format":"date-time").
      */
-    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    public static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     /**
      * Validate that the provided JSON conforms to the schema.

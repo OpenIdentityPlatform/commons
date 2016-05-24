@@ -31,11 +31,12 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.io.IOException;
+import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.api.annotations.Default;
+import org.forgerock.api.annotations.Description;
 import org.forgerock.api.annotations.EnumTitle;
 import org.forgerock.api.annotations.Format;
 import org.forgerock.api.annotations.MultipleOf;
@@ -58,6 +59,8 @@ public class JsonSchemaExtensionsTest {
     private JsonValue hasStringSchema;
     private JsonValue hasArraySchema;
     private JsonValue hasNumericSchema;
+    private JsonValue hasObject;
+    private JsonValue hasDate;
 
     @BeforeClass
     public void beforeClass() throws IOException {
@@ -67,6 +70,8 @@ public class JsonSchemaExtensionsTest {
         hasStringSchema = schemaAsJsonValue(HasString.class);
         hasArraySchema = schemaAsJsonValue(HasArray.class);
         hasNumericSchema = schemaAsJsonValue(HasNumeric.class);
+        hasObject = schemaAsJsonValue(HasObject.class);
+        hasDate = schemaAsJsonValue(HasDate.class);
     }
 
     @DataProvider(name = "data")
@@ -111,6 +116,12 @@ public class JsonSchemaExtensionsTest {
                 {hasNumericSchema, "myDouble", entry("minimum", Double.MIN_VALUE)},
                 {hasNumericSchema, "myDouble", entry("maximum", Double.MAX_VALUE)},
                 {hasNumericSchema, "myFloat", entry("format", "float")},
+
+                {hasObject, "anObject", entry("required", true)},
+
+                // NOTE: SerializationFeature.WRITE_DATES_AS_TIMESTAMPS must be disabled on Jackson ObjectMapper
+                {hasDate, "myDate", entry("type", "string")},
+                {hasDate, "myDate", entry("format", "date-time")}
         };
     }
 
@@ -150,6 +161,18 @@ public class JsonSchemaExtensionsTest {
                 .contains("type", "string")
                 .hasArray("enumTitles")
                 .containsExactly("One", "Two", "Three");
+
+        // type's title
+        assertThat(schema)
+                .hasPath("title")
+                .isString()
+                .isEqualTo("HasEnum Title");
+
+        // type's description
+        assertThat(schema)
+                .hasPath("description")
+                .isString()
+                .isEqualTo("HasEnum Description");
     }
 
     private enum MyEnum {
@@ -161,6 +184,8 @@ public class JsonSchemaExtensionsTest {
         THREE
     }
 
+    @Title("HasEnum Title")
+    @Description("HasEnum Description")
     private static class HasEnum {
         private MyEnum myEnum;
 
@@ -207,7 +232,7 @@ public class JsonSchemaExtensionsTest {
         @Pattern(regexp = "[a-zA-Z]{1,100}")
         @Default("myDefault")
         @Title("HasString Title")
-        @JsonPropertyDescription("HasString Description")
+        @Description("HasString Description")
         String myString = "myDefault";
 
         @Format("hostname")
@@ -266,6 +291,31 @@ public class JsonSchemaExtensionsTest {
 
         public float getMyFloat() {
             return myFloat;
+        }
+    }
+
+    private static class HasObject {
+        @NotNull
+        AnObject anObject;
+
+        public AnObject getAnObject() {
+            return anObject;
+        }
+    }
+
+    private static class AnObject {
+        String myString;
+
+        public String getMyString() {
+            return myString;
+        }
+    }
+
+    private static class HasDate {
+        Date myDate;
+
+        public Date getMyDate() {
+            return myDate;
         }
     }
 
