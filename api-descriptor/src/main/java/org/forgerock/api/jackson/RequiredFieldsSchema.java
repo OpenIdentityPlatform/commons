@@ -16,23 +16,25 @@
 
 package org.forgerock.api.jackson;
 
+import java.util.Set;
+
 /**
- * Extension interface for CREST subclasses of Jackson's {@code JsonSchema} to specify a property as <em>required</em>
- * or optional.
+ * Extension interface for CREST subclasses of Jackson's {@code JsonSchema} to specify an array of <em>required</em>
+ * fields.
  */
-public interface RequiredSchema {
+interface RequiredFieldsSchema {
 
     /**
-     * Get <em>required</em> field.
+     * Get <em>required</em> field names.
      *
-     * @return {@code true} if property is required and {@code false} if optional
+     * @return Required field-names or {@code null}
      */
-    Boolean isRequired();
+    Set<String> getRequiredFields();
 
     /**
-     * Set <em>required</em> field.
+     * Set <em>required</em> field names.
      *
-     * @param required {@code true} if property is required and {@code false} if optional
+     * @param requiredFields Required field-names or {@code null}
      */
-    void setRequired(Boolean required);
+    void setRequiredFields(Set<String> requiredFields);
 }

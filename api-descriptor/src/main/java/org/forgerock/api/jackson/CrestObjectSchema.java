@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.json;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.validation.ValidationException;
@@ -37,12 +38,13 @@ import org.forgerock.api.enums.WritePolicy;
  * An extension to the Jackson {@code ObjectSchema} that includes the custom CREST JSON Schema attributes.
  */
 public class CrestObjectSchema extends ObjectSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
-        ValidatableSchema {
+        ValidatableSchema, RequiredFieldsSchema {
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
     private Boolean returnOnDemand;
     private Integer propertyOrder;
+    private Set<String> requiredFields;
 
     @Override
     public WritePolicy getWritePolicy() {
@@ -146,5 +148,17 @@ public class CrestObjectSchema extends ObjectSchema implements CrestReadWritePol
     @Override
     public Boolean getReadonly() {
         return super.getReadonly();
+    }
+
+    // This method overrides the superclass' definition of "required" via JsonProperty annotation
+    @JsonProperty("required")
+    @Override
+    public Set<String> getRequiredFields() {
+        return requiredFields;
+    }
+
+    @Override
+    public void setRequiredFields(Set<String> requiredFields) {
+        this.requiredFields = requiredFields;
     }
 }

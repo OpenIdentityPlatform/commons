@@ -59,7 +59,6 @@ public class JsonSchemaExtensionsTest {
     private JsonValue hasStringSchema;
     private JsonValue hasArraySchema;
     private JsonValue hasNumericSchema;
-    private JsonValue hasObject;
     private JsonValue hasDate;
 
     @BeforeClass
@@ -70,7 +69,6 @@ public class JsonSchemaExtensionsTest {
         hasStringSchema = schemaAsJsonValue(HasString.class);
         hasArraySchema = schemaAsJsonValue(HasArray.class);
         hasNumericSchema = schemaAsJsonValue(HasNumeric.class);
-        hasObject = schemaAsJsonValue(HasObject.class);
         hasDate = schemaAsJsonValue(HasDate.class);
     }
 
@@ -81,7 +79,6 @@ public class JsonSchemaExtensionsTest {
                 {hasIntegerWithMinMaxSchema, "myInt", entry("minimum", 1)},
                 {hasIntegerWithMinMaxSchema, "myInt", entry("maximum", 10)},
                 {hasIntegerWithMinMaxSchema, "myInt", entry("multipleOf", 1.0)},
-                {hasIntegerWithMinMaxSchema, "myInt", entry("required", true)},
 
                 {hasIntegerWithDecimalMinMaxSchema, "myInt", entry("minimum", 1)},
                 {hasIntegerWithDecimalMinMaxSchema, "myInt", entry("maximum", 10)},
@@ -116,8 +113,6 @@ public class JsonSchemaExtensionsTest {
                 {hasNumericSchema, "myDouble", entry("minimum", Double.MIN_VALUE)},
                 {hasNumericSchema, "myDouble", entry("maximum", Double.MAX_VALUE)},
                 {hasNumericSchema, "myFloat", entry("format", "float")},
-
-                {hasObject, "anObject", entry("required", true)},
 
                 // NOTE: SerializationFeature.WRITE_DATES_AS_TIMESTAMPS must be disabled on Jackson ObjectMapper
                 {hasDate, "myDate", entry("type", "string")},
@@ -162,6 +157,11 @@ public class JsonSchemaExtensionsTest {
                 .hasArray("enumTitles")
                 .containsExactly("One", "Two", "Three");
 
+        // type's required fields
+        assertThat(schema)
+                .hasArray("required")
+                .containsExactly("myEnum");
+
         // type's title
         assertThat(schema)
                 .hasPath("title")
@@ -187,6 +187,7 @@ public class JsonSchemaExtensionsTest {
     @Title("HasEnum Title")
     @Description("HasEnum Description")
     private static class HasEnum {
+        @NotNull
         private MyEnum myEnum;
 
         public MyEnum getMyEnum() {
@@ -202,7 +203,6 @@ public class JsonSchemaExtensionsTest {
         @Min(1)
         @Max(10)
         @MultipleOf(1)
-        @NotNull
         Integer myInt;
 
         public Integer getMyInt() {
@@ -291,23 +291,6 @@ public class JsonSchemaExtensionsTest {
 
         public float getMyFloat() {
             return myFloat;
-        }
-    }
-
-    private static class HasObject {
-        @NotNull
-        AnObject anObject;
-
-        public AnObject getAnObject() {
-            return anObject;
-        }
-    }
-
-    private static class AnObject {
-        String myString;
-
-        public String getMyString() {
-            return myString;
         }
     }
 

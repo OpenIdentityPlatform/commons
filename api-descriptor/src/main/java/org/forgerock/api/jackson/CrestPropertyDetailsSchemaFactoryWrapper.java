@@ -28,7 +28,10 @@ import javax.validation.constraints.Size;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JavaType;
@@ -106,6 +109,14 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
         final Description description = clazz.getAnnotation(Description.class);
         if (description != null && !isEmpty(description.value())) {
             schema.setDescription(description.value());
+        }
+
+        final Set<String> requiredFieldNames;
+        if (schema instanceof RequiredFieldsSchema) {
+            requiredFieldNames = Collections.synchronizedSet(new HashSet<String>());
+            ((RequiredFieldsSchema) schema).setRequiredFields(requiredFieldNames);
+        } else {
+            requiredFieldNames = null;
         }
 
         // look for field/parameter/method-level annotations
@@ -190,7 +201,12 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
             private void addRequired(BeanProperty writer, JsonSchema schema) {
                 NotNull notNull = annotationFor(writer, NotNull.class);
                 if (notNull != null) {
-                    schema.setRequired(true);
+                    if (requiredFieldNames != null) {
+                        requiredFieldNames.add(writer.getName());
+                    } else {
+                        // NOTE: this condition may never happen, but is here to deal with unknown edge cases
+                        schema.setRequired(true);
+                    }
                 }
             }
 
