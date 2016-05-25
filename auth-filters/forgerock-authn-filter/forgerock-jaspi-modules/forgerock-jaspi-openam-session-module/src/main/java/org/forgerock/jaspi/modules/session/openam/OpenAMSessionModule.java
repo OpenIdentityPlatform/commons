@@ -42,6 +42,7 @@ import java.net.URI;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
@@ -50,6 +51,7 @@ import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.handler.HttpClientHandler;
+import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Cookie;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.RequestCookies;
@@ -76,6 +78,9 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
     private static final String JSON_REST_ROOT_ENDPOINT = "json";
     private static final String JSON_SESSIONS_RELATIVE_URI = JSON_REST_ROOT_ENDPOINT + "/sessions/";
     private static final String JSON_USERS_ENDPOINT = "users/";
+
+    private static final String MIME_TYPE_APPLICATION_JSON = "application/json";
+    private static final String CHARACTER_ENCODING = "UTF-8";
 
     private final Options httpClientOptions;
 
@@ -297,6 +302,10 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
                 .setMethod("POST")
                 .setUri(URI.create(openamDeploymentUrl + JSON_SESSIONS_RELATIVE_URI + tokenId
                         + "?_action=validate"));
+
+        // set empty body and Content-Type header for AM 12.
+        validateRequest.getEntity().setJson(Collections.emptyMap());
+
         return httpClient.send(validateRequest)
                 .thenAsync(onValidateSuccess(tokenId, clientSubject), onValidateFailure());
     }
