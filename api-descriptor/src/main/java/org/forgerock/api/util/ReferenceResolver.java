@@ -17,7 +17,9 @@
 package org.forgerock.api.util;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.ApiError;
@@ -59,24 +61,28 @@ public class ReferenceResolver {
      * must not have previously been registered.
      *
      * @param apiDescription {@link ApiDescription} to register, which has not previously been registered
+     * @return self
      */
-    public void register(final ApiDescription apiDescription) {
+    public ReferenceResolver register(final ApiDescription apiDescription) {
         if (map.containsKey(apiDescription.getId())) {
             throw new IllegalStateException("Already registered ID = " + apiDescription.getId());
         }
         map.put(apiDescription.getId(), apiDescription);
+        return this;
     }
 
     /**
      * Registers external {@link ApiDescription}s, for {@link org.forgerock.api.models.Reference} lookup, and each
      * must not have previously been registered.
      *
-     * @param apiDescriptions List of  {@link ApiDescription}s to register, which have not previously been registered
+     * @param apiDescriptions List of {@link ApiDescription}s to register, which have not previously been registered
+     * @return self
      */
-    public void registerAll(final ApiDescription... apiDescriptions) {
+    public ReferenceResolver registerAll(final ApiDescription... apiDescriptions) {
         for (final ApiDescription item : apiDescriptions) {
             register(item);
         }
+        return this;
     }
 
     /**
@@ -86,20 +92,37 @@ public class ReferenceResolver {
      * @return {@link Schema} or {@code null} if not found
      */
     public Schema getDefinition(final Reference reference) {
+        return resolveDefinition(reference, new HashSet<String>());
+    }
+
+    private Schema resolveDefinition(final Reference reference, final Set<String> visitedRefs) {
         final int nameStart = reference.getValue().indexOf(DEFINITIONS_REF);
         if (nameStart != -1) {
             final String name = reference.getValue().substring(nameStart + DEFINITIONS_REF.length());
             if (!name.isEmpty()) {
+                if (!visitedRefs.add(reference.getValue())) {
+                    throw new IllegalStateException("Reference loop detected: " + reference.getValue());
+                }
                 if (nameStart == 0) {
                     // there is no namespace, so do a local lookup
                     if (local.getDefinitions() != null) {
-                        return local.getDefinitions().get(name);
+                        final Schema schema = local.getDefinitions().get(name);
+                        if (schema != null && schema.getReference() != null) {
+                            // reference chain
+                            return resolveDefinition(schema.getReference(), visitedRefs);
+                        }
+                        return schema;
                     }
                 } else {
                     final String namespace = reference.getValue().substring(0, nameStart);
                     final ApiDescription apiDescription = map.get(namespace);
                     if (apiDescription != null && apiDescription.getDefinitions() != null) {
-                        return apiDescription.getDefinitions().get(name);
+                        final Schema schema = apiDescription.getDefinitions().get(name);
+                        if (schema != null && schema.getReference() != null) {
+                            // reference chain
+                            return resolveDefinition(schema.getReference(), visitedRefs);
+                        }
+                        return schema;
                     }
                 }
             }
@@ -114,20 +137,37 @@ public class ReferenceResolver {
      * @return {@link ApiError} or {@code null} if not found
      */
     public ApiError getError(final Reference reference) {
+        return resolveError(reference, new HashSet<String>());
+    }
+
+    private ApiError resolveError(final Reference reference, final Set<String> visitedRefs) {
         final int nameStart = reference.getValue().indexOf(ERRORS_REF);
         if (nameStart != -1) {
             final String name = reference.getValue().substring(nameStart + ERRORS_REF.length());
             if (!name.isEmpty()) {
+                if (!visitedRefs.add(reference.getValue())) {
+                    throw new IllegalStateException("Reference loop detected: " + reference.getValue());
+                }
                 if (nameStart == 0) {
                     // there is no namespace, so do a local lookup
                     if (local.getErrors() != null) {
-                        return local.getErrors().get(name);
+                        final ApiError error = local.getErrors().get(name);
+                        if (error != null && error.getReference() != null) {
+                            // reference chain
+                            return resolveError(error.getReference(), visitedRefs);
+                        }
+                        return error;
                     }
                 } else {
                     final String namespace = reference.getValue().substring(0, nameStart);
                     final ApiDescription apiDescription = map.get(namespace);
                     if (apiDescription != null && apiDescription.getErrors() != null) {
-                        return apiDescription.getErrors().get(name);
+                        final ApiError error = apiDescription.getErrors().get(name);
+                        if (error != null && error.getReference() != null) {
+                            // reference chain
+                            return resolveError(error.getReference(), visitedRefs);
+                        }
+                        return error;
                     }
                 }
             }
@@ -142,20 +182,37 @@ public class ReferenceResolver {
      * @return {@link Resource} or {@code null} if not found
      */
     public Resource getService(final Reference reference) {
+        return resolveService(reference, new HashSet<String>());
+    }
+
+    private Resource resolveService(final Reference reference, final Set<String> visitedRefs) {
         final int nameStart = reference.getValue().indexOf(SERVICES_REF);
         if (nameStart != -1) {
             final String name = reference.getValue().substring(nameStart + SERVICES_REF.length());
             if (!name.isEmpty()) {
+                if (!visitedRefs.add(reference.getValue())) {
+                    throw new IllegalStateException("Reference loop detected: " + reference.getValue());
+                }
                 if (nameStart == 0) {
                     // there is no namespace, so do a local lookup
                     if (local.getServices() != null) {
-                        return local.getServices().get(name);
+                        final Resource service = local.getServices().get(name);
+                        if (service != null && service.getReference() != null) {
+                            // reference chain
+                            return resolveService(service.getReference(), visitedRefs);
+                        }
+                        return service;
                     }
                 } else {
                     final String namespace = reference.getValue().substring(0, nameStart);
                     final ApiDescription apiDescription = map.get(namespace);
                     if (apiDescription != null && apiDescription.getServices() != null) {
-                        return apiDescription.getServices().get(name);
+                        final Resource service = apiDescription.getServices().get(name);
+                        if (service != null && service.getReference() != null) {
+                            // reference chain
+                            return resolveService(service.getReference(), visitedRefs);
+                        }
+                        return service;
                     }
                 }
             }
