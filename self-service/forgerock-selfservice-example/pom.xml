@@ -22,7 +22,7 @@
     <parent>
         <artifactId>forgerock-selfservice</artifactId>
         <groupId>org.forgerock.commons</groupId>
-        <version>20.0.0-SNAPSHOT</version>
+        <version>20.0.0-alpha-4</version>
     </parent>
 
     <artifactId>forgerock-selfservice-example</artifactId>
