@@ -68,7 +68,6 @@ public class CrestHttpApplication implements DescribedHttpApplication {
 
     @Override
     public Handler start() throws HttpApplicationException {
-        // TODO bootstrap ApiDescription
         final Asciidoctor asciidoctor = Asciidoctor.Factory.create();
 
         final Router crestRouter = new Router();
@@ -122,7 +121,7 @@ public class CrestHttpApplication implements DescribedHttpApplication {
                         final String uri = request.getUri().toString();
                         final String baseUrl = uri.substring(0, uri.indexOf("/docs/api"));
                         final String url = baseUrl + "/openapi/index.html?url="
-                                + Uris.urlEncodeQueryParameterNameOrValue(baseUrl + SWAGGER_JSON_ROUTE)
+                                + Uris.urlEncodeQueryParameterNameOrValue('/' + SWAGGER_JSON_ROUTE)
                                 + "&title=" + Uris.urlEncodeQueryParameterNameOrValue("Users and Devices API");
 
                         final Response response = new Response(Status.FOUND);
@@ -164,6 +163,6 @@ public class CrestHttpApplication implements DescribedHttpApplication {
 
     @Override
     public ApiProducer<Swagger> getApiProducer() {
-        return new SwaggerApiProducer(new Info().title("CREST Examples"), "", "localhost", Scheme.HTTP);
+        return new SwaggerApiProducer(new Info().title("CREST Examples"), null, null, Scheme.HTTP);
     }
 }
