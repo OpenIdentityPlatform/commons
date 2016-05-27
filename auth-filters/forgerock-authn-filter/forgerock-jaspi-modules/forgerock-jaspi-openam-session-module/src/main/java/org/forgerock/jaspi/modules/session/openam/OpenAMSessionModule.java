@@ -51,7 +51,6 @@ import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.handler.HttpClientHandler;
-import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Cookie;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.RequestCookies;
