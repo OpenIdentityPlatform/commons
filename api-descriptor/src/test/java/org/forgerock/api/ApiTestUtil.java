@@ -32,6 +32,9 @@ import static org.forgerock.http.routing.Version.version;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.JsonValue.field;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.forgerock.api.enums.CountPolicy;
 import org.forgerock.api.enums.CreateMode;
 import org.forgerock.api.enums.PagingMode;
@@ -51,6 +54,7 @@ import org.forgerock.api.models.Patch;
 import org.forgerock.api.models.Paths;
 import org.forgerock.api.models.Query;
 import org.forgerock.api.models.Read;
+import org.forgerock.api.models.Reference;
 import org.forgerock.api.models.Resource;
 import org.forgerock.api.models.Schema;
 import org.forgerock.api.models.Services;
@@ -270,36 +274,26 @@ public final class ApiTestUtil {
     }
 
     public static ApiDescription createUserAndDeviceExampleApiDescription() {
-        // propertyOrder fields allow for testing explicit property-order
-        final Schema errorDetailSchema = schema()
-                .schema(json(object(
-                        field("type", "object"),
-                        field("properties", object(
-                                field("subCode", object(
-                                        field("type", "integer")
-                                )),
-                                field("reason", object(
-                                        field("type", "string"),
-                                        field("propertyOrder", 100)
-                                )),
-                                field("message", object(
-                                        field("type", "string"),
-                                        field("propertyOrder", 10)
-                                ))
-                        )))))
+        final Errors errors = Errors.errors()
+                .put("badRequest", ApiError.apiError()
+                        .code(400)
+                        .description("Bad request")
+                        .build())
+                .put("unauthorized", ApiError.apiError()
+                        .code(401)
+                        .description("Unauthorized - Missing or bad authentication")
+                        .build())
                 .build();
-        final ApiError notFoundError = ApiError.apiError()
-                .code(404)
-                .description("Custom not-found error.")
-                .schema(errorDetailSchema)
-                .build();
+        final List<ApiError> errorList = Arrays.asList(
+                ApiError.apiError().reference(Reference.reference().value("#/errors/badRequest").build()).build(),
+                ApiError.apiError().reference(Reference.reference().value("#/errors/unauthorized").build()).build());
 
         final Schema userSchema = schema()
                 .schema(json(object(
                         field("type", "object"),
                         field("title", "User"),
                         field("description", "User description"),
-                        field("required", array("_id", "displayName")),
+                        field("required", array("uid", "name", "password")),
                         field("properties", object(
                                 field("_id", object(
                                         field("type", "string"),
@@ -312,18 +306,23 @@ public final class ApiTestUtil {
                                         field("title", "Revision identifier"),
                                         field("readOnly", true)
                                 )),
-                                field("displayName", object(
+                                field("uid", object(
                                         field("type", "string"),
-                                        field("title", "Name"),
+                                        field("title", "User ID"),
+                                        field("description", "User unique identifier")
+                                )),
+                                field("name", object(
+                                        field("type", "string"),
+                                        field("title", "User name"),
                                         field("description", "Name for this user")
                                 )),
                                 field("devices", object(
                                         field("type", "array"),
-                                        field("title", "Name"),
+                                        field("title", "Devices"),
                                         field("description", "Devices belonging to this user"),
                                         field("items", object(
                                                 field("$ref", "#/definitions/device"))),
-                                        field("readOnly", true),
+                                        field("readOnly", false),
                                         field("uniqueItems", true)
                                 ))
                         ))
@@ -335,6 +334,7 @@ public final class ApiTestUtil {
                         field("type", "object"),
                         field("title", "Device"),
                         field("description", "Device description"),
+                        field("required", array("did", "name", "type")),
                         field("properties", object(
                                 field("_id", object(
                                         field("type", "string"),
@@ -347,9 +347,28 @@ public final class ApiTestUtil {
                                         field("title", "Revision identifier"),
                                         field("readOnly", true)
                                 )),
-                                field("description", object(
+                                field("did", object(
                                         field("type", "string"),
-                                        field("title", "Description")
+                                        field("title", "Device ID")
+                                )),
+                                field("name", object(
+                                        field("type", "string"),
+                                        field("title", "Device name")
+                                )),
+                                field("type", object(
+                                        field("type", "string"),
+                                        field("title", "Device type")
+                                )),
+                                field("stolen", object(
+                                        field("type", "boolean"),
+                                        field("title", "Stolen flag"),
+                                        field("description", "Set to `true` if the device has been stolen")
+                                )),
+                                field("rollOutDate", object(
+                                        field("type", "string"),
+                                        field("format", "date"),
+                                        field("title", "Roll-out date"),
+                                        field("description", "Device roll-out date")
                                 ))
                         ))
                 )))
@@ -367,35 +386,66 @@ public final class ApiTestUtil {
                 .resourceSchema(schema()
                         .reference(reference().value("#/definitions/user").build())
                         .build())
-                .create(create().mode(CreateMode.ID_FROM_SERVER).build())
+                .create(create().mode(CreateMode.ID_FROM_SERVER)
+                        .parameter(Parameter.parameter()
+                                .name("_action")
+                                .type("string")
+                                .required(true)
+                                .source(ParameterSource.ADDITIONAL)
+                                .enumValues("create")
+                                .build())
+                        .errors(errorList)
+                        .build())
                 .query(query()
                         .type(QueryType.FILTER)
                         .description("Search for users, matching a filter.")
-                        .queryableFields("_id", "displayName")
+                        .queryableFields("uid", "name", "password")
                         .pagingMode(PagingMode.COOKIE, PagingMode.OFFSET)
                         .countPolicy(CountPolicy.NONE)
+                        .errors(errorList)
                         .build())
                 .items(items()
-                        .create(create().mode(CreateMode.ID_FROM_CLIENT).build())
-                        .read(Read.read()
-                                .error(notFoundError)
+                        .pathParameter(Parameter.parameter()
+                                .name("userId")
+                                .type("string")
+                                .source(ParameterSource.PATH)
+                                .required(true)
+                                .description("User ID")
                                 .build())
-                        .update(Update.update().build())
-                        .delete(Delete.delete().build())
-                        .patch(Patch.patch().operations(PatchOperation.ADD).build())
-                        .action(Action.action().name("resetPassword").build())
-                        .build())
-                .subresources(SubResources.subresources()
-                        .put("/{userId}/devices", resource()
-                                .reference(reference().value("#/services/devices:1.0").build())
+                        .create(create()
+                                .mode(CreateMode.ID_FROM_CLIENT)
+                                .errors(errorList)
+                                .build())
+                        .read(Read.read()
+                                .errors(errorList)
+                                .build())
+                        .update(Update.update()
+                                .errors(errorList)
+                                .build())
+                        .delete(Delete.delete()
+                                .errors(errorList)
+                                .build())
+                        .patch(Patch.patch()
+                                .operations(PatchOperation.ADD)
+                                .errors(errorList)
+                                .build())
+                        .action(Action.action()
+                                .name("resetPassword")
+                                .error(ApiError.apiError()
+                                        .code(501)
+                                        .description(
+                                                "Action `resetPassword` reached. As it is an example service it has "
+                                                        + "not been implemented.")
+                                        .build())
+                                .errors(errorList)
+                                .build())
+                        .subresources(SubResources.subresources()
+                                .put("/devices", resource()
+                                        .reference(reference().value("#/services/devices:1.0").build())
+                                        .build())
                                 .build())
                         .build())
                 .build();
-
-//        final Resource userResource2 = resource()
-//                .description("User service")
-//                .mvccSupported(true)
-//                .build();
 
         final Resource deviceResource1 = resource()
                 .title("User-Device Service")
@@ -404,34 +454,65 @@ public final class ApiTestUtil {
                 .resourceSchema(schema()
                         .reference(reference().value("#/definitions/device").build())
                         .build())
-                .create(create().mode(CreateMode.ID_FROM_SERVER).build())
+                .create(create().mode(CreateMode.ID_FROM_SERVER)
+                        .parameter(Parameter.parameter()
+                                .name("_action")
+                                .type("string")
+                                .required(true)
+                                .source(ParameterSource.ADDITIONAL)
+                                .enumValues("create")
+                                .build())
+                        .errors(errorList)
+                        .build())
                 .query(query()
                         .type(QueryType.FILTER)
                         .description("Search for users, matching a filter.")
-                        .queryableFields("_id", "description")
+                        .queryableFields("did", "name", "type")
                         .pagingMode(PagingMode.COOKIE, PagingMode.OFFSET)
                         .countPolicy(CountPolicy.NONE)
+                        .errors(errorList)
                         .build())
                 .items(items()
-                        .create(create().mode(CreateMode.ID_FROM_CLIENT).build())
-                        .read(Read.read().build())
-                        .update(Update.update().build())
-                        .delete(Delete.delete().build())
-                        .patch(Patch.patch().operations(PatchOperation.ADD).build())
-                        .action(Action.action().name("markAsStolen").build())
+                        .pathParameter(Parameter.parameter()
+                                .name("deviceId")
+                                .type("string")
+                                .source(ParameterSource.PATH)
+                                .required(true)
+                                .description("Device ID")
+                                .build())
+                        .create(create()
+                                .mode(CreateMode.ID_FROM_CLIENT)
+                                .errors(errorList)
+                                .build())
+                        .read(Read.read()
+                                .errors(errorList)
+                                .build())
+                        .update(Update.update()
+                                .errors(errorList)
+                                .build())
+                        .delete(Delete.delete()
+                                .errors(errorList)
+                                .build())
+                        .patch(Patch.patch()
+                                .operations(PatchOperation.ADD)
+                                .errors(errorList)
+                                .build())
+                        .action(Action.action()
+                                .name("markAsStolen")
+                                .error(ApiError.apiError()
+                                        .code(501)
+                                        .description(
+                                                "Action `markAsStolen` reached. As it is an example service it has "
+                                                        + "not been implemented.")
+                                        .build())
+                                .errors(errorList)
+                                .build())
                         .build())
                 .build();
 
-//        final Resource deviceResource2 = resource()
-//                .description("Device service")
-//                .mvccSupported(true)
-//                .build();
-
         final Services services = services()
                 .put("users:1.0", userResource1)
-//                .put("users:2.0", userResource2)
                 .put("devices:1.0", deviceResource1)
-//                .put("devices:2.0", deviceResource2)
                 .build();
 
         final Paths paths = paths()
@@ -439,10 +520,6 @@ public final class ApiTestUtil {
                                 .put(version(1), resource().reference(
                                         reference().value("#/services/users:1.0").build()
                                         ).build()
-//                        )
-//                        .put(version(2), resource().reference(
-//                                reference().value("#/services/users:2.0").build()
-//                                ).build()
                                 ).build()
                 )
                 .put("/admins", versionedPath()
@@ -459,6 +536,7 @@ public final class ApiTestUtil {
                 .definitions(definitions)
                 .services(services)
                 .paths(paths)
+                .errors(errors)
                 .build();
     }
 

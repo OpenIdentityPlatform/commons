@@ -410,7 +410,7 @@ public final class ApiDocGenerator {
         outputItems(version, resource, parameters, pathName, parentNamespace);
 
         // sub-resource paths
-        outputSubResources(version, resource, parameters, pathName, parentNamespace);
+        outputSubResources(version, resource.getSubresources(), parameters, pathName, parentNamespace);
 
         // output resource-file
         final String resourceFilename = namespace + ADOC_EXTENSION;
@@ -436,17 +436,18 @@ public final class ApiDocGenerator {
             final List<Parameter> itemsParameters = mergeParameters(mergeParameters(new ArrayList<>(parameters),
                     resource.getParameters()), pathParameter);
 
+            outputSubResources(version, items.getSubresources(), itemsParameters, itemsPathName, itemsPathDocNamespace);
+
             final String resourceFilename = outputResource(parentPathName, version,
                     itemsResource, itemsParameters, itemsPathDocNamespace);
             addPathResource(itemsPathName, version, resourceFilename);
         }
     }
 
-    private void outputSubResources(final Version version, final Resource resource, final List<Parameter> parameters,
-            final String parentPathName, final String parentNamespace)
+    private void outputSubResources(final Version version, final SubResources subResources,
+            final List<Parameter> parameters, final String parentPathName, final String parentNamespace)
             throws IOException {
-        if (resource.getSubresources() != null) {
-            final SubResources subResources = resource.getSubresources();
+        if (subResources != null) {
             final List<String> subPathNames = new ArrayList<>(subResources.getNames());
             Collections.sort(subPathNames);
 

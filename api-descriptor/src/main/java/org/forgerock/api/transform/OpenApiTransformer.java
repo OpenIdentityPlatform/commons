@@ -47,6 +47,7 @@ import org.forgerock.api.models.ApiError;
 import org.forgerock.api.models.Create;
 import org.forgerock.api.models.Definitions;
 import org.forgerock.api.models.Delete;
+import org.forgerock.api.models.Items;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Patch;
 import org.forgerock.api.models.Paths;
@@ -372,7 +373,7 @@ public class OpenApiTransformer {
 
         // create collection-items and sub-resources
         buildItems(resource, pathName, tag, resourceVersion, parameters, pathMap);
-        buildSubResources(resource, pathName, resourceVersion, parameters, pathMap);
+        buildSubResources(resource.getSubresources(), pathName, resourceVersion, parameters, pathMap);
     }
 
     /**
@@ -388,34 +389,36 @@ public class OpenApiTransformer {
     private void buildItems(final Resource resource, final String pathName, final String parentTag,
             final String resourceVersion, final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getItems() != null) {
+            final Items items = resource.getItems();
+
             // an items-resource inherits some fields from its parent, so build combined resource
-            final Resource itemsResource = resource.getItems().asResource(resource.isMvccSupported(),
+            final Resource itemsResource = items.asResource(resource.isMvccSupported(),
                     resource.getResourceSchema(), resource.getTitle(), resource.getDescription());
 
-            Parameter pathParameter = resource.getItems().getPathParameter();
-            List<Parameter> itemsParameters = mergeParameters(mergeParameters(new ArrayList<>(parameters),
-                    resource.getParameters()), pathParameter);
+            final Parameter pathParameter = items.getPathParameter();
+            final List<Parameter> itemsParameters = unmodifiableList(mergeParameters(mergeParameters(
+                    new ArrayList<>(parameters), resource.getParameters()), pathParameter));
 
             final String itemsPath = buildPath(pathName, "/{" + pathParameter.getName() + "}");
+            buildSubResources(items.getSubresources(), itemsPath, resourceVersion, itemsParameters, pathMap);
             buildResourcePaths(itemsResource, itemsPath, parentTag, resourceVersion,
-                    unmodifiableList(itemsParameters), pathMap);
+                    itemsParameters, pathMap);
         }
     }
 
     /**
      * Builds {@link Resource} sub-resources.
      *
-     * @param resource CREST resource
+     * @param subResources CREST sub-resources
      * @param pathName Resource path-name
      * @param resourceVersion Resource version-name or empty-string
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
-    private void buildSubResources(final Resource resource, final String pathName,
+    private void buildSubResources(final SubResources subResources, final String pathName,
             final String resourceVersion, final List<Parameter> parameters, final Map<String, Path> pathMap) {
-        if (resource.getSubresources() != null) {
+        if (subResources != null) {
             // recursively build sub-resources
-            final SubResources subResources = resource.getSubresources();
             final List<String> subPathNames = new ArrayList<>(subResources.getNames());
             Collections.sort(subPathNames);
             for (final String name : subPathNames) {
