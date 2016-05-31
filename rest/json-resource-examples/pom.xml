@@ -59,6 +59,11 @@
       <artifactId>asciidoctorj</artifactId>
       <version>1.5.4</version>
     </dependency>
+    <dependency>
+      <groupId>org.forgerock.http</groupId>
+      <artifactId>http-descriptor-example</artifactId>
+      <version>${project.version}</version>
+    </dependency>
   </dependencies>
   <build>
     <plugins>

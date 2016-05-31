@@ -33,6 +33,7 @@ import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.example.DescribedOauth2Endpoint;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.protocol.Request;
@@ -61,7 +62,7 @@ import io.swagger.models.Swagger;
  */
 public class CrestHttpApplication implements DescribedHttpApplication {
 
-    private static final String SWAGGER_JSON_ROUTE = "?_api";
+    private static final String SWAGGER_JSON_ROUTE = "../..?_api";
 
     private static final ContentTypeHeader HTML_CONTENT_TYPE_HEADER =
             ContentTypeHeader.valueOf("text/html; charset=UTF-8");
@@ -81,6 +82,8 @@ public class CrestHttpApplication implements DescribedHttpApplication {
 
         final org.forgerock.http.routing.Router router = new org.forgerock.http.routing.Router();
         router.setDefaultRoute(crestHandler);
+        router.addRoute(RouteMatchers.requestUriMatcher(RoutingMode.STARTS_WITH, "/chf/oauth2"),
+                new DescribedOauth2Endpoint());
 
         // convert ApiDescription to HTML documentation
         router.addRoute(RouteMatchers.requestUriMatcher(RoutingMode.STARTS_WITH, "/docs/html"),
@@ -121,7 +124,7 @@ public class CrestHttpApplication implements DescribedHttpApplication {
                         final String uri = request.getUri().toString();
                         final String baseUrl = uri.substring(0, uri.indexOf("/docs/api"));
                         final String url = baseUrl + "/openapi/index.html?url="
-                                + Uris.urlEncodeQueryParameterNameOrValue('/' + SWAGGER_JSON_ROUTE)
+                                + Uris.urlEncodeQueryParameterNameOrValue(SWAGGER_JSON_ROUTE)
                                 + "&title=" + Uris.urlEncodeQueryParameterNameOrValue("Users and Devices API");
 
                         final Response response = new Response(Status.FOUND);

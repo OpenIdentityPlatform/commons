@@ -238,7 +238,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         Context context = createClientContext(attributesContext, req);
 
         if (apiDescribed && SwaggerUtils.isApiRequest(request)) {
-            writeApi(resp, request, context);
+            writeApi(resp, request, req, context);
             return;
         }
 
@@ -283,10 +283,40 @@ public final class HttpFrameworkServlet extends HttpServlet {
         }
     }
 
-    private void writeApi(HttpServletResponse resp, Request request, Context context) {
-        Describable<Swagger, Request> handler =
-                (Describable<Swagger, Request>) this.handler;
-        Response chfResponse = SwaggerUtils.request(handler, request, context);
+    private void writeApi(HttpServletResponse resp, Request request, final HttpServletRequest req, Context context) {
+        Response chfResponse = SwaggerUtils.request(new Describable<Swagger, Request>() {
+            @Override
+            public Swagger api(ApiProducer<Swagger> producer) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public Swagger handleApiRequest(Context context, Request request) {
+                Swagger swagger = SwaggerUtils.clone(handler.handleApiRequest(context, request));
+                String basePath = swagger.getBasePath();
+                String consumedBase = routingBase.extractMatchedUri(req);
+                if (consumedBase.endsWith("/")) {
+                    consumedBase = consumedBase.substring(0, consumedBase.length() - 1);
+                }
+                if (!consumedBase.startsWith("/")) {
+                    consumedBase = "/" + consumedBase;
+                }
+                if (basePath != null && basePath.startsWith("/")) {
+                    basePath = basePath.substring(1);
+                }
+                return swagger.basePath(consumedBase + (basePath == null ? "" : "/" + basePath));
+            }
+
+            @Override
+            public void addDescriptorListener(Listener listener) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public void removeDescriptorListener(Listener listener) {
+                throw new UnsupportedOperationException();
+            }
+        }, request, context);
         writeResponse(chfResponse, resp, context.asContext(SessionContext.class));
     }
 

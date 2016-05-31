@@ -17,12 +17,16 @@
 package org.forgerock.http.servlet.example;
 
 import static io.swagger.models.Scheme.HTTP;
+import static org.forgerock.http.routing.RouteMatchers.requestUriMatcher;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.http.DescribedHttpApplication;
+import org.forgerock.http.example.DescribedOauth2Endpoint;
+import org.forgerock.http.routing.Router;
+import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.swagger.SwaggerApiProducer;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
@@ -66,7 +70,9 @@ public class ExampleHttpApplication implements DescribedHttpApplication {
 
     @Override
     public Handler start() {
-        return new Handler() {
+        Router router = new Router();
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "oauth2"), new DescribedOauth2Endpoint());
+        router.setDefaultRoute(new Handler() {
             @Override
             public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
                 Map<String, String> content = new HashMap<>();
@@ -74,7 +80,8 @@ public class ExampleHttpApplication implements DescribedHttpApplication {
                 content.put("matchedUri", context.asContext(UriRouterContext.class).getBaseUri());
                 return newResultPromise(new Response(Status.OK).setEntity(content));
             }
-        };
+        });
+        return router;
     }
 
     @Override

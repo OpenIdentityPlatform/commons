@@ -1,0 +1,119 @@
+swagger: "2.0"
+security_definitions:
+  login:
+    type: basic
+    description: Basic authentication for login - try password = username!
+  oauth2:
+    type: oauth2
+    flow: accessCode
+    authorizationUrl: BASE_URL/authorize
+    tokenUrl: BASE_URL/token
+    scopes:
+      test: A simple scope - not required.
+tags:
+  - name: CHF OAuth 2.0
+paths:
+  /authorize:
+    get:
+      summary: OAuth 2.0 Authorization Endpoint
+      tags:
+        - CHF OAuth 2.0
+      responses:
+        "400":
+          description: Missing required parameter, such as redirect_uri.
+        "302":
+          description: Redirection according to OAuth 2.0 specification.
+      parameters:
+      - name: client_id
+        in: query
+        description: The client identifier
+        required: true
+        type: string
+      - name: redirect_uri
+        in: query
+        description: The redirect URI for redirection responses
+        required: true
+        type: string
+      - name: response_type
+        in: query
+        description: The OAuth 2.0 response type - only code is accepted
+        enum:
+        - code
+        required: true
+        type: string
+      - name: state
+        in: query
+        description: The OAuth 2.0 state parameter
+        required: false
+        type: string
+  /login:
+    get:
+      summary: Login url
+      tags:
+        - CHF OAuth 2.0
+      security:
+        - basic: []
+      responses:
+        "401":
+          description: Login required
+  /token:
+    post:
+      summary: OAuth 2.0 Token Endpoint
+      tags:
+        - CHF OAuth 2.0
+      consumes:
+      - application/x-www-form-urlencoded
+      produces:
+      - application/json
+      responses:
+        "400":
+          description: Bad request data, according to OAuth 2.0 specification
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: The OAuth 2.0 error code.
+      parameters:
+      - name: client_id
+        in: formData
+        description: The client identifier
+        required: true
+        type: string
+      - name: client_secret
+        in: formData
+        description: The client secret
+        required: true
+        type: string
+      - name: redirect_uri
+        in: formData
+        description: The redirect URI used in the authorization request
+        required: true
+        type: string
+      - name: grant_type
+        in: formData
+        description: The OAuth 2.0 grant type - must be authorization_code
+        enum:
+        - authorization_code
+        required: true
+        type: string
+  /api:
+    get:
+      summary: Get the username from the token
+      tags:
+        - CHF OAuth 2.0
+      security:
+        - oauth2: []
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response containing the username from the bearer token
+          schema:
+            type: object
+            properties:
+              user:
+                type: string
+                description: The username
+        "401":
+          description: Could not validate the bearer token.

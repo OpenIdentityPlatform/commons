@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.forgerock.guava.common.base.Function;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.routing.Version;
-import org.forgerock.http.ApiProducer;
 
 import io.swagger.models.Info;
 import io.swagger.models.Model;
@@ -99,7 +99,7 @@ public class SwaggerApiProducer implements ApiProducer<Swagger> {
             Map<String, Path> result = new HashMap<>(pathMap.size());
             for (Map.Entry<String, Path> entry : pathMap.entrySet()) {
                 String key = entry.getKey();
-                if (key.startsWith("/")) {
+                if (!key.startsWith("/")) {
                     key = "/" + key;
                 }
                 result.put(parentPath + key, entry.getValue());
