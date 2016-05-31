@@ -45,6 +45,7 @@
     <module>http-client-apache-async</module>
     <module>http-examples</module>
     <module>binding-test-utils</module>
+    <module>http-oauth2</module>
   </modules>
   <build>
     <plugins>
