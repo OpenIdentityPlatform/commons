@@ -39,10 +39,10 @@ You can quickly try out a [simple CREST HTTP application](json-resource-examples
 using the following commands in a terminal:
 
 ```
-$ git clone ssh://git@stash.forgerock.org:7999/commons/forgerock-rest.git
-$ cd forgerock-rest
+$ git clone https://stash.forgerock.org/scm/commons/forgerock-commons.git
+$ cd forgerock-commons
 $ mvn clean:install
-$ cd json-resource-examples
+$ cd rest/json-resource-examples
 $ mvn jetty:run
 ```
 
