@@ -19,7 +19,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>commons-parent</artifactId>
-        <version>20.0.0-SNAPSHOT</version>
+        <version>21.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>json-ref</artifactId>
     <packaging>pom</packaging>
