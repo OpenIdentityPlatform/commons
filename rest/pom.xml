@@ -42,6 +42,7 @@
         <i18nFrameworkVersion>1.4.1</i18nFrameworkVersion>
     </properties>
     <modules>
+        <module>api-descriptor</module>
         <module>forgerock-rest-docbook</module>
         <module>json-resource</module>
         <module>json-resource-examples</module>

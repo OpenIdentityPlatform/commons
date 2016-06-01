@@ -69,7 +69,6 @@
 
   <modules>
     <module>commons-bom</module>
-    <module>api-descriptor</module>
     <module>audit</module>
     <module>auth-filters</module>
     <module>http-framework</module>
