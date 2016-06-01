@@ -49,6 +49,8 @@ import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.descriptor.examples.handler.UserCollectionHandler;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.routing.DelegatingRouteMatcher;
+import org.forgerock.services.routing.RouteMatch;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -134,23 +136,30 @@ public class CrestHttpApplication implements DescribedHttpApplication {
                 });
 
         // simple page providing links to HTML docs and Swagger UI
-        router.addRoute(RouteMatchers.requestUriMatcher(RoutingMode.EQUALS, "/"),
-                new Handler() {
-                    @Override
-                    public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
-                        final String html = "<!DOCTYPE html><html><head><title>CREST Examples</title></head><body>"
-                                + "<p><a href=\"?_api\">Users and Devices API OpenAPI JSON</a></p>"
-                                + "<p><a href=\"?_crestapi\">Users and Devices API CREST Descriptor JSON</a></p>"
-                                + "<p><a href=\"./docs/api\">Users and Devices API explorer</a></p>"
-                                + "<p><a href=\"./docs/html\">Users and Devices API documentation</a></p>"
-                                + "</body></html>";
+        router.addRoute(new DelegatingRouteMatcher<Request>(RouteMatchers.requestUriMatcher(RoutingMode.EQUALS, "/")) {
+            @Override
+            public RouteMatch evaluate(Context context, Request request) {
+                if (request.getForm().containsKey("_crestapi")) {
+                    return null;
+                }
+                return super.evaluate(context, request);
+            }
+        }, new Handler() {
+            @Override
+            public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
+                final String html = "<!DOCTYPE html><html><head><title>CREST Examples</title></head><body>"
+                        + "<p><a href=\"?_api\">Users and Devices API OpenAPI JSON</a></p>"
+                        + "<p><a href=\"?_crestapi\">Users and Devices API CREST Descriptor JSON</a></p>"
+                        + "<p><a href=\"./docs/api\">Users and Devices API explorer</a></p>"
+                        + "<p><a href=\"./docs/html\">Users and Devices API documentation</a></p>"
+                        + "</body></html>";
 
-                        final Response response = new Response(Status.OK);
-                        response.getHeaders().add(HTML_CONTENT_TYPE_HEADER);
-                        response.setEntity(html);
-                        return Response.newResponsePromise(response);
-                    }
-                });
+                final Response response = new Response(Status.OK);
+                response.getHeaders().add(HTML_CONTENT_TYPE_HEADER);
+                response.setEntity(html);
+                return Response.newResponsePromise(response);
+            }
+        });
         return router;
     }
 
