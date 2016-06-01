@@ -574,9 +574,9 @@ public class ResourceTest {
         assertThat(query1.getStability()).isEqualTo(Stability.EVOLVING);
         assertThat(query1.getType()).isEqualTo(QueryType.ID);
         assertThat(query1.getQueryId()).isEqualTo("query1");
-        assertThat(query1.getCountPolicy()[0]).isEqualTo(CountPolicy.ESTIMATE);
-        assertThat(query1.getPagingMode()[0]).isEqualTo(PagingMode.COOKIE);
-        assertThat(query1.getPagingMode()[1]).isEqualTo(PagingMode.OFFSET);
+        assertThat(query1.getCountPolicies()[0]).isEqualTo(CountPolicy.ESTIMATE);
+        assertThat(query1.getPagingModes()[0]).isEqualTo(PagingMode.COOKIE);
+        assertThat(query1.getPagingModes()[1]).isEqualTo(PagingMode.OFFSET);
         assertThat(query1.getQueryableFields()[0]).isEqualTo("field1");
         assertThat(query1.getQueryableFields()[1]).isEqualTo("field2");
         assertThat(query1.getSupportedSortKeys()[0]).isEqualTo("key1");
@@ -591,9 +591,9 @@ public class ResourceTest {
         assertThat(query2.getStability()).isEqualTo(Stability.EVOLVING);
         assertThat(query2.getType()).isEqualTo(QueryType.ID);
         assertThat(query2.getQueryId()).isEqualTo("query2");
-        assertThat(query2.getCountPolicy()[0]).isEqualTo(CountPolicy.NONE);
-        assertThat(query2.getPagingMode()[0]).isEqualTo(PagingMode.COOKIE);
-        assertThat(query2.getPagingMode()[1]).isEqualTo(PagingMode.OFFSET);
+        assertThat(query2.getCountPolicies()[0]).isEqualTo(CountPolicy.NONE);
+        assertThat(query2.getPagingModes()[0]).isEqualTo(PagingMode.COOKIE);
+        assertThat(query2.getPagingModes()[1]).isEqualTo(PagingMode.OFFSET);
         assertThat(query2.getQueryableFields()[0]).isEqualTo("field1");
         assertThat(query2.getQueryableFields()[1]).isEqualTo("field2");
         assertThat(query2.getSupportedSortKeys()[0]).isEqualTo("key1");

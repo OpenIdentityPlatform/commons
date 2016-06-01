@@ -139,11 +139,11 @@
             "name",
             "password"
           ],
-          "pagingMode": [
+          "pagingModes": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicy": [
+          "countPolicies": [
             "NONE"
           ],
           "description": "Query the user collection",
@@ -313,11 +313,11 @@
             "name",
             "password"
           ],
-          "pagingMode": [
+          "pagingModes": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicy": [
+          "countPolicies": [
             "NONE"
           ],
           "description": "Query the user collection",
@@ -489,11 +489,11 @@
             "rollOutDate",
             "stolen"
           ],
-          "pagingMode": [
+          "pagingModes": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicy": [
+          "countPolicies": [
             "NONE"
           ],
           "description": "Query the device collection",
@@ -660,11 +660,11 @@
             "rollOutDate",
             "stolen"
           ],
-          "pagingMode": [
+          "pagingModes": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicy": [
+          "countPolicies": [
             "NONE"
           ],
           "description": "Query the device collection",

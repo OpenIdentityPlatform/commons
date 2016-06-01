@@ -38,8 +38,8 @@ import org.forgerock.api.enums.QueryType;
 public final class Query extends Operation implements Comparable<Query> {
 
     private final QueryType type;
-    private final PagingMode[] pagingMode;
-    private final CountPolicy[] countPolicy;
+    private final PagingMode[] pagingModes;
+    private final CountPolicy[] countPolicies;
     private final String queryId;
     private final String[] queryableFields;
     private final String[] supportedSortKeys;
@@ -47,8 +47,8 @@ public final class Query extends Operation implements Comparable<Query> {
     private Query(Builder builder) {
         super(builder);
         this.type = builder.type;
-        this.pagingMode = builder.pagingMode;
-        this.countPolicy = builder.countPolicy;
+        this.pagingModes = builder.pagingModes;
+        this.countPolicies = builder.countPolicies;
         this.queryId = builder.queryId;
         this.queryableFields = builder.queryableFields;
         this.supportedSortKeys = builder.supportedSortKeys;
@@ -78,8 +78,8 @@ public final class Query extends Operation implements Comparable<Query> {
      *
      * @return Paging mode enums
      */
-    public PagingMode[] getPagingMode() {
-        return pagingMode;
+    public PagingMode[] getPagingModes() {
+        return pagingModes;
     }
 
     /**
@@ -89,8 +89,8 @@ public final class Query extends Operation implements Comparable<Query> {
      *
      * @return Supported paging policy enums
      */
-    public CountPolicy[] getCountPolicy() {
-        return countPolicy;
+    public CountPolicy[] getCountPolicies() {
+        return countPolicies;
     }
 
     /**
@@ -133,8 +133,8 @@ public final class Query extends Operation implements Comparable<Query> {
         }
         Query query = (Query) o;
         return type == query.type
-                && Arrays.equals(pagingMode, query.pagingMode)
-                && Arrays.equals(countPolicy, query.countPolicy)
+                && Arrays.equals(pagingModes, query.pagingModes)
+                && Arrays.equals(countPolicies, query.countPolicies)
                 && Objects.equals(queryId, query.queryId)
                 && Arrays.equals(queryableFields, query.queryableFields)
                 && Arrays.equals(supportedSortKeys, query.supportedSortKeys);
@@ -142,7 +142,7 @@ public final class Query extends Operation implements Comparable<Query> {
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), type, pagingMode, countPolicy, queryId, queryableFields,
+        return Objects.hash(super.hashCode(), type, pagingModes, countPolicies, queryId, queryableFields,
                 supportedSortKeys);
     }
 
@@ -186,8 +186,8 @@ public final class Query extends Operation implements Comparable<Query> {
         return query()
                 .detailsFromAnnotation(query.operationDescription(), descriptor, relativeType)
                 .type(query.type())
-                .pagingMode(query.pagingModes())
-                .countPolicy(query.countPolicies())
+                .pagingModes(query.pagingModes())
+                .countPolicies(query.countPolicies())
                 .queryId(queryId)
                 .queryableFields(query.queryableFields())
                 .supportedSortKeys(query.sortKeys())
@@ -239,8 +239,8 @@ public final class Query extends Operation implements Comparable<Query> {
     public static final class Builder extends Operation.Builder<Builder> {
 
         private QueryType type;
-        private PagingMode[] pagingMode;
-        private CountPolicy[] countPolicy;
+        private PagingMode[] pagingModes;
+        private CountPolicy[] countPolicies;
         private String queryId;
         private String[] queryableFields;
         private String[] supportedSortKeys;
@@ -273,9 +273,9 @@ public final class Query extends Operation implements Comparable<Query> {
          * @param pagingMode Query paging mode enum
          * @return Builder
          */
-        @JsonProperty("pagingMode")
-        public Builder pagingMode(PagingMode... pagingMode) {
-            this.pagingMode = pagingMode;
+        @JsonProperty("pagingModes")
+        public Builder pagingModes(PagingMode... pagingMode) {
+            this.pagingModes = pagingMode;
             return this;
         }
 
@@ -287,9 +287,9 @@ public final class Query extends Operation implements Comparable<Query> {
          * @param countPolicy Array of supported paging mode policies
          * @return Builder
          */
-        @JsonProperty("countPolicy")
-        public Builder countPolicy(CountPolicy... countPolicy) {
-            this.countPolicy = countPolicy;
+        @JsonProperty("countPolicies")
+        public Builder countPolicies(CountPolicy... countPolicy) {
+            this.countPolicies = countPolicy;
             return this;
         }
 

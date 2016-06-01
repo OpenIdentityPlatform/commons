@@ -153,8 +153,8 @@
         {
           "type" : "FILTER",
           "description" : "Query audit events via Elasticsearch Audit Event Handler.",
-          "pagingMode" : [ "OFFSET", "COOKIE" ],
-          "countPolicy" : [ "EXACT" ],
+          "pagingModes" : [ "OFFSET", "COOKIE" ],
+          "countPolicies" : [ "EXACT" ],
           "queryableFields" : [
             "eventName",
             "timestamp",

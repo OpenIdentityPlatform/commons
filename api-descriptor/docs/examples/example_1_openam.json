@@ -379,7 +379,7 @@
                             "topics",
                             "location"
                         ],
-                        "pagingMode": [
+                        "pagingModes": [
                             "OFFSET"
                         ],
                         "description":"Allows query of the CSV instances - the only supported query is `true`."

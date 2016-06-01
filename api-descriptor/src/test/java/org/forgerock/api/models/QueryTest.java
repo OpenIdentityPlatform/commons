@@ -77,15 +77,15 @@ public class QueryTest {
     public void testQueryBuilder() {
         final Query query = Query.query()
                 .type(QueryType.EXPRESSION)
-                .pagingMode(PagingMode.COOKIE, PagingMode.OFFSET)
-                .countPolicy(CountPolicy.EXACT, CountPolicy.ESTIMATE)
+                .pagingModes(PagingMode.COOKIE, PagingMode.OFFSET)
+                .countPolicies(CountPolicy.EXACT, CountPolicy.ESTIMATE)
                 .queryableFields("field1", "field2")
                 .supportedSortKeys("key1", "key2")
                 .build();
 
         assertThat(query.getType()).isEqualTo(QueryType.EXPRESSION);
-        assertThat(query.getPagingMode()).contains(PagingMode.COOKIE, PagingMode.OFFSET);
-        assertThat(query.getCountPolicy()).contains(CountPolicy.EXACT, CountPolicy.ESTIMATE);
+        assertThat(query.getPagingModes()).contains(PagingMode.COOKIE, PagingMode.OFFSET);
+        assertThat(query.getCountPolicies()).contains(CountPolicy.EXACT, CountPolicy.ESTIMATE);
         assertThat(query.getQueryableFields()).contains("field1", "field2");
         assertThat(query.getSupportedSortKeys()).contains("key1", "key2");
     }

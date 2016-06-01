@@ -753,23 +753,23 @@ public final class ApiDocGenerator {
             table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
         }
 
-        if (!isEmpty(query.getPagingMode())) {
+        if (!isEmpty(query.getPagingModes())) {
             headers.add(asciiDoc().link("query-paging-modes", "Paging Modes").toString());
             columnWidths.add(COLUMN_WIDTH_MEDIUM);
 
             final AsciiDoc blockDoc = asciiDoc();
-            for (final PagingMode pagingMode : query.getPagingMode()) {
+            for (final PagingMode pagingMode : query.getPagingModes()) {
                 blockDoc.unorderedList1(asciiDoc().mono(pagingMode.toString()).toString());
             }
             table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);
         }
 
-        if (!isEmpty(query.getCountPolicy())) {
+        if (!isEmpty(query.getCountPolicies())) {
             headers.add(asciiDoc().link("query-page-count-policies", "Page Count Policies").toString());
             columnWidths.add(COLUMN_WIDTH_MEDIUM);
 
             final AsciiDoc blockDoc = asciiDoc();
-            for (final CountPolicy countPolicy : query.getCountPolicy()) {
+            for (final CountPolicy countPolicy : query.getCountPolicies()) {
                 blockDoc.unorderedList1(asciiDoc().mono(countPolicy.toString()).toString());
             }
             table.columnCell(blockDoc.toString(), ASCII_DOC_CELL);

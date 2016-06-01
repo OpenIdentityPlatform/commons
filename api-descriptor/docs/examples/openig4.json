@@ -192,7 +192,7 @@
             "path",
             "pat"
           ],
-          "pagingMode": [
+          "pagingModes": [
             "OFFSET"
           ],
           "description": "Return resources matching the filter expression. At present, the only supported filter is `true` (return all resources).",

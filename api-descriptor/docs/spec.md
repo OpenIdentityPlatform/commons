@@ -466,14 +466,14 @@ Resource queries arrays can include up to one query filter operation, one query 
 
 #### Properties
 
-Key           | Type                        | Required?  | Description
-------------- | --------------------------- |:----------:| ------------------------------------
-`type`        | String                      | ✓          | Supported values are:`ID`, `FILTER`, `EXPRESSION`.
-`pagingMode`  | String[]                    |            | Supported values are:`COOKIE`, `OFFSET`.<br>Paging is not supported if omitted.
-`countPolicy` | String[]                    |            | Supported values are:`ESTIMATE`, `EXACT`, `NONE`.<br>Counts are not provided if omitted.
-`queryId`     | String                      | `type:ID`  | Required if `type` is `ID`.
-`queryableFields` | String[]                | `type:FILTER` | Required if `type` is `FILTER`.<br>Lists the fields in the `resourceSchema` that can be queried.<br>`*` means all fields can be queried.
-`supportedSortKeys` | String[]              |            | The keys that may be used to sort the filter results.<br>`*` means all keys are supported.
+Key             | Type                        | Required?  | Description
+--------------- | --------------------------- |:----------:| ------------------------------------
+`type`          | String                      | ✓          | Supported values are:`ID`, `FILTER`, `EXPRESSION`.
+`pagingModes`   | String[]                    |            | Supported values are:`COOKIE`, `OFFSET`.<br>Paging is not supported if omitted.
+`countPolicies` | String[]                    |            | Supported values are:`ESTIMATE`, `EXACT`, `NONE`.<br>Counts are not provided if omitted.
+`queryId`       | String                      | `type:ID`  | Required if `type` is `ID`.
+`queryableFields` | String[]                  | `type:FILTER` | Required if `type` is `FILTER`.<br>Lists the fields in the `resourceSchema` that can be queried.<br>`*` means all fields can be queried.
+`supportedSortKeys` | String[]                |            | The keys that may be used to sort the filter results.<br>`*` means all keys are supported.
 
 The following example shows a resource that supports all three types of query:
 

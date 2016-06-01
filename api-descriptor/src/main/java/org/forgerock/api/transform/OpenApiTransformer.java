@@ -736,8 +736,8 @@ public class OpenApiTransformer {
                 pageSizeParamter.setType("integer");
                 operation.addParameter(pageSizeParamter);
 
-                if (query.getPagingMode() != null) {
-                    for (final PagingMode pagingMode : query.getPagingMode()) {
+                if (query.getPagingModes() != null) {
+                    for (final PagingMode pagingMode : query.getPagingModes()) {
                         final QueryParameter parameter = new QueryParameter();
                         switch (pagingMode) {
                         case COOKIE:
@@ -759,8 +759,8 @@ public class OpenApiTransformer {
                 totalPagedResultsPolicyParameter.setName("_totalPagedResultsPolicy");
                 totalPagedResultsPolicyParameter.setType("string");
                 final List<String> totalPagedResultsPolicyValues = new ArrayList<>();
-                if (query.getCountPolicy() != null) {
-                    for (final CountPolicy countPolicy : query.getCountPolicy()) {
+                if (query.getCountPolicies() != null) {
+                    for (final CountPolicy countPolicy : query.getCountPolicies()) {
                         totalPagedResultsPolicyValues.add(countPolicy.name());
                     }
                 } else {

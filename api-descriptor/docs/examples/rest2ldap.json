@@ -297,11 +297,11 @@
             "displayName",
             "members/_id"
           ],
-          "pagingMode": [
+          "pagingModes": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicy": [
+          "countPolicies": [
             "NONE"
           ],
           "description": "Return resources matching the filter.",
@@ -577,11 +577,11 @@
             "contactInformation/telephoneNumber",
             "groups/_id"
           ],
-          "pagingMode": [
+          "pagingModes": [
             "COOKIE",
             "OFFSET"
           ],
-          "countPolicy": [
+          "countPolicies": [
             "NONE"
           ],
           "description": "Return resources matching the filter.",

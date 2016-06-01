@@ -125,9 +125,9 @@ public class JsonToApiDescriptorObjectTest {
         assertThat(apiDescription.getServices().get("devices:1.0").getQueries()).hasSize(1);
         assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getType())
                 .isEqualTo(QueryType.FILTER);
-        assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getPagingMode()).hasSize(2);
-        assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getCountPolicy()).hasSize(1);
-        assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getCountPolicy()[0])
+        assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getPagingModes()).hasSize(2);
+        assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getCountPolicies()).hasSize(1);
+        assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getCountPolicies()[0])
                 .isEqualTo(CountPolicy.NONE);
         assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getQueryableFields()).hasSize(5);
         assertThat(apiDescription.getServices().get("devices:1.0").getQueries()[0].getSupportedLocales()).hasSize(2);
@@ -190,9 +190,9 @@ public class JsonToApiDescriptorObjectTest {
         assertThat(apiDescription.getServices().get("devices:2.0").getQueries()).hasSize(1);
         assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getType())
                 .isEqualTo(QueryType.FILTER);
-        assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getPagingMode()).hasSize(2);
-        assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getCountPolicy()).hasSize(1);
-        assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getCountPolicy()[0])
+        assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getPagingModes()).hasSize(2);
+        assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getCountPolicies()).hasSize(1);
+        assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getCountPolicies()[0])
                 .isEqualTo(CountPolicy.NONE);
         assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getQueryableFields()).hasSize(5);
         assertThat(apiDescription.getServices().get("devices:2.0").getQueries()[0].getSupportedLocales()).hasSize(2);
@@ -259,9 +259,9 @@ public class JsonToApiDescriptorObjectTest {
         assertThat(apiDescription.getServices().get("users:1.0").getQueries()).hasSize(1);
         assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getType())
                 .isEqualTo(QueryType.FILTER);
-        assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getPagingMode()).hasSize(2);
-        assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getCountPolicy()).hasSize(1);
-        assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getCountPolicy()[0])
+        assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getPagingModes()).hasSize(2);
+        assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getCountPolicies()).hasSize(1);
+        assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getCountPolicies()[0])
                 .isEqualTo(CountPolicy.NONE);
         assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getQueryableFields()).hasSize(3);
         assertThat(apiDescription.getServices().get("users:1.0").getQueries()[0].getSupportedLocales()).hasSize(2);
