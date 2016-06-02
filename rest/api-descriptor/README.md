@@ -34,19 +34,3 @@ There are multiple benefits of a well-functioning API Descriptor, both for Forge
 * Endpoints to discover API descriptions
 * Automatic generation of API documentation
 * A ForgeRock-consistent UI to explore the APIs
-
-### Additional Resources
-
-**Static documentation by other companies:**
-
-* Oracle seems to offer very static documentation. Example: Oracle  Fusion Middleware Developing and Customizing Applications for Oracle Identity Manager - Using SCIM/REST Services: https://docs.oracle.com/cd/E52734_01/oim/OMDEV/scim.htm#OMDEV5526
-* Ping seems to have very static documentation only. Example: https://developer.pingidentity.com/en/api/pingid-api.html
-* Gigya has very good, nicely laid out documentation, but also static: http://developers.gigya.com/display/GD/REST+API
-* Okta recommends Postman as the API Test Client, and provides environment templates for it: http://developer.okta.com/docs/api/getting_started/api_test_client.html
-
-**Examples of dynamic API Descriptors:**
-
-* A sample demo of how a Swagger UI-driven Descriptor can look like: http://petstore.swagger.io/#/
-* Wordnik uses Swagger for their API doc: http://developer.wordnik.com/docs.html
-* Twitter has a API Console Tool, that seems to be the dynamic, Swagger-like tool that we want to build: https:/dev.twitter.com/rest/tools/console
-(Note: powered by Apigee)

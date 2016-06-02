@@ -20,12 +20,13 @@ nor does it describe how CREST binds to a transport protocol such as HTTP.
 
 ## Status
 
-This document is a working draft, version `0.2.1`.
+This document is version `1.0.0`.
 
 ### Revision History
 
 Version   | Description
 ---------:| -------------------
+1.0.0     | Initial release.
 0.2.1     | Clarify explanations.
 0.2       | Adds: ability to specify common resources in `services`, collection semantics using `items`, parent-child relations using `subresources`, complex read states, complex field validation policies, and binary field support.
 0.1       | Initial version.
