@@ -160,7 +160,7 @@ public class SwaggerApiProducer implements ApiProducer<Swagger> {
             return null;
         }
 
-        Swagger swagger = addApiInfo(new Swagger());
+        Swagger swagger = addApiInfo(new SwaggerExtended());
         for (Swagger descriptor : descriptors) {
             for (String consumes : ensureNotNull(descriptor.getConsumes())) {
                 swagger.consumes(consumes);

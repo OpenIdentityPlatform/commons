@@ -53,7 +53,7 @@ public final class SwaggerUtils {
      * @return The newly cloned instance.
      */
     public static Swagger clone(Swagger descriptor) {
-        Swagger swagger = new Swagger()
+        Swagger swagger = new SwaggerExtended()
                 .basePath(descriptor.getBasePath())
                 .consumes(descriptor.getConsumes())
                 .info(descriptor.getInfo())

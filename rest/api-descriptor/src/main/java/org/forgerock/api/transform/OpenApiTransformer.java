@@ -68,6 +68,7 @@ import org.forgerock.api.models.VersionedPath;
 import org.forgerock.api.util.ReferenceResolver;
 import org.forgerock.api.util.ValidationUtil;
 import org.forgerock.http.routing.Version;
+import org.forgerock.http.swagger.SwaggerExtended;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.annotations.VisibleForTesting;
 
@@ -164,7 +165,7 @@ public class OpenApiTransformer {
             final ApiDescription apiDescription, final ApiDescription... externalApiDescriptions) {
         this.apiDescription = checkNotNull(apiDescription, "apiDescription required");
 
-        swagger = new Swagger()
+        swagger = new SwaggerExtended()
                 .scheme(secure ? Scheme.HTTPS : Scheme.HTTP)
                 .host(host)
                 .basePath(basePath)
