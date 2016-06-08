@@ -148,7 +148,7 @@ class AsynchronousSyslogPublisher implements SyslogPublisher {
                 try {
                     queue.drainTo(drainList, CAPACITY);
                     if (drainList.isEmpty()) {
-                        byte[] message = queue.poll(10, TimeUnit.SECONDS);
+                        byte[] message = queue.poll(100, TimeUnit.MILLISECONDS);
                         if (message != null) {
                             publishBufferedMessages(Arrays.asList(message));
                         }

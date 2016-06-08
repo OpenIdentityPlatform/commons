@@ -97,7 +97,7 @@ public class AsynchronousTextWriter implements TextWriter {
                 try {
                     queue.drainTo(drainList, CAPACITY);
                     if (drainList.isEmpty()) {
-                        String message = queue.poll(10, TimeUnit.SECONDS);
+                        String message = queue.poll(100, TimeUnit.MILLISECONDS);
                         if (message != null) {
                             writeMessage(message);
                             if (autoFlush) {
