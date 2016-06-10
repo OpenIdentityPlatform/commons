@@ -65,6 +65,7 @@ import org.forgerock.api.models.Schema;
 import org.forgerock.api.models.SubResources;
 import org.forgerock.api.models.Update;
 import org.forgerock.api.models.VersionedPath;
+import org.forgerock.api.util.PathUtil;
 import org.forgerock.api.util.ReferenceResolver;
 import org.forgerock.api.util.ValidationUtil;
 import org.forgerock.http.routing.Version;
@@ -168,12 +169,16 @@ public class OpenApiTransformer {
         swagger = new SwaggerExtended()
                 .scheme(secure ? Scheme.HTTPS : Scheme.HTTP)
                 .host(host)
-                .basePath(basePath)
                 .consumes("application/json")
                 .consumes("text/plain")
                 .consumes("multipart/form-data")
                 .produces("application/json")
                 .info(buildInfo(title));
+
+        if (!isEmpty(basePath)) {
+            // make sure path starts with forward-slash (OpenAPI 2.0 spec), and does not end with one
+            swagger.basePath(PathUtil.buildPath(basePath));
+        }
 
         referenceResolver = new ReferenceResolver(apiDescription);
         if (externalApiDescriptions != null) {
@@ -202,8 +207,8 @@ public class OpenApiTransformer {
     /**
      * Transforms an {@link ApiDescription} into a {@code Swagger} model.
      * <p>
-     *     Note: The returned descriptor does not contain an {@code Info} object, a base path, a host or a scheme, as
-     *     these will all depend on the deployment and/or request.
+     * Note: The returned descriptor does not contain an {@code Info} object, a base path, a host or a scheme, as
+     * these will all depend on the deployment and/or request.
      * </p>
      *
      * @param apiDescription CREST API Descriptor
@@ -305,9 +310,13 @@ public class OpenApiTransformer {
                         versionName = version.toString();
                     }
 
-                    Resource resource = resolveResourceReference(versionedPath.get(version));
-                    buildResourcePaths(resource, pathName, null, versionName, Collections.<Parameter>emptyList(),
-                            pathMap);
+                    final Resource resource = resolveResourceReference(versionedPath.get(version));
+
+                    // make sure path starts with forward-slash (OpenAPI 2.0 spec), and does not end with one
+                    final String normalizedPathName = PathUtil.buildPath(pathName);
+
+                    buildResourcePaths(resource, normalizedPathName, null, versionName,
+                            Collections.<Parameter>emptyList(), pathMap);
                 }
             }
             swagger.setPaths(pathMap);

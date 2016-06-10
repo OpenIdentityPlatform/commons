@@ -25,7 +25,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.forgerock.api.ApiValidationException;
 import org.forgerock.http.routing.Version;
 import org.forgerock.util.Reject;
 
@@ -42,10 +41,6 @@ public final class Paths {
 
     private Paths(Builder builder) {
         this.paths = builder.paths;
-
-        if (paths.isEmpty()) {
-            throw new ApiValidationException("Must have at least one path definition");
-        }
     }
 
     /**

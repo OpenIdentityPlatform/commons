@@ -20,7 +20,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
-import org.forgerock.api.ApiValidationException;
 import org.forgerock.http.routing.Version;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -89,9 +88,10 @@ public class PathsTest {
         assertThat(paths.getPaths()).isNotEmpty();
     }
 
-    @Test(expectedExceptions = ApiValidationException.class)
+    @Test
     public void testEmptyPaths() {
-        Paths.paths().build();
+        final Paths paths = Paths.paths().build();
+        assertThat(paths.getPaths()).isEmpty();
     }
 
 }

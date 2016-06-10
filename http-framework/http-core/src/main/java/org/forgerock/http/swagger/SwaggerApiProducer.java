@@ -220,7 +220,7 @@ public class SwaggerApiProducer implements ApiProducer<Swagger> {
     @Override
     public Swagger addApiInfo(Swagger swagger) {
         if (info != null) {
-            swagger.info(info);
+            swagger.info(info.mergeWith(swagger.getInfo()));
         }
         return swagger.host(host).basePath(basePath).schemes(schemes);
     }

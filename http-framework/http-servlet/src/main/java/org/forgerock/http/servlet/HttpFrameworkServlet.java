@@ -29,6 +29,7 @@ import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -43,6 +44,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import io.swagger.models.Scheme;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.http.DescribedHttpApplication;
 import org.forgerock.http.Handler;
@@ -292,19 +294,25 @@ public final class HttpFrameworkServlet extends HttpServlet {
 
             @Override
             public Swagger handleApiRequest(Context context, Request request) {
-                Swagger swagger = SwaggerUtils.clone(handler.handleApiRequest(context, request));
-                String basePath = swagger.getBasePath();
-                String consumedBase = routingBase.extractMatchedUri(req);
-                if (consumedBase.endsWith("/")) {
-                    consumedBase = consumedBase.substring(0, consumedBase.length() - 1);
+                final Swagger swagger = SwaggerUtils.clone(handler.handleApiRequest(context, request));
+                final UriRouterContext uriRouterContext = context.asContext(UriRouterContext.class);
+                final URI originalUri = uriRouterContext.getOriginalUri();
+
+                // use scheme, host, and/or base-path from request, if not already defined by Swagger
+                if (swagger.getBasePath() == null || swagger.getBasePath().trim().isEmpty()) {
+                    swagger.setBasePath(uriRouterContext.getBaseUri());
                 }
-                if (!consumedBase.startsWith("/")) {
-                    consumedBase = "/" + consumedBase;
+                if (swagger.getSchemes() == null || swagger.getSchemes().isEmpty()) {
+                    swagger.addScheme(Scheme.forValue(originalUri.getScheme()));
                 }
-                if (basePath != null && basePath.startsWith("/")) {
-                    basePath = basePath.substring(1);
+                if (swagger.getHost() == null || swagger.getHost().trim().isEmpty()) {
+                    String host = originalUri.getHost();
+                    if (originalUri.getPort() != 80 && originalUri.getPort() != 443) {
+                        host += ":" + originalUri.getPort();
+                    }
+                    swagger.setHost(host);
                 }
-                return swagger.basePath(consumedBase + (basePath == null ? "" : "/" + basePath));
+                return swagger;
             }
 
             @Override
