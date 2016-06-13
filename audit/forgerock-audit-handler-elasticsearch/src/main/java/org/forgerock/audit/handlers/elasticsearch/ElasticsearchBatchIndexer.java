@@ -30,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.lang.Math.max;
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_INTERVAL;
 
 /**
  * Uses Elasticsearch Bulk API to index audit events in batches.
@@ -41,7 +42,6 @@ class ElasticsearchBatchIndexer {
     private static final int MIN_QUEUE_SIZE = 10000;
     private static final int MIN_BATCH_SIZE = 500;
     private static final int MIN_PER_EVENT_PAYLOAD_SIZE = 32;
-    private static final Duration DEFAULT_WRITE_INTERVAL = new Duration(1L, TimeUnit.SECONDS);
 
     private final BlockingQueue<BatchEntry> queue;
     private final ScheduledExecutorService scheduler;
@@ -71,7 +71,7 @@ class ElasticsearchBatchIndexer {
                 max(averagePerEventPayloadSize, MIN_PER_EVENT_PAYLOAD_SIZE),
                 autoFlush, queue, scheduler, Reject.checkNotNull(eventHandler));
         this.writeInterval = writeInterval == null || writeInterval.getValue() <= 0
-                ? DEFAULT_WRITE_INTERVAL : writeInterval;
+                ? POLLING_INTERVAL : writeInterval;
     }
 
     /**

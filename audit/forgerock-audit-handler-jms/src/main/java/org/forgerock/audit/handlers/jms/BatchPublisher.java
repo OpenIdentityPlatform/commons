@@ -30,6 +30,9 @@ import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TIMEOUT;
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TIMEOUT_UNIT;
+
 /**
  * Generic publisher that will queue anything for batch processing.
  *
@@ -41,7 +44,6 @@ public abstract class BatchPublisher<T> implements Publisher<T> {
     private final BlockingQueue<T> queue;
     private final ExecutorService executorService;
     private final long insertTimeoutSec;
-    private final long pollTimeoutSec;
     private final long shutdownTimeoutSec;
     private volatile boolean stopRequested;
     private final int maxBatchedEvents;
@@ -60,7 +62,6 @@ public abstract class BatchPublisher<T> implements Publisher<T> {
         this.queue = new LinkedBlockingQueue<>(configuration.getCapacity());
         this.maxBatchedEvents = configuration.getMaxBatchedEvents();
         this.insertTimeoutSec = configuration.getInsertTimeoutSec();
-        this.pollTimeoutSec = configuration.getPollTimeoutSec();
         this.shutdownTimeoutSec = configuration.getShutdownTimeoutSec();
         this.stopRequested = false;
         this.executorService = Executors.newFixedThreadPool(configuration.getThreadCount(), new ThreadFactory() {
@@ -183,7 +184,7 @@ public abstract class BatchPublisher<T> implements Publisher<T> {
                 try {
                     queue.drainTo(drainList, maxBatchedEvents);
                     if (drainList.isEmpty()) {
-                        T message = queue.poll(pollTimeoutSec, TimeUnit.SECONDS);
+                        T message = queue.poll(POLLING_TIMEOUT, POLLING_TIMEOUT_UNIT);
                         if (message != null) {
                             publishMessages(Collections.singletonList(message));
                         }

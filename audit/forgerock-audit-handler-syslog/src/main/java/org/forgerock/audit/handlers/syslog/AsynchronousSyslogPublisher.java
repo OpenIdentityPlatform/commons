@@ -32,6 +32,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TIMEOUT;
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TIMEOUT_UNIT;
+
 /**
  * SyslogPublisher that offloads message transmission to a separate thread.
  */
@@ -148,7 +151,7 @@ class AsynchronousSyslogPublisher implements SyslogPublisher {
                 try {
                     queue.drainTo(drainList, CAPACITY);
                     if (drainList.isEmpty()) {
-                        byte[] message = queue.poll(100, TimeUnit.MILLISECONDS);
+                        byte[] message = queue.poll(POLLING_TIMEOUT, POLLING_TIMEOUT_UNIT);
                         if (message != null) {
                             publishBufferedMessages(Arrays.asList(message));
                         }

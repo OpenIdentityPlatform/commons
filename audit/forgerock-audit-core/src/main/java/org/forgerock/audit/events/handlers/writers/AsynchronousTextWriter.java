@@ -30,6 +30,9 @@ import org.forgerock.util.Reject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TIMEOUT;
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TIMEOUT_UNIT;
+
 /**
  * A Text Writer which writes log records asynchronously to character-based stream.
  * <p>
@@ -97,7 +100,7 @@ public class AsynchronousTextWriter implements TextWriter {
                 try {
                     queue.drainTo(drainList, CAPACITY);
                     if (drainList.isEmpty()) {
-                        String message = queue.poll(100, TimeUnit.MILLISECONDS);
+                        String message = queue.poll(POLLING_TIMEOUT, POLLING_TIMEOUT_UNIT);
                         if (message != null) {
                             writeMessage(message);
                             if (autoFlush) {

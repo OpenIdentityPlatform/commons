@@ -47,12 +47,13 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_INTERVAL;
 
 /**
  * Implements a {@link AuditEventHandler} to write {@link AuditEvent}s to a JDBC repository.
@@ -113,7 +114,7 @@ public class JdbcAuditEventHandler extends AuditEventHandlerBase {
                     bufferConfig.getMaxSize(),
                     bufferConfig.isAutoFlush(),
                     jdbcAuditEventExecutor,
-                    Duration.duration(bufferConfig.getWriteInterval()),
+                    POLLING_INTERVAL,
                     bufferConfig.getWriterThreads(),
                     bufferConfig.getMaxBatchedEvents(),
                     dataSource);
