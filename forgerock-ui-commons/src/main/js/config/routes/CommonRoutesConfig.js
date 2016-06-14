@@ -39,14 +39,14 @@ define([
         //view files are loaded when the GenericRouteInterfaceMap module is initialized
         "login": {
             view: "LoginView",
-            url: /login([^\&]+)?(&.+)?/,
+            url: /^login([^\&]+)?(&.+)?/,
             pattern: "login??",
             defaults: ["/",""],
             argumentNames: ["realm","additionalParameters"]
         },
         "logout": {
             event: constants.EVENT_LOGOUT,
-            url: /logout\/(.*)/
+            url: /^logout\/(.*)/
         },
         "loginDialog": {
             dialog: "LoginDialog",

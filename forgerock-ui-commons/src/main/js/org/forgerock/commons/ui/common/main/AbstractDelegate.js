@@ -39,7 +39,9 @@ define([
         if (configuration.hasOwnProperty('passwords') && configuration.passwords.hasOwnProperty('password')) {
             callParams.headers[constants.HEADER_PARAM_REAUTH]=configuration.passwords.password;
         }
-        if(callParams.serviceUrl) {
+
+        callParams.url = callParams.hasOwnProperty('url') ? callParams.url : "";
+        if (callParams.serviceUrl) {
             callParams.url = callParams.serviceUrl + callParams.url;
         } else {
             callParams.url = this.serviceUrl + callParams.url;
