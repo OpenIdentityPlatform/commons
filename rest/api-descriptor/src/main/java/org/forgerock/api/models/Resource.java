@@ -426,8 +426,8 @@ public final class Resource {
                 return type.getAnnotation(CollectionProvider.class).details();
             }
         }
-        LOGGER.warn("Asked for Resource for annotated type, but type does not have required RequestHandler"
-                + " annotation. Returning null for " + type);
+        LOGGER.info("Asked for Resource for annotated type, but type does not have required RequestHandler"
+                + " annotation. No api descriptor will be available for " + type);
         return null;
     }
 

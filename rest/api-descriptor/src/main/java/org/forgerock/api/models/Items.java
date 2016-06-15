@@ -212,8 +212,8 @@ public final class Items {
         final Builder builder = items();
         final CollectionProvider provider = type.getAnnotation(CollectionProvider.class);
         if (provider == null) {
-            LOGGER.warn("Asked for Items for annotated type, but type does not have required RequestHandler"
-                    + " annotation. Returning null for " + type);
+            LOGGER.info("Asked for Items for annotated type, but type does not have required RequestHandler"
+                    + " annotation. No api descriptor will be available for " + type);
             return null;
         }
         builder.pathParameter(Parameter.fromAnnotation(provider.pathParam()));

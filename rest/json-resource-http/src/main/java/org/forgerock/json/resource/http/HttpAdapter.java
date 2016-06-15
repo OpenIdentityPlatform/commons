@@ -625,7 +625,7 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
     private Optional<Describable<ApiDescription, Request>> getDescribableConnection()
             throws ResourceException {
         if (apiId == null || apiVersion == null) {
-            LOGGER.warn("CREST API Descriptor API ID and Version are not set. Not describing.");
+            LOGGER.info("CREST API Descriptor API ID and Version are not set. Not describing.");
             return Optional.absent();
         }
         Connection connection = connectionFactory.getConnection();
