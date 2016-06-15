@@ -91,7 +91,7 @@ public final class SecurityAnswerVerificationStage extends AbstractKbaStage<Secu
 
         int questionsTobeAsked = Math.min(config.getNumberOfQuestionsUserMustAnswer(), shuffledAnswers.size());
         if (questionsTobeAsked != config.getNumberOfQuestionsUserMustAnswer()) {
-            throw new IllegalStateException("Insufficient number of questions. "
+            throw new BadRequestException("Insufficient number of questions. "
                     + "Minimum number of questions user must answer: " + config.getNumberOfQuestionsUserMustAnswer()
                     + ", Questions available: " + shuffledAnswers.size());
         }

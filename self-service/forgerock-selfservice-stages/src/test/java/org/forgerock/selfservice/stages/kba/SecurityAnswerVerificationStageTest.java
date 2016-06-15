@@ -117,7 +117,7 @@ public final class SecurityAnswerVerificationStageTest {
         securityAnswerVerificationStage.gatherInitialRequirements(context, config);
     }
 
-    @Test (expectedExceptions = IllegalStateException.class,
+    @Test (expectedExceptions = BadRequestException.class,
             expectedExceptionsMessageRegExp = "Insufficient number of questions. Minimum number of questions "
                     + "user must answer: 1, Questions available: 0")
     public void testGatherInitialRequirementsExceptionInsufficientNumberOfQuestions() throws Exception {
