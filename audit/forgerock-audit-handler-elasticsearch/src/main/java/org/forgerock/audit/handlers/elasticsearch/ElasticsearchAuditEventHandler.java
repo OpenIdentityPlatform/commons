@@ -39,12 +39,12 @@ import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.protocol.Responses;
 import org.forgerock.http.apache.async.AsyncHttpClientProvider;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Responses;
 import org.forgerock.http.spi.Loader;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CountPolicy;
@@ -108,6 +108,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     private final ElasticsearchAuditEventHandlerConfiguration configuration;
     private final Client client;
     private final ElasticsearchBatchIndexer batchIndexer;
+    private final HttpClientHandler defaultHttpClientHandler;
 
     /**
      * Create a new {@code ElasticsearchAuditEventHandler} instance.
@@ -122,7 +123,13 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             @Audit final Client client) {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         this.configuration = Reject.checkNotNull(configuration);
-        this.client = defaultClient(client);
+        if (client == null) {
+            this.defaultHttpClientHandler = defaultHttpClientHandler();
+            this.client = new Client(defaultHttpClientHandler);
+        } else {
+            this.defaultHttpClientHandler = null;
+            this.client = client;
+        }
         indexName = configuration.getIndexMapping().getIndexName();
         basicAuthHeaderValue = buildBasicAuthHeaderValue();
         baseUri = buildBaseUri();
@@ -153,6 +160,14 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     public void shutdown() throws ResourceException {
         if (batchIndexer != null) {
             batchIndexer.shutdown();
+        }
+        if (defaultHttpClientHandler != null) {
+            try {
+                defaultHttpClientHandler.close();
+            } catch (IOException e) {
+                throw ResourceException.newResourceException(ResourceException.INTERNAL_ERROR,
+                        "An error occurred while closing the default HTTP client handler", e);
+            }
         }
     }
 
@@ -472,26 +487,16 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         return request;
     }
 
-    /**
-     * Provides a default {@link Client} instance if {@code client} argument is {@code null}.
-     *
-     * @param client HTTP client or {@code null}
-     * @return Given {@link Client} or constructs a new {@link AsyncHttpClientProvider Async-Client}
-     */
-    protected Client defaultClient(final Client client) {
-        if (client != null) {
-            return client;
-        }
+    private HttpClientHandler defaultHttpClientHandler() {
         try {
-            return new Client(
-                    new HttpClientHandler(
-                            Options.defaultOptions()
-                                    .set(OPTION_LOADER, new Loader() {
-                                        @Override
-                                        public <S> S load(Class<S> service, Options options) {
-                                            return service.cast(new AsyncHttpClientProvider());
-                                        }
-                                    })));
+            return new HttpClientHandler(
+                    Options.defaultOptions()
+                            .set(OPTION_LOADER, new Loader() {
+                                @Override
+                                public <S> S load(Class<S> service, Options options) {
+                                    return service.cast(new AsyncHttpClientProvider());
+                                }
+                            }));
         } catch (HttpApplicationException e) {
             throw new RuntimeException("Error while building default HTTP Client", e);
         }
