@@ -22,6 +22,7 @@ import static org.forgerock.util.Reject.*;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -177,6 +178,8 @@ public final class Items {
      */
     @JsonIgnore
     public Resource asResource(boolean mvccSupported, Schema resourceSchema, String title, String description) {
+        final List<Action> actions =
+                getActions() == null ? Collections.<Action>emptyList() : Arrays.asList(getActions());
         return Resource.resource()
                 .mvccSupported(mvccSupported)
                 .resourceSchema(resourceSchema)
@@ -187,7 +190,7 @@ public final class Items {
                 .update(getUpdate())
                 .delete(getDelete())
                 .patch(getPatch())
-                .actions(Arrays.asList(getActions()))
+                .actions(actions)
                 .build();
     }
 
