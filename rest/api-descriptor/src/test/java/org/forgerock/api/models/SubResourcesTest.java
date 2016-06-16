@@ -17,18 +17,16 @@
 package org.forgerock.api.models;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 
 import org.forgerock.api.util.PathUtil;
-import org.forgerock.http.routing.Version;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-public class PathsTest {
+public class SubResourcesTest {
 
-    private VersionedPath simplePathNode;
+    private Resource simpleResource;
 
     @BeforeClass
     public void before() {
@@ -40,39 +38,37 @@ public class PathsTest {
                 .name("action1")
                 .response(schema)
                 .build();
-        simplePathNode = VersionedPath.versionedPath()
-                .put(Version.version(1), Resource.resource().action(action1).mvccSupported(true).build())
-                .build();
+        simpleResource = Resource.resource().action(action1).mvccSupported(true).build();
     }
 
     @DataProvider(name = "putValidationData")
     public Object[][] putValidationData() {
         return new Object[][]{
                 {null, null, Exception.class},
-                {null, simplePathNode, IllegalArgumentException.class},
-                {"", simplePathNode, null},
-                {"\t", simplePathNode, IllegalArgumentException.class},
-                {"/contains space", simplePathNode, IllegalArgumentException.class},
+                {null, simpleResource, IllegalArgumentException.class},
+                {"", simpleResource, null},
+                {"\t", simpleResource, IllegalArgumentException.class},
+                {"/contains space", simpleResource, IllegalArgumentException.class},
                 {"/uniqueName", null, NullPointerException.class},
-                {"/notUniqueName", simplePathNode, IllegalStateException.class},
-                {"/uniqueName", simplePathNode, null},
-                {"noLeadingSlash", simplePathNode, null},
-                {"trailingSlash/", simplePathNode, null},
+                {"/notUniqueName", simpleResource, IllegalStateException.class},
+                {"/uniqueName", simpleResource, null},
+                {"noLeadingSlash", simpleResource, null},
+                {"trailingSlash/", simpleResource, null},
         };
     }
 
     @Test(dataProvider = "putValidationData")
-    public void testPut(final String name, final VersionedPath pathNode,
+    public void testPut(final String name, final Resource resource,
             final Class<? extends Throwable> expectedException) throws Exception {
-        final Paths.Builder builder = Paths.paths();
+        final SubResources.Builder builder = SubResources.subresources();
 
         // add an entry, so that we can test for name-uniqueness
-        builder.put("/notUniqueName", simplePathNode);
+        builder.put("/notUniqueName", simpleResource);
 
-        final Paths paths;
+        final SubResources subResources;
         try {
-            builder.put(name, pathNode);
-            paths = builder.build();
+            builder.put(name, resource);
+            subResources = builder.build();
         } catch (final Exception e) {
             if (expectedException != null) {
                 assertThat(e).isInstanceOf(expectedException);
@@ -88,15 +84,15 @@ public class PathsTest {
 
         final String normalizedName = name.isEmpty() ? name : PathUtil.buildPath(name);
 
-        assertThat(paths.get(normalizedName)).isNotNull();
-        assertThat(paths.getNames()).contains(normalizedName, "/notUniqueName");
-        assertThat(paths.getPaths()).isNotEmpty();
+        assertThat(subResources.get(normalizedName)).isNotNull();
+        assertThat(subResources.getNames()).contains(normalizedName, "/notUniqueName");
+        assertThat(subResources.getSubResources()).isNotEmpty();
     }
 
     @Test
-    public void testEmptyPaths() {
-        final Paths paths = Paths.paths().build();
-        assertThat(paths.getPaths()).isEmpty();
+    public void testEmptySubResources() {
+        final SubResources subResources = SubResources.subresources().build();
+        assertThat(subResources.getSubResources()).isEmpty();
     }
 
 }

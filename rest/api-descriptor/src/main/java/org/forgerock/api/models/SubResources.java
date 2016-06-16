@@ -25,6 +25,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.forgerock.api.util.PathUtil;
 import org.forgerock.util.Reject;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -120,8 +121,12 @@ public final class SubResources {
          */
         @JsonAnySetter
         public Builder put(String path, Resource resource) {
-            if (isEmpty(path) || containsWhitespace(path)) {
+            if (path == null || containsWhitespace(path)) {
                 throw new IllegalArgumentException("path required and may not contain whitespace");
+            }
+            if (!path.isEmpty()) {
+                // paths must start with a slash (OpenAPI spec) and not end with one
+                path = PathUtil.buildPath(path);
             }
             if (subResources.containsKey(path)) {
                 throw new IllegalStateException("path not unique");

@@ -25,6 +25,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.forgerock.api.util.PathUtil;
 import org.forgerock.http.routing.Version;
 import org.forgerock.util.Reject;
 
@@ -116,37 +117,48 @@ public final class Paths {
         /**
          * Adds a Path.
          *
-         * @param name Path name
-         * @param path Path
+         * @param path Path string
+         * @param versionedPath Versioned path
          * @return Builder
          */
         @JsonAnySetter
-        public Builder put(String name, VersionedPath path) {
-            if (name == null || containsWhitespace(name)) {
-                throw new IllegalArgumentException("name required and may not contain whitespace");
+        public Builder put(String path, VersionedPath versionedPath) {
+            if (path == null || containsWhitespace(path)) {
+                throw new IllegalArgumentException("path required and may not contain whitespace");
             }
-            if (paths.containsKey(name)) {
-                throw new IllegalStateException("name not unique");
+            if (!path.isEmpty()) {
+                // paths must start with a slash (OpenAPI spec) and not end with one
+                path = PathUtil.buildPath(path);
             }
-            paths.put(name, Reject.checkNotNull(path));
+            if (paths.containsKey(path)) {
+                throw new IllegalStateException("path not unique");
+            }
+            paths.put(path, Reject.checkNotNull(versionedPath));
             return this;
         }
 
         /**
-         * Merge the path definition into the existing path definitions. If the {@code node} is a {@code VersionedPath}
-         * and there is already a {@code VersionedPath} at this path, then the versions will be added together.
+         * Merge the path definition into the existing path definitions. If there is already a {@code VersionedPath}
+         * at this path, then the versions will be added together.
          *
-         * @param path The path.
-         * @param node The node.
-         * @return This builder.
+         * @param path Path string
+         * @param versionedPath Versioned path
+         * @return Builder.
          */
-        public Builder merge(String path, VersionedPath node) {
+        public Builder merge(String path, VersionedPath versionedPath) {
+            if (path == null || containsWhitespace(path)) {
+                throw new IllegalArgumentException("path required and may not contain whitespace");
+            }
+            if (!path.isEmpty()) {
+                // paths must start with a slash (OpenAPI spec) and not end with one
+                path = PathUtil.buildPath(path);
+            }
             if (!paths.containsKey(path)) {
-                put(path, node);
+                put(path, Reject.checkNotNull(versionedPath));
             } else {
                 VersionedPath existing = paths.get(path);
-                for (Version v : node.getVersions()) {
-                    existing.addVersion(v, node.get(v));
+                for (Version v : versionedPath.getVersions()) {
+                    existing.addVersion(v, versionedPath.get(v));
                 }
             }
             return this;

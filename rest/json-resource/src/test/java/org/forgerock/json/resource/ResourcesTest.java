@@ -752,11 +752,11 @@ public final class ResourcesTest {
         ApiDescription api = router.api(new CrestApiProducer("frapi:test", "1.0"));
 
         // Then
-        assertThat(api.getPaths().getNames()).containsOnly("things");
-        Resource thingsResource = api.getPaths().get("things").get(UNVERSIONED);
+        assertThat(api.getPaths().getNames()).containsOnly("/things");
+        Resource thingsResource = api.getPaths().get("/things").get(UNVERSIONED);
         assertThat(thingsResource.getItems()).isNotNull();
-        assertThat(thingsResource.getItems().getSubresources().getNames()).containsOnly("subthing");
-        Resource subthingResource = thingsResource.getItems().getSubresources().get("subthing");
+        assertThat(thingsResource.getItems().getSubresources().getNames()).containsOnly("/subthing");
+        Resource subthingResource = thingsResource.getItems().getSubresources().get("/subthing");
         assertThat(subthingResource.getRead()).isNotNull();
         assertThat(subthingResource.getItems()).isNull();
         assertThat(subthingResource.getSubresources()).isNull();
