@@ -218,7 +218,7 @@ final class HandlerAdapter extends HttpHandler {
                             .remoteAddress(req.getRemoteAddr())
                             .remotePort(req.getRemotePort())
                             .secure("https".equalsIgnoreCase(req.getScheme()))
-                            .certificates((X509Certificate[]) req.getAttribute(Globals.SSL_CERTIFICATE_ATTR))
+                            .certificates((X509Certificate[]) req.getAttribute(Globals.CERTIFICATES_ATTR))
                             .userAgent(req.getHeader("User-Agent"))
                             .localAddress(req.getLocalAddr())
                             .localPort(req.getLocalPort())
