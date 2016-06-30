@@ -17,6 +17,7 @@ package org.forgerock.selfservice.stages.captcha;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.selfservice.core.util.RequirementsBuilder.newEmptyObject;
+import static org.forgerock.util.Utils.closeSilently;
 
 import org.forgerock.http.Client;
 import org.forgerock.http.protocol.Responses;
@@ -108,6 +109,8 @@ public final class CaptchaStage implements ProgressStage<CaptchaStageConfig> {
                                     return json(response.getEntity().getJson());
                                 } catch (IOException e) {
                                     throw new IllegalStateException("Unable to verify recaptcha", e);
+                                } finally {
+                                    closeSilently(response);
                                 }
                             }
                         },
