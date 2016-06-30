@@ -49,3 +49,25 @@ Now they must be specified like so:
 
     js2form: "libs/js2form-2.0-769718a",
     form2js: "libs/form2js-2.0-769718a",
+
+## 13.x -> 14.x
+
+References to UserProfileView in projects which use forgerock-ui-user will need to be updated.
+In 13.x, use of UserProfileView was determined via dependency injection in the requirejs map aliases, like so:
+
+    require.config({ "map": { "*": {
+        "UserProfileView" : (serverInfo.kbaEnabled === "true"
+            ? "org/forgerock/commons/ui/user/profile/UserProfileKBAView"
+            : "org/forgerock/commons/ui/user/profile/UserProfileView")
+    } } });
+
+This was based on the idea that you would swap out one whole view in favor of another, to be responsible
+for rendering the user profile. Switching the view was used to decide whether or not to show the basic profile or the "KBA"-enhanced version.
+
+In 14.x, the reference to the whole view no longer needs to be replaced. Instead, there is a single instance of the UserProfileView which simply needs to be told which child views are available for rendering additional tabs (such as the KBA tab). For example:
+
+    if (serverInfo.kbaEnabled === "true") {
+        require(["org/forgerock/commons/ui/user/profile/UserProfileKBATab"], (tab) => {
+            UserProfileView.registerTab(tab);
+        });
+    }

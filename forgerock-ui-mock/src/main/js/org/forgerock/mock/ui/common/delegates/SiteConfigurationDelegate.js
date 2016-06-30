@@ -15,22 +15,19 @@
  */
 
 define([
-], function() {
+    "UserProfileView"
+], function(UserProfileView) {
     var obj = {},
         kbaEnabled = true;
 
     obj.getConfiguration = function(successCallback) {
-        // based on whatever environmental condition able to be read, set the appropriate
-        // version of the UserProfileView. In this case, hard-code it to the KBA version
 
+        // based on whatever environmental condition able to be read, register the additional KBA
+        // tab with UserProfileView. In this case, it is hard-coded to include the KBA tab.
         if (kbaEnabled === true) {
-            require.config({"map": { "*": {
-                "UserProfileView" : "org/forgerock/commons/ui/user/profile/UserProfileKBAView"
-            } } } );
-        } else {
-            require.config({"map": { "*": {
-                "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView"
-            } } } );
+            require(["org/forgerock/commons/ui/user/profile/UserProfileKBATab"], function (UserProfileKBATab) {
+                UserProfileView.registerTab(UserProfileKBATab);
+            });
         }
 
         successCallback({
