@@ -342,6 +342,8 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
                 } catch (IOException e) {
                     return newExceptionPromise(new AuthenticationException(
                             new InternalServerErrorException(e.getMessage(), e)));
+                } finally {
+                    closeSilently(response);
                 }
             }
         };
@@ -382,6 +384,8 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
                 } catch (IOException | UnsupportedCallbackException e) {
                     throw new AuthenticationException(
                             new InternalServerErrorException(e.getMessage(), e));
+                } finally {
+                    closeSilently(response);
                 }
             }
         };
