@@ -25,6 +25,7 @@ import static org.forgerock.json.resource.ResourceException.newResourceException
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -200,27 +201,32 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             return client.send(request).then(new Function<Response, QueryResponse, ResourceException>() {
                     @Override
                     public QueryResponse apply(Response response) throws ResourceException {
-                        if (!response.getStatus().isSuccessful()) {
-                            final String message = "Elasticsearch response (" + indexName + "/" + topic + SEARCH + "): "
-                                    + response.getEntity();
-                            throw newResourceException(response.getStatus().getCode(), message);
-                        }
                         try {
-                            JsonValue events = json(response.getEntity().getJson());
-                            for (JsonValue event : events.get(HITS).get(HITS)) {
-                                handler.handleResource(
-                                        newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null,
-                                                ElasticsearchUtil.denormalizeJson(event.get(SOURCE))));
+                            if (!response.getStatus().isSuccessful()) {
+                                final String message =
+                                        "Elasticsearch response (" + indexName + "/" + topic + SEARCH + "): "
+                                        + response.getEntity();
+                                throw newResourceException(response.getStatus().getCode(), message);
                             }
-                            final int totalResults = events.get(HITS).get(TOTAL).asInteger();
-                            final String pagedResultsCookie = (pageSize + offset) >= totalResults
-                                    ? null
-                                    : Integer.toString(pageSize + offset);
-                            return newQueryResponse(pagedResultsCookie,
-                                    CountPolicy.EXACT,
-                                    totalResults);
-                        } catch (IOException e) {
-                            throw new InternalServerErrorException(e.getMessage(), e);
+                            try {
+                                JsonValue events = json(response.getEntity().getJson());
+                                for (JsonValue event : events.get(HITS).get(HITS)) {
+                                    handler.handleResource(
+                                            newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null,
+                                                    ElasticsearchUtil.denormalizeJson(event.get(SOURCE))));
+                                }
+                                final int totalResults = events.get(HITS).get(TOTAL).asInteger();
+                                final String pagedResultsCookie = (pageSize + offset) >= totalResults
+                                        ? null
+                                        : Integer.toString(pageSize + offset);
+                                return newQueryResponse(pagedResultsCookie,
+                                        CountPolicy.EXACT,
+                                        totalResults);
+                            } catch (IOException e) {
+                                throw new InternalServerErrorException(e.getMessage(), e);
+                            }
+                        } finally {
+                            closeSilently(response);
                         }
                     }
             },
@@ -245,18 +251,22 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         return client.send(request).then(new Function<Response, ResourceResponse, ResourceException>() {
                 @Override
                 public ResourceResponse apply(Response response) throws ResourceException {
-                    if (!response.getStatus().isSuccessful()) {
-                        throw resourceException(indexName, topic, resourceId, response);
-                    }
-
                     try {
-                        // the original audit JSON is under _source, and we also add back the _id
-                        JsonValue jsonValue = json(response.getEntity().getJson());
-                        jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
-                        jsonValue.put(FIELD_CONTENT_ID, resourceId);
-                        return newResourceResponse(resourceId, null, jsonValue);
-                    } catch (IOException e) {
-                        throw new InternalServerErrorException(e.getMessage(), e);
+                        if (!response.getStatus().isSuccessful()) {
+                            throw resourceException(indexName, topic, resourceId, response);
+                        }
+
+                        try {
+                            // the original audit JSON is under _source, and we also add back the _id
+                            JsonValue jsonValue = json(response.getEntity().getJson());
+                            jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
+                            jsonValue.put(FIELD_CONTENT_ID, resourceId);
+                            return newResourceResponse(resourceId, null, jsonValue);
+                        } catch (IOException e) {
+                            throw new InternalServerErrorException(e.getMessage(), e);
+                        }
+                    } finally {
+                        closeSilently(response);
                     }
                 }
         }, Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
@@ -300,11 +310,15 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             return client.send(request).then(new Function<Response, ResourceResponse, ResourceException>() {
                     @Override
                     public ResourceResponse apply(Response response) throws ResourceException {
-                        if (!response.getStatus().isSuccessful()) {
-                            throw resourceException(indexName, topic, resourceId, response);
+                        try {
+                            if (!response.getStatus().isSuccessful()) {
+                                throw resourceException(indexName, topic, resourceId, response);
+                            }
+                            return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
+                                    event);
+                        } finally {
+                            closeSilently(response);
                         }
-                        return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
-                                event);
                     }
             }, Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
         } catch (Exception e) {
@@ -357,27 +371,27 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     public void publishBatch(final String payload) throws BatchException {
         try {
             final Request request = createRequest(POST, buildBulkUri(), payload);
-
-            final Response response = client.send(request).get();
-            if (!response.getStatus().isSuccessful()) {
-                throw new BatchException("Elasticsearch batch index failed: " + response.getEntity());
-            } else {
-                final JsonValue responseJson = json(response.getEntity().getJson());
-                if (responseJson.get("errors").asBoolean()) {
-                    // one or more batch index operations failed, so log failures
-                    final JsonValue items = responseJson.get("items");
-                    final int n = items.size();
-                    final List<Object> failureItems = new ArrayList<>(n);
-                    for (int i = 0; i < n; ++i) {
-                        final JsonValue item = items.get(i).get("index");
-                        final Integer status = item.get("status").asInteger();
-                        if (status >= 400) {
-                            failureItems.add(item);
+            try (final Response response = client.send(request).get()) {
+                if (!response.getStatus().isSuccessful()) {
+                    throw new BatchException("Elasticsearch batch index failed: " + response.getEntity());
+                } else {
+                    final JsonValue responseJson = json(response.getEntity().getJson());
+                    if (responseJson.get("errors").asBoolean()) {
+                        // one or more batch index operations failed, so log failures
+                        final JsonValue items = responseJson.get("items");
+                        final int n = items.size();
+                        final List<Object> failureItems = new ArrayList<>(n);
+                        for (int i = 0; i < n; ++i) {
+                            final JsonValue item = items.get(i).get("index");
+                            final Integer status = item.get("status").asInteger();
+                            if (status >= 400) {
+                                failureItems.add(item);
+                            }
                         }
+                        final String message = "One or more Elasticsearch batch index entries failed: "
+                                + OBJECT_MAPPER.writeValueAsString(failureItems);
+                        throw new BatchException(message);
                     }
-                    final String message = "One or more Elasticsearch batch index entries failed: "
-                            + OBJECT_MAPPER.writeValueAsString(failureItems);
-                    throw new BatchException(message);
                 }
             }
         } catch (IOException | URISyntaxException | ExecutionException | InterruptedException e) {
