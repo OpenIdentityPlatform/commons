@@ -16,6 +16,7 @@
 package org.forgerock.audit.handlers.elasticsearch;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Elasticsearch batch audit event handler.
@@ -39,5 +40,5 @@ interface ElasticsearchBatchAuditEventHandler {
      * @param payload Elasticsearch Bulk API payload
      * @throws BatchException indicates (full or partial) failure to publish batch
      */
-    void publishBatch(String payload) throws BatchException;
+    Promise<Void, BatchException> publishBatch(String payload);
 }

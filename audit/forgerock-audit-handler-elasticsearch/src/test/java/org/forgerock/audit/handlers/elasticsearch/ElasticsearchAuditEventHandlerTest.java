@@ -305,7 +305,7 @@ public class ElasticsearchAuditEventHandlerTest {
                 createElasticSearchAuditEventHandler(createClient(promise), config);
 
         // when (we expect no exception be thrown)
-        batchHandler.publishBatch(authEventBatchPayload);
+        batchHandler.publishBatch(authEventBatchPayload).getOrThrow();
     }
 
     @Test(expectedExceptions = BatchException.class)
@@ -324,7 +324,7 @@ public class ElasticsearchAuditEventHandlerTest {
                 createElasticSearchAuditEventHandler(createClient(promise), config);
 
         // when
-        batchHandler.publishBatch(invalidAuthEventBatchPayload);
+        batchHandler.publishBatch(invalidAuthEventBatchPayload).getOrThrow();
     }
 
     /**

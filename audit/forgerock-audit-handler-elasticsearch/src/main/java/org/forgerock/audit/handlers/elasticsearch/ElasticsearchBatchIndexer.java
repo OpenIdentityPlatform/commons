@@ -15,6 +15,9 @@
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
+import static java.lang.Math.max;
+import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_INTERVAL;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -24,13 +27,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.lang.Math.max;
-import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_INTERVAL;
 
 /**
  * Uses Elasticsearch Bulk API to index audit events in batches.
@@ -223,11 +224,14 @@ class ElasticsearchBatchIndexer {
 
                     // send batch
                     if (payload.length() != 0) {
-                        try {
-                            eventHandler.publishBatch(payload.toString());
-                        } catch (Exception e) {
-                            logger.error("publishBatch failed", e);
-                        }
+                        eventHandler.publishBatch(payload.toString())
+                                .thenCatch(new Function<BatchException, Void, BatchException>() {
+                                    @Override
+                                    public Void apply(BatchException e) throws BatchException {
+                                        logger.error("publishBatch failed", e);
+                                        return null;
+                                    }
+                                });
                     }
                 } finally {
                     // clear buffers to prepare for next batch

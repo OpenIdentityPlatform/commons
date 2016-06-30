@@ -26,12 +26,12 @@ import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.CloseSilentlyFunction.closeSilently;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
@@ -356,35 +356,50 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * @throws BatchException indicates (full or partial) failure to publish batch
      */
     @Override
-    public void publishBatch(final String payload) throws BatchException {
+    public Promise<Void, BatchException> publishBatch(final String payload) {
+        final Request request;
         try {
-            final Request request = createRequest(POST, buildBulkUri(), payload);
-            try (final Response response = client.send(request).get()) {
-                if (!response.getStatus().isSuccessful()) {
-                    throw new BatchException("Elasticsearch batch index failed: " + response.getEntity());
-                } else {
-                    final JsonValue responseJson = json(response.getEntity().getJson());
-                    if (responseJson.get("errors").asBoolean()) {
-                        // one or more batch index operations failed, so log failures
-                        final JsonValue items = responseJson.get("items");
-                        final int n = items.size();
-                        final List<Object> failureItems = new ArrayList<>(n);
-                        for (int i = 0; i < n; ++i) {
-                            final JsonValue item = items.get(i).get("index");
-                            final Integer status = item.get("status").asInteger();
-                            if (status >= 400) {
-                                failureItems.add(item);
-                            }
-                        }
-                        final String message = "One or more Elasticsearch batch index entries failed: "
-                                + OBJECT_MAPPER.writeValueAsString(failureItems);
-                        throw new BatchException(message);
-                    }
-                }
-            }
-        } catch (IOException | URISyntaxException | ExecutionException | InterruptedException e) {
-            throw new BatchException("Unexpected error while publishing batch", e);
+            request = createRequest(POST, buildBulkUri(), payload);
+        } catch (URISyntaxException e) {
+            return newExceptionPromise(new BatchException("Incorrect URI", e));
         }
+
+        return client.send(request)
+                .then(closeSilently(processBatchResponse()), Responses.<Void, BatchException>noopExceptionFunction());
+    }
+
+    private Function<Response, Void, BatchException> processBatchResponse() {
+        return new Function<Response, Void, BatchException>() {
+            @Override
+            public Void apply(Response response) throws BatchException {
+                try {
+                    if (!response.getStatus().isSuccessful()) {
+                        throw new BatchException("Elasticsearch batch index failed: " + response.getEntity());
+                    } else {
+                        final JsonValue responseJson = json(response.getEntity().getJson());
+                        if (responseJson.get("errors").asBoolean()) {
+                            // one or more batch index operations failed, so log failures
+                            final JsonValue items = responseJson.get("items");
+                            final int n = items.size();
+                            final List<Object> failureItems = new ArrayList<>(n);
+                            for (int i = 0; i < n; ++i) {
+                                final JsonValue item = items.get(i).get("index");
+                                final Integer status = item.get("status").asInteger();
+                                if (status >= 400) {
+                                    failureItems.add(item);
+                                }
+                            }
+                            final String message = "One or more Elasticsearch batch index entries failed: "
+                                    + OBJECT_MAPPER.writeValueAsString(failureItems);
+                            throw new BatchException(message);
+                        }
+                    }
+                } catch (IOException e) {
+                    throw new BatchException("Unexpected error while publishing batch", e);
+                }
+                return null;
+            }
+        };
     }
 
     /**
