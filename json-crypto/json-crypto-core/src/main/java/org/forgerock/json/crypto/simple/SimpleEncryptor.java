@@ -25,10 +25,10 @@ import java.security.Key;
 import java.util.HashMap;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.codec.binary.Base64;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.encode.Base64;
 
 /**
  * Encrypts a JSON value into an {@code x-simple-encryption} type {@code $crypto} JSON object.
@@ -71,7 +71,7 @@ public class SimpleEncryptor implements JsonEncryptor {
     /**
      * Encrypts with a symmetric cipher.
      *
-     * @param value the value to be encrypted.
+     * @param object the value to be encrypted.
      * @return the encrypted value.
      * @throws GeneralSecurityException if a cryptographic operation failed.
      * @throws IOException if an I/O exception occurred.
@@ -79,14 +79,14 @@ public class SimpleEncryptor implements JsonEncryptor {
     private Object symmetric(Object object) throws GeneralSecurityException, IOException {
         Cipher symmetric = Cipher.getInstance(cipher);
         symmetric.init(Cipher.ENCRYPT_MODE, key);
-        String data = Base64.encodeBase64String(symmetric.doFinal(mapper.writeValueAsBytes(object)));
+        String data = Base64.encode(symmetric.doFinal(mapper.writeValueAsBytes(object)));
         byte[] iv = symmetric.getIV();
         HashMap<String, Object> result = new HashMap<>();
         result.put("cipher", this.cipher);
         result.put("key", this.alias);
         result.put("data", data);
         if (iv != null) {
-            result.put("iv", Base64.encodeBase64String(iv));
+            result.put("iv", Base64.encode(iv));
         }
         return result;
     }
@@ -94,7 +94,7 @@ public class SimpleEncryptor implements JsonEncryptor {
     /**
      * Encrypts using an asymmetric cipher.
      *
-     * @param value the value to be encrypted.
+     * @param object the value to be encrypted.
      * @return the encrypted value.
      * @throws GeneralSecurityException if a cryptographic operation failed.
      * @throws IOException if an I/O exception occurred.
@@ -106,13 +106,13 @@ public class SimpleEncryptor implements JsonEncryptor {
         SecretKey sessionKey = generator.generateKey();
         Cipher symmetric = Cipher.getInstance(symmetricCipher);
         symmetric.init(Cipher.ENCRYPT_MODE, sessionKey);
-        String data = Base64.encodeBase64String(symmetric.doFinal(mapper.writeValueAsBytes(object)));
+        String data = Base64.encode(symmetric.doFinal(mapper.writeValueAsBytes(object)));
         Cipher asymmetric = Cipher.getInstance(cipher);
         asymmetric.init(Cipher.ENCRYPT_MODE, key);
         HashMap<String, Object> keyObject = new HashMap<>();
         keyObject.put("cipher", this.cipher);
         keyObject.put("key", this.alias);
-        keyObject.put("data", Base64.encodeBase64String(asymmetric.doFinal(sessionKey.getEncoded())));
+        keyObject.put("data", Base64.encode(asymmetric.doFinal(sessionKey.getEncoded())));
         HashMap<String, Object> result = new HashMap<>();
         result.put("cipher", symmetricCipher);
         result.put("key", keyObject);

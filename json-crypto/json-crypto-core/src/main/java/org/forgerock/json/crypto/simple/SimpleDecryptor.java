@@ -24,11 +24,11 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.codec.binary.Base64;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonDecryptor;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.util.encode.Base64;
 
 /**
  * Decrypts a {@code $crypto} JSON object value encrypted with the
@@ -79,14 +79,14 @@ public class SimpleDecryptor implements JsonDecryptor {
                 Key privateKey = select(key.get("key").required().asString());
                 Cipher asymmetric = Cipher.getInstance(key.get("cipher").required().asString());
                 asymmetric.init(Cipher.DECRYPT_MODE, privateKey);
-                byte[] ciphertext = Base64.decodeBase64(key.get("data").required().asString());
+                byte[] ciphertext = Base64.decode(key.get("data").required().asString());
                 symmetricKey = new SecretKeySpec(asymmetric.doFinal(ciphertext), cipher.split("/", 2)[0]);
             }
             Cipher symmetric = Cipher.getInstance(cipher);
             String iv = value.get("iv").asString();
-            IvParameterSpec ivps = (iv == null ? null : new IvParameterSpec(Base64.decodeBase64(iv)));
+            IvParameterSpec ivps = (iv == null ? null : new IvParameterSpec(Base64.decode(iv)));
             symmetric.init(Cipher.DECRYPT_MODE, symmetricKey, ivps);
-            byte[] plaintext = symmetric.doFinal(Base64.decodeBase64(value.get("data").required().asString()));
+            byte[] plaintext = symmetric.doFinal(Base64.decode(value.get("data").required().asString()));
             return new JsonValue(mapper.readValue(plaintext, Object.class));
         } catch (GeneralSecurityException | IOException | JsonValueException e) {
             throw new JsonCryptoException(e);
