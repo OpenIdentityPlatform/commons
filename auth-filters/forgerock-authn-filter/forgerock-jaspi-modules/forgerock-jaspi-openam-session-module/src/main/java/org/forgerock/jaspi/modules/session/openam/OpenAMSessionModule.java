@@ -21,6 +21,7 @@ import static javax.security.auth.message.AuthStatus.*;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 import static org.forgerock.http.protocol.Responses.noopExceptionFunction;
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.util.CloseSilentlyFunction.closeSilently;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -362,7 +363,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
     }
 
     private Function<Response, AuthStatus, AuthenticationException> onUserResponse(final Subject clientSubject) {
-        return new Function<Response, AuthStatus, AuthenticationException>() {
+        return closeSilently(new Function<Response, AuthStatus, AuthenticationException>() {
             @Override
             public AuthStatus apply(Response response) throws AuthenticationException {
                 if (!response.getStatus().isSuccessful()) {
@@ -384,11 +385,9 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
                 } catch (IOException | UnsupportedCallbackException e) {
                     throw new AuthenticationException(
                             new InternalServerErrorException(e.getMessage(), e));
-                } finally {
-                    closeSilently(response);
                 }
             }
-        };
+        });
     }
 
     private Function<NeverThrowsException, AuthStatus, AuthenticationException> onUserRequestFailure() {

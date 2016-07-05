@@ -25,7 +25,7 @@ import static org.forgerock.json.resource.ResourceException.newResourceException
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.Utils.closeSilently;
+import static org.forgerock.util.CloseSilentlyFunction.closeSilently;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -198,39 +198,34 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                         QUERY, query.getQueryFilter().accept(ELASTICSEARCH_QUERY_FILTER_VISITOR, null).getObject())));
         try {
             final Request request = createRequest(GET, buildSearchUri(topic, pageSize, offset), payload.getObject());
-            return client.send(request).then(new Function<Response, QueryResponse, ResourceException>() {
+            return client.send(request).then(closeSilently(new Function<Response, QueryResponse, ResourceException>() {
                     @Override
                     public QueryResponse apply(Response response) throws ResourceException {
+                        if (!response.getStatus().isSuccessful()) {
+                            final String message =
+                                    "Elasticsearch response (" + indexName + "/" + topic + SEARCH + "): "
+                                    + response.getEntity();
+                            throw newResourceException(response.getStatus().getCode(), message);
+                        }
                         try {
-                            if (!response.getStatus().isSuccessful()) {
-                                final String message =
-                                        "Elasticsearch response (" + indexName + "/" + topic + SEARCH + "): "
-                                        + response.getEntity();
-                                throw newResourceException(response.getStatus().getCode(), message);
+                            JsonValue events = json(response.getEntity().getJson());
+                            for (JsonValue event : events.get(HITS).get(HITS)) {
+                                handler.handleResource(
+                                        newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null,
+                                                ElasticsearchUtil.denormalizeJson(event.get(SOURCE))));
                             }
-                            try {
-                                JsonValue events = json(response.getEntity().getJson());
-                                for (JsonValue event : events.get(HITS).get(HITS)) {
-                                    handler.handleResource(
-                                            newResourceResponse(event.get(FIELD_CONTENT_ID).asString(), null,
-                                                    ElasticsearchUtil.denormalizeJson(event.get(SOURCE))));
-                                }
-                                final int totalResults = events.get(HITS).get(TOTAL).asInteger();
-                                final String pagedResultsCookie = (pageSize + offset) >= totalResults
-                                        ? null
-                                        : Integer.toString(pageSize + offset);
-                                return newQueryResponse(pagedResultsCookie,
-                                        CountPolicy.EXACT,
-                                        totalResults);
-                            } catch (IOException e) {
-                                throw new InternalServerErrorException(e.getMessage(), e);
-                            }
-                        } finally {
-                            closeSilently(response);
+                            final int totalResults = events.get(HITS).get(TOTAL).asInteger();
+                            final String pagedResultsCookie = (pageSize + offset) >= totalResults
+                                    ? null
+                                    : Integer.toString(pageSize + offset);
+                            return newQueryResponse(pagedResultsCookie,
+                                    CountPolicy.EXACT,
+                                    totalResults);
+                        } catch (IOException e) {
+                            throw new InternalServerErrorException(e.getMessage(), e);
                         }
                     }
-            },
-                    Responses.<QueryResponse, ResourceException>noopExceptionFunction());
+            }), Responses.<QueryResponse, ResourceException>noopExceptionFunction());
         } catch (URISyntaxException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
@@ -248,28 +243,24 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
             return new InternalServerErrorException(error, e).asPromise();
         }
 
-        return client.send(request).then(new Function<Response, ResourceResponse, ResourceException>() {
+        return client.send(request).then(closeSilently(new Function<Response, ResourceResponse, ResourceException>() {
                 @Override
                 public ResourceResponse apply(Response response) throws ResourceException {
-                    try {
-                        if (!response.getStatus().isSuccessful()) {
-                            throw resourceException(indexName, topic, resourceId, response);
-                        }
+                    if (!response.getStatus().isSuccessful()) {
+                        throw resourceException(indexName, topic, resourceId, response);
+                    }
 
-                        try {
-                            // the original audit JSON is under _source, and we also add back the _id
-                            JsonValue jsonValue = json(response.getEntity().getJson());
-                            jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
-                            jsonValue.put(FIELD_CONTENT_ID, resourceId);
-                            return newResourceResponse(resourceId, null, jsonValue);
-                        } catch (IOException e) {
-                            throw new InternalServerErrorException(e.getMessage(), e);
-                        }
-                    } finally {
-                        closeSilently(response);
+                    try {
+                        // the original audit JSON is under _source, and we also add back the _id
+                        JsonValue jsonValue = json(response.getEntity().getJson());
+                        jsonValue = ElasticsearchUtil.denormalizeJson(jsonValue.get(SOURCE));
+                        jsonValue.put(FIELD_CONTENT_ID, resourceId);
+                        return newResourceResponse(resourceId, null, jsonValue);
+                    } catch (IOException e) {
+                        throw new InternalServerErrorException(e.getMessage(), e);
                     }
                 }
-        }, Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
+        }), Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -307,20 +298,17 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
             final Request request = createRequest(PUT, buildEventUri(topic, resourceId), jsonPayload);
 
-            return client.send(request).then(new Function<Response, ResourceResponse, ResourceException>() {
-                    @Override
-                    public ResourceResponse apply(Response response) throws ResourceException {
-                        try {
+            return client.send(request).then(
+                    closeSilently(new Function<Response, ResourceResponse, ResourceException>() {
+                        @Override
+                        public ResourceResponse apply(Response response) throws ResourceException {
                             if (!response.getStatus().isSuccessful()) {
                                 throw resourceException(indexName, topic, resourceId, response);
                             }
                             return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
                                     event);
-                        } finally {
-                            closeSilently(response);
                         }
-                    }
-            }, Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
+                    }), Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
         } catch (Exception e) {
             final String error = String.format("Unable to create audit entry for topic=%s, _id=%s", topic, resourceId);
             LOGGER.error(error, e);

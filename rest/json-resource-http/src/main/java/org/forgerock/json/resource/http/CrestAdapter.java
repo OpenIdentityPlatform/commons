@@ -60,6 +60,7 @@ import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_ID;
 import static org.forgerock.json.resource.http.HttpUtils.PARAM_SORT_KEYS;
 import static org.forgerock.json.resource.http.HttpUtils.PARAM_TOTAL_PAGED_RESULTS_POLICY;
 import static org.forgerock.json.resource.http.HttpUtils.SORT_KEYS_DELIMITER;
+import static org.forgerock.util.CloseSilentlyFunction.closeSilently;
 import static org.forgerock.util.Reject.checkNotNull;
 import static org.forgerock.util.Utils.joinAsString;
 
@@ -169,7 +170,7 @@ final class CrestAdapter implements RequestHandler {
 
         // Expect OK or NO_CONTENT
         return handler.handle(context, httpRequest)
-                      .then(new Function<Response, ActionResponse, ResourceException>() {
+                      .then(closeSilently(new Function<Response, ActionResponse, ResourceException>() {
                           @Override
                           public ActionResponse apply(Response response) throws ResourceException {
                               // Transform HTTP response to CREST ActionResponse
@@ -187,7 +188,7 @@ final class CrestAdapter implements RequestHandler {
                                   throw createResourceException(response, content);
                               }
                           }
-                      }, Responses.<ActionResponse, ResourceException>noopExceptionFunction());
+                      }), Responses.<ActionResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -218,7 +219,7 @@ final class CrestAdapter implements RequestHandler {
 
         // Expect CREATED
         return handler.handle(context, httpRequest)
-                      .then(new Function<Response, ResourceResponse, ResourceException>() {
+                      .then(closeSilently(new Function<Response, ResourceResponse, ResourceException>() {
                           @Override
                           public ResourceResponse apply(Response response) throws ResourceException {
                               // Transform HTTP response to CREST ResourceResponse
@@ -236,7 +237,7 @@ final class CrestAdapter implements RequestHandler {
                                   throw createResourceException(response, content);
                               }
                           }
-                      }, Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
+                      }), Responses.<ResourceResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -303,7 +304,7 @@ final class CrestAdapter implements RequestHandler {
 
         // Expect OK
         return handler.handle(context, httpRequest)
-                      .then(new Function<Response, QueryResponse, ResourceException>() {
+                      .then(closeSilently(new Function<Response, QueryResponse, ResourceException>() {
                           @Override
                           public QueryResponse apply(Response response) throws ResourceException {
                               // Transform HTTP response to CREST ActionResponse
@@ -335,7 +336,7 @@ final class CrestAdapter implements RequestHandler {
                                   throw createResourceException(response, content);
                               }
                           }
-                      }, Responses.<QueryResponse, ResourceException>noopExceptionFunction());
+                      }), Responses.<QueryResponse, ResourceException>noopExceptionFunction());
     }
 
     @Override
@@ -370,7 +371,7 @@ final class CrestAdapter implements RequestHandler {
 
     private static Function<Response, ResourceResponse, ResourceException> buildCrestResponse(
             final List<Status> accepted) {
-        return new Function<Response, ResourceResponse, ResourceException>() {
+        return closeSilently(new Function<Response, ResourceResponse, ResourceException>() {
             @Override
             public ResourceResponse apply(Response response) throws ResourceException {
                 // Transform HTTP response to CREST ResourceResponse
@@ -388,7 +389,7 @@ final class CrestAdapter implements RequestHandler {
                     throw createResourceException(response, content);
                 }
             }
-        };
+        });
     }
 
     private static void putIfNotNull(Form form, String name, Object value) {
