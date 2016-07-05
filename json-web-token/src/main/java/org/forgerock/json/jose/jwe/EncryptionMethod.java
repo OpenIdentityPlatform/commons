@@ -36,10 +36,27 @@ public enum EncryptionMethod {
      */
     A128CBC_HS256("AES_128_CBC_HMAC_SHA_256", "AES/CBC/PKCS5Padding", "HMACSHA256", "AES", 16, 256),
     /**
+     * AES encryption in CBC mode with PKCS5 Padding and a 192 bit length, AES encryption for CEK, HMAC using SHA-384
+     * hash algorithm for the authentication tag.
+     */
+    A192CBC_HS384("AES_192_CBC_HMAC_SHA_384", "AES/CBC/PKCS5Padding", "HMACSHA384", "AES", 24, 384),
+    /**
      * AES encryption in CBC mode with PKCS5 Padding and a 256 bit length, AES encryption for CEK, HMAC using SHA-256
      * hash algorithm for authentication tag.
      */
-    A256CBC_HS512("AES_256_CBC_HMAC_SHA_512", "AES/CBC/PKCS5Padding", "HMACSHA512", "AES", 32, 512);
+    A256CBC_HS512("AES_256_CBC_HMAC_SHA_512", "AES/CBC/PKCS5Padding", "HMACSHA512", "AES", 32, 512),
+    /**
+     * AES encryption in Galois Counter Mode (GCM) with a 128 bit key length.
+     */
+    A128GCM("AES_128_GCM", "AES/GCM/NoPadding", null, "AES", 16, 128),
+    /**
+     * AES encryption in Galois Counter Mode (GCM) with a 192 bit key length.
+     */
+    A192GCM("AES_192_GCM", "AES/GCM/NoPadding", null, "AES", 24, 192),
+    /**
+     * AES encryption in Galois Counter Mode (GCM) with a 256 bit key length.
+     */
+    A256GCM("AES_256_GCM", "AES/GCM/NoPadding", null, "AES", 32, 256);
 
     private final String name;
     private final String transformation;
@@ -60,7 +77,7 @@ public enum EncryptionMethod {
      * @param keyOffset The number of octets in each of the CEK and MAC key.
      * @param keySize The bit length of the Content Encryption Key (CEK).
      */
-    private EncryptionMethod(String name, String transformation, String macAlgorithm, String encryptionAlgorithm,
+    EncryptionMethod(String name, String transformation, String macAlgorithm, String encryptionAlgorithm,
             int keyOffset, int keySize) {
         this.name = name;
         this.transformation = transformation;

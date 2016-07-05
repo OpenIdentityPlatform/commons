@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
@@ -38,7 +38,7 @@ public interface EncryptionHandler {
      * See points 1, 2, 3 in <a href="http://tools.ietf.org/html/draft-ietf-jose-json-web-encryption-11#section-5.1">
      *     Section 5.1</a> of the JWE Specification.
      *
-     * @return The Content Encryption Key.
+     * @return The Content Encryption Key or {@literal null} if the shared key should be used directly.
      */
     Key getContentEncryptionKey();
 

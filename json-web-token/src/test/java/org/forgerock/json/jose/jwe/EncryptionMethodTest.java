@@ -27,7 +27,11 @@ public class EncryptionMethodTest {
     private Object[][] specCompliantNames() {
         return new Object[][]{
             {EncryptionMethod.A128CBC_HS256, "A128CBC-HS256"},
+            {EncryptionMethod.A192CBC_HS384, "A192CBC-HS384"},
             {EncryptionMethod.A256CBC_HS512, "A256CBC-HS512"},
+            {EncryptionMethod.A128GCM, "A128GCM"},
+            {EncryptionMethod.A192GCM, "A192GCM"},
+            {EncryptionMethod.A256GCM, "A256GCM"}
         };
     }
 

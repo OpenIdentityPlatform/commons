@@ -130,6 +130,9 @@ public class EncryptedJwt implements Jwt, Payload {
         EncryptionHandler encryptionHandler = encryptionManager.getEncryptionHandler(header);
 
         Key contentEncryptionKey = encryptionHandler.getContentEncryptionKey();
+        if (contentEncryptionKey == null) {
+            contentEncryptionKey = publicKey;
+        }
         byte[] encryptedContentEncryptionKey = encryptionHandler.generateJWEEncryptedKey(publicKey,
                 contentEncryptionKey);
         String encodedEncryptedKey = Base64url.encode(encryptedContentEncryptionKey);

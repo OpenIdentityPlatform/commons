@@ -29,7 +29,19 @@ import org.forgerock.json.jose.jwt.Algorithm;
 public enum JweAlgorithm implements Algorithm {
 
     /** RSA in ECB mode with PKCS1 Padding. */
-    RSAES_PKCS1_V1_5("RSA1_5", "RSA/ECB/PKCS1Padding", JweAlgorithmType.RSA);
+    RSAES_PKCS1_V1_5("RSA1_5", "RSA/ECB/PKCS1Padding", JweAlgorithmType.RSA),
+    /** RSA in ECB mode with OAEP with SHA-1 and MGF1 padding.*/
+    RSA_OAEP("RSA-OAEP", "RSA/ECB/OAEPWithSHA-1AndMGF1Padding", JweAlgorithmType.RSA),
+    /** RSA in ECB mode with OAEP with SHA-256 and MGF1 with SHA-256 padding. */
+    RSA_OAEP_256("RSA-OAEP-256", "RSA/ECB/OAEPWithSHA-256AndMGF1Padding", JweAlgorithmType.RSA),
+    /** Direct encryption with a shared symmetric key. */
+    DIRECT("dir", null, JweAlgorithmType.DIRECT),
+    /** AES-128 KeyWrap. */
+    A128KW("A128KW", "AESWrap", JweAlgorithmType.AES_KEYWRAP),
+    /** AES-192 KeyWrap. */
+    A192KW("A192KW", "AESWrap", JweAlgorithmType.AES_KEYWRAP),
+    /** AES-256 KeyWrap. */
+    A256KW("A256KW", "AESWrap", JweAlgorithmType.AES_KEYWRAP);
 
     private final String name;
     private final String transformation;
@@ -43,7 +55,7 @@ public enum JweAlgorithm implements Algorithm {
      * @param transformation The Java Cryptographic algorithm name
      * @param algorithmType The JweAlgorithmType of the JweAlgorithm.
      */
-    private JweAlgorithm(String name, String transformation, JweAlgorithmType algorithmType) {
+    JweAlgorithm(String name, String transformation, JweAlgorithmType algorithmType) {
         this.name = name;
         this.transformation = transformation;
         this.algorithmType = algorithmType;

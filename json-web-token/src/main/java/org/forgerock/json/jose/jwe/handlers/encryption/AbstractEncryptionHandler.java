@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
@@ -39,7 +39,9 @@ import org.forgerock.json.jose.exceptions.JweEncryptionException;
  * concrete EncryptionHandler implementations.
  *
  * @since 2.0.0
+ * @deprecated Use {@link ContentEncryptionHandler} instead.
  */
+@Deprecated
 public abstract class AbstractEncryptionHandler implements EncryptionHandler {
     private static final Logger LOGGER = Logger.getLogger(AbstractEncryptionHandler.class.getName());
 

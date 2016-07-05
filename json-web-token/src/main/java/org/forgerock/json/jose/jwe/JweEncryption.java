@@ -11,10 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
+
+import java.util.Arrays;
 
 /**
  * This class represents the result from the encryption process of the JWT plaintext.
@@ -53,5 +55,22 @@ public class JweEncryption {
      */
     public byte[] getAuthenticationTag() {
         return authenticationTag;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        final JweEncryption that = (JweEncryption) o;
+        return Arrays.equals(ciphertext, that.ciphertext) && Arrays.equals(authenticationTag, that.authenticationTag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(new Object[] { ciphertext, authenticationTag });
     }
 }

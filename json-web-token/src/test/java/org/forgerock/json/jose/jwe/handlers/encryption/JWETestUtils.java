@@ -11,33 +11,27 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
-package org.forgerock.json.jose.jwe;
+package org.forgerock.json.jose.jwe.handlers.encryption;
 
 /**
- * An Enum of the possible types of JWE algorithms that can be used to encrypt a JWT.
- * @see JweAlgorithm
- *
- * @since 2.0.0
+ * Some test utilities for working with RFC example values.
  */
-public enum JweAlgorithmType {
-
-    /** RSA encryption algorithm. */
-    RSA,
-    /** Direct symmetric encryption. */
-    DIRECT,
-    /** AES KeyWrap. */
-    AES_KEYWRAP;
+final class JWETestUtils {
 
     /**
-     * Turns the JweAlgorithmType constant into a JSON value string.
+     * Cast an array of unsigned integer values into a (signed) byte array.
      *
-     * @return {@inheritDoc}
+     * @param values the integer values all between 0..255.
+     * @return the equivalent byte array.
      */
-    @Override
-    public String toString() {
-        return super.toString();
+    static byte[] bytes(int... values) {
+        byte[] result = new byte[values.length];
+        for (int i = 0; i < values.length; ++i) {
+            result[i] = (byte) values[i];
+        }
+        return result;
     }
 }

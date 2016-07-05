@@ -445,7 +445,7 @@ public class RsaJWK extends JWK {
             BigInteger publicExponent = asPositiveBigInteger(getPublicExponent());
             BigInteger p = asPositiveBigInteger(getPrimeP());
             BigInteger q = asPositiveBigInteger(getPrimeQ());
-            BigInteger dp = asPositiveBigInteger(getCRTCoefficient());
+            BigInteger dp = asPositiveBigInteger(getPrimePExponent());
             BigInteger dq = asPositiveBigInteger(getPrimeQExponent());
             BigInteger qi = asPositiveBigInteger(getCRTCoefficient());
 

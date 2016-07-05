@@ -11,16 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
 
 import org.forgerock.json.jose.exceptions.JweException;
+import org.forgerock.json.jose.jwe.handlers.encryption.AESKeyWrapEncryptionHandler;
+import org.forgerock.json.jose.jwe.handlers.encryption.DirectEncryptionHandler;
 import org.forgerock.json.jose.jwe.handlers.encryption.EncryptionHandler;
-import org.forgerock.json.jose.jwe.handlers.encryption.RSA15AES128CBCHS256EncryptionHandler;
-import org.forgerock.json.jose.jwe.handlers.encryption.RSA15AES256CBCHS512EncryptionHandler;
-import org.forgerock.json.jose.jws.SigningManager;
+import org.forgerock.json.jose.jwe.handlers.encryption.RSAEncryptionHandler;
 
 /**
  * A service to get the appropriate EncryptionHandler for a specified Java Cryptographic encryption algorithm.
@@ -41,10 +41,13 @@ public class EncryptionManager {
      */
     public EncryptionHandler getEncryptionHandler(JweHeader header) {
 
-        switch (header.getAlgorithm()) {
-        case RSAES_PKCS1_V1_5: {
+        switch (header.getAlgorithm().getAlgorithmType()) {
+        case RSA:
             return getEncryptionHandler(header.getAlgorithm(), header.getEncryptionMethod());
-        }
+        case DIRECT:
+            return getEncryptionHandler(header.getAlgorithm(), header.getEncryptionMethod());
+        case AES_KEYWRAP:
+            return getEncryptionHandler(header.getAlgorithm(), header.getEncryptionMethod());
         default: {
             throw new JweException("No Encryption Handler for unknown encryption algorithm, "
                     + header.getAlgorithm() + ".");
@@ -62,17 +65,20 @@ public class EncryptionManager {
      */
     private EncryptionHandler getEncryptionHandler(JweAlgorithm algorithm, EncryptionMethod encryptionMethod) {
 
-        switch (encryptionMethod) {
-        case A128CBC_HS256: {
-            return new RSA15AES128CBCHS256EncryptionHandler(new SigningManager());
-        }
-        case A256CBC_HS512: {
-            return new RSA15AES256CBCHS512EncryptionHandler(new SigningManager());
-        }
-        default: {
+        switch (algorithm) {
+        case RSAES_PKCS1_V1_5:
+        case RSA_OAEP:
+        case RSA_OAEP_256:
+            return new RSAEncryptionHandler(encryptionMethod, algorithm);
+        case DIRECT:
+            return new DirectEncryptionHandler(encryptionMethod);
+        case A128KW:
+        case A192KW:
+        case A256KW:
+            return new AESKeyWrapEncryptionHandler(encryptionMethod);
+        default:
             throw new JweException("No Encryption Handler for unknown encryption method, "
                     + encryptionMethod + ", with algorithm,  " + algorithm + ".");
-        }
         }
     }
 }

@@ -11,29 +11,27 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.forgerock.json.jose.exceptions.JweDecryptionException;
-import org.forgerock.json.jose.jwe.JweEncryption;
-import org.forgerock.json.jose.jws.SigningManager;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import java.security.Key;
 
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
-import java.security.Key;
 
-/**
- * Tests based on https://tools.ietf.org/html/rfc7518#appendix-B.1
- */
-public class RSA15AES128CBCHS256EncryptionHandlerTest {
+import org.forgerock.json.jose.exceptions.JweDecryptionException;
+import org.forgerock.json.jose.jwe.EncryptionMethod;
+import org.forgerock.json.jose.jwe.JweEncryption;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
-    private RSA15AES128CBCHS256EncryptionHandler handler;
+public class A128CBCHS256Test {
+
+    private AESCBCHMACSHA2ContentEncryptionHandler handler;
     private byte[] key;
     private byte[] plainText;
     private byte[] iv;
@@ -43,7 +41,7 @@ public class RSA15AES128CBCHS256EncryptionHandlerTest {
 
     @BeforeMethod
     public void createEncryptionHandler() {
-        handler = new RSA15AES128CBCHS256EncryptionHandler(new SigningManager());
+        handler = new AESCBCHMACSHA2ContentEncryptionHandler(EncryptionMethod.A128CBC_HS256);
 
         // K - the combined key. First 16 bytes are MAC key, last 16 are encryption key
         key = hexToBytes("00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f\n"
@@ -88,7 +86,7 @@ public class RSA15AES128CBCHS256EncryptionHandlerTest {
         final Key secretKey = new SecretKeySpec(key, "AES");
 
         // When
-        final JweEncryption result = handler.encryptPlaintext(secretKey, iv, plainText, additionalData);
+        final JweEncryption result = handler.encrypt(secretKey, iv, plainText, additionalData);
 
         // Then
         assertThat(result.getCiphertext()).as("ciphertext").isEqualTo(cipherText);
@@ -101,7 +99,7 @@ public class RSA15AES128CBCHS256EncryptionHandlerTest {
         final Key secretKey = new SecretKeySpec(key, "AES");
 
         // When
-        byte[] result = handler.decryptCiphertext(secretKey, iv, cipherText, tag, additionalData);
+        byte[] result = handler.decrypt(secretKey, iv, new JweEncryption(cipherText, tag), additionalData);
 
         // Then
         assertThat(result).as("decrypted plaintext").isEqualTo(plainText);
@@ -114,7 +112,7 @@ public class RSA15AES128CBCHS256EncryptionHandlerTest {
         tag[0] = (byte) -tag[0];
 
         // When
-        handler.decryptCiphertext(secretKey, iv, cipherText, tag, additionalData);
+        handler.decrypt(secretKey, iv, new JweEncryption(cipherText, tag), additionalData);
 
         // Then - exception
     }
@@ -122,4 +120,6 @@ public class RSA15AES128CBCHS256EncryptionHandlerTest {
     private byte[] hexToBytes(String hex) {
         return DatatypeConverter.parseHexBinary(hex.replaceAll("\\s+", ""));
     }
+
+
 }

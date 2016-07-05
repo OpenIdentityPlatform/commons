@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
@@ -24,7 +24,9 @@ import org.forgerock.json.jose.jws.SigningManager;
  * RSAES_PCKS1_V1_5 and EncryptionMethod A128CBC_HS256.
  *
  * @since 2.0.0
+ * @deprecated Use {@link RSAEncryptionHandler} and {@link AESCBCHMACSHA2ContentEncryptionHandler} instead.
  */
+@Deprecated
 public class RSA15AES128CBCHS256EncryptionHandler extends AbstractRSAESPkcs1V15AesCbcHmacEncryptionHandler {
 
     /**
