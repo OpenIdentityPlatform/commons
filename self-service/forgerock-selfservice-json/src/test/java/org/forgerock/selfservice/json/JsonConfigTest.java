@@ -21,10 +21,18 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.json.JsonValue;
@@ -38,10 +46,30 @@ import org.testng.annotations.Test;
  */
 public final class JsonConfigTest {
 
+    private static final Function<StageConfig, String> TO_STAGE_NAME = new Function<StageConfig, String>() {
+        @Override
+        public String apply(StageConfig stageConfig) {
+            return stageConfig.getName();
+        }
+    };
+
+    private static final String[] STAGES = new String[] {
+            "emailValidation",
+            "userQuery",
+            "retrieveUsername",
+            "emailUsername",
+            "userDetails",
+            "kbaSecurityAnswerDefinitionStage",
+            "selfRegistration",
+            "resetStage"
+    };
+
     @Test
     public void testConfigFromJson() throws Exception {
         JsonValue json = readConfig("/selfservice.json");
         ProcessInstanceConfig config = new JsonConfig(getClass().getClassLoader()).buildProcessInstanceConfig(json);
+        assertThat(config.getStageConfigs().size()).isEqualTo(8);
+        assertThat(FluentIterable.from(config.getStageConfigs()).transform(TO_STAGE_NAME)).containsExactly(STAGES);
         assertThat(config.getStorageType()).isEqualTo(StorageType.STATELESS);
         assertThat(config.getSnapshotTokenConfig().getType()).isEqualTo("jwt");
     }

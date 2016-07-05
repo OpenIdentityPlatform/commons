@@ -20,6 +20,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.StorageType;
@@ -42,18 +43,13 @@ import org.forgerock.selfservice.stages.user.UserQueryConfig;
  * @since 0.2.0
  */
 final class JsonConfig {
-
-    private final ClassLoader classLoader;
     private final ObjectMapper mapper;
 
     JsonConfig(ClassLoader classLoader) {
-        this.classLoader = classLoader;
         mapper = new ObjectMapper();
         mapper
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                /* TODO when on Jackson 2.6.x
                 .setTypeFactory(TypeFactory.defaultInstance().withClassLoader(classLoader))
-                */
                 .registerModule(
                         new SimpleModule("SelfServiceModule", Version.unknownVersion())
                                 .addDeserializer(StorageType.class, new StorageTypeDeserializer()))
@@ -83,18 +79,6 @@ final class JsonConfig {
      *         the one built from the provided json
      */
     ProcessInstanceConfig buildProcessInstanceConfig(JsonValue json) {
-
-        /* TODO when on Jackson 2.6.x, the class loader wil be set above and we'll just
         return mapper.convertValue(json.getObject(), ProcessInstanceConfig.class);
-         */
-
-        // Jackson 2.5 and lower
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        try {
-            Thread.currentThread().setContextClassLoader(classLoader);
-            return mapper.convertValue(json.getObject(), ProcessInstanceConfig.class);
-        } finally {
-            Thread.currentThread().setContextClassLoader(loader);
-        }
     }
 }
