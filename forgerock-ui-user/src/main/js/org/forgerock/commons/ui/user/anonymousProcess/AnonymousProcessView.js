@@ -151,8 +151,8 @@ define([
             }, this));
         },
 
-        setDelegate: function (endpoint, token) {
-            this.delegate = new AnonymousProcessDelegate(endpoint, token);
+        setDelegate: function (endpoint, token, additional) {
+            this.delegate = new AnonymousProcessDelegate(endpoint, token, additional);
         },
 
         submitDelegate: function (params, onSubmit) {

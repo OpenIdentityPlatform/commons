@@ -21,8 +21,9 @@ define([
     "org/forgerock/commons/ui/common/util/Constants"
 ], function ($, _, AbstractDelegate, Constants) {
 
-    var AnonymousProcessDelegate = function (path, token) {
+    var AnonymousProcessDelegate = function (path, token, additional) {
         this.token = token;
+        this.additional = additional || "";
         return AbstractDelegate.call(this, "/" + Constants.context + "/" + path);
     };
 
@@ -50,7 +51,7 @@ define([
     AnonymousProcessDelegate.prototype.submit = function (input) {
         return this.serviceCall({
             "type": "POST",
-            "url": "?_action=submitRequirements",
+            "url": "?_action=submitRequirements" + this.additional,
             "data": JSON.stringify({
                 "token" : this.token,
                 "input" : input
