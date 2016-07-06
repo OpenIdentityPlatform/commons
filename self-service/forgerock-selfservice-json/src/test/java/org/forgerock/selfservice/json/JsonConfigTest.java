@@ -21,13 +21,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -53,22 +48,23 @@ public final class JsonConfigTest {
         }
     };
 
+    /* the stages that are defined in the test resource "selfservice.json" */
     private static final String[] STAGES = new String[] {
-            "emailValidation",
-            "userQuery",
-            "retrieveUsername",
-            "emailUsername",
-            "userDetails",
-            "kbaSecurityAnswerDefinitionStage",
-            "selfRegistration",
-            "resetStage"
+        "emailValidation",
+        "userQuery",
+        "retrieveUsername",
+        "emailUsername",
+        "userDetails",
+        "kbaSecurityAnswerDefinitionStage",
+        "selfRegistration",
+        "resetStage"
     };
 
     @Test
     public void testConfigFromJson() throws Exception {
         JsonValue json = readConfig("/selfservice.json");
         ProcessInstanceConfig config = new JsonConfig(getClass().getClassLoader()).buildProcessInstanceConfig(json);
-        assertThat(config.getStageConfigs().size()).isEqualTo(8);
+        assertThat(config.getStageConfigs().size()).isEqualTo(STAGES.length);
         assertThat(FluentIterable.from(config.getStageConfigs()).transform(TO_STAGE_NAME)).containsExactly(STAGES);
         assertThat(config.getStorageType()).isEqualTo(StorageType.STATELESS);
         assertThat(config.getSnapshotTokenConfig().getType()).isEqualTo("jwt");
