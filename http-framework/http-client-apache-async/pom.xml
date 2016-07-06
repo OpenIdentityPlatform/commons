@@ -37,8 +37,15 @@
     </dependency>
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpasyncclient</artifactId>
-      <version>4.1</version>
+      <artifactId>httpasyncclient-osgi</artifactId>
+      <version>${apache-httpasyncclient.version}</version>
+      <!-- Dependencies packaged within the OSGi bundle: no need to transitively duplicates them -->
+      <exclusions>
+        <exclusion>
+          <groupId>org.apache.httpcomponents</groupId>
+          <artifactId>httpasyncclient</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.forgerock.http</groupId>

@@ -12,7 +12,7 @@
   ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
   ~ information: "Portions copyright [year] [name of copyright owner]".
   ~
-  ~ Copyright 2015 ForgeRock AS.
+  ~ Copyright 2015-2016 ForgeRock AS.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -33,13 +33,56 @@
       <groupId>org.forgerock.http</groupId>
       <artifactId>chf-http-core</artifactId>
     </dependency>
+    <!-- This dependency is inherited by both the synchronous and asynchronous AHC CHF Drivers.
+         The asynchronous driver has a dependency on 'httpasyncclient-osgi' (that itself depends on 'httpclient'),
+          so make sure that there is no incompatibility before updating theses versions -->
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <!-- This dependency is inherited by both the synchronous and asynchronous AHC CHF Drivers.
-           The asynchronous driver has a dependency on 'httpasyncclient' (that itself depends on 'httpclient'),
-            so make sure that there is no incompatibility before updating theses versions -->
-      <version>4.4.1</version>
+      <artifactId>httpclient-osgi</artifactId>
+      <version>${apache-httpclient.version}</version>
+      <!-- Dependencies packaged within the OSGi bundle: no need to transitively duplicates them -->
+      <exclusions>
+        <exclusion>
+          <artifactId>httpclient</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>httpmime</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>httpclient-cache</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>fluent-hc</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-codec</artifactId>
+          <groupId>commons-codec</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpcore-osgi</artifactId>
+      <version>${apache-httpcore.version}</version>
+      <!-- Dependencies packaged within the OSGi bundle: no need to transitively duplicates them -->
+      <exclusions>
+        <exclusion>
+          <artifactId>httpcore</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>httpcore-nio</artifactId>
+          <groupId>org.apache.httpcomponents</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
     </dependency>
   </dependencies>
 
