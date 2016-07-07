@@ -114,19 +114,15 @@ define([
              * Called when a change is made to this.data.changes or this.data.watchedObj
              */
             checkChanges: function () {
-                var isChanged =  _.some(this.data.watchedProperties, function (prop) {
-                    return !this.compareObjects(prop, this.data.watchedObj, this.data.changes);
-                }, this);
-
-                $(this.element).toggle(isChanged);
+                $(this.element).toggle(this.isChanged());
             },
 
             /**
              * Called to check if changes were done
              */
             isChanged: function () {
-                var isChanged =   _.some(this.data.watchedProperties, function (prop) {
-                    return this.compareObjects(prop, this.data.watchedObj, this.data.changes);
+                var isChanged = _.some(this.data.watchedProperties, function (prop) {
+                    return !this.compareObjects(prop, this.data.watchedObj, this.data.changes);
                 }, this);
 
                 return isChanged;
@@ -154,7 +150,7 @@ define([
                 if (_.isObject(val1) && _.isObject(val2)) {
                     deleteEmptyProperties(val1);
                     deleteEmptyProperties(val2);
-                } else if (!val1 && !val2){
+                } else if (!val1 && !val2 && val1 === val2) {
                     return true;
                 }
 
@@ -187,4 +183,3 @@ define([
 
     return changesPendingInstance;
 });
-
