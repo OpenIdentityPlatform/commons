@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwk;
@@ -34,7 +34,6 @@ import java.util.List;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
-import org.forgerock.util.encode.Base64;
 import org.forgerock.util.encode.Base64url;
 
 /**
@@ -166,9 +165,9 @@ public class RsaJWK extends JWK {
      * @param e the public exponent JWK
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
-    public RsaJWK(KeyUse use, String alg, String kid, String n, String e, String x5u, String x5t, List<Base64> x5c) {
+    public RsaJWK(KeyUse use, String alg, String kid, String n, String e, String x5u, String x5t, List<String> x5c) {
         this (use, alg, kid, n, e, null, null, null, null, null, null, null, x5u, x5t, x5c);
     }
 
@@ -182,10 +181,10 @@ public class RsaJWK extends JWK {
      * @param d the private exponent JWK
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
     public RsaJWK(KeyUse use, String alg, String kid, String n, String e, String d, String x5u, String x5t,
-                  List<Base64> x5c) {
+                  List<String> x5c) {
         this (use, alg, kid, n, e, d, null, null, null, null, null, null, x5u, x5t, x5c);
     }
 
@@ -203,10 +202,10 @@ public class RsaJWK extends JWK {
      * @param qi the first CRT Coefficient of the JWK
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
     public RsaJWK(KeyUse use, String alg, String kid, String n, String e, String p, String q, String dp,
-                  String dq, String qi, String x5u, String x5t, List<Base64> x5c) {
+                  String dq, String qi, String x5u, String x5t, List<String> x5c) {
         this (use, alg, kid, n, e, null, p, q, dp, dq, qi, null, x5u, x5t, x5c);
     }
 
@@ -226,11 +225,11 @@ public class RsaJWK extends JWK {
      * @param factors the extra factors of the JWK
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
     public RsaJWK(KeyUse use, String alg, String kid, String n, String e, String d, String p, String q,
                   String dp, String dq, String qi, List<OtherFactors> factors,
-                  String x5u, String x5t, List<Base64> x5c) {
+                  String x5u, String x5t, List<String> x5c) {
         super(KeyType.RSA, use, alg, kid, x5u, x5t, x5c);
         if (n != null && !n.isEmpty()) {
             put(N, n);
@@ -282,9 +281,9 @@ public class RsaJWK extends JWK {
      * @param key the RSAPublicKey to use
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
-    public RsaJWK(RSAPublicKey key, KeyUse use, String alg, String kid, String x5u, String x5t, List<Base64> x5c) {
+    public RsaJWK(RSAPublicKey key, KeyUse use, String alg, String kid, String x5u, String x5t, List<String> x5c) {
         this(use, alg, kid,
                 Base64url.encode(key.getModulus().toByteArray()),
                 Base64url.encode(key.getPublicExponent().toByteArray()),
@@ -299,10 +298,10 @@ public class RsaJWK extends JWK {
      * @param privKey the RSAPrivateKey to use
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
     public RsaJWK(RSAPublicKey pubKey, RSAPrivateKey privKey, KeyUse use, String alg, String kid,
-                  String x5u, String x5t, List<Base64> x5c) {
+                  String x5u, String x5t, List<String> x5c) {
         this(use, alg, kid,
                 Base64url.encode(pubKey.getModulus().toByteArray()),
                 Base64url.encode(pubKey.getPublicExponent().toByteArray()),
@@ -318,10 +317,10 @@ public class RsaJWK extends JWK {
      * @param privCert the RSAPrivateCrtKey to use
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
     public RsaJWK(RSAPublicKey pubKey, RSAPrivateCrtKey privCert, KeyUse use, String alg, String kid,
-                  String x5u, String x5t, List<Base64> x5c) {
+                  String x5u, String x5t, List<String> x5c) {
         this(use, alg, kid,
                 Base64url.encode(pubKey.getModulus().toByteArray()),
                 Base64url.encode(pubKey.getPublicExponent().toByteArray()),
@@ -508,7 +507,7 @@ public class RsaJWK extends JWK {
 
         String n = null, e = null, d = null, p = null, q = null, dq = null, dp = null, qi = null;
         String x5u = null, x5t = null;
-        List<Base64> x5c = null;
+        List<String> x5c = null;
         List<Object> factors = null;
         List<OtherFactors> listOfFactors = null;
 
@@ -536,7 +535,7 @@ public class RsaJWK extends JWK {
         factors = json.get(FACTORS).asList();
         x5u = json.get(X5U).asString();
         x5t = json.get(X5T).asString();
-        x5c = json.get(X5C).asList(Base64.class);
+        x5c = json.get(X5C).asList(String.class);
         if (factors != null && !factors.isEmpty()) {
             listOfFactors = new ArrayList<>(factors.size());
             for (Object factor : factors) {

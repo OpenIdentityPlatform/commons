@@ -30,7 +30,6 @@ import java.util.List;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.jws.SupportedEllipticCurve;
-import org.forgerock.util.encode.Base64;
 import org.forgerock.util.encode.Base64url;
 
 /**
@@ -68,10 +67,10 @@ public class EcJWK extends JWK {
      * @param curve The known curve to use. For example "NIST P-256".
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
     public EcJWK(KeyUse use, String alg, String kid, String x, String y, String d, String curve,
-                 String x5u, String x5t, List<Base64> x5c) {
+                 String x5u, String x5t, List<String> x5c) {
         super(KeyType.EC, use, alg, kid, x5u, x5t, x5c);
         if (x == null || x.isEmpty()) {
             throw new JsonException("x is required for an EcJWK");
@@ -101,10 +100,10 @@ public class EcJWK extends JWK {
      * @param curve The known curve to use. For example "NIST P-256".
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
     public EcJWK(KeyUse use, String alg, String kid, String x, String y, String curve, String x5u, String x5t,
-                 List<Base64> x5c) {
+                 List<String> x5c) {
         this (use, alg, kid, x, y, null, curve, x5u, x5t, x5c);
     }
 
@@ -164,7 +163,7 @@ public class EcJWK extends JWK {
         KeyUse use = null;
         String x = null, y = null, d = null, curve = null, alg = null, kid = null;
         String x5u = null, x5t = null;
-        List<Base64> x5c = null;
+        List<String> x5c = null;
 
         kty = KeyType.getKeyType(json.get(KTY).asString());
 
@@ -183,7 +182,7 @@ public class EcJWK extends JWK {
 
         x5u = json.get(X5U).asString();
         x5t = json.get(X5T).asString();
-        x5c = json.get(X5C).asList(Base64.class);
+        x5c = json.get(X5C).asList(String.class);
 
         return new EcJWK(use, alg, kid, x, y, d, curve, x5u, x5t, x5c);
     }

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwk;
@@ -21,6 +21,7 @@ import org.forgerock.util.encode.Base64url;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -28,9 +29,11 @@ import java.security.interfaces.RSAPrivateCrtKey;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.HashMap;
+import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static org.testng.Assert.*;
 
 public class RsaJWKTest {
 
@@ -91,16 +94,32 @@ public class RsaJWKTest {
             + "UIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rx"
             + "yR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU";
 
+    private static final String X5C = "[\"MIICQDCCAakCBEeNB0swDQYJKoZIhvcNAQEEBQAwZzELMAkGA1UEBhMCVVMxEzAR"
+            + "BgNVBAgTCkNhbGlmb3JuaWExFDASBgNVBAcTC1NhbnRhIENsYXJhMQwwCgYDVQQK"
+            + "EwNTdW4xEDAOBgNVBAsTB09wZW5TU08xDTALBgNVBAMTBHRlc3QwHhcNMDgwMTE1"
+            + "MTkxOTM5WhcNMTgwMTEyMTkxOTM5WjBnMQswCQYDVQQGEwJVUzETMBEGA1UECBMK"
+            + "Q2FsaWZvcm5pYTEUMBIGA1UEBxMLU2FudGEgQ2xhcmExDDAKBgNVBAoTA1N1bjEQ"
+            + "MA4GA1UECxMHT3BlblNTTzENMAsGA1UEAxMEdGVzdDCBnzANBgkqhkiG9w0BAQEF"
+            + "AAOBjQAwgYkCgYEArSQc/U75GB2AtKhbGS5piiLkmJzqEsp64rDxbMJ+xDrye0EN"
+            + "/q1U5Of+RkDsaN/igkAvV1cuXEgTL6RlafFPcUX7QxDhZBhsYF9pbwtMzi4A4su9"
+            + "hnxIhURebGEmxKW9qJNYJs0Vo5+IgjxuEWnjnnVgHTs1+mq5QYTA7E6ZyL8CAwEA"
+            + "ATANBgkqhkiG9w0BAQQFAAOBgQB3Pw/UQzPKTPTYi9upbFXlrAKMwtFf2OW4yvGW"
+            + "WvlcwcNSZJmTJ8ARvVYOMEVNbsT4OFcfu2/PeYoAdiDAcGy/F2Zuj8XJJpuQRSE6"
+            + "PtQqBuDEHjjmOQJ0rV/r8mO1ZCtHRhpZ5zYRjhRC9eCbjx9VrFax0JDC/FfwWigm"
+            + "rW0Y0Q==\"]";
+
     private static final String ALG = "RS256";
     private static final String KID = "2011-04-29";
     private static final String KTY = "RSA";
 
     //json objects
     private String json = null;
+    private String jsonWithX5C = null;
     private JsonValue jsonValue = null;
+    private JsonValue jsonValueWithX5C = null;
 
     @BeforeClass
-    public void setup() {
+    public void setup() throws IOException {
         /*{
          "kty":"RSA",
           "n":"0vx7agoebGcQSuuPiLJXZptN9nndrQmbXEps2aiAFbWhM78LhWx4
@@ -132,7 +151,20 @@ public class RsaJWKTest {
      UIZEVFEcOqwemRN81zoDAaa-Bk0KWNGDjJHZDdDmFhW3AN7lI-puxk_mHZGJ11rx
      yR8O55XLSe3SPmRfKwZI6yU24ZxvQKFYItdldUKGzO6Ia6zTKhAVRU",
           "alg":"RS256",
-          "kid":"2011-04-29"
+          "kid":"2011-04-29",
+          "x5c":"["MIICQDCCAakCBEeNB0swDQYJKoZIhvcNAQEEBQAwZzELMAkGA1UEBhMCVVMxEzAR
+                   BgNVBAgTCkNhbGlmb3JuaWExFDASBgNVBAcTC1NhbnRhIENsYXJhMQwwCgYDVQQK
+                   EwNTdW4xEDAOBgNVBAsTB09wZW5TU08xDTALBgNVBAMTBHRlc3QwHhcNMDgwMTE1
+                   MTkxOTM5WhcNMTgwMTEyMTkxOTM5WjBnMQswCQYDVQQGEwJVUzETMBEGA1UECBMK
+                   Q2FsaWZvcm5pYTEUMBIGA1UEBxMLU2FudGEgQ2xhcmExDDAKBgNVBAoTA1N1bjEQ
+                   MA4GA1UECxMHT3BlblNTTzENMAsGA1UEAxMEdGVzdDCBnzANBgkqhkiG9w0BAQEF
+                   AAOBjQAwgYkCgYEArSQc/U75GB2AtKhbGS5piiLkmJzqEsp64rDxbMJ+xDrye0EN
+                   /q1U5Of+RkDsaN/igkAvV1cuXEgTL6RlafFPcUX7QxDhZBhsYF9pbwtMzi4A4su9
+                   hnxIhURebGEmxKW9qJNYJs0Vo5+IgjxuEWnjnnVgHTs1+mq5QYTA7E6ZyL8CAwEA
+                   ATANBgkqhkiG9w0BAQQFAAOBgQB3Pw/UQzPKTPTYi9upbFXlrAKMwtFf2OW4yvGW
+                   WvlcwcNSZJmTJ8ARvVYOMEVNbsT4OFcfu2/PeYoAdiDAcGy/F2Zuj8XJJpuQRSE6
+                   PtQqBuDEHjjmOQJ0rV/r8mO1ZCtHRhpZ5zYRjhRC9eCbjx9VrFax0JDC/FfwWigm
+                   rW0Y0Q=="]
           }
          */
         //create string rsa JWT
@@ -152,6 +184,24 @@ public class RsaJWKTest {
                 .append("}");
         json = sb.toString();
 
+        //create string rsa JWT with optional X5C value
+        sb = new StringBuilder();
+        sb.append("{")
+                .append("\"kty\"").append(":").append("\"" + KTY + "\"").append(",")
+                .append("\"n\"").append(":").append("\"" + N + "\"").append(",")
+                .append("\"e\"").append(":").append("\"" + E + "\"").append(",")
+                .append("\"d\"").append(":").append("\"" + D + "\"").append(",")
+                .append("\"p\"").append(":").append("\"" + P + "\"").append(",")
+                .append("\"q\"").append(":").append("\"" + Q + "\"").append(",")
+                .append("\"dp\"").append(":").append("\"" + DP + "\"").append(",")
+                .append("\"dq\"").append(":").append("\"" + DQ + "\"").append(",")
+                .append("\"qi\"").append(":").append("\"" + QI + "\"").append(",")
+                .append("\"alg\"").append(":").append("\"" + ALG + "\"").append(",")
+                .append("\"kid\"").append(":").append("\"" + KID + "\"").append(",")
+                .append("\"x5c\"").append(":").append(X5C)
+                .append("}");
+        jsonWithX5C = sb.toString();
+
         //create json value object
         jsonValue = new JsonValue(new HashMap<>());
         jsonValue.put("kty", KTY);
@@ -165,6 +215,21 @@ public class RsaJWKTest {
         jsonValue.put("qi", QI);
         jsonValue.put("alg", ALG);
         jsonValue.put("kid", KID);
+
+        //create json value object with optional X5C value
+        jsonValueWithX5C = new JsonValue(new HashMap<>());
+        jsonValueWithX5C.put("kty", KTY);
+        jsonValueWithX5C.put("n", N);
+        jsonValueWithX5C.put("e", E);
+        jsonValueWithX5C.put("d", D);
+        jsonValueWithX5C.put("p", P);
+        jsonValueWithX5C.put("q", Q);
+        jsonValueWithX5C.put("dp", DP);
+        jsonValueWithX5C.put("dq", DQ);
+        jsonValueWithX5C.put("qi", QI);
+        jsonValueWithX5C.put("alg", ALG);
+        jsonValueWithX5C.put("kid", KID);
+        jsonValueWithX5C.put("x5c", new ObjectMapper().readValue(X5C, List.class));
     }
 
     @Test
@@ -183,6 +248,18 @@ public class RsaJWKTest {
         assertEquals(jwk.getPrimePExponent(), DP);
         assertEquals(jwk.getPrimeQExponent(), DQ);
         assertEquals(jwk.getCRTCoefficient(), QI);
+        assertNull(jwk.getX509Chain());
+    }
+
+    @Test
+    public void testCreateJWKWithX5CFromAString() throws IOException  {
+        //Given
+
+        //When
+        RsaJWK jwk = RsaJWK.parse(jsonWithX5C);
+
+        //Then
+        assertEquals(jwk.getX509Chain(), new ObjectMapper().readValue(X5C, List.class));
     }
 
     @Test
@@ -201,6 +278,18 @@ public class RsaJWKTest {
         assertEquals(jwk.getPrimePExponent(), DP);
         assertEquals(jwk.getPrimeQExponent(), DQ);
         assertEquals(jwk.getCRTCoefficient(), QI);
+        assertNull(jwk.getX509Chain());
+    }
+
+    @Test
+    public void testCreateJWKWithX5CFromAJsonValue() throws IOException {
+        //Given
+
+        //When
+        RsaJWK jwk = RsaJWK.parse(jsonValueWithX5C);
+
+        //Then
+        assertEquals(jwk.getX509Chain(), new ObjectMapper().readValue(X5C, List.class));
     }
 
     @Test

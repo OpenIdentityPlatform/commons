@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwk;
@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
-import org.forgerock.util.encode.Base64;
 
 /**
  * Creates an Octet JWK.
@@ -39,9 +38,9 @@ public class OctJWK extends JWK {
      * @param key the symmetric key
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
-    public OctJWK(KeyUse use, String alg, String kid, String key, String x5u, String x5t, List<Base64> x5c) {
+    public OctJWK(KeyUse use, String alg, String kid, String key, String x5u, String x5t, List<String> x5c) {
         super(KeyType.OCT, use, alg, kid, x5u, x5t, x5c);
         if (key == null || key.isEmpty()) {
             throw new JsonException("key is a required field for an OctJWK");
@@ -82,7 +81,7 @@ public class OctJWK extends JWK {
 
         String k = null, alg = null, kid = null;
         String x5u = null, x5t = null;
-        List<Base64> x5c = null;
+        List<String> x5c = null;
 
         k = json.get(K).asString();
 
@@ -97,7 +96,7 @@ public class OctJWK extends JWK {
 
         x5u = json.get(X5U).asString();
         x5t = json.get(X5T).asString();
-        x5c = json.get(X5C).asList(Base64.class);
+        x5c = json.get(X5C).asList(String.class);
 
         return new OctJWK(use, alg, kid, k, x5u, x5t, x5c);
     }

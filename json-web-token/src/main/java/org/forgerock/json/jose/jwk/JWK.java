@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwk;
@@ -23,7 +23,6 @@ import java.util.Map;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.jwt.JWObject;
-import org.forgerock.util.encode.Base64;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -85,9 +84,9 @@ public abstract class JWK extends JWObject {
      * @param kid the JWK key id
      * @param x5u the x509 url for the key
      * @param x5t the x509 thumbnail for the key
-     * @param x5c the x509 chain
+     * @param x5c the x509 chain as a list of Base64 encoded strings
      */
-    protected JWK(KeyType kty, KeyUse use, String alg, String kid, String x5u, String x5t, List<Base64> x5c) {
+    protected JWK(KeyType kty, KeyUse use, String alg, String kid, String x5u, String x5t, List<String> x5c) {
         super();
         if (kty == null) {
             new JsonException("kty is a required field");
@@ -220,10 +219,10 @@ public abstract class JWK extends JWObject {
     }
 
     /**
-     * Gets a List of base64 encoded chain certs.
-     * @return X509 Cert Chain
+     * Gets a List of X509 chain certs.
+     * @return X509 Cert Chain as list of encoded strings or null if none are available.
      */
-    public List<Base64> getX509Chain() {
-        return get(X5C).asList(Base64.class);
+    public List<String> getX509Chain() {
+        return get(X5C).asList(String.class);
     }
 }
