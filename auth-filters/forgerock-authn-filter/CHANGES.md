@@ -1,3 +1,7 @@
+20.1.0
+
+Fixed COMMONS-102.
+
 2.0.0
 
 To use create an instance of the FallbackServerAuthContext you need to wire in the following interfaces/classes with

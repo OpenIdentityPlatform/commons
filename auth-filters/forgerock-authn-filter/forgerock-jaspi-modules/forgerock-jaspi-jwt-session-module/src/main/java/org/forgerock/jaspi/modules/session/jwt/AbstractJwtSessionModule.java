@@ -21,6 +21,7 @@ import static org.forgerock.caf.authentication.framework.AuthenticationFramework
 
 import java.io.IOException;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -40,13 +42,16 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
-import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
-import org.forgerock.json.jose.jwe.JweHeader;
+import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.SignedEncryptedJwt;
+import org.forgerock.json.jose.jws.handlers.HmacSigningHandler;
+import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.utils.KeystoreManager;
+import org.forgerock.util.encode.Base64;
 
 /**
  * A JASPI Session Module which creates a JWT when securing the response from a successful authentication and sets it
@@ -94,6 +99,9 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
     public static final String SECURE_COOKIE_KEY = "isSecure";
     /** The domains the cookie should be set on property key. */
     public static final String COOKIE_DOMAINS_KEY = "cookieDomains";
+    /** HMAC signing key. */
+    public static final String HMAC_SIGNING_KEY = "hmacKey";
+    private static final JwsAlgorithm SIGNING_ALGORITHM = JwsAlgorithm.HS256;
 
     private final JwtBuilderFactory jwtBuilderFactory;
 
@@ -113,6 +121,8 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
     boolean isHttpOnly;
     boolean isSecure;
     Collection<String> cookieDomains;
+    private SigningHandler signingHandler;
+
 
     /**
      * Constructs an instance of the AbstractJwtSessionModule.
@@ -181,6 +191,12 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
         if (cookieDomains == null || cookieDomains.isEmpty()) {
             cookieDomains = Collections.singleton(null);
         }
+        final byte[] signingKey = Base64.decode((String) options.get(HMAC_SIGNING_KEY));
+        if (signingKey == null || signingKey.length < 32) {
+            throw new AuthenticationException("Signing key must be at least 256-bits base64 encoded");
+        }
+        this.signingHandler = new HmacSigningHandler(signingKey);
+        Arrays.fill(signingKey, (byte) 0);
     }
 
     /**
@@ -312,7 +328,10 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
         Key privateKey = keystoreManager.getPrivateKey(keyAlias, privateKeyPassword);
 
-        EncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, EncryptedJwt.class);
+        SignedEncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, SignedEncryptedJwt.class);
+        if (!jwt.verify(signingHandler)) {
+            return null;
+        }
         jwt.decrypt(privateKey);
 
         Date expirationTime = jwt.getClaimsSet().getExpirationTime();
@@ -372,7 +391,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
         Key publicKey = keystoreManager.getPublicKey(keyAlias);
 
-        String jwtString = rebuildEncryptedJwt((EncryptedJwt) jwt, publicKey);
+        String jwtString = rebuildEncryptedJwt(jwt, publicKey);
 
         addCookiesToResponse(createCookies(jwtString, getCookieMaxAge(now, exp), "/"), messageInfo);
     }
@@ -388,8 +407,8 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
      * @param publicKey The public key.
      * @return The Session Jwt.
      */
-    protected String rebuildEncryptedJwt(EncryptedJwt jwt, Key publicKey) {
-        return new EncryptedJwt((JweHeader) jwt.getHeader(), jwt.getClaimsSet(), publicKey).build();
+    protected String rebuildEncryptedJwt(Jwt jwt, Key publicKey) {
+        return buildJwtString(jwt.getClaimsSet(), publicKey);
     }
 
     /**
@@ -482,16 +501,21 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
                 .claims(jwtParameters)
                 .build();
 
-        String jwtString = jwtBuilderFactory
+        String jwtString = buildJwtString(claimsSet, publicKey);
+
+        return createCookies(jwtString, getCookieMaxAge(now, exp), "/");
+    }
+
+    private String buildJwtString(JwtClaimsSet claimsSet, Key publicKey) {
+        return jwtBuilderFactory
                 .jwe(publicKey)
                 .headers()
                 .alg(JweAlgorithm.RSAES_PKCS1_V1_5)
                 .enc(EncryptionMethod.A128CBC_HS256)
                 .done()
                 .claims(claimsSet)
+                .sign(signingHandler, SIGNING_ALGORITHM)
                 .build();
-
-        return createCookies(jwtString, getCookieMaxAge(now, exp), "/");
     }
 
     /**
