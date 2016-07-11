@@ -11,21 +11,27 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
 
 import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
+import org.forgerock.json.jose.jwt.Jwt;
+import org.forgerock.json.jose.jwt.JwtClaimsSet;
+
+import java.security.Key;
 
 /**
- * A nested encrypted and then signed JWT.
+ * An implementation of a JWS with a nested JWE as its payload.
+ * <p>
+ * @see SignedJwt
+ * @see EncryptedJwt
  *
- * @deprecated Use {@link EncryptedThenSignedJwt} instead.
+ * @since 2.0.0
  */
-@Deprecated
-public class SignedEncryptedJwt extends EncryptedThenSignedJwt {
+public class EncryptedThenSignedJwt extends SignedJwt {
 
     /**
      * Constructs a fresh, new SignedEncryptedJwt from the given JwsHeader and nested Encrypted JWT.
@@ -36,8 +42,7 @@ public class SignedEncryptedJwt extends EncryptedThenSignedJwt {
      * @param nestedJwe The nested Encrypted JWT that will be the payload of this JWS.
      * @param signingHandler The SigningHandler instance used to sign the JWS.
      */
-    public SignedEncryptedJwt(final JwsHeader header, final EncryptedJwt nestedJwe,
-            final SigningHandler signingHandler) {
+    public EncryptedThenSignedJwt(JwsHeader header, EncryptedJwt nestedJwe, SigningHandler signingHandler) {
         super(header, nestedJwe, signingHandler);
     }
 
@@ -54,8 +59,29 @@ public class SignedEncryptedJwt extends EncryptedThenSignedJwt {
      *                     payload concatenated using a "." character.
      * @param signature The resulting signature of signing the signing input.
      */
-    public SignedEncryptedJwt(final JwsHeader header, final EncryptedJwt nestedJwe, final byte[] signingInput,
-            final byte[] signature) {
+    public EncryptedThenSignedJwt(JwsHeader header, EncryptedJwt nestedJwe, byte[] signingInput, byte[] signature) {
         super(header, nestedJwe, signingInput, signature);
+    }
+
+    /**
+     * Gets the claims set object for the nested Encrypted JWT that is the payload of this JWS.
+     *
+     * @return {@inheritDoc}
+     * @see org.forgerock.json.jose.jwt.Jwt#getClaimsSet()
+     */
+    @Override
+    public JwtClaimsSet getClaimsSet() {
+        return ((Jwt) getPayload()).getClaimsSet();
+    }
+
+    /**
+     * Decrypts the JWE so that it Claims Set can be accessed.
+     * <p>
+     * The same private key must be given here that is the pair to the public key that was used to encrypt the JWT.
+     *
+     * @param privateKey The private key pair to the public key that encrypted the JWT.
+     */
+    public void decrypt(Key privateKey) {
+        ((EncryptedJwt) getPayload()).decrypt(privateKey);
     }
 }

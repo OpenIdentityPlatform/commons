@@ -16,20 +16,35 @@
 
 package org.forgerock.json.jose.builders;
 
+import org.forgerock.json.jose.jws.JwsHeader;
+
 /**
- * Builds headers for nested encrypted and then signed JWTs.
+ * An implementation of a JWS Header builder that provides a fluent builder pattern to create JWS headers for
+ * signed encrypted JWTs.
+ * <p>
+ * See {@link JwsHeader} for information on the JwsHeader object that this builder creates.
  *
- * @deprecated Use {@link EncryptedThenSignedJwtHeaderBuilder} instead.
+ * @since 2.0.0
  */
-@Deprecated
-public class SignedEncryptedJwsHeaderBuilder extends EncryptedThenSignedJwtHeaderBuilder {
+public class EncryptedThenSignedJwtHeaderBuilder
+        extends JwtSecureHeaderBuilder<EncryptedThenSignedJwtBuilder, EncryptedThenSignedJwtHeaderBuilder> {
 
     /**
      * Constructs a new JwsHeaderBuilder, parented by the given JwtBuilder.
      *
      * @param jwtBuilder The JwtBuilder instance that this JwsHeaderBuilder is a child of.
      */
-    public SignedEncryptedJwsHeaderBuilder(final EncryptedThenSignedJwtBuilder jwtBuilder) {
+    public EncryptedThenSignedJwtHeaderBuilder(EncryptedThenSignedJwtBuilder jwtBuilder) {
         super(jwtBuilder);
+    }
+
+    /**
+     * Creates a JwsHeader instance from the header parameters set in this builder.
+     *
+     * @return A JwsHeader instance.
+     */
+    @Override
+    protected JwsHeader build() {
+        return new JwsHeader(getHeaders());
     }
 }

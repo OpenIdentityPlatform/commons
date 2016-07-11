@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
@@ -20,6 +20,7 @@ import java.security.Key;
 
 import org.forgerock.json.jose.jwe.handlers.compression.CompressionHandler;
 import org.forgerock.json.jose.jwe.handlers.encryption.EncryptionHandler;
+import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.jwt.JwtHeader;
@@ -44,7 +45,7 @@ public class EncryptedJwt implements Jwt, Payload {
 
     private final JweHeader header;
 
-    private JwtClaimsSet claimsSet;
+    private Payload payload;
     private final Key publicKey;
 
     private final String encodedHeader;
@@ -59,13 +60,17 @@ public class EncryptedJwt implements Jwt, Payload {
      * The specified public key will be used to perform the encryption of the JWT.
      *
      * @param header The JweHeader containing the header parameters of the JWE.
-     * @param claimsSet The JwtClaimsSet containing the claims of the JWE.
+     * @param payload The claimset of the JWE.
      * @param publicKey The public key to use to perform the encryption.
      */
-    public EncryptedJwt(JweHeader header, JwtClaimsSet claimsSet, Key publicKey) {
+    public EncryptedJwt(JweHeader header, JwtClaimsSet payload, Key publicKey) {
+        this(header, (Payload) payload, publicKey);
+    }
+
+    EncryptedJwt(JweHeader header, Payload payload, Key encryptionKey) {
         this.header = header;
-        this.claimsSet = claimsSet;
-        this.publicKey = publicKey;
+        this.payload = payload;
+        this.publicKey = encryptionKey;
 
         this.encodedHeader = null;
         this.encryptedContentEncryptionKey = null;
@@ -100,25 +105,25 @@ public class EncryptedJwt implements Jwt, Payload {
         this.publicKey = null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JwtHeader getHeader() {
         return header;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JwtClaimsSet getClaimsSet() {
-        return claimsSet;
+        return (JwtClaimsSet) payload;
     }
 
     /**
-     * {@inheritDoc}
+     * The payload of the encrypted JWT. This is either the claims set or a nested signed JWT.
+     *
+     * @return the payload of the encrypted JWT.
      */
+    Payload getPayload() {
+        return payload;
+    }
+
     @Override
     public String build() {
 
@@ -137,7 +142,7 @@ public class EncryptedJwt implements Jwt, Payload {
         String jweHeader = header.build();
         String encodedJweHeader = Utils.base64urlEncode(jweHeader);
         byte[] plaintext = compressPlaintext(header.getCompressionAlgorithm(),
-                claimsSet.build().getBytes(Utils.CHARSET));
+                payload.build().getBytes(Utils.CHARSET));
         byte[] additionalAuthenticatedData = encodedJweHeader.getBytes(Utils.CHARSET);
         JweEncryption cipherTextAndAuthTag = encryptionHandler.encryptPlaintext(contentEncryptionKey,
                 initialisationVector, plaintext, additionalAuthenticatedData);
@@ -187,8 +192,18 @@ public class EncryptedJwt implements Jwt, Payload {
         byte[] plaintext = encryptionHandler.decryptCiphertext(contentEncryptionKey, initialisationVector, ciphertext,
                 authenticationTag, additionalAuthenticatedData);
 
-        String claimsSetString = new String(plaintext, Utils.CHARSET);
+        String decryptedPayload = new String(plaintext, Utils.CHARSET);
 
-        claimsSet = new JwtClaimsSet(Utils.parseJson(claimsSetString));
+        payload = decodePayload(decryptedPayload);
+    }
+
+    /**
+     * Decodes the decrypted payload of this JWT.
+     *
+     * @param decryptedPayload the decrypted payload.
+     * @return the decoded payload as either a {@link JwtClaimsSet} or nested {@link SignedJwt}.
+     */
+    Payload decodePayload(String decryptedPayload) {
+        return new JwtClaimsSet(Utils.parseJson(decryptedPayload));
     }
 }

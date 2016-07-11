@@ -519,7 +519,7 @@ public class JwtImplementationSpecTest {
     }
 
     @Test
-    public void shouldSetNestedSignedJweTypeTojwe() throws IOException {
+    public void shouldSetNestedSignedJweTypeTojwt() throws IOException {
 
         //Given
         JwtBuilderFactory jwtBuilderFactory = new JwtBuilderFactory();
@@ -536,8 +536,7 @@ public class JwtImplementationSpecTest {
         String[] jwtParts = jwtString.split("\\.", -1);
         String headerString = new String(Base64url.decode(jwtParts[0]));
         Map<String, Object> jwtMap = JwtTestHelper.jsonToMap(headerString);
-        assertTrue(jwtMap.get("typ") instanceof String);
-        assertEquals(JwtType.jwtType((String) jwtMap.get("typ")), JwtType.JWE);
+        assertThat(jwtMap.get("cty")).isInstanceOf(String.class).isEqualTo(JwtType.JWT.name());
     }
 
     @Test(expectedExceptions = InvalidJwtException.class)

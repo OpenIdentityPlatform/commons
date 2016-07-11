@@ -11,31 +11,21 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
 
-import org.forgerock.json.jose.jwe.EncryptedJwt;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
-import org.forgerock.json.jose.jws.JwsHeader;
-import org.forgerock.json.jose.jws.SignedEncryptedJwt;
-import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
-import org.forgerock.json.jose.jwt.JwtType;
 
 /**
- * An implementation of a JwtBuilder that can build a JWT and encrypt it and nest it within another signed JWT,
- * resulting in an SignedEncryptedJwt object.
+ * Builds encrypted and then signed nested JWTs.
  *
- * @since 2.0.0
+ * @deprecated Use {@link EncryptedThenSignedJwtBuilder} instead.
  */
-public class SignedEncryptedJwtBuilder extends AbstractJwtBuilder implements SignedJwtBuilder {
-
-    private final EncryptedJwtBuilder encryptedJwtBuilder;
-    private final SigningHandler signingHandler;
-    private final JwsAlgorithm jwsAlgorithm;
-    private final SignedEncryptedJwsHeaderBuilder headerBuilder;
+@Deprecated
+public class SignedEncryptedJwtBuilder extends EncryptedThenSignedJwtBuilder {
 
     /**
      * Constructs a new SignedEncryptedJwtBuilder that will use the given EncryptedJwtBuilder, to build the nested
@@ -45,40 +35,9 @@ public class SignedEncryptedJwtBuilder extends AbstractJwtBuilder implements Sig
      * @param signingHandler The SigningHandler instance used to sign the JWS.
      * @param jwsAlgorithm The JwsAlgorithm to use when signing the JWT.
      */
-    public SignedEncryptedJwtBuilder(EncryptedJwtBuilder encryptedJwtBuilder, SigningHandler signingHandler,
-            JwsAlgorithm jwsAlgorithm) {
-        this.encryptedJwtBuilder = encryptedJwtBuilder;
-        this.signingHandler = signingHandler;
-        this.jwsAlgorithm = jwsAlgorithm;
-        this.headerBuilder = new SignedEncryptedJwsHeaderBuilder(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public SignedJwt asJwt() {
-        JwsHeader header = headerBuilder.alg(jwsAlgorithm).build();
-        header.setType(JwtType.JWE);
-        EncryptedJwt encryptedJwt = encryptedJwtBuilder.asJwt();
-
-        return new SignedEncryptedJwt(header, encryptedJwt, signingHandler);
-    }
-
-    /**
-     * Builds the JWS into a <code>String</code> by calling the <tt>build</tt> method on the JWS object.
-     * <p>
-     * @see org.forgerock.json.jose.jws.SignedEncryptedJwt#build()
-     *
-     * @return The base64url encoded UTF-8 parts of the JWS.
-     */
-    @Override
-    public String build() {
-        return asJwt().build();
-    }
-
-    @Override
-    public SignedEncryptedJwsHeaderBuilder headers() {
-        return headerBuilder;
+    public SignedEncryptedJwtBuilder(final EncryptedJwtBuilder encryptedJwtBuilder,
+            final SigningHandler signingHandler,
+            final JwsAlgorithm jwsAlgorithm) {
+        super(encryptedJwtBuilder, signingHandler, jwsAlgorithm);
     }
 }

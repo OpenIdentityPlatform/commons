@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -31,7 +31,7 @@ import org.forgerock.json.jose.jwt.JwtClaimsSet;
  */
 public class EncryptedJwtBuilder extends AbstractJwtBuilder {
 
-    private final Key publicKey;
+    final Key publicKey;
 
     /**
      * Constructs a new EncryptedJwtBuilder that will use the given public key to encrypt the JWT.
@@ -48,9 +48,10 @@ public class EncryptedJwtBuilder extends AbstractJwtBuilder {
      * @return The JweHeaderBuilder instance.
      */
     @Override
-    public JweHeaderBuilder headers() {
-        setJwtHeaderBuilder(new JweHeaderBuilder(this));
-        return (JweHeaderBuilder) getHeaderBuilder();
+    @SuppressWarnings("unchecked")
+    public JweHeaderBuilder<? extends EncryptedJwtBuilder> headers() {
+        setJwtHeaderBuilder(new JweHeaderBuilder<>(this));
+        return (JweHeaderBuilder<? extends EncryptedJwtBuilder>) getHeaderBuilder();
     }
 
     /**
@@ -71,14 +72,25 @@ public class EncryptedJwtBuilder extends AbstractJwtBuilder {
      * @param signingHandler The SigningHandler instance used to sign the JWS.
      * @param jwsAlgorithm The JwsAlgorithm to use when signing the JWT.
      * @return The SignedEncryptedJwtBuilder instance.
+     * @deprecated Use {@link #signedWith(SigningHandler, JwsAlgorithm)} instead.
      */
+    @Deprecated
     public SignedEncryptedJwtBuilder sign(SigningHandler signingHandler, JwsAlgorithm jwsAlgorithm) {
         return new SignedEncryptedJwtBuilder(this, signingHandler, jwsAlgorithm);
     }
 
     /**
-     * {@inheritDoc}
+     * Returns an {@link EncryptedThenSignedJwtBuilder} that will build a signed JWT with this builder's encrypted JWT
+     * as its payload.
+     *
+     * @param signingHandler The SigningHandler instance used to sign the JWS.
+     * @param jwsAlgorithm The JwsAlgorithm to use when signing the JWT.
+     * @return The EncryptedThenSignedJwtBuilder instance.
      */
+    public EncryptedThenSignedJwtBuilder signedWith(SigningHandler signingHandler, JwsAlgorithm jwsAlgorithm) {
+        return new EncryptedThenSignedJwtBuilder(this, signingHandler, jwsAlgorithm);
+    }
+
     @Override
     public EncryptedJwt asJwt() {
         JwtHeaderBuilder<?, ?> headerBuilder = getHeaderBuilder();

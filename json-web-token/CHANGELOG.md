@@ -1,3 +1,8 @@
+# 21.0.0
+
+## Changes
+* Support nested signed-then-encrypted JWTs : [COMMONS-99](https://bugster.forgerock.org/jira/browse/COMMONS-99)
+
 # 3.0.4
 
 ## Changes

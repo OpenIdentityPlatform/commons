@@ -49,9 +49,6 @@ public enum JweAlgorithm implements Algorithm {
         this.algorithmType = algorithmType;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getAlgorithm() {
         return transformation;

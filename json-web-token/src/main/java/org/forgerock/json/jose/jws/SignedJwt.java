@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -33,7 +33,7 @@ import org.forgerock.util.encode.Base64url;
  *
  * @since 2.0.0
  */
-public class SignedJwt implements Jwt {
+public class SignedJwt implements Jwt, Payload {
 
     private final JwsHeader header;
     private final Payload payload;
@@ -144,7 +144,7 @@ public class SignedJwt implements Jwt {
      * EncryptedJwt, {@link org.forgerock.json.jose.jwe.EncryptedJwt}.
      *
      * @return The JWS' payload.
-     * @see SignedEncryptedJwt
+     * @see EncryptedThenSignedJwt
      */
     protected Payload getPayload() {
         return payload;

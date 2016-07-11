@@ -11,10 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
+
+import java.security.Key;
 
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedJwt;
@@ -62,8 +64,15 @@ public class SignedJwtBuilderImpl extends AbstractJwtBuilder implements SignedJw
     }
 
     /**
-     * {@inheritDoc}
+     * Wraps the signed JWT in an outer encrypted JWE envelope.
+     *
+     * @param encryptionKey the key to use for encryption. This should either be a symmetric secret key or a public key.
+     * @return the nested encrypted signed JWT builder.
      */
+    public SignedThenEncryptedJwtBuilder encrypt(Key encryptionKey) {
+        return new SignedThenEncryptedJwtBuilder(this, encryptionKey);
+    }
+
     @Override
     public SignedJwt asJwt() {
         JwtHeaderBuilder<?, ?> headerBuilder = getHeaderBuilder();

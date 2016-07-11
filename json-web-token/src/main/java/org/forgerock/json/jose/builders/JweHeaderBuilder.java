@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -27,15 +27,16 @@ import org.forgerock.json.jose.jwt.JwtHeader;
  * See {@link JweHeader} for information on the JweHeader object that this builder creates.
  *
  * @since 2.0.0
+ * @param <B> the concrete JWT builder type that headers are being built for.
  */
-public class JweHeaderBuilder extends JwtSecureHeaderBuilder<EncryptedJwtBuilder, JweHeaderBuilder> {
+public class JweHeaderBuilder<B extends EncryptedJwtBuilder> extends JwtSecureHeaderBuilder<B, JweHeaderBuilder<B>> {
 
     /**
      * Constructs a new JweHeaderBuilder, parented by the given JwtBuilder.
      *
      * @param jwtBuilder The JwtBuilder instance that this JweHeaderBuilder is a child of.
      */
-    public JweHeaderBuilder(EncryptedJwtBuilder jwtBuilder) {
+    public JweHeaderBuilder(B jwtBuilder) {
         super(jwtBuilder);
     }
 
@@ -47,7 +48,7 @@ public class JweHeaderBuilder extends JwtSecureHeaderBuilder<EncryptedJwtBuilder
      * @param enc The Encryption Method.
      * @return This JweHeaderBuilder.
      */
-    public JweHeaderBuilder enc(EncryptionMethod enc) {
+    public JweHeaderBuilder<B> enc(EncryptionMethod enc) {
         header("enc", enc.toString());
         return this;
     }
@@ -60,7 +61,7 @@ public class JweHeaderBuilder extends JwtSecureHeaderBuilder<EncryptedJwtBuilder
      * @param epk The Ephemeral Public Key.
      * @return This JweHeaderBuilder.
      */
-    public JweHeaderBuilder epk(String epk) {
+    public JweHeaderBuilder<B> epk(String epk) {
         header("epk", epk);
         return this;
     }
@@ -74,7 +75,7 @@ public class JweHeaderBuilder extends JwtSecureHeaderBuilder<EncryptedJwtBuilder
      * @param zip The Compression Algorithm.
      * @return This JweHeaderBuilder.
      */
-    public JweHeaderBuilder zip(CompressionAlgorithm zip) {
+    public JweHeaderBuilder<B> zip(CompressionAlgorithm zip) {
         header("zip", zip.toString());
         return this;
     }
@@ -87,7 +88,7 @@ public class JweHeaderBuilder extends JwtSecureHeaderBuilder<EncryptedJwtBuilder
      * @param apu The Agreement PartyUInfo.
      * @return This JweHeaderBuilder.
      */
-    public JweHeaderBuilder apu(String apu) {
+    public JweHeaderBuilder<B> apu(String apu) {
         header("apu", apu);
         return this;
     }

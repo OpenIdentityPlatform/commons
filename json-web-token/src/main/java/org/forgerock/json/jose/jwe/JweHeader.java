@@ -150,9 +150,6 @@ public class JweHeader extends JwtSecureHeader {
         return get(AGREEMENT_PARTY_UINFO_HEADER_KEY).asString();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setParameter(String key, Object value) {
         JweHeaderKey headerKey = JweHeaderKey.getHeaderKey(key.toUpperCase());
@@ -190,9 +187,6 @@ public class JweHeader extends JwtSecureHeader {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getParameter(String key) {
         JweHeaderKey headerKey = JweHeaderKey.getHeaderKey(key.toUpperCase());

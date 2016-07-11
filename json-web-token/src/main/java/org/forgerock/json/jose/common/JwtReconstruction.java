@@ -11,27 +11,28 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.common;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
+import org.forgerock.json.jose.jwe.SignedThenEncryptedJwt;
 import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jws.JwsHeader;
-import org.forgerock.json.jose.jws.SignedEncryptedJwt;
+import org.forgerock.json.jose.jws.EncryptedThenSignedJwt;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
 import org.forgerock.json.jose.jwt.JwtType;
 import org.forgerock.json.jose.utils.Utils;
 import org.forgerock.util.encode.Base64url;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * A service that provides a method for reconstruct a JWT string back into its relevant JWT object,
@@ -40,6 +41,10 @@ import java.util.Map;
  * @since 2.0.0
  */
 public class JwtReconstruction {
+    private static final String PAYLOAD_CONTENT_TYPE = "cty";
+    private static final String JWT_TYPE = "typ";
+    private static final String ENCRYPTION_METHOD = "enc";
+    private static final String ALGORITHM = "alg";
 
     private static final int JWS_NUM_PARTS = 3;
     private static final int JWE_NUM_PARTS = 5;
@@ -56,7 +61,6 @@ public class JwtReconstruction {
      */
     public <T extends Jwt> T reconstructJwt(String jwtString, Class<T> jwtClass) {
 
-        Jwt jwt;
 
         //split into parts
         String[] jwtParts = jwtString.split("\\.", -1);
@@ -67,19 +71,25 @@ public class JwtReconstruction {
         //first part always header
         //turn into json value
         JsonValue headerJson = new JsonValue(Utils.parseJson(Utils.base64urlDecode(jwtParts[0])));
-        JwtType jwtType = JwtType.JWT;
-        if (headerJson.isDefined("typ")) {
-            jwtType = JwtType.valueOf(headerJson.get("typ").asString().toUpperCase());
+        JwtType contentType = null;
+        if (headerJson.isDefined(PAYLOAD_CONTENT_TYPE)) {
+            contentType = JwtType.jwtType(headerJson.get(PAYLOAD_CONTENT_TYPE).asString());
         }
 
-        if (headerJson.isDefined("enc")) {
+        JwtType jwtType = null;
+        if (headerJson.isDefined(JWT_TYPE)) {
+            jwtType = JwtType.jwtType(headerJson.get(JWT_TYPE).asString());
+        }
+
+        final Jwt jwt;
+        if (headerJson.isDefined(ENCRYPTION_METHOD)) {
             //is encrypted jwt
             verifyNumberOfParts(jwtParts, JWE_NUM_PARTS);
             jwt = reconstructEncryptedJwt(jwtParts);
-        } else if (JwtType.JWE.equals(jwtType)) {
+        } else if (JwtType.JWE == contentType || JwtType.JWT == contentType || JwtType.JWE == jwtType) {
             verifyNumberOfParts(jwtParts, JWS_NUM_PARTS);
             jwt = reconstructSignedEncryptedJwt(jwtParts);
-        } else if (headerJson.isDefined("alg")) {
+        } else if (headerJson.isDefined(ALGORITHM)) {
             //is signed jwt
             verifyNumberOfParts(jwtParts, JWS_NUM_PARTS);
             jwt = reconstructSignedJwt(jwtParts);
@@ -161,9 +171,13 @@ public class JwtReconstruction {
 
         JweHeader jweHeader = new JweHeader(Utils.parseJson(header));
 
-
-        return new EncryptedJwt(jweHeader, encodedHeader, encryptedContentEncryptionKey, initialisationVector,
-                ciphertext, authenticationTag);
+        if (jweHeader.getContentType() != null) {
+            return new SignedThenEncryptedJwt(jweHeader, encodedHeader, encryptedContentEncryptionKey,
+                    initialisationVector, ciphertext, authenticationTag);
+        } else {
+            return new EncryptedJwt(jweHeader, encodedHeader, encryptedContentEncryptionKey, initialisationVector,
+                    ciphertext, authenticationTag);
+        }
     }
 
     /**
@@ -175,7 +189,7 @@ public class JwtReconstruction {
      * @param jwtParts The three base64url UTF-8 encoded string parts of a signed JWT.
      * @return A SignedEncryptedJwt object.
      */
-    private SignedEncryptedJwt reconstructSignedEncryptedJwt(String[] jwtParts) {
+    private EncryptedThenSignedJwt reconstructSignedEncryptedJwt(String[] jwtParts) {
 
         String encodedHeader = jwtParts[0];
         String encodedPayload = jwtParts[1];
@@ -196,7 +210,7 @@ public class JwtReconstruction {
 
         JwsHeader jwsHeader = new JwsHeader(combinedHeader);
 
-        return new SignedEncryptedJwt(jwsHeader, encryptedJwt,
+        return new EncryptedThenSignedJwt(jwsHeader, encryptedJwt,
                 (encodedHeader + "." + encodedPayload).getBytes(Utils.CHARSET), signature);
     }
 }

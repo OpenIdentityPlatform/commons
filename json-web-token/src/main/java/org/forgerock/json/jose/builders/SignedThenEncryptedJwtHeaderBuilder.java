@@ -17,19 +17,16 @@
 package org.forgerock.json.jose.builders;
 
 /**
- * Builds headers for nested encrypted and then signed JWTs.
- *
- * @deprecated Use {@link EncryptedThenSignedJwtHeaderBuilder} instead.
+ * Builder for nested signed-then-encrypted JWT headers.
  */
-@Deprecated
-public class SignedEncryptedJwsHeaderBuilder extends EncryptedThenSignedJwtHeaderBuilder {
+class SignedThenEncryptedJwtHeaderBuilder extends JweHeaderBuilder<SignedThenEncryptedJwtBuilder> {
 
     /**
-     * Constructs a new JwsHeaderBuilder, parented by the given JwtBuilder.
+     * Constructs the build with the given parent JWT builder.
      *
-     * @param jwtBuilder The JwtBuilder instance that this JwsHeaderBuilder is a child of.
+     * @param jwtBuilder the parent builder.
      */
-    public SignedEncryptedJwsHeaderBuilder(final EncryptedThenSignedJwtBuilder jwtBuilder) {
+    SignedThenEncryptedJwtHeaderBuilder(final SignedThenEncryptedJwtBuilder jwtBuilder) {
         super(jwtBuilder);
     }
 }

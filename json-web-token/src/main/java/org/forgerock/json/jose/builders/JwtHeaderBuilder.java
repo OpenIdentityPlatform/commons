@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -59,6 +59,21 @@ public abstract class JwtHeaderBuilder<T extends JwtBuilder, B extends JwtHeader
     @SuppressWarnings("unchecked")
     public B header(String key, Object value) {
         headers.put(key, value);
+        return (B) this;
+    }
+
+    /**
+     * Adds a customer header parameter to the JWT header if the value is not null.
+     *
+     * @param key The header parameter key.
+     * @param value The header parameter value, or {@literal null} if not specified.
+     * @return This JwtHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B headerIfNotNull(String key, Object value) {
+        if (value != null) {
+            header(key, value);
+        }
         return (B) this;
     }
 
