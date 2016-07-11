@@ -68,7 +68,7 @@ final class HandlerAdapter extends HttpHandler {
 
     /** Methods that should not include an entity body. */
     private static final CaseInsensitiveSet NON_ENTITY_METHODS = new CaseInsensitiveSet(
-            Arrays.asList("GET", "HEAD", "TRACE", "DELETE"));
+            Arrays.asList("GET", "HEAD", "TRACE"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HandlerAdapter.class);
 

@@ -31,6 +31,40 @@ import io.swagger.models.Swagger;
 
 /**
  * Provides the Grizzly HTTP library support to the common HTTP Framework.
+ * <p>
+ * Simple example usage with OpenIG. It attempts to listen on port 8080 and expects to find an OpenIG config directory
+ * under the config-base directory where the example is started. It runs until an exception is thrown or the process is
+ * killed.
+ * </p>
+ * <pre>
+ *     <code>
+ *
+ *        import org.forgerock.http.HttpApplication;
+ *        import org.forgerock.http.grizzly.GrizzlySupport;
+ *        import org.forgerock.openig.http.GatewayEnvironment;
+ *        import org.forgerock.openig.http.GatewayHttpApplication;
+ *        import org.glassfish.grizzly.http.server.HttpServer;
+ *
+ *        public class Main {
+ *
+ *            public static void main(String[] args) {
+ *
+ *                // Set this to an appropriate value to enable OpenIG to find its configuration files.
+ *                System.setProperty(GatewayEnvironment.BASE_SYSTEM_PROPERTY, "config-base");
+ *                HttpServer server = HttpServer.createSimpleServer(null, 8080);
+ *                HttpApplication application = new GatewayHttpApplication();
+ *                server.getServerConfiguration().addHttpHandler(GrizzlySupport.newGrizzlyHttpHandler(application));
+ *                // Set to true if you want to enable HTTP methods such as Delete having a payload.
+ *                server.getServerConfiguration().setAllowPayloadForUndefinedHttpMethods(true);
+ *                try {
+ *                    server.start();
+ *                } catch (Exception e) {
+ *                    server.shutdownNow();
+ *                }
+ *            }
+ *        }
+ *     </code>
+ * </pre>
  */
 public final class GrizzlySupport {
 

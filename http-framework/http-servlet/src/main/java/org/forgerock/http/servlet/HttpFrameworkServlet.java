@@ -99,7 +99,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
 
     /** Methods that should not include an entity body. */
     private static final CaseInsensitiveSet NON_ENTITY_METHODS = new CaseInsensitiveSet(
-            Arrays.asList("GET", "HEAD", "TRACE", "DELETE"));
+            Arrays.asList("GET", "HEAD", "TRACE"));
 
     /**
      * Servlet init-param for configuring the routing base for the
