@@ -16,7 +16,18 @@
 
 package org.forgerock.api.jackson;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -25,13 +36,20 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.lang.annotation.Annotation;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+
+import org.forgerock.api.annotations.Default;
+import org.forgerock.api.annotations.Description;
+import org.forgerock.api.annotations.EnumTitle;
+import org.forgerock.api.annotations.Example;
+import org.forgerock.api.annotations.Format;
+import org.forgerock.api.annotations.MultipleOf;
+import org.forgerock.api.annotations.PropertyOrder;
+import org.forgerock.api.annotations.PropertyPolicies;
+import org.forgerock.api.annotations.ReadOnly;
+import org.forgerock.api.annotations.Title;
+import org.forgerock.api.annotations.UniqueItems;
+import org.forgerock.api.enums.WritePolicy;
+import org.forgerock.guava.common.io.Resources;
 
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JavaType;
@@ -49,17 +67,6 @@ import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import com.fasterxml.jackson.module.jsonSchema.types.NumberSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.SimpleTypeSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.StringSchema;
-import org.forgerock.api.annotations.Default;
-import org.forgerock.api.annotations.Description;
-import org.forgerock.api.annotations.EnumTitle;
-import org.forgerock.api.annotations.Format;
-import org.forgerock.api.annotations.MultipleOf;
-import org.forgerock.api.annotations.PropertyOrder;
-import org.forgerock.api.annotations.PropertyPolicies;
-import org.forgerock.api.annotations.ReadOnly;
-import org.forgerock.api.annotations.Title;
-import org.forgerock.api.annotations.UniqueItems;
-import org.forgerock.api.enums.WritePolicy;
 
 /**
  * A {@code SchemaFactoryWrapper} that adds the extra CREST schema attributes once the Jackson schema generation has
@@ -83,6 +90,7 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
             return wrapper;
         }
     };
+    private static final String CLASSPATH_RESOURCE = "classpath:";
 
     /**
      * Create a new wrapper. Sets the {@link CrestJsonSchemaFactory} in the parent class's {@code schemaProvider} so
@@ -119,6 +127,11 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
             requiredFieldNames = null;
         }
 
+        final Example example = clazz.getAnnotation(Example.class);
+        if (schema instanceof WithExampleSchema && example != null && !isEmpty(example.value())) {
+            setExample(clazz, example, (WithExampleSchema<?>) schema);
+        }
+
         // look for field/parameter/method-level annotations
         return new ObjectVisitorDecorator(objectVisitor) {
             @Override
@@ -150,6 +163,15 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
                 addUniqueItems(writer, schema);
                 addMultipleOf(writer, schema);
                 addFormat(writer, schema);
+                addExample(writer, schema);
+            }
+
+            private void addExample(BeanProperty writer, JsonSchema schema) {
+                Example annotation = annotationFor(writer, Example.class);
+                if (annotation != null) {
+                    WithExampleSchema<?> exampleSchema = (WithExampleSchema<?>) schema;
+                    setExample(writer.getType().getRawClass(), annotation, exampleSchema);
+                }
             }
 
             private void addEnumTitles(BeanProperty writer, JsonSchema schema) {
@@ -388,5 +410,28 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
                 return getSchema().asObjectSchema().getProperties().get(writer.getName());
             }
         };
+    }
+
+    private void setExample(Class<?> contextClass, Example annotation, WithExampleSchema<?> exampleSchema) {
+        String example = annotation.value();
+        if (example.startsWith(CLASSPATH_RESOURCE)) {
+            ClassLoader classLoader = contextClass.getClassLoader();
+            try {
+                String name = example.substring(CLASSPATH_RESOURCE.length()).trim();
+                URL resource = classLoader.getResource(name);
+                if (resource != null) {
+                    example = Resources.toString(resource, UTF_8);
+                } else {
+                    throw new IllegalStateException("Cannot read resource: " + example);
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("Cannot read resource: " + example, e);
+            }
+        }
+        try {
+            exampleSchema.setExample(example);
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not parse example value to type of schema", e);
+        }
     }
 }

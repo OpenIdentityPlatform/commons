@@ -16,13 +16,21 @@
 
 package org.forgerock.api.jackson;
 
+import static org.forgerock.api.jackson.JacksonUtils.OBJECT_MAPPER;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.validation.ValidationException;
 
 import org.forgerock.api.enums.ReadPolicy;
 import org.forgerock.json.JsonValue;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import org.forgerock.api.enums.WritePolicy;
 
@@ -30,12 +38,16 @@ import org.forgerock.api.enums.WritePolicy;
  * An extension to the Jackson {@code ArraySchema} that includes the custom CREST JSON Schema attributes.
  */
 public class CrestArraySchema extends ArraySchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
-        ValidatableSchema {
+        ValidatableSchema, WithExampleSchema<List<Object>> {
+    private static final JavaType EXAMPLE_VALUE_TYPE = OBJECT_MAPPER.getTypeFactory()
+            .constructParametrizedType(ArrayList.class, List.class, Object.class);
+
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
     private Boolean returnOnDemand;
     private Integer propertyOrder;
+    private List<Object> example;
 
     @Override
     public WritePolicy getWritePolicy() {
@@ -112,5 +124,56 @@ public class CrestArraySchema extends ArraySchema implements CrestReadWritePolic
                 itemSchema.validate(arrayItems.next());
             }
         }
+    }
+
+    @Override
+    public List<Object> getExample() {
+        List<Object> example = this.example;
+        if (example == null) {
+            example = new ArrayList<>();
+            boolean foundExample = items.isSingleItems()
+                    ? applySingleSchemaExample(example)
+                    : applyMultipleSchemasExamples(example);
+            if (!foundExample) {
+                example = null;
+            }
+        }
+        return example;
+    }
+
+    private boolean applySingleSchemaExample(List<Object> example) {
+        boolean foundExample = false;
+        if (items.asSingleItems().getSchema() instanceof WithExampleSchema) {
+            Object itemsExample = ((WithExampleSchema) items.asSingleItems().getSchema()).getExample();
+            if (itemsExample != null) {
+                int count = minItems != null && minItems > 1 ? minItems : 1;
+                foundExample = true;
+                for (int i = 0; i < count; i++) {
+                    example.add(itemsExample);
+                }
+            }
+        }
+        return foundExample;
+    }
+
+    private boolean applyMultipleSchemasExamples(List<Object> example) {
+        boolean foundExample = false;
+        for (JsonSchema schema : items.asArrayItems().getJsonSchemas()) {
+            if (schema instanceof WithExampleSchema) {
+                Object propertyExample = ((WithExampleSchema) schema).getExample();
+                if (propertyExample != null) {
+                    foundExample = true;
+                    example.add(propertyExample);
+                } else {
+                    example.add(new HashMap<>());
+                }
+            }
+        }
+        return foundExample;
+    }
+
+    @Override
+    public void setExample(String example) throws IOException {
+        this.example = OBJECT_MAPPER.readValue(example, EXAMPLE_VALUE_TYPE);
     }
 }

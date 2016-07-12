@@ -22,6 +22,13 @@ import static org.forgerock.api.jackson.JacksonUtils.schemaFor;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.util.Reject.checkNotNull;
+import static org.forgerock.util.test.assertj.Conditions.equalTo;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
@@ -30,14 +37,12 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.io.IOException;
-import java.util.Date;
 
-import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.api.annotations.Default;
 import org.forgerock.api.annotations.Description;
 import org.forgerock.api.annotations.EnumTitle;
+import org.forgerock.api.annotations.Example;
 import org.forgerock.api.annotations.Format;
 import org.forgerock.api.annotations.MultipleOf;
 import org.forgerock.api.annotations.PropertyOrder;
@@ -52,6 +57,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
+
 public class JsonSchemaExtensionsTest {
 
     private JsonValue hasIntegerWithMinMaxSchema;
@@ -64,8 +71,7 @@ public class JsonSchemaExtensionsTest {
     @BeforeClass
     public void beforeClass() throws IOException {
         hasIntegerWithMinMaxSchema = schemaAsJsonValue(HasIntegerWithMinMax.class);
-        hasIntegerWithDecimalMinMaxSchema = schemaAsJsonValue(
-                HasIntegerWithDecimalMinMaxExclusive.class);
+        hasIntegerWithDecimalMinMaxSchema = schemaAsJsonValue(HasIntegerWithDecimalMinMaxExclusive.class);
         hasStringSchema = schemaAsJsonValue(HasString.class);
         hasArraySchema = schemaAsJsonValue(HasArray.class);
         hasNumericSchema = schemaAsJsonValue(HasNumeric.class);
@@ -173,6 +179,48 @@ public class JsonSchemaExtensionsTest {
                 .hasPath("description")
                 .isString()
                 .isEqualTo("HasEnum Description");
+    }
+
+    @Test
+    public void testExamples() throws Exception {
+        final JsonValue schema = schemaAsJsonValue(HasExamples.class);
+
+        assertThat(schema)
+                .hasPath("properties/array/example")
+                .isArray()
+                .containsOnly("ONE", "TWO");
+
+        assertThat(schema)
+                .hasPath("properties/obj/example")
+                .isObject()
+                .containsExactly(entry("name", "fred"));
+
+        assertThat(schema).hasPath("properties/string/example").isString().isEqualTo("fred");
+        assertThat(schema).hasPath("properties/integer/example").isLong().isEqualTo(123456789012345678L);
+        assertThat(schema).hasPath("properties/number/example").isDouble().isEqualTo(123.456D);
+        assertThat(schema).hasPath("properties/bool/example").isBoolean().isTrue();
+
+        assertThat(schema)
+                .hasPath("example")
+                .isObject()
+                .stringIs("string", equalTo("fred"))
+                .longIs("integer", equalTo(123456789012345678L))
+                .doubleIs("number", equalTo(123.456D))
+                .booleanIs("bool", equalTo(true));
+        assertThat(schema).hasPath("example/array").isArray().hasSize(2);
+        assertThat(schema).hasPath("example/obj").isObject().containsFields("name");
+    }
+
+    @Test
+    public void testClassExample() throws Exception {
+        final JsonValue schema = schemaAsJsonValue(ClassHasExample.class);
+
+        assertThat(schema)
+                .hasPath("example")
+                .isObject()
+                .stringIs("string", equalTo("fred"))
+                .longIs("integer", equalTo(123456789012345678L));
+        assertThat(schema).hasPath("properties/integer/example").isLong().isEqualTo(1234567890123456L);
     }
 
     private enum MyEnum {
@@ -300,6 +348,28 @@ public class JsonSchemaExtensionsTest {
         public Date getMyDate() {
             return myDate;
         }
+    }
+
+    private static class HasExamples {
+        @Example("fred")
+        public String string;
+        @Example("123456789012345678")
+        public Long integer;
+        @Example("123.456")
+        public BigDecimal number;
+        @Example("true")
+        public boolean bool;
+        @Example("[\"ONE\",\"TWO\"]")
+        public List<MyEnum> array;
+        @Example("{\"name\":\"fred\"}")
+        public Map<String, String> obj;
+    }
+
+    @Example("classpath:org/forgerock/api/jackson/JsonSchemaExtensionsTest.ClassHasExample.json")
+    private static class ClassHasExample {
+        public String string;
+        @Example("1234567890123456")
+        public Long integer;
     }
 
     /**

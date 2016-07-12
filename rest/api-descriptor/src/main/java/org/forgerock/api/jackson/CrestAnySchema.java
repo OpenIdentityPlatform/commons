@@ -16,6 +16,10 @@
 
 package org.forgerock.api.jackson;
 
+import static org.forgerock.api.jackson.JacksonUtils.OBJECT_MAPPER;
+
+import java.io.IOException;
+
 import javax.validation.ValidationException;
 
 import org.forgerock.api.enums.ReadPolicy;
@@ -28,12 +32,13 @@ import org.forgerock.api.enums.WritePolicy;
  * An extension to the Jackson {@code AnySchema} that includes the custom CREST JSON Schema attributes.
  */
 public class CrestAnySchema extends AnySchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
-        ValidatableSchema {
+        ValidatableSchema, WithExampleSchema<Object> {
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
     private Boolean returnOnDemand;
     private Integer propertyOrder;
+    private Object example;
 
     @Override
     public WritePolicy getWritePolicy() {
@@ -88,5 +93,15 @@ public class CrestAnySchema extends AnySchema implements CrestReadWritePoliciesS
     @Override
     public void validate(JsonValue object) throws ValidationException {
         // any Object is a valid AnySchema.
+    }
+
+    @Override
+    public Object getExample() {
+        return this.example;
+    }
+
+    @Override
+    public void setExample(String example) throws IOException {
+        this.example = OBJECT_MAPPER.readValue(example, Object.class);
     }
 }

@@ -42,7 +42,7 @@ import org.forgerock.api.enums.WritePolicy;
  * An extension to the Jackson {@code StringSchema} that includes the custom CREST JSON Schema attributes.
  */
 class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema, EnumSchema,
-        ValidatableSchema, PropertyFormatSchema {
+        ValidatableSchema, PropertyFormatSchema, WithExampleSchema<String> {
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
@@ -51,6 +51,7 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
     private String propertyFormat;
     @JsonProperty
     private Map<String, List<String>> options;
+    private String example;
 
     @Override
     public WritePolicy getWritePolicy() {
@@ -204,4 +205,13 @@ class CrestStringSchema extends StringSchema implements CrestReadWritePoliciesSc
         this.propertyFormat = propertyFormat;
     }
 
+    @Override
+    public String getExample() {
+        return example;
+    }
+
+    @Override
+    public void setExample(String example) {
+        this.example = example;
+    }
 }

@@ -37,7 +37,7 @@ import org.forgerock.api.enums.WritePolicy;
  * An extension to the Jackson {@code IntegerSchema} that includes the custom CREST JSON Schema attributes.
  */
 class CrestIntegerSchema extends IntegerSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema, EnumSchema,
-        ValidatableSchema, MultipleOfSchema, PropertyFormatSchema, MinimumMaximumSchema {
+        ValidatableSchema, MultipleOfSchema, PropertyFormatSchema, MinimumMaximumSchema, WithExampleSchema<Long> {
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
@@ -49,6 +49,7 @@ class CrestIntegerSchema extends IntegerSchema implements CrestReadWritePolicies
     private BigDecimal propertyMaximum;
     @JsonProperty
     private Map<String, List<String>> options;
+    private Long example;
 
     @Override
     public WritePolicy getWritePolicy() {
@@ -186,4 +187,13 @@ class CrestIntegerSchema extends IntegerSchema implements CrestReadWritePolicies
         this.propertyMaximum = propertyMaximum;
     }
 
+    @Override
+    public Long getExample() {
+        return example;
+    }
+
+    @Override
+    public void setExample(String example) {
+        this.example = Long.valueOf(example);
+    }
 }

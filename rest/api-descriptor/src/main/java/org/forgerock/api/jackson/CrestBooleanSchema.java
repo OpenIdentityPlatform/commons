@@ -29,12 +29,13 @@ import org.forgerock.api.enums.WritePolicy;
  * An extension to the Jackson {@code BooleanSchema} that includes the custom CREST JSON Schema attributes.
  */
 public class CrestBooleanSchema extends BooleanSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
-        ValidatableSchema {
+        ValidatableSchema, WithExampleSchema<Boolean> {
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
     private Boolean returnOnDemand;
     private Integer propertyOrder;
+    private Boolean example;
 
     @Override
     public WritePolicy getWritePolicy() {
@@ -103,5 +104,15 @@ public class CrestBooleanSchema extends BooleanSchema implements CrestReadWriteP
     @Override
     public Boolean getReadonly() {
         return super.getReadonly();
+    }
+
+    @Override
+    public Boolean getExample() {
+        return example;
+    }
+
+    @Override
+    public void setExample(String example) {
+        this.example = Boolean.valueOf(example);
     }
 }

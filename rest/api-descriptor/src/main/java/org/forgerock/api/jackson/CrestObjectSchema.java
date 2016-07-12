@@ -16,8 +16,10 @@
 
 package org.forgerock.api.jackson;
 
+import static org.forgerock.api.jackson.JacksonUtils.OBJECT_MAPPER;
 import static org.forgerock.json.JsonValue.json;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -26,25 +28,29 @@ import java.util.regex.Pattern;
 
 import javax.validation.ValidationException;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.api.enums.ReadPolicy;
+import org.forgerock.api.enums.WritePolicy;
 import org.forgerock.json.JsonValue;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.module.jsonSchema.JsonSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
-import org.forgerock.api.enums.WritePolicy;
 
 /**
  * An extension to the Jackson {@code ObjectSchema} that includes the custom CREST JSON Schema attributes.
  */
 public class CrestObjectSchema extends ObjectSchema implements CrestReadWritePoliciesSchema, OrderedFieldSchema,
-        ValidatableSchema, RequiredFieldsSchema {
+        ValidatableSchema, RequiredFieldsSchema, WithExampleSchema<Map<String, Object>> {
+    private static final JavaType EXAMPLE_VALUE_TYPE = OBJECT_MAPPER.getTypeFactory()
+            .constructParametrizedType(HashMap.class, Map.class, String.class, Object.class);
     private WritePolicy writePolicy;
     private ReadPolicy readPolicy;
     private Boolean errorOnWritePolicyFailure;
     private Boolean returnOnDemand;
     private Integer propertyOrder;
     private Set<String> requiredFields;
+    private Map<String, Object> example;
 
     @Override
     public WritePolicy getWritePolicy() {
@@ -160,5 +166,30 @@ public class CrestObjectSchema extends ObjectSchema implements CrestReadWritePol
     @Override
     public void setRequiredFields(Set<String> requiredFields) {
         this.requiredFields = requiredFields;
+    }
+
+    @Override
+    public Map<String, Object> getExample() {
+        Map<String, Object> example = this.example;
+        if (example == null) {
+            example = new HashMap<>();
+            for (Map.Entry<String, JsonSchema> property : getProperties().entrySet()) {
+                if (property.getValue() instanceof WithExampleSchema) {
+                    Object propertyExample = ((WithExampleSchema) property.getValue()).getExample();
+                    if (propertyExample != null) {
+                        example.put(property.getKey(), propertyExample);
+                    }
+                }
+            }
+            if (example.isEmpty()) {
+                example = null;
+            }
+        }
+        return example;
+    }
+
+    @Override
+    public void setExample(String example) throws IOException {
+        this.example = OBJECT_MAPPER.readValue(example, EXAMPLE_VALUE_TYPE);
     }
 }

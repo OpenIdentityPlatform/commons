@@ -558,6 +558,16 @@ Key Path    | Type                        | Description
 }
 ```
 
+#### Example values
+
+Similar to [the OpenAPI specification](http://swagger.io/specification/#schemaObject), we support example values for
+JSON Schemas, but unlike OpenAPI, we also support these example values on sub properties too.
+
+##### Properties
+
+Key           | Type                        | Description
+------------- | --------------------------- | ------------------------------------
+`schema`      | _Match containing schema_   | An example value. The type should match whatever the containing schema or property type is.
 
 * * *
 
