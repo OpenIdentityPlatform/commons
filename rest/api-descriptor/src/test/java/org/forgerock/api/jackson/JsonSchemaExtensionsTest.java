@@ -27,6 +27,7 @@ import static org.forgerock.util.test.assertj.Conditions.equalTo;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -39,6 +40,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.assertj.core.data.MapEntry;
+import org.forgerock.api.annotations.AdditionalProperties;
 import org.forgerock.api.annotations.Default;
 import org.forgerock.api.annotations.Description;
 import org.forgerock.api.annotations.EnumTitle;
@@ -67,6 +69,7 @@ public class JsonSchemaExtensionsTest {
     private JsonValue hasArraySchema;
     private JsonValue hasNumericSchema;
     private JsonValue hasDate;
+    private JsonValue hasAdditionalProperties;
 
     @BeforeClass
     public void beforeClass() throws IOException {
@@ -76,6 +79,7 @@ public class JsonSchemaExtensionsTest {
         hasArraySchema = schemaAsJsonValue(HasArray.class);
         hasNumericSchema = schemaAsJsonValue(HasNumeric.class);
         hasDate = schemaAsJsonValue(HasDate.class);
+        hasAdditionalProperties = schemaAsJsonValue(HasAdditionalProperties.class);
     }
 
     @DataProvider(name = "data")
@@ -132,6 +136,13 @@ public class JsonSchemaExtensionsTest {
                 .hasObject("properties")
                 .hasObject(fieldName)
                 .contains(entry);
+    }
+
+    @Test
+    public void testAdditionalProperties() {
+        assertThat(hasAdditionalProperties)
+                .hasObject("additionalProperties")
+                .contains(entry("type", "string"));
     }
 
     @Test
@@ -370,6 +381,11 @@ public class JsonSchemaExtensionsTest {
         public String string;
         @Example("1234567890123456")
         public Long integer;
+    }
+
+    @AdditionalProperties(String.class)
+    private static class HasAdditionalProperties extends HashMap<String, String> {
+        // empty
     }
 
     /**

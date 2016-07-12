@@ -28,9 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import io.swagger.models.ArrayModel;
 import io.swagger.models.Info;
 import io.swagger.models.Model;
@@ -68,11 +65,6 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class OpenApiTransformerTest {
-
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
-            .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-            .enable(SerializationFeature.INDENT_OUTPUT);
 
     @Test
     public void testUserAndDevicesExample() throws Exception {
@@ -115,9 +107,6 @@ public class OpenApiTransformerTest {
                 "/users/{userId}/devices/{deviceId}#1.0_delete",
                 "/users/{userId}/devices/{deviceId}#1.0_patch",
                 "/users/{userId}/devices/{deviceId}#1.0_action_markasstolen");
-        assertThat(swagger.getDefinitions()).containsOnlyKeys("user", "device");
-
-        System.out.println(OBJECT_MAPPER.writeValueAsString(swagger));
     }
 
     @Test
@@ -133,9 +122,6 @@ public class OpenApiTransformerTest {
                 "/testPath#_query_filter",
                 "/testPath#_query_id_id1",
                 "/testPath#_query_id_id2");
-        assertThat(swagger.getDefinitions()).containsOnlyKeys("mySchema");
-
-        //System.out.println(OBJECT_MAPPER.writeValueAsString(swagger));
     }
 
     @Test
@@ -201,9 +187,6 @@ public class OpenApiTransformerTest {
                 "/testPath#2.0_query_filter",
                 "/testPath#2.0_query_id_id1",
                 "/testPath#2.0_query_id_id2");
-        assertThat(swagger.getDefinitions()).containsOnlyKeys("mySchema");
-
-        //System.out.println(OBJECT_MAPPER.writeValueAsString(swagger));
     }
 
     @Test
@@ -337,6 +320,17 @@ public class OpenApiTransformerTest {
                                 o.type("string");
                                 o.setEnum(Arrays.asList("enum_1", "enum_2"));
                                 o.setVendorExtension("x-enum_titles", Arrays.asList("enum_1_title", "enum_2_title"));
+                                return o;
+                            }
+                        }.get(), null},
+                {json(object(
+                        field("type", "object"),
+                        field("additionalProperties", object(field("type", "string"))))),
+                        new Supplier<Model>() {
+                            @Override
+                            public Model get() {
+                                final ModelImpl o = new ModelImpl();
+                                o.setAdditionalProperties(new StringProperty());
                                 return o;
                             }
                         }.get(), null},

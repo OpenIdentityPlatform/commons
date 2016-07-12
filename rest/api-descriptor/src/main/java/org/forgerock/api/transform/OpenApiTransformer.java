@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import org.forgerock.api.enums.CountPolicy;
 import org.forgerock.api.enums.PagingMode;
@@ -140,6 +141,8 @@ public class OpenApiTransformer {
     private final ReferenceResolver referenceResolver;
 
     private final ApiDescription apiDescription;
+
+    private final Map<String, Model> definitionMap = new HashMap<>();
 
     /**
      * Default constructor that is only used by unit tests.
@@ -1006,13 +1009,11 @@ public class OpenApiTransformer {
             final Response response = new Response();
             response.description("Success");
             if (schema.getSchema() != null) {
-                if ("array".equals(schema.getSchema().get("type").asString())) {
-                    response.setSchema(buildProperty(schema.getSchema()));
-                } else {
-                    final ObjectProperty property = new ObjectProperty();
-                    property.setProperties(buildProperties(schema.getSchema()));
-                    response.schema(property);
-                }
+                // https://github.com/swagger-api/swagger-core/issues/1306
+                final Model model = buildModel(schema.getSchema());
+                final String name = UUID.randomUUID().toString() + "-response";
+                definitionMap.put(name, model);
+                response.schema(new RefProperty(name));
             } else {
                 final String ref = getDefinitionsReference(schema.getReference());
                 if (ref == null) {
@@ -1104,9 +1105,13 @@ public class OpenApiTransformer {
 
                 final Response response = new Response();
                 response.description(description);
-                final ObjectProperty property = new ObjectProperty();
-                property.setProperties(buildProperties(errorJsonSchema));
-                response.schema(property);
+
+                // https://github.com/swagger-api/swagger-core/issues/1306
+                final Model model = buildModel(errorJsonSchema);
+                final String name = UUID.randomUUID().toString() + "-error";
+                definitionMap.put(name, model);
+                response.schema(new RefProperty(name));
+
                 responses.put(String.valueOf(code), response);
             }
         }
@@ -1178,8 +1183,6 @@ public class OpenApiTransformer {
     void buildDefinitions() {
         final Definitions definitions = apiDescription.getDefinitions();
         if (definitions != null) {
-            final Map<String, Model> definitionMap = new HashMap<>();
-
             // named schema definitions
             final Set<String> definitionNames = definitions.getNames();
             for (final String name : definitionNames) {
@@ -1188,6 +1191,9 @@ public class OpenApiTransformer {
                     definitionMap.put(name, buildModel(schema.getSchema()));
                 }
             }
+        }
+
+        if (!definitionMap.isEmpty()) {
             swagger.setDefinitions(definitionMap);
         }
     }
@@ -1210,6 +1216,7 @@ public class OpenApiTransformer {
             if (!required.isEmpty()) {
                 model.setRequired(required);
             }
+            model.setAdditionalProperties(buildProperty(schema.get("additionalProperties")));
             break;
         case "array":
             return buildArrayModel(schema);

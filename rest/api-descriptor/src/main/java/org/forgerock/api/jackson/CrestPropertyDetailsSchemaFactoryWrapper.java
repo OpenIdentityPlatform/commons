@@ -17,6 +17,7 @@
 package org.forgerock.api.jackson;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.forgerock.api.jackson.JacksonUtils.OBJECT_MAPPER;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
 import java.io.IOException;
@@ -65,8 +66,10 @@ import com.fasterxml.jackson.module.jsonSchema.factories.VisitorContext;
 import com.fasterxml.jackson.module.jsonSchema.factories.WrapperFactory;
 import com.fasterxml.jackson.module.jsonSchema.types.ArraySchema;
 import com.fasterxml.jackson.module.jsonSchema.types.NumberSchema;
+import com.fasterxml.jackson.module.jsonSchema.types.ObjectSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.SimpleTypeSchema;
 import com.fasterxml.jackson.module.jsonSchema.types.StringSchema;
+import org.forgerock.api.annotations.AdditionalProperties;
 
 /**
  * A {@code SchemaFactoryWrapper} that adds the extra CREST schema attributes once the Jackson schema generation has
@@ -164,6 +167,7 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
                 addMultipleOf(writer, schema);
                 addFormat(writer, schema);
                 addExample(writer, schema);
+                addAdditionalProperties(writer, schema);
             }
 
             private void addExample(BeanProperty writer, JsonSchema schema) {
@@ -369,6 +373,17 @@ public class CrestPropertyDetailsSchemaFactoryWrapper extends SchemaFactoryWrapp
                         }
                         ((PropertyFormatSchema) schema).setPropertyFormat(formatValue);
                     }
+                }
+            }
+
+            private void addAdditionalProperties(BeanProperty writer, JsonSchema schema) throws JsonMappingException {
+                AdditionalProperties additionalProperties = annotationFor(writer, AdditionalProperties.class);
+                if (additionalProperties != null && !additionalProperties.value().isInstance(Void.class)) {
+                    CrestPropertyDetailsSchemaFactoryWrapper visitor = new CrestPropertyDetailsSchemaFactoryWrapper();
+                    OBJECT_MAPPER.acceptJsonFormatVisitor(additionalProperties.value(), visitor);
+                    ObjectSchema.SchemaAdditionalProperties schemaAdditionalProperties =
+                            new ObjectSchema.SchemaAdditionalProperties(visitor.finalSchema());
+                    ((ObjectSchema) schema).setAdditionalProperties(schemaAdditionalProperties);
                 }
             }
 
