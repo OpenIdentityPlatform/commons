@@ -277,7 +277,7 @@ public final class Resources {
                 || provider instanceof CollectionResourceProvider) {
             return HandlerVariant.COLLECTION_RESOURCE;
         }
-        throw new IllegalArgumentException("Cannot deduce provider variant");
+        throw new IllegalArgumentException("Cannot deduce provider variant" + provider.getClass());
     }
 
     private static void addRequestHandlerToRouter(Object provider, Router router, String basePath) {

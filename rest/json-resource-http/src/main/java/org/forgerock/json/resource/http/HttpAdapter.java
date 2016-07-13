@@ -762,6 +762,10 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
     }
 
     private void updateDescriptor() {
+        if (apiProducer == null) {
+            // Not yet attached to CHF
+            return;
+        }
         try {
             Optional<Describable<ApiDescription, Request>> describable = getDescribableConnection();
             if (describable.isPresent()) {

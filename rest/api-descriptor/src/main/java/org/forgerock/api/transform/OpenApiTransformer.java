@@ -313,7 +313,7 @@ public class OpenApiTransformer {
                     final Resource resource = resolveResourceReference(versionedPath.get(version));
 
                     // make sure path starts with forward-slash (OpenAPI 2.0 spec), and does not end with one
-                    final String normalizedPathName = PathUtil.buildPath(pathName);
+                    final String normalizedPathName = pathName.isEmpty() ? "/" : PathUtil.buildPath(pathName);
 
                     buildResourcePaths(resource, normalizedPathName, null, versionName,
                             Collections.<Parameter>emptyList(), pathMap);
