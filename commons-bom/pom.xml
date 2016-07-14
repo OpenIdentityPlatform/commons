@@ -35,7 +35,6 @@
     <properties>
         <!-- Third party components versions -->
         <assertj.version>2.4.0</assertj.version>
-        <fest-assert.version>1.4</fest-assert.version>
         <forgerock-guava.version>18.0.4</forgerock-guava.version>
         <jackson.version>2.6.7</jackson.version>
         <mockito.version>1.10.19</mockito.version>
@@ -114,12 +113,6 @@
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
                 <version>${testng.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.easytesting</groupId>
-                <artifactId>fest-assert</artifactId>
-                <version>${fest-assert.version}</version>
             </dependency>
 
             <dependency>
