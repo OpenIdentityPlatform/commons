@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.selfservice.core.crypto;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.util.crypto.CryptoConstants.*;
 
 import org.forgerock.json.JsonValue;
 
@@ -26,11 +27,6 @@ import org.forgerock.json.JsonValue;
  * @since 0.2.0
  */
 public class CryptoService {
-    private static final String CRYPTO = "$crypto";
-    private static final String TYPE = "type";
-    private static final String VALUE = "value";
-    private static final String ALGORITHM = "algorithm";
-    private static final String DATA = "data";
 
     /**
      * Hashes a string value. Generates a new salt value.
@@ -48,10 +44,10 @@ public class CryptoService {
         final String encodedField = fieldStorageScheme.hashField(plainTextValue);
         return json(object(
                 field(CRYPTO, object(
-                        field(VALUE, object(
-                                field(ALGORITHM, algorithm),
-                                field(DATA, encodedField))),
-                        field(TYPE, CryptoConstants.STORAGE_TYPE_HASH)))));
+                        field(CRYPTO_VALUE, object(
+                                field(CRYPTO_ALGORITHM, algorithm),
+                                field(CRYPTO_DATA, encodedField))),
+                        field(CRYPTO_TYPE, STORAGE_TYPE_HASH)))));
     }
 
     /**
@@ -64,10 +60,10 @@ public class CryptoService {
         return value != null
                 && value.isNotNull()
                 && value.isDefined(CRYPTO)
-                && value.get(CRYPTO).get(TYPE).isString()
-                && value.get(CRYPTO).isDefined(VALUE)
-                && value.get(CRYPTO).get(VALUE).isDefined(ALGORITHM)
-                && value.get(CRYPTO).get(VALUE).get(ALGORITHM).isString();
+                && value.get(CRYPTO).get(CRYPTO_TYPE).isString()
+                && value.get(CRYPTO).isDefined(CRYPTO_VALUE)
+                && value.get(CRYPTO).get(CRYPTO_VALUE).isDefined(CRYPTO_ALGORITHM)
+                && value.get(CRYPTO).get(CRYPTO_VALUE).get(CRYPTO_ALGORITHM).isString();
     }
 
     /**
@@ -84,15 +80,15 @@ public class CryptoService {
      *            if an exception occurred while matching
      */
     public boolean matches(String plainTextValue, JsonValue value) throws JsonCryptoException {
-        JsonValue cryptoValue = value.get(CRYPTO).get(VALUE);
-        String algorithm = cryptoValue.get(ALGORITHM).asString();
+        JsonValue cryptoValue = value.get(CRYPTO).get(CRYPTO_VALUE);
+        String algorithm = cryptoValue.get(CRYPTO_ALGORITHM).asString();
         final FieldStorageScheme fieldStorageScheme = getFieldStorageScheme(algorithm);
-        return fieldStorageScheme.fieldMatches(plainTextValue, cryptoValue.get(DATA).asString());
+        return fieldStorageScheme.fieldMatches(plainTextValue, cryptoValue.get(CRYPTO_DATA).asString());
     }
 
     private FieldStorageScheme getFieldStorageScheme(String algorithm) throws JsonCryptoException {
         try {
-            if (algorithm.equals(CryptoConstants.ALGORITHM_SHA_256)) {
+            if (algorithm.equals(ALGORITHM_SHA_256)) {
                 return new SaltedSHA256FieldStorageScheme();
             } else {
                 throw new JsonCryptoException("Unsupported field storage algorithm " + algorithm);

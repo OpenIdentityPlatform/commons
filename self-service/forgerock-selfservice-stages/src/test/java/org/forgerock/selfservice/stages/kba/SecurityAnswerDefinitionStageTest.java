@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.selfservice.stages.kba;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.util.crypto.CryptoConstants.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 import static org.mockito.BDDMockito.given;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -140,19 +142,18 @@ public final class SecurityAnswerDefinitionStageTest {
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/customQuestion")
                 .isEqualTo(KBA_QUESTION_3);
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer/$crypto/value/algorithm")
-                .isEqualTo("SHA-256");
+                .isEqualTo(ALGORITHM_SHA_256);
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer/$crypto/value/data").hasSize(64);
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/0/answer/$crypto/type")
-                .isEqualTo("salted-hash");
+                .isEqualTo(STORAGE_TYPE_HASH);
 
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/questionId")
                 .isEqualTo("1");
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer/$crypto/value/algorithm")
-                .isEqualTo("SHA-256");
+                .isEqualTo(ALGORITHM_SHA_256);
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer/$crypto/value/data").hasSize(64);
         assertThat(userJson).stringAt(config.getKbaPropertyName() + "/1/answer/$crypto/type")
-                .isEqualTo("salted-hash");
-
+                .isEqualTo(STORAGE_TYPE_HASH);
     }
 
     @Test

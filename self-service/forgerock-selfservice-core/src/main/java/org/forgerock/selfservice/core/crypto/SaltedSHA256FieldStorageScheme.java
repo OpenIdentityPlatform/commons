@@ -11,11 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.selfservice.core.crypto;
 
-import static org.forgerock.selfservice.core.crypto.CryptoConstants.ALGORITHM_SHA_256;
+import static org.forgerock.util.crypto.CryptoConstants.ALGORITHM_SHA_256;
 
 /**
  * This class defines a field storage scheme based on the 256-bit SHA-2 algorithm defined in FIPS 180-2.

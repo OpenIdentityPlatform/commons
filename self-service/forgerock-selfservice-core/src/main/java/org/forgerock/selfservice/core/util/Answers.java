@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.selfservice.core.util;
 
+import static org.forgerock.util.crypto.CryptoConstants.ALGORITHM_SHA_256;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.selfservice.core.crypto.CryptoConstants;
 import org.forgerock.selfservice.core.crypto.CryptoService;
 import org.forgerock.selfservice.core.crypto.JsonCryptoException;
 
@@ -51,7 +52,7 @@ public final class Answers {
                 return answer;
             }
             if (answer.isString()) {
-                return cryptoService.hash(normaliseAnswer(answer.asString()), CryptoConstants.ALGORITHM_SHA_256);
+                return cryptoService.hash(normaliseAnswer(answer.asString()), ALGORITHM_SHA_256);
             }
             throw new InternalServerErrorException("Provided answer is neither a string, nor an already hashed value.");
         } catch (JsonCryptoException e) {

@@ -16,13 +16,31 @@
 
 package org.forgerock.json.crypto;
 
+import static org.forgerock.util.crypto.CryptoConstants.*;
+
 import java.util.HashMap;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.util.crypto.CryptoConstants;
 
 /**
  * Represents a JSON {@code $crypto} object.
+ *
+ * For example:
+ * <pre>
+ * "$crypto":{
+ *     "value":{
+ *         "data":"wfoQJXXXXTa551pKTMjZ/Q==",
+ *         "cipher":"AES/CBC/PKCS5Padding",
+ *         "iv":"OXHdtVBURv6fAuRa88CDnA==",
+ *         "key":"openidm-sym-default"
+ *     },
+ *     "type":"x-simple-encryption"
+ * }
+ * </pre>
+ *
+ * @see CryptoConstants for constants used to build the json.
  */
 public class JsonCrypto {
 
@@ -74,9 +92,9 @@ public class JsonCrypto {
      */
     public static boolean isJsonCrypto(JsonValue value) {
         boolean result = false;
-        if (value.isDefined("$crypto")) { // avoid transformer endless loops
-            JsonValue crypto = value.get("$crypto");
-            result = (crypto.get("type").isString() && crypto.isDefined("value"));
+        if (value.isDefined(CRYPTO)) { // avoid transformer endless loops
+            JsonValue crypto = value.get(CRYPTO);
+            result = (crypto.get(CRYPTO_TYPE).isString() && crypto.isDefined(CRYPTO_VALUE));
         }
         return result;
     }
@@ -122,9 +140,9 @@ public class JsonCrypto {
      * @throws JsonValueException if the specified value is malformed.
      */
     public void fromJsonValue(JsonValue value) throws JsonValueException {
-        JsonValue crypto = value.get("$crypto").required();
-        this.type = crypto.get("type").required().asString();
-        this.value = crypto.get("value").required();
+        JsonValue crypto = value.get(CRYPTO).required();
+        this.type = crypto.get(CRYPTO_TYPE).required().asString();
+        this.value = crypto.get(CRYPTO_VALUE).required();
     }
 
     /**
@@ -133,10 +151,12 @@ public class JsonCrypto {
      */
     public JsonValue toJsonValue() {
         HashMap<String, Object> crypto = new HashMap<>();
-        crypto.put("type", type);
-        crypto.put("value", value == null ? null : value.getObject());
+        crypto.put(CRYPTO_TYPE, type);
+        crypto.put(CRYPTO_VALUE, value == null
+                ? null
+                : value.getObject());
         HashMap<String, Object> result = new HashMap<>();
-        result.put("$crypto", crypto);
+        result.put(CRYPTO, crypto);
         return new JsonValue(result);
     }
 }

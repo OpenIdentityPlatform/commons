@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.selfservice.stages.kba;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.util.crypto.CryptoConstants.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 import static org.mockito.BDDMockito.given;
@@ -23,6 +24,7 @@ import static org.mockito.Matchers.any;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
@@ -354,11 +356,11 @@ public final class SecurityAnswerVerificationStageTest {
 
     private Object newHashedAnswer(String data) {
         return object(
-                field("$crypto", object(
-                        field("value", object(
-                                field("algorithm", "SHA-256"),
-                                field("data", data))),
-                        field("type", "salted-hash"))));
+                field(CRYPTO, object(
+                        field(CRYPTO_VALUE, object(
+                                field(CRYPTO_ALGORITHM, ALGORITHM_SHA_256),
+                                field(CRYPTO_DATA, data))),
+                        field(CRYPTO_TYPE, STORAGE_TYPE_HASH))));
     }
 
     private JsonValue newEmptyJsonValue() {

@@ -11,29 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.selfservice.core.crypto;
 
 /**
- * Constants for use with the Cryptography Service.
- *
- * @since 0.2.0
+ * Provides common crypto constants and classes.
  */
-public final class CryptoConstants {
-
-    /**
-     * A salted hash encryption storage type.
-     */
-    public static final String STORAGE_TYPE_HASH = "salted-hash";
-
-    /**
-     * The name of the message digest algorithm that should be used to generate 256-bit SHA-2 hashes.
-     */
-    public static final String ALGORITHM_SHA_256 = "SHA-256";
-
-    private CryptoConstants() {
-        throw new UnsupportedOperationException();
-    }
-
-}
+package org.forgerock.util.crypto;
