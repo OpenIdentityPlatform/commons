@@ -22,6 +22,8 @@ import static org.forgerock.api.models.Resource.AnnotatedTypeVariant.*;
 import static org.forgerock.api.models.Resource.*;
 import static org.forgerock.json.JsonValue.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 
 import org.forgerock.api.annotations.Actions;
@@ -35,6 +37,7 @@ import org.forgerock.api.enums.PagingMode;
 import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.enums.Stability;
+import org.forgerock.api.jackson.JacksonUtils;
 import org.forgerock.api.jackson.TranslationModule;
 import org.forgerock.api.jackson.TranslationSerializer;
 import org.forgerock.api.util.Translator;
@@ -47,12 +50,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ResourceTest {
 
+    public static final String I18NJSONSCHEMA_JSON = "i18njsonschema.json";
     private final String title = "My Title";
     private final String description = "My Description";
     public static final String TRANSLATED_DISCRIPTION_TWICE_REGEX =
             ".*(If you see this it has been translated).*(If you see this it has been translated).*";
+    public static final String TRANSLATED_JSON_SCHEMA_DESC_TITLE =
+            ".*(Json schema description).*(Json schema title).*";
     private final String i18nDescription = Translator.TRANSLATION_KEY_PREFIX + "api-dictionary#description_test";
     private Schema schema;
+    private Schema i18nSchema;
     private Create create;
     private Read read;
     private Update update;
@@ -64,10 +71,11 @@ public class ResourceTest {
     private Query query2;
 
     @BeforeClass
-    public void beforeClass() {
+    public void beforeClass() throws IOException {
         schema = Schema.schema()
                 .schema(json(object()))
                 .build();
+        i18nSchema = getI18nSchema();
         create = Create.create()
                 .mode(CreateMode.ID_FROM_SERVER)
                 .build();
@@ -722,7 +730,7 @@ public class ResourceTest {
 
         final Resource resource = Resource.resource()
                 .description(description)
-                .resourceSchema(schema)
+                .resourceSchema(i18nSchema)
                 .operations(create, readLocal, update, delete, patch, action1, action2, query1, query2)
                 .mvccSupported(true)
                 .build();
@@ -740,6 +748,7 @@ public class ResourceTest {
         String serialized = mapper.writeValueAsString(resource);
 
         assertThat(serialized.matches(TRANSLATED_DISCRIPTION_TWICE_REGEX));
+        assertThat(serialized.matches(TRANSLATED_JSON_SCHEMA_DESC_TITLE));
 
     }
 
@@ -784,4 +793,8 @@ public class ResourceTest {
         public Integer field;
     }
 
+    private Schema getI18nSchema() throws IOException {
+        InputStream is = this.getClass().getResourceAsStream(I18NJSONSCHEMA_JSON);
+        return Schema.schema().schema(json(JacksonUtils.OBJECT_MAPPER.readValue(is, Object.class))).build();
+    }
 }

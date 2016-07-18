@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "id": "urn:jsonschema:org:forgerock:json:resource:descriptor:examples:model:User",
+  "required": [
+    "uid",
+    "password",
+    "name"
+  ],
+  "description": "i18n:api-dictionary#jsonschema_desc",
+  "title": "i18n:api-dictionary#jsonschema_title",
+  "properties": {
+    "uid": {
+      "type": "string",
+      "description": "Unique user identifier",
+      "title": "User ID"
+    },
+    "name": {
+      "type": "string",
+      "description": "The user name",
+      "title": "User name"
+    },
+    "password": {
+      "type": "string",
+      "description": "Password of the user",
+      "title": "Password"
+    },
+    "devices": {
+      "type": "array",
+      "description": "Devices belonging to this user",
+      "title": "Devices",
+      "items": {
+        "type": "object",
+        "id": "urn:jsonschema:org:forgerock:json:resource:descriptor:examples:model:Device",
+        "required": [
+          "name",
+          "type",
+          "did"
+        ],
+        "description": "Device entity",
+        "title": "Device",
+        "properties": {
+          "did": {
+            "type": "string",
+            "description": "Unique device identifier",
+            "title": "Device ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "The device's name",
+            "title": "Device name"
+          },
+          "type": {
+            "type": "string",
+            "description": "The device's type",
+            "title": "Device type"
+          },
+          "stolen": {
+            "type": "boolean",
+            "description": "Set to true if the device has been stolen",
+            "title": "Stolen flag"
+          },
+          "rollOutDate": {
+            "type": "string",
+            "description": "Device roll-out date",
+            "title": "Roll-out date",
+            "format": "date-time"
+          }
+        }
+      },
+      "uniqueItems": true
+    }
+  }
+}
