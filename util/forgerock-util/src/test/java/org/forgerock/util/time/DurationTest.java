@@ -129,6 +129,7 @@ public class DurationTest {
         assertThat(duration("1 micros")).isEqualTo(1L, TimeUnit.MICROSECONDS);
         assertThat(duration("1 micro")).isEqualTo(1L, TimeUnit.MICROSECONDS);
         assertThat(duration("1 us")).isEqualTo(1L, TimeUnit.MICROSECONDS);
+        assertThat(duration("1 \u03BCs")).isEqualTo(1L, TimeUnit.MICROSECONDS); // lowercase-greek-mu
 
         assertThat(duration("1 nanoseconds")).isEqualTo(1L, TimeUnit.NANOSECONDS);
         assertThat(duration("1 nanosecond")).isEqualTo(1L, TimeUnit.NANOSECONDS);

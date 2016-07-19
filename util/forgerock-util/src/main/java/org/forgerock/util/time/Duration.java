@@ -234,7 +234,7 @@ public class Duration implements Comparable<Duration> {
         for (String ms : asList("milliseconds", "millisecond", "millisec", "millis", "milli", "ms")) {
             TIME_UNITS.put(ms, MILLISECONDS);
         }
-        for (String us : asList("microseconds", "microsecond", "microsec", "micros", "micro", "us")) {
+        for (String us : asList("microseconds", "microsecond", "microsec", "micros", "micro", "us", "\u03BCs")) {
             TIME_UNITS.put(us, MICROSECONDS);
         }
         for (String ns : asList("nanoseconds", "nanosecond", "nanosec", "nanos", "nano", "ns")) {
