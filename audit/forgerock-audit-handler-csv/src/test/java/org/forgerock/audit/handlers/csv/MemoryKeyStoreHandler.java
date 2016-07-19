@@ -17,13 +17,12 @@ package org.forgerock.audit.handlers.csv;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
-import java.io.IOException;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 
 import org.forgerock.audit.secure.KeyStoreHandler;
+import org.forgerock.security.keystore.KeyStoreBuilder;
+import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.util.Utils;
 
 /**
  * In memory implementation of {@link KeyStoreHandler}
@@ -34,13 +33,11 @@ public class MemoryKeyStoreHandler implements KeyStoreHandler {
     private final String password = "password";
 
     public MemoryKeyStoreHandler() {
-        try {
-            keyStore = KeyStore.getInstance(CsvSecureConstants.KEYSTORE_TYPE);
-            // Pass null as InputStream to initialize it.
-            keyStore.load(null, password.toCharArray());
-        } catch (IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException ex) {
-            throw new RuntimeException(ex);
-        }
+        this.keyStore = new KeyStoreBuilder()
+                .withKeyStoreType(Utils.asEnum(CsvSecureConstants.KEYSTORE_TYPE, KeyStoreType.class))
+                .withPassword(password)
+                .withInputStream(null)
+                .build();
     }
 
     @Override

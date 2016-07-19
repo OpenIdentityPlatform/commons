@@ -17,29 +17,32 @@
 package org.forgerock.json.crypto.cli;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.util.ArrayList;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonTransformer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
 import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonTransformer;
-import org.forgerock.json.JsonValue;
+import org.forgerock.security.keystore.KeyStoreBuilder;
+import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.util.Utils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Command-line interface to encrypt/decrypt.
@@ -156,13 +159,12 @@ public class Main {
 
     private SimpleKeyStoreSelector getSimpleKeySelector(String keystore, String type, String password, String provider)
             throws Exception {
-        KeyStore ks = (provider == null ? KeyStore.getInstance(type) : KeyStore.getInstance(type, provider));
-        File ksFile = new File(keystore);
-        if (ksFile.exists()) {
-            ks.load(new FileInputStream(ksFile), password == null ? null : password.toCharArray());
-        } else {
-            throw new FileNotFoundException("KeyStore file not found at: " + ksFile.getAbsolutePath());
-        }
+        final KeyStore ks = new KeyStoreBuilder()
+                .withKeyStoreFile(keystore)
+                .withPassword(password)
+                .withProvider(provider)
+                .withKeyStoreType(Utils.asEnum(type, KeyStoreType.class))
+                .build();
         return new SimpleKeyStoreSelector(ks, password);
     }
 

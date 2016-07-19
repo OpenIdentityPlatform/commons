@@ -19,8 +19,10 @@ package org.forgerock.jaspi.modules.session.jwt;
 import static org.forgerock.caf.authentication.framework.AuditTrail.AUDIT_SESSION_ID_KEY;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.Key;
+import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
@@ -29,7 +31,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -50,7 +51,10 @@ import org.forgerock.json.jose.jws.handlers.HmacSigningHandler;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
-import org.forgerock.json.jose.utils.KeystoreManager;
+import org.forgerock.security.keystore.KeyStoreBuilder;
+import org.forgerock.security.keystore.KeyStoreManager;
+import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.util.Utils;
 import org.forgerock.util.encode.Base64;
 
 /**
@@ -109,7 +113,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
     private String keyAlias;
     private String privateKeyPassword;
-    private String keystoreType;
+    private KeyStoreType keystoreType;
     private String keystoreFile;
     private String keystorePassword;
     String sessionCookieName;
@@ -150,7 +154,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
         this.handler = handler;
         this.keyAlias = (String) options.get(KEY_ALIAS_KEY);
         this.privateKeyPassword = (String) options.get(PRIVATE_KEY_PASSWORD_KEY);
-        this.keystoreType = (String) options.get(KEYSTORE_TYPE_KEY);
+        this.keystoreType = Utils.asEnum((String) options.get(KEYSTORE_TYPE_KEY), KeyStoreType.class);
         this.keystoreFile = (String) options.get(KEYSTORE_FILE_KEY);
         this.keystorePassword = (String) options.get(KEYSTORE_PASSWORD_KEY);
         this.sessionCookieName = (String) options.get(SESSION_COOKIE_NAME_KEY);
@@ -268,6 +272,9 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
             } catch (JweDecryptionException e) {
                 LOG.debug("Failed to decrypt Jwt", e);
                 return null;
+            } catch (FileNotFoundException e) {
+                LOG.debug("Unable to load keystore", e);
+                return null;
             }
             if (jwt != null) {
                 //if all goes well!
@@ -277,7 +284,12 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
                 // This helps reduce overheads when the client makes multiple requests for a single operation.
                 if (hasCoolOffPeriodExpired(jwt)) {
                     // reset tokenIdleTime
-                    resetIdleTimeout(jwt, messageInfo);
+                    try {
+                        resetIdleTimeout(jwt, messageInfo);
+                    } catch (FileNotFoundException e) {
+                        LOG.debug("Unable to load keystore", e);
+                        return null;
+                    }
                 }
 
                 messageInfo.getMap().put(JWT_VALIDATED_KEY, true);
@@ -322,11 +334,15 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
      * @param sessionJwt The JWT string.
      * @return The validated decrypted JWT.
      */
-    private Jwt verifySessionJwt(String sessionJwt) {
+    private Jwt verifySessionJwt(String sessionJwt) throws FileNotFoundException {
+        final KeyStore keyStore = new KeyStoreBuilder()
+                .withKeyStoreFile(keystoreFile)
+                .withPassword(keystorePassword)
+                .withKeyStoreType(keystoreType)
+                .build();
+        final KeyStoreManager keyStoreManager = new KeyStoreManager(keyStore);
 
-        KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
-
-        Key privateKey = keystoreManager.getPrivateKey(keyAlias, privateKeyPassword);
+        Key privateKey = keyStoreManager.getPrivateKey(keyAlias, privateKeyPassword);
 
         SignedEncryptedJwt jwt = jwtBuilderFactory.reconstruct(sessionJwt, SignedEncryptedJwt.class);
         if (!jwt.verify(signingHandler)) {
@@ -370,8 +386,9 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
      *
      * @param jwt The Jwt, which has been decrypted and validated prior to this call.
      * @param messageInfo The {@code MessageInfo} which contains the response with the Jwt Session Cookie.
+     * @throws FileNotFoundException If unable to load keystore.
      */
-    private void resetIdleTimeout(Jwt jwt, MessageInfo messageInfo) {
+    private void resetIdleTimeout(Jwt jwt, MessageInfo messageInfo) throws FileNotFoundException {
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
@@ -387,9 +404,14 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
         jwt.getClaimsSet().setNotBeforeTime(nbf);
         jwt.getClaimsSet().setClaim(TOKEN_IDLE_TIME_IN_SECONDS_CLAIM_KEY, tokenIdleTime.getTime() / 1000L);
 
-        KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
+        final KeyStore keyStore = new KeyStoreBuilder()
+                .withKeyStoreFile(keystoreFile)
+                .withPassword(keystorePassword)
+                .withKeyStoreType(keystoreType)
+                .build();
+        final KeyStoreManager keyStoreManager = new KeyStoreManager(keyStore);
 
-        Key publicKey = keystoreManager.getPublicKey(keyAlias);
+        Key publicKey = keyStoreManager.getPublicKey(keyAlias);
 
         String jwtString = rebuildEncryptedJwt(jwt, publicKey);
 
@@ -455,7 +477,12 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
             String sessionId = UUID.randomUUID().toString();
             jwtParameters.put("sessionId", sessionId);
             messageInfo.getMap().put(AUDIT_SESSION_ID_KEY, sessionId);
-            addCookiesToResponse(createSessionJwtCookies(jwtParameters), messageInfo);
+            try {
+                addCookiesToResponse(createSessionJwtCookies(jwtParameters), messageInfo);
+            } catch (FileNotFoundException e) {
+                LOG.debug("Unable to load keystore", e);
+                return AuthStatus.FAILURE;
+            }
         }
 
         return AuthStatus.SEND_SUCCESS;
@@ -471,13 +498,19 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
      *
      * @param jwtParameters The parameters that should be added to the JWT payload.
      * @throws AuthenticationException If there is a problem creating and encrypting the JWT.
+     * @throws FileNotFoundException If unable to load keystore.
      */
     private Collection<C> createSessionJwtCookies(Map<String, Object> jwtParameters)
-            throws AuthenticationException {
+            throws AuthenticationException, FileNotFoundException {
 
-        KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreFile, keystorePassword);
+        final KeyStore keyStore = new KeyStoreBuilder()
+                .withKeyStoreFile(keystoreFile)
+                .withPassword(keystorePassword)
+                .withKeyStoreType(keystoreType)
+                .build();
+        final KeyStoreManager keyStoreManager = new KeyStoreManager(keyStore);
 
-        Key publicKey = keystoreManager.getPublicKey(keyAlias);
+        Key publicKey = keyStoreManager.getPublicKey(keyAlias);
 
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());

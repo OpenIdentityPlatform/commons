@@ -40,4 +40,14 @@
         <justification>OPENDJ-1058: Added a timeout parameter to actively shutdown dead connections</justification>
       </difference>
     -->
+    <difference>
+        <className>org/forgerock/json/jose/utils/KeystoreManager</className>
+        <differenceType>8001</differenceType>
+        <justification>COMMONS-100 Moved this class to the commons security module</justification>
+    </difference>
+    <difference>
+        <className>org/forgerock/json/jose/utils/KeystoreManagerException</className>
+        <differenceType>8001</differenceType>
+        <justification>COMMONS-100 Moved this class to the commons security module</justification>
+    </difference>
 </differences>

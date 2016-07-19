@@ -79,5 +79,6 @@
     <module>rest</module>
     <module>self-service</module>
     <module>util</module>
+    <module>security</module>
   </modules>
 </project>

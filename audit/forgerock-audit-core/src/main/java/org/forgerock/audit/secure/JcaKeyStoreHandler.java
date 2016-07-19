@@ -16,18 +16,19 @@
 
 package org.forgerock.audit.secure;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+
+import org.forgerock.security.keystore.KeyStoreBuilder;
+import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.util.Utils;
 
 /**
  * Default implementation of a Keystore handler.
@@ -36,7 +37,7 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
 
     private final String location;
     private final String password;
-    private final String type;
+    private final KeyStoreType type;
     private KeyStore store;
 
     /**
@@ -54,20 +55,20 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
     public JcaKeyStoreHandler(String type, String location, String password) throws Exception {
         this.location = location;
         this.password = password;
-        this.type = type;
+        this.type = Utils.asEnum(type, KeyStoreType.class);
         init();
     }
 
     private void init() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
-        File ksFile = new File(location);
-        store = KeyStore.getInstance(type);
-        if (ksFile.exists()) {
-            try (InputStream in = new BufferedInputStream(new FileInputStream(location))) {
-                store.load(in, password.toCharArray());
-            }
+        final File keystore = new File(location);
+        if (!keystore.exists()) {
+            this.store = createKeyStore();
         } else {
-            // Create an empty one
-            store.load(null, password.toCharArray());
+            this.store = new KeyStoreBuilder()
+                    .withKeyStoreFile(location)
+                    .withKeyStoreType(type)
+                    .withPassword(password)
+                    .build();
         }
     }
 
@@ -101,6 +102,17 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
 
     @Override
     public String getType() {
-        return type;
+        return type.name();
+    }
+
+    private KeyStore createKeyStore()
+            throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
+        final KeyStore keyStore;
+        try (final OutputStream keystoreFile = new FileOutputStream(location)) {
+            keyStore = KeyStore.getInstance(type.name());
+            keyStore.load(null, password.toCharArray());
+            keyStore.store(keystoreFile, password.toCharArray());
+        }
+        return keyStore;
     }
 }

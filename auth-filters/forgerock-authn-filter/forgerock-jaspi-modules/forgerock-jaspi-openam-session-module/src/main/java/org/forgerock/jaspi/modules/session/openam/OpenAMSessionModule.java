@@ -23,9 +23,16 @@ import static org.forgerock.http.protocol.Responses.noopExceptionFunction;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.util.CloseSilentlyFunction.closeSilently;
 import static org.forgerock.util.Utils.closeSilently;
-import static org.forgerock.util.promise.Promises.newExceptionPromise;
-import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.util.promise.Promises.*;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.security.KeyStore;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.security.auth.Subject;
@@ -35,16 +42,6 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.security.KeyStore;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
@@ -58,10 +55,13 @@ import org.forgerock.http.protocol.RequestCookies;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.security.keystore.KeyStoreBuilder;
+import org.forgerock.security.keystore.KeyStoreType;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
+import org.forgerock.util.Utils;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
@@ -234,18 +234,13 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
         }
     }
 
-    private KeyStore buildKeyStore(final String keystoreFile, final String type,
-            final String password) throws Exception {
-        final KeyStore keyStore = KeyStore.getInstance(type);
-        InputStream keyInput = null;
-        try {
-            keyInput = new FileInputStream(keystoreFile);
-            final char[] credentials = password == null ? null : password.toCharArray();
-            keyStore.load(keyInput, credentials);
-        } finally {
-            closeSilently(keyInput);
-        }
-        return keyStore;
+    private KeyStore buildKeyStore(final String keystoreFile, final String type, final String password)
+            throws Exception {
+        return new KeyStoreBuilder()
+                .withKeyStoreFile(keystoreFile)
+                .withKeyStoreType(Utils.asEnum(type, KeyStoreType.class))
+                .withPassword(password)
+                .build();
     }
 
     /**

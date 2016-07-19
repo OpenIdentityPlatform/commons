@@ -11,26 +11,23 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
-package org.forgerock.json.common.util;
+package org.forgerock.security.keystore;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
-
-import org.forgerock.json.jose.utils.KeystoreManager;
-import org.testng.annotations.Test;
-
-@SuppressWarnings("javadoc")
-public class KeystoreManagerTest {
-
-    @Test
-    public void should() throws UnsupportedEncodingException {
-
-        KeystoreManager keystoreManager = new KeystoreManager("JKS",
-                URLDecoder.decode(ClassLoader.getSystemResource("keystore.jks").getFile(), "UTF-8"), "password");
-
-        keystoreManager.getPrivateKey("jwt-test-ks", "password");
-    }
+/**
+ * Lists the various keystore/truststore types.
+ * @see <a href="http://docs.oracle.com/javase/7/docs/technotes/guides/security/StandardNames.html#KeyStore">
+ *     List of Keystore Types in JDK 7</a>
+ */
+public enum KeyStoreType {
+    /** JKS keystore type. */
+    JKS,
+    /** JCEKS keystore type. */
+    JCEKS,
+    /** PKCS11 keystore type. */
+    PKCS11,
+    /** PKCS12 keystore type. */
+    PKCS12
 }

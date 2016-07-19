@@ -11,13 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
-package org.forgerock.json.jose.utils;
+package org.forgerock.security.keystore;
 
 /**
- * Represents an exception from an operation using the KeystoreManager class.
+ * Represents an exception from an operation using the KeyStoreManager class.
  *
  * @since 2.0.0
  */
@@ -34,6 +34,18 @@ public class KeystoreManagerException extends RuntimeException {
      *                {@link #getMessage()} method.
      */
     public KeystoreManagerException(String message) {
+        super(message);
+    }
+
+    /**
+     * Constructs a new KeystoreManagerException with the specified detail message. The cause is not initialized,
+     * and may subsequently be initialized by a call to {@link #initCause}.
+     *
+     * @param message The detail message. The detail message is saved for later retrieval by the
+     *                {@link #getMessage()} method.
+     * @param cause The {@link Throwable} that caused the exception.
+     */
+    public KeystoreManagerException(String message, Throwable cause) {
         super(message);
     }
 

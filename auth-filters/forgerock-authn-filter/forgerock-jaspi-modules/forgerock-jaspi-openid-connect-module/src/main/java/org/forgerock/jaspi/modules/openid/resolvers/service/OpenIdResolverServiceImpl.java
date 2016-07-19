@@ -11,14 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.jaspi.modules.openid.resolvers.service;
 
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 
+import java.io.FileNotFoundException;
 import java.net.URL;
+import java.security.KeyStore;
 import java.security.PublicKey;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -26,8 +28,11 @@ import java.util.concurrent.ConcurrentMap;
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolver;
 import org.forgerock.jaspi.modules.openid.resolvers.OpenIdResolverFactory;
-import org.forgerock.json.jose.utils.KeystoreManager;
-import org.forgerock.json.jose.utils.KeystoreManagerException;
+import org.forgerock.security.keystore.KeyStoreBuilder;
+import org.forgerock.security.keystore.KeyStoreManager;
+import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.security.keystore.KeystoreManagerException;
+import org.forgerock.util.Utils;
 
 /**
  * Holds a copy of the current OpenID Resolvers.
@@ -101,9 +106,13 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
 
         try {
             // Do not need the private key password as we are only ever getting the public key
-            final KeystoreManager keystoreManager = new KeystoreManager(keystoreType, keystoreLocation,
-                    keystorePassword);
-            final PublicKey key = keystoreManager.getPublicKey(keyAlias);
+            final KeyStore keyStore = new KeyStoreBuilder()
+                    .withKeyStoreFile(keystoreLocation)
+                    .withKeyStoreType(Utils.asEnum(keystoreType, KeyStoreType.class))
+                    .withPassword(keystorePassword)
+                    .build();
+            final KeyStoreManager keyStoreManager = new KeyStoreManager(keyStore);
+            final PublicKey key = keyStoreManager.getPublicKey(keyAlias);
 
             final OpenIdResolver impl = openIdResolverFactory.createPublicKeyResolver(issuer, key);
             openIdResolvers.put(issuer, impl);
@@ -112,6 +121,9 @@ public class OpenIdResolverServiceImpl implements OpenIdResolverService {
             return false;
         } catch (NullPointerException npe) {
             LOG.debug("No key found in keystore with appropriate alias", npe);
+            return false;
+        } catch (FileNotFoundException e) {
+            LOG.debug("Unable to load keystore", e);
             return false;
         }
 

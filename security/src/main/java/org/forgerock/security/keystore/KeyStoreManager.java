@@ -11,13 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
-package org.forgerock.json.jose.utils;
+package org.forgerock.security.keystore;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -25,49 +23,22 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 /**
  * A class that manages a Java Key Store and has methods for extracting out public/private keys and certificates.
- *
- * @since 2.0.0
  */
-public class KeystoreManager {
+public class KeyStoreManager {
 
-    private KeyStore keyStore = null;
-
-    /**
-     * Constructs an instance of the KeystoreManager.
-     *
-     * @param keyStoreType The type of Java KeyStore.
-     * @param keyStoreFile The file path to the KeyStore.
-     * @param keyStorePassword The password for the KeyStore.
-     */
-    public KeystoreManager(String keyStoreType, String keyStoreFile,
-            String keyStorePassword) {
-        loadKeyStore(keyStoreType, keyStoreFile, keyStorePassword);
-    }
+    private final KeyStore keyStore;
 
     /**
-     * Loads the KeyStore based on the given parameters.
+     * Constructs an instance of the KeyStoreManager.
      *
-     * @param keyStoreType The type of Java KeyStore.
-     * @param keyStoreFile The file path to the KeyStore.
-     * @param keyStorePassword The password for the KeyStore.
+     * @param keyStore The managed {@link KeyStore}. The key store must already be loaded.
      */
-    private void loadKeyStore(String keyStoreType, String keyStoreFile, String keyStorePassword) {
-        try {
-            keyStore = KeyStore.getInstance(keyStoreType);
-            if (keyStoreFile == null || keyStoreFile.isEmpty()) {
-                throw new KeystoreManagerException("mapPk2Cert.JKSKeyProvider: KeyStore FileName is null, "
-                        + "unable to establish Mapping Public Keys to Certificates!");
-            }
-            FileInputStream fis = new FileInputStream(keyStoreFile);
-            keyStore.load(fis, keyStorePassword.toCharArray());
-        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException | IOException e) {
-            throw new KeystoreManagerException(e);
-        }
+    public KeyStoreManager(final KeyStore keyStore) {
+        this.keyStore = keyStore;
     }
 
     /**
@@ -84,7 +55,7 @@ public class KeystoreManager {
         try {
             return keyStore.getCertificate(certAlias);
         } catch (KeyStoreException e) {
-            throw new KeystoreManagerException(e);
+            throw new KeystoreManagerException("Unable to get certificate: " + certAlias, e);
         }
     }
 
@@ -128,7 +99,6 @@ public class KeystoreManager {
      * @return The Private Key.
      */
     public PrivateKey getPrivateKey(String keyAlias, String privateKeyPassword) {
-
         if (keyAlias == null || keyAlias.length() == 0) {
             return null;
         }
@@ -136,7 +106,15 @@ public class KeystoreManager {
         try {
             return (PrivateKey) keyStore.getKey(keyAlias, privateKeyPassword.toCharArray());
         } catch (KeyStoreException | NoSuchAlgorithmException | UnrecoverableKeyException e) {
-            throw new KeystoreManagerException(e);
+            throw new KeystoreManagerException("unable to get private key:" + keyAlias, e);
         }
+    }
+
+    /**
+     * Gets the managed {@link KeyStore}.
+     * @return The managed {@link KeyStore}.
+     */
+    public KeyStore getKeyStore() {
+        return keyStore;
     }
 }
