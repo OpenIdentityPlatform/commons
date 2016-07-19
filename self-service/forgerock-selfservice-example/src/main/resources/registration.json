@@ -1,6 +1,13 @@
 {
   "stageConfigs": [
     {
+      "name" : "termsAndConditions",
+      "termsTranslations" : {
+        "en" : "Some fake terms",
+        "fr" : "More fake terms"
+      }
+    },
+    {
       "class" : "org.forgerock.selfservice.custom.MathProblemStageConfig",
       "leftValue" : 12,
       "rightValue" : 4

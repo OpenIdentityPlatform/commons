@@ -1,6 +1,13 @@
 {
   "stageConfigs": [
     {
+      "name" : "termsAndConditions",
+      "termsTranslations" : {
+        "en" : "Some fake terms",
+        "fr" : "More fake terms"
+      }
+    },
+    {
       "name" : "emailValidation",
       "emailServiceUrl": "/email",
       "subjectTranslations": {

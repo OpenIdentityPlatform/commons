@@ -50,6 +50,7 @@ public final class JsonConfigTest {
 
     /* the stages that are defined in the test resource "selfservice.json" */
     private static final String[] STAGES = new String[] {
+        "termsAndConditions",
         "emailValidation",
         "userQuery",
         "retrieveUsername",

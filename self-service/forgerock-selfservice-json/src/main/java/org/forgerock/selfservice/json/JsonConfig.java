@@ -31,6 +31,7 @@ import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
 import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
 import org.forgerock.selfservice.stages.reset.ResetStageConfig;
+import org.forgerock.selfservice.stages.terms.TermsAndConditionsConfig;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
 import org.forgerock.selfservice.stages.user.EmailUsernameConfig;
 import org.forgerock.selfservice.stages.user.RetrieveUsernameConfig;
@@ -65,6 +66,7 @@ final class JsonConfig {
                         new NamedType(SecurityAnswerVerificationConfig.class, SecurityAnswerVerificationConfig.NAME),
                         new NamedType(RetrieveUsernameConfig.class, RetrieveUsernameConfig.NAME),
                         new NamedType(EmailUsernameConfig.class, EmailUsernameConfig.NAME),
+                        new NamedType(TermsAndConditionsConfig.class, TermsAndConditionsConfig.NAME),
 
                         // token handler config object mapping
                         new NamedType(JwtTokenHandlerConfig.class, JwtTokenHandlerConfig.TYPE));
