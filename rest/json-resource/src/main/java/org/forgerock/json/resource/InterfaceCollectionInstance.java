@@ -31,7 +31,7 @@ class InterfaceCollectionInstance implements RequestHandler {
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(final Context context,
             final ActionRequest request) {
-        return provider.actionInstance(Resources.parentOf(context), Resources.idOf(context), request);
+        return provider.actionInstance(context, Resources.idOf(context), request);
     }
 
     @Override
@@ -45,13 +45,13 @@ class InterfaceCollectionInstance implements RequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(final Context context,
             final DeleteRequest request) {
-        return provider.deleteInstance(Resources.parentOf(context), Resources.idOf(context), request);
+        return provider.deleteInstance(context, Resources.idOf(context), request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context,
             final PatchRequest request) {
-        return provider.patchInstance(Resources.parentOf(context), Resources.idOf(context), request);
+        return provider.patchInstance(context, Resources.idOf(context), request);
     }
 
     @Override
@@ -65,13 +65,13 @@ class InterfaceCollectionInstance implements RequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
             final ReadRequest request) {
-        return provider.readInstance(Resources.parentOf(context), Resources.idOf(context), request);
+        return provider.readInstance(context, Resources.idOf(context), request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
             final UpdateRequest request) {
-        return provider.updateInstance(Resources.parentOf(context), Resources.idOf(context), request);
+        return provider.updateInstance(context, Resources.idOf(context), request);
     }
 
 }

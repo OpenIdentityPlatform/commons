@@ -11,17 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.authz.filter.crest;
 
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.*;
@@ -46,8 +48,10 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.Test;
 
@@ -193,18 +197,20 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
-        Context context = mock(Context.class);
+        Context context = new RootContext();
         ActionRequest request = Requests.newActionRequest("RESOURCE_NAME", "ACTION_ID");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
-        given(module.authorizeAction(context, request)).willReturn(authorizePromise);
+        given(module.authorizeAction(isA(Context.class), eq(request))).willReturn(authorizePromise);
 
         //When
         chain.handleAction(context, request);
 
         //Then
-        verify(target).actionInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<ActionRequest>anyObject());
+        ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
+        verify(target).actionInstance(captor.capture(), eq("RESOURCE_NAME"), Matchers.<ActionRequest>anyObject());
+        assertThat(captor.getValue().asContext(RootContext.class)).isSameAs(context);
     }
 
     @SuppressWarnings("unchecked")
@@ -285,7 +291,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
-        Context context = mock(Context.class);
+        Context context = new RootContext();
         CreateRequest request = Requests.newCreateRequest("", json(object()));
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
@@ -296,7 +302,9 @@ public class AuthorizationFiltersTest {
         chain.handleCreate(context, request);
 
         //Then
-        verify(target).createInstance(eq(context), Matchers.<CreateRequest>anyObject());
+        ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
+        verify(target).createInstance(captor.capture(), Matchers.<CreateRequest>anyObject());
+        assertThat(captor.getValue().asContext(RootContext.class)).isSameAs(context);
     }
 
     @SuppressWarnings("unchecked")
@@ -310,7 +318,7 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
-        Context context = mock(Context.class);
+        Context context = new RootContext();
         CreateRequest request = Requests.newCreateRequest("RESOURCE_NAME", json(object()));
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessDenied("REASON",
@@ -377,18 +385,20 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
-        Context context = mock(Context.class);
+        Context context = new RootContext();
         DeleteRequest request = Requests.newDeleteRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
-        given(module.authorizeDelete(context, request)).willReturn(authorizePromise);
+        given(module.authorizeDelete(isA(Context.class), eq(request))).willReturn(authorizePromise);
 
         //When
         chain.handleDelete(context, request);
 
         //Then
-        verify(target).deleteInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<DeleteRequest>anyObject());
+        ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
+        verify(target).deleteInstance(captor.capture(), eq("RESOURCE_NAME"), Matchers.<DeleteRequest>anyObject());
+        assertThat(captor.getValue().asContext(RootContext.class)).isSameAs(context);
     }
 
     @SuppressWarnings("unchecked")
@@ -469,18 +479,20 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
-        Context context = mock(Context.class);
+        Context context = new RootContext();
         PatchRequest request = Requests.newPatchRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
-        given(module.authorizePatch(context, request)).willReturn(authorizePromise);
+        given(module.authorizePatch(isA(Context.class), eq(request))).willReturn(authorizePromise);
 
         //When
         chain.handlePatch(context, request);
 
         //Then
-        verify(target).patchInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<PatchRequest>anyObject());
+        ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
+        verify(target).patchInstance(captor.capture(), eq("RESOURCE_NAME"), Matchers.<PatchRequest>anyObject());
+        assertThat(captor.getValue().asContext(RootContext.class)).isSameAs(context);
     }
 
     @SuppressWarnings("unchecked")
@@ -560,19 +572,21 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
-        Context context = mock(Context.class);
+        Context context = new RootContext();
         QueryRequest request = Requests.newQueryRequest("");
         QueryResourceHandler handler = mock(QueryResourceHandler.class);
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
-        given(module.authorizeQuery(context, request)).willReturn(authorizePromise);
+        given(module.authorizeQuery(isA(Context.class), eq(request))).willReturn(authorizePromise);
 
         //When
         chain.handleQuery(context, request, handler);
 
         //Then
-        verify(target).queryCollection(eq(context), any(QueryRequest.class), any(QueryResourceHandler.class));
+        ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
+        verify(target).queryCollection(captor.capture(), any(QueryRequest.class), any(QueryResourceHandler.class));
+        assertThat(captor.getValue().asContext(RootContext.class)).isSameAs(context);
     }
 
     @Test
@@ -653,18 +667,20 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
-        Context context = mock(Context.class);
+        Context context = new RootContext();
         ReadRequest request = Requests.newReadRequest("RESOURCE_NAME");
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
-        given(module.authorizeRead(context, request)).willReturn(authorizePromise);
+        given(module.authorizeRead(isA(Context.class), eq(request))).willReturn(authorizePromise);
 
         //When
         chain.handleRead(context, request);
 
         //Then
-        verify(target).readInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<ReadRequest>anyObject());
+        ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
+        verify(target).readInstance(captor.capture(), eq("RESOURCE_NAME"), Matchers.<ReadRequest>anyObject());
+        assertThat(captor.getValue().asContext(RootContext.class)).isSameAs(context);
     }
 
     @SuppressWarnings("unchecked")
@@ -745,18 +761,20 @@ public class AuthorizationFiltersTest {
 
         FilterChain chain = AuthorizationFilters.createAuthorizationFilter(target, modules);
 
-        Context context = mock(Context.class);
+        Context context = new RootContext();
         UpdateRequest request = Requests.newUpdateRequest("RESOURCE_NAME", json(object()));
         Promise<AuthorizationResult, ResourceException> authorizePromise =
                 Promises.newResultPromise(AuthorizationResult.accessPermitted());
 
-        given(module.authorizeUpdate(context, request)).willReturn(authorizePromise);
+        given(module.authorizeUpdate(isA(Context.class), eq(request))).willReturn(authorizePromise);
 
         //When
         chain.handleUpdate(context, request);
 
         //Then
-        verify(target).updateInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<UpdateRequest>anyObject());
+        ArgumentCaptor<Context> captor = ArgumentCaptor.forClass(Context.class);
+        verify(target).updateInstance(captor.capture(), eq("RESOURCE_NAME"), Matchers.<UpdateRequest>anyObject());
+        assertThat(captor.getValue().asContext(RootContext.class)).isSameAs(context);
     }
 
     @SuppressWarnings("unchecked")

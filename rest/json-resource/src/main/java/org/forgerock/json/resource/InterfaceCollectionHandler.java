@@ -31,13 +31,13 @@ class InterfaceCollectionHandler implements RequestHandler {
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(final Context context,
             final ActionRequest request) {
-        return provider.actionCollection(Resources.parentOf(context), request);
+        return provider.actionCollection(context, request);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
             final CreateRequest request) {
-        return provider.createInstance(Resources.parentOf(context), request);
+        return provider.createInstance(context, request);
     }
 
     @Override
@@ -59,7 +59,7 @@ class InterfaceCollectionHandler implements RequestHandler {
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context,
             final QueryRequest request, final QueryResourceHandler handler) {
-        return provider.queryCollection(Resources.parentOf(context), request, handler);
+        return provider.queryCollection(context, request, handler);
     }
 
     @Override
