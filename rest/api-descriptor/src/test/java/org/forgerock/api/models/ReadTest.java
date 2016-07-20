@@ -24,6 +24,7 @@ import java.util.Arrays;
 
 import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.api.enums.Stability;
+import org.forgerock.util.i18n.LocalizableString;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -33,7 +34,7 @@ import org.testng.annotations.Test;
  */
 public class ReadTest {
 
-    private final String description = "My Description";
+    private final LocalizableString description = new LocalizableString("My Description");
     private final String[] supportedLocales = new String[]{"en"};
     private ApiError internalServerApiError;
     private ApiError notFoundApiError;

@@ -73,6 +73,7 @@ import org.forgerock.http.routing.Version;
 import org.forgerock.http.swagger.SwaggerExtended;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.annotations.VisibleForTesting;
+import org.forgerock.util.i18n.PreferredLocales;
 
 import io.swagger.models.ArrayModel;
 import io.swagger.models.Info;
@@ -143,6 +144,9 @@ public class OpenApiTransformer {
     private final ApiDescription apiDescription;
 
     private final Map<String, Model> definitionMap = new HashMap<>();
+
+    // TODO Removed in a different PR.
+    private static final PreferredLocales PREFERRED_LOCALES = new PreferredLocales();
 
     /**
      * Default constructor that is only used by unit tests.
@@ -359,7 +363,9 @@ public class OpenApiTransformer {
         // group resource endpoints by tag
         String tag = parentTag;
         if (isEmpty(tag)) {
-            tag = !isEmpty(resource.getTitle()) ? resource.getTitle() : pathName;
+            tag = !isEmpty(resource.getTitle().toTranslatedString(PREFERRED_LOCALES))
+                    ? resource.getTitle().toTranslatedString(PREFERRED_LOCALES)
+                    : pathName;
             if (hasResourceVersion) {
                 tag += " v" + resourceVersion;
             }
@@ -813,7 +819,10 @@ public class OpenApiTransformer {
             final List<Parameter> parameters) {
         final Operation operation = new Operation();
         operation.setOperationId(operationNamespace);
-        applyOperationDescription(operationModel.getDescription(), operation);
+        String description = operationModel.getDescription() == null
+                ? null
+                : operationModel.getDescription().toTranslatedString(PREFERRED_LOCALES);
+        applyOperationDescription(description, operation);
         applyOperationStability(operationModel.getStability(), operation);
         applyOperationParameters(mergeParameters(new ArrayList<>(parameters), operationModel.getParameters()),
                 operation);
@@ -946,7 +955,10 @@ public class OpenApiTransformer {
                 }
                 operationParameter.setName(parameter.getName());
                 operationParameter.setType(parameter.getType());
-                operationParameter.setDescription(parameter.getDescription());
+                final String description = parameter.getDescription() == null
+                        ? null
+                        : parameter.getDescription().toTranslatedString(PREFERRED_LOCALES);
+                operationParameter.setDescription(description);
                 operationParameter.setRequired(ValidationUtil.nullToFalse(parameter.isRequired()));
                 if (!isEmpty(parameter.getEnumValues())) {
                     operationParameter.setEnum(asList(parameter.getEnumValues()));
@@ -1041,14 +1053,14 @@ public class OpenApiTransformer {
                 final int code = apiError.getCode();
                 final List<String> descriptions = new ArrayList<>();
                 if (apiError.getDescription() != null) {
-                    descriptions.add(apiError.getDescription());
+                    descriptions.add(apiError.getDescription().toTranslatedString(PREFERRED_LOCALES));
                 }
                 for (int k = i + 1; k < n; ++k) {
                     final ApiError error = resolvedErrors.get(k);
                     if (error.getCode() == code) {
                         // TODO build composite schema with detailsSchema??? error.getSchema();
                         if (error.getDescription() != null) {
-                            descriptions.add(error.getDescription());
+                            descriptions.add(error.getDescription().toTranslatedString(PREFERRED_LOCALES));
                         }
                         ++i;
                     }
@@ -1172,7 +1184,10 @@ public class OpenApiTransformer {
         final Info info = new Info();
         info.setTitle(title);
         info.setVersion(apiDescription.getVersion());
-        info.description(apiDescription.getDescription());
+        String description = apiDescription.getDescription() == null
+                ? null
+                : apiDescription.getDescription().toTranslatedString(PREFERRED_LOCALES);
+        info.description(description);
         return info;
     }
 

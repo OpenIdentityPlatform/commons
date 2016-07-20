@@ -16,17 +16,18 @@
 
 package org.forgerock.json.resource.http;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.api.models.ApiDescription.*;
 import static org.forgerock.json.resource.Applications.simpleCrestApplication;
 import static org.forgerock.util.promise.Promises.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.mockito.BDDMockito.*;
 import static org.mockito.Mockito.any;
 
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
@@ -82,8 +83,7 @@ public class HttpAdapterTest {
         // Then
         assertThat(result).succeeded();
         Object json = result.get().getEntity().getJson();
-        assertThat(json).isInstanceOf(ApiDescription.class);
-        assertThat(((ApiDescription) json).getId()).isEqualTo("test:descriptor");
+        assertThat(JsonValue.json(json)).isObject().stringAt("id").isEqualTo("test:descriptor");
     }
 
     private interface DescribableConnection extends Connection,

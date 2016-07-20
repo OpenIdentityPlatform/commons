@@ -24,6 +24,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.api.enums.Stability;
+import org.forgerock.util.i18n.LocalizableString;
 
 /**
  * Class that represents the Operation type in API descriptor.
@@ -31,7 +32,7 @@ import org.forgerock.api.enums.Stability;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class Operation {
 
-    private final String description;
+    private final LocalizableString description;
     private final String[] supportedLocales;
     @JsonProperty("errors")
     private final ApiError[] apiErrors;
@@ -60,7 +61,7 @@ public abstract class Operation {
      *
      * @return Description
      */
-    public String getDescription() {
+    public LocalizableString getDescription() {
         return description;
     }
 
@@ -134,7 +135,7 @@ public abstract class Operation {
      */
     public abstract static class Builder<T extends Builder<T>> {
 
-        private String description;
+        private LocalizableString description;
         private String[] supportedLocales;
         private final List<ApiError> apiErrors;
         private final List<Parameter> parameters;
@@ -161,9 +162,20 @@ public abstract class Operation {
          * @param description A description of the endpoint
          * @return Builder
          */
+        public T description(LocalizableString description) {
+            this.description = description;
+            return self();
+        }
+
+        /**
+         * Set the description.
+         *
+         * @param description A description of the endpoint
+         * @return Builder
+         */
         @JsonProperty("description")
         public T description(String description) {
-            this.description = description;
+            this.description = new LocalizableString(description);
             return self();
         }
 
@@ -252,7 +264,7 @@ public abstract class Operation {
             for (org.forgerock.api.annotations.Parameter parameter : operation.parameters()) {
                 parameter(Parameter.fromAnnotation(parameter));
             }
-            return description(operation.description())
+            return description(new LocalizableString(operation.description(), relativeType.getClassLoader()))
                     .supportedLocales(operation.locales())
                     .stability(operation.stability());
         }

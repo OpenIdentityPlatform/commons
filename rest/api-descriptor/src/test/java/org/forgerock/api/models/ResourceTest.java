@@ -16,15 +16,16 @@
 
 package org.forgerock.api.models;
 
-import static java.util.Arrays.*;
-import static org.assertj.core.api.Assertions.*;
-import static org.forgerock.api.models.Resource.AnnotatedTypeVariant.*;
-import static org.forgerock.api.models.Resource.*;
-import static org.forgerock.json.JsonValue.*;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.api.models.Resource.AnnotatedTypeVariant.COLLECTION_RESOURCE_COLLECTION;
+import static org.forgerock.api.models.Resource.AnnotatedTypeVariant.SINGLETON_RESOURCE;
+import static org.forgerock.api.models.Resource.fromAnnotatedType;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Locale;
 
 import org.forgerock.api.annotations.Actions;
 import org.forgerock.api.annotations.CollectionProvider;
@@ -38,9 +39,8 @@ import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.enums.Stability;
 import org.forgerock.api.jackson.JacksonUtils;
-import org.forgerock.api.jackson.TranslationModule;
-import org.forgerock.api.jackson.TranslationSerializer;
-import org.forgerock.api.util.Translator;
+import org.forgerock.http.util.Json;
+import org.forgerock.util.i18n.LocalizableString;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -51,13 +51,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ResourceTest {
 
     public static final String I18NJSONSCHEMA_JSON = "i18njsonschema.json";
-    private final String title = "My Title";
-    private final String description = "My Description";
-    public static final String TRANSLATED_DISCRIPTION_TWICE_REGEX =
-            ".*(If you see this it has been translated).*(If you see this it has been translated).*";
     public static final String TRANSLATED_JSON_SCHEMA_DESC_TITLE =
             ".*(Json schema description).*(Json schema title).*";
-    private final String i18nDescription = Translator.TRANSLATION_KEY_PREFIX + "api-dictionary#description_test";
+    private final LocalizableString title = new LocalizableString("My Title");
+    private final LocalizableString description = new LocalizableString("My Description");
+    public static final String TRANSLATED_DISCRIPTION_TWICE_REGEX =
+            ".*(If you see this it has been translated).*(If you see this it has been translated).*";
+    private final LocalizableString i18nDescription = new LocalizableString("i18n:api-dictionary#description_test",
+            ResourceTest.class.getClassLoader());
     private Schema schema;
     private Schema i18nSchema;
     private Create create;
@@ -267,7 +268,7 @@ public class ResourceTest {
         assertThat(resource.getCreate()).isNotNull();
         assertThat(resource.isMvccSupported()).isTrue();
         Create create = resource.getCreate();
-        assertThat(create.getDescription()).isEqualTo("A create resource operation.");
+        assertThat(create.getDescription()).isEqualTo(new LocalizableString("A create resource operation."));
         assertThat(create.getApiErrors()).hasSize(2);
         assertThat(create.getParameters()).hasSize(1);
         assertThat(create.getSupportedLocales()).hasSize(2);
@@ -324,7 +325,7 @@ public class ResourceTest {
         assertThat(resource.getRead()).isNotNull();
         assertThat(resource.isMvccSupported()).isTrue();
         Read read = resource.getRead();
-        assertThat(read.getDescription()).isEqualTo("A read resource operation.");
+        assertThat(read.getDescription()).isEqualTo(new LocalizableString("A read resource operation."));
         assertThat(read.getApiErrors()).isNull();
         assertThat(read.getParameters()).isNull();
         assertThat(read.getSupportedLocales()).hasSize(0);
@@ -352,7 +353,7 @@ public class ResourceTest {
         assertThat(resource.getUpdate()).isNotNull();
         assertThat(resource.isMvccSupported()).isTrue();
         Update update = resource.getUpdate();
-        assertThat(update.getDescription()).isEqualTo("An update resource operation.");
+        assertThat(update.getDescription()).isEqualTo(new LocalizableString("An update resource operation."));
         assertThat(update.getApiErrors()).isNull();
         assertThat(update.getParameters()).isNull();
         assertThat(update.getSupportedLocales()).hasSize(0);
@@ -379,7 +380,7 @@ public class ResourceTest {
         assertThat(resource.getDelete()).isNotNull();
         assertThat(resource.isMvccSupported()).isTrue();
         Delete delete = resource.getDelete();
-        assertThat(delete.getDescription()).isEqualTo("A delete resource operation.");
+        assertThat(delete.getDescription()).isEqualTo(new LocalizableString("A delete resource operation."));
         assertThat(delete.getApiErrors()).isNull();
         assertThat(delete.getParameters()).isNull();
         assertThat(delete.getSupportedLocales()).hasSize(0);
@@ -406,7 +407,7 @@ public class ResourceTest {
         assertThat(resource.getPatch()).isNotNull();
         assertThat(resource.isMvccSupported()).isTrue();
         Patch patch = resource.getPatch();
-        assertThat(patch.getDescription()).isEqualTo("A patch resource operation.");
+        assertThat(patch.getDescription()).isEqualTo(new LocalizableString("A patch resource operation."));
         assertThat(patch.getApiErrors()).isNull();
         assertThat(patch.getParameters()).isNull();
         assertThat(patch.getSupportedLocales()).hasSize(0);
@@ -442,7 +443,7 @@ public class ResourceTest {
         assertThat(resource.getActions()).isNotNull();
         assertThat(resource.getActions()).hasSize(2);
         Action action1 = resource.getActions()[0];
-        assertThat(action1.getDescription()).isEqualTo("An action resource operation.");
+        assertThat(action1.getDescription()).isEqualTo(new LocalizableString("An action resource operation."));
         assertThat(action1.getApiErrors()).hasSize(2);
         assertThat(action1.getParameters()).hasSize(1);
         assertThat(action1.getSupportedLocales()).hasSize(2);
@@ -452,7 +453,7 @@ public class ResourceTest {
         assertThat(action1.getResponse()).isNotNull();
 
         Action action2 = resource.getActions()[1];
-        assertThat(action2.getDescription()).isEqualTo("An action resource operation.");
+        assertThat(action2.getDescription()).isEqualTo(new LocalizableString("An action resource operation."));
         assertThat(action2.getApiErrors()).hasSize(2);
         assertThat(action2.getParameters()).hasSize(1);
         assertThat(action2.getSupportedLocales()).hasSize(2);
@@ -575,7 +576,7 @@ public class ResourceTest {
         assertThat(resource.getQueries()).isNotNull();
         assertThat(resource.getQueries()).hasSize(2);
         Query query1 = resource.getQueries()[0];
-        assertThat(query1.getDescription()).isEqualTo("A query resource operation.");
+        assertThat(query1.getDescription()).isEqualTo(new LocalizableString("A query resource operation."));
         assertThat(query1.getApiErrors()).hasSize(2);
         assertThat(query1.getParameters()).hasSize(1);
         assertThat(query1.getSupportedLocales()).hasSize(2);
@@ -592,7 +593,7 @@ public class ResourceTest {
         assertThat(query1.getSupportedSortKeys()[2]).isEqualTo("key3");
 
         Query query2 = resource.getQueries()[1];
-        assertThat(query2.getDescription()).isEqualTo("A query resource operation.");
+        assertThat(query2.getDescription()).isEqualTo(new LocalizableString("A query resource operation."));
         assertThat(query2.getApiErrors()).hasSize(2);
         assertThat(query2.getParameters()).hasSize(1);
         assertThat(query2.getSupportedLocales()).hasSize(2);
@@ -728,22 +729,15 @@ public class ResourceTest {
                 .error(ApiError.apiError().code(12).description(i18nDescription).build())
                 .build();
 
-        final Resource resource = Resource.resource()
+
+        Resource resource = Resource.resource()
                 .description(description)
                 .resourceSchema(i18nSchema)
                 .operations(create, readLocal, update, delete, patch, action1, action2, query1, query2)
-                .mvccSupported(true)
+                .mvccSupported(false)
                 .build();
 
-        ObjectMapper mapper = new ObjectMapper();
-
-        Translator translator = new Translator();
-        translator.setLocale(Locale.ENGLISH);
-
-        TranslationModule module = new TranslationModule();
-        module.addSerializer(new TranslationSerializer(translator));
-
-        mapper.registerModule(module);
+        ObjectMapper mapper = new ObjectMapper().registerModule(new Json.LocalizableStringModule());
 
         String serialized = mapper.writeValueAsString(resource);
 

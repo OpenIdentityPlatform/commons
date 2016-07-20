@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import org.forgerock.api.ApiValidationException;
+import org.forgerock.util.i18n.LocalizableString;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -30,13 +31,13 @@ public class ApiErrorTest {
         return new Object[][]{
                 {null, null, ApiValidationException.class},
                 {500, null, ApiValidationException.class},
-                {null, "my description", ApiValidationException.class},
-                {500, "my description", null},
+                {null, new LocalizableString("my description"), ApiValidationException.class},
+                {500, new LocalizableString("my description"), null},
         };
     }
 
     @Test(dataProvider = "buildValidationData")
-    public void testBuildValidation(final Integer code, final String description,
+    public void testBuildValidation(final Integer code, final LocalizableString description,
             final Class<? extends Throwable> expectedException) {
         final ApiError.Builder builder = ApiError.apiError();
         final ApiError apiError;

@@ -113,7 +113,7 @@ public abstract class Schema {
      * @return Schema instance
      */
     public static Schema fromAnnotation(org.forgerock.api.annotations.Schema schema, ApiDescription descriptor,
-            Class<?> relativeType) {
+            final Class<?> relativeType) {
         Class<?> type = schema.fromType();
         if (type.equals(Void.class) && Strings.isNullOrEmpty(schema.schemaResource())) {
             return null;
@@ -136,7 +136,9 @@ public abstract class Schema {
             // not using a type, so must be using a resource file containing JSON Schema json.
             InputStream resource = relativeType.getResourceAsStream(schema.schemaResource());
             try {
-                builder.schema(json(JacksonUtils.OBJECT_MAPPER.readValue(resource, Object.class)));
+                JsonValue json = json(JacksonUtils.OBJECT_MAPPER.readValue(resource, Object.class))
+                        .as(new TranslateJsonValue(relativeType.getClassLoader()));
+                builder.schema(json);
             } catch (IOException e) {
                 throw new IllegalArgumentException("Could not read declared resource " + schema.schemaResource(), e);
             }

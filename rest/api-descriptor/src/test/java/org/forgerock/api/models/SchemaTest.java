@@ -16,25 +16,61 @@
 
 package org.forgerock.api.models;
 
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
+import static org.forgerock.api.models.ApiDescription.apiDescription;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import org.forgerock.json.JsonValue;
-import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import org.forgerock.api.annotations.EnumTitle;
 import org.forgerock.api.annotations.PropertyOrder;
 import org.forgerock.api.annotations.PropertyPolicies;
 import org.forgerock.api.enums.WritePolicy;
+import org.forgerock.http.util.Json;
+import org.forgerock.json.JsonValue;
+import org.forgerock.util.i18n.LocalizableString;
+import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 
 public class SchemaTest {
 
     @Test
+    public void testTranslationTransformer() throws Exception {
+        ApiDescription apiDescription = apiDescription()
+                .id("frapi:test")
+                .version("1.0")
+                .description(new LocalizableString("Default API description."))
+                .build();
+
+        Schema fromAnno = Schema.fromAnnotation(
+                IdentifiedResponse.class.getAnnotation(org.forgerock.api.annotations.Schema.class),
+                apiDescription, this.getClass());
+
+
+        JsonValue schema = fromAnno.getSchema();
+
+        String result = new String(Json.writeJson(schema.getObject()), StandardCharsets.UTF_8);
+
+        assertThat(result).doesNotContain("i18n:");
+        assertThat(result).contains("Json schema description");
+    }
+
+    @org.forgerock.api.annotations.Schema(schemaResource = "i18njsonschema.json")
+    private static final class IdentifiedResponse {
+        public String uid;
+        public String name;
+    }
+
+    @Test
     public void testType() throws Exception {
         JsonValue schema = Schema.newBuilder().type(Described.class).build().getSchema();
+
+        assertThat(schema).isObject();
+
         assertThat(schema).isObject().hasObject("properties")
                 .hasObject("myfield")
                 .contains(

@@ -35,7 +35,7 @@ import org.forgerock.api.annotations.Update;
 import org.forgerock.api.enums.CountPolicy;
 import org.forgerock.api.enums.PagingMode;
 import org.forgerock.api.enums.QueryType;
-import org.forgerock.api.util.Translator;
+import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
@@ -104,7 +104,8 @@ public class UserCollectionProviderV1 {
      */
     @Query(operationDescription =
         @Operation(
-            description = Translator.TRANSLATION_KEY_PREFIX + "api-dictionary-example#user_query_operation_description",
+            description = LocalizableString.TRANSLATION_KEY_PREFIX
+                    + "api-dictionary-example#user_query_operation_description",
             locales = {"en-GB", "en-US"},
             errors = {
                 @ApiError(
@@ -137,9 +138,9 @@ public class UserCollectionProviderV1 {
      */
     @Create(operationDescription =
         @Operation(
-            description = Translator.TRANSLATION_KEY_PREFIX
+            description = LocalizableString.TRANSLATION_KEY_PREFIX
                     + "api-dictionary-example#user_create_operation_description",
-            locales = {"en-GB", "en-US"},
+            locales = {"en-GB", "en-US", "fr"},
             errors = {
                 @ApiError(
                     id = "badRequest",

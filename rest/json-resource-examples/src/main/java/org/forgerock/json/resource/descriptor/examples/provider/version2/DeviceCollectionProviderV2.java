@@ -16,7 +16,7 @@
 
 package org.forgerock.json.resource.descriptor.examples.provider.version2;
 
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.util.promise.Promises.newExceptionPromise;
 
 import org.forgerock.api.annotations.Action;
 import org.forgerock.api.annotations.ApiError;
@@ -25,7 +25,7 @@ import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
 import org.forgerock.api.annotations.Parameter;
 import org.forgerock.api.annotations.Schema;
-import org.forgerock.api.util.Translator;
+import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.MemoryBackend;
@@ -76,7 +76,7 @@ public class DeviceCollectionProviderV2 extends DeviceCollectionProviderV1 {
      */
     @Action(operationDescription =
         @Operation(
-            description = Translator.TRANSLATION_KEY_PREFIX
+            description = LocalizableString.TRANSLATION_KEY_PREFIX
                     + "api-dictionary-example#device_action_rollout_operation_description",
             locales = {"en-GB", "en-US"},
             errors = {

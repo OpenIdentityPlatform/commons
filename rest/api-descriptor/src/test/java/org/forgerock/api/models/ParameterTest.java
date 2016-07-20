@@ -22,6 +22,7 @@ import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.enums.ParameterSource;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -108,7 +109,7 @@ public class ParameterTest {
         assertThat(parameter.getName()).isEqualTo(name);
         assertThat(parameter.getType()).isEqualTo(type);
         assertThat(parameter.getDefaultValue()).isEqualTo(defaultValue);
-        assertThat(parameter.getDescription()).isEqualTo(description);
+        assertThat(parameter.getDescription().toTranslatedString(new PreferredLocales())).isEqualTo(description);
         assertThat(parameter.getSource()).isEqualTo(source);
         assertThat(parameter.isRequired()).isEqualTo(required);
         assertThat(parameter.getEnumValues()).isEqualTo(enumValues);

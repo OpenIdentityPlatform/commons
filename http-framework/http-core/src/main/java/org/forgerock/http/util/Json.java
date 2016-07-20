@@ -17,8 +17,10 @@
 
 package org.forgerock.http.util;
 
-import static com.fasterxml.jackson.core.JsonParser.Feature.*;
-import static java.lang.String.*;
+import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_COMMENTS;
+import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_SINGLE_QUOTES;
+import static com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS;
+import static java.lang.String.format;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,8 +31,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.util.i18n.LocalizableString;
+import org.forgerock.util.i18n.PreferredLocales;
+
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
 
@@ -43,7 +51,7 @@ public final class Json {
     /** Non strict object mapper / data binder used to read json configuration files/data. */
     private static final ObjectMapper LENIENT_MAPPER;
     static {
-        LENIENT_MAPPER = new ObjectMapper().registerModule(new JsonValueModule());
+        LENIENT_MAPPER = new ObjectMapper().registerModules(new JsonValueModule(), new LocalizableStringModule());
         LENIENT_MAPPER.configure(ALLOW_COMMENTS, true);
         LENIENT_MAPPER.configure(ALLOW_SINGLE_QUOTES, true);
         LENIENT_MAPPER.configure(ALLOW_UNQUOTED_CONTROL_CHARS, true);
@@ -51,7 +59,36 @@ public final class Json {
 
     /** Strict object mapper / data binder used to read json configuration files/data. */
     private static final ObjectMapper STRICT_MAPPER = new ObjectMapper()
-            .registerModule(new JsonValueModule());
+            .registerModules(new JsonValueModule(), new LocalizableStringModule());
+
+    /**
+     * Attribute Key for the {@link org.forgerock.util.i18n.PreferredLocales} instance.
+     */
+    public static final String PREFERRED_LOCALES_ATTRIBUTE = "PreferredLocales";
+
+    /**
+     * Jackson Module that adds a serializer for {@link LocalizableString}.
+     */
+    public static class LocalizableStringModule extends SimpleModule {
+
+        private static final PreferredLocales DEFAULT_PREFERRED_LOCALES = new PreferredLocales();
+
+        /** Default constructor. */
+        public LocalizableStringModule() {
+            addSerializer(LocalizableString.class, new JsonSerializer<LocalizableString>() {
+                @Override
+                public void serialize(LocalizableString localizableString, JsonGenerator jsonGenerator,
+                        SerializerProvider serializerProvider) throws IOException {
+                    PreferredLocales locales =
+                            (PreferredLocales) serializerProvider.getAttribute(PREFERRED_LOCALES_ATTRIBUTE);
+                    if (locales == null) {
+                        locales = DEFAULT_PREFERRED_LOCALES;
+                    }
+                    jsonGenerator.writeString(localizableString.toTranslatedString(locales));
+                }
+            });
+        }
+    }
 
     /**
      * Jackson Module that uses a mixin to make sure that a {@link org.forgerock.json.JsonValue} instance is

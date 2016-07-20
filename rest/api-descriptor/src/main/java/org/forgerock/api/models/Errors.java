@@ -160,7 +160,8 @@ public final class Errors {
         public int compare(final Map.Entry<String, ApiError> o1, final Map.Entry<String, ApiError> o2) {
             final int codeCompare = Integer.compare(o1.getValue().getCode(), o2.getValue().getCode());
             if (codeCompare == 0) {
-                return o1.getValue().getDescription().compareTo(o2.getValue().getDescription());
+                return o1.getValue().getDescription().toString()
+                        .compareTo(o2.getValue().getDescription().toString());
             }
             return codeCompare;
         }

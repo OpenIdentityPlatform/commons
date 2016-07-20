@@ -61,6 +61,7 @@ import org.forgerock.api.models.Reference;
 import org.forgerock.api.models.Schema;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.i18n.LocalizableString;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -204,7 +205,7 @@ public class OpenApiTransformerTest {
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .id("frapi:test")
                 .version("2.0")
-                .description("My Description")
+                .description(new LocalizableString("My Description"))
                 .build();
         final OpenApiTransformer transformer = new OpenApiTransformer("Test", "localhost:8080", "/", false,
                 apiDescription);
@@ -225,7 +226,7 @@ public class OpenApiTransformerTest {
         final ApiDescription apiDescription = ApiDescription.apiDescription()
                 .id("frapi:test")
                 .version("2.0")
-                .description("My Description")
+                .description(new LocalizableString("My Description"))
                 .definitions(definitions)
                 .build();
         final OpenApiTransformer transformer = new OpenApiTransformer("Test", "localhost:8080", "/", false,

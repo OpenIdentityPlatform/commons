@@ -19,16 +19,20 @@ package org.forgerock.http.swagger;
 import static org.forgerock.http.protocol.Entity.APPLICATION_JSON_CHARSET_UTF_8;
 import static org.forgerock.http.protocol.Responses.newInternalServerError;
 
+import org.forgerock.http.header.AcceptLanguageHeader;
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.header.MalformedHeaderException;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
+import org.forgerock.http.util.Json;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 import io.swagger.models.Swagger;
@@ -40,7 +44,8 @@ public final class SwaggerUtils {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+            .registerModule(new Json.LocalizableStringModule());
 
     /**
      * Request parameter for the OpenAPI API Descriptor.
@@ -82,15 +87,20 @@ public final class SwaggerUtils {
         try {
             Swagger result = handler.handleApiRequest(context, request);
             if (result != null) {
+                ObjectWriter writer = OBJECT_MAPPER.writer();
+                if (request.getHeaders().containsKey(AcceptLanguageHeader.NAME)) {
+                    writer = writer.withAttribute(Json.PREFERRED_LOCALES_ATTRIBUTE,
+                            request.getHeaders().get(AcceptLanguageHeader.class).getLocales());
+                }
                 Response response = new Response()
                         .setStatus(Status.OK)
-                        .setEntity(OBJECT_MAPPER.writeValueAsBytes(result));
+                        .setEntity(writer.writeValueAsBytes(result));
                 response.getHeaders().put(ContentTypeHeader.NAME, APPLICATION_JSON_CHARSET_UTF_8);
                 return response;
             } else {
                 return new Response(Status.NOT_IMPLEMENTED);
             }
-        } catch (RuntimeException | JsonProcessingException e) {
+        } catch (RuntimeException | JsonProcessingException | MalformedHeaderException e) {
             return newInternalServerError(e);
         }
     }

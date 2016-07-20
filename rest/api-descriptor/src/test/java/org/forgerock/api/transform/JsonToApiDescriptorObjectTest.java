@@ -28,6 +28,8 @@ import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.QueryType;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.http.util.Json;
+import org.forgerock.util.i18n.LocalizableString;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -39,11 +41,13 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  */
 public class JsonToApiDescriptorObjectTest {
 
-    private static final String DESCRIPTION = "Users can have devices, but the devices are their own resources.";
+    private static final LocalizableString DESCRIPTION = new LocalizableString(
+            "Users can have devices, but the devices are their own resources.");
 
     private static final File[] EXAMPLE_FILES = new File("docs/examples").listFiles();
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper().registerModule(new Json.JsonValueModule());
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .registerModules(new Json.JsonValueModule(), new Json.LocalizableStringModule());
 
     @Test
     public void subResourcesJsonToApiDescriptorPropertiesTest() throws IOException {
@@ -52,7 +56,8 @@ public class JsonToApiDescriptorObjectTest {
 
         ApiDescription apiDescription = OBJECT_MAPPER.readValue(file, ApiDescription.class);
 
-        assertThat(apiDescription.getDescription()).isEqualTo(DESCRIPTION);
+        assertThat(apiDescription.getDescription().toTranslatedString(new PreferredLocales()))
+                .isEqualTo(DESCRIPTION.toTranslatedString(new PreferredLocales()));
         assertThat(apiDescription.getDefinitions().getNames()).hasSize(2);
 
         //schema assertions
@@ -143,17 +148,20 @@ public class JsonToApiDescriptorObjectTest {
         assertThat(apiDescription.getServices().get("devices:1.0").getItems().getRead().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("devices:1.0").getItems().getRead().getApiErrors()).hasSize(3);
-        assertThat(apiDescription.getServices().get("devices:1.0").getItems().getUpdate().getDescription())
+        assertThat(apiDescription.getServices().get("devices:1.0").getItems().getUpdate().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("Update a device");
         assertThat(apiDescription.getServices().get("devices:1.0").getItems().getUpdate().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("devices:1.0").getItems().getUpdate().getApiErrors()).hasSize(2);
-        assertThat(apiDescription.getServices().get("devices:1.0").getItems().getDelete().getDescription())
+        assertThat(apiDescription.getServices().get("devices:1.0").getItems().getDelete().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("Delete a device");
         assertThat(apiDescription.getServices().get("devices:1.0").getItems().getDelete().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("devices:1.0").getItems().getDelete().getApiErrors()).hasSize(2);
-        assertThat(apiDescription.getServices().get("devices:1.0").getItems().getPatch().getDescription())
+        assertThat(apiDescription.getServices().get("devices:1.0").getItems().getPatch().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("Patch a device");
         assertThat(apiDescription.getServices().get("devices:1.0").getItems().getPatch().getSupportedLocales())
                 .hasSize(2);
@@ -209,18 +217,21 @@ public class JsonToApiDescriptorObjectTest {
         assertThat(apiDescription.getServices().get("devices:2.0").getItems().getRead().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("devices:2.0").getItems().getRead().getApiErrors()).hasSize(3);
-        assertThat(apiDescription.getServices().get("devices:2.0").getItems().getUpdate().getDescription())
+        assertThat(apiDescription.getServices().get("devices:2.0").getItems().getUpdate().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("Update a device");
         assertThat(apiDescription.getServices().get("devices:2.0").getItems().getUpdate().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("devices:2.0").getItems().getUpdate().getApiErrors())
                 .hasSize(2);
-        assertThat(apiDescription.getServices().get("devices:2.0").getItems().getDelete().getDescription())
+        assertThat(apiDescription.getServices().get("devices:2.0").getItems().getDelete().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("Delete a device");
         assertThat(apiDescription.getServices().get("devices:2.0").getItems().getDelete().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("devices:2.0").getItems().getDelete().getApiErrors()).hasSize(2);
-        assertThat(apiDescription.getServices().get("devices:2.0").getItems().getPatch().getDescription())
+        assertThat(apiDescription.getServices().get("devices:2.0").getItems().getPatch().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("Patch a device");
         assertThat(apiDescription.getServices().get("devices:2.0").getItems().getPatch().getSupportedLocales())
                 .hasSize(2);
@@ -277,17 +288,20 @@ public class JsonToApiDescriptorObjectTest {
         assertThat(apiDescription.getServices().get("users:1.0").getItems().getRead().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("users:1.0").getItems().getRead().getApiErrors()).hasSize(3);
-        assertThat(apiDescription.getServices().get("users:1.0").getItems().getUpdate().getDescription())
+        assertThat(apiDescription.getServices().get("users:1.0").getItems().getUpdate().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("User update operation");
         assertThat(apiDescription.getServices().get("users:1.0").getItems().getUpdate().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("users:1.0").getItems().getUpdate().getApiErrors()).hasSize(2);
-        assertThat(apiDescription.getServices().get("users:1.0").getItems().getDelete().getDescription())
+        assertThat(apiDescription.getServices().get("users:1.0").getItems().getDelete().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("User delete operation");
         assertThat(apiDescription.getServices().get("users:1.0").getItems().getDelete().getSupportedLocales())
                 .hasSize(2);
         assertThat(apiDescription.getServices().get("users:1.0").getItems().getDelete().getApiErrors()).hasSize(2);
-        assertThat(apiDescription.getServices().get("users:1.0").getItems().getPatch().getDescription())
+        assertThat(apiDescription.getServices().get("users:1.0").getItems().getPatch().getDescription()
+                .toTranslatedString(new PreferredLocales()))
                 .isEqualTo("User patch operation");
         assertThat(apiDescription.getServices().get("users:1.0").getItems().getPatch().getSupportedLocales())
                 .hasSize(2);

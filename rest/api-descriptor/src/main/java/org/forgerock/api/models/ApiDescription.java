@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
+import org.forgerock.util.i18n.LocalizableString;
 
 /**
  * Class that represents the ApiDescription type in API descriptor.
@@ -37,7 +38,7 @@ public final class ApiDescription {
 
     private final String id;
     private final String version;
-    private final String description;
+    private final LocalizableString description;
     private final Definitions definitions;
     private final Services services;
     private final Errors errors;
@@ -80,7 +81,7 @@ public final class ApiDescription {
      *
      * @return Description of API Descriptor
      */
-    public String getDescription() {
+    public LocalizableString getDescription() {
         return description;
     }
 
@@ -217,7 +218,7 @@ public final class ApiDescription {
     public static final class Builder {
 
         private String id;
-        private String description;
+        private LocalizableString description;
         private Definitions definitions;
         private Errors errors;
         private Services services;
@@ -250,6 +251,17 @@ public final class ApiDescription {
          */
         @JsonProperty("description")
         public Builder description(String description) {
+            this.description = new LocalizableString(description);
+            return this;
+        }
+
+        /**
+         * Sets the description.
+         *
+         * @param description Description of API Description
+         * @return Builder
+         */
+        public Builder description(LocalizableString description) {
             this.description = description;
             return this;
         }

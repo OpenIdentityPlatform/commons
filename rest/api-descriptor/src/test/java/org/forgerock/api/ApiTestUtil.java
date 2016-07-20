@@ -49,6 +49,7 @@ import org.forgerock.api.models.Create;
 import org.forgerock.api.models.Definitions;
 import org.forgerock.api.models.Delete;
 import org.forgerock.api.models.Errors;
+import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.api.models.Parameter;
 import org.forgerock.api.models.Patch;
 import org.forgerock.api.models.Paths;
@@ -210,8 +211,8 @@ public final class ApiTestUtil {
                 .build();
 
         final Resource resourceV1 = resource()
-                .title("Resource title")
-                .description("Default description for resourceV1.")
+                .title(new LocalizableString("Resource title"))
+                .description(new LocalizableString("Default description for resourceV1."))
                 .resourceSchema(schema)
                 .create(createIdFromServer)
                 .read(read)
@@ -223,8 +224,8 @@ public final class ApiTestUtil {
                 .mvccSupported(true)
                 .build();
         final Resource resourceV2 = resource()
-                .title("Resource title")
-                .description("Default description for resourceV2.")
+                .title(new LocalizableString("Resource title"))
+                .description(new LocalizableString("Default description for resourceV2."))
                 .resourceSchema(schema)
                 .create(createIdFromClient)
                 .read(read)
@@ -265,7 +266,7 @@ public final class ApiTestUtil {
         return apiDescription()
                 .id("frapi:test")
                 .version("1.0")
-                .description("Default API description.")
+                .description(new LocalizableString("Default API description."))
                 .definitions(definitions)
                 .paths(paths)
                 .errors(errors)
@@ -380,8 +381,8 @@ public final class ApiTestUtil {
                 .build();
 
         final Resource userResource1 = resource()
-                .title("User Service")
-                .description("User management service")
+                .title(new LocalizableString("User Service"))
+                .description(new LocalizableString("User management service"))
                 .mvccSupported(true)
                 .resourceSchema(schema()
                         .reference(reference().value("#/definitions/user").build())
@@ -448,8 +449,8 @@ public final class ApiTestUtil {
                 .build();
 
         final Resource deviceResource1 = resource()
-                .title("User-Device Service")
-                .description("User-device management service")
+                .title(new LocalizableString("User-Device Service"))
+                .description(new LocalizableString("User-device management service"))
                 .mvccSupported(true)
                 .resourceSchema(schema()
                         .reference(reference().value("#/definitions/device").build())

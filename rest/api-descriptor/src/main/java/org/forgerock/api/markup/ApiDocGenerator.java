@@ -65,6 +65,8 @@ import org.forgerock.api.models.VersionedPath;
 import org.forgerock.api.util.ReferenceResolver;
 import org.forgerock.api.util.ValidationUtil;
 import org.forgerock.http.routing.Version;
+import org.forgerock.util.i18n.LocalizableString;
+import org.forgerock.util.i18n.PreferredLocales;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,6 +81,8 @@ public final class ApiDocGenerator {
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
             .enable(SerializationFeature.INDENT_OUTPUT);
+
+    private static final PreferredLocales PREFERRED_LOCALES = new PreferredLocales();
 
     enum CrestMethod {
         CREATE, READ, UPDATE, DELETE, PATCH, ACTION, QUERY
@@ -226,8 +230,8 @@ public final class ApiDocGenerator {
                 .rawLine(":toc: left")
                 .rawLine(":toclevels: 5")
                 .newline();
-
-        final String descriptionFilename = outputDescriptionBlock(apiDescription.getDescription(), namespace);
+        final String description = toTranslatedString(apiDescription.getDescription());
+        final String descriptionFilename = outputDescriptionBlock(description, namespace);
         pathsDoc.include(descriptionFilename);
 
         if (pathsFilename != null) {
@@ -397,7 +401,8 @@ public final class ApiDocGenerator {
         final String namespace = normalizeName(parentNamespace, "resource");
         final AsciiDoc resourceDoc = asciiDoc();
 
-        final String descriptionFilename = outputDescriptionBlock(resource.getDescription(), namespace);
+        final String descriptionFilename = outputDescriptionBlock(
+                resource.getDescription().toTranslatedString(PREFERRED_LOCALES), namespace);
         resourceDoc.include(descriptionFilename);
 
         outputOperation(CrestMethod.CREATE, resource, sectionLevel, parameters, namespace, resourceDoc);
@@ -529,8 +534,8 @@ public final class ApiDocGenerator {
             final String namespace = normalizeName(parentNamespace, displayName);
             final AsciiDoc operationDoc = asciiDoc()
                     .sectionTitle(displayName, sectionLevel);
-
-            final String descriptionFilename = outputDescriptionBlock(operation.getDescription(), namespace);
+            final String description = toTranslatedString(operation.getDescription());
+            final String descriptionFilename = outputDescriptionBlock(description, namespace);
             operationDoc.include(descriptionFilename);
 
             final List<String> headers = new ArrayList<>();
@@ -615,8 +620,8 @@ public final class ApiDocGenerator {
         final AsciiDoc operationDoc = asciiDoc()
                 .horizontalRule()
                 .sectionTitle(asciiDoc().rawText("Action: ").mono(action.getName()).toString(), sectionLevel);
-
-        final String descriptionFilename = outputDescriptionBlock(action.getDescription(), namespace);
+        final String description = toTranslatedString(action.getDescription());
+        final String descriptionFilename = outputDescriptionBlock(description, namespace);
         operationDoc.include(descriptionFilename);
 
         final List<String> headers = new ArrayList<>();
@@ -733,7 +738,8 @@ public final class ApiDocGenerator {
             throw new ApiDocGeneratorException("Unsupported QueryType: " + query.getType());
         }
 
-        final String descriptionFilename = outputDescriptionBlock(query.getDescription(), namespace);
+        final String descriptionFilename = outputDescriptionBlock(
+                query.getDescription().toTranslatedString(PREFERRED_LOCALES), namespace);
         operationDoc.include(descriptionFilename);
 
         final List<String> headers = new ArrayList<>();
@@ -935,7 +941,8 @@ public final class ApiDocGenerator {
             }
 
             final String namespace = normalizeName(parametersNamespace, parameter.getName());
-            final String descriptionFilename = outputDescriptionBlock(parameter.getDescription(), namespace);
+            final String description = toTranslatedString(parameter.getDescription());
+            final String descriptionFilename = outputDescriptionBlock(description, namespace);
 
             // format table
             table.columnCell(parameter.getName(), MONO_CELL)
@@ -947,6 +954,12 @@ public final class ApiDocGenerator {
                     .rowEnd();
         }
         table.tableEnd();
+    }
+
+    private String toTranslatedString(LocalizableString localizableString) {
+        return localizableString == null
+                        ? null
+                        : localizableString.toTranslatedString(PREFERRED_LOCALES);
     }
 
     /**
@@ -1028,14 +1041,14 @@ public final class ApiDocGenerator {
             for (final ApiError error : resolvedErrors) {
                 table.columnCell(String.valueOf(error.getCode()), MONO_CELL);
                 if (error.getSchema() == null) {
-                    table.columnCell(error.getDescription());
+                    table.columnCell(error.getDescription().toTranslatedString(PREFERRED_LOCALES));
                 } else {
                     final Schema schema = error.getSchema().getReference() == null
                             ? error.getSchema()
                             : referenceResolver.getDefinition(error.getSchema().getReference());
 
                     final AsciiDoc blockDoc = asciiDoc()
-                            .rawParagraph(error.getDescription())
+                            .rawParagraph(error.getDescription().toTranslatedString(PREFERRED_LOCALES))
                             .rawParagraph("This error may contain an underlying `cause` that conforms to the following "
                                     + "schema:")
                             .listingBlock(OBJECT_MAPPER.writeValueAsString(schema.getSchema().getObject()), "json");

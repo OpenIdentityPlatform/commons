@@ -16,12 +16,52 @@
 
 package org.forgerock.json.resource.http;
 
-import static org.forgerock.http.HttpApplication.*;
-import static org.forgerock.json.resource.Applications.*;
-import static org.forgerock.json.resource.Requests.*;
-import static org.forgerock.json.resource.http.HttpUtils.*;
-import static org.forgerock.util.Reject.*;
-import static org.forgerock.util.promise.Promises.*;
+import static org.forgerock.http.HttpApplication.LOGGER;
+import static org.forgerock.json.resource.Applications.simpleCrestApplication;
+import static org.forgerock.json.resource.Requests.newApiRequest;
+import static org.forgerock.json.resource.http.HttpUtils.CONTENT_TYPE_REGEX;
+import static org.forgerock.json.resource.http.HttpUtils.ETAG_ANY;
+import static org.forgerock.json.resource.http.HttpUtils.FIELDS_DELIMITER;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_IF_MATCH;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_IF_MODIFIED_SINCE;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_IF_NONE_MATCH;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_IF_UNMODIFIED_SINCE;
+import static org.forgerock.json.resource.http.HttpUtils.MIME_TYPE_APPLICATION_JSON;
+import static org.forgerock.json.resource.http.HttpUtils.MIME_TYPE_MULTIPART_FORM_DATA;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_ACTION;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_FIELDS;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_MIME_TYPE;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_PAGED_RESULTS_COOKIE;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_PAGED_RESULTS_OFFSET;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_PAGE_SIZE;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_PRETTY_PRINT;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_EXPRESSION;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_FILTER;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_ID;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_SORT_KEYS;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_TOTAL_PAGED_RESULTS_POLICY;
+import static org.forgerock.json.resource.http.HttpUtils.PROTOCOL_VERSION_1;
+import static org.forgerock.json.resource.http.HttpUtils.RESTRICTED_HEADER_NAMES;
+import static org.forgerock.json.resource.http.HttpUtils.SORT_KEYS_DELIMITER;
+import static org.forgerock.json.resource.http.HttpUtils.asBooleanValue;
+import static org.forgerock.json.resource.http.HttpUtils.asIntValue;
+import static org.forgerock.json.resource.http.HttpUtils.asSingleValue;
+import static org.forgerock.json.resource.http.HttpUtils.determineRequestType;
+import static org.forgerock.json.resource.http.HttpUtils.fail;
+import static org.forgerock.json.resource.http.HttpUtils.getIfMatch;
+import static org.forgerock.json.resource.http.HttpUtils.getIfNoneMatch;
+import static org.forgerock.json.resource.http.HttpUtils.getJsonActionContent;
+import static org.forgerock.json.resource.http.HttpUtils.getJsonContent;
+import static org.forgerock.json.resource.http.HttpUtils.getJsonPatchContent;
+import static org.forgerock.json.resource.http.HttpUtils.getMethod;
+import static org.forgerock.json.resource.http.HttpUtils.getParameter;
+import static org.forgerock.json.resource.http.HttpUtils.getRequestedResourceVersion;
+import static org.forgerock.json.resource.http.HttpUtils.prepareResponse;
+import static org.forgerock.json.resource.http.HttpUtils.rejectIfMatch;
+import static org.forgerock.json.resource.http.HttpUtils.rejectIfNoneMatch;
+import static org.forgerock.json.resource.http.HttpUtils.staticContextFactory;
+import static org.forgerock.util.Reject.checkNotNull;
+import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,6 +73,7 @@ import org.forgerock.api.CrestApiProducer;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.transform.OpenApiTransformer;
 import org.forgerock.guava.common.base.Optional;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.http.Handler;
 import org.forgerock.http.header.AcceptLanguageHeader;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -42,6 +83,7 @@ import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
 import org.forgerock.http.swagger.SwaggerUtils;
+import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.AdviceContext;
@@ -65,7 +107,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;
@@ -73,6 +114,9 @@ import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.i18n.PreferredLocales;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import io.swagger.models.Swagger;
 
@@ -111,6 +155,8 @@ import io.swagger.models.Swagger;
 final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.http.protocol.Request>,
         Describable.Listener {
 
+    private static final ObjectMapper API_OBJECT_MAPPER = new ObjectMapper()
+            .registerModules(new Json.LocalizableStringModule(), new Json.JsonValueModule());
     private final ConnectionFactory connectionFactory;
     private final HttpContextFactory contextFactory;
     private final String apiId;
@@ -615,7 +661,10 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
             Request request = newApiRequest(getResourcePath(context, req));
             context = prepareRequest(context, req, request);
             ApiDescription api = describable.get().handleApiRequest(context, request);
-            return newResultPromise(new Response().setStatus(Status.OK).setEntity(api));
+
+            ObjectWriter writer = API_OBJECT_MAPPER.writer()
+                    .withAttribute(Json.PREFERRED_LOCALES_ATTRIBUTE, request.getPreferredLocales());
+            return newResultPromise(new Response().setStatus(Status.OK).setEntity(writer.writeValueAsBytes(api)));
         } catch (Exception e) {
             return fail(req, e);
         }

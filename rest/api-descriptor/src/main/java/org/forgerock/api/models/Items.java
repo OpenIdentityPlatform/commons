@@ -35,6 +35,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.annotations.Actions;
 import org.forgerock.api.annotations.CollectionProvider;
+import org.forgerock.util.i18n.LocalizableString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,7 +178,8 @@ public final class Items {
      * @return New {@link Resource}
      */
     @JsonIgnore
-    public Resource asResource(boolean mvccSupported, Schema resourceSchema, String title, String description) {
+    public Resource asResource(boolean mvccSupported, Schema resourceSchema, LocalizableString title,
+            LocalizableString description) {
         final List<Action> actions =
                 getActions() == null ? Collections.<Action>emptyList() : Arrays.asList(getActions());
         return Resource.resource()

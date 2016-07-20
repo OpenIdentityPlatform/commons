@@ -31,6 +31,7 @@ import java.util.Arrays;
 import org.forgerock.api.ApiTestUtil;
 import org.forgerock.api.markup.asciidoc.AsciiDoc;
 import org.forgerock.api.models.ApiDescription;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -88,7 +89,10 @@ public class ApiDocGeneratorTest {
         final Path outputApiDescriptionPath = testOutputDirPath.resolve(normalizeName(apiDescription.getId(),
                 "index_description.adoc"));
         final String outputApiDescription = new String(Files.readAllBytes(outputApiDescriptionPath), UTF_8);
-        assertThat(outputApiDescription).contains(apiDescription.getDescription());
+        final String description = apiDescription.getDescription() == null
+                ? null
+                : apiDescription.getDescription().toTranslatedString(new PreferredLocales());
+        assertThat(outputApiDescription).contains(description);
     }
 
     @Test
@@ -101,7 +105,10 @@ public class ApiDocGeneratorTest {
         final Path outputApiDescriptionPath = testOutputDirPath.resolve(normalizeName(apiDescription.getId(),
                 "index_description.adoc"));
         final String outputApiDescription = new String(Files.readAllBytes(outputApiDescriptionPath), UTF_8);
-        assertThat(outputApiDescription).contains(apiDescription.getDescription());
+        final String description = apiDescription.getDescription() == null
+                ? null
+                : apiDescription.getDescription().toTranslatedString(new PreferredLocales());
+        assertThat(outputApiDescription).contains(description);
     }
 
     @Test

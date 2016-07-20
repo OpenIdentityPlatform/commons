@@ -23,6 +23,7 @@ import java.util.Objects;
 
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.guava.common.base.Strings;
+import org.forgerock.util.i18n.LocalizableString;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -42,7 +43,7 @@ public final class ApiError {
 
     // Must be an Integer, because 0 is not a valid default
     private final Integer code;
-    private final String description;
+    private final LocalizableString description;
     private final Schema schema;
     @JsonProperty("$ref")
     private final Reference reference;
@@ -53,7 +54,7 @@ public final class ApiError {
         this.schema = builder.schema;
         this.reference = builder.reference;
 
-        if (reference == null && (code == null || isEmpty(description))) {
+        if (reference == null && (code == null || description == null || isEmpty(description.toString()))) {
             throw new ApiValidationException("code and description are required");
         }
         if (reference != null && (code != null || description != null || schema != null)) {
@@ -75,7 +76,7 @@ public final class ApiError {
      *
      * @return Description
      */
-    public String getDescription() {
+    public LocalizableString getDescription() {
         return description;
     }
 
@@ -139,7 +140,7 @@ public final class ApiError {
     public static ApiError fromAnnotation(org.forgerock.api.annotations.ApiError apiError,
                                           ApiDescription descriptor, Class<?> relativeType) {
         ApiError apiErrorDefinition = apiError()
-                .description(apiError.description())
+                .description(new LocalizableString(apiError.description(), relativeType.getClassLoader()))
                 .code(apiError.code())
                 .schema(Schema.fromAnnotation(apiError.detailSchema(), descriptor, relativeType))
                 .build();
@@ -159,7 +160,7 @@ public final class ApiError {
 
         // Must be an Integer, because 0 is not a valid default.
         private Integer code;
-        private String description;
+        private LocalizableString description;
         private Schema schema;
         private Reference reference;
 
@@ -184,9 +185,20 @@ public final class ApiError {
          * @param description ApiError description
          * @return This builder.
          */
+        public Builder description(LocalizableString description) {
+            this.description = description;
+            return this;
+        }
+
+        /**
+         * Set the error description.
+         *
+         * @param description ApiError description
+         * @return This builder.
+         */
         @JsonProperty("description")
         public Builder description(String description) {
-            this.description = description;
+            this.description = new LocalizableString(description);
             return this;
         }
 
@@ -244,7 +256,7 @@ public final class ApiError {
             }
             final int codeCompare = o1.code.compareTo(o2.code);
             if (codeCompare == 0) {
-                return o1.description.compareTo(o2.description);
+                return o1.description.toString().compareTo(o2.description.toString());
             }
             return codeCompare;
         }

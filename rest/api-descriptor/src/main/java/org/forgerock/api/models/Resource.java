@@ -16,9 +16,9 @@
 
 package org.forgerock.api.models;
 
-import static org.forgerock.api.models.Reference.*;
-import static org.forgerock.api.util.ValidationUtil.*;
-import static org.forgerock.util.Reject.*;
+import static org.forgerock.api.models.Reference.reference;
+import static org.forgerock.api.util.ValidationUtil.isEmpty;
+import static org.forgerock.util.Reject.rejectStateIfTrue;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -28,8 +28,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.annotations.Actions;
 import org.forgerock.api.annotations.CollectionProvider;
@@ -38,10 +36,13 @@ import org.forgerock.api.annotations.Queries;
 import org.forgerock.api.annotations.RequestHandler;
 import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.util.Reject;
+import org.forgerock.util.i18n.LocalizableString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 /**
  * Class that represents the Resource type in API descriptor.
@@ -60,8 +61,8 @@ public final class Resource {
     @JsonProperty("$ref")
     private final Reference reference;
     private final Schema resourceSchema;
-    private final String title;
-    private final String description;
+    private final LocalizableString title;
+    private final LocalizableString description;
     private final Create create;
     private final Read read;
     private final Update update;
@@ -117,7 +118,7 @@ public final class Resource {
      *
      * @return Title
      */
-    public String getTitle() {
+    public LocalizableString getTitle() {
         return title;
     }
 
@@ -126,7 +127,7 @@ public final class Resource {
      *
      * @return Description
      */
-    public String getDescription() {
+    public LocalizableString getDescription() {
         return description;
     }
 
@@ -395,8 +396,8 @@ public final class Resource {
 
         Resource resource = builder.resourceSchema(resourceSchema)
                 .mvccSupported(handler.mvccSupported())
-                .title(handler.title())
-                .description(handler.description())
+                .title(new LocalizableString(handler.title(), type.getClassLoader()))
+                .description(new LocalizableString(handler.description(), type.getClassLoader()))
                 .subresources(subResources)
                 .items(items)
                 .build();
@@ -464,8 +465,8 @@ public final class Resource {
      */
     public final static class Builder {
         private Schema resourceSchema;
-        private String title;
-        private String description;
+        private LocalizableString title;
+        private LocalizableString description;
         private Create create;
         private Read read;
         private Update update;
@@ -521,9 +522,32 @@ public final class Resource {
          * @param title Title of the endpoint
          * @return Builder
          */
+        public Builder title(LocalizableString title) {
+            this.title = title;
+            return this;
+        }
+
+        /**
+         * Set the title.
+         *
+         * @param title Title of the endpoint
+         * @return Builder
+         */
         @JsonProperty("title")
         public Builder title(String title) {
-            this.title = title;
+            this.title = new LocalizableString(title);
+            return this;
+        }
+
+        /**
+         * Set the description.
+         *
+         * @param description A description of the endpoint
+         * @return Builder
+         */
+        public Builder description(LocalizableString description) {
+            checkState();
+            this.description = description;
             return this;
         }
 
@@ -536,7 +560,7 @@ public final class Resource {
         @JsonProperty("description")
         public Builder description(String description) {
             checkState();
-            this.description = description;
+            this.description = new LocalizableString(description);
             return this;
         }
 

@@ -19,19 +19,20 @@ package org.forgerock.api.models;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.api.models.ApiError.*;
 
+import org.forgerock.util.i18n.LocalizableString;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ErrorsTest {
 
-    private static final ApiError INTERNAL_SERVER_ERROR = apiError().code(500).description("Internal Service Error")
-            .build();
+    private static final ApiError INTERNAL_SERVER_ERROR = apiError().code(500).description(
+            new LocalizableString("Internal Service Error")).build();
 
-    private static final ApiError OTHER_EQUAL_ERROR = apiError().code(500).description("Internal Service Error")
-            .build();
+    private static final ApiError OTHER_EQUAL_ERROR = apiError().code(500).description(
+            new LocalizableString("Internal Service Error")).build();
 
-    private static final ApiError OTHER_NON_EQUAL_ERROR = apiError().code(501).description("Not Supported Error")
-            .build();
+    private static final ApiError OTHER_NON_EQUAL_ERROR = apiError().code(501).description(
+            new LocalizableString("Not Supported Error")).build();
 
     @DataProvider(name = "putValidationData")
     public Object[][] putValidationData() {

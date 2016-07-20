@@ -34,3 +34,30 @@ There are multiple benefits of a well-functioning API Descriptor, both for Forge
 * Endpoints to discover API descriptions
 * Automatic generation of API documentation
 * A ForgeRock-consistent UI to explore the APIs
+
+### Translation
+
+Some API description fields can be marked for translation, specifically String fields that describe the API.
+These String fields can be replaced with a URI. The URI should specify the scheme, the resource location and the key of the text to be used.
+
+* "i18n:relative/path/to/resouce#key"
+
+An example being :
+
+* "i18n:api-descriptor/SnsMessageResource#service.title"
+
+Where the SnsMessageResource.properties is a properties file in the Resources folder, containing the key value pairs like this:
+
+* service.title = Push Notification Response Endpoint
+
+Additional resources can be added next to the default resource which contain desired translations. E.g. Translated French would be in a file called
+
+ * SnsMessageResource_fr.properties
+
+And it would contain the same keys but with French translations, e.g.
+
+* service.title = Je suis désolé, je ne parle pas français
+
+The API descriptor will return the most appropriate translation. If locale is not specified or cannot be matched, the default properties file will be used.
+If the locale is specified in the request and is matched, then the resource for that locale is used. The locale should be specified in the request using the 'Accept-Language' header. 
+

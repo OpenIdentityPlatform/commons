@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.api.enums.ParameterSource;
+import org.forgerock.util.i18n.LocalizableString;
 
 /**
  * Class that represents the Parameter type in API descriptor.
@@ -37,7 +38,7 @@ public final class Parameter {
     private final String name;
     private final String type;
     private final String defaultValue; //Todo String?
-    private final String description;
+    private final LocalizableString description;
     private final ParameterSource source;
     private final Boolean required;
     private final String[] enumValues;
@@ -105,7 +106,7 @@ public final class Parameter {
      *
      * @return Parameter description
      */
-    public String getDescription() {
+    public LocalizableString getDescription() {
         return description;
     }
 
@@ -206,7 +207,7 @@ public final class Parameter {
         private String name;
         private String type;
         private String defaultValue;
-        private String description;
+        private LocalizableString description;
         private ParameterSource source;
         private Boolean required;
         private String[] enumValues;
@@ -281,9 +282,20 @@ public final class Parameter {
          * @param description The description of the parameter
          * @return builder
          */
+        public Builder description(LocalizableString description) {
+            this.description = description;
+            return this;
+        }
+
+        /**
+         * Set the parameter description.
+         *
+         * @param description The description of the parameter
+         * @return builder
+         */
         @JsonProperty("description")
         public Builder description(String description) {
-            this.description = description;
+            this.description = new LocalizableString(description);
             return this;
         }
 

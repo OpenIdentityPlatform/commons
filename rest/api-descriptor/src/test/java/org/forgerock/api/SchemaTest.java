@@ -18,6 +18,7 @@ package org.forgerock.api;
 import org.forgerock.api.markdown.MarkdownReader;
 import org.forgerock.api.markdown.PropertyRecord;
 import org.forgerock.api.markdown.TypeDescriptor;
+import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.http.routing.Version;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -112,19 +113,23 @@ public class SchemaTest {
 
     private boolean isValidSimpleType(Method method, String type, boolean isEnumType) throws ClassNotFoundException {
         Class<?> methodParameter = method.getParameterTypes()[0];
-        String methodParamName = methodParameter.getName();
+        String methodParamType = methodParameter.getName();
         String methodParamPckgName = (methodParameter.getPackage() != null)
                 ? methodParameter.getPackage().getName() : "";
 
         if (type.endsWith("[]")) {
-            return methodParamName.equals(List.class.getName())
-                    || (!isEnumType && methodParamName.equals(toArrayClassName(type)))
-                    || (isEnumType && methodParamName.startsWith(
+            return methodParamType.equals(List.class.getName())
+                    || (!isEnumType && methodParamType.equals(toArrayClassName(type)))
+                    || (isEnumType && methodParamType.startsWith(
                     String.format(ARRAY_CLASS_NAME_FORMAT, ENUMS_PACKAGE)));
         } else {
-            return (!isEnumType && methodParamName.equals(type))
+            return (!isEnumType && (methodParamType.equals(type) || isEquivalent(type, methodParamType)))
                     || (isEnumType && methodParamPckgName.startsWith(ENUMS_PACKAGE));
         }
+    }
+
+    private boolean isEquivalent(String type, String param) {
+        return type.equals(String.class.getCanonicalName()) && param.equals(LocalizableString.class.getCanonicalName());
     }
 
     private String toArrayClassName(String type) {

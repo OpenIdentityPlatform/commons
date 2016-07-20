@@ -21,18 +21,23 @@ import static org.forgerock.api.models.Read.*;
 import static org.forgerock.api.models.Resource.*;
 import static org.forgerock.api.models.Services.services;
 
+import org.forgerock.util.i18n.LocalizableString;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ServicesTest {
 
-    private static final Resource SERVICE = resource().title("Title").description("Desc")
+
+    private static final Resource SERVICE = resource().title(new LocalizableString("Title")).description(
+            new LocalizableString("Desc"))
             .read(read().description("read").build()).mvccSupported(true).build();
 
-    private static final Resource OTHER_EQUAL_SERVICE = resource().title("Title").description("Desc")
+    private static final Resource OTHER_EQUAL_SERVICE = resource().title(new LocalizableString("Title")).description(
+            new LocalizableString("Desc"))
             .read(read().description("read").build()).mvccSupported(true).build();
 
-    private static final Resource OTHER_NON_EQUAL_SERVICE = resource().title("Different Title").description("Desc")
+    private static final Resource OTHER_NON_EQUAL_SERVICE = resource().title(new LocalizableString("Different Title"))
+            .description(new LocalizableString("Desc"))
             .read(read().description("read").build()).mvccSupported(true).build();
 
     @DataProvider(name = "putValidationData")

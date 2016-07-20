@@ -30,6 +30,7 @@ import java.util.Set;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Definitions;
 import org.forgerock.api.models.Errors;
+import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.api.models.Paths;
 import org.forgerock.api.models.Services;
 import org.forgerock.api.models.VersionedPath;
@@ -43,7 +44,7 @@ public class CrestApiProducer implements ApiProducer<ApiDescription> {
 
     private final String version;
     private final String id;
-    private final String description;
+    private final LocalizableString description;
 
     /**
      * Construct a new producer.
@@ -51,7 +52,7 @@ public class CrestApiProducer implements ApiProducer<ApiDescription> {
      * @param apiVersion The version of the API being described.
      * @param description The API description.
      */
-    public CrestApiProducer(String id, String apiVersion, String description) {
+    public CrestApiProducer(String id, String apiVersion, LocalizableString description) {
         this.id = id;
         this.version = apiVersion;
         this.description = description;
