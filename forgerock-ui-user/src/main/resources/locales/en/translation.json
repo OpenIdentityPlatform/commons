@@ -183,6 +183,9 @@
                 "tryAgain": "Try Finding Your Username Again",
                 "answerQuestions": "Answer the security questions below to retrieve your username."
             },
+            "termsAndConditions" : {
+                "title" : "Terms and Conditions"
+            },
             "kba" : {
                 "description": "Select __numberOfQuestions__ or more security questions below. These questions will help us verify your identity if you forget your password.",
                 "provideAnother": "Add a question",

@@ -78,3 +78,18 @@
       color: darken(@base-theme-color, 5%);
     }
 }
+
+.fr-panel-scrollable {
+  .panel-body {
+    max-height: 300px;
+    overflow: auto;
+  }
+
+  .panel-heading {
+    border-bottom: 0px;
+
+    .panel-title {
+      font-weight: bold;
+    }
+  }
+}
