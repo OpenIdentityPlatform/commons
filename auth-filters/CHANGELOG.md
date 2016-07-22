@@ -1,3 +1,7 @@
+# 21.0.0
+## Changes
+* CAF-249 Remove HttpAuthorizationModule and companion classes
+
 # 20.0.0
 ## Changes
 
