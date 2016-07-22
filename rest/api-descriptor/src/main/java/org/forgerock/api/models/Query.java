@@ -56,9 +56,6 @@ public final class Query extends Operation implements Comparable<Query> {
         if (type == null) {
             throw new ApiValidationException("type is required");
         }
-        if (type == QueryType.FILTER && isEmpty(queryableFields)) {
-            throw new ApiValidationException("queryableFields required for type = FILTER");
-        }
         if (type == QueryType.ID && isEmpty(queryId)) {
             throw new ApiValidationException("queryId required for type = ID");
         }

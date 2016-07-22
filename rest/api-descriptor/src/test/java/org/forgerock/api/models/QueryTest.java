@@ -34,12 +34,12 @@ public class QueryTest {
                 // invalid
                 {null, null, null, ApiValidationException.class},
                 {QueryType.ID, null, null, ApiValidationException.class},
-                {QueryType.FILTER, null, null, ApiValidationException.class},
 
                 // valid
                 {QueryType.ID, "id", null, null},
                 {QueryType.FILTER, null, new String[]{"field"}, null},
                 {QueryType.EXPRESSION, null, null, null},
+                {QueryType.FILTER, null, null, null},
         };
     }
 
