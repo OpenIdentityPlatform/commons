@@ -22,11 +22,12 @@ import java.util.Map;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.exceptions.InvalidJwtException;
 import org.forgerock.json.jose.exceptions.JwtReconstructionException;
+import org.forgerock.json.jose.jwe.CompressionManager;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
-import org.forgerock.json.jose.jwe.SignedThenEncryptedJwt;
 import org.forgerock.json.jose.jwe.JweHeader;
-import org.forgerock.json.jose.jws.JwsHeader;
+import org.forgerock.json.jose.jwe.SignedThenEncryptedJwt;
 import org.forgerock.json.jose.jws.EncryptedThenSignedJwt;
+import org.forgerock.json.jose.jws.JwsHeader;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
@@ -134,14 +135,14 @@ public class JwtReconstruction {
         String encodedClaimsSet = jwtParts[1];
         String encodedSignature = jwtParts[2];
 
-
         String header = Utils.base64urlDecode(encodedHeader);
-        String claimsSetString = Utils.base64urlDecode(encodedClaimsSet);
+
         byte[] signature = Base64url.decode(encodedSignature);
 
         JwsHeader jwsHeader = new JwsHeader(Utils.parseJson(header));
 
-        JwtClaimsSet claimsSet = new JwtClaimsSet(Utils.parseJson(claimsSetString));
+        byte[] payload = new CompressionManager().decompress(jwsHeader.getCompressionAlgorithm(), encodedClaimsSet);
+        JwtClaimsSet claimsSet = new JwtClaimsSet(Utils.parseJson(new String(payload, Utils.CHARSET)));
 
         return new SignedJwt(jwsHeader, claimsSet, (encodedHeader + "." + encodedClaimsSet).getBytes(Utils.CHARSET),
                 signature);

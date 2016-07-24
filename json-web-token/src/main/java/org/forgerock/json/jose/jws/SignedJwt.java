@@ -16,6 +16,7 @@
 
 package org.forgerock.json.jose.jws;
 
+import org.forgerock.json.jose.jwe.CompressionManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
@@ -159,7 +160,8 @@ public class SignedJwt implements Jwt, Payload {
         String jwsHeader = header.build();
         String encodedHeader = Utils.base64urlEncode(jwsHeader);
         String jwsPayload = payload.build();
-        String encodedClaims = Utils.base64urlEncode(jwsPayload);
+
+        String encodedClaims = new CompressionManager().compress(header.getCompressionAlgorithm(), jwsPayload);
 
         String signingInput = encodedHeader + "." + encodedClaims;
 

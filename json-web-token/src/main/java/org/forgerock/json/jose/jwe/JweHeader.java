@@ -30,7 +30,6 @@ public class JweHeader extends JwtSecureHeader {
 
     private static final String ENCRYPTION_METHOD_HEADER_KEY = "enc";
     private static final String EPHEMERAL_PUBLIC_KEY_HEADER_KEY = "epk";
-    private static final String COMPRESSION_ALGORITHM_HEADER_KEY = "zip";
     private static final String AGREEMENT_PARTY_UINFO_HEADER_KEY = "apu";   //Base64url
 
     /**
@@ -102,30 +101,6 @@ public class JweHeader extends JwtSecureHeader {
         return get(EPHEMERAL_PUBLIC_KEY_HEADER_KEY).asString();
     }
 
-    /**
-     * Sets the Compression Algorithm header parameter for this JWE.
-     * <p>
-     * If present, the value of the Compression Algorithm header parameter MUST be CompressionAlgorithm constant DEF.
-     *
-     * @param compressionAlgorithm The Compression Algorithm.
-     */
-    public void setCompressionAlgorithm(CompressionAlgorithm compressionAlgorithm) {
-        put(COMPRESSION_ALGORITHM_HEADER_KEY, compressionAlgorithm.toString());
-    }
-
-    /**
-     * Gets the Compression Algorithm header parameter for this JWE.
-     *
-     * @return The Compression Algorithm.
-     */
-    public CompressionAlgorithm getCompressionAlgorithm() {
-        String compressionAlgorithm = get(COMPRESSION_ALGORITHM_HEADER_KEY).asString();
-        if (compressionAlgorithm == null) {
-            return CompressionAlgorithm.NONE;
-        } else {
-            return CompressionAlgorithm.valueOf(compressionAlgorithm);
-        }
-    }
 
     /**
      * Sets the Agreement PartyUInfo header parameter for this JWE.

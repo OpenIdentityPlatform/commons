@@ -23,6 +23,7 @@
     - `A256KW`: AES KeyWrap with 256-bit keys.
 * Fix decompression when decrypting compressed JWEs : [COMMONS-105](
 https://bugster.forgerock.org/jira/browse/COMMONS-105)
+* Support compression for JWS signed JWTs : [COMMONS-106](https://bugster.forgerock.org/jira/browse/COMMONS-106)
 
 # 3.0.4
 

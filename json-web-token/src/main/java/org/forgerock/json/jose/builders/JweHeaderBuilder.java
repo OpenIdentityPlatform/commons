@@ -66,18 +66,10 @@ public class JweHeaderBuilder<B extends EncryptedJwtBuilder> extends JwtSecureHe
         return this;
     }
 
-    /**
-     * Sets the Compression Algorithm header parameter for this JWE.
-     * <p>
-     * @see org.forgerock.json.jose.jwe.JweHeader#setCompressionAlgorithm(
-     * org.forgerock.json.jose.jwe.CompressionAlgorithm)
-     *
-     * @param zip The Compression Algorithm.
-     * @return This JweHeaderBuilder.
-     */
+    // Overridden purely to preserve type compatibility with older version
+    @Override
     public JweHeaderBuilder<B> zip(CompressionAlgorithm zip) {
-        header("zip", zip.toString());
-        return this;
+        return super.zip(zip);
     }
 
     /**

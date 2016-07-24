@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe;
@@ -20,6 +20,8 @@ import org.forgerock.json.jose.exceptions.JweException;
 import org.forgerock.json.jose.jwe.handlers.compression.CompressionHandler;
 import org.forgerock.json.jose.jwe.handlers.compression.DeflateCompressionHandler;
 import org.forgerock.json.jose.jwe.handlers.compression.NOPCompressionHandler;
+import org.forgerock.json.jose.utils.Utils;
+import org.forgerock.util.encode.Base64url;
 
 /**
  * A service to get the appropriate CompressionHandler for a specified Compression algorithm.
@@ -51,5 +53,29 @@ public class CompressionManager {
                     + algorithm + ".");
         }
         }
+    }
+
+    /**
+     * Convenience method equivalent to
+     * {@code Base64url.encode(getCompressionHandler(compressionAlgorithm).compress(data.getBytes(Utils.CHARSET)))}.
+     *
+     * @param compressionAlgorithm the compression algorithm to use.
+     * @param data the data to compress.
+     * @return the base64url-encoded compressed data.
+     */
+    public String compress(CompressionAlgorithm compressionAlgorithm, String data) {
+        return Base64url.encode(getCompressionHandler(compressionAlgorithm).compress(data.getBytes(Utils.CHARSET)));
+    }
+
+    /**
+     * Convenience method equivalent to
+     * {@code getCompressionHandler(compressionAlgorithm).decompress(Base64url.decode(data))}.
+     *
+     * @param compressionAlgorithm the compression algorithm to use.
+     * @param data the base64url-encoded data to decompress.
+     * @return the decompressed data.
+     */
+    public byte[] decompress(CompressionAlgorithm compressionAlgorithm, String data) {
+        return getCompressionHandler(compressionAlgorithm).decompress(Base64url.decode(data));
     }
 }

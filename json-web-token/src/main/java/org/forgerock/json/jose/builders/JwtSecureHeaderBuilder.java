@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.builders;
@@ -19,7 +19,9 @@ package org.forgerock.json.jose.builders;
 import java.net.URL;
 import java.util.List;
 
+import org.forgerock.json.jose.jwe.CompressionAlgorithm;
 import org.forgerock.json.jose.jwk.JWK;
+import org.forgerock.json.jose.jws.JwtSecureHeader;
 
 /**
  * A base implementation of a JWT header builder, for the common security header parameters shared by the JWS and JWE
@@ -154,6 +156,20 @@ public abstract class JwtSecureHeaderBuilder<T extends JwtBuilder, B extends Jwt
     @SuppressWarnings("unchecked")
     public B crit(List<String> crit) {
         header("crit", crit);
+        return (B) this;
+    }
+
+    /**
+     * Sets the Compression Algorithm header parameter for this JWE.
+     * <p>
+     * @see JwtSecureHeader#setCompressionAlgorithm(CompressionAlgorithm)
+     *
+     * @param zip The Compression Algorithm.
+     * @return This JweHeaderBuilder.
+     */
+    @SuppressWarnings("unchecked")
+    public B zip(CompressionAlgorithm zip) {
+        header("zip", zip.toString());
         return (B) this;
     }
 }

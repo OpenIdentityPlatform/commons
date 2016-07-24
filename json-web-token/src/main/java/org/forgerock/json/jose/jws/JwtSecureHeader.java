@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jws;
@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
+import org.forgerock.json.jose.jwe.CompressionAlgorithm;
 import org.forgerock.json.jose.jwk.JWK;
 import org.forgerock.json.jose.jwt.JwtHeader;
 import org.forgerock.json.jose.utils.Utils;
@@ -44,6 +45,7 @@ import org.forgerock.util.encode.Base64;
  * @since 2.0.0
  */
 public abstract class JwtSecureHeader extends JwtHeader {
+    private static final String COMPRESSION_ALGORITHM_HEADER_KEY = "zip";
 
     /**
      * Constructs a new, empty JwtSecureHeader.
@@ -372,4 +374,30 @@ public abstract class JwtSecureHeader extends JwtHeader {
 
         return value;
     }
+
+    /**
+     * Sets the Compression Algorithm header parameter for this JWE.
+     * <p>
+     * If present, the value of the Compression Algorithm header parameter MUST be CompressionAlgorithm constant DEF.
+     *
+     * @param compressionAlgorithm The Compression Algorithm.
+     */
+    public void setCompressionAlgorithm(CompressionAlgorithm compressionAlgorithm) {
+        put(COMPRESSION_ALGORITHM_HEADER_KEY, compressionAlgorithm.toString());
+    }
+
+    /**
+     * Gets the Compression Algorithm header parameter for this JWE.
+     *
+     * @return The Compression Algorithm.
+     */
+    public CompressionAlgorithm getCompressionAlgorithm() {
+        String compressionAlgorithm = get(COMPRESSION_ALGORITHM_HEADER_KEY).asString();
+        if (compressionAlgorithm == null) {
+            return CompressionAlgorithm.NONE;
+        } else {
+            return CompressionAlgorithm.valueOf(compressionAlgorithm);
+        }
+    }
+
 }
