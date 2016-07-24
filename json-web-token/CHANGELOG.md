@@ -21,6 +21,8 @@
     being reused, which is very bad for the security of GCM mode.
     - `A192KW`: AES KeyWrap with 192-bit keys.
     - `A256KW`: AES KeyWrap with 256-bit keys.
+* Fix decompression when decrypting compressed JWEs : [COMMONS-105](
+https://bugster.forgerock.org/jira/browse/COMMONS-105)
 
 # 3.0.4
 

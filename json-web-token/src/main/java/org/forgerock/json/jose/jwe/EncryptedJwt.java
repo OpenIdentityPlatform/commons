@@ -194,10 +194,24 @@ public class EncryptedJwt implements Jwt, Payload {
 
         byte[] plaintext = encryptionHandler.decryptCiphertext(contentEncryptionKey, initialisationVector, ciphertext,
                 authenticationTag, additionalAuthenticatedData);
+        plaintext = decompressPlaintext(header.getCompressionAlgorithm(), plaintext);
 
         String decryptedPayload = new String(plaintext, Utils.CHARSET);
 
         payload = decodePayload(decryptedPayload);
+    }
+
+    /**
+     * Performs decompression of the given plaintext if required. Whether or not decompression is actually applied
+     * depends on the {@link CompressionAlgorithm}.
+     *
+     * @param compressionAlgorithm the compression algorithm.
+     * @param plaintext the plaintext to decompress.
+     * @return the decompressed plaintext.
+     */
+    private byte[] decompressPlaintext(CompressionAlgorithm compressionAlgorithm, byte[] plaintext) {
+        CompressionHandler compressionHandler = compressionManager.getCompressionHandler(compressionAlgorithm);
+        return compressionHandler.decompress(plaintext);
     }
 
     /**

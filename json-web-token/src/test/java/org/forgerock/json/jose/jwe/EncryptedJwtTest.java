@@ -25,6 +25,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -37,23 +38,39 @@ import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
+import org.forgerock.util.Utils;
 import org.forgerock.util.encode.Base64url;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class EncryptedJwtTest {
     private static final Logger logger = LoggerFactory.getLogger(EncryptedJwtTest.class);
     private KeyPair rsaKeyPair;
+    private Key symmetricKey;
+
+    private JwtBuilderFactory jbf;
+    private JwtReconstruction jwtReconstruction;
 
     @BeforeClass
     public void generateKeyPair() throws Exception {
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
         rsaKeyPair = keyPairGenerator.generateKeyPair();
+
+        byte[] keyData = new byte[32];
+        Arrays.fill(keyData, (byte) 42);
+        symmetricKey = new SecretKeySpec(keyData, "AES");
+    }
+
+    @BeforeMethod
+    public void createJwtBuilderFactory() {
+        jbf = new JwtBuilderFactory();
+        jwtReconstruction = new JwtReconstruction();
     }
 
     @Test(dataProvider = "cbcEncryptionMethods")
@@ -68,7 +85,6 @@ public class EncryptedJwtTest {
         }
 
         // Given
-        JwtReconstruction reconstruction = new JwtReconstruction();
         JwtClaimsSet claims = new JwtBuilderFactory().claims().build();
         String encryptedJwt = new JwtBuilderFactory().jwe(rsaKeyPair.getPublic()).claims(claims)
                                                      .headers().enc(encryptionMethod).alg(algorithm).done().build();
@@ -93,7 +109,7 @@ public class EncryptedJwtTest {
                 initialisationVector[ivEnd] = newLastIvByte;
                 encryptedJwtParts[2] = Base64url.encode(initialisationVector);
 
-                reconstruction.reconstructJwt(join(encryptedJwtParts, '.'), EncryptedJwt.class)
+                jwtReconstruction.reconstructJwt(join(encryptedJwtParts, '.'), EncryptedJwt.class)
                         .decrypt(rsaKeyPair.getPrivate());
 
             } catch (JweDecryptionException ex) {
@@ -115,8 +131,6 @@ public class EncryptedJwtTest {
         final JwtClaimsSet claims = new JwtClaimsSet();
         claims.setClaim("test1", "This is a test claim");
         claims.setIssuedAtTime(new Date());
-        final JwtBuilderFactory jbf = new JwtBuilderFactory();
-        final JwtReconstruction jwtReconstruction = new JwtReconstruction();
         final Key encryptionKey = getEncryptionKey(encryptionMethod, jweAlgorithm);
         final Key decryptionKey = getDecryptionKey(encryptionMethod, jweAlgorithm);
 
@@ -136,8 +150,6 @@ public class EncryptedJwtTest {
         final JwtClaimsSet claims = new JwtClaimsSet();
         claims.setClaim("test1", "This is a test claim");
         claims.setIssuedAtTime(new Date());
-        final JwtBuilderFactory jbf = new JwtBuilderFactory();
-        final JwtReconstruction jwtReconstruction = new JwtReconstruction();
         final Key encryptionKey = getEncryptionKey(encryptionMethod, jweAlgorithm);
         final Key decryptionKey = getDecryptionKey(encryptionMethod, jweAlgorithm);
         String jwt = jbf.jwe(encryptionKey).headers().alg(jweAlgorithm).enc(encryptionMethod).done().claims(claims)
@@ -165,8 +177,6 @@ public class EncryptedJwtTest {
         final JwtClaimsSet claims = new JwtClaimsSet();
         claims.setClaim("test1", "This is a test claim");
         claims.setIssuedAtTime(new Date());
-        final JwtBuilderFactory jbf = new JwtBuilderFactory();
-        final JwtReconstruction jwtReconstruction = new JwtReconstruction();
         final Key encryptionKey = getEncryptionKey(encryptionMethod, jweAlgorithm);
         final Key decryptionKey = getDecryptionKey(encryptionMethod, jweAlgorithm);
         String jwt = jbf.jwe(encryptionKey).headers().alg(jweAlgorithm).enc(encryptionMethod).done().claims(claims)
@@ -182,6 +192,43 @@ public class EncryptedJwtTest {
         result.decrypt(decryptionKey);
 
         // Then - exception
+    }
+
+    @Test
+    public void shouldDecompressCorrectly() {
+        // Given
+        final JwtClaimsSet claims = new JwtClaimsSet();
+        for (int i = 0; i < 20; ++i) {
+            claims.setClaim(Integer.toString(i), "aaaaaaaaaaaaaaaaaaaa");
+        }
+
+        // When
+        String jwt = encryptedJwtWithCompression(CompressionAlgorithm.DEF, claims);
+        EncryptedJwt result = jwtReconstruction.reconstructJwt(jwt, EncryptedJwt.class);
+        result.decrypt(symmetricKey);
+
+        // Then
+        assertThat(result.getClaimsSet().build()).isEqualTo(claims.build());
+    }
+
+    @Test
+    public void shouldCompressWhenAsked() {
+        // Given
+        final JwtClaimsSet claims = new JwtClaimsSet();
+        // Repetitive claim values should compress well
+        for (int i = 0; i < 20; ++i) {
+            claims.setClaim(Integer.toString(i), "aaaaaaaaaaaaaaaaaaaa");
+        }
+
+        // When
+        String compressedJwt = encryptedJwtWithCompression(CompressionAlgorithm.DEF, claims);
+        String uncompressedJwt = encryptedJwtWithCompression(CompressionAlgorithm.NONE, claims);
+
+        logger.info("Uncompressed size = {} bytes, Compressed size = {} bytes", uncompressedJwt.length(),
+                compressedJwt.length());
+
+        // Then
+        assertThat(compressedJwt.length()).isLessThan(uncompressedJwt.length());
     }
 
     private Key getEncryptionKey(EncryptionMethod method, JweAlgorithm algorithm) {
@@ -254,14 +301,12 @@ public class EncryptedJwtTest {
         return result.toArray(new Object[0][]);
     }
 
+    private String encryptedJwtWithCompression(CompressionAlgorithm compressionAlgorithm, JwtClaimsSet claims) {
+        return jbf.jwe(symmetricKey).headers().alg(JweAlgorithm.DIRECT).enc(EncryptionMethod.A128CBC_HS256)
+                .zip(compressionAlgorithm).done().claims(claims).build();
+    }
+
     private String join(String[] parts, char delim) {
-        StringBuilder sb = new StringBuilder();
-        for (String part : parts) {
-            if (sb.length() > 0) {
-                sb.append(delim);
-            }
-            sb.append(part);
-        }
-        return sb.toString();
+        return Utils.joinAsString(Character.toString(delim), (Object[]) parts);
     }
 }
