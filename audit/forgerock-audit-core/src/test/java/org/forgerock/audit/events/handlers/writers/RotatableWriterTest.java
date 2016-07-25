@@ -24,15 +24,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
-import org.forgerock.audit.retention.FileNamingPolicy;
-import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
 import org.forgerock.audit.retention.TimestampFilenameFilter;
 import org.forgerock.audit.rotation.FixedTimeRotationPolicy;
 import org.forgerock.audit.rotation.RotationPolicy;
@@ -49,7 +46,6 @@ import org.testng.annotations.Test;
 public class RotatableWriterTest {
 
     private static final String ONE_SECOND = "1 second";
-    private static final int MAX_NUMBER_OF_HISTORY_FILES = 3;
     private static final int MAX_BYTES_TO_WRITE = 100;
     private static final String ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-HH.mm.ss.SSS";
 
@@ -310,78 +306,6 @@ public class RotatableWriterTest {
         assertThat(rotatableWriter.getBytesWritten()).isEqualTo(0L);
     }
 
-    @Test
-    public void testRetentionWithMaxNumberOfFiles() throws Exception {
-        // given
-        final File file = getTempFile();
-        final String prefix = "testRetentionWithMaxNumberOfFiles";
-        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
-        configuration.setRotationRetentionCheckInterval("10ms");
-        configuration.getFileRotation().setRotationEnabled(true);
-        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
-        configuration.getFileRetention().setMaxNumberOfHistoryFiles(MAX_NUMBER_OF_HISTORY_FILES);
-        final FileNamingPolicy fileNamingPolicy =
-                new TimeStampFileNamingPolicyWithNamedBasedOrdering(file, ROTATION_FILE_SUFFIX, prefix);
-        rotatableWriter = new RotatableWriter(file, configuration, true, fileNamingPolicy);
-
-        // when
-        Set<File> allHistoricalFiles = new HashSet<>();
-        for (int i = 0; i < MAX_NUMBER_OF_HISTORY_FILES + 1; i++) {
-            // force sufficient file rotations for files to start getting deleted
-            writeThenFlushBytes(rotatableWriter, MAX_BYTES_TO_WRITE + 1);
-            rotatableWriter.rotateIfNeeded();
-            allHistoricalFiles = getAllHistoricalFiles(file, prefix, i + 1, allHistoricalFiles);
-        }
-
-        // then
-        assertThat(allHistoricalFiles).isNotEmpty().hasSize(MAX_NUMBER_OF_HISTORY_FILES + 1);
-        waitForExpectedNumberOfHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
-        assertRetainedHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
-    }
-
-    private void waitForExpectedNumberOfHistoricalFiles(final File file, final String prefix,
-            final int expectedNumberOfFiles) throws InterruptedException {
-        int count = 0;
-        int numberOfHistFiles = 0;
-        Set<File> emptySet = Collections.emptySet();
-        while (numberOfHistFiles != expectedNumberOfFiles && count <= 20) {
-            Thread.sleep(50);
-            numberOfHistFiles = getAllHistoricalFiles(file, prefix, expectedNumberOfFiles, emptySet).size();
-            count++;
-        }
-    }
-
-    @Test
-    public void testRetentionWithMaxSizeOfFile() throws Exception {
-        // given
-        final File file = getTempFile();
-        final String prefix = "testRetentionWithMaxSizeOfFile";
-        final FileBasedEventHandlerConfiguration configuration = new DefaultFileBasedAuditEventHandlerConfiguration();
-        configuration.setRotationRetentionCheckInterval("100 ms");
-        configuration.getFileRotation().setRotationEnabled(true);
-        configuration.getFileRotation().setMaxFileSize(MAX_BYTES_TO_WRITE);
-        configuration.getFileRetention().setMaxDiskSpaceToUse(MAX_BYTES_TO_WRITE * MAX_NUMBER_OF_HISTORY_FILES);
-        final FileNamingPolicy fileNamingPolicy =
-                new TimeStampFileNamingPolicyWithNamedBasedOrdering(file, ROTATION_FILE_SUFFIX, prefix);
-        rotatableWriter = new RotatableWriter(file, configuration, true, fileNamingPolicy);
-
-        // when
-        Set<File> allHistoricalFiles = new HashSet<>();
-        for (int i = 0; i < MAX_NUMBER_OF_HISTORY_FILES + 1; i++) {
-            // force sufficient file rotations for files to start getting deleted
-            writeThenFlushBytes(rotatableWriter, MAX_BYTES_TO_WRITE);
-            rotatableWriter.rotateIfNeeded();
-            allHistoricalFiles = getAllHistoricalFiles(file, prefix, i + 1, allHistoricalFiles);
-        }
-
-        // then
-        assertThat(allHistoricalFiles).isNotEmpty().hasSize(MAX_NUMBER_OF_HISTORY_FILES + 1);
-        waitForExpectedNumberOfHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
-        assertRetainedHistoricalFiles(file, prefix, MAX_NUMBER_OF_HISTORY_FILES);
-    }
-
-    // TODO: testRetentionWithFreeDiskSpaceRetentionPolicy - how?
-
     private void writeThenFlushBytes(final RotatableWriter writer, final int bytesToWrite) throws IOException {
         writer.write(new String(new byte[bytesToWrite]));
         writer.flush();
@@ -436,26 +360,6 @@ public class RotatableWriterTest {
             for (File file: files) {
                 file.deleteOnExit();
             }
-        }
-    }
-
-    private static class TimeStampFileNamingPolicyWithNamedBasedOrdering extends TimeStampFileNamingPolicy {
-
-        public TimeStampFileNamingPolicyWithNamedBasedOrdering(final File initialFile, final String timeStampFormat,
-                final String prefix) {
-            super(initialFile, timeStampFormat, prefix);
-        }
-
-        /**
-         * List the files in the initial file directory that match the prefix, name and suffix format.
-         * {@inheritDoc}
-         */
-        @Override
-        public List<File> listFiles() {
-            List<File> fileList = super.listFiles();
-            // make sure the files are sorted from oldest to newest by filename - timestamps won't be accurate enough.
-            Collections.sort(fileList);
-            return fileList;
         }
     }
 
