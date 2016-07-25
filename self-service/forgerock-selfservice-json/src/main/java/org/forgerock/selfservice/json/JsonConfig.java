@@ -11,9 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.selfservice.json;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -25,6 +31,7 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
+import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
@@ -44,9 +51,40 @@ import org.forgerock.selfservice.stages.user.UserQueryConfig;
  * @since 0.2.0
  */
 final class JsonConfig {
+
+    /* Define "standard" NamedTypes, or type-name mappings here.  They will be augmented with custom type
+     * mappings passed in from the client or integrating product.
+     */
+    private static final NamedType[] DEFAULT_NAMED_TYPES = new NamedType[] {
+        // stage config object mapping
+        new NamedType(CaptchaStageConfig.class, CaptchaStageConfig.NAME),
+        new NamedType(ResetStageConfig.class, ResetStageConfig.NAME),
+        new NamedType(UserRegistrationConfig.class, UserRegistrationConfig.NAME),
+        new NamedType(UserQueryConfig.class, UserQueryConfig.NAME),
+        new NamedType(VerifyEmailAccountConfig.class, VerifyEmailAccountConfig.NAME),
+        new NamedType(UserDetailsConfig.class, UserDetailsConfig.NAME),
+        new NamedType(SecurityAnswerDefinitionConfig.class, SecurityAnswerDefinitionConfig.NAME),
+        new NamedType(SecurityAnswerVerificationConfig.class, SecurityAnswerVerificationConfig.NAME),
+        new NamedType(RetrieveUsernameConfig.class, RetrieveUsernameConfig.NAME),
+        new NamedType(EmailUsernameConfig.class, EmailUsernameConfig.NAME),
+        new NamedType(TermsAndConditionsConfig.class, TermsAndConditionsConfig.NAME),
+
+        // token handler config object mapping
+        new NamedType(JwtTokenHandlerConfig.class, JwtTokenHandlerConfig.TYPE)
+    };
+
     private final ObjectMapper mapper;
 
     JsonConfig(ClassLoader classLoader) {
+        this(classLoader, new HashMap<String, Class<? extends StageConfig>>());
+    }
+
+    JsonConfig(ClassLoader classLoader, Map<String, Class<? extends StageConfig>> stageConfigMappings) {
+        final List<NamedType> namedTypes = new ArrayList<>(Arrays.asList(DEFAULT_NAMED_TYPES));
+        // add custom stage config mapping to default named types
+        for (Map.Entry<String, Class<? extends StageConfig>> entry : stageConfigMappings.entrySet()) {
+            namedTypes.add(new NamedType(entry.getValue(), entry.getKey()));
+        }
         mapper = new ObjectMapper();
         mapper
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
@@ -54,22 +92,7 @@ final class JsonConfig {
                 .registerModule(
                         new SimpleModule("SelfServiceModule", Version.unknownVersion())
                                 .addDeserializer(StorageType.class, new StorageTypeDeserializer()))
-                .registerSubtypes(
-                        // stage config object mapping
-                        new NamedType(CaptchaStageConfig.class, CaptchaStageConfig.NAME),
-                        new NamedType(ResetStageConfig.class, ResetStageConfig.NAME),
-                        new NamedType(UserRegistrationConfig.class, UserRegistrationConfig.NAME),
-                        new NamedType(UserQueryConfig.class, UserQueryConfig.NAME),
-                        new NamedType(VerifyEmailAccountConfig.class, VerifyEmailAccountConfig.NAME),
-                        new NamedType(UserDetailsConfig.class, UserDetailsConfig.NAME),
-                        new NamedType(SecurityAnswerDefinitionConfig.class, SecurityAnswerDefinitionConfig.NAME),
-                        new NamedType(SecurityAnswerVerificationConfig.class, SecurityAnswerVerificationConfig.NAME),
-                        new NamedType(RetrieveUsernameConfig.class, RetrieveUsernameConfig.NAME),
-                        new NamedType(EmailUsernameConfig.class, EmailUsernameConfig.NAME),
-                        new NamedType(TermsAndConditionsConfig.class, TermsAndConditionsConfig.NAME),
-
-                        // token handler config object mapping
-                        new NamedType(JwtTokenHandlerConfig.class, JwtTokenHandlerConfig.TYPE));
+                .registerSubtypes(namedTypes.toArray(new NamedType[0]));
     }
 
     /**

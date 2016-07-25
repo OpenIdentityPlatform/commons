@@ -11,24 +11,31 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.selfservice.json;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.ProcessStore;
 import org.forgerock.selfservice.core.ProgressStageProvider;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
+import org.forgerock.selfservice.core.config.StageConfig;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.util.Reject;
 
 /**
  * Builder for {@link AnonymousProcessService} from JSON config and AnonymousProcessService requirements.
+ *
+ * @since 20.0.0
  */
 public final class JsonAnonymousProcessServiceBuilder {
 
     private ClassLoader classLoader = getClass().getClassLoader(); // assume this ClassLoader if not supplied
+    private Map<String, Class<? extends StageConfig>> stageConfigMappings = new HashMap<>();
     private JsonValue jsonConfig;
     private ProgressStageProvider progressStageProvider;
     private SnapshotTokenHandlerFactory tokenHandlerFactory;
@@ -55,6 +62,18 @@ public final class JsonAnonymousProcessServiceBuilder {
      */
     public JsonAnonymousProcessServiceBuilder withClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
+        return this;
+    }
+
+    /**
+     * Provide additional named type-mapping, if desired.
+     *
+     * @param name the {@code name} attribute value to associate with the new stage config type
+     * @param type the {@link StageConfig} type to associate
+     * @return this builder instance
+     */
+    public JsonAnonymousProcessServiceBuilder withStageConfigMapping(String name, Class<? extends StageConfig> type) {
+        this.stageConfigMappings.put(name, type);
         return this;
     }
 
@@ -109,7 +128,8 @@ public final class JsonAnonymousProcessServiceBuilder {
      */
     public AnonymousProcessService build() {
         Reject.ifNull(classLoader, jsonConfig, progressStageProvider, tokenHandlerFactory, processStore);
-        ProcessInstanceConfig config = new JsonConfig(classLoader).buildProcessInstanceConfig(jsonConfig);
+        ProcessInstanceConfig config = new JsonConfig(classLoader, stageConfigMappings)
+                .buildProcessInstanceConfig(jsonConfig);
         Reject.ifNull(config.getStageConfigs(), config.getSnapshotTokenConfig(), config.getStorageType());
         Reject.ifTrue(config.getStageConfigs().isEmpty());
         return new AnonymousProcessService(config, progressStageProvider, tokenHandlerFactory, processStore,

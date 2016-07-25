@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -93,6 +94,22 @@ public final class JsonConfigTest {
             assertThat(stageConfigs).hasSize(1);
             assertThat(stageConfigs.get(0).getClass().toString()).endsWith("MathProblemStageConfig");
         }
+    }
+
+    @Test
+    public void testRegistrationOfCustomStageName() throws Exception {
+        JsonValue json = readConfig("/custom-with-name.json");
+        Map<String, Class<? extends StageConfig>> namedTypes = new HashMap<>();
+        namedTypes.put(CustomStageConfig.NAME, CustomStageConfig.class);
+
+        ProcessInstanceConfig config = new JsonConfig(getClass().getClassLoader(), namedTypes)
+                .buildProcessInstanceConfig(json);
+        assertThat(config.getStageConfigs().size()).isEqualTo(1);
+        assertThat(FluentIterable.from(config.getStageConfigs()).transform(TO_STAGE_NAME))
+                .containsExactly(CustomStageConfig.NAME);
+        List<StageConfig> stageConfigs = config.getStageConfigs();
+        assertThat(stageConfigs).hasSize(1);
+        assertThat(stageConfigs.get(0).getClass()).isEqualTo(CustomStageConfig.class);
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
