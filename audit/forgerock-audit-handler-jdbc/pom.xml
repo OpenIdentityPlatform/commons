@@ -20,7 +20,7 @@
     <parent>
         <artifactId>forgerock-audit</artifactId>
         <groupId>org.forgerock.commons</groupId>
-        <version>21.0.0-alpha-4</version>
+        <version>21.0.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>forgerock-audit-handler-jdbc</artifactId>
