@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-package org.forgerock.json.patch;
+package org.forgerock.json;
 
 import static org.forgerock.json.JsonValueFunctions.pointer;
 
@@ -23,14 +23,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.forgerock.json.JsonException;
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
-
 /**
- * Processes partial modifications to JSON values. Implements
- * <a href="http://tools.ietf.org/html/rfc6902#section-4.1">RFC 6902 - JSON Patch</a>.
+ * Processes partial modifications to JSON values.
  */
 public final class JsonPatch {
 
@@ -87,7 +81,7 @@ public final class JsonPatch {
      * @throws NullPointerException if either of {@code original} or {@code target} are {@code null}.
      */
     public static JsonValue diff(JsonValue original, JsonValue target) {
-        ArrayList<Object> result = new ArrayList<Object>();
+        final List<Object> result = new ArrayList<>();
         if (differentTypes(original, target)) { // different types cause a replace
             result.add(op("replace", original.getPointer(), target));
         } else if (original.isMap()) {
@@ -127,6 +121,44 @@ public final class JsonPatch {
             result.add(op("replace", original.getPointer(), target));
         }
         return new JsonValue(result);
+    }
+
+    /**
+     * Compares two JSON values, and returns whether the two objects are identical.  Fails fast in that a
+     * {@code false} is returned as soon as a difference is detected.
+     *
+     * @param value a value.
+     * @param other another value.
+     * @return whether the two inputs are equal.
+     * @throws NullPointerException if either of {@code value} or {@code other} are {@code null}.
+     */
+    public static boolean isEqual(JsonValue value, JsonValue other) {
+        if (differentTypes(value, other)) {
+            return false;
+        }
+        if (value.size() != other.size()) {
+            return false;
+        }
+        if (value.isMap()) {
+            // only need test that other has same keys with same values as value as they are the same size at this point
+            for (String key : value.keys()) {
+                if (!other.isDefined(key) // other is missing the property
+                            || !isEqual(value.get(key), other.get(key))) { // recursively compare properties
+                    return false;
+                }
+            }
+        } else if (value.isList()) {
+            Iterator<JsonValue> i1 = value.iterator();
+            Iterator<JsonValue> i2 = other.iterator();
+            while (i1.hasNext() && i2.hasNext()) {
+                if (!isEqual(i1.next(), i2.next())) { // recursively compare elements
+                    return false;
+                }
+            }
+        } else if (!value.isNull() && !value.getObject().equals(other.getObject())) { // simple value comparison
+            return false;
+        }
+        return true;
     }
 
     /**

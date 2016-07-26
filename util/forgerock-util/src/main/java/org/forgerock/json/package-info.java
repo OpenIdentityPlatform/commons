@@ -13,7 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc. All rights reserved.
  *
- * Portions Copyrighted 2011-2015 ForgeRock AS.
+ * Portions Copyrighted 2011-2016 ForgeRock AS.
  */
 
 /**
@@ -23,5 +23,7 @@
  * representation of JSON; rather, it focuses exclusively on processing Java structures
  * composed of {@code Map}, {@code List}, {@code String}, {@code Number} and {@code Boolean}
  * objects.
+ * <p>
+ * Methods and utilities for computing differences and patching JSON structures are also included.
  */
 package org.forgerock.json;

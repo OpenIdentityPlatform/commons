@@ -11,13 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS. All rights reserved.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
-package org.forgerock.json.patch;
-
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
+package org.forgerock.json;
 
 /**
  * RFC6902 expects the patch value to be a predetermined, static value to be used in the

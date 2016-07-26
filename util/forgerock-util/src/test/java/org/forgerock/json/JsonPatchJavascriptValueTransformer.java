@@ -11,16 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS. All rights reserved.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
-package org.forgerock.json.patch;
+package org.forgerock.json;
 
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
 
 /**
  * RFC6902 expects the patch value to be a predetermined, static value to be used in the
@@ -62,16 +59,14 @@ public class JsonPatchJavascriptValueTransformer implements JsonPatchValueTransf
         if (script == null || script.getObject() == null || !script.isString()) {
             return null;
         }
-        Context cx = Context.enter();
+
         try {
-            Scriptable scope = cx.initStandardObjects();
+            ScriptEngineManager factory = new ScriptEngineManager();
+            ScriptEngine engine = factory.getEngineByName("JavaScript");
             String finalScript = "var content = " + content.toString() + "; " + script.getObject();
-            Object result = cx.evaluateString(scope, finalScript, "script", 1, null);
-            return Context.toString(result);
+            return String.valueOf(engine.eval(finalScript));
         } catch (Exception e) {
             throw new JsonValueException(script, "failed to eval script", e);
-        } finally {
-            Context.exit();
         }
     }
 }

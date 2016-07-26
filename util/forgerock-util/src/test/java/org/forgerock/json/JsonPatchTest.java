@@ -11,16 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
-package org.forgerock.json.patch;
+package org.forgerock.json;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
 import org.testng.annotations.Test;
 
 public class JsonPatchTest {
@@ -41,9 +39,12 @@ public class JsonPatchTest {
         v2.remove("b");
         diff = JsonPatch.diff(v1, v2);
         assertThat(diff.size()).isEqualTo(1);
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+
         JsonPatch.patch(v1, diff);
         assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
         assertThat(v1.isDefined("b")).isFalse();
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
     }
 
     @Test
@@ -55,9 +56,12 @@ public class JsonPatchTest {
         v2.put("c", "d");
         diff = JsonPatch.diff(v1, v2);
         assertThat(diff.size()).isEqualTo(1);
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+
         JsonPatch.patch(v1, diff);
         assertThat(v1.get("c").getObject()).isEqualTo("d");
         assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
     }
 
     @Test
@@ -93,9 +97,12 @@ public class JsonPatchTest {
         v2.put("a", "e");
         diff = JsonPatch.diff(v1, v2);
         assertThat(diff.size()).isEqualTo(1);
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+
         JsonPatch.patch(v1, diff);
         assertThat(v1.get("a").getObject()).isEqualTo("e");
         assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
     }
 
     @Test
@@ -152,7 +159,7 @@ public class JsonPatchTest {
     }
 
     @Test
-    public void mapDiffNoChanges() {
+    public void mapNoChanges() {
         v1 = json(object(
                 field("foo", "bar"),
                 field("boo", "far")
@@ -160,8 +167,53 @@ public class JsonPatchTest {
         v2 = v1.copy();
         diff = JsonPatch.diff(v1, v2);
         assertThat(diff.size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
+
         JsonPatch.patch(v1, diff);
         assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
+    }
+
+    @Test
+    public void mapDifferentSizes() {
+        v1 = json(object(
+                field("foo", "bar"),
+                field("boo", "far")
+        ));
+        v2 = json(object(
+                field("foo", "bar"),
+                field("boo", "far"),
+                field("bar", "baz")
+        ));
+        diff = JsonPatch.diff(v1, v2);
+        assertThat(diff.size()).isEqualTo(1);
+        // different size maps should "fail fast" when testing equality
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+
+        JsonPatch.patch(v1, diff);
+        assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
+    }
+
+    @Test
+    public void mapSameSizeDifferentKeys() {
+        v1 = json(object(
+                field("foo", "bar"),
+                field("boo", "far")
+        ));
+        v2 = json(object(
+                field("foo", "bar"),
+                field("bar", "baz")
+        ));
+        diff = JsonPatch.diff(v1, v2);
+        // diff should contain a remove of one key-value pair and an add of the new one
+        assertThat(diff.size()).isEqualTo(2);
+        // same-size maps with different keys will have to be traversed when testing equality
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+
+        JsonPatch.patch(v1, diff);
+        assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
     }
 
     @Test
@@ -175,8 +227,63 @@ public class JsonPatchTest {
         v2 = v1.copy();
         diff = JsonPatch.diff(v1, v2);
         assertThat(diff.size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
+
         JsonPatch.patch(v1, diff);
         assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
+    }
+
+    @Test
+    public void listDiffDifferentSizes() {
+        v1 = json(array("a", "b", "c"));
+        v2 = v1.copy();
+        v2.add("d");
+        diff = JsonPatch.diff(v1, v2);
+        assertThat(diff.size()).isEqualTo(1);
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+
+        JsonPatch.patch(v1, diff);
+        assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
+    }
+
+    @Test
+    public void listDiffDifferentElements() {
+        v1 = json(array("a", "b", "c"));
+        v2 = json(array("a", "b", "d"));
+        diff = JsonPatch.diff(v1, v2);
+        assertThat(diff.size()).isEqualTo(1);
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+
+        JsonPatch.patch(v1, diff);
+        assertThat(JsonPatch.diff(v1, v2).size()).isEqualTo(0);
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
+    }
+
+    @Test
+    public void differentTypesNotEqual() {
+        v1 = json(array("a", "b", "c"));
+        v2 = json(object(field("foo", "bar")));
+
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+    }
+
+    @Test
+    public void oneNullNotEqual() {
+        v1 = json(null);
+        v2 = json(object());
+
+        assertThat(JsonPatch.isEqual(v1, v2)).isFalse();
+        assertThat(JsonPatch.isEqual(v2, v1)).isFalse();
+    }
+
+    @Test
+    public void twoNullAreEqual() {
+        v1 = json(null);
+        v2 = json(null);
+
+        assertThat(JsonPatch.isEqual(v1, v2)).isTrue();
     }
 
     @Test

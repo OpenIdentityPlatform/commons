@@ -1889,4 +1889,41 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
             put(token, object);
         }
     }
+
+    /**
+     * Performs a deep comparison of this JSON value with another JSON value, and returns whether the two objects
+     * are identical.  Fails fast in that a {@code false} is returned as soon as a difference is detected.
+     *
+     * @param other another value.
+     * @return whether the two objects are equal.
+     * @throws NullPointerException if either of {@code value} or {@code other} are {@code null}.
+     */
+    public boolean isEqualTo(JsonValue other) {
+        return JsonPatch.isEqual(this, other);
+    }
+
+    /**
+     * Performs a deep comparison of this JSON vlaue with another JSON value, and produces a
+     * JSON Patch value, which contains the operations necessary to modify the current value
+     * to arrive at the {@code target} value.
+     *
+     * @param target the intended target value.
+     * @return the resulting JSON Patch value.
+     * @throws NullPointerException if either of {@code original} or {@code target} are {@code null}.
+     */
+    public JsonValue diff(JsonValue target) {
+        return JsonPatch.diff(this, target);
+    }
+
+    /**
+     * Applies a set of modifications in a JSON patch value to the current object, resulting
+     * in the intended target value. In the event of a failure, this method does not revert
+     * any modifications applied up to the point of failure.
+     *
+     * @param patch the JSON Patch value, specifying the modifications to apply to the original value.
+     * @throws JsonValueException if application of the patch failed.
+     */
+    public void patch(JsonValue patch) {
+        JsonPatch.patch(this, patch);
+    }
 }

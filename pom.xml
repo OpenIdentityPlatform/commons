@@ -73,7 +73,6 @@
     <module>auth-filters</module>
     <module>http-framework</module>
     <module>json-crypto</module>
-    <module>json-patch</module>
     <module>json-ref</module>
     <module>json-schema</module>
     <module>json-web-token</module>
