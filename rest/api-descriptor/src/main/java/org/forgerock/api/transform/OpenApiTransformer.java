@@ -73,9 +73,9 @@ import org.forgerock.http.routing.Version;
 import org.forgerock.http.swagger.SwaggerExtended;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.annotations.VisibleForTesting;
+import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.util.i18n.PreferredLocales;
 
-import io.swagger.models.ArrayModel;
 import io.swagger.models.Info;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
@@ -85,31 +85,10 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
-import io.swagger.models.parameters.BodyParameter;
-import io.swagger.models.parameters.HeaderParameter;
-import io.swagger.models.parameters.PathParameter;
-import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.parameters.RefParameter;
-import io.swagger.models.parameters.SerializableParameter;
 import io.swagger.models.properties.AbstractNumericProperty;
-import io.swagger.models.properties.AbstractProperty;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.BinaryProperty;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.ByteArrayProperty;
-import io.swagger.models.properties.DateProperty;
-import io.swagger.models.properties.DateTimeProperty;
-import io.swagger.models.properties.DoubleProperty;
-import io.swagger.models.properties.FloatProperty;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.LongProperty;
-import io.swagger.models.properties.ObjectProperty;
-import io.swagger.models.properties.PasswordProperty;
 import io.swagger.models.properties.Property;
 import io.swagger.models.properties.RefProperty;
-import io.swagger.models.properties.StringProperty;
-import io.swagger.models.properties.UUIDProperty;
 
 /**
  * Transforms an {@link ApiDescription} into an OpenAPI/Swagger model.
@@ -135,6 +114,10 @@ public class OpenApiTransformer {
     private static final String PARAMETER_IF_NONE_MATCH_REV_ONLY = "If-None-Match: <rev>";
 
     static final String DEFINITIONS_REF = "#/definitions/";
+    private static final String I18N_PREFIX = LocalizableString.TRANSLATION_KEY_PREFIX + "ApiDescription#";
+    private static final String FIELDS_PARAMETER_DESCRIPTION = I18N_PREFIX + "common.parameters.fields";
+    private static final String PRETTYPRINT_PARAMETER_DESCRIPTION = I18N_PREFIX + "common.parameters.prettyprint";
+    private static final String MIMETYPE_PARAMETER_DESCRIPTION = I18N_PREFIX + "common.parameters.mimetype";
 
     @VisibleForTesting
     final Swagger swagger;
@@ -144,9 +127,6 @@ public class OpenApiTransformer {
     private final ApiDescription apiDescription;
 
     private final Map<String, Model> definitionMap = new HashMap<>();
-
-    // TODO Removed in a different PR.
-    private static final PreferredLocales PREFERRED_LOCALES = new PreferredLocales();
 
     /**
      * Default constructor that is only used by unit tests.
@@ -169,7 +149,7 @@ public class OpenApiTransformer {
      * @param externalApiDescriptions External CREST API Descriptions, for resolving {@link Reference}s, or {@code null}
      */
     @VisibleForTesting
-    OpenApiTransformer(final String title, final String host, final String basePath, final boolean secure,
+    OpenApiTransformer(final LocalizableString title, final String host, final String basePath, final boolean secure,
             final ApiDescription apiDescription, final ApiDescription... externalApiDescriptions) {
         this.apiDescription = checkNotNull(apiDescription, "apiDescription required");
 
@@ -204,8 +184,9 @@ public class OpenApiTransformer {
      * @param externalApiDescriptions External CREST API Descriptions, for resolving {@link Reference}s, or {@code null}
      * @return {@code Swagger} model
      */
-    public static Swagger execute(final String title, final String host, final String basePath, final boolean secure,
-            final ApiDescription apiDescription, final ApiDescription... externalApiDescriptions) {
+    public static Swagger execute(final LocalizableString title, final String host, final String basePath,
+            final boolean secure, final ApiDescription apiDescription,
+            final ApiDescription... externalApiDescriptions) {
         final OpenApiTransformer transformer = new OpenApiTransformer(title, host, basePath, secure, apiDescription,
                 externalApiDescriptions);
         return transformer.doExecute();
@@ -244,36 +225,32 @@ public class OpenApiTransformer {
      * Build globally-defined parameters, which are referred to by-reference.
      */
     private void buildParameters() {
+        ClassLoader loader = this.getClass().getClassLoader();
+
         // _fields
-        final QueryParameter fieldsParameter = new QueryParameter();
+        final LocalizableQueryParameter fieldsParameter = new LocalizableQueryParameter();
         fieldsParameter.setName(PARAMETER_FIELDS);
         fieldsParameter.setType("string");
         fieldsParameter.setCollectionFormat("csv");
-        fieldsParameter.setDescription(
-                "Optional parameter containing a comma separated list of field references specifying which fields of "
-                        + "the targeted JSON resource should be returned.");
+        fieldsParameter.description(new LocalizableString(FIELDS_PARAMETER_DESCRIPTION, loader));
         swagger.addParameter(fieldsParameter.getName(), fieldsParameter);
 
         // _prettyPrint
-        final QueryParameter prettyPrintParameter = new QueryParameter();
+        final LocalizableQueryParameter prettyPrintParameter = new LocalizableQueryParameter();
         prettyPrintParameter.setName(PARAMETER_PRETTY_PRINT);
         prettyPrintParameter.setType("boolean");
-        prettyPrintParameter.setDescription(
-                "Optional parameter requesting that the returned JSON resource content should be formatted to be more "
-                        + "human readable.");
+        fieldsParameter.description(new LocalizableString(PRETTYPRINT_PARAMETER_DESCRIPTION, loader));
         swagger.addParameter(prettyPrintParameter.getName(), prettyPrintParameter);
 
         // _mimeType
-        final QueryParameter mimeTypeParameter = new QueryParameter();
+        final LocalizableQueryParameter mimeTypeParameter = new LocalizableQueryParameter();
         mimeTypeParameter.setName(PARAMETER_MIME_TYPE);
         mimeTypeParameter.setType("string");
-        mimeTypeParameter.setDescription(
-                "Optional parameter requesting that the response have the given MIME-Type. Use of this parameter "
-                        + "requires a _fields parameter with a single field specified.");
+        fieldsParameter.description(new LocalizableString(MIMETYPE_PARAMETER_DESCRIPTION, loader));
         swagger.addParameter(mimeTypeParameter.getName(), mimeTypeParameter);
 
         // PUT-operation IF-NONE-MATCH always has * value
-        final HeaderParameter putIfNoneMatchParameter = new HeaderParameter();
+        final LocalizableHeaderParameter putIfNoneMatchParameter = new LocalizableHeaderParameter();
         putIfNoneMatchParameter.setName(PARAMETER_IF_NONE_MATCH);
         putIfNoneMatchParameter.setType("string");
         putIfNoneMatchParameter.required(true);
@@ -281,13 +258,13 @@ public class OpenApiTransformer {
         swagger.addParameter(PARAMETER_IF_NONE_MATCH_ANY_ONLY, putIfNoneMatchParameter);
 
         // READ-operation IF-NONE-MATCH cannot have * value
-        final HeaderParameter readIfNoneMatchParameter = new HeaderParameter();
+        final LocalizableHeaderParameter readIfNoneMatchParameter = new LocalizableHeaderParameter();
         readIfNoneMatchParameter.setName(PARAMETER_IF_NONE_MATCH);
         readIfNoneMatchParameter.setType("string");
         swagger.addParameter(PARAMETER_IF_NONE_MATCH_REV_ONLY, readIfNoneMatchParameter);
 
         // IF-MATCH
-        final HeaderParameter ifMatchParameter = new HeaderParameter();
+        final LocalizableHeaderParameter ifMatchParameter = new LocalizableHeaderParameter();
         ifMatchParameter.setName(PARAMETER_IF_MATCH);
         ifMatchParameter.setType("string");
         ifMatchParameter.setDefault("*");
@@ -353,7 +330,7 @@ public class OpenApiTransformer {
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
-    private void buildResourcePaths(final Resource resource, final String pathName, final String parentTag,
+    private void buildResourcePaths(final Resource resource, final String pathName, final LocalizableString parentTag,
             final String resourceVersion, final List<Parameter> parameters, final Map<String, Path> pathMap) {
         // always show version at end of paths, inside the URL fragment
         final boolean hasResourceVersion = !isEmpty(resourceVersion);
@@ -361,15 +338,23 @@ public class OpenApiTransformer {
                 ? normalizeName(pathName, resourceVersion) : normalizeName(pathName);
 
         // group resource endpoints by tag
-        String tag = parentTag;
-        if (isEmpty(tag)) {
-            tag = !isEmpty(resource.getTitle().toTranslatedString(PREFERRED_LOCALES))
-                    ? resource.getTitle().toTranslatedString(PREFERRED_LOCALES)
-                    : pathName;
-            if (hasResourceVersion) {
-                tag += " v" + resourceVersion;
-            }
-            swagger.addTag(new Tag().name(tag));
+        LocalizableString tag = parentTag;
+        if (tag == null || isEmpty(tag.toString())) {
+            final LocalizableString title = resource.getTitle();
+            final String titleString = title.toString();
+            tag = new LocalizableString(hasResourceVersion ? titleString + " v" + resourceVersion : titleString) {
+                @Override
+                public String toTranslatedString(PreferredLocales locales) {
+                    String tag = !isEmpty(titleString)
+                            ? title.toTranslatedString(locales)
+                            : pathName;
+                    if (hasResourceVersion) {
+                        tag += " v" + resourceVersion;
+                    }
+                    return tag;
+                }
+            };
+            swagger.addTag(new LocalizableTag().name(tag));
         }
 
         Schema resourceSchema = null;
@@ -412,7 +397,7 @@ public class OpenApiTransformer {
      * @param parameters CREST operation parameters
      * @param pathMap Output for OpenAPI paths that are constructed
      */
-    private void buildItems(final Resource resource, final String pathName, final String parentTag,
+    private void buildItems(final Resource resource, final String pathName, final LocalizableString parentTag,
             final String resourceVersion, final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getItems() != null) {
             final Items items = resource.getItems();
@@ -473,7 +458,7 @@ public class OpenApiTransformer {
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildCreate(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final LocalizableString tag, final String resourceVersion, final Schema resourceSchema,
             final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getCreate() != null) {
             final Create create = resource.getCreate();
@@ -481,7 +466,7 @@ public class OpenApiTransformer {
             case ID_FROM_CLIENT:
                 final String createPutNamespace = normalizeName(pathNamespace, "create", "put");
                 final String createPutPathFragment = normalizeName(resourceVersion, "create", "put");
-                final Operation putOperation = buildOperation(create, createPutNamespace, resourceSchema,
+                final LocalizableOperation putOperation = buildOperation(create, createPutNamespace, resourceSchema,
                         resourceSchema, parameters);
                 putOperation.setSummary("Create with Client-Assigned ID");
 
@@ -494,7 +479,7 @@ public class OpenApiTransformer {
             case ID_FROM_SERVER:
                 final String createPostNamespace = normalizeName(pathNamespace, "create", "post");
                 final String createPostPathFragment = normalizeName(resourceVersion, "create", "post");
-                final Operation postOperation = buildOperation(create, createPostNamespace, resourceSchema,
+                final LocalizableOperation postOperation = buildOperation(create, createPostNamespace, resourceSchema,
                         resourceSchema, parameters);
                 postOperation.setSummary("Create with Server-Assigned ID");
 
@@ -520,14 +505,15 @@ public class OpenApiTransformer {
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildRead(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final LocalizableString tag, final String resourceVersion, final Schema resourceSchema,
             final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getRead() != null) {
             final String operationNamespace = normalizeName(pathNamespace, "read");
             final String operationPathFragment = normalizeName(resourceVersion, "read");
             final Read read = resource.getRead();
 
-            final Operation operation = buildOperation(read, operationNamespace, null, resourceSchema, parameters);
+            final LocalizableOperation operation = buildOperation(read, operationNamespace, null, resourceSchema,
+                    parameters);
             operation.setSummary("Read");
             operation.addParameter(new RefParameter(PARAMETER_MIME_TYPE));
 
@@ -552,15 +538,15 @@ public class OpenApiTransformer {
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildUpdate(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final LocalizableString tag, final String resourceVersion, final Schema resourceSchema,
             final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getUpdate() != null) {
             final String operationNamespace = normalizeName(pathNamespace, "update");
             final String operationPathFragment = normalizeName(resourceVersion, "update");
             final Update update = resource.getUpdate();
 
-            final Operation operation = buildOperation(update, operationNamespace, resourceSchema, resourceSchema,
-                    parameters);
+            final LocalizableOperation operation = buildOperation(update, operationNamespace, resourceSchema,
+                    resourceSchema, parameters);
             operation.setSummary("Update");
 
             if (resource.isMvccSupported()) {
@@ -584,14 +570,14 @@ public class OpenApiTransformer {
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildDelete(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final LocalizableString tag, final String resourceVersion, final Schema resourceSchema,
             final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getDelete() != null) {
             final String operationNamespace = normalizeName(pathNamespace, "delete");
             final String operationPathFragment = normalizeName(resourceVersion, "delete");
             final Delete delete = resource.getDelete();
 
-            final Operation operation = buildOperation(delete, operationNamespace, null, resourceSchema,
+            final LocalizableOperation operation = buildOperation(delete, operationNamespace, null, resourceSchema,
                     parameters);
             operation.setSummary("Delete");
 
@@ -616,7 +602,7 @@ public class OpenApiTransformer {
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildPatch(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final LocalizableString tag, final String resourceVersion, final Schema resourceSchema,
             final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (resource.getPatch() != null) {
             final String operationNamespace = normalizeName(pathNamespace, "patch");
@@ -624,8 +610,8 @@ public class OpenApiTransformer {
             final Patch patch = resource.getPatch();
 
             final Schema requestSchema = buildPatchRequestPayload(patch.getOperations());
-            final Operation operation = buildOperation(patch, operationNamespace, requestSchema, resourceSchema,
-                    parameters);
+            final LocalizableOperation operation = buildOperation(patch, operationNamespace, requestSchema,
+                    resourceSchema, parameters);
             operation.setSummary("Update via Patch Operations");
 
             if (resource.isMvccSupported()) {
@@ -648,7 +634,7 @@ public class OpenApiTransformer {
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildActions(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final List<Parameter> parameters,
+            final LocalizableString tag, final String resourceVersion, final List<Parameter> parameters,
             final Map<String, Path> pathMap) {
         if (!isEmpty(resource.getActions())) {
             final String operationNamespace = normalizeName(pathNamespace, "action");
@@ -657,11 +643,11 @@ public class OpenApiTransformer {
                 final String actionNamespace = normalizeName(operationNamespace, action.getName());
                 final String actionPathFragment = normalizeName(operationPathFragment, action.getName());
 
-                final Operation operation = buildOperation(action, actionNamespace, action.getRequest(),
+                final LocalizableOperation operation = buildOperation(action, actionNamespace, action.getRequest(),
                         action.getResponse(), parameters);
                 operation.setSummary("Action: " + action.getName());
 
-                final QueryParameter actionParameter = new QueryParameter();
+                final LocalizableQueryParameter actionParameter = new LocalizableQueryParameter();
                 actionParameter.setName("_action");
                 actionParameter.setType("string");
                 actionParameter.setEnum(asList(action.getName()));
@@ -686,7 +672,7 @@ public class OpenApiTransformer {
      * @param pathMap Output for OpenAPI paths that are constructed
      */
     private void buildQueries(final Resource resource, final String pathName, final String pathNamespace,
-            final String tag, final String resourceVersion, final Schema resourceSchema,
+            final LocalizableString tag, final String resourceVersion, final Schema resourceSchema,
             final List<Parameter> parameters, final Map<String, Path> pathMap) {
         if (!isEmpty(resource.getQueries())) {
             final String operationNamespace = normalizeName(pathNamespace, "query");
@@ -695,14 +681,14 @@ public class OpenApiTransformer {
                 final String queryNamespace;
                 final String queryPathFragment;
                 final String summary;
-                final QueryParameter queryParameter;
+                final LocalizableQueryParameter queryParameter;
                 switch (query.getType()) {
                 case ID:
                     queryNamespace = normalizeName(operationNamespace, "id", query.getQueryId());
                     queryPathFragment = normalizeName(operationPathFragment, "id", query.getQueryId());
                     summary = "Query by ID: " + query.getQueryId();
 
-                    queryParameter = new QueryParameter();
+                    queryParameter = new LocalizableQueryParameter();
                     queryParameter.setName("_queryId");
                     queryParameter.setType("string");
                     queryParameter.setEnum(asList(query.getQueryId()));
@@ -713,7 +699,7 @@ public class OpenApiTransformer {
                     queryPathFragment = normalizeName(operationPathFragment, "filter");
                     summary = "Query by Filter";
 
-                    queryParameter = new QueryParameter();
+                    queryParameter = new LocalizableQueryParameter();
                     queryParameter.setName("_queryFilter");
                     queryParameter.setType("string");
                     queryParameter.setRequired(true);
@@ -723,7 +709,7 @@ public class OpenApiTransformer {
                     queryPathFragment = normalizeName(operationPathFragment, "expression");
                     summary = "Query by Expression";
 
-                    queryParameter = new QueryParameter();
+                    queryParameter = new LocalizableQueryParameter();
                     queryParameter.setName("_queryExpression");
                     queryParameter.setType("string");
                     queryParameter.setRequired(true);
@@ -746,18 +732,19 @@ public class OpenApiTransformer {
                     responsePayload = resourceSchema;
                 }
 
-                final Operation operation = buildOperation(query, queryNamespace, null, responsePayload, parameters);
+                final LocalizableOperation operation = buildOperation(query, queryNamespace, null, responsePayload,
+                        parameters);
                 operation.setSummary(summary);
                 operation.addParameter(queryParameter);
 
-                final QueryParameter pageSizeParamter = new QueryParameter();
+                final LocalizableQueryParameter pageSizeParamter = new LocalizableQueryParameter();
                 pageSizeParamter.setName("_pageSize");
                 pageSizeParamter.setType("integer");
                 operation.addParameter(pageSizeParamter);
 
                 if (query.getPagingModes() != null) {
                     for (final PagingMode pagingMode : query.getPagingModes()) {
-                        final QueryParameter parameter = new QueryParameter();
+                        final LocalizableQueryParameter parameter = new LocalizableQueryParameter();
                         switch (pagingMode) {
                         case COOKIE:
                             parameter.setName("_pagedResultsCookie");
@@ -774,7 +761,7 @@ public class OpenApiTransformer {
                     }
                 }
 
-                final QueryParameter totalPagedResultsPolicyParameter = new QueryParameter();
+                final LocalizableQueryParameter totalPagedResultsPolicyParameter = new LocalizableQueryParameter();
                 totalPagedResultsPolicyParameter.setName("_totalPagedResultsPolicy");
                 totalPagedResultsPolicyParameter.setType("string");
                 final List<String> totalPagedResultsPolicyValues = new ArrayList<>();
@@ -790,7 +777,7 @@ public class OpenApiTransformer {
 
                 if (query.getType() != QueryType.ID) {
                     // _sortKeys parameter is not supported for ID queries
-                    final QueryParameter sortKeysParameter = new QueryParameter();
+                    final LocalizableQueryParameter sortKeysParameter = new LocalizableQueryParameter();
                     sortKeysParameter.setName("_sortKeys");
                     sortKeysParameter.setType("string");
                     if (!isEmpty(query.getSupportedSortKeys())) {
@@ -814,15 +801,12 @@ public class OpenApiTransformer {
      * @param parameters CREST operation parameters
      * @return Swagger operation
      */
-    private Operation buildOperation(final org.forgerock.api.models.Operation operationModel,
+    private LocalizableOperation buildOperation(final org.forgerock.api.models.Operation operationModel,
             final String operationNamespace, final Schema requestPayload, final Schema responsePayload,
             final List<Parameter> parameters) {
-        final Operation operation = new Operation();
+        final LocalizableOperation operation = new LocalizableOperation();
         operation.setOperationId(operationNamespace);
-        String description = operationModel.getDescription() == null
-                ? null
-                : operationModel.getDescription().toTranslatedString(PREFERRED_LOCALES);
-        applyOperationDescription(description, operation);
+        operation.description(operationModel.getDescription());
         applyOperationStability(operationModel.getStability(), operation);
         applyOperationParameters(mergeParameters(new ArrayList<>(parameters), operationModel.getParameters()),
                 operation);
@@ -843,15 +827,15 @@ public class OpenApiTransformer {
      * @param tag Tag used to group OpenAPI operations or {@code null}
      * @param pathMap Path map
      */
-    private void addOperation(final Operation operation, final String method, final String pathName,
-            final String pathFragment, final String resourceVersion, final String tag,
+    private void addOperation(final LocalizableOperation operation, final String method, final String pathName,
+            final String pathFragment, final String resourceVersion, final LocalizableString tag,
             final Map<String, Path> pathMap) {
         boolean showPathFragment = false;
         if (!isEmpty(resourceVersion)) {
             showPathFragment = true;
             operation.setVendorExtension("x-resourceVersion", resourceVersion);
         }
-        if (!isEmpty(tag)) {
+        if (!isEmpty(tag.toString())) {
             operation.addTag(tag);
         }
 
@@ -939,26 +923,23 @@ public class OpenApiTransformer {
     private void applyOperationParameters(final List<Parameter> parameters, final Operation operation) {
         if (!parameters.isEmpty()) {
             for (final Parameter parameter : parameters) {
-                final SerializableParameter operationParameter;
+                final LocalizableSerializableParameter operationParameter;
                 // NOTE: request-payload BodyParameter is applied elsewhere
                 switch (parameter.getSource()) {
                 case PATH:
-                    operationParameter = new PathParameter();
+                    operationParameter = new LocalizablePathParameter();
                     break;
                 case ADDITIONAL:
                     // we assume that additional parameters are query-parameters, which would need to be changed
                     // with post-processing if, for example, they should be HTTP headers
-                    operationParameter = new QueryParameter();
+                    operationParameter = new LocalizableQueryParameter();
                     break;
                 default:
                     throw new TransformerException("Unsupported ParameterSource: " + parameter.getSource());
                 }
                 operationParameter.setName(parameter.getName());
                 operationParameter.setType(parameter.getType());
-                final String description = parameter.getDescription() == null
-                        ? null
-                        : parameter.getDescription().toTranslatedString(PREFERRED_LOCALES);
-                operationParameter.setDescription(description);
+                operationParameter.description(parameter.getDescription());
                 operationParameter.setRequired(ValidationUtil.nullToFalse(parameter.isRequired()));
                 if (!isEmpty(parameter.getEnumValues())) {
                     operationParameter.setEnum(asList(parameter.getEnumValues()));
@@ -999,7 +980,7 @@ public class OpenApiTransformer {
                 }
                 model = new RefModel(ref);
             }
-            final BodyParameter parameter = new BodyParameter();
+            final LocalizableBodyParameter parameter = new LocalizableBodyParameter();
             parameter.setName("requestPayload");
             parameter.setSchema(model);
             parameter.setRequired(true);
@@ -1051,33 +1032,19 @@ public class OpenApiTransformer {
 
                 // for a given apiError-code, create a bulleted-list of descriptions, if there is more than one to merge
                 final int code = apiError.getCode();
-                final List<String> descriptions = new ArrayList<>();
+                final List<LocalizableString> descriptions = new ArrayList<>();
                 if (apiError.getDescription() != null) {
-                    descriptions.add(apiError.getDescription().toTranslatedString(PREFERRED_LOCALES));
+                    descriptions.add(apiError.getDescription());
                 }
                 for (int k = i + 1; k < n; ++k) {
                     final ApiError error = resolvedErrors.get(k);
                     if (error.getCode() == code) {
                         // TODO build composite schema with detailsSchema??? error.getSchema();
                         if (error.getDescription() != null) {
-                            descriptions.add(error.getDescription().toTranslatedString(PREFERRED_LOCALES));
+                            descriptions.add(error.getDescription());
                         }
                         ++i;
                     }
-                }
-
-                final String description;
-                if (descriptions.isEmpty()) {
-                    description = null;
-                } else if (descriptions.size() == 1) {
-                    description = descriptions.get(0);
-                } else {
-                    // Create a bulleted-list using single-asterisk, as supported by GitHub Flavored Markdown
-                    final AsciiDoc bulletedList = AsciiDoc.asciiDoc();
-                    for (final String listItem : descriptions) {
-                        bulletedList.unorderedList1(listItem);
-                    }
-                    description = bulletedList.toString();
                 }
 
                 Object errorCause = null;
@@ -1115,8 +1082,22 @@ public class OpenApiTransformer {
                         ))
                 ));
 
-                final Response response = new Response();
-                response.description(description);
+                final LocalizableResponse response = new LocalizableResponse();
+                if (descriptions.size() == 1) {
+                    response.description(descriptions.get(0));
+                } else if (!descriptions.isEmpty()) {
+                    response.description(new LocalizableString("Aggregated bullet description list") {
+                        @Override
+                        public String toTranslatedString(PreferredLocales locales) {
+                            // Create a bulleted-list using single-asterisk, as supported by GitHub Flavored Markdown
+                            final AsciiDoc bulletedList = AsciiDoc.asciiDoc();
+                            for (final LocalizableString listItem : descriptions) {
+                                bulletedList.unorderedList1(listItem.toTranslatedString(locales));
+                            }
+                            return bulletedList.toString();
+                        }
+                    });
+                }
 
                 // https://github.com/swagger-api/swagger-core/issues/1306
                 final Model model = buildModel(errorJsonSchema);
@@ -1179,15 +1160,10 @@ public class OpenApiTransformer {
      * @return Info model
      */
     @VisibleForTesting
-    Info buildInfo(final String title) {
+    Info buildInfo(final LocalizableString title) {
         // TODO set other Info fields
-        final Info info = new Info();
-        info.setTitle(title);
+        Info info = new LocalizableInfo().title(title).description(apiDescription.getDescription());
         info.setVersion(apiDescription.getVersion());
-        String description = apiDescription.getDescription() == null
-                ? null
-                : apiDescription.getDescription().toTranslatedString(PREFERRED_LOCALES);
-        info.description(description);
         return info;
     }
 
@@ -1221,11 +1197,12 @@ public class OpenApiTransformer {
      */
     @VisibleForTesting
     Model buildModel(final JsonValue schema) {
-        final ModelImpl model;
+        final LocalizableModelImpl model;
         final String type = schema.get("type").asString();
         switch (type) {
         case "object":
-            model = new ModelImpl().type(type);
+            model = new LocalizableModelImpl();
+            model.type(type);
             model.setProperties(buildProperties(schema));
             final List<String> required = getArrayOfJsonString("required", schema);
             if (!required.isEmpty()) {
@@ -1241,7 +1218,8 @@ public class OpenApiTransformer {
         case "integer":
         case "number":
         case "string":
-            model = new ModelImpl().type(type);
+            model = new LocalizableModelImpl();
+            model.type(type);
             if (schema.get("default").isNotNull()) {
                 model.setDefaultValue(schema.get("default").asString());
             }
@@ -1273,8 +1251,8 @@ public class OpenApiTransformer {
             throw new TransformerException("Unsupported JSON schema type: " + type);
         }
 
-        model.setTitle(schema.get("title").asString());
-        model.setDescription(schema.get("description").asString());
+        setTitleFromJsonValue(model, schema.get("title"));
+        setDescriptionFromJsonValue(model, schema.get("description"));
 
         // TODO reference
         // TODO external-docs URLs
@@ -1290,9 +1268,9 @@ public class OpenApiTransformer {
      * @return Swagger array-schema model
      */
     private Model buildArrayModel(final JsonValue schema) {
-        final ArrayModel model = new ArrayModel();
-        model.setTitle(schema.get("title").asString());
-        model.setDescription(schema.get("description").asString());
+        final LocalizableArrayModel model = new LocalizableArrayModel();
+        setTitleFromJsonValue(model, schema.get("title"));
+        setDescriptionFromJsonValue(model, schema.get("description"));
         model.setProperties(buildProperties(schema));
         model.setItems(buildProperty(schema.get("items")));
 
@@ -1385,19 +1363,19 @@ public class OpenApiTransformer {
         // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat
         final String format = schema.get("format").asString();
 
-        final AbstractProperty abstractProperty;
+        final LocalizableProperty abstractProperty;
         final String type = schema.get("type").asString();
         switch (type) {
         case "object": {
             // TODO there is a MapProperty type, but I am not sure how it is useful
-            final ObjectProperty property = new ObjectProperty();
+            final LocalizableObjectProperty property = new LocalizableObjectProperty();
             property.setProperties(buildProperties(schema));
             property.setRequiredProperties(getArrayOfJsonString("required", schema));
             abstractProperty = property;
             break;
         }
         case "array": {
-            final ArrayProperty property = new ArrayProperty();
+            final LocalizableArrayProperty property = new LocalizableArrayProperty();
             property.setItems(buildProperty(schema.get("items")));
             property.setMinItems(schema.get("minItems").asInteger());
             property.setMaxItems(schema.get("maxItems").asInteger());
@@ -1406,41 +1384,41 @@ public class OpenApiTransformer {
             break;
         }
         case "boolean":
-            abstractProperty = new BooleanProperty();
+            abstractProperty = new LocalizableBooleanProperty();
             break;
         case "integer": {
             final AbstractNumericProperty property;
             if ("int64".equals(format)) {
-                property = new LongProperty();
+                property = new LocalizableLongProperty();
             } else {
-                property = new IntegerProperty();
+                property = new LocalizableIntegerProperty();
             }
             property.setMinimum(schema.get("minimum").asDouble());
             property.setMaximum(schema.get("maximum").asDouble());
             property.setExclusiveMinimum(schema.get("exclusiveMinimum").asBoolean());
             property.setExclusiveMaximum(schema.get("exclusiveMaximum").asBoolean());
-            abstractProperty = property;
+            abstractProperty = (LocalizableProperty) property;
             break;
         }
         case "number": {
             final AbstractNumericProperty property;
             if (isEmpty(format)) {
                 // ambiguous
-                property = new DoubleProperty();
+                property = new LocalizableDoubleProperty();
             } else {
                 switch (format) {
                 case "int32":
-                    property = new IntegerProperty();
+                    property = new LocalizableIntegerProperty();
                     break;
                 case "int64":
-                    property = new LongProperty();
+                    property = new LocalizableLongProperty();
                     break;
                 case "float":
-                    property = new FloatProperty();
+                    property = new LocalizableFloatProperty();
                     break;
                 case "double":
                 default:
-                    property = new DoubleProperty();
+                    property = new LocalizableDoubleProperty();
                     break;
                 }
             }
@@ -1448,14 +1426,14 @@ public class OpenApiTransformer {
             property.setMaximum(schema.get("maximum").asDouble());
             property.setExclusiveMinimum(schema.get("exclusiveMinimum").asBoolean());
             property.setExclusiveMaximum(schema.get("exclusiveMaximum").asBoolean());
-            abstractProperty = property;
+            abstractProperty = (LocalizableProperty) property;
             break;
         }
         case "null":
             return null;
         case "string": {
             if (isEmpty(format)) {
-                final StringProperty property = new StringProperty();
+                final LocalizableStringProperty property = new LocalizableStringProperty();
                 property.setMinLength(schema.get("minLength").asInteger());
                 property.setMaxLength(schema.get("maxLength").asInteger());
                 property.setPattern(schema.get("pattern").asString());
@@ -1463,10 +1441,10 @@ public class OpenApiTransformer {
             } else {
                 switch (format) {
                 case "byte":
-                    abstractProperty = new ByteArrayProperty();
+                    abstractProperty = new LocalizableByteArrayProperty();
                     break;
                 case "binary": {
-                    final BinaryProperty property = new BinaryProperty();
+                    final LocalizableBinaryProperty property = new LocalizableBinaryProperty();
                     property.setMinLength(schema.get("minLength").asInteger());
                     property.setMaxLength(schema.get("maxLength").asInteger());
                     property.setPattern(schema.get("pattern").asString());
@@ -1475,13 +1453,13 @@ public class OpenApiTransformer {
                 }
                 case "date":
                 case "full-date":
-                    abstractProperty = new DateProperty();
+                    abstractProperty = new LocalizableDateProperty();
                     break;
                 case "date-time":
-                    abstractProperty = new DateTimeProperty();
+                    abstractProperty = new LocalizableDateTimeProperty();
                     break;
                 case "password": {
-                    final PasswordProperty property = new PasswordProperty();
+                    final LocalizablePasswordProperty property = new LocalizablePasswordProperty();
                     property.setMinLength(schema.get("minLength").asInteger());
                     property.setMaxLength(schema.get("maxLength").asInteger());
                     property.setPattern(schema.get("pattern").asString());
@@ -1489,7 +1467,7 @@ public class OpenApiTransformer {
                     break;
                 }
                 case "uuid": {
-                    final UUIDProperty property = new UUIDProperty();
+                    final LocalizableUUIDProperty property = new LocalizableUUIDProperty();
                     property.setMinLength(schema.get("minLength").asInteger());
                     property.setMaxLength(schema.get("maxLength").asInteger());
                     property.setPattern(schema.get("pattern").asString());
@@ -1497,7 +1475,7 @@ public class OpenApiTransformer {
                     break;
                 }
                 default: {
-                    final StringProperty property = new StringProperty();
+                    final LocalizableStringProperty property = new LocalizableStringProperty();
                     property.setMinLength(schema.get("minLength").asInteger());
                     property.setMaxLength(schema.get("maxLength").asInteger());
                     property.setPattern(schema.get("pattern").asString());
@@ -1518,8 +1496,8 @@ public class OpenApiTransformer {
         if (schema.get("default").isNotNull()) {
             abstractProperty.setDefault(schema.get("default").asString());
         }
-        abstractProperty.setTitle(schema.get("title").asString());
-        abstractProperty.setDescription(schema.get("description").asString());
+        setTitleFromJsonValue(abstractProperty, schema.get("title"));
+        setDescriptionFromJsonValue(abstractProperty, schema.get("description"));
 
         final String readPolicy = schema.get("readPolicy").asString();
         if (!isEmpty(readPolicy)) {
@@ -1602,6 +1580,22 @@ public class OpenApiTransformer {
             }
         }
         return null;
+    }
+
+    static void setTitleFromJsonValue(LocalizableTitleAndDescription<?> model, JsonValue source) {
+        if (source.isString()) {
+            model.title(source.asString());
+        } else {
+            model.title((LocalizableString) source.getObject());
+        }
+    }
+
+    static void setDescriptionFromJsonValue(LocalizableTitleAndDescription<?> model, JsonValue source) {
+        if (source.isString()) {
+            model.description(source.asString());
+        } else {
+            model.description((LocalizableString) source.getObject());
+        }
     }
 
 }

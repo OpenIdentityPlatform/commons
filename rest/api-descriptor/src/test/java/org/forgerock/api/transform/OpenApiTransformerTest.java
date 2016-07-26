@@ -19,8 +19,11 @@ package org.forgerock.api.transform;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.forgerock.api.models.Reference.reference;
-import static org.forgerock.api.transform.OpenApiTransformer.*;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.api.transform.OpenApiTransformer.DEFINITIONS_REF;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,29 +31,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import io.swagger.models.ArrayModel;
-import io.swagger.models.Info;
-import io.swagger.models.Model;
-import io.swagger.models.ModelImpl;
-import io.swagger.models.Operation;
-import io.swagger.models.Swagger;
-import io.swagger.models.Tag;
-import io.swagger.models.parameters.HeaderParameter;
-import io.swagger.models.properties.ArrayProperty;
-import io.swagger.models.properties.BinaryProperty;
-import io.swagger.models.properties.BooleanProperty;
-import io.swagger.models.properties.ByteArrayProperty;
-import io.swagger.models.properties.DateProperty;
-import io.swagger.models.properties.DateTimeProperty;
-import io.swagger.models.properties.DoubleProperty;
-import io.swagger.models.properties.FloatProperty;
-import io.swagger.models.properties.IntegerProperty;
-import io.swagger.models.properties.LongProperty;
-import io.swagger.models.properties.ObjectProperty;
-import io.swagger.models.properties.PasswordProperty;
-import io.swagger.models.properties.Property;
-import io.swagger.models.properties.StringProperty;
-import io.swagger.models.properties.UUIDProperty;
 import org.forgerock.api.ApiTestUtil;
 import org.forgerock.api.enums.PatchOperation;
 import org.forgerock.api.enums.ReadPolicy;
@@ -62,19 +42,31 @@ import org.forgerock.api.models.Schema;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.i18n.LocalizableString;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import io.swagger.models.ArrayModel;
+import io.swagger.models.Info;
+import io.swagger.models.Model;
+import io.swagger.models.ModelImpl;
+import io.swagger.models.Operation;
+import io.swagger.models.Swagger;
+import io.swagger.models.parameters.HeaderParameter;
+import io.swagger.models.properties.Property;
+
 public class OpenApiTransformerTest {
+
+    public static final PreferredLocales PREFERRED_LOCALES = new PreferredLocales();
 
     @Test
     public void testUserAndDevicesExample() throws Exception {
         final ApiDescription apiDescription = ApiTestUtil.createUserAndDeviceExampleApiDescription();
         final Swagger swagger = OpenApiTransformer.execute(apiDescription);
 
-        assertThat(swagger.getTags()).containsOnly(
-                new Tag().name("User Service v1.0"),
-                new Tag().name("User-Device Service v1.0"));
+        assertThat(swagger.getTags()).hasSize(2);
+        assertTag(swagger, 0, "User Service v1.0");
+        assertTag(swagger, 1, "User-Device Service v1.0");
         assertThat(swagger.getPaths()).containsOnlyKeys(
                 "/admins#1.0_create_post",
                 "/admins#1.0_query_filter",
@@ -115,7 +107,8 @@ public class OpenApiTransformerTest {
         final ApiDescription apiDescription = ApiTestUtil.createApiDescription(false);
         final Swagger swagger = OpenApiTransformer.execute(apiDescription);
 
-        assertThat(swagger.getTags()).containsOnly(new Tag().name("Resource title"));
+        assertThat(swagger.getTags()).hasSize(1);
+        assertTag(swagger, 0, "Resource title");
         assertThat(swagger.getPaths()).containsOnlyKeys(
                 "/testPath",
                 "/testPath#_action_action1",
@@ -163,9 +156,9 @@ public class OpenApiTransformerTest {
                     }
                 }, swagger);
 
-        assertThat(swagger.getTags()).containsOnly(
-                new Tag().name("Resource title v1.0"),
-                new Tag().name("Resource title v2.0"));
+        assertThat(swagger.getTags()).hasSize(2);
+        assertTag(swagger, 0, "Resource title v1.0");
+        assertTag(swagger, 1, "Resource title v2.0");
         assertThat(swagger.getPaths()).containsOnlyKeys(
                 "/testPath#1.0_create_post",
                 "/testPath#1.0_read",
@@ -190,6 +183,12 @@ public class OpenApiTransformerTest {
                 "/testPath#2.0_query_id_id2");
     }
 
+    private void assertTag(Swagger swagger, int tagNumber, String expected) {
+        assertThat(swagger.getTags().get(tagNumber)).isInstanceOf(LocalizableTag.class);
+        LocalizableTag tag = (LocalizableTag) swagger.getTags().get(tagNumber);
+        assertThat(tag.getLocalizableName().toTranslatedString(PREFERRED_LOCALES)).isEqualTo(expected);
+    }
+
     @Test
     public void testBuildPatchRequestPayload() {
         final OpenApiTransformer transformer = new OpenApiTransformer();
@@ -207,15 +206,15 @@ public class OpenApiTransformerTest {
                 .version("2.0")
                 .description(new LocalizableString("My Description"))
                 .build();
-        final OpenApiTransformer transformer = new OpenApiTransformer("Test", "localhost:8080", "/", false,
-                apiDescription);
+        final OpenApiTransformer transformer = new OpenApiTransformer(new LocalizableString("Test"), "localhost:8080",
+                "/", false, apiDescription);
 
-        final Info info = transformer.buildInfo("My Title");
+        final Info info = transformer.buildInfo(new LocalizableString("My Title"));
 
-        assertThat(info).isEqualTo(new Info()
-                .title("My Title")
-                .version("2.0")
-                .description("My Description"));
+        assertThat(info).isEqualTo(new LocalizableInfo()
+                .title(new LocalizableString("My Title"))
+                .description(new LocalizableString("My Description"))
+                .version("2.0"));
     }
 
     @Test
@@ -229,12 +228,13 @@ public class OpenApiTransformerTest {
                 .description(new LocalizableString("My Description"))
                 .definitions(definitions)
                 .build();
-        final OpenApiTransformer transformer = new OpenApiTransformer("Test", "localhost:8080", "/", false,
-                apiDescription);
+        final OpenApiTransformer transformer = new OpenApiTransformer(new LocalizableString("Test"), "localhost:8080",
+                "/", false, apiDescription);
 
         transformer.buildDefinitions();
 
-        assertThat(transformer.swagger.getDefinitions()).containsEntry("myDef", new ModelImpl().type("object"));
+        assertThat(transformer.swagger.getDefinitions()).containsEntry("myDef",
+                new LocalizableModelImpl().type("object"));
     }
 
     @DataProvider(name = "buildModelData")
@@ -243,7 +243,7 @@ public class OpenApiTransformerTest {
                 {null, null, NullPointerException.class},
                 {json(null), null, NullPointerException.class},
                 {json(object(field("type", "not_a_json_schema_type"))), null, TransformerException.class},
-                {json(object(field("type", "object"))), new ModelImpl().type("object"), null},
+                {json(object(field("type", "object"))), new LocalizableModelImpl().type("object"), null},
                 {json(object(
                         field("type", "object"),
                         field("properties", object(field("name", object(field("type", "string"))))),
@@ -254,9 +254,9 @@ public class OpenApiTransformerTest {
                             @Override
                             public Model get() {
                                 final Map<String, Property> properties = new HashMap<>();
-                                properties.put("name", new StringProperty());
+                                properties.put("name", new LocalizableStringProperty());
 
-                                final ModelImpl o = new ModelImpl();
+                                final ModelImpl o = new LocalizableModelImpl();
                                 o.type("object");
                                 o.setProperties(properties);
                                 o.addRequired("name");
@@ -265,7 +265,7 @@ public class OpenApiTransformerTest {
                                 return o;
                             }
                         }.get(), null},
-                {json(object(field("type", "array"))), new ArrayModel(), null},
+                {json(object(field("type", "array"))), new LocalizableArrayModel(), null},
                 {json(object(
                         field("type", "array"),
                         field("items", object(field("type", "string"))),
@@ -274,25 +274,25 @@ public class OpenApiTransformerTest {
                         new Supplier<Model>() {
                             @Override
                             public Model get() {
-                                final ArrayModel o = new ArrayModel();
-                                o.setItems(new StringProperty());
+                                final ArrayModel o = new LocalizableArrayModel();
+                                o.setItems(new LocalizableStringProperty());
                                 o.setTitle("My Title");
                                 o.setDescription("My Description");
                                 return o;
                             }
                         }.get(), null},
-                {json(object(field("type", "boolean"))), new ModelImpl().type("boolean"), null},
-                {json(object(field("type", "integer"))), new ModelImpl().type("integer"), null},
-                {json(object(field("type", "number"))), new ModelImpl().type("number"), null},
+                {json(object(field("type", "boolean"))), new LocalizableModelImpl().type("boolean"), null},
+                {json(object(field("type", "integer"))), new LocalizableModelImpl().type("integer"), null},
+                {json(object(field("type", "number"))), new LocalizableModelImpl().type("number"), null},
                 {json(object(field("type", "null"))), new ModelImpl().type("null"), null},
-                {json(object(field("type", "string"))), new ModelImpl().type("string"), null},
+                {json(object(field("type", "string"))), new LocalizableModelImpl().type("string"), null},
                 {json(object(
                         field("type", "string"),
                         field("default", "my_default"))),
                         new Supplier<Model>() {
                             @Override
                             public Model get() {
-                                final ModelImpl o = new ModelImpl();
+                                final ModelImpl o = new LocalizableModelImpl();
                                 o.type("string");
                                 o.setDefaultValue("my_default");
                                 return o;
@@ -304,7 +304,7 @@ public class OpenApiTransformerTest {
                         new Supplier<Model>() {
                             @Override
                             public Model get() {
-                                final ModelImpl o = new ModelImpl();
+                                final ModelImpl o = new LocalizableModelImpl();
                                 o.type("string");
                                 o.setFormat("date");
                                 return o;
@@ -317,7 +317,7 @@ public class OpenApiTransformerTest {
                         new Supplier<Model>() {
                             @Override
                             public Model get() {
-                                final ModelImpl o = new ModelImpl();
+                                final ModelImpl o = new LocalizableModelImpl();
                                 o.type("string");
                                 o.setEnum(Arrays.asList("enum_1", "enum_2"));
                                 o.setVendorExtension("x-enum_titles", Arrays.asList("enum_1_title", "enum_2_title"));
@@ -330,8 +330,8 @@ public class OpenApiTransformerTest {
                         new Supplier<Model>() {
                             @Override
                             public Model get() {
-                                final ModelImpl o = new ModelImpl();
-                                o.setAdditionalProperties(new StringProperty());
+                                final ModelImpl o = new LocalizableModelImpl();
+                                o.setAdditionalProperties(new LocalizableStringProperty());
                                 return o;
                             }
                         }.get(), null},
@@ -366,7 +366,7 @@ public class OpenApiTransformerTest {
                 {json(null), null, null},
                 {json(object(field("type", "not_a_json_schema_type"))), null, TransformerException.class},
                 {json(object(field("type", "null"))), null, null},
-                {json(object(field("type", "object"))), new ObjectProperty(), null},
+                {json(object(field("type", "object"))), new LocalizableObjectProperty(), null},
                 {json(object(
                         field("type", "object"),
                         field("properties", object(field("name", object(field("type", "string"))))),
@@ -375,15 +375,15 @@ public class OpenApiTransformerTest {
                             @Override
                             public Property get() {
                                 final Map<String, Property> properties = new HashMap<>();
-                                properties.put("name", new StringProperty());
+                                properties.put("name", new LocalizableStringProperty());
 
-                                final ObjectProperty o = new ObjectProperty();
+                                final LocalizableObjectProperty o = new LocalizableObjectProperty();
                                 o.setProperties(properties);
                                 o.setRequiredProperties(Arrays.asList("name"));
                                 return o;
                             }
                         }.get(), null},
-                {json(object(field("type", "array"))), new ArrayProperty(), null},
+                {json(object(field("type", "array"))), new LocalizableArrayProperty(), null},
                 {json(object(
                         field("type", "array"),
                         field("items", object(field("type", "string"))),
@@ -393,18 +393,20 @@ public class OpenApiTransformerTest {
                         new Supplier<Property>() {
                             @Override
                             public Property get() {
-                                final ArrayProperty o = new ArrayProperty();
-                                o.setItems(new StringProperty());
+                                final LocalizableArrayProperty o = new LocalizableArrayProperty();
+                                o.setItems(new LocalizableStringProperty());
                                 o.setMinItems(1);
                                 o.setMaxItems(10);
                                 o.setUniqueItems(true);
                                 return o;
                             }
                         }.get(), null},
-                {json(object(field("type", "boolean"))), new BooleanProperty(), null},
-                {json(object(field("type", "integer"))), new IntegerProperty(), null},
-                {json(object(field("type", "integer"), field("format", "int32"))), new IntegerProperty(), null},
-                {json(object(field("type", "integer"), field("format", "int64"))), new LongProperty(), null},
+                {json(object(field("type", "boolean"))), new LocalizableBooleanProperty(), null},
+                {json(object(field("type", "integer"))), new LocalizableIntegerProperty(), null},
+                {json(object(field("type", "integer"), field("format", "int32"))),
+                    new LocalizableIntegerProperty(), null},
+                {json(object(field("type", "integer"), field("format", "int64"))),
+                    new LocalizableLongProperty(), null},
                 {json(object(
                         field("type", "integer"),
                         field("format", "int64"),
@@ -416,7 +418,7 @@ public class OpenApiTransformerTest {
                         new Supplier<Property>() {
                             @Override
                             public Property get() {
-                                final LongProperty o = new LongProperty();
+                                final LocalizableLongProperty o = new LocalizableLongProperty();
                                 o.setMinimum(1.0);
                                 o.setMaximum(2.0);
                                 o.setExclusiveMinimum(true);
@@ -425,11 +427,15 @@ public class OpenApiTransformerTest {
                                 return o;
                             }
                         }.get(), null},
-                {json(object(field("type", "number"))), new DoubleProperty(), null},
-                {json(object(field("type", "number"), field("format", "int32"))), new IntegerProperty(), null},
-                {json(object(field("type", "number"), field("format", "int64"))), new LongProperty(), null},
-                {json(object(field("type", "number"), field("format", "float"))), new FloatProperty(), null},
-                {json(object(field("type", "number"), field("format", "double"))), new DoubleProperty(), null},
+                {json(object(field("type", "number"))), new LocalizableDoubleProperty(), null},
+                {json(object(field("type", "number"), field("format", "int32"))),
+                    new LocalizableIntegerProperty(), null},
+                {json(object(field("type", "number"), field("format", "int64"))),
+                    new LocalizableLongProperty(), null},
+                {json(object(field("type", "number"), field("format", "float"))),
+                    new LocalizableFloatProperty(), null},
+                {json(object(field("type", "number"), field("format", "double"))),
+                    new LocalizableDoubleProperty(), null},
                 {json(object(
                         field("type", "number"),
                         field("format", "double"),
@@ -440,7 +446,7 @@ public class OpenApiTransformerTest {
                         new Supplier<Property>() {
                             @Override
                             public Property get() {
-                                final DoubleProperty o = new DoubleProperty();
+                                final LocalizableDoubleProperty o = new LocalizableDoubleProperty();
                                 o.setMinimum(1.0);
                                 o.setMaximum(2.0);
                                 o.setExclusiveMinimum(true);
@@ -448,22 +454,28 @@ public class OpenApiTransformerTest {
                                 return o;
                             }
                         }.get(), null},
-                {json(object(field("type", "string"))), new StringProperty(), null},
-                {json(object(field("type", "string"), field("format", "byte"))), new ByteArrayProperty(), null},
-                {json(object(field("type", "string"), field("format", "binary"))), new BinaryProperty(), null},
-                {json(object(field("type", "string"), field("format", "date"))), new DateProperty(), null},
+                {json(object(field("type", "string"))), new LocalizableStringProperty(), null},
+                {json(object(field("type", "string"), field("format", "byte"))), new LocalizableByteArrayProperty(),
+                    null},
+                {json(object(field("type", "string"), field("format", "binary"))), new LocalizableBinaryProperty(),
+                    null},
+                {json(object(field("type", "string"), field("format", "date"))), new LocalizableDateProperty(),
+                    null},
                 {json(object(field("type", "string"), field("format", "full-date"))),
                         new Supplier<Property>() {
                             @Override
                             public Property get() {
-                                final DateProperty o = new DateProperty();
+                                final LocalizableDateProperty o = new LocalizableDateProperty();
                                 o.setFormat("full-date");
                                 return o;
                             }
                         }.get(), null},
-                {json(object(field("type", "string"), field("format", "date-time"))), new DateTimeProperty(), null},
-                {json(object(field("type", "string"), field("format", "password"))), new PasswordProperty(), null},
-                {json(object(field("type", "string"), field("format", "uuid"))), new UUIDProperty(), null},
+                {json(object(field("type", "string"), field("format", "date-time"))), new LocalizableDateTimeProperty(),
+                    null},
+                {json(object(field("type", "string"), field("format", "password"))), new LocalizablePasswordProperty(),
+                    null},
+                {json(object(field("type", "string"), field("format", "uuid"))), new LocalizableUUIDProperty(),
+                    null},
                 {json(object(
                         field("type", "string"),
                         field("format", "an_unsupported_format"),
@@ -482,7 +494,7 @@ public class OpenApiTransformerTest {
                         new Supplier<Property>() {
                             @Override
                             public Property get() {
-                                final StringProperty o = new StringProperty();
+                                final LocalizableStringProperty o = new LocalizableStringProperty();
                                 o.setFormat("an_unsupported_format");
                                 o.setMinLength(1);
                                 o.setMaxLength(10);
