@@ -11,10 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * An Enum for the JWT Header parameter names.
@@ -38,6 +43,29 @@ public enum JwtHeaderKey {
     CUSTOM;
 
     /**
+     * Read-only {@code Map} of {@code JwtHeaderKey} values as lower-case {@code String}s, for fast lookup.
+     */
+    private static final Map<String, JwtHeaderKey> NAME_MAP;
+
+    static {
+        final Map<String, JwtHeaderKey> temp = new HashMap<>();
+        for (final JwtHeaderKey key : values()) {
+            temp.put(key.lowerCaseName, key);
+        }
+        NAME_MAP = Collections.unmodifiableMap(temp);
+    }
+
+    private final String lowerCaseName;
+
+    /**
+     * Creates a {@code JwtHeaderKey} with pre-allocated lower-case {@code String} representation, as a
+     * performance optimization, because this {@code enum} is often converted to a {@code String}.
+     */
+    JwtHeaderKey() {
+        this.lowerCaseName = name().toLowerCase(Locale.ROOT);
+    }
+
+    /**
      * Returns a lowercase String of the JwtHeaderKey constant.
      *
      * @return Lowercase String representation of the constant.
@@ -55,21 +83,23 @@ public enum JwtHeaderKey {
      * @param headerKey The String representation of a JwtHeaderKey.
      * @return The matching JwtHeaderKey.
      */
-    public static JwtHeaderKey getHeaderKey(String headerKey) {
-        try {
-            return JwtHeaderKey.valueOf(headerKey.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            return CUSTOM;
+    public static JwtHeaderKey getHeaderKey(final String headerKey) {
+        if (headerKey != null && !headerKey.isEmpty()) {
+            final JwtHeaderKey value = NAME_MAP.get(headerKey.toLowerCase(Locale.ROOT));
+            if (value != null) {
+                return value;
+            }
         }
+        return CUSTOM;
     }
 
     /**
      * Turns the JwtHeaderKey constant into a lowercase String.
      *
-     * @return {@inheritDoc}
+     * @return Lowercase String representation of the constant.
      */
     @Override
     public String toString() {
-        return super.toString().toLowerCase();
+        return lowerCaseName;
     }
 }

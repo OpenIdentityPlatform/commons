@@ -11,12 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
 
 import static org.testng.Assert.assertEquals;
+
+import java.util.Locale;
 
 import org.testng.annotations.Test;
 
@@ -27,36 +29,39 @@ public class JwtHeaderKeyTest {
     public void shouldGetValue() {
 
         //Given
+        for (final JwtHeaderKey item : JwtHeaderKey.values()) {
+            //When
+            final String value = item.value();
 
-        //When
-        String value = JwtHeaderKey.TYP.value();
-
-        //Then
-        assertEquals(value, "typ");
+            //Then
+            assertEquals(value, item.name().toLowerCase(Locale.ROOT));
+        }
     }
 
     @Test
     public void shouldToString() {
 
         //Given
+        for (final JwtHeaderKey item : JwtHeaderKey.values()) {
+            //When
+            final String s = item.toString();
 
-        //When
-        String value = JwtHeaderKey.ALG.toString();
-
-        //Then
-        assertEquals(value, "alg");
+            //Then
+            assertEquals(s, item.name().toLowerCase(Locale.ROOT));
+        }
     }
 
     @Test
     public void shouldGetHeaderKey() {
 
         //Given
+        for (final JwtHeaderKey item : JwtHeaderKey.values()) {
+            //When
+            final JwtHeaderKey headerKey = JwtHeaderKey.getHeaderKey(item.name());
 
-        //When
-        JwtHeaderKey headerKey = JwtHeaderKey.getHeaderKey("ALG");
-
-        //Then
-        assertEquals(headerKey, JwtHeaderKey.ALG);
+            //Then
+            assertEquals(headerKey, item);
+        }
     }
 
     @Test
