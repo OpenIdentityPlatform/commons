@@ -14,17 +14,22 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-// add new test modules here:
 define([
-    "./commons/AbstractCollection",
-    "./commons/AbstractModel",
-    "./commons/Base64",
-    "./commons/form2js",
-    "./commons/OAuth",
-    "./commons/ObjectUtil",
-    "./commons/Queue",
-    "./commons/Router",
-    "./commons/UIUtils",
-    "./commons/ValidatorsManager",
-    "./user/AnonymousProcessView"
-]);
+    "org/forgerock/commons/ui/common/main/Router"
+], function (Router) {
+    QUnit.module('Router Functions');
+
+    QUnit.test("getLink", function () {
+        var fakeRoute = {
+            url: /fake-(.+)\-(.+)/,
+            pattern: "fake-?-?"
+        };
+
+        QUnit.equal(Router.getLink(fakeRoute, ["simple", "value"]), "fake-simple-value");
+        QUnit.equal(Router.getLink(fakeRoute, ["comp?lex", "value"]), "fake-comp?lex-value");
+        QUnit.equal(Router.getLink(fakeRoute, ["part?ial"]), "fake-part?ial-");
+        QUnit.equal(Router.getLink(fakeRoute, []), "fake--");
+
+    });
+
+});

@@ -240,7 +240,7 @@ define([
     obj.getLink = function(route, rawParameters) {
         var pattern,
             args = obj.applyDefaultParameters(route, rawParameters),
-            i;
+            i = 0;
 
         if (!_.isRegExp(route.url)) {
             pattern = route.url.replace(/:[A-Za-z@.]+/, "?");
@@ -249,14 +249,16 @@ define([
         }
 
         if (args) {
-            for(i = 0; i < args.length; i++) {
-                if (typeof args[i] === "string") {
-                    pattern = pattern.replace("?", args[i]);
+            // Breaks the pattern up into groups, based on ? placeholders
+            // Each ? found will be replaced by the corresponding argument
+            // The final result will recompose the groups into a single string value
+            pattern = _.map(pattern.match(/([^\?]+|\?)/g), function (part) {
+                if (part === "?") {
+                    return (typeof args[i] === "string") ? args[i++] : "";
                 } else {
-                    break;
+                    return part;
                 }
-            }
-            pattern = pattern.replace(/\?/g, "");
+            }).join('');
         }
 
         return pattern;

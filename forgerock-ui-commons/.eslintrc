@@ -3,7 +3,8 @@
     "extends": "forgerock",
     "env": {
         "amd": true,
-        "browser": true
+        "browser": true,
+        "qunit": true
     },
     "rules": {
         /*
