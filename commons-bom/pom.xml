@@ -25,7 +25,7 @@
 
     <groupId>org.forgerock.commons</groupId>
     <artifactId>commons-bom</artifactId>
-    <version>21.0.0-alpha-5</version>
+    <version>21.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>ForgeRock Bill Of Materials</name>
@@ -583,8 +583,4 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-  <scm>
-    <tag>21.0.0-alpha-5</tag>
-  </scm>
 </project>

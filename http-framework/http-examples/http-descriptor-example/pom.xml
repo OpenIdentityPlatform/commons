@@ -19,7 +19,7 @@
     <parent>
         <artifactId>chf-http-examples</artifactId>
         <groupId>org.forgerock.http</groupId>
-        <version>21.0.0-alpha-5</version>
+        <version>21.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 

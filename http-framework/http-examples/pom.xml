@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.forgerock.http</groupId>
     <artifactId>forgerock-http-framework-parent</artifactId>
-    <version>21.0.0-alpha-5</version>
+    <version>21.0.0-SNAPSHOT</version>
   </parent>
   <artifactId>chf-http-examples</artifactId>
   <packaging>pom</packaging>
