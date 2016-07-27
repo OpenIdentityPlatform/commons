@@ -28,16 +28,15 @@ import org.forgerock.util.promise.NeverThrowsException;
  * Iterates over each JsonValue node in the JsonValue structure and if it's a String marked for translation,
  * It replaces the String with a LocalizableString.
  */
-class TranslateJsonValue implements Function<JsonValue, JsonValue, NeverThrowsException> {
+class TranslateJsonSchema implements Function<JsonValue, JsonValue, NeverThrowsException> {
 
     private final ClassLoader loader;
 
     /**
-     * Constructor which takes a type where the String is defined. The type is used to
-     * to get the class loader where any resources needed wil be defined.
+     * Constructor which takes a {@code ClassLoader} where the String is defined.
      * @param loader the {@code ClassLoader} where the translation resources are defined
      */
-    public TranslateJsonValue(ClassLoader loader) {
+    public TranslateJsonSchema(ClassLoader loader) {
         this.loader = loader;
     }
 
@@ -54,13 +53,13 @@ class TranslateJsonValue implements Function<JsonValue, JsonValue, NeverThrowsEx
         if (value.isCollection()) {
             JsonValue transformedValue = json(array());
             for (JsonValue item : value) {
-                transformedValue.add(item.as(this));
+                transformedValue.add(item.as(this).getObject());
             }
             returnValue = transformedValue;
         } else if (value.isMap()) {
             JsonValue transformedValue = json(object());
             for (String key : value.keys()) {
-                transformedValue.put(key, value.get(key).as(this));
+                transformedValue.put(key, value.get(key).as(this).getObject());
             }
             returnValue = transformedValue;
         } else if (value.isString() && value.asString().startsWith(LocalizableString.TRANSLATION_KEY_PREFIX)) {

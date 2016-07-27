@@ -137,7 +137,7 @@ public abstract class Schema {
             InputStream resource = relativeType.getResourceAsStream(schema.schemaResource());
             try {
                 JsonValue json = json(JacksonUtils.OBJECT_MAPPER.readValue(resource, Object.class))
-                        .as(new TranslateJsonValue(relativeType.getClassLoader()));
+                        .as(new TranslateJsonSchema(relativeType.getClassLoader()));
                 builder.schema(json);
             } catch (IOException e) {
                 throw new IllegalArgumentException("Could not read declared resource " + schema.schemaResource(), e);
@@ -211,7 +211,8 @@ public abstract class Schema {
             try {
                 JsonSchema jsonSchema = schemaFor(type);
                 String schemaString = OBJECT_MAPPER.writer().writeValueAsString(jsonSchema);
-                this.schema = json(OBJECT_MAPPER.readValue(schemaString, Object.class));
+                this.schema = json(OBJECT_MAPPER.readValue(schemaString, Object.class))
+                        .as(new TranslateJsonSchema(type.getClassLoader()));
             } catch (JsonMappingException e) {
                 throw new IllegalArgumentException(e);
             } catch (IOException e) {

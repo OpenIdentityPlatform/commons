@@ -87,7 +87,6 @@ public class LocalizableString {
                 // the bundle wasn't found, so we return the fragment
                 return resource.getFragment();
             }
-
         }
     }
 

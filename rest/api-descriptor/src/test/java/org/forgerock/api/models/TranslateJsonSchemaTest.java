@@ -26,11 +26,11 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.util.i18n.LocalizableString;
 import org.testng.annotations.Test;
 
-public class TranslateJsonValueTest {
+public class TranslateJsonSchemaTest {
 
     @Test
     public void testTransformString() {
-        TranslateJsonValue translateFunction = new TranslateJsonValue(this.getClass().getClassLoader());
+        TranslateJsonSchema translateFunction = new TranslateJsonSchema(this.getClass().getClassLoader());
         JsonValue jsonValue = json("i18n:here");
         JsonValue result = jsonValue.as(translateFunction);
         assertThat(result.getObject() instanceof LocalizableString);
@@ -39,7 +39,7 @@ public class TranslateJsonValueTest {
 
     @Test
     public void testTransformNumber() {
-        TranslateJsonValue translateFunction = new TranslateJsonValue(null);
+        TranslateJsonSchema translateFunction = new TranslateJsonSchema(null);
         JsonValue jsonValue = json(123);
         JsonValue result = jsonValue.as(translateFunction);
         assertThat(result.getObject() instanceof Number);
@@ -47,7 +47,7 @@ public class TranslateJsonValueTest {
 
     @Test
     public void testTransformBoolean() {
-        TranslateJsonValue translateFunction = new TranslateJsonValue(null);
+        TranslateJsonSchema translateFunction = new TranslateJsonSchema(null);
         JsonValue jsonValue = json(false);
         JsonValue result = jsonValue.as(translateFunction);
         assertThat(result.getObject() instanceof Boolean);
@@ -55,7 +55,7 @@ public class TranslateJsonValueTest {
 
     @Test
     public void testTransformNull() {
-        TranslateJsonValue translateFunction = new TranslateJsonValue(null);
+        TranslateJsonSchema translateFunction = new TranslateJsonSchema(null);
         JsonValue jsonValue = json(null);
         JsonValue result = jsonValue.as(translateFunction);
         assertThat(result.getObject() == null);
@@ -63,7 +63,7 @@ public class TranslateJsonValueTest {
 
     @Test
     public void testTransformObjectTransformsChildren() {
-        TranslateJsonValue translateFunction = new TranslateJsonValue(null);
+        TranslateJsonSchema translateFunction = new TranslateJsonSchema(null);
         JsonValue jsonValue = json(object(field("first", "i18n:here"), field("second", "i18n:there")));
         JsonValue result = jsonValue.as(translateFunction);
         assertThat(result.get("first").getObject()).isInstanceOf(LocalizableString.class);
@@ -72,7 +72,7 @@ public class TranslateJsonValueTest {
 
     @Test
     public void testTransformObjectTransformsChildrenWithNulls() {
-        TranslateJsonValue translateFunction = new TranslateJsonValue(null);
+        TranslateJsonSchema translateFunction = new TranslateJsonSchema(null);
         JsonValue jsonValue = json(object(field("first", "i18n:here"), field("second", null), null));
         JsonValue result = jsonValue.as(translateFunction);
         assertThat(result.get("first").getObject()).isInstanceOf(LocalizableString.class);
@@ -81,7 +81,7 @@ public class TranslateJsonValueTest {
 
     @Test
     public void testTransformArrayTransformsChildren() {
-        TranslateJsonValue translateFunction = new TranslateJsonValue(null);
+        TranslateJsonSchema translateFunction = new TranslateJsonSchema(null);
         JsonValue jsonValue = json(array("i18n:here", "i18n:there"));
         JsonValue result = jsonValue.as(translateFunction);
         assertThat(result.get(0).getObject()).isInstanceOf(LocalizableString.class);
@@ -90,7 +90,7 @@ public class TranslateJsonValueTest {
 
     @Test
     public void testTransformSetTransformsChildren() {
-        TranslateJsonValue translateFunction = new TranslateJsonValue(null);
+        TranslateJsonSchema translateFunction = new TranslateJsonSchema(null);
         JsonValue jsonValue = json(set("i18n:here", "i18n:there"));
         JsonValue result = jsonValue.as(translateFunction);
         assertThat(result.get(0).getObject()).isInstanceOf(LocalizableString.class);

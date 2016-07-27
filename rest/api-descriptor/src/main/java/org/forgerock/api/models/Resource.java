@@ -535,8 +535,7 @@ public final class Resource {
          */
         @JsonProperty("title")
         public Builder title(String title) {
-            this.title = new LocalizableString(title);
-            return this;
+            return title(new LocalizableString(title));
         }
 
         /**
@@ -560,8 +559,7 @@ public final class Resource {
         @JsonProperty("description")
         public Builder description(String description) {
             checkState();
-            this.description = new LocalizableString(description);
-            return this;
+            return description(new LocalizableString(description));
         }
 
         /**
