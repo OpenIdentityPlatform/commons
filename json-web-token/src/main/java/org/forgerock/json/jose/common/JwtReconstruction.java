@@ -28,6 +28,7 @@ import org.forgerock.json.jose.jwe.JweHeader;
 import org.forgerock.json.jose.jwe.SignedThenEncryptedJwt;
 import org.forgerock.json.jose.jws.EncryptedThenSignedJwt;
 import org.forgerock.json.jose.jws.JwsHeader;
+import org.forgerock.json.jose.jws.SignedEncryptedJwt;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jwt.Jwt;
 import org.forgerock.json.jose.jwt.JwtClaimsSet;
@@ -211,7 +212,8 @@ public class JwtReconstruction {
 
         JwsHeader jwsHeader = new JwsHeader(combinedHeader);
 
-        return new EncryptedThenSignedJwt(jwsHeader, encryptedJwt,
+        // This can be changed to return EncryptedThenSignedJwt once SignedEncryptedJwt is removed
+        return new SignedEncryptedJwt(jwsHeader, encryptedJwt,
                 (encodedHeader + "." + encodedPayload).getBytes(Utils.CHARSET), signature);
     }
 }

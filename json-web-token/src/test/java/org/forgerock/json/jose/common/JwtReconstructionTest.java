@@ -21,11 +21,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.helper.KeysHelper;
 import org.forgerock.json.jose.jwe.EncryptedJwt;
-import org.forgerock.json.jose.jwe.SignedThenEncryptedJwt;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
-import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jwe.SignedThenEncryptedJwt;
 import org.forgerock.json.jose.jws.EncryptedThenSignedJwt;
+import org.forgerock.json.jose.jws.JwsAlgorithm;
+import org.forgerock.json.jose.jws.SignedEncryptedJwt;
 import org.forgerock.json.jose.jws.SignedJwt;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
@@ -130,7 +131,7 @@ public class JwtReconstructionTest {
                     .header(HEADER_KEY, HEADER_VALUE)
                 .done()
                 .claims(jwtClaimsSet)
-                .sign(signingHandler, JwsAlgorithm.RS256)
+                .signedWith(signingHandler, JwsAlgorithm.RS256)
                 .build();
 
         // When
@@ -143,6 +144,35 @@ public class JwtReconstructionTest {
         assertThat(signatureVerified).isTrue();
         assertThat(signedEncryptedJwt.getHeader().getParameter(HEADER_KEY)).isEqualTo(HEADER_VALUE);
         assertThat(signedEncryptedJwt.getClaimsSet().getClaim(CLAIM_KEY)).isEqualTo(CLAIM_VALUE);
+    }
+
+    @Test
+    public void canReconstructOldStyleSignedEncryptedJwt() {
+        SigningHandler signingHandler = new SigningManager().newRsaSigningHandler(KeysHelper.getRSAPrivateKey());
+        SigningHandler verificationHandler = new SigningManager().newRsaSigningHandler(KeysHelper.getRSAPublicKey());
+        JwtClaimsSet jwtClaimsSet = jwtBuilderFactory.claims().claim(CLAIM_KEY, CLAIM_VALUE).build();
+
+        String jwtString = jwtBuilderFactory.jwe(KeysHelper.getRSAPublicKey())
+                .headers()
+                    .alg(JweAlgorithm.RSAES_PKCS1_V1_5)
+                    .enc(EncryptionMethod.A128CBC_HS256)
+                    .header(HEADER_KEY, HEADER_VALUE)
+                .done()
+                .claims(jwtClaimsSet)
+                .sign(signingHandler, JwsAlgorithm.RS256)
+                .build();
+
+        // When
+        SignedEncryptedJwt signedEncryptedJwt = jwtBuilderFactory.reconstruct(jwtString,
+                SignedEncryptedJwt.class);
+        signedEncryptedJwt.decrypt(KeysHelper.getRSAPrivateKey());
+        boolean signatureVerified = signedEncryptedJwt.verify(verificationHandler);
+
+        // Then
+        assertThat(signatureVerified).isTrue();
+        assertThat(signedEncryptedJwt.getHeader().getParameter(HEADER_KEY)).isEqualTo(HEADER_VALUE);
+        assertThat(signedEncryptedJwt.getClaimsSet().getClaim(CLAIM_KEY)).isEqualTo(CLAIM_VALUE);
+
     }
 
     @Test
