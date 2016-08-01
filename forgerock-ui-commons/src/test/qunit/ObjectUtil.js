@@ -118,6 +118,11 @@ define([
                 patchDef[0].field === "/manager" && _.isEqual(patchDef[0].value, {_ref: "a/b/c"}),
             "Addition of whole new complex property results in full map added");
 
+        patchDef = ObjectUtil.generatePatchSet({manager:null},{manager:{_ref: "a/b/c"}});
+        QUnit.ok(patchDef.length === 1 && patchDef[0].operation === "remove" &&
+                patchDef[0].field === "/manager" && !patchDef[0].value,
+            "Setting a complex property to null results in a remove operation on the whole object");
+
         patchDef = ObjectUtil.generatePatchSet({manager:{_ref: "a/b/c"}},{manager:null});
         QUnit.ok(patchDef.length === 1 && patchDef[0].operation === "replace" &&
                 patchDef[0].field === "/manager" && _.isEqual(patchDef[0].value, {_ref: "a/b/c"}),

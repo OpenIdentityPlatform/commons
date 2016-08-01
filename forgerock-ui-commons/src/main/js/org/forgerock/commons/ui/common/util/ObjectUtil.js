@@ -233,6 +233,11 @@ define([
                                 "remove",
                                 finalPathToAdd
                             ));
+                    } else if (newValueAtFinalPath === null) {
+                        return {
+                            "operation": "remove",
+                            "field": finalPathToAdd
+                        };
                     } else {
                         return {
                             "operation": (oldValueAtFinalPath === undefined) ? "add" : "replace",
