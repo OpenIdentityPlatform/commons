@@ -206,6 +206,10 @@ define([
                             href: _.get(obj.configuration, "username.href")
                         };
 
+                        if (obj.configuration.helpLinks) {
+                            this.data.helpLinks = obj.configuration.helpLinks;
+                        }
+
                         this.reload();
                         this.parentRender(callback);
 
