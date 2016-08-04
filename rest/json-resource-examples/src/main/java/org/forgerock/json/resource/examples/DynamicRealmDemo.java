@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.examples;
@@ -28,8 +28,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
+import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -51,7 +52,6 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -176,8 +176,8 @@ public final class DynamicRealmDemo {
         final Router router = new Router();
         router.addRoute(uriTemplate("/users"), collection(path, "user"));
         router.addRoute(uriTemplate("/groups"), collection(path, "group"));
-        return router.setDefaultRoute(
-                new Router().addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/{realm}"), subrealms(path)));
+        router.addRoute(requestUriMatcher(RoutingMode.STARTS_WITH, "/{realm}"), subrealms(path));
+        return router;
     }
 
     /**
@@ -192,7 +192,6 @@ public final class DynamicRealmDemo {
             @Override
             public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
                     final ReadRequest request) {
-                log("Handling request for realm " + parentPath);
                 return subrealm(parentPath, context).handleRead(context, request);
             }
 

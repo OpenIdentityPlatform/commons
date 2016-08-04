@@ -447,6 +447,16 @@ public final class Resources {
         return newResultPromise(result);
     }
 
+    // Strips off the unwanted leaf routing context which was added when routing
+    // requests to a collection.
+    static Context parentOf(Context context) {
+        if (context instanceof IdFieldContext) {
+            context = context.getParent();
+        }
+        assert context instanceof UriRouterContext;
+        return context.getParent();
+    }
+
     private static class IdFieldContext extends AbstractContext {
 
         private static final String ID_FIELD_NAME = "IdFieldName";

@@ -16,11 +16,10 @@
 
 package org.forgerock.http.routing;
 
-import static org.forgerock.http.routing.RoutingMode.EQUALS;
-import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
-import static org.forgerock.http.util.Paths.joinPath;
-import static org.forgerock.http.util.Paths.urlDecode;
+import static org.forgerock.http.routing.RoutingMode.*;
+import static org.forgerock.http.util.Paths.*;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -99,13 +98,22 @@ class UriRouteMatcher extends RouteMatcher<List<String>> {
         if (!matcher.matches()) {
             return null;
         }
-        Map<String, String> variableMap = new LinkedHashMap<>();
-        if (context.containsContext(UriRouterContext.class)) {
-            variableMap.putAll(context.asContext(UriRouterContext.class).getUriTemplateVariables());
-        }
-        for (int i = 0; i < variables.size(); i++) {
+        Map<String, String> variableMap;
+        switch (variables.size()) {
+        case 0:
+            variableMap = Collections.emptyMap();
+            break;
+        case 1:
             // Group 0 matches entire URL, group 1 matches entire template.
-            variableMap.put(variables.get(i), urlDecode(matcher.group(i + 2)));
+            variableMap = Collections.singletonMap(variables.get(0), urlDecode(matcher.group(2)));
+            break;
+        default:
+            variableMap = new LinkedHashMap<>(variables.size());
+            for (int i = 0; i < variables.size(); i++) {
+                // Group 0 matches entire URL, group 1 matches entire template.
+                variableMap.put(variables.get(i), urlDecode(matcher.group(i + 2)));
+            }
+            break;
         }
         String remaining = UriTemplateParser.removeLeadingSlash(uri.substring(matcher.end(1)));
         return new UriRouteMatch(matcher.group(1), remaining, variableMap, mode);
