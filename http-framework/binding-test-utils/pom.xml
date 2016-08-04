@@ -19,7 +19,7 @@
     <parent>
         <artifactId>forgerock-http-framework-parent</artifactId>
         <groupId>org.forgerock.http</groupId>
-        <version>21.0.0-SNAPSHOT</version>
+        <version>21.0.0-alpha-6</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
