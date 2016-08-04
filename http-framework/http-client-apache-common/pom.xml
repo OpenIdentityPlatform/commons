@@ -21,7 +21,7 @@
   <parent>
     <artifactId>forgerock-http-framework-parent</artifactId>
     <groupId>org.forgerock.http</groupId>
-    <version>21.0.0-alpha-6</version>
+    <version>21.0.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>chf-client-apache-common</artifactId>
