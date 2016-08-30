@@ -33,6 +33,10 @@ define([
             "onValidate": "onValidate"
         },
 
+        partials: [
+            "partials/providers/_providerButton.html"
+        ],
+
         formSubmit: function(event) {
             event.preventDefault();
             if(this.$el.find("[name=loginRemember]:checked").length !== 0) {

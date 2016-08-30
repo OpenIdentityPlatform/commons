@@ -4,6 +4,14 @@
     <div class="row">
         <form class="form-signin" role="form">
             <div class="col-sm-6 col-sm-offset-3">
+                {{#if providers}}
+                <div class="fr-login-social-providers">
+                    {{#each providers}}
+                    {{> providers/_providerButton}}
+                    {{/each}}
+                </div>
+                <label class="separator"><span>{{t "templates.user.LoginTemplate.orSignInNormally"}}</span></label>
+                {{/if}}
                 <div class="login">
                     <div class="form-group">
                         <input type="text" name="login" id="login" value="" class="form-control input-lg" placeholder="Username" required autofocus>

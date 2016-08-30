@@ -53,7 +53,8 @@
                 "registerAccount" : "Create an account",
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Forgot Password?",
-                "forgotUsername" : "Forgot Username?"
+                "forgotUsername" : "Forgot Username?",
+                "orSignInNormally" : "or sign in with your username and password"
             },
             "404" : {
                 "pageNotFound" : "Page not found",
