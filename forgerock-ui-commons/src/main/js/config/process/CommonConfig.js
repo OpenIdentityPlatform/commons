@@ -367,8 +367,8 @@ define([
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false});
 
                     if (!Configuration.backgroundLogin) {
-                        if (Configuration.globalData.auth.urlParams && Configuration.globalData.auth.urlParams.goto) {
-                            window.location.href = Configuration.globalData.auth.urlParams.goto;
+                        if (_.has(Configuration, "globalData.auth.urlParams.goto")) {
+                            window.location.href = decodeURIComponent(Configuration.globalData.auth.urlParams.goto);
                             return false;
                         }
 
@@ -398,7 +398,7 @@ define([
 
                 }, function (reason) {
 
-                    if (Configuration.globalData.auth.urlParams && Configuration.globalData.auth.urlParams.gotoOnFail) {
+                    if (_.has(Configuration, "globalData.auth.urlParams.gotoOnFail")) {
                         window.location.href = Configuration.globalData.auth.urlParams.gotoOnFail;
                         return false;
                     }
