@@ -207,7 +207,10 @@ define([
                         };
 
                         if (obj.configuration.helpLinks) {
-                            this.data.helpLinks = obj.configuration.helpLinks;
+                            this.data.helpLinks = _.map(obj.configuration.helpLinks, function(helpLink) {
+                                helpLink.label = $.t(helpLink.label);
+                                return helpLink;
+                            });
                         }
 
                         this.reload();
