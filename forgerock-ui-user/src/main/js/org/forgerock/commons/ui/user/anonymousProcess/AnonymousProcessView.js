@@ -180,27 +180,29 @@ define([
             });
         },
 
+        attemptCustomTemplate: function(stateData, baseTemplateUrl, response, processStatePromise) {
+            var templateUrl = baseTemplateUrl + this.processType
+                + "/" + response.type + "-" + response.tag + ".html";
+
+            UIUtils.compileTemplate(templateUrl, stateData)
+            .then(function (renderedTemplate) {
+                processStatePromise.resolve(renderedTemplate);
+            }, _.bind(function () {
+                this.loadGenericTemplate(stateData, baseTemplateUrl, processStatePromise);
+            }, this));
+        },
+
+        loadGenericTemplate: function (stateData, baseTemplateUrl, processStatePromise) {
+            UIUtils.compileTemplate(
+                baseTemplateUrl + (_.has(stateData, "requirements")
+                ? "GenericInputForm.html" : "GenericEndPage.html"),
+            stateData,
+            processStatePromise.resolve);
+        },
+
         renderProcessState: function (response) {
             var processStatePromise = $.Deferred(),
-                baseTemplateUrl = "templates/user/process/",
-                loadGenericTemplate = function (stateData) {
-                    UIUtils.fillTemplateWithData(
-                        baseTemplateUrl + (_.has(response, "requirements")
-                            ? "GenericInputForm.html" : "GenericEndPage.html"),
-                        stateData,
-                        processStatePromise.resolve
-                    );
-                },
-                attemptCustomTemplate = _.bind(function (stateData) {
-                    var templateUrl = baseTemplateUrl + this.processType
-                        + "/" + response.type + "-" + response.tag + ".html";
-                    UIUtils.compileTemplate(templateUrl, stateData)
-                        .then(function (renderedTemplate) {
-                            processStatePromise.resolve(renderedTemplate);
-                        }, function () {
-                            loadGenericTemplate(stateData);
-                        });
-                }, this);
+                baseTemplateUrl = "templates/user/process/";
 
             if (_.has(response, "requirements")) {
                 this.stateData = _.extend({
@@ -214,9 +216,9 @@ define([
             }
 
             if (_.has(response, "type") && _.has(response, "tag")) {
-                attemptCustomTemplate(this.stateData);
+                this.attemptCustomTemplate(this.stateData, baseTemplateUrl, response, processStatePromise);
             } else {
-                loadGenericTemplate(this.stateData);
+                this.loadGenericTemplate(this.stateData, baseTemplateUrl, response, processStatePromise);
             }
 
             return processStatePromise.then(_.bind(function (content) {
@@ -226,7 +228,6 @@ define([
                 }, this));
                 this.$el.find(":input:visible:first").focus();
             }, this));
-
         },
 
         buildQueryFilter: function () {
