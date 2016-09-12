@@ -73,7 +73,7 @@ define([
                 } else if (isReactView(view)) {
                     // ReactAdapterView (and thus React and React-DOM) are only loaded when a React view is encountered
                     require(["org/forgerock/commons/ui/common/main/ReactAdapterView"], function(ReactAdapterView) {
-                        (new ReactAdapterView(view)).render();
+                        (new ReactAdapterView({ reactView: view })).render();
                     });
                 } else {
                     throw new Error("[ViewManager] Unable to determine view type (Backbone or React).");

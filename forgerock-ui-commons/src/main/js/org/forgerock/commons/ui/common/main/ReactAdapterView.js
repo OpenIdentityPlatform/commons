@@ -26,9 +26,29 @@ define([
 ], function(_, Backbone, ReactDOM, React, Configuration, EventManager, Constants, UIUtils) {
     var BASE_TEMPLATE = "templates/common/DefaultBaseTemplate.html";
 
+    function throwOnNoInitializationOptions (options) {
+        if (!options) {
+            throw new Error("[ReactAdapterView] No initialization options found.");
+        }
+    }
+
+    function throwOnNoReactView (options) {
+        if (!options.reactView) {
+            throw new Error("[ReactAdapterView] No \"reactView\" option found on initialization options.");
+        }
+    }
+
     return Backbone.View.extend({
-        initialize: function (view) {
-            this.view = view;
+        initialize: function (options) {
+            throwOnNoInitializationOptions(options);
+            throwOnNoReactView(options);
+
+            this.options = options;
+
+            _.defaults(this.options, {
+                reactProps: {},
+                needsBaseTemplate: true
+            });
         },
 
         setBaseTemplate: function () {
@@ -37,21 +57,23 @@ define([
         },
 
         renderReactComponent: function () {
-            var props = {};
-
-            ReactDOM.render(React.createElement(this.view, props), this.el);
+            ReactDOM.render(React.createElement(this.options.reactView, this.options.reactProps), this.el);
         },
 
         render: function() {
             var view = this;
 
-            this.setBaseTemplate();
+            if (this.options.needsBaseTemplate) {
+                this.setBaseTemplate();
 
-            UIUtils.compileTemplate(BASE_TEMPLATE).then(function (template) {
-                document.getElementById("wrapper").innerHTML = template;
-                view.setElement("#content");
+                UIUtils.compileTemplate(BASE_TEMPLATE).then(function (template) {
+                    document.getElementById("wrapper").innerHTML = template;
+                    view.setElement("#content");
+                    view.renderReactComponent();
+                });
+            } else {
                 view.renderReactComponent();
-            });
+            }
         }
     });
 });
