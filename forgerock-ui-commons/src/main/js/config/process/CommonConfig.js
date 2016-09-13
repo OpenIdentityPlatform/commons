@@ -35,32 +35,29 @@ define([
             processDescription: function(event, Router, Configuration, UIUtils, CookieHelper, SessionManager,
                                          i18nManager) {
                 var postSessionCheck = function () {
-                        UIUtils.preloadInitialTemplates();
-                        UIUtils.preloadInitialPartials();
-                        Router.init();
-                    },
-                    initLocalization = function () {
-                        i18nManager.init({
-                            serverLang: Configuration.globalData.lang,
-                            paramLang: Router.convertCurrentUrlToJSON().params,
-                            defaultLang: Constants.DEFAULT_LANGUAGE
-                        });
-                    };
+                    UIUtils.preloadInitialTemplates();
+                    UIUtils.preloadInitialPartials();
+                    Router.init();
+                };
 
-                SessionManager.getLoggedUser(function(user) {
-                    Configuration.setProperty('loggedUser', user);
-                    initLocalization();
-                    // WARNING - do not use the promise returned from sendEvent as an example for using this system
-                    // TODO - replace with simplified event system as per CUI-110
-                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false})
-                        .then(postSessionCheck);
-                }, function() {
-                    initLocalization();
-                    if (!CookieHelper.cookiesEnabled()) {
-                        location.href = "#enableCookies/";
-                    }
-                    EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true})
-                        .then(postSessionCheck);
+                i18nManager.init({
+                    serverLang: Configuration.globalData.lang,
+                    paramLang: Router.convertCurrentUrlToJSON().params,
+                    defaultLang: Constants.DEFAULT_LANGUAGE
+                }).then(function () {
+                    SessionManager.getLoggedUser(function(user) {
+                        Configuration.setProperty('loggedUser', user);
+                        // WARNING - do not use the promise returned from sendEvent as an example for using this system
+                        // TODO - replace with simplified event system as per CUI-110
+                        EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: false})
+                            .then(postSessionCheck);
+                    }, function() {
+                        if (!CookieHelper.cookiesEnabled()) {
+                            location.href = "#enableCookies/";
+                        }
+                        EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true})
+                            .then(postSessionCheck);
+                    });
                 });
             }
         },

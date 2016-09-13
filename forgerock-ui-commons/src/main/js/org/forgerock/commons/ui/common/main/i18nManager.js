@@ -21,9 +21,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
     "handlebars",
     "i18next",
     "module",
-    "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function($, _, require, Handlebars, i18next, Module, CookieHelper, Configuration) {
+    "org/forgerock/commons/ui/common/util/CookieHelper"
+], function($, _, require, Handlebars, i18next, Module, CookieHelper) {
 
     var obj = {};
 
@@ -56,14 +55,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             overrideLang = {},
             nameSpace = options.nameSpace ? options.nameSpace : "translation";
 
-        // The requirements for a logged in and out user are different.
-        if (Configuration.loggedUser) {
-            // A logged in user will have no overriding "locale" query parameter and so the cookie is checked.
-            overrideLang.locale = CookieHelper.getCookie("i18next");
-        } else {
-            // A logged out user may have an overriding "locale" query parameter.
-            overrideLang.locale = options.paramLang.locale;
-        }
+        overrideLang.locale = options.paramLang.locale || CookieHelper.getCookie("i18next");
 
         if (overrideLang.locale) {
             locales = overrideLang.locale.split(" ");
@@ -75,7 +67,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
         // return if the stored lang matches the new one.
         if (obj.lang && obj.lang === options.serverLang) {
-            return;
+            return $.Deferred().resolve();
         }
         obj.lang = options.serverLang;
 
@@ -90,8 +82,6 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             nsseparator: ":::",
             resGetPath: require.toUrl("locales/__lng__/__ns__.json")
         };
-
-        i18next.init(opts);
 
         Handlebars.registerHelper("t", function(key, options) {
             options = options || {};
@@ -119,6 +109,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
                 return new Handlebars.SafeString(map[fallback]);
             }
         });
+
+        return i18next.init(opts);
 
     };
 
