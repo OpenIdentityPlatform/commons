@@ -188,16 +188,16 @@ define([
             .then(function (renderedTemplate) {
                 processStatePromise.resolve(renderedTemplate);
             }, _.bind(function () {
-                this.loadGenericTemplate(stateData, baseTemplateUrl, processStatePromise);
+                this.loadGenericTemplate(stateData, baseTemplateUrl, response, processStatePromise);
             }, this));
         },
 
-        loadGenericTemplate: function (stateData, baseTemplateUrl, processStatePromise) {
+        loadGenericTemplate: function (stateData, baseTemplateUrl, response, processStatePromise) {
             UIUtils.compileTemplate(
-                baseTemplateUrl + (_.has(stateData, "requirements")
+                baseTemplateUrl + (_.has(response, "requirements")
                 ? "GenericInputForm.html" : "GenericEndPage.html"),
-            stateData,
-            processStatePromise.resolve);
+                stateData
+            ).then(processStatePromise.resolve);
         },
 
         renderProcessState: function (response) {
