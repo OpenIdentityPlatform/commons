@@ -34,7 +34,10 @@ require.config({
     paths: {
         // sinon only needed (or available) for Mock project
         sinon: "libs/sinon-1.15.4",
-        i18next: "libs/i18next-1.7.3-min",
+        i18next: "libs/i18next-3.4.3-min",
+        jqueryI18next: "libs/jquery-i18next-1.1.0-min",
+        i18nextLngDetector: "libs/i18next-browser-languageDetector-1.0.0-min",
+        i18nextXHRBackend: "libs/i18nextXHRBackend-1.2.0-min",
         backbone: "libs/backbone-1.1.2-min",
         "backbone.paginator": "libs/backbone.paginator.min-2.0.2-min",
         "backbone-relational": "libs/backbone-relational-0.9.0-min",
@@ -110,7 +113,19 @@ require.config({
         },
         i18next: {
             deps: ["jquery", "handlebars"],
-            exports: "i18n"
+            exports: "i18next"
+        },
+        jqueryI18next: {
+            deps: ["i18next"],
+            exports: "jqueryI18next"
+        },
+        i18nextXHRBackend: {
+            deps: ["i18next"],
+            exports: "i18nextXHRBackend"
+        },
+        i18nextLngDetector: {
+            deps: ["i18next"],
+            exports: "i18nextLngDetector"
         },
         moment: {
             exports: "moment"

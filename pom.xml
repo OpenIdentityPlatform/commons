@@ -195,7 +195,28 @@
             <dependency>
                 <groupId>org.forgerock.commons.ui.libs</groupId>
                 <artifactId>i18next</artifactId>
-                <version>1.7.3</version>
+                <version>3.4.3</version>
+                <type>js</type>
+                <classifier>min</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>jquery-i18next</artifactId>
+                <version>1.1.0</version>
+                <type>js</type>
+                <classifier>min</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>i18next-browser-languageDetector</artifactId>
+                <version>1.0.0</version>
+                <type>js</type>
+                <classifier>min</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons.ui.libs</groupId>
+                <artifactId>i18nextXHRBackend</artifactId>
+                <version>1.2.0</version>
                 <type>js</type>
                 <classifier>min</classifier>
             </dependency>

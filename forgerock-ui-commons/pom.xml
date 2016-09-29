@@ -139,6 +139,24 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>jquery-i18next</artifactId>
+            <type>js</type>
+            <classifier>min</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>i18nextXHRBackend</artifactId>
+            <type>js</type>
+            <classifier>min</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>i18next-browser-languageDetector</artifactId>
+            <type>js</type>
+            <classifier>min</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>requirejs</artifactId>
             <type>js</type>
             <classifier>min</classifier>
