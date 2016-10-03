@@ -413,6 +413,16 @@ define([
 
     obj.FilterHeaderCell = Backgrid.HeaderCell.extend({
         className: "filter-header-cell",
+        events: {
+            "click a": "preventSortOnClear"
+        },
+        preventSortOnClear: function (e) {
+            if ($(e.target).data().backgridAction === "clear") {
+                e.preventDefault();
+            } else {
+                this.onClick(e);
+            }
+        },
         render: function () {
             var filter = new Backgrid.Extension.ThemeableServerSideFilter({
                 name: this.column.get("name"),
