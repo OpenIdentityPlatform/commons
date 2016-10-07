@@ -22,9 +22,9 @@ define([
             status: "400",
             message: "badRequestError"
         },
-        "unauthorized": {
+        "unauthenticated": {
             status: "401",
-            event: Constants.EVENT_UNAUTHORIZED
+            event: Constants.EVENT_UNAUTHENTICATED
         },
         "forbidden": {
             status: "403",

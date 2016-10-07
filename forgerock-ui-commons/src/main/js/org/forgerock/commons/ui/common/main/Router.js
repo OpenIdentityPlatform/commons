@@ -165,7 +165,10 @@ define([
 
     obj.checkRole = function (route) {
         if(route.role) {
-            if(!conf.loggedUser || !_.find(route.role.split(','), function(role) {
+            if (!conf.loggedUser) {
+                EventManager.sendEvent(constants.EVENT_UNAUTHENTICATED, { fromRouter: true });
+                return false;
+            } else if(!_.find(route.role.split(','), function(role) {
                 return conf.loggedUser.uiroles.indexOf(role) !== -1;
             })) {
                 EventManager.sendEvent(constants.EVENT_UNAUTHORIZED, { fromRouter: true });

@@ -108,22 +108,23 @@ define([
         {
             startEvent: Constants.EVENT_UNAUTHORIZED,
             description: "",
+            dependencies: [ ],
+            processDescription: function() {
+                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
+            }
+        },
+        {
+            startEvent: Constants.EVENT_UNAUTHENTICATED,
+            description: "",
             dependencies: [
                 "org/forgerock/commons/ui/common/main/Router",
-                "org/forgerock/commons/ui/common/main/Configuration",
-                "org/forgerock/commons/ui/common/main/SessionManager"
+                "org/forgerock/commons/ui/common/main/Configuration"
             ],
-            processDescription: function(error, Router, Configuration, SessionManager) {
+            processDescription: function(error, Router, Configuration) {
                 var hash = Router.getCurrentHash();
                 if (!Configuration.gotoURL && !hash.match(Router.configuration.routes.login.url)) {
                     Configuration.setProperty("gotoURL", "#" + hash);
                 }
-
-                if (Configuration.loggedUser) {
-                    SessionManager.logout();
-                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
-                }
-
                 EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, {
                     anonymousMode: true
                 });
