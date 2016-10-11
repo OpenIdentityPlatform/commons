@@ -21,12 +21,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
     "handlebars",
     "i18next",
     "module",
-    "jqueryI18next",
-    "i18nextLngDetector",
-    "i18nextXHRBackend",
     "org/forgerock/commons/ui/common/util/CookieHelper"
-], function($, _, require, Handlebars, i18next, Module, jqueryI18next, i18nextLngDetector,
-            i18nextXHRBackend, CookieHelper) {
+], function($, _, require, Handlebars, i18next, Module, CookieHelper) {
 
     var obj = {};
 
@@ -55,10 +51,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
     obj.init = function(options) {
 
         var locales = [],
+            opts = {},
             overrideLang = {},
-            promise = $.Deferred(),
-            instance,
-            opts,
             nameSpace = options.nameSpace ? options.nameSpace : "translation";
 
         overrideLang.locale = options.paramLang.locale || CookieHelper.getCookie("i18next");
@@ -79,19 +73,14 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
         opts = {
             fallbackLng: locales,
+            detectLngQS: "locale",
+            getAsync: false,
+            useCookie : true,
             lng: options.serverLang,
             load: Module.config().i18nLoad || "current",
-            ns: [nameSpace],
-            backend: {
-                loadPath: require.toUrl("locales/{{lng}}/{{ns}}.json")
-            },
-            detection: {
-                lookupQuerystring: 'locale',
-                lookupCookie: 'i18next'
-            },
-            keySeparator: ".",
-            nsSeparator: ":::"
-
+            ns: nameSpace,
+            nsseparator: ":::",
+            resGetPath: require.toUrl("locales/__lng__/__ns__.json")
         };
 
         Handlebars.registerHelper("t", function(key, options) {
@@ -121,25 +110,8 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             }
         });
 
-        instance = i18next
-            .use(i18nextLngDetector)
-            .use(i18nextXHRBackend)
-            .use(jqueryI18next)
-            .init(opts, function() {
-                jqueryI18next.init(instance, $, {
-                    tName: 't',
-                    i18nName: 'i18n',
-                    handleName: 'localize',
-                    selectorAttr: 'data-i18n',
-                    targetAttr: 'i18n-target',
-                    optionsAttr: 'i18n-options',
-                    useOptionsAttr: false,
-                    parseDefaultValueFromContent: true
-                });
-                promise.resolve();
-            });
+        return i18next.init(opts);
 
-        return promise;
     };
 
     return obj;
