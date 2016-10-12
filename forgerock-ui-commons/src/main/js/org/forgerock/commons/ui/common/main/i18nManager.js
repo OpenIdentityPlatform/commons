@@ -83,9 +83,17 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             resGetPath: require.toUrl("locales/__lng__/__ns__.json")
         };
 
-        Handlebars.registerHelper("t", function(key, options) {
-            options = options || {};
-            return new Handlebars.SafeString(i18next.t(key, options.hash));
+        /**
+         * @param {boolean} unsafeString If true the returned string will be escaped.
+         * Otherwise the string will be pressumed to be safe.
+         * @returns {string} Returns the translation string
+        */
+        Handlebars.registerHelper("t", function(key, unsafeString) {
+            if (unsafeString === true) {
+                return Handlebars.escapeExpression(i18next.t(key));
+            } else {
+                return new Handlebars.SafeString(i18next.t(key));
+            }
         });
 
         /**
