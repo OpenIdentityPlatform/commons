@@ -83,16 +83,37 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             resGetPath: require.toUrl("locales/__lng__/__ns__.json")
         };
 
+
+        // TODO: should be removed once we upgrade to the newer version of handlebars
         /**
-         * @param {boolean} unsafeString If true the returned string will be escaped.
-         * Otherwise the string will be pressumed to be safe.
-         * @returns {string} Returns the translation string
-        */
-        Handlebars.registerHelper("t", function(key, unsafeString) {
-            if (unsafeString === true) {
-                return Handlebars.escapeExpression(i18next.t(key));
+         * Handlebars parameterized translation helper
+         * @example
+         * 1) In translation file define a value under "key.to.my.translation.string" key,
+         *    e.g. "Display __foo__ and __bar__"
+         * 2) Call helper function with string parameter: {{t "key.to.my.translation.string" "test1" }}
+         *    Or call helper function with parameters: {{t "key.to.my.translation.string" foo="test1" bar="test2"}}
+         * 3) Resulting string will be "Display test1 and test2"
+         */
+        Handlebars.registerHelper("t", function (translationKey, options) {
+            var parameters = {},
+                key;
+
+            options = options || {};
+
+            if (_.isObject(options.hash)) {
+                for (key in options.hash) {
+                    if (options.hash.hasOwnProperty(key)) {
+                        parameters[key] = options.hash[key];
+                    }
+                }
+
+                if (parameters.safeString === false) {
+                    return $.t(translationKey, parameters);
+                } else {
+                    return new Handlebars.SafeString(i18next.t(translationKey, parameters));
+                }
             } else {
-                return new Handlebars.SafeString(i18next.t(key));
+                return new Handlebars.SafeString(i18next.t(translationKey, options));
             }
         });
 
