@@ -83,16 +83,17 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
             resGetPath: require.toUrl("locales/__lng__/__ns__.json")
         };
 
-
-        // TODO: should be removed once we upgrade to the newer version of handlebars
         /**
          * Handlebars parameterized translation helper
+         * @param {Object|String} [options] Object or String to pass to this function.
+         * @param {Boolean} [options.safeString] If set to false the returned string will be html character encoded
          * @example
          * 1) In translation file define a value under "key.to.my.translation.string" key,
          *    e.g. "Display __foo__ and __bar__"
-         * 2) Call helper function with string parameter: {{t "key.to.my.translation.string" "test1" }}
-         *    Or call helper function with parameters: {{t "key.to.my.translation.string" foo="test1" bar="test2"}}
+         * 2) call helper function with key value pairs: {{t "key.to.my.translation.string" foo="test1" bar="test2"}}
          * 3) Resulting string will be "Display test1 and test2"
+         * 4) Alternately you can call this helper function with a single string parameter:
+         *    {{t "key.to.my.translation.string" "test1" }}
          */
         Handlebars.registerHelper("t", function (translationKey, options) {
             var parameters = {},
@@ -100,13 +101,14 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
 
             options = options || {};
 
+            // TODO: Should be removed once we upgrade to the newer version of handlebars.
+            // The safeString check must remain until we use triple handlebars syntax for safe strings.
             if (_.isObject(options.hash)) {
                 for (key in options.hash) {
                     if (options.hash.hasOwnProperty(key)) {
                         parameters[key] = options.hash[key];
                     }
                 }
-
                 if (parameters.safeString === false) {
                     return $.t(translationKey, parameters);
                 } else {
