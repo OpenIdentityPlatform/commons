@@ -29,6 +29,9 @@ define([
     /**
      * A HoC (higher-order component) that wraps another component to provide `this.props.router`.
      * Pass in your component and it will return the wrapped component.
+     * <p/>
+     * Accompanying prop type can be found within the
+     * {@link module:org/forgerock/commons/ui/common/components/hoc/withRouterPropType|withRouterPropType} module.
      * @param  {ReactComponent} WrappedComponent Component to wrap
      * @returns {ReactComponent} Wrapped component
      * @example
