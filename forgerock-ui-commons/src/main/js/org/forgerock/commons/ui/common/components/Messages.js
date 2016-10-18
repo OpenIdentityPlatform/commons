@@ -53,7 +53,15 @@ define([
                 });
             }
         },
-
+        /**
+         * @param {Object} msg contains the message object
+         * @param {string} msg.type - The type of mesage to be displayed. TYPE_SUCCESS, TYPE_INFO, TYPE_WARNING
+         * or TYPE_DANGER
+         * @param {string} [msg.messages] - The message to be displayed.
+         * @param {Object} [msg.response] - The responce from a rest call will be parsed to extract the message
+         * @param {boolean} [msg.escape] - If set to true the displayed message will be escaped. This is useful when
+         * the message could contain unsafe strings.
+         */
         addMessage: function(msg) {
             var i, _this = obj.messages;
             if(!msg.message && msg.response && typeof msg.response.responseJSON === "object"
@@ -65,6 +73,9 @@ define([
                     console.log("duplicated message");
                     return;
                 }
+            }
+            if (msg.escape === true) {
+                msg.message = _.escape(msg.message);
             }
             console.info(msg.type + ":", msg.message, msg);
             _this.list.push(msg);

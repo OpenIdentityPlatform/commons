@@ -96,12 +96,12 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
          */
         Handlebars.registerHelper("t", function (key, options) {
             options = options || {};
-            if (_.get(options.hash, "safeString") === false) {
+            if (_.get(options.hash, "safeString") !== false) {
+                return new Handlebars.SafeString(i18next.t(key, options.hash)).string;
+            } else {
                 // TODO: OPENAM-9618 The safeString check must remain until we use
                 // triple handlebars syntax for safe strings.
                 return i18next.t(key, options.hash);
-            } else {
-                return new Handlebars.SafeString(i18next.t(key, options.hash)).string;
             }
         });
 
