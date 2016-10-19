@@ -87,7 +87,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
          * Handlebars parameterized translation helper
          * @param {Object|String} [options] Object or String to pass to this function.
          * @param {Boolean} [options.hash.safeString] If set to false the returned string will be html character encoded
-         * @returns {String} returns a translation string.
+         * @returns {Object|String} returns a translation object or string if safeString was set to false.
          * @example
          * 1) In translation file define a value under "key.to.my.translation.string" key,
          *    e.g. "Display __foo__ and __bar__"
@@ -97,7 +97,7 @@ define( "org/forgerock/commons/ui/common/main/i18nManager", [
         Handlebars.registerHelper("t", function (key, options) {
             options = options || {};
             if (_.get(options.hash, "safeString") !== false) {
-                return new Handlebars.SafeString(i18next.t(key, options.hash)).string;
+                return new Handlebars.SafeString(i18next.t(key, options.hash));
             } else {
                 // TODO: OPENAM-9618 The safeString check must remain until we use
                 // triple handlebars syntax for safe strings.
