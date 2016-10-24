@@ -49,7 +49,24 @@ define([
             '?response_type=code&scope=' + encodeURIComponent(scopes) +
             '&redirect_uri=' + this.getRedirectURI() +
             '&state=' + encodeURIComponent(state) +
+            '&nonce=' + this.generateNonce(client_id) +
             '&client_id=' + client_id;
+    };
+
+    obj.generateNonce = function () {
+        // Math.random().toString(36) converts a random number into a string with letters and numbers
+        // ex: Math.random() produces 0.12; 0.12.toString(36) => "0.4bipx4bipx5cxg5veqmfmkj4i"
+        // "0.4bipx4bipx5cxg5veqmfmkj4i".substr(2,12) => 4bipx4bipx5c
+        // this is sufficiently random to be used as an unguessable nonce
+        var nonce = Math.random().toString(36).substr(2, 12);
+        sessionStorage.setItem("OAuthNonce", nonce);
+        return nonce;
+    };
+
+    obj.getCurrentNonce = function() {
+        var nonce = sessionStorage.getItem("OAuthNonce");
+        sessionStorage.removeItem("OAuthNonce");
+        return nonce;
     };
 
     return obj;

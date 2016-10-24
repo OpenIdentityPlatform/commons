@@ -21,7 +21,7 @@ define([
 ], function (sinon, OAuth, URIUtils) {
     QUnit.module('OAuth Functions');
 
-    QUnit.moduleStart(function( details ) {
+    QUnit.moduleStart(function() {
         sinon.stub(URIUtils, "getCurrentOrigin", function () {
             return "http://rp.com";
         });
@@ -30,7 +30,7 @@ define([
         });
     });
 
-    QUnit.moduleDone(function( details ) {
+    QUnit.moduleDone(function() {
         URIUtils.getCurrentOrigin.restore();
         URIUtils.getCurrentPathName.restore();
     });
@@ -44,6 +44,9 @@ define([
         );
     });
     QUnit.test("oAuth request url", function () {
+        sinon.stub(OAuth, "generateNonce", function () {
+            return "nonceValue";
+        });
         QUnit.equal(OAuth.getRequestURL(
                 "http://idp.com/request",
                 "myClientId",
@@ -51,9 +54,11 @@ define([
                 "MyState1234"
             ),
             "http://idp.com/request?response_type=code&scope=openid%20profile%20email&"+
-            "redirect_uri=http://rp.com/app/oauthReturn.html&state=MyState1234&client_id=myClientId",
+            "redirect_uri=http://rp.com/app/oauthReturn.html&state=MyState1234"+
+            "&nonce=nonceValue&client_id=myClientId",
             "generated oAuth request url matches expected value"
         );
+        OAuth.generateNonce.restore();
     });
 
 });
