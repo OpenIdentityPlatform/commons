@@ -30,6 +30,7 @@ define([
             "<option value=\"tick'test\">tick'test</option>" +
             "<option value='less<test'>less&lt;test</option>" +
             "<option value='and&test'>and&amp;test</option>" +
+            "<option value='false'>boolean&amp;test</option>" +
             "{{/staticSelect}}" +
         "</select>");
 
@@ -47,5 +48,8 @@ define([
 
         testHTML = template({"testVal": "and&test"});
         QUnit.equal($(testHTML).val(), "and&test", "and&test option selected");
+
+        testHTML = template({"testVal": false});
+        QUnit.equal($(testHTML).val(), "false", "boolean&amp;test option selected");
     });
 });
