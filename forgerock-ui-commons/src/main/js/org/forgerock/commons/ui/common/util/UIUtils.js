@@ -454,16 +454,16 @@ define([
         }
     });
 
+    /**
+     * Handlebars 'urlTo' helper
+     * @returns {String} fragment from a given route key after applying arguments or default values.
+     *
+     * @example {{urlTo 'login'}} will return "#login"
+     */
     Handlebars.registerHelper("urlTo", function(routeKey) {
-        var result;
-        if (_.isArray(arguments[1])) {
-            result = "#" + Router.getLink(Router.configuration.routes[routeKey], arguments[1]);
-        } else {
-            result = "#" + Router.getLink(Router.configuration.routes[routeKey], _.toArray([arguments[1]]));
-        }
-
-        //Don't return a safe string to prevent XSS.
-        return result;
+        var args = [].concat(arguments[1]);
+        // Don't return a safe string to prevent XSS.
+        return "#" + Router.getLink(Router.configuration.routes[routeKey], args);
     });
 
     /**

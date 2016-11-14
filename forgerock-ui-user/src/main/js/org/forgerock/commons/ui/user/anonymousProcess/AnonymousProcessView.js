@@ -24,6 +24,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/util/URIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
 ], function($, _, form2js,
     AbstractView,
@@ -32,7 +33,13 @@ define([
     EventManager,
     Router,
     UIUtils,
+    URIUtils,
     ValidatorsManager) {
+
+    function getCurrentFragmentParamString () {
+        var params = URIUtils.getCurrentFragmentQueryString();
+        return _.isEmpty(params) ? "" : "&" + params;
+    }
 
     /**
      * Given a position in the DOM, look for children elements which comprise a
@@ -147,6 +154,9 @@ define([
                 return;
             }
 
+            // TODO: The first undefined argument is the deprecated realm which is defined in the
+            // CommonRoutesConfig login route. This needs to be removed as part of AME-11109.
+            this.data.args = [undefined, getCurrentFragmentParamString()];
             this.setTranslationBase();
             this.parentRender();
         },
