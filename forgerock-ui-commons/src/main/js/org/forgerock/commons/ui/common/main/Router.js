@@ -193,7 +193,15 @@ define([
                 }, this);
             },
             routeCallback : function(route) {
-                if (!obj.checkRole(route)) { return; }
+                if (!obj.checkRole(route)) {
+                    if (!conf.loggedUser) {
+                        return;
+                    }
+                    route = {
+                        view: "org/forgerock/commons/ui/common/UnauthorizedView",
+                        url: ""
+                    };
+                }
 
                 /**
                  * we don't actually use any of the backbone-provided arguments to this function,

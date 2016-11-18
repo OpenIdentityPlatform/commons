@@ -209,7 +209,11 @@ define([
                     fromRouter = event.fromRouter;
 
                 if (!Router.checkRole(route)) {
-                    return;
+                    route = {
+                        view: "org/forgerock/commons/ui/common/UnauthorizedView",
+                        url: "",
+                        fromRouter: true
+                    };
                 }
 
                 if (Configuration.backgroundLogin) {
@@ -455,7 +459,6 @@ define([
             ],
             processDescription: function(event, router, conf, sessionManager) {
                 return sessionManager.logout(function() {
-                    delete conf.gotoURL;
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "loggedOut");
                     EventManager.sendEvent(Constants.EVENT_AUTHENTICATION_DATA_CHANGED, { anonymousMode: true});
                     return EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {

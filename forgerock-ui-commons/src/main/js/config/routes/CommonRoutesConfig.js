@@ -26,7 +26,6 @@ define([
         },
         "default": {
             event: constants.EVENT_HANDLE_DEFAULT_ROUTE,
-            role: "ui-user",
             url: /^$/,
             pattern: ""
         },

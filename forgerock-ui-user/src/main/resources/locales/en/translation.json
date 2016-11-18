@@ -75,6 +75,12 @@
             "ChangesPendingTemplate": {
                 "undo": "Undo Changes",
                 "changesPending": "Changes Pending"
+            },
+            "unauthorized" : {
+                "title": "Unauthorized",
+                "description": "Insufficient access to view this page.",
+                "logoutLink": "Login Again",
+                "goBackLink": "Go Back"
             }
         }
     },
