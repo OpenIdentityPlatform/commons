@@ -164,7 +164,7 @@ public class SetCookieHeader extends Header {
             if (cookie.getExpires() != null) {
                 sb.append("; ").append("Expires").append("=").append(HeaderUtil.formatDate(cookie.getExpires()));
             }
-            if (cookie.getMaxAge() != null && cookie.getMaxAge() > 0) {
+            if (cookie.getMaxAge() != null ) {
                 sb.append("; ").append("Max-Age").append("=").append(cookie.getMaxAge());
             }
             if (cookie.getPath() != null) {
