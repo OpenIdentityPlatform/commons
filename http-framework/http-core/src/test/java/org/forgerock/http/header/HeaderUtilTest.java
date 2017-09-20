@@ -147,7 +147,7 @@ public class HeaderUtilTest {
 
     @Test
     public void testParseRfc850Date() {
-        final Date result = HeaderUtil.parseDate("Sunday, 06-Nov-94 08:49:37 GMT");
+        final Date result = HeaderUtil.parseDate("Sunday, 06-Nov-1994 08:49:37 GMT");
         final String formattedDate = HeaderUtil.formatDate(result);
         assertThat(formattedDate).isEqualTo("Sun, 06 Nov 1994 08:49:37 GMT");
     }
