@@ -386,6 +386,10 @@ public final class HeaderUtil {
         if (date != null) {
             return date;
         }
+        date = parseDate(s, "EEE, dd-MMM-yyyy HH:mm:ss zzz");
+        if (date != null) {
+            return date;
+        }
         date = parseDate(s, LEGACY_RFC_850_DATE_FORMAT);
         if (date != null) {
             return date;
