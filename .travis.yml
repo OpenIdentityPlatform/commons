@@ -18,5 +18,5 @@ cache:
   directories:
   - $HOME/.m2
 script:
-  - mvn -q -f clean install -f maven-external-dependency-plugin
-  - mvn -q -f clean install -f maven-external-dependency-plugin-test
+  - mvn -q clean install -f maven-external-dependency-plugin
+  - mvn -q clean install -f maven-external-dependency-plugin-test
