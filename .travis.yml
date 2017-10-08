@@ -14,8 +14,8 @@ jdk:
 notifications:
  email:
   - support@openam.org.ru
-#cache:
-#  directories:
-#  - $HOME/.m2
+cache:
+  directories:
+  - $HOME/.m2
 script:
-  - mvn -q -f -X -DskipTests clean install
+  - mvn -q -DskipTests clean install
