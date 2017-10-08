@@ -1,0 +1,21 @@
+[submodule "forgerock-bom"]
+	path = forgerock-bom
+	url = https://github.com/OpenIdentityPlatform/forgerock-bom.git
+[submodule "forgerock-build-tools"]
+	path = forgerock-build-tools
+	url = https://github.com/OpenIdentityPlatform/forgerock-build-tools.git
+[submodule "forgerock-commons"]
+	path = forgerock-commons
+	url = https://github.com/OpenIdentityPlatform/forgerock-commons.git
+[submodule "forgerock-guava"]
+	path = forgerock-guava
+	url = https://github.com/OpenIdentityPlatform/forgerock-guava.git
+[submodule "forgerock-guice"]
+	path = forgerock-guice
+	url = https://github.com/OpenIdentityPlatform/forgerock-guice.git
+[submodule "forgerock-i18n-framework"]
+	path = forgerock-i18n-framework
+	url = https://github.com/OpenIdentityPlatform/forgerock-i18n-framework.git
+[submodule "forgerock-ui"]
+	path = forgerock-ui
+	url = https://github.com/OpenIdentityPlatform/forgerock-ui.git
