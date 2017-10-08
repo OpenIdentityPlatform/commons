@@ -46,46 +46,8 @@
     <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-bom/browse</url>
   </scm>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>forgerock-snapshots</id>
-      <name>ForgeRock Snapshot Repository</name>
-      <url>${forgerockDistMgmtSnapshotsUrl}</url>
-    </snapshotRepository>
 
-    <repository>
-      <id>forgerock-staging</id>
-      <name>ForgeRock Release Repository</name>
-      <url>${forgerockDistMgmtReleasesUrl}</url>
-    </repository>
-  </distributionManagement>
 
-  <!-- (see FAQ at http://maven.apache.org/guides/mini/guide-central-repository-upload.html ) -->
-  <repositories>
-    <repository>
-      <id>forgerock-staging-repository</id>
-      <name>ForgeRock Release Repository</name>
-      <url>${forgerockDistMgmtReleasesUrl}</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
-    </repository>
-
-    <repository>
-      <id>forgerock-snapshots-repository</id>
-      <name>ForgeRock Snapshot Repository</name>
-      <url>${forgerockDistMgmtSnapshotsUrl}</url>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-    </repository>
-  </repositories>
 
   <properties>
     <maven.min.version>3.0.1</maven.min.version>
