@@ -18,4 +18,4 @@ cache:
   directories:
   - $HOME/.m2
 script:
-  - mvn -q -DskipTests  clean install -X -f pom.xml
+  - mvn -q -DskipTests  clean install -X
