@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.9</version>
+        <version>2.0.6</version>
     </parent>
 
     <properties>
@@ -56,30 +56,30 @@
             <url>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-ui</url>
         </site>
     </distributionManagement>
-    <repositories>
-        <repository>
-            <id>forgerock-staging-repository</id>
-            <name>ForgeRock Release Repository</name>
-            <url>http://maven.forgerock.org/repo/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-        </repository>
-        <repository>
-            <id>forgerock-snapshots-repository</id>
-            <name>ForgeRock Snapshot Repository</name>
-            <url>http://maven.forgerock.org/repo/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
+<!--     <repositories> -->
+<!--         <repository> -->
+<!--             <id>forgerock-staging-repository</id> -->
+<!--             <name>ForgeRock Release Repository</name> -->
+<!--             <url>http://maven.forgerock.org/repo/releases</url> -->
+<!--             <snapshots> -->
+<!--                 <enabled>false</enabled> -->
+<!--             </snapshots> -->
+<!--             <releases> -->
+<!--                 <enabled>true</enabled> -->
+<!--             </releases> -->
+<!--         </repository> -->
+<!--         <repository> -->
+<!--             <id>forgerock-snapshots-repository</id> -->
+<!--             <name>ForgeRock Snapshot Repository</name> -->
+<!--             <url>http://maven.forgerock.org/repo/snapshots</url> -->
+<!--             <snapshots> -->
+<!--                 <enabled>true</enabled> -->
+<!--             </snapshots> -->
+<!--             <releases> -->
+<!--                 <enabled>false</enabled> -->
+<!--             </releases> -->
+<!--         </repository> -->
+<!--     </repositories> -->
 
     <modules>
         <module>forgerock-ui-commons</module>
@@ -88,6 +88,407 @@
     </modules>
 
     <build>
+    		<plugins>
+			<plugin>
+				<groupId>com.savage7.maven.plugins</groupId>
+				<artifactId>maven-external-dependency-plugin</artifactId>
+				<version>0.6-SNAPSHOT</version>
+				<inherited>false</inherited>
+				<configuration>
+					<stagingDirectory>
+						${project.build.directory}/dependencies/
+                    </stagingDirectory>
+					<createChecksum>true</createChecksum>
+					<skipChecksumVerification>false</skipChecksumVerification>
+					<force>false</force>
+					<artifactItems>
+						<artifactItem>
+							<groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>handlebars</artifactId>
+			                <version>4.0.5</version>
+			                <packaging>js</packaging>
+							<downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/{version}/{artifactId}.{packaging}
+                        		</downloadUrl>
+                        	</artifactItem>
+                        	<artifactItem>
+				            <groupId>org.forgerock.commons.ui.libs</groupId>
+				            <artifactId>backgrid-select-all</artifactId>
+				            <version>0.3.5</version>
+				            <packaging>js</packaging>
+				            <classifier>min</classifier>
+				            <downloadUrl>
+								https://github.com/cloudflare/backgrid-select-all/blob/{version}/{artifactId}.{classifier}.{packaging}
+                        		</downloadUrl>
+				        </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>lodash</artifactId>
+			                <version>3.10.1</version>
+			                <packaging>js</packaging>
+			                <classifier>min</classifier>
+			                <downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/lodash.js/{version}/{artifactId}.{classifier}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>js2form</artifactId>
+			                <packaging>js</packaging>
+			                <version>2.0-769718a</version>
+			                <downloadUrl>
+								https://raw.githubusercontent.com/maxatwork/form2js/769718a159ff88da82613c2c7e5b1eaa2e0c73e7/src/{artifactId}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>form2js</artifactId>
+			                <packaging>js</packaging>
+			                <version>2.0-769718a</version>
+			                <downloadUrl>
+								https://raw.githubusercontent.com/maxatwork/form2js/769718a159ff88da82613c2c7e5b1eaa2e0c73e7/src/{artifactId}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+				            <groupId>org.forgerock.commons.ui.libs</groupId>
+				            <artifactId>titatoggle</artifactId>
+				            <version>1.2.6</version>
+				            <classifier>min</classifier>
+				            <packaging>css</packaging>
+				            <downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/titatoggle/{version}/{artifactId}-dist-{classifier}.{packaging}
+                        		</downloadUrl>
+				        </artifactItem>
+				        <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>dragula</artifactId>
+			                <version>3.6.7</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/dragula/{version}/{artifactId}.{classifier}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>font-awesome</artifactId>
+			                <version>4.5.0</version>
+			                <packaging>zip</packaging>
+			                <downloadUrl>
+								https://github.com/FortAwesome/Font-Awesome/archive/v{version}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>react</artifactId>
+			                <version>15.2.1</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+								https://unpkg.com/{artifactId}@{version}/dist/{artifactId}.{classifier}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>react-dom</artifactId>
+			                <version>15.2.1</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/react-dom/{version}/{artifactId}.{classifier}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>sinon</artifactId>
+			                <version>1.15.4</version>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/sinon.js/{version}/{artifactId}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>qunit</artifactId>
+			                <version>1.15.0</version>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/qunit/{version}/{artifactId}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>qunit</artifactId>
+			                <packaging>css</packaging>
+			                <version>1.15.0</version>
+			                <downloadUrl>
+								https://cdnjs.cloudflare.com/ajax/libs/qunit/{version}/{artifactId}.{packaging}
+                        		</downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>jquery.ba-dotimeout</artifactId>
+			                <version>1.0</version>
+			                <packaging>js</packaging>
+			                <classifier>min</classifier>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/jquery-dotimeout/{version}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>bootstrap-dialog</artifactId>
+			                <version>1.34.4</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/{version}/{packaging}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>bootstrap-dialog</artifactId>
+			                <version>1.34.4</version>
+			                <classifier>min</classifier>
+			                <packaging>css</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/{version}/{packaging}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>		
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>selectize</artifactId>
+			                <version>0.12.1</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                 <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/selectize.js/{version}/{packaging}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>selectize</artifactId>
+			                <version>0.12.1</version>
+			                <classifier>bootstrap3</classifier>
+			                <packaging>css</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/selectize.js/{version}/{packaging}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>		
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>moment</artifactId>
+			                <version>2.8.1</version>
+			                <packaging>js</packaging>
+			                <classifier>min</classifier>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/moment.js/{version}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>            
+                        <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>i18next</artifactId>
+			                <version>1.7.3</version>
+			                <packaging>js</packaging>
+			                <classifier>min</classifier>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/i18next/{version}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			             <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>requirejs</artifactId>
+			                <version>2.1.14</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                 <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/require.js/{version}/require.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+                        <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backbone-relational</artifactId>
+			                <version>0.9.0</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/backbone-relational/{version}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+                        <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backbone</artifactId>
+			                <version>1.1.2</version>
+			                <packaging>js</packaging>
+			                <classifier>min</classifier>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/backbone.js/{version}/{artifactId}-{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backbone.paginator.min</artifactId>
+			                <version>2.0.2</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/backbone.paginator/{version}/backbone.paginator.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backgrid.min</artifactId>
+			                <version>0.3.5</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/backgrid.js/{version}/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backgrid.min</artifactId>
+			                <version>0.3.5</version>
+			                <packaging>less</packaging>
+			                <downloadUrl>
+			                		https://raw.githubusercontent.com/aldaris/xui-deps/master/less/backgrid.min-0.3.5.less
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backgrid-paginator.min</artifactId>
+			                <version>0.3.5</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+			                		https://raw.githubusercontent.com/cloudflare/backgrid-paginator/{version}/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backgrid-paginator.min</artifactId>
+			                <version>0.3.5</version>
+			                <packaging>css</packaging>
+			                <downloadUrl>
+			                		https://raw.githubusercontent.com/cloudflare/backgrid-paginator/{version}/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backgrid-filter.min</artifactId>
+			                <version>0.3.5</version>
+			                <classifier>min</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+			                		https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>backgrid-filter.min</artifactId>
+			                <version>0.3.5</version>
+			                <packaging>css</packaging>
+			                <downloadUrl>
+			                		https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>jquery</artifactId>
+			                <version>2.1.1</version>
+			                <packaging>js</packaging>
+			                <classifier>min</classifier>
+			                 <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/jquery/{version}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>bootstrap</artifactId>
+			                <version>3.3.5</version>
+			                <classifier>custom</classifier>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/{version}/{packaging}/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>bootstrap</artifactId>
+			                <version>3.3.5</version>
+			                <classifier>custom</classifier>
+			                <packaging>css</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/{version}/{packaging}/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>jquery.placeholder</artifactId>
+			                <version>2.0.8</version>
+			                <packaging>js</packaging>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/jquery-placeholder/{version}/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>spin</artifactId>
+			                <version>2.0.1</version>
+			                <packaging>js</packaging>
+			                <classifier>min</classifier>
+			                <downloadUrl>
+			                		https://cdnjs.cloudflare.com/ajax/libs/{artifactId}.{packaging}/{version}/{artifactId}.{classifier}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+			                <groupId>org.forgerock.commons.ui.libs</groupId>
+			                <artifactId>xdate</artifactId>
+			                <version>0.8</version>
+			                <packaging>js</packaging>
+			                <classifier>min</classifier>
+			                <downloadUrl>
+			                		https://raw.githubusercontent.com/arshaw/{artifactId}/v{version}/src/{artifactId}.{packaging}
+			                </downloadUrl>
+			            </artifactItem>
+			            <artifactItem>
+				            <groupId>org.forgerock.commons.ui.libs</groupId>
+				            <artifactId>CodeMirror</artifactId>
+				            <version>4.10</version>
+				            <packaging>zip</packaging>
+				            <downloadUrl>
+			                		https://github.com/codemirror/{artifactId}/archive/{version}.0.{packaging}
+			                </downloadUrl>
+				        </artifactItem>
+					</artifactItems>
+				</configuration>
+				<executions>
+					<execution>
+						<id>clean-external-dependencies</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean-external</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>resolve-install-external-dependencies</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>resolve-external</goal>
+							<goal>install-external</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>deploy-external-dependencies</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-external</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+    		</plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
