@@ -114,7 +114,6 @@
 							]]></downloadUrl>
 							<extractFile>{artifactId}</extractFile>
 						</artifactItem>
-					</artifactItems>
 						<!-- HERE IS AN EXAMPLE OF AN ARTIFACT DEFINED THAT DOWNLOADS A FILE 
 							THAT CONTAINS A SHA1 CHECKSUM USED BY ANOTHER ALREADY MAVEN HOSTED ARTIFACT. 
 							PLEASE NOTE, THIS DEPENDENCY WILL FAIL TO INSTALL SINCE THE GROUP ID, ARTIFACT 
