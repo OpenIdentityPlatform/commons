@@ -74,6 +74,56 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
             </plugin>
+                    			<plugin>
+				<groupId>com.savage7.maven.plugins</groupId>
+				<artifactId>maven-external-dependency-plugin</artifactId>
+				<version>0.6-SNAPSHOT</version>
+				<inherited>false</inherited>
+				<configuration>
+					<stagingDirectory>
+						${project.build.directory}/dependencies/
+                    </stagingDirectory>
+					<createChecksum>true</createChecksum>
+					<skipChecksumVerification>false</skipChecksumVerification>
+					<force>false</force>
+					<artifactItems>
+						<artifactItem>
+				            <groupId>org.forgerock.commons.ui.libs</groupId>
+				            <artifactId>less</artifactId>
+				            <version>1.5.1</version>
+				            <classifier>rhino</classifier>
+				            <packaging>js</packaging>
+				            <downloadUrl>
+								https://raw.githubusercontent.com/{artifactId}/{artifactId}.{packaging}/v1.7.5/dist/{artifactId}-{classifier}-{version}.{packaging}
+                        		</downloadUrl>		
+				        </artifactItem>
+					</artifactItems>
+				</configuration>
+				<executions>
+					<execution>
+						<id>clean-external-dependencies</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean-external</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>resolve-install-external-dependencies</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>resolve-external</goal>
+							<goal>install-external</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>deploy-external-dependencies</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy-external</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
         </plugins>
     </build>
 </project>

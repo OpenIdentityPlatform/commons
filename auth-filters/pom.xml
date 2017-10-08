@@ -68,19 +68,19 @@
         </notifiers>
     </ciManagement>
 
-    <repositories>
-        <repository>
-            <id>restlet-cache</id>
-            <name>Restlet Cache Repository</name>
-            <url>http://maven.forgerock.org/repo/maven.restlet.org</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+<!--     <repositories> -->
+<!--         <repository> -->
+<!--             <id>restlet-cache</id> -->
+<!--             <name>Restlet Cache Repository</name> -->
+<!--             <url>http://maven.forgerock.org/repo/maven.restlet.org</url> -->
+<!--             <releases> -->
+<!--                 <enabled>true</enabled> -->
+<!--             </releases> -->
+<!--             <snapshots> -->
+<!--                 <enabled>false</enabled> -->
+<!--             </snapshots> -->
+<!--         </repository> -->
+<!--     </repositories> -->
 
     <build>
         <pluginManagement>

@@ -19,8 +19,8 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>2.0.7</version>
-        <relativePath />
+        <version>2.0.6</version>
+        <relativePath/>
     </parent>
 
     <groupId>org.forgerock.commons</groupId>
@@ -47,31 +47,31 @@
         <apache-httpasyncclient.version>4.1.2</apache-httpasyncclient.version>
     </properties>
 
-    <repositories>
-      <repository>
-         <id>forgerock-staging-repository</id>
-         <name>ForgeRock Release Repository</name>
-         <url>http://maven.forgerock.org/repo/releases</url>
-         <snapshots>
-            <enabled>false</enabled>
-         </snapshots>
-         <releases>
-            <enabled>true</enabled>
-         </releases>
-      </repository>
+<!--     <repositories> -->
+<!--       <repository> -->
+<!--          <id>forgerock-staging-repository</id> -->
+<!--          <name>ForgeRock Release Repository</name> -->
+<!--          <url>http://maven.forgerock.org/repo/releases</url> -->
+<!--          <snapshots> -->
+<!--             <enabled>false</enabled> -->
+<!--          </snapshots> -->
+<!--          <releases> -->
+<!--             <enabled>true</enabled> -->
+<!--          </releases> -->
+<!--       </repository> -->
 
-      <repository>
-         <id>forgerock-snapshots-repository</id>
-         <name>ForgeRock Snapshot Repository</name>
-         <url>http://maven.forgerock.org/repo/snapshots</url>
-         <snapshots>
-            <enabled>true</enabled>
-         </snapshots>
-         <releases>
-            <enabled>false</enabled>
-         </releases>
-      </repository>
-   </repositories>
+<!--       <repository> -->
+<!--          <id>forgerock-snapshots-repository</id> -->
+<!--          <name>ForgeRock Snapshot Repository</name> -->
+<!--          <url>http://maven.forgerock.org/repo/snapshots</url> -->
+<!--          <snapshots> -->
+<!--             <enabled>true</enabled> -->
+<!--          </snapshots> -->
+<!--          <releases> -->
+<!--             <enabled>false</enabled> -->
+<!--          </releases> -->
+<!--       </repository> -->
+<!--    </repositories> -->
 
     <dependencyManagement>
         <dependencies>
