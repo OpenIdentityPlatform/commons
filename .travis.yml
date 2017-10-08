@@ -1,0 +1,22 @@
+language: java
+os:
+ - linux
+before_install:
+ - date -u
+ - uname -a
+ - env | sort
+branches:
+ only:
+   - master
+jdk:
+  - oraclejdk8
+  - openjdk8
+notifications:
+ email:
+  - support@openam.org.ru
+cache:
+  directories:
+  - $HOME/.m2
+script:
+  - mvn -q -f clean install -f maven-external-dependency-plugin
+  - mvn -q -f clean install -f maven-external-dependency-plugin-test
