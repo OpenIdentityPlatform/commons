@@ -19,3 +19,6 @@
 [submodule "forgerock-ui"]
 	path = forgerock-ui
 	url = https://github.com/OpenIdentityPlatform/forgerock-ui.git
+[submodule "maven-external-dependency-plugin"]
+	path = maven-external-dependency-plugin
+	url = https://github.com/openam-org-ru/maven-external-dependency-plugin.git
