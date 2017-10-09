@@ -2,22 +2,27 @@ language: java
 os:
  - linux
  - osx
+ 
  before_install:
  - date -u
  - uname -a
  - env | sort
+ 
 branches:
  only:
    - master
+   
 jdk:
   - oraclejdk8
   - openjdk8
+  
 notifications:
  email:
   - support@openam.org.ru
+  
 cache:
   directories:
   - $HOME/.m2
+  
 script:
   - mvn -q clean install -U -DskipTests=true
-  
