@@ -77,5 +77,29 @@
             </includes>
             <fileMode>0640</fileMode>
         </fileSet>
+         <fileSet>
+            <directory>${project.build.directory}/Font-Awesome-4.5.0</directory>
+            <outputDirectory>/css/fontawesome</outputDirectory>
+            <includes>
+              <include>css/font-awesome.min.css</include>
+            </includes>
+            <fileMode>0640</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/Font-Awesome-4.5.0</directory>
+            <outputDirectory>/css/fontawesome</outputDirectory>
+            <includes>
+              <include>fonts/*</include>
+            </includes>
+            <fileMode>0640</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/Font-Awesome-4.5.0</directory>
+            <outputDirectory>/css/fontawesome</outputDirectory>
+            <includes>
+              <include>less/variables.less</include>
+            </includes>
+            <fileMode>0640</fileMode>
+        </fileSet>
     </fileSets>
 </assembly>
