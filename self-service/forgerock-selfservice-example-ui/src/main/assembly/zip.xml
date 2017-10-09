@@ -34,7 +34,7 @@
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/www</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>
