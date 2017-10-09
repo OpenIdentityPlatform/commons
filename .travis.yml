@@ -1,7 +1,8 @@
 language: java
 os:
  - linux
-before_install:
+ - osx
+ before_install:
  - date -u
  - uname -a
  - env | sort
