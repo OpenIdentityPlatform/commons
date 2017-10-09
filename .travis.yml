@@ -18,4 +18,5 @@ cache:
   directories:
   - $HOME/.m2
 script:
-  - mvn -q -f -DskipTests clean install
+  - mvn -q clean install -X
+  
