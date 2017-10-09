@@ -37,14 +37,14 @@
             <includes>
                 <include>org.forgerock.commons.ui.libs:*:js</include>
             </includes>
-            <outputDirectory>/libs</outputDirectory>
+            <outputDirectory>libs</outputDirectory>
         </dependencySet>
         <dependencySet>
             <includes>
                 <include>org.forgerock.commons.ui.libs:*:css</include>
                 <include>org.forgerock.commons.ui.libs:*:less</include>
             </includes>
-            <outputDirectory>/css</outputDirectory>
+            <outputDirectory>css</outputDirectory>
         </dependencySet>
     </dependencySets>
 
@@ -55,7 +55,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/font-awesome-4.5.0</directory>
-            <outputDirectory>/css/fontawesome</outputDirectory>
+            <outputDirectory>css/fontawesome</outputDirectory>
             <includes>
               <include>css/font-awesome.min.css</include>
             </includes>
@@ -63,7 +63,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/font-awesome-4.5.0</directory>
-            <outputDirectory>/css/fontawesome</outputDirectory>
+            <outputDirectory>css/fontawesome</outputDirectory>
             <includes>
               <include>fonts/*</include>
             </includes>
@@ -71,7 +71,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/font-awesome-4.5.0</directory>
-            <outputDirectory>/css/fontawesome</outputDirectory>
+            <outputDirectory>css/fontawesome</outputDirectory>
             <includes>
               <include>less/variables.less</include>
             </includes>
