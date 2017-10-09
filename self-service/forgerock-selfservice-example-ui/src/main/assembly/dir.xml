@@ -34,11 +34,11 @@
     <fileSets>
         <fileSet>
             <directory>${basedir}/target/classes</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/target/dependency</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>
