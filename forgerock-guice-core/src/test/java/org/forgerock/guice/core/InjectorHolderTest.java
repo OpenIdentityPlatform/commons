@@ -27,6 +27,8 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
+
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -34,8 +36,16 @@ public class InjectorHolderTest {
 
     @BeforeClass
     public void setUp() {
+        defaultModuleLoader = InjectorConfiguration.getGuiceModuleLoader();
         InjectorConfiguration.setGuiceModuleLoader(new TestGuiceModuleLoader());
     }
+    private GuiceModuleLoader defaultModuleLoader;
+
+    @AfterClass
+    public void tearDownClass() {
+        InjectorConfiguration.setGuiceModuleLoader(defaultModuleLoader);
+    }
+
 
     @Test
     public void shouldAlwaysReturnTheSameInjector() {
