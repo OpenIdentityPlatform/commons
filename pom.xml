@@ -520,7 +520,7 @@
                             <configuration>
                                 <nodeVersion>v4.2.6</nodeVersion>
                                 <npmVersion>3.5.3</npmVersion>
-                                <npmDownloadRoot>http://maven.forgerock.org/repo/api/npm/npm-virtual/npm/-/</npmDownloadRoot>
+<!--                            <npmDownloadRoot>http://maven.forgerock.org/repo/api/npm/npm-virtual/npm/-/</npmDownloadRoot> -->
                             </configuration>
                         </execution>
                         <execution>
