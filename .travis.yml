@@ -6,7 +6,7 @@ matrix:
         - os: linux
           jdk: openjdk8
         - os: osx
-osx_image: xcode9.1
+          osx_image: xcode9.1
 before_install:
  - date -u
  - uname -a
