@@ -67,7 +67,7 @@
 
     <!-- Shared components versions -->
     <forgerock-guava.version>18.0.3</forgerock-guava.version>
-    <forgerock-util.version>3.0.2</forgerock-util.version>
+    <forgerock-util.version>21.0.0-SNAPSHOT</forgerock-util.version>
     <json-crypto.version>3.0.2</json-crypto.version>
     <json-patch.version>3.0.2</json-patch.version>
     <json-ref.version>3.0.2</json-ref.version>
