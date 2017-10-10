@@ -42,8 +42,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.internal.Nullable;
-
+import javax.annotation.Nullable;
 /**
  * Guice module for wiring the JASPI runtime.
  *
