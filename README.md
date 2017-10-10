@@ -4,4 +4,4 @@
 ## How-to build
 
 * git clone --recursive  https://github.com/OpenIdentityPlatform/forgerock-parent.git
-* mvn clean install -DskipTests=true -f forgerock-parent
+* mvn clean install -f forgerock-parent
