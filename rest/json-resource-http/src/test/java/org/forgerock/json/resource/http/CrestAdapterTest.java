@@ -801,7 +801,7 @@ public class CrestAdapterTest {
         reg.setAsyncSupported(true);
         reg.setLoadOnStartup(1);
 
-        HttpServer server = HttpServer.createSimpleServer(".", new PortRange(6000, 7000));
+        HttpServer server = HttpServer.createSimpleServer(".", "localhost", new PortRange(6000, 7000));
         try (HttpClientHandler httpClientHandler = new HttpClientHandler()) {
             webappContext.deploy(server);
             server.start();
@@ -812,7 +812,8 @@ public class CrestAdapterTest {
 
             // Read -------------
             ReadRequest readRequest = newReadRequest("users/bjensen");
-            ResourceResponse readResponse = handler.handleRead(new RootContext(), readRequest).getOrThrow();
+            Promise<ResourceResponse, ResourceException> promise = handler.handleRead(new RootContext(), readRequest);
+            ResourceResponse readResponse = promise.getOrThrow();
             assertThat(readResponse.getId()).isEqualTo("ae32f");
             assertThat(readResponse.getRevision()).isEqualTo("1");
             assertThat(readResponse.getContent()).isEqualTo(readRequest.toJsonValue());
@@ -910,6 +911,7 @@ public class CrestAdapterTest {
                 @Override
                 public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
                                                                                final ReadRequest request) {
+                	
                     return newResourceResponse("ae32f", "1", request.toJsonValue()).asPromise();
                 }
 
