@@ -20,8 +20,5 @@ notifications:
 cache:
   directories:
   - $HOME/.m2
-before_script:
-  - git submodule foreach git checkout master
-  - git submodule foreach git checkout master
 script:
   - mvn -q clean install
