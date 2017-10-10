@@ -21,4 +21,6 @@ cache:
   directories:
   - $HOME/.m2
 script:
+  - git submodule foreach git checkout master
+  - git submodule foreach git pull
   - mvn -q clean install
