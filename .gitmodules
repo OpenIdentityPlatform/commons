@@ -22,3 +22,6 @@
 [submodule "maven-external-dependency-plugin"]
 	path = maven-external-dependency-plugin
 	url = https://github.com/openam-org-ru/maven-external-dependency-plugin.git
+[submodule "forgerock-bloomfilter"]
+	path = forgerock-bloomfilter
+	url = https://github.com/OpenIdentityPlatform/forgerock-bloomfilter.git

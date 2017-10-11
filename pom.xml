@@ -63,6 +63,7 @@
 		<module>forgerock-guice</module>
 		<module>forgerock-ui</module>
 		<module>forgerock-commons</module>
+		<module>forgerock-bloomfilter</module>
 	</modules>
     <properties>
         <!-- ************** -->
