@@ -1,7 +1,9 @@
-.DS_Store
-docs
-node_modules
-node/
+*.iml
 target
 .idea
-*.iml
+.project
+.settings
+.classpath
+dependency-reduced-pom.xml
+node_modules
+node/
