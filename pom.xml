@@ -66,15 +66,15 @@
     <testng.version>6.9.4</testng.version>
 
     <!-- Shared components versions -->
-    <forgerock-guava.version>18.0.3</forgerock-guava.version>
+    <forgerock-guava.version>18.0.4</forgerock-guava.version>
     <forgerock-util.version>21.0.0-SNAPSHOT</forgerock-util.version>
     <json-crypto.version>3.0.2</json-crypto.version>
     <json-patch.version>3.0.2</json-patch.version>
     <json-ref.version>3.0.2</json-ref.version>
     <json-schema.version>3.0.2</json-schema.version>
     <json-web-token.version>3.0.2</json-web-token.version>
-    <forgerock-http-framework.version>3.0.1</forgerock-http-framework.version>
-    <forgerock-rest.version>4.0.3</forgerock-rest.version>
+    <forgerock-http-framework.version>21.0.0-SNAPSHOT</forgerock-http-framework.version>
+    <forgerock-rest.version>21.0.0-SNAPSHOT</forgerock-rest.version>
     <forgerock-auth-filters.version>3.1.5</forgerock-auth-filters.version>
     <forgerock-audit.version>4.1.1</forgerock-audit.version>
     <forgerock-selfservice.version>1.0.3</forgerock-selfservice.version>
