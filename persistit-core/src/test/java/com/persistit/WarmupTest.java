@@ -16,6 +16,7 @@
 
 package com.persistit;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -63,6 +64,7 @@ public class WarmupTest extends PersistitUnitTestCase {
   }
 
   @Test
+  @Ignore
   public void readOrderIsSequential() throws Exception {
 
     Exchange ex = _persistit.getExchange("persistit", "WarmupTest", true);
