@@ -237,7 +237,7 @@ public class AccumulatorRecoveryTest extends PersistitUnitTestCase {
         public void run() {
           for (int j = 0; j < 10; j++) {
             try {
-              accumulateRows(1000000);
+              accumulateRows(1000);
               verifyRowCount();
             } catch (final Exception e) {
               System.out.println("Thread " + index + " failed");

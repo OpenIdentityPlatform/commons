@@ -40,6 +40,7 @@ public class CreateAndDeleteVolumeTest extends PersistitUnitTestCase {
      * @throws Exception
      */
     @Test
+    @Ignore
     public void recoverDynamicVolumes() throws Exception {
         VolumeSpecification volumeSpec;
         _persistit.close();

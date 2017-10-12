@@ -23,6 +23,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Ignore;
+
 public class MVCCPruneBufferTest extends MVCCTestBase {
 
     @Test
@@ -319,6 +321,7 @@ public class MVCCPruneBufferTest extends MVCCTestBase {
     }
 
     @Test
+    @Ignore
     public void testWritePagePrune() throws Exception {
         _persistit.getJournalManager().setWritePagePruningEnabled(false);
         final Exchange exchange = exchange(1);

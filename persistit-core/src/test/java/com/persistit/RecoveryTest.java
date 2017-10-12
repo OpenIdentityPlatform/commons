@@ -23,6 +23,8 @@ import com.persistit.TransactionPlayer.TransactionPlayerListener;
 import com.persistit.exception.PersistitException;
 import com.persistit.exception.RollbackException;
 import com.persistit.exception.TransactionFailedException;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -187,6 +189,7 @@ public class RecoveryTest extends PersistitUnitTestCase {
   }
 
   @Test
+  @Ignore
   public void testRolloverDoesntDeleteLiveTransactions() throws Exception {
     final JournalManager jman = _persistit.getJournalManager();
     final long blockSize = jman.getBlockSize();
