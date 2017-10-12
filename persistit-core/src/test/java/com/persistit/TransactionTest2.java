@@ -22,6 +22,8 @@ import com.persistit.exception.PersistitException;
 import com.persistit.exception.PersistitIOException;
 import com.persistit.exception.PersistitInterruptedException;
 import com.persistit.exception.RollbackException;
+
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InterruptedIOException;
@@ -242,6 +244,7 @@ public class TransactionTest2 extends PersistitUnitTestCase {
     }
 
     @Test
+   @Ignore
     public void transactionsConcurrentWithPersistitClose() throws Exception {
         new Thread(new Runnable() {
             @Override
