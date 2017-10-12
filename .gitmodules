@@ -25,3 +25,6 @@
 [submodule "forgerock-bloomfilter"]
 	path = forgerock-bloomfilter
 	url = https://github.com/OpenIdentityPlatform/forgerock-bloomfilter.git
+[submodule "forgerock-persistit"]
+	path = forgerock-persistit
+	url = https://github.com/OpenIdentityPlatform/forgerock-persistit.git
