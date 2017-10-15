@@ -17,10 +17,10 @@
 package org.forgerock.bloomfilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.guava.common.hash.Funnels.integerFunnel;
+import static com.google.common.hash.Funnels.integerFunnel;
 import static org.mockito.Mockito.mock;
 
-import org.forgerock.guava.common.hash.Funnel;
+import com.google.common.hash.Funnel;
 import org.forgerock.util.time.TimeService;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

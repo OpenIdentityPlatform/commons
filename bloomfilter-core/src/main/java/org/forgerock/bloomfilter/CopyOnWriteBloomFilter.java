@@ -16,7 +16,7 @@
 
 package org.forgerock.bloomfilter;
 
-import org.forgerock.guava.common.hash.Funnel;
+import com.google.common.hash.Funnel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
     private final long capacity;
     private final double falsePositiveProbability;
 
-    private final AtomicReference<org.forgerock.guava.common.hash.BloomFilter<T>> bloomFilterAtomicReference;
+    private final AtomicReference<com.google.common.hash.BloomFilter<T>> bloomFilterAtomicReference;
 
     CopyOnWriteBloomFilter(final Funnel<? super T> funnel,
                            final long capacity,
@@ -43,9 +43,9 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
         this.capacity = capacity;
         this.falsePositiveProbability = falsePositiveProbability;
 
-        final org.forgerock.guava.common.hash.BloomFilter<T> bf =
-                org.forgerock.guava.common.hash.BloomFilter.create(funnel, (int) capacity, falsePositiveProbability);
-        this.bloomFilterAtomicReference = new AtomicReference<org.forgerock.guava.common.hash.BloomFilter<T>>(bf);
+        final com.google.common.hash.BloomFilter<T> bf =
+                com.google.common.hash.BloomFilter.create(funnel, (int) capacity, falsePositiveProbability);
+        this.bloomFilterAtomicReference = new AtomicReference<com.google.common.hash.BloomFilter<T>>(bf);
     }
 
     @Override
@@ -57,8 +57,8 @@ final class CopyOnWriteBloomFilter<T> implements BloomFilter<T> {
     public void addAll(final Collection<? extends T> elements) {
         LOGGER.debug("Adding elements: {}", elements);
         boolean changed;
-        org.forgerock.guava.common.hash.BloomFilter<T> prev;
-        org.forgerock.guava.common.hash.BloomFilter<T> next;
+        com.google.common.hash.BloomFilter<T> prev;
+        com.google.common.hash.BloomFilter<T> next;
 
         int attempts = 0;
 

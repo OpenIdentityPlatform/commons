@@ -16,7 +16,7 @@
 
 package org.forgerock.bloomfilter;
 
-import org.forgerock.guava.common.hash.Funnel;
+import com.google.common.hash.Funnel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +31,7 @@ final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizedBloomFilter.class);
     private final long capacity;
     private final double falsePositiveProbability;
-    private final org.forgerock.guava.common.hash.BloomFilter<T> bloomFilter;
+    private final com.google.common.hash.BloomFilter<T> bloomFilter;
 
     SynchronizedBloomFilter(final Funnel<? super T> funnel,
                                    final long capacity,
@@ -39,7 +39,7 @@ final class SynchronizedBloomFilter<T> implements BloomFilter<T> {
         this.falsePositiveProbability = falsePositiveProbability;
         this.capacity = capacity;
 
-        this.bloomFilter = org.forgerock.guava.common.hash.BloomFilter.create(funnel, (int) capacity, falsePositiveProbability);
+        this.bloomFilter = com.google.common.hash.BloomFilter.create(funnel, (int) capacity, falsePositiveProbability);
     }
 
     @Override

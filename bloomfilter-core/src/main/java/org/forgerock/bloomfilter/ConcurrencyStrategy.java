@@ -16,7 +16,7 @@
 
 package org.forgerock.bloomfilter;
 
-import org.forgerock.guava.common.hash.Funnel;
+import com.google.common.hash.Funnel;
 
 /**
  * Strategy that determines how thread-safety of bloom filters should be managed. Different strategies have different

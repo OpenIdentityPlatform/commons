@@ -16,9 +16,9 @@
 
 package org.forgerock.bloomfilter;
 
-import org.forgerock.guava.common.hash.Funnel;
-import org.forgerock.guava.common.hash.Hashing;
-import org.forgerock.guava.common.primitives.Longs;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.Hashing;
+import com.google.common.primitives.Longs;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;

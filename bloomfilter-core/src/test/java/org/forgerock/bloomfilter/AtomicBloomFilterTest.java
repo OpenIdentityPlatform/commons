@@ -18,8 +18,8 @@ package org.forgerock.bloomfilter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.forgerock.guava.common.hash.Funnel;
-import org.forgerock.guava.common.hash.Funnels;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.Funnels;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

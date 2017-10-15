@@ -16,8 +16,8 @@
 
 package org.forgerock.bloomfilter;
 
-import org.forgerock.guava.common.hash.Funnel;
-import org.forgerock.guava.common.hash.Funnels;
+import com.google.common.hash.Funnel;
+import com.google.common.hash.Funnels;
 import org.forgerock.util.Reject;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.time.TimeService;
