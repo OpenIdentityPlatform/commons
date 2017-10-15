@@ -54,6 +54,7 @@
         <module>forgerock-audit-handler-jdbc</module>
         <module>forgerock-audit-handler-elasticsearch</module>
         <module>forgerock-audit-handler-json</module>
+        <module>forgerock-audit-handler-splunk</module>
     </modules>
 
     <dependencyManagement>
