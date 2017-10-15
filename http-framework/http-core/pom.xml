@@ -49,8 +49,6 @@
 	<dependency>
 	    <groupId>com.google.guava</groupId>
 	    <artifactId>guava</artifactId>
-<!-- 	    If you need support for JDK 1.7 or Android, use the Android flavor -->
-	    <version>23.2-android</version>
 	</dependency>
     <dependency>
       <groupId>org.assertj</groupId>
