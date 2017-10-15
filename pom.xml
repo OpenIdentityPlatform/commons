@@ -502,6 +502,30 @@
         <version>${forgerock-audit.version}</version>
       </dependency>
 
+      <dependency>
+          <groupId>org.forgerock.commons</groupId>
+          <artifactId>forgerock-audit-handler-splunk</artifactId>
+          <version>${forgerock-audit.version}</version>
+      </dependency>
+      
+      <dependency>
+          <groupId>org.forgerock.commons</groupId>
+          <artifactId>forgerock-audit-handler-jms</artifactId>
+          <version>${forgerock-audit.version}</version>
+      </dependency>
+      
+      <dependency>
+          <groupId>org.forgerock.commons</groupId>
+          <artifactId>forgerock-audit-handler-elasticsearch</artifactId>
+          <version>${forgerock-audit.version}</version>
+      </dependency>
+ 
+       <dependency>
+          <groupId>org.forgerock.commons</groupId>
+          <artifactId>forgerock-audit-handler-json</artifactId>
+          <version>${forgerock-audit.version}</version>
+      </dependency>
+                 
       <!-- ForgeRock User Self-Service dependencies -->
       <dependency>
         <groupId>org.forgerock.commons</groupId>
