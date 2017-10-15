@@ -16,6 +16,7 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -145,15 +146,15 @@ public class ECDSASigningHandler implements SigningHandler {
         Reject.ifNull(signature);
         SupportedEllipticCurve curve = SupportedEllipticCurve.forSignature(signature);
 
-        int midPoint = curve.getSignatureSize() >> 1;
-        final byte[] r = Arrays.copyOfRange(signature, 0, midPoint);
-        final byte[] s = Arrays.copyOfRange(signature, midPoint, signature.length);
+        final int midPoint = curve.getSignatureSize() >> 1;
+        final BigInteger r = new BigInteger(Arrays.copyOfRange(signature, 0, midPoint));
+        final BigInteger s = new BigInteger(Arrays.copyOfRange(signature, midPoint, signature.length));
 
         // Each integer component needs at most 2 bytes for the length field and 1 byte for the tag, for a total of 6
         // bytes for both integers.
         final ByteBuffer params = ByteBuffer.allocate(signature.length + 6);
-        DerUtils.writeInteger(params, r);
-        DerUtils.writeInteger(params, s);
+        DerUtils.writeInteger(params, r.toByteArray());
+        DerUtils.writeInteger(params, s.toByteArray());
 
         final int size = params.position();
         // The overall sequence may need up to 4 bytes for the length field plus 1 byte for the sequence tag.
@@ -161,7 +162,10 @@ public class ECDSASigningHandler implements SigningHandler {
         sequence.put(DerUtils.SEQUENCE_TAG);
         DerUtils.writeLength(sequence, size);
         sequence.put((ByteBuffer) params.flip());
-        return sequence.array();
+
+        final byte[] result = new byte[sequence.position()];
+        ((ByteBuffer) sequence.flip()).get(result);
+        return result;
     }
 
 }
