@@ -59,7 +59,7 @@
 		<module>forgerock-bom</module>
 		<module>forgerock-build-tools</module>
 		<module>forgerock-i18n-framework</module>
-		<module>forgerock-guava</module>
+<!-- 		<module>forgerock-guava</module> -->
 		<module>forgerock-guice</module>
 		<module>forgerock-ui</module>
 		<module>forgerock-commons</module>
