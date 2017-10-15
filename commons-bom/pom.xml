@@ -521,6 +521,17 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-handler-splunk</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+  
+              <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-handler-json</artifactId>
+                <version>${project.version}</version>
+            </dependency>          
             <!-- ForgeRock User Self-Service dependencies -->
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
