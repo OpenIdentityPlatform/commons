@@ -13,29 +13,16 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.elasticsearch;
+package org.forgerock.audit.events.handlers.buffering;
 
 /**
- * Indicates failure during a batch operation.
+ * Basic batch publisher factory implementation.
  */
-class BatchException extends Exception {
+public final class BatchPublisherFactoryImpl implements BatchPublisherFactory {
 
-    /**
-     * Constructs a new {@code BatchException} with given message.
-     *
-     * @param message Message
-     */
-    public BatchException(String message) {
-        super(message);
+    @Override
+    public BufferedBatchPublisher.Builder newBufferedPublisher(BatchConsumer consumer) {
+        return BufferedBatchPublisher.newBuilder(consumer);
     }
 
-    /**
-     * Constructs a new {@code BatchException} with given message and cause.
-     *
-     * @param message Message
-     * @param cause Cause of this {@code BatchException}
-     */
-    public BatchException(String message, Throwable cause) {
-        super(message, cause);
-    }
 }

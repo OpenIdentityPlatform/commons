@@ -11,27 +11,26 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
-
 package org.forgerock.http.filter;
-
-import static org.forgerock.http.HttpApplication.LOGGER;
 
 import java.io.IOException;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
-import org.forgerock.http.session.Session;
-import org.forgerock.http.session.SessionManager;
-import org.forgerock.http.session.SessionContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.session.Session;
+import org.forgerock.http.session.SessionContext;
+import org.forgerock.http.session.SessionManager;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Filter implementation that uses a {@link SessionManager} to set the {@link Session} in the
@@ -40,7 +39,9 @@ import org.forgerock.util.promise.ResultHandler;
  * <p>The previous {@code Session} value will be saved and restored after the {@code Handler} has been executed.</p>
  */
 class SessionFilter implements Filter {
-    private SessionManager sessionManager;
+    private static final Logger logger = LoggerFactory.getLogger(SessionFilter.class);
+
+    private final SessionManager sessionManager;
 
     SessionFilter(SessionManager sessionManager) {
         Reject.ifNull(sessionManager, "sessionManager must not be null");
@@ -59,7 +60,7 @@ class SessionFilter implements Filter {
                            try {
                                sessionManager.save(sessionContext.getSession(), response);
                            } catch (IOException e) {
-                               LOGGER.error("Failed to save session", e);
+                               logger.error("Failed to save session", e);
                            } finally {
                                sessionContext.setSession(oldSession);
                            }

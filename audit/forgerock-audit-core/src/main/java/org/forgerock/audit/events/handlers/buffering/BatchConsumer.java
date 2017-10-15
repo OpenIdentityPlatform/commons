@@ -13,32 +13,39 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.elasticsearch;
+package org.forgerock.audit.events.handlers.buffering;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
 
 /**
- * Elasticsearch batch audit event handler.
+ * Implementation is responsible for being able to build up a batch payload and to publish that payload.
  */
-interface ElasticsearchBatchAuditEventHandler {
+public interface BatchConsumer {
 
     /**
-     * Adds an audit event to an Elasticsearch Bulk API payload.
+     * Adds an audit event to a batch payload.
      *
-     * @param topic Event topic
-     * @param event Event JSON payload
-     * @param payload Elasticsearch Bulk API payload
-     * @throws BatchException indicates failure to add-to-batch
+     * @param topic
+     *         event topic
+     * @param event
+     *         event JSON payload
+     * @param payload
+     *         batch payload
+     *
+     * @throws BatchException
+     *         indicates failure to add-to-batch
      */
     void addToBatch(String topic, JsonValue event, StringBuilder payload) throws BatchException;
 
     /**
-     * Publishes a <a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html">Bulk API</a>
-     * payload to Elasticsearch.
+     * Publishes the batch payload.
      *
-     * @param payload Elasticsearch Bulk API payload
-     * @throws BatchException indicates (full or partial) failure to publish batch
+     * @param payload
+     *         batch payload
+     *
+     * @return a simple promise encapsulating any potential batch exception
      */
     Promise<Void, BatchException> publishBatch(String payload);
+
 }

@@ -13,7 +13,6 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-
 package org.forgerock.api.util;
 
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
@@ -26,24 +25,14 @@ import java.util.regex.Pattern;
 import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.api.models.Parameter;
 
-/**
- * Utilities for working with API Description paths and path-parameters.
- */
+/** Utilities for working with API Description paths and path-parameters. */
 public final class PathUtil {
 
-    /**
-     * Pattern for replacing multiple forward-slashes with a single forward-slash.
-     */
+    /** Pattern for replacing multiple forward-slashes with a single forward-slash. */
     private static final Pattern SQUASH_FORWARD_SLASHES_PATTERN = Pattern.compile("[/]{2,}");
-
-    /**
-     * Pattern for removing multiple trailing-slashes.
-     */
+    /** Pattern for removing multiple trailing-slashes. */
     private static final Pattern TRAILING_SLASHES_PATTERN = Pattern.compile("[/]+$");
-
-    /**
-     * Pattern for finding curly-brace-delimited path-variables in a URL-path.
-     */
+    /** Pattern for finding curly-brace-delimited path-variables in a URL-path. */
     private static final Pattern PATH_VARIABLE_PATTERN = Pattern.compile("\\{([^{}]+)\\}");
 
     private PathUtil() {
@@ -61,16 +50,16 @@ public final class PathUtil {
         if (isEmpty(segment)) {
             throw new IllegalArgumentException("segment argument required");
         }
-        String path = '/' + segment;
+        final StringBuilder path = new StringBuilder().append('/').append(segment);
         if (moreSegments != null) {
             for (final String s : moreSegments) {
-                path += '/' + s;
+                path.append('/').append(s);
             }
         }
 
         // squash forward-slashes
         final Matcher m = SQUASH_FORWARD_SLASHES_PATTERN.matcher(path);
-        final String normalized = m.find() ? m.replaceAll("/") : path;
+        final String normalized = m.find() ? m.replaceAll("/") : path.toString();
 
         // remove trailing-slashes
         return TRAILING_SLASHES_PATTERN.matcher(normalized).replaceAll("");
@@ -132,5 +121,4 @@ public final class PathUtil {
         }
         return parameterList;
     }
-
 }

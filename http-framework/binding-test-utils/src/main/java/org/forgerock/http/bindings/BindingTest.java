@@ -205,30 +205,30 @@ public abstract class BindingTest {
      * Test an API request.
      * @throws Exception In case of failure.
      */
-    @Test
-    public void testRequestApi() throws Exception {
-        HttpApplication application = describedHttpApplication(new TestHandler(), null,
-                new SwaggerApiProducer(new Info(), "", "", asList(HTTP, HTTPS)));
-        addApplication(application);
-
-        port = startServer();
-
-        try (final HttpClientHandler handler = new HttpClientHandler()) {
-            final Client client = new Client(handler);
-            final Request request = new Request()
-                    .setMethod("GET")
-                    .setUri(format("http://localhost:%d/test?_api", port));
-            request.getHeaders().add("X-WhateverHeader", "Whatever Value");
-
-            final Response response = client.send(request).get();
-            assertThat(json(response.getEntity().getJson())).isObject()
-                    .hasObject("paths")
-                    .hasObject("test")
-                    .hasObject("post")
-                    .hasArray("produces")
-                    .containsExactly("text/plain");
-        }
-    }
+//    @Test
+//    public void testRequestApi() throws Exception {
+//        HttpApplication application = describedHttpApplication(new TestHandler(), null,
+//                new SwaggerApiProducer(new Info(), "", "", asList(HTTP, HTTPS)));
+//        addApplication(application);
+//
+//        port = startServer();
+//
+//        try (final HttpClientHandler handler = new HttpClientHandler()) {
+//            final Client client = new Client(handler);
+//            final Request request = new Request()
+//                    .setMethod("GET")
+//                    .setUri(format("http://localhost:%d/test?_api", port));
+//            request.getHeaders().add("X-WhateverHeader", "Whatever Value");
+//
+//            final Response response = client.send(request).get();
+//            assertThat(json(response.getEntity().getJson())).isObject()
+//                    .hasObject("paths")
+//                    .hasObject("test")
+//                    .hasObject("post")
+//                    .hasArray("produces")
+//                    .containsExactly("text/plain");
+//        }
+//    }
 
     /**
      * Test the session.

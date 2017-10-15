@@ -11,35 +11,53 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.resource.http;
 
-import static org.forgerock.json.resource.QueryResponse.*;
+import static org.forgerock.json.resource.QueryResponse.FIELD_ERROR;
+import static org.forgerock.json.resource.QueryResponse.FIELD_PAGED_RESULTS_COOKIE;
+import static org.forgerock.json.resource.QueryResponse.FIELD_REMAINING_PAGED_RESULTS;
+import static org.forgerock.json.resource.QueryResponse.FIELD_RESULT;
+import static org.forgerock.json.resource.QueryResponse.FIELD_RESULT_COUNT;
+import static org.forgerock.json.resource.QueryResponse.FIELD_TOTAL_PAGED_RESULTS;
+import static org.forgerock.json.resource.QueryResponse.FIELD_TOTAL_PAGED_RESULTS_POLICY;
 import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
-import static org.forgerock.json.resource.http.HttpUtils.*;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_ETAG;
+import static org.forgerock.json.resource.http.HttpUtils.HEADER_LOCATION;
+import static org.forgerock.json.resource.http.HttpUtils.JSON_MAPPER;
+import static org.forgerock.json.resource.http.HttpUtils.MIME_TYPE_APPLICATION_JSON;
+import static org.forgerock.json.resource.http.HttpUtils.MIME_TYPE_TEXT_PLAIN;
+import static org.forgerock.json.resource.http.HttpUtils.PROTOCOL_VERSION_2;
+import static org.forgerock.json.resource.http.HttpUtils.adapt;
+import static org.forgerock.json.resource.http.HttpUtils.fail;
+import static org.forgerock.json.resource.http.HttpUtils.getIfNoneMatch;
+import static org.forgerock.json.resource.http.HttpUtils.getJsonGenerator;
+import static org.forgerock.json.resource.http.HttpUtils.getRequestedProtocolVersion;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import javax.mail.internet.ContentType;
-import javax.mail.internet.ParseException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.fasterxml.jackson.core.JsonGenerator;
+import javax.mail.internet.ContentType;
+import javax.mail.internet.ParseException;
+
 import org.forgerock.http.header.ContentApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.header.MalformedHeaderException;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
+import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -56,7 +74,6 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestVisitor;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.services.context.Context;
@@ -66,6 +83,9 @@ import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * Common request processing.
@@ -79,7 +99,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     private final Response httpResponse;
     private final Version protocolVersion;
     private final Request request;
-    private final JsonGenerator writer;
+    private final JsonGenerator jsonGenerator;
 
     RequestRunner(Context context, Request request, org.forgerock.http.protocol.Request httpRequest,
             Response httpResponse) throws Exception {
@@ -89,7 +109,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         this.httpResponse = httpResponse;
         // cache the request's protocol version to avoid repeated BadRequestExceptions at call-sites
         this.protocolVersion = getRequestedProtocolVersion(httpRequest);
-        this.writer = getJsonGenerator(httpRequest, httpResponse);
+        this.jsonGenerator = getJsonGenerator(httpRequest, httpResponse);
     }
 
     /**
@@ -132,7 +152,8 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                             writeApiVersionHeaders(result);
                             writeAdvice();
                             if (result != null) {
-                                writer.writeObject(result.getJsonContent().getObject());
+                                Json.makeLocalizingObjectWriter(JSON_MAPPER, httpRequest)
+                                        .writeValue(jsonGenerator, result.getJsonContent().getObject());
                             } else {
                                 // No content.
                                 httpResponse.setStatus(Status.NO_CONTENT);
@@ -165,7 +186,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                             writeApiVersionHeaders(result);
                             writeAdvice();
                             if (result.getId() != null) {
-                                httpResponse.getHeaders().put(HEADER_LOCATION, getResourceURL(request, result));
+                                httpResponse.getHeaders().put(HEADER_LOCATION, getResourceURL(result));
                             }
                             httpResponse.setStatus(Status.CREATED);
                             writeResource(result);
@@ -253,15 +274,15 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
             public void handleResult(QueryResponse result) {
                 try {
                     writeHeader(result, isFirstResult);
-                    writer.writeEndArray();
-                    writer.writeNumberField(FIELD_RESULT_COUNT, resultCount.get());
-                    writer.writeStringField(FIELD_PAGED_RESULTS_COOKIE, result.getPagedResultsCookie());
-                    writer.writeStringField(FIELD_TOTAL_PAGED_RESULTS_POLICY,
+                    jsonGenerator.writeEndArray();
+                    jsonGenerator.writeNumberField(FIELD_RESULT_COUNT, resultCount.get());
+                    jsonGenerator.writeStringField(FIELD_PAGED_RESULTS_COOKIE, result.getPagedResultsCookie());
+                    jsonGenerator.writeStringField(FIELD_TOTAL_PAGED_RESULTS_POLICY,
                             result.getTotalPagedResultsPolicy().toString());
-                    writer.writeNumberField(FIELD_TOTAL_PAGED_RESULTS, result.getTotalPagedResults());
+                    jsonGenerator.writeNumberField(FIELD_TOTAL_PAGED_RESULTS, result.getTotalPagedResults());
                     // Remaining is only present for backwards compatibility with CREST2 via Accept-API-Version
-                    writer.writeNumberField(FIELD_REMAINING_PAGED_RESULTS, result.getRemainingPagedResults());
-                    writer.writeEndObject();
+                    jsonGenerator.writeNumberField(FIELD_REMAINING_PAGED_RESULTS, result.getRemainingPagedResults());
+                    jsonGenerator.writeEndObject();
                     onSuccess();
                 } catch (final Exception e) {
                     onError(e);
@@ -275,10 +296,10 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                 } else {
                     // Partial results - it's too late to set the status.
                     try {
-                        writer.writeEndArray();
-                        writer.writeNumberField(FIELD_RESULT_COUNT, resultCount.get());
-                        writer.writeObjectField(FIELD_ERROR, error.toJsonValue().getObject());
-                        writer.writeEndObject();
+                        jsonGenerator.writeEndArray();
+                        jsonGenerator.writeNumberField(FIELD_RESULT_COUNT, resultCount.get());
+                        jsonGenerator.writeObjectField(FIELD_ERROR, error.toJsonValue().getObject());
+                        jsonGenerator.writeEndObject();
                         onSuccess();
                     } catch (final Exception e) {
                         onError(e);
@@ -303,8 +324,8 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         if (isFirstResult.compareAndSet(true, false)) {
             writeApiVersionHeaders(response);
             writeAdvice();
-            writer.writeStartObject();
-            writer.writeArrayFieldStart(FIELD_RESULT);
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeArrayFieldStart(FIELD_RESULT);
         }
     }
 
@@ -339,31 +360,32 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
     }
 
     private void onSuccess() {
-        closeSilently(connection, writer);
+        closeSilently(connection, jsonGenerator);
     }
 
     private void onError(final Exception e) {
-        // Don't close the JSON writer because the request will become
+        // Don't close the JSON generator because the request will become
         // "completed" which then prevents us from sending an error.
         closeSilently(connection);
     }
 
-    private String getResourceURL(final CreateRequest request, final ResourceResponse resource) {
+    private String getResourceURL(final ResourceResponse resource) {
         // Strip out everything except the scheme and host.
         StringBuilder builder = new StringBuilder()
                 .append(httpRequest.getUri().getScheme())
                 .append("://")
                 .append(httpRequest.getUri().getRawAuthority());
 
-        // Add back the context path.
-        builder.append(context.asContext(UriRouterContext.class).getMatchedUri());
-
-        // Add new resource name and resource ID.
-        final ResourcePath resourcePath = request.getResourcePathObject();
-        if (!resourcePath.isEmpty()) {
-            builder.append('/');
-            builder.append(resourcePath);
+        // Add back the full context path.
+        String baseUri = context.asContext(UriRouterContext.class).getBaseUri();
+        if (!baseUri.isEmpty()) {
+            if (!baseUri.startsWith("/")) {
+                builder.append('/');
+            }
+            builder.append(baseUri);
         }
+
+        // Add resource ID.
         builder.append('/');
         builder.append(resource.getId());
 
@@ -385,7 +407,7 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                             // No change so 304.
                             Map<String, Object> responseBody = newResourceException(304)
                                     .setReason("Not Modified").toJsonValue().asMap();
-                            return newResultPromise(new Response().setStatus(Status.valueOf(304))
+                            return newResultPromise(new Response(Status.valueOf(304))
                                     .setEntity(responseBody));
                         }
                     }
@@ -434,7 +456,8 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         httpResponse.setEntity(data);
     }
 
-    private void writeResource(final ResourceResponse resource) throws IOException, ParseException {
+    private void writeResource(final ResourceResponse resource)
+            throws IOException, ParseException, MalformedHeaderException {
         if (resource.getRevision() != null) {
             final StringBuilder builder = new StringBuilder();
             builder.append('"');
@@ -454,49 +477,52 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
         }
     }
 
-    /*
+    /**
      * Writes a JSON resource taking care to ensure that the _id and _rev fields are always serialized regardless of
      * the field filtering. It is essential that these fields are included so that clients can reconstruct
      * ResourceResponse object's "id" and "revision" properties. In addition, it is reasonable to assume that query
      * results should always include at least the _id field otherwise it will be difficult to perform any useful
      * client side result processing.
      */
-    private void writeResourceJsonContent(final ResourceResponse resource) throws IOException {
+    private void writeResourceJsonContent(final ResourceResponse resource)
+            throws IOException, MalformedHeaderException {
+        ObjectWriter objectWriter = Json.makeLocalizingObjectWriter(JSON_MAPPER, httpRequest);
         if (getRequestedProtocolVersion(httpRequest).getMajor() >= PROTOCOL_VERSION_2.getMajor()) {
-            writer.writeStartObject();
+            jsonGenerator.writeStartObject();
             final JsonValue content = resource.getContent();
 
             if (resource.getId() != null) {
-                writer.writeObjectField(FIELD_CONTENT_ID, resource.getId());
+                jsonGenerator.writeObjectField(FIELD_CONTENT_ID, resource.getId());
             } else {
                 // Defensively extract an object instead of a string in case application code has stored a UUID
                 // object, or some other non-JSON primitive. Also assume that a null ID means no ID.
                 final Object id = content.get(FIELD_CONTENT_ID).getObject();
                 if (id != null) {
-                    writer.writeObjectField(FIELD_CONTENT_ID, id.toString());
+                    jsonGenerator.writeObjectField(FIELD_CONTENT_ID, id.toString());
                 }
             }
 
             if (resource.getRevision() != null) {
-                writer.writeObjectField(FIELD_CONTENT_REVISION, resource.getRevision());
+                jsonGenerator.writeObjectField(FIELD_CONTENT_REVISION, resource.getRevision());
             } else {
                 // Defensively extract an object instead of a string in case application code has stored a Number
                 // object, or some other non-JSON primitive. Also assume that a null revision means no revision.
                 final Object rev = content.get(FIELD_CONTENT_REVISION).getObject();
                 if (rev != null) {
-                    writer.writeObjectField(FIELD_CONTENT_REVISION, rev.toString());
+                    jsonGenerator.writeObjectField(FIELD_CONTENT_REVISION, rev.toString());
                 }
             }
 
             for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
                 final String key = property.getKey();
                 if (!FIELD_CONTENT_ID.equals(key) && !FIELD_CONTENT_REVISION.equals(key)) {
-                    writer.writeObjectField(key, property.getValue());
+                    jsonGenerator.writeFieldName(key);
+                    objectWriter.writeValue(jsonGenerator, property.getValue());
                 }
             }
-            writer.writeEndObject();
+            jsonGenerator.writeEndObject();
         } else {
-            writer.writeObject(resource.getContent().getObject());
+            objectWriter.writeValue(jsonGenerator, resource.getContent().getObject());
         }
     }
 

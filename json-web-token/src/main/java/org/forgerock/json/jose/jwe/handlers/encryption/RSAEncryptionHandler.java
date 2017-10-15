@@ -11,24 +11,29 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwe.handlers.encryption;
 
+import static java.security.spec.MGF1ParameterSpec.SHA256;
+import static javax.crypto.spec.PSource.PSpecified.DEFAULT;
+import static org.forgerock.json.jose.jwe.JweAlgorithm.RSA_OAEP_256;
+import static org.forgerock.json.jose.jwe.JweAlgorithmType.RSA;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.AlgorithmParameterSpec;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.OAEPParameterSpec;
 
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.exceptions.JweEncryptionException;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweAlgorithm;
-import org.forgerock.json.jose.jwe.JweAlgorithmType;
 import org.forgerock.json.jose.jwe.JweEncryption;
 import org.forgerock.util.Reject;
 
@@ -38,21 +43,27 @@ import org.forgerock.util.Reject;
  * @see <a href="https://tools.ietf.org/html/rfc7518#section-4.2">RFC 7518 Section 4.2 and 4.3</a>
  */
 public final class RSAEncryptionHandler implements EncryptionHandler {
+    private static final OAEPParameterSpec RSA_OAEP_256_PARAMS = new OAEPParameterSpec("SHA-256", "MGF1", SHA256,
+            DEFAULT);
     private final EncryptionMethod encryptionMethod;
     private final ContentEncryptionHandler contentEncryptionHandler;
     private final JweAlgorithm jweAlgorithm;
+    private final AlgorithmParameterSpec parameterSpec;
 
     /**
-     * Constructs a new AbstractRSAES_PKCS1_V1_5EncryptionHandler instance.
+     * Constructs a new RSAEncryptionHandler instance.
      *
      * @param encryptionMethod the content encryption method. Must not be null.
-     * @param jweAlgorithm the JWE algorithm. Must not be null.
+     * @param jweAlgorithm the JWE algorithm. Must not be null. Must be an RSA encryption algorithm.
      */
     public RSAEncryptionHandler(EncryptionMethod encryptionMethod, final JweAlgorithm jweAlgorithm) {
         this.encryptionMethod = checkNotNull(encryptionMethod, "EncryptionMethod must not be null");
         this.jweAlgorithm = checkNotNull(jweAlgorithm, "JweAlgorithm must not be null");
-        Reject.ifFalse(jweAlgorithm.getAlgorithmType() == JweAlgorithmType.RSA, "");
+        Reject.ifFalse(jweAlgorithm.getAlgorithmType() == RSA, "JweAlgorithm type must be RSA");
         this.contentEncryptionHandler = ContentEncryptionHandler.getInstance(encryptionMethod);
+        // RSA-OAEP-256 requires non-default algorithm parameters to conform to the JWE spec. The JRE defaults are
+        // correct for all other modes, so leave as null.
+        this.parameterSpec = jweAlgorithm == RSA_OAEP_256 ? RSA_OAEP_256_PARAMS : null;
     }
 
     /**
@@ -123,7 +134,7 @@ public final class RSAEncryptionHandler implements EncryptionHandler {
     public Key decryptContentEncryptionKey(Key key, byte[] encryptedContentEncryptionKey) {
         try {
             final Cipher cipher = Cipher.getInstance(jweAlgorithm.getAlgorithm());
-            cipher.init(Cipher.UNWRAP_MODE, key);
+            cipher.init(Cipher.UNWRAP_MODE, key, parameterSpec);
             return cipher.unwrap(encryptedContentEncryptionKey, encryptionMethod.getEncryptionAlgorithm(),
                     Cipher.SECRET_KEY);
         } catch (GeneralSecurityException e) {
@@ -144,7 +155,7 @@ public final class RSAEncryptionHandler implements EncryptionHandler {
     private byte[] encryptKey(final RSAPublicKey keyEncryptionKey, final Key contentKey) {
         try {
             final Cipher cipher = Cipher.getInstance(jweAlgorithm.getAlgorithm());
-            cipher.init(Cipher.WRAP_MODE, keyEncryptionKey);
+            cipher.init(Cipher.WRAP_MODE, keyEncryptionKey, parameterSpec);
             return cipher.wrap(contentKey);
         } catch (GeneralSecurityException e) {
             throw new JweEncryptionException(e);

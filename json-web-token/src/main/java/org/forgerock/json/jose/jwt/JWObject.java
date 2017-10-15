@@ -11,18 +11,19 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.json.jose.jwt;
-
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.jose.exceptions.JwtRuntimeException;
+import org.forgerock.json.jose.utils.Utils;
 
 /**
  * A base implementation class for a JSON Web object.
@@ -146,13 +147,12 @@ public abstract class JWObject {
     }
 
     /**
-     * Returns a string representation of the JWObject. The result resembles-but is not guaranteed to conform to-JSON
-     * syntax.
+     * Returns a string representation of the JWObject. The result is guaranteed to be valid JSON object syntax.
      *
      * @return A JSON String representation.
      */
     @Override
     public String toString() {
-        return jsonValue.toString();
+        return Utils.writeJsonObject(jsonValue.asMap());
     }
 }

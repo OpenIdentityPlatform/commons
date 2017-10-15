@@ -13,11 +13,11 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-
 package org.forgerock.api.transform;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static org.forgerock.api.markup.asciidoc.AsciiDoc.normalizeName;
 import static org.forgerock.api.util.PathUtil.buildPath;
@@ -29,6 +29,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.fieldIfNotNull;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.listOf;
 import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.ArrayList;
@@ -69,12 +70,17 @@ import org.forgerock.api.models.VersionedPath;
 import org.forgerock.api.util.PathUtil;
 import org.forgerock.api.util.ReferenceResolver;
 import org.forgerock.api.util.ValidationUtil;
+import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.routing.Version;
 import org.forgerock.http.swagger.SwaggerExtended;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.util.Function;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.util.i18n.PreferredLocales;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.models.Info;
 import io.swagger.models.Model;
@@ -85,6 +91,7 @@ import io.swagger.models.RefModel;
 import io.swagger.models.Response;
 import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
+import io.swagger.models.parameters.HeaderParameter;
 import io.swagger.models.parameters.RefParameter;
 import io.swagger.models.properties.AbstractNumericProperty;
 import io.swagger.models.properties.Property;
@@ -97,40 +104,37 @@ import io.swagger.models.properties.RefProperty;
  */
 public class OpenApiTransformer {
 
+    private static final Logger logger = LoggerFactory.getLogger(OpenApiTransformer.class);
+
     private static final String EMPTY_STRING = "";
 
     private static final String PARAMETER_FIELDS = "_fields";
-
     private static final String PARAMETER_PRETTY_PRINT = "_prettyPrint";
-
     private static final String PARAMETER_MIME_TYPE = "_mimeType";
-
     private static final String PARAMETER_IF_MATCH = "If-Match";
-
     private static final String PARAMETER_IF_NONE_MATCH = "If-None-Match";
-
     private static final String PARAMETER_IF_NONE_MATCH_ANY_ONLY = "If-None-Match: *";
-
     private static final String PARAMETER_IF_NONE_MATCH_REV_ONLY = "If-None-Match: <rev>";
+    private static final String PARAMETER_LOCATION = "Location";
 
     static final String DEFINITIONS_REF = "#/definitions/";
     private static final String I18N_PREFIX = LocalizableString.TRANSLATION_KEY_PREFIX + "ApiDescription#";
     private static final String FIELDS_PARAMETER_DESCRIPTION = I18N_PREFIX + "common.parameters.fields";
     private static final String PRETTYPRINT_PARAMETER_DESCRIPTION = I18N_PREFIX + "common.parameters.prettyprint";
     private static final String MIMETYPE_PARAMETER_DESCRIPTION = I18N_PREFIX + "common.parameters.mimetype";
+    private static final String LOCATION_PARAMETER_DESCRIPTION = I18N_PREFIX + "common.parameters.location";
 
     @VisibleForTesting
     final Swagger swagger;
-
     private final ReferenceResolver referenceResolver;
-
     private final ApiDescription apiDescription;
-
     private final Map<String, Model> definitionMap = new HashMap<>();
 
-    /**
-     * Default constructor that is only used by unit tests.
-     */
+    /** {@code Location}-header property. */
+    private final LocalizableStringProperty locationProperty = new LocalizableStringProperty()
+            .description(new LocalizableString(LOCATION_PARAMETER_DESCRIPTION, getClass().getClassLoader()));
+
+    /** Default constructor that is only used by unit tests. */
     @VisibleForTesting
     OpenApiTransformer() {
         swagger = null;
@@ -221,11 +225,9 @@ public class OpenApiTransformer {
         return swagger;
     }
 
-    /**
-     * Build globally-defined parameters, which are referred to by-reference.
-     */
+    /** Build globally-defined parameters, which are referred to by-reference. */
     private void buildParameters() {
-        ClassLoader loader = this.getClass().getClassLoader();
+        ClassLoader loader = getClass().getClassLoader();
 
         // _fields
         final LocalizableQueryParameter fieldsParameter = new LocalizableQueryParameter();
@@ -239,14 +241,14 @@ public class OpenApiTransformer {
         final LocalizableQueryParameter prettyPrintParameter = new LocalizableQueryParameter();
         prettyPrintParameter.setName(PARAMETER_PRETTY_PRINT);
         prettyPrintParameter.setType("boolean");
-        fieldsParameter.description(new LocalizableString(PRETTYPRINT_PARAMETER_DESCRIPTION, loader));
+        prettyPrintParameter.description(new LocalizableString(PRETTYPRINT_PARAMETER_DESCRIPTION, loader));
         swagger.addParameter(prettyPrintParameter.getName(), prettyPrintParameter);
 
         // _mimeType
         final LocalizableQueryParameter mimeTypeParameter = new LocalizableQueryParameter();
         mimeTypeParameter.setName(PARAMETER_MIME_TYPE);
         mimeTypeParameter.setType("string");
-        fieldsParameter.description(new LocalizableString(MIMETYPE_PARAMETER_DESCRIPTION, loader));
+        mimeTypeParameter.description(new LocalizableString(MIMETYPE_PARAMETER_DESCRIPTION, loader));
         swagger.addParameter(mimeTypeParameter.getName(), mimeTypeParameter);
 
         // PUT-operation IF-NONE-MATCH always has * value
@@ -271,9 +273,7 @@ public class OpenApiTransformer {
         swagger.addParameter(ifMatchParameter.getName(), ifMatchParameter);
     }
 
-    /**
-     * Traverse CREST API Descriptor paths, to build the Swagger model.
-     */
+    /** Traverse CREST API Descriptor paths, to build the Swagger model. */
     private void buildPaths() {
         final Paths paths = apiDescription.getPaths();
         if (paths != null) {
@@ -287,7 +287,6 @@ public class OpenApiTransformer {
                 for (final Version version : versions) {
                     final String versionName;
                     if (VersionedPath.UNVERSIONED.equals(version)) {
-                        // resource is unversioned
                         versionName = EMPTY_STRING;
                     } else {
                         // versionName is start of URL-fragment for path (e.g., /myPath#1.0)
@@ -765,12 +764,12 @@ public class OpenApiTransformer {
                 totalPagedResultsPolicyParameter.setName("_totalPagedResultsPolicy");
                 totalPagedResultsPolicyParameter.setType("string");
                 final List<String> totalPagedResultsPolicyValues = new ArrayList<>();
-                if (query.getCountPolicies() != null) {
+                if (query.getCountPolicies() == null || query.getCountPolicies().length == 0) {
+                    totalPagedResultsPolicyValues.add(CountPolicy.NONE.name());
+                } else {
                     for (final CountPolicy countPolicy : query.getCountPolicies()) {
                         totalPagedResultsPolicyValues.add(countPolicy.name());
                     }
-                } else {
-                    totalPagedResultsPolicyValues.add("NONE");
                 }
                 totalPagedResultsPolicyParameter._enum(totalPagedResultsPolicyValues);
                 operation.addParameter(totalPagedResultsPolicyParameter);
@@ -811,7 +810,7 @@ public class OpenApiTransformer {
         applyOperationParameters(mergeParameters(new ArrayList<>(parameters), operationModel.getParameters()),
                 operation);
         applyOperationRequestPayload(requestPayload, operation);
-        applyOperationResponsePayloads(responsePayload, operationModel.getApiErrors(), operation);
+        applyOperationResponsePayloads(responsePayload, operationModel.getApiErrors(), operationModel, operation);
         return operation;
     }
 
@@ -834,6 +833,11 @@ public class OpenApiTransformer {
         if (!isEmpty(resourceVersion)) {
             showPathFragment = true;
             operation.setVendorExtension("x-resourceVersion", resourceVersion);
+            operation.addParameter(new HeaderParameter()
+                    .name(AcceptApiVersionHeader.NAME)
+                    .type("string")
+                    .required(true)
+                    ._enum(singletonList(AcceptApiVersionHeader.RESOURCE + "=" + resourceVersion)));
         }
         if (!isEmpty(tag.toString())) {
             operation.addTag(tag);
@@ -882,18 +886,6 @@ public class OpenApiTransformer {
 
         if (operationPath.set(method, operation) == null) {
             throw new TransformerException("Unsupported method: " + method);
-        }
-    }
-
-    /**
-     * Adds a description to a Swagger operation.
-     *
-     * @param description Operation description or {@code null}
-     * @param operation Swagger operation
-     */
-    private void applyOperationDescription(final String description, final Operation operation) {
-        if (!isEmpty(description)) {
-            operation.setDescription(description);
         }
     }
 
@@ -950,9 +942,6 @@ public class OpenApiTransformer {
                                 asList(parameter.getEnumTitles()));
                     }
                 }
-
-                // TODO schema related fields in SerializableParameter
-
                 operation.addParameter(operationParameter);
             }
         }
@@ -993,10 +982,11 @@ public class OpenApiTransformer {
      *
      * @param schema Success-response JSON schema
      * @param apiErrorResponses ApiError responses
+     * @param operationModel CREST operation
      * @param operation Swagger operation
      */
     private void applyOperationResponsePayloads(final Schema schema, final ApiError[] apiErrorResponses,
-            final Operation operation) {
+            final org.forgerock.api.models.Operation operationModel, final Operation operation) {
         final Map<String, Response> responses = new HashMap<>();
         if (schema != null) {
             final Response response = new Response();
@@ -1004,7 +994,7 @@ public class OpenApiTransformer {
             if (schema.getSchema() != null) {
                 // https://github.com/swagger-api/swagger-core/issues/1306
                 final Model model = buildModel(schema.getSchema());
-                final String name = UUID.randomUUID().toString() + "-response";
+                final String name = UUID.randomUUID() + "-response";
                 definitionMap.put(name, model);
                 response.schema(new RefProperty(name));
             } else {
@@ -1014,7 +1004,12 @@ public class OpenApiTransformer {
                 }
                 response.schema(new RefProperty(ref));
             }
-            responses.put("200", response);
+            if (operationModel instanceof Create) {
+                response.addHeader(PARAMETER_LOCATION, locationProperty);
+                responses.put("201", response);
+            } else {
+                responses.put("200", response);
+            }
         }
 
         if (!isEmpty(apiErrorResponses)) {
@@ -1101,7 +1096,7 @@ public class OpenApiTransformer {
 
                 // https://github.com/swagger-api/swagger-core/issues/1306
                 final Model model = buildModel(errorJsonSchema);
-                final String name = UUID.randomUUID().toString() + "-error";
+                final String name = UUID.randomUUID() + "-error";
                 definitionMap.put(name, model);
                 response.schema(new RefProperty(name));
 
@@ -1161,15 +1156,13 @@ public class OpenApiTransformer {
      */
     @VisibleForTesting
     Info buildInfo(final LocalizableString title) {
-        // TODO set other Info fields
-        Info info = new LocalizableInfo().title(title).description(apiDescription.getDescription());
-        info.setVersion(apiDescription.getVersion());
-        return info;
+        return new LocalizableInfo()
+            .title(title != null ? title : new LocalizableString(apiDescription.getId()))
+            .description(apiDescription.getDescription())
+            .version(apiDescription.getVersion());
     }
 
-    /**
-     * Converts global CREST schema definitions into glabal Swagger schema definitions.
-     */
+    /** Converts global CREST schema definitions into glabal Swagger schema definitions. */
     @VisibleForTesting
     void buildDefinitions() {
         final Definitions definitions = apiDescription.getDefinitions();
@@ -1197,19 +1190,18 @@ public class OpenApiTransformer {
      */
     @VisibleForTesting
     Model buildModel(final JsonValue schema) {
-        final LocalizableModelImpl model;
         final String type = schema.get("type").asString();
+        if (type == null) {
+            if (schema.isDefined("allOf")) {
+                return buildAllOfModel(schema);
+            } else if (schema.isDefined("$ref")) {
+                return buildReferenceModel(schema);
+            }
+            throw new TransformerException(unsupportedJsonSchema(schema));
+        }
         switch (type) {
         case "object":
-            model = new LocalizableModelImpl();
-            model.type(type);
-            model.setProperties(buildProperties(schema));
-            final List<String> required = getArrayOfJsonString("required", schema);
-            if (!required.isEmpty()) {
-                model.setRequired(required);
-            }
-            model.setAdditionalProperties(buildProperty(schema.get("additionalProperties")));
-            break;
+            return buildObjectModel(schema);
         case "array":
             return buildArrayModel(schema);
         case "null":
@@ -1218,45 +1210,99 @@ public class OpenApiTransformer {
         case "integer":
         case "number":
         case "string":
-            model = new LocalizableModelImpl();
-            model.type(type);
-            if (schema.get("default").isNotNull()) {
-                model.setDefaultValue(schema.get("default").asString());
-            }
-
-            final List<String> enumValues = getArrayOfJsonString("enum", schema);
-            if (!enumValues.isEmpty()) {
-                model.setEnum(enumValues);
-
-                // enum_titles only provided with enum values
-                final JsonValue options = schema.get("options");
-                if (options.isNotNull()) {
-                    final List<String> enumTitles = getArrayOfJsonString("enum_titles", options);
-                    if (!enumTitles.isEmpty()) {
-                        model.setVendorExtension("x-enum_titles", enumTitles);
-                    }
-                }
-            }
-
-            if (schema.get("format").isNotNull()) {
-                // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat
-                model.setFormat(schema.get("format").asString());
-                if ("full-date".equals(model.getFormat()) && "string".equals(type)) {
-                    // Swagger normalizes full-date to date format
-                    model.setFormat("date");
-                }
-            }
-            break;
+            return buildScalarModel(schema, type);
         default:
-            throw new TransformerException("Unsupported JSON schema type: " + type);
+            throw new TransformerException("Unsupported JSON Schema type '" + type + "' in schema " + schema);
+        }
+    }
+
+    private Model buildAllOfModel(final JsonValue schema) {
+        final List<Model> allOf = schema.get("allOf").as(listOf(model()));
+        if (allOf == null || allOf.isEmpty()) {
+            throw new TransformerException(unsupportedJsonSchema(schema));
+        }
+        final LocalizableComposedModel model = new LocalizableComposedModel();
+        setTitleAndDescriptionFromSchema(model, schema);
+        model.setAllOf(allOf);
+
+        // TODO external-docs URLs
+
+        return model;
+    }
+
+    private String unsupportedJsonSchema(final JsonValue schema) {
+        return "Unsupported JSON schema: expected 'type', '$ref' or non-empty 'allOf' property in: '" + schema + "'";
+    }
+
+    private Model buildReferenceModel(JsonValue schema) {
+        final LocalizableRefModel model = new LocalizableRefModel();
+        setTitleAndDescriptionFromSchema(model, schema);
+        model.setReference(schema.get("$ref").asString());
+        model.setProperties(buildProperties(schema));
+
+        // TODO external-docs URLs
+
+        return model;
+    }
+
+    private Function<JsonValue, Model, JsonValueException> model() {
+        return new Function<JsonValue, Model, JsonValueException>() {
+            @Override
+            public Model apply(JsonValue value) throws JsonValueException {
+                return buildModel(value);
+            }
+        };
+    }
+
+    private Model buildObjectModel(final JsonValue schema) {
+        final LocalizableModelImpl model = new LocalizableModelImpl();
+        model.type("object");
+        model.setDiscriminator(schema.get("discriminator").asString());
+        model.setProperties(buildProperties(schema));
+        final List<String> required = getArrayOfJsonString("required", schema);
+        if (!required.isEmpty()) {
+            model.setRequired(required);
+        }
+        model.setAdditionalProperties(buildProperty(schema.get("additionalProperties")));
+        setTitleAndDescriptionFromSchema(model, schema);
+
+        // TODO external-docs URLs
+
+        return model;
+    }
+
+    private LocalizableModelImpl buildScalarModel(final JsonValue schema, final String type) {
+        final LocalizableModelImpl model = new LocalizableModelImpl();
+        model.type(type);
+        setTitleAndDescriptionFromSchema(model, schema);
+        if (schema.get("default").isNotNull()) {
+            model.setDefaultValue(schema.get("default").asString());
         }
 
-        setTitleFromJsonValue(model, schema.get("title"));
-        setDescriptionFromJsonValue(model, schema.get("description"));
+        final List<String> enumValues = getArrayOfJsonString("enum", schema);
+        if (!enumValues.isEmpty()) {
+            model.setEnum(enumValues);
 
-        // TODO reference
+            // enum_titles only provided with enum values
+            final JsonValue options = schema.get("options");
+            if (options.isNotNull()) {
+                final List<String> enumTitles = getArrayOfJsonString("enum_titles", options);
+                if (!enumTitles.isEmpty()) {
+                    model.setVendorExtension("x-enum_titles", enumTitles);
+                }
+            }
+        }
+
+        if (schema.get("format").isNotNull()) {
+            // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat
+            model.setFormat(schema.get("format").asString());
+            if ("full-date".equals(model.getFormat()) && "string".equals(type)) {
+                // Swagger normalizes full-date to date format
+                model.setFormat("date");
+            }
+        }
+
         // TODO external-docs URLs
-        // TODO discriminator (see openapi spec and https://gist.github.com/leedm777/5730877)
 
         return model;
     }
@@ -1269,12 +1315,10 @@ public class OpenApiTransformer {
      */
     private Model buildArrayModel(final JsonValue schema) {
         final LocalizableArrayModel model = new LocalizableArrayModel();
-        setTitleFromJsonValue(model, schema.get("title"));
-        setDescriptionFromJsonValue(model, schema.get("description"));
+        setTitleAndDescriptionFromSchema(model, schema);
         model.setProperties(buildProperties(schema));
         model.setItems(buildProperty(schema.get("items")));
 
-        // TODO reference
         // TODO external-docs URLs
 
         return model;
@@ -1297,7 +1341,15 @@ public class OpenApiTransformer {
 
                 boolean sortByPropertyOrder = false;
                 for (final Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
-                    final Property property = buildProperty(json(entry.getValue()));
+                    final Property property;
+                    try {
+                        property = buildProperty(json(entry.getValue()));
+                    } catch (RuntimeException re) {
+                        //json schema can be valid but fail on building the properties
+                        logger.info("Json schema error: " + entry.getValue() + "\n"
+                                + re.getMessage(), re.fillInStackTrace());
+                        throw re;
+                    }
                     if (!sortByPropertyOrder && property.getVendorExtensions().containsKey("x-propertyOrder")) {
                         sortByPropertyOrder = true;
                     }
@@ -1362,142 +1414,21 @@ public class OpenApiTransformer {
 
         // https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat
         final String format = schema.get("format").asString();
-
-        final LocalizableProperty abstractProperty;
-        final String type = schema.get("type").asString();
-        switch (type) {
-        case "object": {
-            // TODO there is a MapProperty type, but I am not sure how it is useful
-            final LocalizableObjectProperty property = new LocalizableObjectProperty();
-            property.setProperties(buildProperties(schema));
-            property.setRequiredProperties(getArrayOfJsonString("required", schema));
-            abstractProperty = property;
-            break;
-        }
-        case "array": {
-            final LocalizableArrayProperty property = new LocalizableArrayProperty();
-            property.setItems(buildProperty(schema.get("items")));
-            property.setMinItems(schema.get("minItems").asInteger());
-            property.setMaxItems(schema.get("maxItems").asInteger());
-            property.setUniqueItems(schema.get("uniqueItems").asBoolean());
-            abstractProperty = property;
-            break;
-        }
-        case "boolean":
-            abstractProperty = new LocalizableBooleanProperty();
-            break;
-        case "integer": {
-            final AbstractNumericProperty property;
-            if ("int64".equals(format)) {
-                property = new LocalizableLongProperty();
-            } else {
-                property = new LocalizableIntegerProperty();
-            }
-            property.setMinimum(schema.get("minimum").asDouble());
-            property.setMaximum(schema.get("maximum").asDouble());
-            property.setExclusiveMinimum(schema.get("exclusiveMinimum").asBoolean());
-            property.setExclusiveMaximum(schema.get("exclusiveMaximum").asBoolean());
-            abstractProperty = (LocalizableProperty) property;
-            break;
-        }
-        case "number": {
-            final AbstractNumericProperty property;
-            if (isEmpty(format)) {
-                // ambiguous
-                property = new LocalizableDoubleProperty();
-            } else {
-                switch (format) {
-                case "int32":
-                    property = new LocalizableIntegerProperty();
-                    break;
-                case "int64":
-                    property = new LocalizableLongProperty();
-                    break;
-                case "float":
-                    property = new LocalizableFloatProperty();
-                    break;
-                case "double":
-                default:
-                    property = new LocalizableDoubleProperty();
-                    break;
-                }
-            }
-            property.setMinimum(schema.get("minimum").asDouble());
-            property.setMaximum(schema.get("maximum").asDouble());
-            property.setExclusiveMinimum(schema.get("exclusiveMinimum").asBoolean());
-            property.setExclusiveMaximum(schema.get("exclusiveMaximum").asBoolean());
-            abstractProperty = (LocalizableProperty) property;
-            break;
-        }
-        case "null":
+        final LocalizableProperty abstractProperty = toLocalizableProperty(schema, format);
+        if (abstractProperty == null) {
             return null;
-        case "string": {
-            if (isEmpty(format)) {
-                final LocalizableStringProperty property = new LocalizableStringProperty();
-                property.setMinLength(schema.get("minLength").asInteger());
-                property.setMaxLength(schema.get("maxLength").asInteger());
-                property.setPattern(schema.get("pattern").asString());
-                abstractProperty = property;
-            } else {
-                switch (format) {
-                case "byte":
-                    abstractProperty = new LocalizableByteArrayProperty();
-                    break;
-                case "binary": {
-                    final LocalizableBinaryProperty property = new LocalizableBinaryProperty();
-                    property.setMinLength(schema.get("minLength").asInteger());
-                    property.setMaxLength(schema.get("maxLength").asInteger());
-                    property.setPattern(schema.get("pattern").asString());
-                    abstractProperty = property;
-                    break;
-                }
-                case "date":
-                case "full-date":
-                    abstractProperty = new LocalizableDateProperty();
-                    break;
-                case "date-time":
-                    abstractProperty = new LocalizableDateTimeProperty();
-                    break;
-                case "password": {
-                    final LocalizablePasswordProperty property = new LocalizablePasswordProperty();
-                    property.setMinLength(schema.get("minLength").asInteger());
-                    property.setMaxLength(schema.get("maxLength").asInteger());
-                    property.setPattern(schema.get("pattern").asString());
-                    abstractProperty = property;
-                    break;
-                }
-                case "uuid": {
-                    final LocalizableUUIDProperty property = new LocalizableUUIDProperty();
-                    property.setMinLength(schema.get("minLength").asInteger());
-                    property.setMaxLength(schema.get("maxLength").asInteger());
-                    property.setPattern(schema.get("pattern").asString());
-                    abstractProperty = property;
-                    break;
-                }
-                default: {
-                    final LocalizableStringProperty property = new LocalizableStringProperty();
-                    property.setMinLength(schema.get("minLength").asInteger());
-                    property.setMaxLength(schema.get("maxLength").asInteger());
-                    property.setPattern(schema.get("pattern").asString());
-                    abstractProperty = property;
-                    break;
-                }
-                }
-            }
-            break;
-        }
-        default:
-            throw new TransformerException("Unsupported JSON schema type: " + type);
         }
 
         if (!isEmpty(format)) {
             abstractProperty.setFormat(format);
         }
-        if (schema.get("default").isNotNull()) {
-            abstractProperty.setDefault(schema.get("default").asString());
+        if (!(abstractProperty instanceof LocalizableObjectProperty
+                || abstractProperty instanceof LocalizableArrayProperty)
+                && schema.get("default").isNotNull()) {
+            // object and array are handled in toLocalizableProperty
+            abstractProperty.setDefault(schema.get("default").getObject().toString());
         }
-        setTitleFromJsonValue(abstractProperty, schema.get("title"));
-        setDescriptionFromJsonValue(abstractProperty, schema.get("description"));
+        setTitleAndDescriptionFromSchema(abstractProperty, schema);
 
         final String readPolicy = schema.get("readPolicy").asString();
         if (!isEmpty(readPolicy)) {
@@ -1529,6 +1460,126 @@ public class OpenApiTransformer {
         }
 
         return abstractProperty;
+    }
+
+    private LocalizableProperty toLocalizableProperty(final JsonValue schema, final String format) {
+        final String type = schema.get("type").asString();
+        switch (type) {
+        case "object": {
+            final LocalizableObjectProperty property = new LocalizableObjectProperty();
+            property.setProperties(buildProperties(schema));
+            property.setRequiredProperties(getArrayOfJsonString("required", schema));
+            if (schema.get("default").isNotNull()) {
+                property.setDefault(schema.get("default").getObject());
+            }
+            return property;
+        }
+        case "array": {
+            final LocalizableArrayProperty property = new LocalizableArrayProperty();
+            property.setItems(buildProperty(schema.get("items")));
+            property.setMinItems(schema.get("minItems").asInteger());
+            property.setMaxItems(schema.get("maxItems").asInteger());
+            property.setUniqueItems(schema.get("uniqueItems").asBoolean());
+            if (schema.get("default").isNotNull()) {
+                property.setDefault(schema.get("default").asList());
+            }
+            return property;
+        }
+        case "boolean":
+            return new LocalizableBooleanProperty();
+        case "integer": {
+            final AbstractNumericProperty property;
+            if ("int64".equals(format)) {
+                property = new LocalizableLongProperty();
+            } else {
+                property = new LocalizableIntegerProperty();
+            }
+            property.setMinimum(schema.get("minimum").asDouble());
+            property.setMaximum(schema.get("maximum").asDouble());
+            property.setExclusiveMinimum(schema.get("exclusiveMinimum").asBoolean());
+            property.setExclusiveMaximum(schema.get("exclusiveMaximum").asBoolean());
+            return (LocalizableProperty) property;
+        }
+        case "number": {
+            final AbstractNumericProperty property;
+            if (isEmpty(format)) {
+                // ambiguous
+                property = new LocalizableDoubleProperty();
+            } else {
+                switch (format) {
+                case "int32":
+                    property = new LocalizableIntegerProperty();
+                    break;
+                case "int64":
+                    property = new LocalizableLongProperty();
+                    break;
+                case "float":
+                    property = new LocalizableFloatProperty();
+                    break;
+                case "double":
+                default:
+                    property = new LocalizableDoubleProperty();
+                    break;
+                }
+            }
+            property.setMinimum(schema.get("minimum").asDouble());
+            property.setMaximum(schema.get("maximum").asDouble());
+            property.setExclusiveMinimum(schema.get("exclusiveMinimum").asBoolean());
+            property.setExclusiveMaximum(schema.get("exclusiveMaximum").asBoolean());
+            return (LocalizableProperty) property;
+        }
+        case "null":
+            return null;
+        case "string": {
+            if (isEmpty(format)) {
+                final LocalizableStringProperty property = new LocalizableStringProperty();
+                property.setMinLength(schema.get("minLength").asInteger());
+                property.setMaxLength(schema.get("maxLength").asInteger());
+                property.setPattern(schema.get("pattern").asString());
+                return property;
+            }
+
+            switch (format) {
+            case "byte":
+                return new LocalizableByteArrayProperty();
+            case "binary": {
+                final LocalizableBinaryProperty property = new LocalizableBinaryProperty();
+                property.setMinLength(schema.get("minLength").asInteger());
+                property.setMaxLength(schema.get("maxLength").asInteger());
+                property.setPattern(schema.get("pattern").asString());
+                return property;
+            }
+            case "date":
+            case "full-date":
+                return new LocalizableDateProperty();
+            case "date-time":
+                return new LocalizableDateTimeProperty();
+            case "password": {
+                final LocalizablePasswordProperty property = new LocalizablePasswordProperty();
+                property.setMinLength(schema.get("minLength").asInteger());
+                property.setMaxLength(schema.get("maxLength").asInteger());
+                property.setPattern(schema.get("pattern").asString());
+                return property;
+            }
+            case "uuid": {
+                final LocalizableUUIDProperty property = new LocalizableUUIDProperty();
+                property.setMinLength(schema.get("minLength").asInteger());
+                property.setMaxLength(schema.get("maxLength").asInteger());
+                property.setPattern(schema.get("pattern").asString());
+                return property;
+            }
+            default: {
+                final LocalizableStringProperty property = new LocalizableStringProperty();
+                property.setMinLength(schema.get("minLength").asInteger());
+                property.setMaxLength(schema.get("maxLength").asInteger());
+                property.setPattern(schema.get("pattern").asString());
+                return property;
+            }
+            }
+        }
+        default:
+            throw new TransformerException("Unsupported JSON schema type: " + type);
+        }
     }
 
     /**
@@ -1582,6 +1633,11 @@ public class OpenApiTransformer {
         return null;
     }
 
+    private void setTitleAndDescriptionFromSchema(LocalizableTitleAndDescription<?> model, JsonValue schema) {
+        setTitleFromJsonValue(model, schema.get("title"));
+        setDescriptionFromJsonValue(model, schema.get("description"));
+    }
+
     static void setTitleFromJsonValue(LocalizableTitleAndDescription<?> model, JsonValue source) {
         if (source.isString()) {
             model.title(source.asString());
@@ -1597,5 +1653,4 @@ public class OpenApiTransformer {
             model.description((LocalizableString) source.getObject());
         }
     }
-
 }

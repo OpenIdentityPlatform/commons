@@ -11,14 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.events.handlers;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 /**
  * Base class for audit event handler configuration.
  */
@@ -34,7 +36,7 @@ public abstract class EventHandlerConfiguration {
 
     /** The set of topics that this audit event handler accepts. */
     @JsonPropertyDescription("audit.handlers.all.topics")
-    private Set<String> topics;
+    private Set<String> topics = new HashSet<>();
 
     /**
      * Checks if the audit event handler is enabled.

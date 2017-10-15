@@ -26,6 +26,16 @@ import java.io.InputStream;
  */
 public abstract class BranchingInputStream extends InputStream {
 
+    private final BranchingInputStream parent;
+
+    /**
+     * Initialise the {@code BranchingInputStream} with the specified parent.
+     * @param parent The parent stream, or null if it is the trunk.
+     */
+    protected BranchingInputStream(BranchingInputStream parent) {
+        this.parent = parent;
+    }
+
     /**
      * Creates a new branch at this stream's current position.
      * The returned stream will have this stream as its parent.
@@ -61,5 +71,7 @@ public abstract class BranchingInputStream extends InputStream {
      * @return the parent branching input stream from which this branch was
      *         created, or {@code null} if this is the trunk.
      */
-    public abstract BranchingInputStream parent();
+    public BranchingInputStream parent() {
+        return parent;
+    }
 }

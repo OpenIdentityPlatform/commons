@@ -18,12 +18,13 @@ package org.forgerock.json.crypto;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonTransformer;
+//import org.forgerock.json.JsonTransformer;
 
 /**
  * Transforms JSON values by applying a decryptor.
  */
-public class JsonCryptoTransformer implements JsonTransformer {
+public class JsonCryptoTransformer //implements JsonTransformer 
+{
 
     /** Decryptor to apply to JSON values. */
     private JsonDecryptor decryptor;
@@ -41,7 +42,7 @@ public class JsonCryptoTransformer implements JsonTransformer {
         this.decryptor = decryptor;
     }
 
-    @Override
+    //@Override
     public void transform(JsonValue value) throws JsonException {
         if (JsonCrypto.isJsonCrypto(value)) {
             JsonCrypto crypto = new JsonCrypto(value);

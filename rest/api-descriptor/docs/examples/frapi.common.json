@@ -1,7 +1,8 @@
 {
   "id" : "frapi:common",
   "description" : "Collection of common ForgeRock CREST definitions and errors",
-  "version" : "1.0.0",
+  "version" : "1.0.0", 
+  "paths":{},
   "errors" : {
     "badRequest" : {
       "code" : 400,

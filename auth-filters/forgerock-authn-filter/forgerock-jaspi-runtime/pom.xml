@@ -57,9 +57,9 @@
             <artifactId>json-resource</artifactId>
         </dependency>
 
-        <dependency> <!-- Required for MediaType in FailureResponseHandler -->
-            <groupId>org.forgerock.commons.guava</groupId>
-            <artifactId>forgerock-guava-net</artifactId>
-        </dependency>
+<!--         <dependency> Required for MediaType in FailureResponseHandler -->
+<!--             <groupId>org.forgerock.commons.guava</groupId> -->
+<!--             <artifactId>forgerock-guava-net</artifactId> -->
+<!--         </dependency> -->
     </dependencies>
 </project>

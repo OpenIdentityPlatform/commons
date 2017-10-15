@@ -183,12 +183,13 @@ public final class Parameter {
 
     /**
      * Builds a Parameter object from the data in the annotation.
+     * @param type The type to resolve {@link LocalizableString}s from.
      * @param parameter The annotation that holds the data
      * @return Parameter instance
      */
-    public static Parameter fromAnnotation(org.forgerock.api.annotations.Parameter parameter) {
+    public static Parameter fromAnnotation(Class<?> type, org.forgerock.api.annotations.Parameter parameter) {
         return parameter()
-                .description(parameter.description())
+                .description(new LocalizableString(parameter.description(), type))
                 .defaultValue(parameter.defaultValue())
                 .enumValues(parameter.enumValues())
                 .enumTitles(parameter.enumTitles())

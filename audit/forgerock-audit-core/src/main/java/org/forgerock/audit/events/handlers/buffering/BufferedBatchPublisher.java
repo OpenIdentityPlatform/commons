@@ -13,10 +13,9 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.elasticsearch;
+package org.forgerock.audit.events.handlers.buffering;
 
 import static java.lang.Math.max;
-import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_INTERVAL;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.forgerock.audit.batch.CommonAuditBatchConfiguration;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
@@ -34,58 +34,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Uses Elasticsearch Bulk API to index audit events in batches.
+ * Buffers audit events to a bounded queue, periodically flushing the queue to a provided {@link BatchConsumer}.
+ * If the bounded queue becomes full, further events are dropped until the queue is next flushed.
  */
-class ElasticsearchBatchIndexer {
+public final class BufferedBatchPublisher implements BatchPublisher {
 
-    private static final Logger logger = LoggerFactory.getLogger(ElasticsearchAuditEventHandler.class);
-
-    private static final int MIN_QUEUE_SIZE = 10000;
-    private static final int MIN_BATCH_SIZE = 500;
-    private static final int MIN_PER_EVENT_PAYLOAD_SIZE = 32;
+    private static final Logger logger = LoggerFactory.getLogger(BufferedBatchPublisher.class);
 
     private final BlockingQueue<BatchEntry> queue;
     private final ScheduledExecutorService scheduler;
     private final QueueConsumer queueConsumer;
     private final Duration writeInterval;
 
-    /**
-     * Creates a {@link ElasticsearchBatchIndexer}. For arguments with minimum values, the minimum will be used
-     * without warning if the provided value is lower than that minimum.
-     *
-     * @param capacity Fixed queue size (min. is 10000)
-     * @param writeInterval Interval to read up to {@code maxBatchedEvents} from the queue,
-     * or {@code null} (default 1 second)
-     * @param maxBatchedEvents Batch size (min. is 500)
-     * @param averagePerEventPayloadSize Average number of characters, per event, in a batch payload (min. is 32)
-     * @param autoFlush {@code true} when data in queue should always be flushed on shutdown and {@code false} when
-     * it is acceptable to drop events in the queue
-     * @param eventHandler Batch audit event handler
-     */
-    public ElasticsearchBatchIndexer(final int capacity, final Duration writeInterval, final int maxBatchedEvents,
-            final int averagePerEventPayloadSize, final boolean autoFlush,
-            final ElasticsearchBatchAuditEventHandler eventHandler) {
-        queue = new ArrayBlockingQueue<>(max(capacity, MIN_QUEUE_SIZE));
+    private BufferedBatchPublisher(BuilderImpl builder) {
+        queue = new ArrayBlockingQueue<>(builder.capacity);
         scheduler = Executors.newScheduledThreadPool(1);
-        queueConsumer = new QueueConsumer(
-                max(maxBatchedEvents, MIN_BATCH_SIZE),
-                max(averagePerEventPayloadSize, MIN_PER_EVENT_PAYLOAD_SIZE),
-                autoFlush, queue, scheduler, Reject.checkNotNull(eventHandler));
-        this.writeInterval = writeInterval == null || writeInterval.getValue() <= 0
-                ? POLLING_INTERVAL : writeInterval;
+        queueConsumer = new QueueConsumer(builder.maxBatchedEvents, builder.averagePerEventPayloadSize,
+                builder.autoFlush, queue, scheduler, builder.batchConsumer);
+        this.writeInterval = builder.writeInterval;
     }
 
     /**
-     * Starts periodically sending batch data to Elasticsearch.
+     * Starts periodically sending batch data.
      */
+    @Override
     public void startup() {
         scheduler.scheduleAtFixedRate(queueConsumer, 0, writeInterval.to(TimeUnit.MILLISECONDS), TimeUnit.MILLISECONDS);
     }
 
     /**
-     * Stops sending batch data to Elasticsearch, and awaits termination of pending queue tasks when {@code autoFlush}
-     * is enabled.
+     * Stops sending batch data, and awaits termination of pending queue tasks when {@code autoFlush} is enabled.
      */
+    @Override
     public void shutdown() {
         if (!scheduler.isShutdown()) {
             queueConsumer.shutdown();
@@ -96,10 +76,14 @@ class ElasticsearchBatchIndexer {
      * Inserts the specified element at the tail of this queue if it is possible to do so immediately without
      * exceeding the queue's capacity, returning {@code true} upon success and {@code false} if this queue is full.
      *
-     * @param topic Event topic
-     * @param event Event payload to index, where {@code _id} field is the identifier
+     * @param topic
+     *         Event topic
+     * @param event
+     *         Event payload to index, where {@code _id} field is the identifier
+     *
      * @return {@code true} if the element was added to this queue, else {@code false}
      */
+    @Override
     public boolean offer(final String topic, final JsonValue event) {
         return queue.offer(new BatchEntry(topic, event));
     }
@@ -115,8 +99,10 @@ class ElasticsearchBatchIndexer {
         /**
          * Creates a new audit-event batch entry.
          *
-         * @param topic Event topic
-         * @param event Event JSON payload
+         * @param topic
+         *         Event topic
+         * @param event
+         *         Event JSON payload
          */
         public BatchEntry(final String topic, final JsonValue event) {
             this.topic = topic;
@@ -153,7 +139,7 @@ class ElasticsearchBatchIndexer {
         private final BlockingQueue<BatchEntry> queue;
         private final List<BatchEntry> batch;
         private final StringBuilder payload;
-        private final ElasticsearchBatchAuditEventHandler eventHandler;
+        private final BatchConsumer batchEventHandler;
         private final ScheduledExecutorService scheduler;
 
         private volatile boolean shutdown;
@@ -161,21 +147,27 @@ class ElasticsearchBatchIndexer {
         /**
          * Creates a {@code QueueConsumer}.
          *
-         * @param maxBatchedEvents Batch size
-         * @param averagePerEventPayloadSize Average number of characters, per event, in a batch payload
-         * @param flushOnShutdown When {@code true}, the queue will be flushed on shutdown and when {@code false},
-         * items in the queue will be dropped
-         * @param queue Audit-event queue
-         * @param scheduler This runnable's scheduler
-         * @param eventHandler Batch audit event handler
+         * @param maxBatchedEvents
+         *         Batch size
+         * @param averagePerEventPayloadSize
+         *         Average number of characters, per event, in a batch payload
+         * @param flushOnShutdown
+         *         When {@code true}, the queue will be flushed on shutdown and when {@code false},
+         *         items in the queue will be dropped
+         * @param queue
+         *         Audit-event queue
+         * @param scheduler
+         *         This runnable's scheduler
+         * @param batchEventHandler
+         *         Batch audit event handler
          */
         public QueueConsumer(final int maxBatchedEvents, final int averagePerEventPayloadSize,
                 final boolean flushOnShutdown, final BlockingQueue<BatchEntry> queue,
-                final ScheduledExecutorService scheduler, final ElasticsearchBatchAuditEventHandler eventHandler) {
+                final ScheduledExecutorService scheduler, final BatchConsumer batchEventHandler) {
             this.queue = queue;
             this.flushOnShutdown = flushOnShutdown;
             this.scheduler = scheduler;
-            this.eventHandler = eventHandler;
+            this.batchEventHandler = batchEventHandler;
             this.maxBatchedEvents = maxBatchedEvents;
             batch = new ArrayList<>(maxBatchedEvents);
             payload = new StringBuilder(maxBatchedEvents * averagePerEventPayloadSize);
@@ -216,7 +208,7 @@ class ElasticsearchBatchIndexer {
                     // add to batch
                     for (final BatchEntry entry : batch) {
                         try {
-                            eventHandler.addToBatch(entry.getTopic(), entry.getEvent(), payload);
+                            batchEventHandler.addToBatch(entry.getTopic(), entry.getEvent(), payload);
                         } catch (Exception e) {
                             logger.error("addToBatch failed", e);
                         }
@@ -224,7 +216,7 @@ class ElasticsearchBatchIndexer {
 
                     // send batch
                     if (payload.length() != 0) {
-                        eventHandler.publishBatch(payload.toString())
+                        batchEventHandler.publishBatch(payload.toString())
                                 .thenCatch(new Function<BatchException, Void, BatchException>() {
                                     @Override
                                     public Void apply(BatchException e) throws BatchException {
@@ -257,6 +249,142 @@ class ElasticsearchBatchIndexer {
             // normal run of batch operation
             batch();
         }
+    }
+
+    /**
+     * Provides a new builder.
+     *
+     * @param batchConsumer
+     *         a non-null batch consumer
+     *
+     * @return a new builder
+     */
+    public static Builder newBuilder(final BatchConsumer batchConsumer) {
+        return new BuilderImpl(batchConsumer);
+    }
+
+    /**
+     * Builder used to construct a new {@link BufferedBatchPublisher}.
+     */
+    public interface Builder {
+
+        /**
+         * Sets the maximum queue capacity. Must be >= 10000.
+         *
+         * @param capacity
+         *         queue capacity
+         *
+         * @return this builder
+         */
+        Builder capacity(int capacity);
+
+        /**
+         * Sets the maximum number of events in a given batch. Must be >= 500.
+         *
+         * @param maxBatchedEvents
+         *         maximum number of batched events
+         *
+         * @return this builder
+         */
+        Builder maxBatchEvents(int maxBatchedEvents);
+
+        /**
+         * Sets the average event payload size, used to initialise string buffers. Must be >= 32.
+         *
+         * @param averagePerEventPayloadSize
+         *         average event payload size
+         *
+         * @return this builder
+         */
+        Builder averagePerEventPayloadSize(int averagePerEventPayloadSize);
+
+        /**
+         * The interval duration between each write. Must be > 0.
+         *
+         * @param writeInterval
+         *         write interval
+         *
+         * @return this builder
+         */
+        Builder writeInterval(Duration writeInterval);
+
+        /**
+         * Whether events to should be automatically flushed on shutdown.
+         *
+         * @param autoFlush
+         *         whether to auto flush
+         *
+         * @return this builder
+         */
+        Builder autoFlush(boolean autoFlush);
+
+        /**
+         * Constructs a new {@link BatchPublisher}.
+         *
+         * @return a new {@link BatchPublisher}
+         */
+        BatchPublisher build();
+    }
+
+    private static final class BuilderImpl implements Builder {
+
+        private static final int MIN_QUEUE_SIZE = 10000;
+        private static final int MIN_BATCH_SIZE = 500;
+        private static final int MIN_PER_EVENT_PAYLOAD_SIZE = 32;
+
+        private final BatchConsumer batchConsumer;
+
+        private int capacity;
+        private int maxBatchedEvents;
+        private int averagePerEventPayloadSize;
+        private Duration writeInterval;
+        private boolean autoFlush;
+
+        private BuilderImpl(final BatchConsumer batchConsumer) {
+            Reject.ifNull(batchConsumer, "batchConsumer must not be null");
+            this.batchConsumer = batchConsumer;
+            capacity = MIN_QUEUE_SIZE;
+            maxBatchedEvents = MIN_BATCH_SIZE;
+            averagePerEventPayloadSize = MIN_PER_EVENT_PAYLOAD_SIZE;
+            writeInterval = CommonAuditBatchConfiguration.POLLING_INTERVAL;
+        }
+
+        @Override
+        public Builder capacity(final int capacity) {
+            this.capacity = max(capacity, MIN_QUEUE_SIZE);
+            return this;
+        }
+
+        @Override
+        public Builder maxBatchEvents(final int maxBatchedEvents) {
+            this.maxBatchedEvents = max(maxBatchedEvents, MIN_BATCH_SIZE);
+            return this;
+        }
+
+        @Override
+        public Builder averagePerEventPayloadSize(final int averagePerEventPayloadSize) {
+            this.averagePerEventPayloadSize = max(averagePerEventPayloadSize, MIN_PER_EVENT_PAYLOAD_SIZE);
+            return this;
+        }
+
+        @Override
+        public Builder writeInterval(final Duration writeInterval) {
+            this.writeInterval = (writeInterval != null && writeInterval.getValue() > 0)
+                    ? writeInterval : CommonAuditBatchConfiguration.POLLING_INTERVAL;
+            return this;
+        }
+
+        @Override
+        public Builder autoFlush(final boolean autoFlush) {
+            this.autoFlush = autoFlush;
+            return this;
+        }
+
+        @Override
+        public BatchPublisher build() {
+            return new BufferedBatchPublisher(this);
+        }
+
     }
 
 }

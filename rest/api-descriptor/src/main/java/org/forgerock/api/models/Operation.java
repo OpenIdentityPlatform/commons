@@ -262,9 +262,9 @@ public abstract class Operation {
                 error(ApiError.fromAnnotation(apiApiError, descriptor, relativeType));
             }
             for (org.forgerock.api.annotations.Parameter parameter : operation.parameters()) {
-                parameter(Parameter.fromAnnotation(parameter));
+                parameter(Parameter.fromAnnotation(relativeType, parameter));
             }
-            return description(new LocalizableString(operation.description(), relativeType.getClassLoader()))
+            return description(new LocalizableString(operation.description(), relativeType))
                     .supportedLocales(operation.locales())
                     .stability(operation.stability());
         }

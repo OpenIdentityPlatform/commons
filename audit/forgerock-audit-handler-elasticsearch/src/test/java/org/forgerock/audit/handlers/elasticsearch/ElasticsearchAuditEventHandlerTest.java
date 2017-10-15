@@ -41,6 +41,7 @@ import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.DependencyProviderBase;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
+import org.forgerock.audit.events.handlers.buffering.BatchException;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.http.Client;
 import org.forgerock.http.Handler;
@@ -277,7 +278,7 @@ public class ElasticsearchAuditEventHandlerTest {
         final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
         config.getBuffering().setEnabled(true);
 
-        final ElasticsearchBatchAuditEventHandler batchHandler =
+        final ElasticsearchAuditEventHandler batchHandler =
                 createElasticSearchAuditEventHandler(createClient(promise), config);
         final JsonValue event = resourceAsJsonValue(RESOURCE_PATH + "authEventBeforeNormalization.json");
         final StringBuilder builder = new StringBuilder();
@@ -301,7 +302,7 @@ public class ElasticsearchAuditEventHandlerTest {
         final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
         config.getBuffering().setEnabled(true);
 
-        final ElasticsearchBatchAuditEventHandler batchHandler =
+        final ElasticsearchAuditEventHandler batchHandler =
                 createElasticSearchAuditEventHandler(createClient(promise), config);
 
         // when (we expect no exception be thrown)
@@ -320,7 +321,7 @@ public class ElasticsearchAuditEventHandlerTest {
         final ElasticsearchAuditEventHandlerConfiguration config = new ElasticsearchAuditEventHandlerConfiguration();
         config.getBuffering().setEnabled(true);
 
-        final ElasticsearchBatchAuditEventHandler batchHandler =
+        final ElasticsearchAuditEventHandler batchHandler =
                 createElasticSearchAuditEventHandler(createClient(promise), config);
 
         // when

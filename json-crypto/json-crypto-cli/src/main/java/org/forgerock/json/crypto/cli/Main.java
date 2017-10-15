@@ -30,7 +30,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
 import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonTransformer;
+//import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
@@ -143,15 +143,15 @@ public class Main {
             value = new JsonCrypto(encryptor.getType(), encryptor.encrypt(value)).toJsonValue();
             setDestinationValue(cmd.getOptionValue(PROPERTIES_DESTJSON_OPTION), value);
         } else if (cmd.hasOption(PROPERTIES_DECRYPT_COMMAND)) {
-            final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<>(1);
+            final ArrayList<JsonCryptoTransformer> decryptionTransformers = new ArrayList<>(1);
             decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(
                     getSimpleKeySelector(cmd.getOptionValue(PROPERTIES_KEYSTORE_OPTION),
                     cmd.getOptionValue(PROPERTIES_STORETYPE_OPTION, KeyStore.getDefaultType()),
                             cmd.getOptionValue(PROPERTIES_STOREPASS_OPTION),
                             cmd.getOptionValue(PROPERTIES_PROVIDERNAME_OPTION)))));
             JsonValue value = getSourceValue(cmd.getOptionValue(PROPERTIES_SRCJSON_OPTION), true);
-            setDestinationValue(cmd.getOptionValue(PROPERTIES_DESTJSON_OPTION), new JsonValue(value.getObject(),
-                    new JsonPointer(), decryptionTransformers));
+            decryptionTransformers.get(0).transform(value);
+            setDestinationValue(cmd.getOptionValue(PROPERTIES_DESTJSON_OPTION), value);
         } else {
             usage();
         }

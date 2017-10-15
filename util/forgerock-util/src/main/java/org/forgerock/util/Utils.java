@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.util;
 
@@ -213,6 +213,15 @@ public final class Utils {
         final StringBuilder sb = new StringBuilder("Expecting String containing one of: ");
         sb.append(joinAsString(" ", (Object[]) constants));
         throw new IllegalArgumentException(sb.toString());
+    }
+
+    /**
+     * Check to see if the provided String is {@code null} or empty.
+     * @param value The value to check.
+     * @return {@code true} if the value is either {@code null} or is empty.
+     */
+    public static boolean isNullOrEmpty(String value) {
+        return value == null || value.isEmpty();
     }
 
     private Utils() {

@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
@@ -234,7 +235,8 @@ public class Duration implements Comparable<Duration> {
         for (String ms : asList("milliseconds", "millisecond", "millisec", "millis", "milli", "ms")) {
             TIME_UNITS.put(ms, MILLISECONDS);
         }
-        for (String us : asList("microseconds", "microsecond", "microsec", "micros", "micro", "us", "\u03BCs")) {
+        for (String us : asList("microseconds", "microsecond", "microsec", "micros", "micro", "us", "\u03BCs",
+                "\u00B5s")) { // the last two support 'mu' and 'micro sign' abbreviations
             TIME_UNITS.put(us, MICROSECONDS);
         }
         for (String ns : asList("nanoseconds", "nanosecond", "nanosec", "nanos", "nano", "ns")) {
@@ -390,4 +392,24 @@ public class Duration implements Comparable<Duration> {
 
         return !biggestOverflowed ? Long.compare(thisConverted, thatConverted) : unitCompare;
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+
+        if (!(other instanceof Duration)) {
+            return false;
+        }
+
+        Duration duration = (Duration) other;
+        return number == duration.number && unit == duration.unit;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(number, unit);
+    }
+
 }

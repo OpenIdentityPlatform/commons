@@ -53,6 +53,7 @@
         <module>forgerock-audit-handler-jms</module>
         <module>forgerock-audit-handler-jdbc</module>
         <module>forgerock-audit-handler-elasticsearch</module>
+        <module>forgerock-audit-handler-json</module>
     </modules>
 
     <dependencyManagement>

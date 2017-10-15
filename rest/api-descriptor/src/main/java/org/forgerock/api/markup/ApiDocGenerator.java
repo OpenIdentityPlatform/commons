@@ -65,6 +65,7 @@ import org.forgerock.api.models.VersionedPath;
 import org.forgerock.api.util.ReferenceResolver;
 import org.forgerock.api.util.ValidationUtil;
 import org.forgerock.http.routing.Version;
+import org.forgerock.http.util.Json;
 import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.util.i18n.PreferredLocales;
 
@@ -80,7 +81,8 @@ public final class ApiDocGenerator {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .setSerializationInclusion(JsonInclude.Include.NON_NULL)
             .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-            .enable(SerializationFeature.INDENT_OUTPUT);
+            .enable(SerializationFeature.INDENT_OUTPUT)
+            .registerModules(new Json.LocalizableStringModule(), new Json.JsonValueModule());
 
     private static final PreferredLocales PREFERRED_LOCALES = new PreferredLocales();
 

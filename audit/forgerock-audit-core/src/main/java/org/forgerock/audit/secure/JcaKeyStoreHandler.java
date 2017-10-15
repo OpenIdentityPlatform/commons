@@ -62,7 +62,10 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
     private void init() throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
         final File keystore = new File(location);
         if (!keystore.exists()) {
-            this.store = createKeyStore();
+            this.store = new KeyStoreBuilder()
+                    .withKeyStoreType(type)
+                    .withPassword(password)
+                    .build();
         } else {
             this.store = new KeyStoreBuilder()
                     .withKeyStoreFile(location)
@@ -103,16 +106,5 @@ public class JcaKeyStoreHandler implements KeyStoreHandler {
     @Override
     public String getType() {
         return type.name();
-    }
-
-    private KeyStore createKeyStore()
-            throws IOException, KeyStoreException, CertificateException, NoSuchAlgorithmException {
-        final KeyStore keyStore;
-        try (final OutputStream keystoreFile = new FileOutputStream(location)) {
-            keyStore = KeyStore.getInstance(type.name());
-            keyStore.load(null, password.toCharArray());
-            keyStore.store(keystoreFile, password.toCharArray());
-        }
-        return keyStore;
     }
 }

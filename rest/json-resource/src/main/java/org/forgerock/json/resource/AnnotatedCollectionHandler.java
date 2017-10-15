@@ -19,7 +19,10 @@ package org.forgerock.json.resource;
 import org.forgerock.api.annotations.CollectionProvider;
 import org.forgerock.api.annotations.Create;
 import org.forgerock.api.annotations.Query;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -31,11 +34,12 @@ import org.forgerock.util.promise.Promise;
  * reporting the erroneous request to the caller.
  * {@see org.forgeock.json.resource.annotations}
  */
-class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
+class AnnotatedCollectionHandler extends InterfaceCollectionHandler implements Describable<ApiDescription, Request> {
 
     private final AnnotatedMethod createMethod;
     private final AnnotatedMethod queryMethod;
     private final AnnotatedActionMethods actionMethods;
+    private final Describable<ApiDescription, Request> describable;
 
     public AnnotatedCollectionHandler(Object requestHandler) {
         super(null);
@@ -46,6 +50,9 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
         this.createMethod = AnnotatedMethod.findMethod(requestHandler, Create.class, false);
         this.queryMethod = AnnotatedMethod.findMethod(requestHandler, Query.class, false);
         this.actionMethods = AnnotatedActionMethods.findAll(requestHandler, false);
+        this.describable = requestHandler instanceof Describable
+                ? (Describable<ApiDescription, Request>) requestHandler
+                : null;
     }
 
     @Override
@@ -62,5 +69,37 @@ class AnnotatedCollectionHandler extends InterfaceCollectionHandler {
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         return actionMethods.invoke(context, request);
+    }
+
+    @Override
+    public ApiDescription api(ApiProducer<ApiDescription> producer) {
+        if (describable == null) {
+            throw new UnsupportedOperationException(
+                    "The provided request handler does not support API Descriptor methods");
+        }
+        return describable.api(producer);
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        if (describable == null) {
+            throw new UnsupportedOperationException(
+                    "The provided request handler does not support API Descriptor methods");
+        }
+        return describable.handleApiRequest(context, request);
+    }
+
+    @Override
+    public void addDescriptorListener(Describable.Listener listener) {
+        if (describable != null) {
+            describable.addDescriptorListener(listener);
+        }
+    }
+
+    @Override
+    public void removeDescriptorListener(Describable.Listener listener) {
+        if (describable != null) {
+            describable.removeDescriptorListener(listener);
+        }
     }
 }

@@ -122,10 +122,11 @@ public final class Services {
         @JsonAnySetter
         public Builder put(String name, Resource resource) {
             if (isEmpty(name) || containsWhitespace(name)) {
-                throw new IllegalArgumentException("name required and may not contain whitespace");
+                throw new IllegalArgumentException("Resource name required and may not contain whitespace");
             }
             if (services.containsKey(name) && !services.get(name).equals(resource)) {
-                throw new IllegalStateException("name not unique");
+                throw new IllegalStateException("The give Resource name already exists but the Resource objects"
+                        + " are not equal");
             }
 
             services.put(name, checkNotNull(resource));

@@ -13,13 +13,10 @@
  *
  * Copyright 2014-2016 ForgeRock AS.
  */
-
 package org.forgerock.http;
 
 import org.forgerock.http.io.Buffer;
 import org.forgerock.util.Factory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Configuration class to configure the {@code HttpApplication} instance.
@@ -32,11 +29,6 @@ import org.slf4j.LoggerFactory;
  * </p>
  */
 public interface HttpApplication {
-
-    /**
-     * Http Framework core Logger instance.
-     */
-    Logger LOGGER = LoggerFactory.getLogger(HttpApplication.class);
 
     /**
      * Gets the root {@link Handler} that will handle all HTTP requests.

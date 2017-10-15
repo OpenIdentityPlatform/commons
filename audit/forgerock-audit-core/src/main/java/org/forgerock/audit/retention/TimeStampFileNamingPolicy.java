@@ -11,18 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.audit.retention;
 
 import static org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration.FileRotation.DEFAULT_ROTATION_FILE_SUFFIX;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.forgerock.audit.util.LastModifiedTimeFileComparator;
 import org.joda.time.LocalDateTime;
@@ -36,6 +38,8 @@ import org.slf4j.LoggerFactory;
  */
 public class TimeStampFileNamingPolicy implements FileNamingPolicy {
 
+    private static final int INITIAL_STRING_BUFFER_SIZE = 64;
+
     private static final Logger logger = LoggerFactory.getLogger(TimeStampFileNamingPolicy.class);
 
     private final File initialFile;
@@ -43,6 +47,7 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
     private final String prefix;
     private final TimestampFilenameFilter timestampFilenameFilter;
     private final LastModifiedTimeFileComparator lastModifiedTimeFileComparator = new LastModifiedTimeFileComparator();
+    private final AtomicInteger collisionCounter = new AtomicInteger();
 
     /**
      * Constructs a TimeStampFileNaming policy with a given initial file, a timestamp format, and a prefix string.
@@ -85,7 +90,7 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
      */
     @Override
     public File getNextName() {
-        final StringBuilder newFileName = new StringBuilder();
+        final StringBuilder newFileName = new StringBuilder(INITIAL_STRING_BUFFER_SIZE);
         final Path path = initialFile.toPath();
 
         if (prefix != null) {
@@ -98,7 +103,13 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
             newFileName.append(LocalDateTime.now().toString(suffixDateFormat));
         }
 
-        return path.resolveSibling(newFileName.toString()).toFile();
+        Path newFilePath = path.resolveSibling(newFileName.toString());
+        if (Files.exists(newFilePath)) {
+            // prevent filename collision with unique suffix
+            newFileName.append('.').append(collisionCounter.incrementAndGet());
+            newFilePath = path.resolveSibling(newFileName.toString());
+        }
+        return newFilePath.toFile();
     }
 
     /**

@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2014 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -40,13 +40,22 @@ final class MemoryBuffer implements Buffer {
     /** Current length of the buffer. */
     private int length = 0;
 
-    MemoryBuffer(int initial, int limit) {
+    MemoryBuffer(final int initial, final int limit) {
         data = new byte[initial];
         this.limit = limit;
     }
 
     @Override
-    public int read(int pos, byte[] b, int off, int len) throws IOException {
+    public byte read(final int pos) throws IOException {
+        notClosed();
+        if (pos < data.length) {
+            return data[pos];
+        }
+        throw new IndexOutOfBoundsException();
+    }
+
+    @Override
+    public int read(final int pos, final byte[] b, final int off, final int len) throws IOException {
         if (off < 0 || len < 0 || len > b.length - off) {
             throw new IndexOutOfBoundsException();
         }
@@ -60,12 +69,27 @@ final class MemoryBuffer implements Buffer {
     }
 
     @Override
-    public void append(byte[] b, int off, int len) throws IOException {
+    public void append(final byte b) throws IOException {
+        notClosed();
+        final int end = this.length + 1;
+        growBufferIfNecessary(end);
+        data[this.length] = b;
+        this.length = end;
+    }
+
+    @Override
+    public void append(final byte[] b, final int off, final int len) throws IOException {
         if (off < 0 || len < 0 || len > b.length - off) {
             throw new IndexOutOfBoundsException();
         }
         notClosed();
-        int end = this.length + len;
+        final int end = this.length + len;
+        growBufferIfNecessary(end);
+        System.arraycopy(b, off, data, this.length, len);
+        this.length = end;
+    }
+
+    private void growBufferIfNecessary(final int end) throws OverflowException {
         if (end > limit) {
             throw new OverflowException();
         }
@@ -73,8 +97,6 @@ final class MemoryBuffer implements Buffer {
             // buffer grows exponentially (up to limit)
             data = Arrays.copyOf(data, Math.max(end, Math.min(limit, data.length << 1)));
         }
-        System.arraycopy(b, off, data, this.length, len);
-        this.length += len;
     }
 
     @Override

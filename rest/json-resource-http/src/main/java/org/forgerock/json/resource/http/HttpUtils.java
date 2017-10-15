@@ -47,9 +47,12 @@ import javax.mail.internet.ParseException;
 
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;
+import org.forgerock.http.header.MalformedHeaderException;
+import org.forgerock.http.io.PipeBufferedStream;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.Version;
+import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
@@ -164,7 +167,8 @@ public final class HttpUtils {
     static final String FIELDS_DELIMITER = ",";
     static final String SORT_KEYS_DELIMITER = ",";
 
-    private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+    static final ObjectMapper JSON_MAPPER = new ObjectMapper()
+            .registerModules(new Json.JsonValueModule(), new Json.LocalizableStringModule());
 
     private static final String FILENAME = "filename";
     private static final String MIME_TYPE = "mimetype";
@@ -296,12 +300,14 @@ public final class HttpUtils {
             }
             resp.setStatus(Status.valueOf(re.getCode()));
             final JsonGenerator writer = getJsonGenerator(req, resp);
-            writer.writeObject(re.toJsonValue().getObject());
+            Json.makeLocalizingObjectWriter(JSON_MAPPER, req).writeValue(writer, re.toJsonValue().getObject());
             closeSilently(writer);
             return newResultPromise(resp);
         } catch (final IOException ignored) {
             // Ignore the error since this was probably the cause.
             return newResultPromise(newInternalServerError());
+        } catch (MalformedHeaderException e) {
+            return newResultPromise(new Response(Status.BAD_REQUEST).setEntity("Malformed header"));
         }
     }
 
@@ -567,7 +573,10 @@ public final class HttpUtils {
 
         final JsonGenerator writer =
                 JSON_MAPPER.getFactory().createGenerator(pipeStream.getIn());
-        writer.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, false);
+
+        // Need to have the JsonGenerator close the stream so that it is
+        // properly released.
+        writer.configure(JsonGenerator.Feature.AUTO_CLOSE_TARGET, true);
 
         // Enable pretty printer if requested.
         final List<String> values = getParameter(req, PARAM_PRETTY_PRINT);
@@ -669,7 +678,7 @@ public final class HttpUtils {
     }
 
     static Response prepareResponse(org.forgerock.http.protocol.Request req) throws ResourceException {
-        return prepareResponse(req, new Response());
+        return prepareResponse(req, new Response(Status.OK));
     }
 
     static Response prepareResponse(org.forgerock.http.protocol.Request req, org.forgerock.http.protocol.Response resp)

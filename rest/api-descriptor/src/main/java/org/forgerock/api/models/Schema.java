@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.forgerock.api.jackson.JacksonUtils;
-import org.forgerock.guava.common.base.Strings;
+import com.google.common.base.Strings;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.Reject;
 
@@ -77,7 +77,7 @@ public abstract class Schema {
 
     private boolean isSchemaPropertyMatches(Schema schema1) {
         return getSchema() != null && schema1.getSchema() != null
-                ? getSchema().getObject().equals(schema1.getSchema().getObject())
+                ? getSchema().isEqualTo(schema1.getSchema())
                 : schema1.getSchema() == getSchema();
     }
 

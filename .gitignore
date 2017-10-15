@@ -94,4 +94,6 @@ local.properties
 .texlipse
 
 # TestNG Eclipse plugin
-*/test-output
+test-output
+java.old
+package-info.java

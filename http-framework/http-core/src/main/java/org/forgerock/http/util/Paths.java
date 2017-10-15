@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.util;
 
-import static java.util.Collections.*;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,6 +106,32 @@ public final class Paths {
             s.append(urlEncode(element));
         }
         return s.toString();
+    }
+
+    /**
+     * Removes trailing slash (if there is any), returns the same value otherwise.
+     * Note that this method does not recursively clean the value from all its trailing slashes ({@literal /openam//}
+     * will be transformed to {@literal /openam/}, not {@literal /openam}).
+     *
+     * @param path path with (possibly) trailing slash
+     * @return path without the trailing slash (if there was one), same path otherwise
+     */
+    public static String removeTrailingSlash(String path) {
+        return path.endsWith("/")
+                ? path.substring(0, path.length() - 1)
+                : path;
+    }
+
+    /**
+     * Add leading slash (if there is not already), returns the same value otherwise.
+     *
+     * @param path path without (possibly) leading slash
+     * @return path with a leading slash (if there was none), same path otherwise
+     */
+    public static String addLeadingSlash(String path) {
+        return path.startsWith("/")
+                ? path
+                : "/" + path;
     }
 
     private Paths() {

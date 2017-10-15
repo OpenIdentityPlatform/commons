@@ -15,19 +15,37 @@
  */
 package org.forgerock.audit.events.handlers;
 
+import static org.forgerock.util.Reject.checkNotNull;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.forgerock.audit.retention.DiskSpaceUsedRetentionPolicy;
+import org.forgerock.audit.retention.FreeDiskSpaceRetentionPolicy;
+import org.forgerock.audit.retention.RetentionPolicy;
+import org.forgerock.audit.retention.SizeBasedRetentionPolicy;
+import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
+import org.forgerock.audit.rotation.FixedTimeRotationPolicy;
+import org.forgerock.audit.rotation.RotationPolicy;
+import org.forgerock.audit.rotation.SizeBasedRotationPolicy;
+import org.forgerock.audit.rotation.TimeLimitRotationPolicy;
 import org.forgerock.util.Reject;
 import org.forgerock.util.time.Duration;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Configures time based or size based log file rotation.
  */
 public abstract class FileBasedEventHandlerConfiguration extends EventHandlerConfiguration {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileBasedEventHandlerConfiguration.class);
 
     @JsonPropertyDescription("audit.handlers.file.fileRotation")
     private FileRotation fileRotation = new FileRotation();
@@ -272,6 +290,52 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
         public void setRotationTimes(List<String> rotationTimes) {
             this.rotationTimes.addAll(rotationTimes);
         }
+
+        /**
+         * Builds a {@link TimeStampFileNamingPolicy} instance from configuration options.
+         *
+         * @param file Initial log file
+         * @return {@link TimeStampFileNamingPolicy} instance
+         */
+        @JsonIgnore
+        public TimeStampFileNamingPolicy buildTimeStampFileNamingPolicy(final File file) {
+            return new TimeStampFileNamingPolicy(checkNotNull(file), getRotationFileSuffix(), getRotationFilePrefix());
+        }
+
+        /**
+         * Builds {@link RotationPolicy} instances from configuration options.
+         *
+         * @return {@link RotationPolicy} instances
+         */
+        @JsonIgnore
+        public List<RotationPolicy> buildRotationPolicies() {
+            final List<RotationPolicy> rotationPolicies = new ArrayList<>();
+
+            // add SizeBasedRotationPolicy if a non zero size is supplied
+            final long maxFileSize = getMaxFileSize();
+            if (maxFileSize > 0) {
+                rotationPolicies.add(new SizeBasedRotationPolicy(maxFileSize));
+            }
+
+            // add FixedTimeRotationPolicy
+            final List<Duration> dailyRotationTimes = new LinkedList<>();
+            for (final String rotationTime : getRotationTimes()) {
+                Duration duration = parseDuration("rotation time", rotationTime, null);
+                if (duration != null && !duration.isUnlimited()) {
+                    dailyRotationTimes.add(duration);
+                }
+            }
+            if (!dailyRotationTimes.isEmpty()) {
+                rotationPolicies.add(new FixedTimeRotationPolicy(dailyRotationTimes));
+            }
+
+            // add TimeLimitRotationPolicy if enabled
+            final Duration rotationInterval = parseDuration("rotation interval", getRotationInterval(), Duration.ZERO);
+            if (!(rotationInterval.isZero() || rotationInterval.isUnlimited())) {
+                rotationPolicies.add(new TimeLimitRotationPolicy(rotationInterval));
+            }
+            return rotationPolicies;
+        }
     }
 
     /**
@@ -343,6 +407,45 @@ public abstract class FileBasedEventHandlerConfiguration extends EventHandlerCon
          */
         public void setMinFreeSpaceRequired(final long minFreeSpaceRequired) {
             this.minFreeSpaceRequired = minFreeSpaceRequired;
+        }
+
+        /**
+         * Builds {@link RetentionPolicy} instances from configuration options.
+         *
+         * @return {@link RetentionPolicy} instances
+         */
+        @JsonIgnore
+        public List<RetentionPolicy> buildRetentionPolicies() {
+            final List<RetentionPolicy> retentionPolicies = new ArrayList<>();
+
+            // Add SizeBasedRetentionPolicy if the max number of files config value is more than 0
+            final int maxNumberOfHistoryFiles = getMaxNumberOfHistoryFiles();
+            if (maxNumberOfHistoryFiles > 0) {
+                retentionPolicies.add(new SizeBasedRetentionPolicy(maxNumberOfHistoryFiles));
+            }
+
+            // Add DiskSpaceUsedRetentionPolicy if config value > 0
+            final long maxDiskSpaceToUse = getMaxDiskSpaceToUse();
+            if (maxDiskSpaceToUse > 0) {
+                retentionPolicies.add(new DiskSpaceUsedRetentionPolicy(maxDiskSpaceToUse));
+            }
+
+            // Add FreeDiskSpaceRetentionPolicy if config value > 0
+            final long minimumFreeDiskSpace = getMinFreeSpaceRequired();
+            if (minimumFreeDiskSpace > 0) {
+                retentionPolicies.add(new FreeDiskSpaceRetentionPolicy(minimumFreeDiskSpace));
+            }
+            return retentionPolicies;
+        }
+    }
+
+    private static Duration parseDuration(final String description, final String duration,
+            final Duration defaultValue) {
+        try {
+            return Duration.duration(duration);
+        } catch (IllegalArgumentException e) {
+            logger.info("Invalid {} value: '{}'", description, duration);
+            return defaultValue;
         }
     }
 }

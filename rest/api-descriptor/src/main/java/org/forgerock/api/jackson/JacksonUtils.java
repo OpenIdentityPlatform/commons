@@ -48,17 +48,19 @@ public final class JacksonUtils {
      *
      * @param json JSON content.
      * @param schema The schema. Must be an instance of one of the extended schema classes in this package.
+     * @return {@code true} if schema implements {@link ValidatableSchema} and was validated and {@code false} otherwise
      * @throws ValidationException If the JSON does not conform to the schema.
      */
-    public static void validateJsonToSchema(String json, JsonSchema schema) throws ValidationException {
-        if (!(schema instanceof ValidatableSchema)) {
-            throw new IllegalArgumentException("Cannot validate against a plain Jackson JsonSchema");
+    public static boolean validateJsonToSchema(String json, JsonSchema schema) throws ValidationException {
+        if (schema instanceof ValidatableSchema) {
+            try {
+                ((ValidatableSchema) schema).validate(json(OBJECT_MAPPER.readValue(json, Object.class)));
+                return true;
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Cannot parse JSON", e);
+            }
         }
-        try {
-            ((ValidatableSchema) schema).validate(json(OBJECT_MAPPER.readValue(json, Object.class)));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Cannot parse JSON", e);
-        }
+        return false;
     }
 
     /**

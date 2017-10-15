@@ -18,6 +18,7 @@ package org.forgerock.audit.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -125,28 +126,74 @@ public final class JsonValueUtils {
 
     /**
      * Extracts String representation of field identified by <code>fieldName</code> from <code>json</code> object.
+     * <code>JsonValue</code> transformers are applied up to <code>fieldName</code> but not to its components.
      *
      * @param json the {@link JsonValue} object from which to extract a value.
      * @param fieldName the field identifier in a form consumable by {@link JsonPointer}.
      *
      * @return A non-null String representation of the field's value. If the specified field is not present or has
-     *         a null value, an empty string will be returned.
+     *         a null value, null will be returned.
      */
     public static String extractValueAsString(final JsonValue json, final String fieldName) {
-        JsonValue value = json.get(new JsonPointer(fieldName));
-        if (value == null || value.isNull()) {
-            return null;
-        } else if (value.isString()) {
-            return value.asString();
-        } else {
-            String rawStr = null;
-            try {
-                rawStr = MAPPER.writeValueAsString(value.getObject());
-            } catch (JsonProcessingException e) {
-                LOGGER.error("Unable to write the value for field {} as a string.", fieldName);
+        return extractValueAsString(json, new JsonPointer(fieldName));
+    }
+
+    /**
+     * Extracts String representation of field identified by <code>pointer</code> from <code>json</code> object.
+     * <code>JsonValue</code> transformers are applied up to <code>fieldName</code> but not to its components.
+     *
+     * @param json the {@link JsonValue} object from which to extract a value.
+     * @param pointer the field identifier as a {@link JsonPointer}.
+     *
+     * @return A non-null String representation of the field's value. If the specified field is not present or has
+     *         a null value, null will be returned.
+     */
+    public static String extractValueAsString(final JsonValue json, final JsonPointer pointer) {
+        Object value = json.getObject();
+        for (String name : pointer.toArray()) {
+	        	if (value instanceof JsonValue)
+	        		value=((JsonValue)value).getObject();
+            if (value instanceof Map<?, ?>) {
+                value = ((Map<?, ?>) value).get(name);
+            } else if (value instanceof Collection<?>) {
+                int valueNum = JsonValue.toIndex(name);
+                Collection<?> col = (Collection<?>) value;
+                if (valueNum < 0 || valueNum > col.size()) {
+                    value = null;
+                    break;
+                }
+                int cnt = 0;
+                for (Object o : col) {
+                    if (cnt == valueNum) {
+                        value = o;
+                        break;
+                    }
+                    cnt++;
+                }
+            } else {
+                value = null;
+                break;
             }
-            return rawStr;
+            
         }
+        if (value == null) {
+            return null;
+        }
+        if (value instanceof String || value instanceof Integer || value instanceof Long || value instanceof Boolean) {
+            return String.valueOf(value);
+        } else {
+            return extractComplexString(value, pointer);
+        }
+    }
+
+    private static String extractComplexString(Object value, JsonPointer name) {
+        String rawStr = null;
+        try {
+            rawStr = MAPPER.writeValueAsString(value);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Unable to write the value for field {} as a string.", name.toString());
+        }
+        return rawStr;
     }
 
     private static JsonValue buildObject(Map<String, Object> objectSet) {

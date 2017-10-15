@@ -31,6 +31,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.http.header.AcceptLanguageHeader;
+import org.forgerock.http.header.MalformedHeaderException;
+import org.forgerock.http.protocol.Request;
 import org.forgerock.util.i18n.LocalizableString;
 import org.forgerock.util.i18n.PreferredLocales;
 
@@ -38,6 +41,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 
@@ -64,7 +68,7 @@ public final class Json {
     /**
      * Attribute Key for the {@link org.forgerock.util.i18n.PreferredLocales} instance.
      */
-    public static final String PREFERRED_LOCALES_ATTRIBUTE = "PreferredLocales";
+    private static final String PREFERRED_LOCALES_ATTRIBUTE = "PreferredLocales";
 
     /**
      * Jackson Module that adds a serializer for {@link LocalizableString}.
@@ -258,4 +262,40 @@ public final class Json {
     public static byte[] writeJson(final Object objectToWrite) throws IOException {
         return STRICT_MAPPER.writeValueAsBytes(objectToWrite);
     }
+
+    /**
+     * Make an object writer that contains the locales from the request for serialization of {@link LocalizableString}
+     * instances. The provided {@code mapper} will be used to create the writer so that serialization configuration is
+     * not recreated.
+     *
+     * @param mapper The {@code ObjectMapper} to obtain a writer from.
+     * @param request The CHF request.
+     * @return The configured {@code ObjectWriter}.
+     * @throws MalformedHeaderException If the Accept-Language header is malformed.
+     */
+    public static ObjectWriter makeLocalizingObjectWriter(ObjectMapper mapper, Request request)
+            throws MalformedHeaderException {
+        return makeLocalizingObjectWriter(mapper,
+                request.getHeaders().containsKey(AcceptLanguageHeader.NAME)
+                        ? request.getHeaders().get(AcceptLanguageHeader.class).getLocales()
+                        : null);
+    }
+
+    /**
+     * Make an object writer that contains the provided locales for serialization of {@link LocalizableString}
+     * instances. The provided {@code mapper} will be used to create the writer so that serialization configuration is
+     * not recreated.
+     *
+     * @param mapper The {@code ObjectMapper} to obtain a writer from.
+     * @param locales The {@code PreferredLocales} instance to use for localization, or {@code null}.
+     * @return The configured {@code ObjectWriter}.
+     */
+    public static ObjectWriter makeLocalizingObjectWriter(ObjectMapper mapper, PreferredLocales locales) {
+        ObjectWriter writer = mapper.writer();
+        if (locales != null) {
+            writer = writer.withAttribute(Json.PREFERRED_LOCALES_ATTRIBUTE, locales);
+        }
+        return writer;
+    }
+
 }

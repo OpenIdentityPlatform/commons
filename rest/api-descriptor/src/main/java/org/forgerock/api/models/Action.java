@@ -25,7 +25,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.forgerock.guava.common.base.Strings;
+import com.google.common.base.Strings;
 
 import org.forgerock.api.ApiValidationException;
 

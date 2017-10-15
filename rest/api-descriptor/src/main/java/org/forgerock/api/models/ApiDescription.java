@@ -13,11 +13,11 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-
 package org.forgerock.api.models;
 
 import static org.forgerock.api.models.Definitions.definitions;
 import static org.forgerock.api.models.Errors.errors;
+import static org.forgerock.api.models.Paths.paths;
 import static org.forgerock.api.models.Services.services;
 import static org.forgerock.api.util.ValidationUtil.isEmpty;
 
@@ -29,9 +29,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.forgerock.api.ApiValidationException;
 import org.forgerock.util.i18n.LocalizableString;
 
-/**
- * Class that represents the ApiDescription type in API descriptor.
- */
+/** Class that represents the ApiDescription type in API descriptor. */
 @JsonDeserialize(builder = ApiDescription.Builder.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public final class ApiDescription {
@@ -51,7 +49,7 @@ public final class ApiDescription {
         this.definitions = builder.definitions == null ? definitions().build() : builder.definitions;
         this.services = builder.services == null ? services().build() : builder.services;
         this.errors = builder.errors == null ? errors().build() : builder.errors;
-        this.paths = builder.paths;
+        this.paths = builder.paths == null ? paths().build() : builder.paths;
 
         if (isEmpty(id) || isEmpty(version)) {
             throw new ApiValidationException("id and version required");
@@ -176,6 +174,8 @@ public final class ApiDescription {
      *
      * @return Paths
      */
+    // Jackson queries PathsModule.PathsSerializer.isEmpty() to know whether a Paths object is empty
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public Paths getPaths() {
         return paths;
     }
@@ -336,5 +336,5 @@ public final class ApiDescription {
             return new ApiDescription(this);
         }
     }
-
 }
+

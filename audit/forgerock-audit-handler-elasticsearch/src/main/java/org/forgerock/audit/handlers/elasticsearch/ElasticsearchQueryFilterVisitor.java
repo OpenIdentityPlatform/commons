@@ -16,7 +16,7 @@
 package org.forgerock.audit.handlers.elasticsearch;
 
 import static org.forgerock.audit.events.AuditEventHelper.jsonPointerToDotNotation;
-import static org.forgerock.audit.handlers.elasticsearch.ElasticsearchUtil.normalizeJsonPointer;
+import static org.forgerock.audit.util.ElasticsearchUtil.normalizeJsonPointer;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;

@@ -23,9 +23,6 @@ import java.io.IOException;
  * Wraps a byte array with a stream that can branch to perform divergent reads.
  */
 final class ByteArrayBranchingStream extends BranchingInputStream {
-    /** Branch that this was spawned from, or {@code null} if this is the trunk. */
-    private ByteArrayBranchingStream parent = null;
-
     /** The index of the next byte to read from the byte array. */
     private int position = 0;
 
@@ -36,28 +33,27 @@ final class ByteArrayBranchingStream extends BranchingInputStream {
     private byte[] data;
 
     ByteArrayBranchingStream(byte[] data) {
+        super(null);
+        this.data = data;
+    }
+
+    private ByteArrayBranchingStream(byte[] data, BranchingInputStream parent) {
+        super(parent);
         this.data = data;
     }
 
     @Override
     public ByteArrayBranchingStream branch() {
-        ByteArrayBranchingStream branch = new ByteArrayBranchingStream(data);
+        ByteArrayBranchingStream branch = new ByteArrayBranchingStream(data, this);
         branch.position = this.position;
-        branch.parent = this;
         return branch;
     }
 
     @Override
     public ByteArrayBranchingStream copy() throws IOException {
-        ByteArrayBranchingStream branch = new ByteArrayBranchingStream(data);
+        ByteArrayBranchingStream branch = new ByteArrayBranchingStream(data, this.parent());
         branch.position = this.position;
-        branch.parent = this.parent;
         return branch;
-    }
-
-    @Override
-    public ByteArrayBranchingStream parent() {
-        return parent;
     }
 
     @Override

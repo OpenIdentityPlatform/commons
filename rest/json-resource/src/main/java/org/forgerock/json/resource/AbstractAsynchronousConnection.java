@@ -25,6 +25,7 @@ import org.forgerock.services.context.Context;
  * asynchronous methods.
  */
 public abstract class AbstractAsynchronousConnection implements Connection {
+
     /**
      * Creates a new abstract asynchronous connection.
      */
@@ -35,31 +36,51 @@ public abstract class AbstractAsynchronousConnection implements Connection {
     @Override
     public ActionResponse action(final Context context, final ActionRequest request)
             throws ResourceException {
-        return actionAsync(context, request).getOrThrowUninterruptibly();
+        try {
+            return actionAsync(context, request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw newTimeoutException(e);
+        }
     }
 
     @Override
     public ResourceResponse create(final Context context, final CreateRequest request)
             throws ResourceException {
-        return createAsync(context, request).getOrThrowUninterruptibly();
+        try {
+            return createAsync(context, request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw newTimeoutException(e);
+        }
     }
 
     @Override
     public ResourceResponse delete(final Context context, final DeleteRequest request)
             throws ResourceException {
-        return deleteAsync(context, request).getOrThrowUninterruptibly();
+        try {
+            return deleteAsync(context, request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw newTimeoutException(e);
+        }
     }
 
     @Override
     public ResourceResponse patch(final Context context, final PatchRequest request)
             throws ResourceException {
-        return patchAsync(context, request).getOrThrowUninterruptibly();
+        try {
+            return patchAsync(context, request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw newTimeoutException(e);
+        }
     }
 
     @Override
     public QueryResponse query(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) throws ResourceException {
-        return queryAsync(context, request, handler).getOrThrowUninterruptibly();
+        try {
+            return queryAsync(context, request, handler).getOrThrow();
+        } catch (InterruptedException e) {
+            throw newTimeoutException(e);
+        }
     }
 
     @Override
@@ -76,12 +97,24 @@ public abstract class AbstractAsynchronousConnection implements Connection {
 
     @Override
     public ResourceResponse read(final Context context, final ReadRequest request) throws ResourceException {
-        return readAsync(context, request).getOrThrowUninterruptibly();
+        try {
+            return readAsync(context, request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw newTimeoutException(e);
+        }
     }
 
     @Override
     public ResourceResponse update(final Context context, final UpdateRequest request)
             throws ResourceException {
-        return updateAsync(context, request).getOrThrowUninterruptibly();
+        try {
+            return updateAsync(context, request).getOrThrow();
+        } catch (InterruptedException e) {
+            throw newTimeoutException(e);
+        }
+    }
+
+    private ResourceException newTimeoutException(Exception cause) {
+        return ResourceException.newResourceException(503, "Request was interrupted", cause);
     }
 }

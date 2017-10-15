@@ -54,7 +54,7 @@ public class FreeDiskSpaceRetentionPolicyTest {
         final FileNamingPolicy fileNamingPolicy = mock(FileNamingPolicy.class);
         final File file = mock(File.class);
         when(fileNamingPolicy.listFiles()).thenReturn(new ArrayList<>(Collections.singletonList(file)));
-        when(file.getFreeSpace()).thenReturn(MIN_FREE_DISK_SPACE + 1L);
+        when(file.getUsableSpace()).thenReturn(MIN_FREE_DISK_SPACE + 1L);
         when(file.length()).thenReturn(MIN_FREE_DISK_SPACE + 1L);
 
         // when
