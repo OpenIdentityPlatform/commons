@@ -184,7 +184,16 @@
     <prerequisites>
         <maven>${maven.min.version}</maven>
     </prerequisites>
-
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+			    <groupId>com.google.guava</groupId>
+			    <artifactId>guava</artifactId>
+		<!-- 	    If you need support for JDK 1.7 or Android, use the Android flavor -->
+		    		<version>23.2-android</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
     <build>
         <pluginManagement>
             <!--    mvn versions:display-plugin-updates
