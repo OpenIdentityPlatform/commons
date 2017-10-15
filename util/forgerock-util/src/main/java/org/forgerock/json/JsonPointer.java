@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.json;
@@ -66,7 +66,7 @@ public class JsonPointer implements Iterable<String> {
      *
      * @param tokens an array of string reference tokens.
      */
-    public JsonPointer(String[] tokens) {
+    public JsonPointer(String... tokens) {
         this.tokens = Arrays.copyOf(tokens, tokens.length);
     }
 

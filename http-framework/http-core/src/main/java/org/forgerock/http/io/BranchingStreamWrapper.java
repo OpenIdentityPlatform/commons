@@ -34,22 +34,18 @@ final class BranchingStreamWrapper extends BranchingInputStream {
     /** A shared object by all branches of the same input stream. */
     private Trunk trunk;
 
-    /** Points to this branch's parent. */
-    private final BranchingStreamWrapper parent;
-
     /** This branch's position relative to the trunk buffer. */
     private int position;
 
     BranchingStreamWrapper(InputStream in, Factory<Buffer> bufferFactory) {
+        super(in instanceof BranchingStreamWrapper ? (BranchingInputStream) in : null);
         if (in instanceof BranchingStreamWrapper) {
             // branch off of existing trunk
             BranchingStreamWrapper bsw = (BranchingStreamWrapper) in;
-            parent = bsw;
             trunk = bsw.trunk;
             position = bsw.position;
         } else {
             // wrapping a non-wrapping stream; sprout a new trunk
-            parent = null;
             trunk = new Trunk(in, bufferFactory);
         }
         synchronized (trunk) {
@@ -61,8 +57,8 @@ final class BranchingStreamWrapper extends BranchingInputStream {
      * Creates a twin of the given stream.
      */
     private BranchingStreamWrapper(final BranchingStreamWrapper bsw) {
+        super(bsw.parent());
         // branch off of existing trunk
-        parent = bsw.parent; // twins have the same parent
         trunk = bsw.trunk;
         position = bsw.position;
         synchronized (trunk) {
@@ -84,11 +80,6 @@ final class BranchingStreamWrapper extends BranchingInputStream {
 
     boolean isClosed() {
         return trunk == null;
-    }
-
-    @Override
-    public BranchingStreamWrapper parent() {
-        return parent;
     }
 
     @Override
@@ -188,7 +179,7 @@ final class BranchingStreamWrapper extends BranchingInputStream {
         // synchronization on trunk is already handled by the caller
         ArrayList<BranchingStreamWrapper> branches = new ArrayList<>(trunk.branches);
         for (BranchingStreamWrapper branch : branches) {
-            if (branch.parent == this) {
+            if (branch.parent() == this) {
                 // recursively closes its children
                 branch.close();
             }

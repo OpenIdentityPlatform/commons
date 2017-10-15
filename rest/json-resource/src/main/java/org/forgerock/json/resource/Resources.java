@@ -202,14 +202,21 @@ public final class Resources {
      * @return The constructed handler.
      */
     public static RequestHandler newHandler(Object provider) {
-        final DescribableResourceHandler descriptorProvider = new DescribableResourceHandler();
-        Router router = new Router() {
-            @Override
-            public ApiDescription api(ApiProducer<ApiDescription> producer) {
-                return descriptorProvider.api(producer);
-            }
-        };
-        descriptorProvider.describes(addHandlers(provider, router, "", descriptorProvider.getDefinitionDescriptions()));
+        Router router;
+        if (provider instanceof Describable) {
+            router = new Router();
+            addHandlers(provider, router, "", null);
+        } else {
+            final DescribableResourceHandler descriptorProvider = new DescribableResourceHandler();
+            router = new Router() {
+                @Override
+                protected ApiDescription buildApi(ApiProducer<ApiDescription> producer) {
+                    return descriptorProvider.api(producer);
+                }
+            };
+            descriptorProvider.describes(addHandlers(provider, router, "",
+                    descriptorProvider.getDefinitionDescriptions()));
+        }
         Path path = provider.getClass().getAnnotation(Path.class);
         if (path != null) {
             Router pathRouter = new Router();
@@ -296,10 +303,11 @@ public final class Resources {
         RequestHandler instanceHandler = fromInterface
                 ? new InterfaceCollectionInstance((CollectionResourceProvider) provider)
                 : new AnnotationCollectionInstance(provider);
-        CollectionProvider providerAnnotation = provider.getClass().getAnnotation(CollectionProvider.class);
+        Class<?> providerClass = provider.getClass();
+        CollectionProvider providerAnnotation = providerClass.getAnnotation(CollectionProvider.class);
         Parameter pathParameter;
         if (providerAnnotation != null) {
-            pathParameter = Parameter.fromAnnotation(providerAnnotation.pathParam());
+            pathParameter = Parameter.fromAnnotation(providerClass, providerAnnotation.pathParam());
         } else {
             pathParameter = parameter().name("id").type("string").source(ParameterSource.PATH).required(true).build();
         }
@@ -319,6 +327,9 @@ public final class Resources {
 
     private static Resource makeDescriptor(Object provider, HandlerVariant variant, SubResources subResources,
             ApiDescription definitions, Parameter[] pathParameters) {
+        if (provider instanceof Describable) {
+            return null;
+        }
         Class<?> type = provider.getClass();
         switch (variant) {
         case SINGLETON_RESOURCE:

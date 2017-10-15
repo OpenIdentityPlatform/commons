@@ -109,7 +109,7 @@ public abstract class AuditEventBuilder<T extends AuditEventBuilder<T>> {
             timestamp(System.currentTimeMillis());
         }
         if (!trackingIdEntries.isEmpty()) {
-            jsonValue.put(TRACKING_IDS, trackingIdEntries);
+            jsonValue.put(TRACKING_IDS, array(trackingIdEntries.toArray()));
         }
         superSetDefaultsCalled = true;
     }

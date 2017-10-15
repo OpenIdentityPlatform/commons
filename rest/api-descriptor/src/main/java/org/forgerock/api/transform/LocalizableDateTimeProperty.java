@@ -16,6 +16,8 @@
 
 package org.forgerock.api.transform;
 
+import java.util.Objects;
+
 import org.forgerock.util.i18n.LocalizableString;
 
 import io.swagger.models.properties.DateTimeProperty;
@@ -27,6 +29,7 @@ import io.swagger.models.properties.Property;
 class LocalizableDateTimeProperty extends DateTimeProperty implements LocalizableProperty<Property> {
     private LocalizableString title;
     private LocalizableString description;
+    private String defaultValue;
 
     @Override
     public LocalizableDateTimeProperty title(LocalizableString title) {
@@ -72,6 +75,51 @@ class LocalizableDateTimeProperty extends DateTimeProperty implements Localizabl
     @Override
     public LocalizableString getLocalizableDescription() {
         return description;
+    }
+
+    /**
+     * Sets the default value, which should be in ISO 8601 date-time format.
+     *
+     * @param defaultValue Default value or {@code null}
+     */
+    @Override
+    public void setDefault(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * Gets the default value.
+     *
+     * @return Default value or {@code null}
+     */
+    public String getDefault() {
+        return defaultValue;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+        if (!(o instanceof LocalizableDateTimeProperty)) {
+            return false;
+        }
+        final LocalizableDateTimeProperty other = (LocalizableDateTimeProperty) o;
+        if (!Objects.equals(defaultValue, other.defaultValue)) {
+            return false;
+        }
+        if (!Objects.equals(title, other.title)) {
+            return false;
+        }
+        if (!Objects.equals(description, other.description)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), title, description, defaultValue);
     }
 
 }

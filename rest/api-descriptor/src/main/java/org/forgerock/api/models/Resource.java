@@ -388,7 +388,7 @@ public final class Resource {
         }
 
         for (org.forgerock.api.annotations.Parameter parameter : handler.parameters()) {
-            builder.parameter(Parameter.fromAnnotation(parameter));
+            builder.parameter(Parameter.fromAnnotation(type, parameter));
         }
         for (Parameter param : extraParameters) {
             builder.parameter(param);
@@ -396,8 +396,8 @@ public final class Resource {
 
         Resource resource = builder.resourceSchema(resourceSchema)
                 .mvccSupported(handler.mvccSupported())
-                .title(new LocalizableString(handler.title(), type.getClassLoader()))
-                .description(new LocalizableString(handler.description(), type.getClassLoader()))
+                .title(new LocalizableString(handler.title(), type))
+                .description(new LocalizableString(handler.description(), type))
                 .subresources(subResources)
                 .items(items)
                 .build();

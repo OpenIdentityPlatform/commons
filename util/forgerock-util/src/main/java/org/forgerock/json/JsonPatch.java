@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.forgerock.util.Reject;
+
 /**
  * Processes partial modifications to JSON values.
  */
@@ -131,8 +133,11 @@ public final class JsonPatch {
      * @param other another value.
      * @return whether the two inputs are equal.
      * @throws NullPointerException if either of {@code value} or {@code other} are {@code null}.
+     * @throws IllegalArgumentException if the {@link JsonValue} contains non-JSON primitive values.
      */
     public static boolean isEqual(JsonValue value, JsonValue other) {
+        Reject.ifFalse(isJsonPrimitive(value) && isJsonPrimitive(other),
+                "JsonPatch#isEqual only supports recognizable JSON primitives");
         if (differentTypes(value, other)) {
             return false;
         }
@@ -159,6 +164,11 @@ public final class JsonPatch {
             return false;
         }
         return true;
+    }
+
+    private static boolean isJsonPrimitive(JsonValue value) {
+        return value.isNull() || value.isBoolean() || value.isMap() || value.isList() || value.isNumber()
+                || value.isString();
     }
 
     /**

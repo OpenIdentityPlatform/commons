@@ -36,6 +36,8 @@ import org.forgerock.api.models.Services;
 import org.forgerock.api.models.VersionedPath;
 import org.forgerock.http.routing.Version;
 import org.forgerock.http.ApiProducer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * An {@link ApiProducer} implementation for CREST resources, that provides {@code ApiDescription} descriptors.
@@ -45,6 +47,7 @@ public class CrestApiProducer implements ApiProducer<ApiDescription> {
     private final String version;
     private final String id;
     private final LocalizableString description;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrestApiProducer.class);
 
     /**
      * Construct a new producer.
@@ -101,25 +104,30 @@ public class CrestApiProducer implements ApiProducer<ApiDescription> {
         Services.Builder services = services();
         for (ApiDescription description : descriptions) {
             if (description != null) {
-                if (description.getDefinitions() != null) {
-                    for (String definition : description.getDefinitions().getNames()) {
-                        definitions.put(definition, description.getDefinitions().get(definition));
+                try {
+                    if (description.getDefinitions() != null) {
+                        for (String definition : description.getDefinitions().getNames()) {
+                            definitions.put(definition, description.getDefinitions().get(definition));
+                        }
                     }
-                }
-                if (description.getErrors() != null) {
-                    for (String error : description.getErrors().getNames()) {
-                        errors.put(error, description.getErrors().get(error));
+                    if (description.getErrors() != null) {
+                        for (String error : description.getErrors().getNames()) {
+                            errors.put(error, description.getErrors().get(error));
+                        }
                     }
-                }
-                if (description.getServices() != null) {
-                    for (String service : description.getServices().getNames()) {
-                        services.put(service, description.getServices().get(service));
+                    if (description.getServices() != null) {
+                        for (String service : description.getServices().getNames()) {
+                            services.put(service, description.getServices().get(service));
+                        }
                     }
-                }
-                if (description.getPaths() != null) {
-                    for (String path : description.getPaths().getNames()) {
-                        paths.merge(path, description.getPaths().get(path));
+                    if (description.getPaths() != null) {
+                        for (String path : description.getPaths().getNames()) {
+                            paths.merge(path, description.getPaths().get(path));
+                        }
                     }
+                } catch (RuntimeException re) {
+                    LOGGER.error(re.getMessage(), re.fillInStackTrace());
+                    throw re;
                 }
             }
         }

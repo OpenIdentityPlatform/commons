@@ -11,29 +11,26 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2010–2011 ApexIdentity Inc.
+ * Copyright 2010?2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
  */
-
 package org.forgerock.http.servlet;
 
 import static java.util.Collections.list;
-import static org.forgerock.http.HttpApplication.LOGGER;
 import static org.forgerock.http.handler.Handlers.asDescribableHandler;
 import static org.forgerock.http.handler.Handlers.chainOf;
 import static org.forgerock.http.handler.Handlers.internalServerErrorHandler;
 import static org.forgerock.http.io.IO.newBranchingInputStream;
 import static org.forgerock.http.io.IO.newTemporaryStorage;
 import static org.forgerock.http.protocol.Responses.newInternalServerError;
+import static org.forgerock.http.routing.UriRouterContext.uriRouterContext;
 import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.ServiceLoader;
 
@@ -46,7 +43,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.forgerock.http.ApiProducer;
 import org.forgerock.http.DescribedHttpApplication;
-import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.filter.TransactionIdInboundFilter;
@@ -58,7 +54,6 @@ import org.forgerock.http.protocol.Status;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.session.Session;
 import org.forgerock.http.session.SessionContext;
-import org.forgerock.http.swagger.SwaggerUtils;
 import org.forgerock.http.util.CaseInsensitiveSet;
 import org.forgerock.http.util.Uris;
 import org.forgerock.services.context.AttributesContext;
@@ -66,14 +61,14 @@ import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RequestAuditContext;
 import org.forgerock.services.context.RootContext;
-import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.Factory;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.promise.RuntimeExceptionHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
 
 /**
@@ -90,11 +85,10 @@ import io.swagger.models.Swagger;
  */
 public final class HttpFrameworkServlet extends HttpServlet {
 
+    private static final Logger logger = LoggerFactory.getLogger(HttpFrameworkServlet.class);
     private static final long serialVersionUID = 3524182656424860912L;
 
-    /**
-     * Standard specified request attribute name for retrieving X509 Certificates.
-     */
+    /** Standard specified request attribute name for retrieving X509 Certificates. */
     private static final String SERVLET_REQUEST_X509_ATTRIBUTE = "javax.servlet.request.X509Certificate";
 
     /** Methods that should not include an entity body. */
@@ -114,7 +108,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
     private Factory<Buffer> storage;
     private DescribableHandler handler;
     private ServletRoutingBase routingBase;
-    private boolean apiDescribed = false;
 
     /**
      * Default constructor for use via web.xml declaration.
@@ -147,15 +140,13 @@ public final class HttpFrameworkServlet extends HttpServlet {
             storage = newTemporaryStorage(tmpDir);
         }
         try {
-            Handler handler = application.start();
-            this.handler = chainOf(handler, new TransactionIdInboundFilter());
-            if (application instanceof DescribedHttpApplication && handler instanceof Describable) {
+            this.handler = chainOf(asDescribableHandler(application.start()), new TransactionIdInboundFilter());
+            if (application instanceof DescribedHttpApplication) {
                 ApiProducer<Swagger> apiProducer = ((DescribedHttpApplication) application).getApiProducer();
-                apiDescribed = true;
                 this.handler.api(apiProducer);
             }
         } catch (HttpApplicationException e) {
-            LOGGER.error("Error while starting the application.", e);
+            logger.error("Error while starting the application.", e);
             handler = asDescribableHandler(internalServerErrorHandler(e));
         }
     }
@@ -239,11 +230,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
 
         Context context = createClientContext(attributesContext, req);
 
-        if (apiDescribed && SwaggerUtils.isApiRequest(request)) {
-            writeApi(resp, request, req, context);
-            return;
-        }
-
         // handle request
         final ServletSynchronizer sync = adapter.createServletSynchronizer(req, resp);
         try {
@@ -254,14 +240,14 @@ public final class HttpFrameworkServlet extends HttpServlet {
                                 public void handleResult(Response response) {
                                     writeResponse(request, response, resp, sessionContext, sync);
                                 }
+                            })
+                            .thenOnRuntimeException(new RuntimeExceptionHandler() {
+                                @Override
+                                public void handleRuntimeException(RuntimeException e) {
+                                    logger.error("RuntimeException caught", e);
+                                    writeResponse(request, newInternalServerError(), resp, sessionContext, sync);
+                                }
                             });
-            promise.thenOnRuntimeException(new RuntimeExceptionHandler() {
-                @Override
-                public void handleRuntimeException(RuntimeException e) {
-                    LOGGER.error("RuntimeException caught", e);
-                    writeResponse(request, newInternalServerError(), resp, sessionContext, sync);
-                }
-            });
 
             sync.setAsyncListener(new Runnable() {
                 @Override
@@ -274,7 +260,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
             // RuntimeExceptionHandler), possibly leaving a stale response in the web container :'(
             // Servlet specification indicates that it's the responsibility of the Servlet implementer to call
             // AsyncContext.complete()
-            LOGGER.error("Throwable caught", throwable);
+            logger.error("Throwable caught", throwable);
             writeResponse(request, newInternalServerError(), resp, sessionContext, sync);
         }
 
@@ -283,49 +269,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
         } catch (InterruptedException e) {
             throw new ServletException("Awaiting asynchronous request was interrupted.", e);
         }
-    }
-
-    private void writeApi(HttpServletResponse resp, Request request, final HttpServletRequest req, Context context) {
-        Response chfResponse = SwaggerUtils.request(new Describable<Swagger, Request>() {
-            @Override
-            public Swagger api(ApiProducer<Swagger> producer) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public Swagger handleApiRequest(Context context, Request request) {
-                final Swagger swagger = SwaggerUtils.clone(handler.handleApiRequest(context, request));
-                final UriRouterContext uriRouterContext = context.asContext(UriRouterContext.class);
-                final URI originalUri = uriRouterContext.getOriginalUri();
-
-                // use scheme, host, and/or base-path from request, if not already defined by Swagger
-                if (swagger.getBasePath() == null || swagger.getBasePath().trim().isEmpty()) {
-                    swagger.setBasePath(uriRouterContext.getBaseUri());
-                }
-                if (swagger.getSchemes() == null || swagger.getSchemes().isEmpty()) {
-                    swagger.addScheme(Scheme.forValue(originalUri.getScheme()));
-                }
-                if (swagger.getHost() == null || swagger.getHost().trim().isEmpty()) {
-                    String host = originalUri.getHost();
-                    if (originalUri.getPort() != 80 && originalUri.getPort() != 443) {
-                        host += ":" + originalUri.getPort();
-                    }
-                    swagger.setHost(host);
-                }
-                return swagger;
-            }
-
-            @Override
-            public void addDescriptorListener(Listener listener) {
-                throw new UnsupportedOperationException();
-            }
-
-            @Override
-            public void removeDescriptorListener(Listener listener) {
-                throw new UnsupportedOperationException();
-            }
-        }, request, context);
-        writeResponse(chfResponse, resp, context.asContext(SessionContext.class));
     }
 
     private Request createRequest(HttpServletRequest req) throws IOException, URISyntaxException {
@@ -376,8 +319,8 @@ public final class HttpFrameworkServlet extends HttpServlet {
         String matchedUri = routingBase.extractMatchedUri(req);
         final String requestURI = req.getRequestURI();
         String remaining = requestURI.substring(requestURI.indexOf(matchedUri) + matchedUri.length());
-        return new UriRouterContext(parent, matchedUri, remaining, Collections.<String, String>emptyMap(),
-                request.getUri().asURI());
+        return uriRouterContext(parent).matchedUri(matchedUri).remainingUri(remaining)
+                .originalUri(request.getUri().asURI()).build();
     }
 
     private void writeResponse(Request request, Response response, HttpServletResponse servletResponse,
@@ -418,7 +361,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 response.getEntity().copyRawContentTo(servletResponse.getOutputStream());
             }
         } catch (IOException e) {
-            LOGGER.error("Failed to write response", e);
+            logger.error("Failed to write response", e);
         } finally {
             closeSilently(response);
         }
@@ -429,3 +372,62 @@ public final class HttpFrameworkServlet extends HttpServlet {
         application.stop();
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

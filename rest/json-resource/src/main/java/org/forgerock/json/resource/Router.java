@@ -29,6 +29,7 @@ import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.http.routing.Version;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.services.routing.AbstractRouter;
 import org.forgerock.services.routing.IncomparableRouteMatchException;
 import org.forgerock.services.routing.RouteMatcher;
@@ -226,9 +227,8 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler, ApiD
             Pair<Context, RequestHandler> bestMatch = getBestRoute(context, request);
             if (bestMatch == null) {
                 throw new NotFoundException(String.format("Resource '%s' not found", request.getResourcePath()));
-            } else {
-                return bestMatch;
             }
+            return bestMatch;
         } catch (IncomparableRouteMatchException e) {
             throw new InternalServerErrorException(e.getMessage(), e);
         }
@@ -345,12 +345,37 @@ public class Router extends AbstractRouter<Router, Request, RequestHandler, ApiD
         }
     }
 
-    private UriRouterContext getRouterContext(Context context) {
-        if (context.containsContext(UriRouterContext.class)) {
-            return context.asContext(UriRouterContext.class);
-        } else {
-            return null;
+    @Override
+    @SuppressWarnings("unchecked")
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        try {
+            Pair<Context, RequestHandler> bestRoute = getBestRoute(context, request);
+            if (bestRoute != null) {
+                RequestHandler handler = bestRoute.getSecond();
+                if (handler instanceof Describable) {
+                    Context nextContext = bestRoute.getFirst();
+                    UriRouterContext routerContext = getRouterContext(nextContext);
+                    Request routedRequest = wasRouted(context, routerContext)
+                        ? copyOfApiRequest(request).setResourcePath(getResourcePath(routerContext))
+                        : request;
+                    return ((Describable<ApiDescription, Request>) handler)
+                        .handleApiRequest(nextContext, routedRequest);
+                }
+            }
+        } catch (IncomparableRouteMatchException e) {
+            throw new IllegalStateException(e);
         }
+        if (thisRouterUriMatcher.evaluate(context, request) != null) {
+            return this.api;
+        }
+        throw new UnsupportedOperationException(
+            "No route matched the request resource path " + request.getResourcePath());
+    }
+
+    private UriRouterContext getRouterContext(Context context) {
+        return context.containsContext(UriRouterContext.class)
+            ? context.asContext(UriRouterContext.class)
+            : null;
     }
 
     private boolean wasRouted(Context originalContext, UriRouterContext routerContext) {

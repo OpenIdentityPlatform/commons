@@ -662,7 +662,14 @@ public final class Requests {
         }
     }
 
-    private static final class ApiRequestImpl extends AbstractRequestImpl<Request> implements Request {
+    private static final class ApiRequestImpl extends AbstractRequestImpl<Request> {
+        private ApiRequestImpl() {
+           // nothing to do
+        }
+
+        private ApiRequestImpl(ApiRequestImpl request) {
+            super(request);
+        }
 
         @Override
         protected Request getThis() {
@@ -755,6 +762,17 @@ public final class Requests {
      */
     public static UpdateRequest copyOfUpdateRequest(final UpdateRequest request) {
         return new UpdateRequestImpl(request);
+    }
+
+    /**
+     * Returns a copy of the provided api request.
+     *
+     * @param request
+     *            The api request to be copied.
+     * @return The api request copy.
+     */
+    public static Request copyOfApiRequest(final Request request) {
+        return new ApiRequestImpl((ApiRequestImpl) request);
     }
 
     /**

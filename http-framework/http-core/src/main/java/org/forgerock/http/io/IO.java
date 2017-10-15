@@ -13,7 +13,7 @@
  *
  * Copyright 2009 Sun Microsystems Inc.
  * Portions Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -26,6 +26,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.forgerock.util.Factory;
 
@@ -34,19 +36,13 @@ import org.forgerock.util.Factory;
  */
 public final class IO {
 
-    /**
-     * 8 KiB.
-     */
+    /** 8 KiB. */
     public static final int DEFAULT_TMP_INIT_LENGTH = 8 * 1_024;
 
-    /**
-     * 64 KiB.
-     */
+    /** 64 KiB. */
     public static final int DEFAULT_TMP_MEMORY_LIMIT = 64 * 1_024;
 
-    /**
-     * 1 GiB.
-     */
+    /** 1 GiB. */
     public static final int DEFAULT_TMP_FILE_LIMIT = 1 * 1_024 * 1_024 * 1_024;
 
     /** Size of buffer to use during streaming. */
@@ -55,12 +51,35 @@ public final class IO {
     private static final InputStream NULL_INPUT_STREAM = new ByteArrayInputStream(new byte[0]);
 
     private static final OutputStream NULL_OUTPUT_STREAM = new OutputStream() {
-
         @Override
         public void write(final int b) throws IOException {
             // goes nowhere, does nothing
         }
     };
+
+    /** Initial size of pre-allocated buffer pools.  */
+    private static final int BUF_POOL_INITIAL_SIZE = 32;
+
+    /**
+     * Pool of pre-allocated {@code byte[]} buffers, which will grow in size up to the maximum concurrent threads
+     * that call this class, with {@link #BUF_SIZE} amount of memory allocated for each.
+     */
+    private static final Queue<byte[]> BYTE_BUF_POOL;
+
+    /**
+     * Pool of pre-allocated {@code char[]} buffers, which will grow in size up to the maximum concurrent threads
+     * that call this class, with {@link #BUF_SIZE} amount of memory allocated for each.
+     */
+    private static final Queue<char[]> CHAR_BUF_POOL;
+
+    static {
+        BYTE_BUF_POOL = new ConcurrentLinkedQueue<>();
+        CHAR_BUF_POOL = new ConcurrentLinkedQueue<>();
+        for (int i = 0; i < BUF_POOL_INITIAL_SIZE; ++i) {
+            BYTE_BUF_POOL.add(new byte[BUF_SIZE]);
+            CHAR_BUF_POOL.add(new char[BUF_SIZE]);
+        }
+    }
 
     /**
      * Creates a new branching input stream that wraps a byte array.
@@ -249,10 +268,17 @@ public final class IO {
      *             if an I/O exception occurs.
      */
     public static void stream(final InputStream in, final OutputStream out) throws IOException {
-        final byte[] buf = new byte[BUF_SIZE];
-        int n;
-        while ((n = in.read(buf, 0, BUF_SIZE)) != -1) {
-            out.write(buf, 0, n);
+        byte[] buf = BYTE_BUF_POOL.poll();
+        if (buf == null) {
+            buf = new byte[BUF_SIZE];
+        }
+        try {
+            int n;
+            while ((n = in.read(buf, 0, BUF_SIZE)) != -1) {
+                out.write(buf, 0, n);
+            }
+        } finally {
+            BYTE_BUF_POOL.add(buf);
         }
     }
 
@@ -272,14 +298,21 @@ public final class IO {
      */
     public static int stream(final InputStream in, final OutputStream out, final int len)
             throws IOException {
-        int remaining = len;
-        final byte[] buf = new byte[BUF_SIZE];
-        int n;
-        while (remaining > 0 && (n = in.read(buf, 0, Math.min(remaining, BUF_SIZE))) >= 0) {
-            out.write(buf, 0, n);
-            remaining -= n;
+        byte[] buf = BYTE_BUF_POOL.poll();
+        if (buf == null) {
+            buf = new byte[BUF_SIZE];
         }
-        return len - remaining;
+        try {
+            int remaining = len;
+            int n;
+            while (remaining > 0 && (n = in.read(buf, 0, Math.min(remaining, BUF_SIZE))) >= 0) {
+                out.write(buf, 0, n);
+                remaining -= n;
+            }
+            return len - remaining;
+        } finally {
+            BYTE_BUF_POOL.add(buf);
+        }
     }
 
     /**
@@ -293,10 +326,17 @@ public final class IO {
      *             if an I/O exception occurs.
      */
     public static void stream(final Reader in, final Writer out) throws IOException {
-        final char[] buf = new char[BUF_SIZE];
-        int n;
-        while ((n = in.read(buf, 0, BUF_SIZE)) != -1) {
-            out.write(buf, 0, n);
+        char[] buf = CHAR_BUF_POOL.poll();
+        if (buf == null) {
+            buf = new char[BUF_SIZE];
+        }
+        try {
+            int n;
+            while ((n = in.read(buf, 0, BUF_SIZE)) != -1) {
+                out.write(buf, 0, n);
+            }
+        } finally {
+            CHAR_BUF_POOL.add(buf);
         }
     }
 

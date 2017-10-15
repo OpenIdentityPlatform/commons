@@ -13,7 +13,8 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.audit.handlers.elasticsearch;
+
+package org.forgerock.audit.util;
 
 import static org.forgerock.http.util.Json.readJson;
 import static org.forgerock.json.JsonValue.json;
@@ -33,7 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Utilities for working with Elasticsearch.
  */
-final class ElasticsearchUtil {
+public final class ElasticsearchUtil {
 
     /**
      * Jackson {@link ObjectMapper} for working with JSON.
@@ -51,6 +52,8 @@ final class ElasticsearchUtil {
      */
     @VisibleForTesting
     protected static final String FIELD_NAMES_FIELD = "fieldNames";
+
+    private static final String NORMALIZED_FIELD_JSON_PREFIX = ",\"" + NORMALIZED_FIELD + "\":";
 
     /**
      * Number of normalization metadata fields that this class might add to the {@link #NORMALIZED_FIELD JSON object.
@@ -107,18 +110,13 @@ final class ElasticsearchUtil {
      * @return Resulting JSON, with {@code _normalized} field if any normalization was necessary
      * @throws IOException If unable to parse the json.
      */
-    public static JsonValue normalizeJson(final JsonValue value) throws IOException {
+    public static String normalizeJson(final JsonValue value) throws IOException {
         if (value != null) {
             if (value.get(NORMALIZED_FIELD).isNotNull()) {
                 throw new IllegalStateException(NORMALIZED_FIELD + " is a reserved JsonValue field");
             }
-            final Map<String, Object> normalized = new LinkedHashMap<>(MAX_FIELD_COUNT);
-            final JsonValue result = replaceKeyPeriodsWithUnderscores(value, normalized);
-            if (!normalized.isEmpty()) {
-                // add metadata for de-normalization
-                result.put(NORMALIZED_FIELD, normalized);
-            }
-            return result;
+            final String json = OBJECT_MAPPER.writeValueAsString(value.getObject());
+            return replaceKeyPeriodsWithUnderscores(json);
         }
         return null;
     }
@@ -149,54 +147,55 @@ final class ElasticsearchUtil {
      * [<a href="https://discuss.elastic.co/t/field-name-cannot-contain/33251/29">ref</a>]. If normalization is
      * required, the {@code fieldNames} field will be added to the {@code normalized} metadata.
      *
-     * @param value JSON input
-     * @param normalized De-normalization metadata, which this method may add to
-     * @return Resulting JSON
+     * @param json JSON {@code String} input
+     * @return Resulting JSON {@code String}
      * @throws IOException If unable to parse the json.
      */
     @VisibleForTesting
-    protected static JsonValue replaceKeyPeriodsWithUnderscores(final JsonValue value,
-            final Map<String, Object> normalized) throws IOException {
-        final String s = OBJECT_MAPPER.writeValueAsString(value.getObject());
-        final Matcher m = JSON_KEY_WITH_PERIOD_CHAR_PATTERN.matcher(s);
+    protected static String replaceKeyPeriodsWithUnderscores(final String json)
+            throws IOException {
+        final Matcher m = JSON_KEY_WITH_PERIOD_CHAR_PATTERN.matcher(json);
         if (m.find()) {
             // fieldNames contains metadata for de-normalization
+            final Map<String, Object> normalized = new LinkedHashMap<>(MAX_FIELD_COUNT);
             final Map<String, Object> fieldNames = new LinkedHashMap<>(2);
             normalized.put(FIELD_NAMES_FIELD, fieldNames);
 
-            final int n = s.length();
-            final StringBuilder builder = new StringBuilder(n);
-            if (m.start() != 0) {
-                builder.append(s.substring(0, m.start()));
-            }
+            final int n = json.length();
 
-            String fieldName = m.group(1);
-            fieldNames.put(replaceAllPeriodsWithUnderscores(fieldName), fieldName);
+            // allocate enough capacity to prevent resizing
+            final StringBuilder builder = new StringBuilder(n + NORMALIZED_FIELD_JSON_PREFIX.length() + 128);
+            builder.append(json);
 
-            builder.append(replaceAllPeriodsWithUnderscores(s.substring(m.start(), m.end())));
+            String originalFieldName = m.group(1);
+            String normalizedFieldName = replaceAllPeriodsWithUnderscores(builder, m.start(1), m.end(1));
+            fieldNames.put(normalizedFieldName, originalFieldName);
+
             int index = m.end();
             while (index != n && m.find(index)) {
-                if (index != m.start()) {
-                    builder.append(s.substring(index, m.start()));
-                }
+                originalFieldName = m.group(1);
+                normalizedFieldName = replaceAllPeriodsWithUnderscores(builder, m.start(1), m.end(1));
+                fieldNames.put(normalizedFieldName, originalFieldName);
 
-                fieldName = m.group(1);
-                fieldNames.put(replaceAllPeriodsWithUnderscores(fieldName), fieldName);
-
-                builder.append(replaceAllPeriodsWithUnderscores(s.substring(m.start(), m.end())));
                 index = m.end();
             }
-            if (index != n) {
-                builder.append(s.substring(index));
-            }
-            return json(readJson(builder.toString()));
+
+            // remove last curly-brace, so that we can append
+            builder.setLength(n - 1);
+
+            // add JSON metadata to end
+            builder.append(NORMALIZED_FIELD_JSON_PREFIX)
+                    .append(OBJECT_MAPPER.writeValueAsString(normalized))
+                    .append('}');
+
+            return builder.toString();
         }
         // no normalization required
-        return value;
+        return json;
     }
 
     /**
-     * Reverses the normalization steps preformed by {@link #replaceKeyPeriodsWithUnderscores(JsonValue, Map)}.
+     * Reverses the normalization steps preformed by {@link #replaceKeyPeriodsWithUnderscores(String)}.
      *
      * @param value JSON input
      * @param normalized De-normalization metadata, which this method may add to
@@ -206,23 +205,23 @@ final class ElasticsearchUtil {
     @VisibleForTesting
     protected static JsonValue restoreKeyPeriods(final JsonValue value, final JsonValue normalized) throws IOException {
         final JsonValue fieldNames = normalized.get(FIELD_NAMES_FIELD);
-        if (fieldNames.isNotNull()) {
+        if (fieldNames.isNotNull() && !fieldNames.asMap().isEmpty()) {
             final String s = OBJECT_MAPPER.writeValueAsString(value.getObject());
             final Matcher m = JSON_KEY_WITH_UNDERSCORE_CHAR_PATTERN.matcher(s);
             if (m.find()) {
                 final int n = s.length();
                 final StringBuilder builder = new StringBuilder(n);
-                if (m.start() != 0) {
-                    builder.append(s.substring(0, m.start()));
+                if (m.start(1) != 0) {
+                    builder.append(s.substring(0, m.start(1)));
                 }
-                builder.append(replace(s.substring(m.start(), m.end()), m.group(1), fieldNames));
-                int index = m.end();
+                builder.append(replace(m.group(1), fieldNames));
+                int index = m.end(1);
                 while (index != n && m.find(index)) {
-                    if (index != m.start()) {
-                        builder.append(s.substring(index, m.start()));
+                    if (index != m.start(1)) {
+                        builder.append(s.substring(index, m.start(1)));
                     }
-                    builder.append(replace(s.substring(m.start(), m.end()), m.group(1), fieldNames));
-                    index = m.end();
+                    builder.append(replace(m.group(1), fieldNames));
+                    index = m.end(1);
                 }
                 if (index != n) {
                     builder.append(s.substring(index));
@@ -238,24 +237,30 @@ final class ElasticsearchUtil {
      * Replaces all period-characters with underscore-characters.
      *
      * @param s Input
+     * @param start Start index (inclusive)
+     * @param end End index (exclusive)
      * @return Result
      */
-    private static String replaceAllPeriodsWithUnderscores(final String s) {
-        return PERIOD_CHAR_PATTERN.matcher(s).replaceAll("_");
+    private static String replaceAllPeriodsWithUnderscores(final StringBuilder s, final int start, final int end) {
+        for (int i = start; i < end; ++i) {
+            if (s.charAt(i) == '.') {
+                s.setCharAt(i, '_');
+            }
+        }
+        return s.substring(start, end);
     }
 
     /**
-     * Replaces all instances of a key ({@literal String}) with the corresponding value ({@literal String}). If
-     * a key-value mapping is not found, then the original input is returned.
+     * Finds replacement for a given key ({@literal fieldName}) within {@literal fieldNames} map. If a key-value mapping
+     * is not found, then the original input is returned.
      *
-     * @param s Input
      * @param fieldName Key
      * @param fieldNames Map of key-values ({@literal String})
      * @return Result
      */
-    private static String replace(final String s, final String fieldName, final JsonValue fieldNames) {
+    private static String replace(final String fieldName, final JsonValue fieldNames) {
         final JsonValue value = fieldNames.get(fieldName);
-        return value.isNull() ? s : s.replace(fieldName, fieldNames.get(fieldName).asString());
+        return value.isNull() ? fieldName : value.asString();
     }
 
     /**
@@ -273,5 +278,29 @@ final class ElasticsearchUtil {
             }
         }
         return ptr;
+    }
+
+    /**
+     * Renames a field within the given {@link JsonValue}.
+     *
+     * @param jsonValue {@link JsonValue} to have a top-level field renamed
+     * @param oldKey Old field name
+     * @param newKey New field name (field must <b>not</b> already exist)
+     * @return {@code true} if field was found and renamed, and {@code false} otherwise
+     */
+    public static boolean renameField(final JsonValue jsonValue, final String oldKey, final String newKey) {
+        if (jsonValue.isMap()) {
+            final Map<String, Object> map = jsonValue.asMap();
+            final Object value = map.remove(oldKey);
+            if (value != null) {
+                if (map.put(newKey, value) != null) {
+                    // newKey already existed, so reverse the change and throw Exception
+                    renameField(jsonValue, newKey, oldKey);
+                    throw new IllegalStateException("Cannot overwrite existing field: " + newKey);
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -23,7 +23,7 @@ import static org.forgerock.util.Reject.*;
 
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.models.Resource;
-import org.forgerock.guava.common.base.Optional;
+import com.google.common.base.Optional;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.descriptor.Describable;

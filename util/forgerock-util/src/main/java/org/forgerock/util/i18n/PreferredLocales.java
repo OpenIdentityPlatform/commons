@@ -11,15 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.util.i18n;
+
+import static org.forgerock.util.Utils.isNullOrEmpty;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class encapsulates an ordered list of preferred locales, and the logic
@@ -45,10 +50,20 @@ import java.util.ResourceBundle;
  *         is returned.
  *     </li>
  * </ul>
+ * It is expected that the default resource bundle locale (i.e. the locale for
+ * the bundle properties file that doesn't have a language tag, e.g.
+ * {@code MyBundle.properties}) is {@code en-US}. If this is not the case for an
+ * application, it can be changed by setting the
+ * {@code org.forgerock.defaultBundleLocale} system property.
  */
 public class PreferredLocales {
 
+    private static final Locale DEFAULT_RESOURCE_BUNDLE_LOCALE =
+            Locale.forLanguageTag(System.getProperty("org.forgerock.defaultBundleLocale", "en-US"));
+    private static final Logger logger = LoggerFactory.getLogger(PreferredLocales.class);
+
     private final List<Locale> locales;
+    private final int numberLocales;
 
     /**
      * Create a new preference of locales by copying the provided locales list.
@@ -59,6 +74,7 @@ public class PreferredLocales {
             locales = Collections.singletonList(Locale.ROOT);
         }
         this.locales = Collections.unmodifiableList(locales);
+        this.numberLocales = locales.size();
     }
 
     /**
@@ -92,22 +108,56 @@ public class PreferredLocales {
      * @return The bundle in the best matching locale.
      */
     public ResourceBundle getBundleInPreferredLocale(String bundleName, ClassLoader classLoader) {
-        for (Locale locale : locales) {
+        logger.debug("Finding best {} bundle for locales {}", bundleName, locales);
+        for (int i = 0; i < numberLocales; i++) {
+            Locale locale = locales.get(i);
             ResourceBundle candidate = ResourceBundle.getBundle(bundleName, locale, classLoader);
-            if (matches(locale, candidate.getLocale())) {
+            Locale candidateLocale = candidate.getLocale();
+            List<Locale> remainingLocales = locales.subList(i + 1, numberLocales);
+            if (matches(locale, candidateLocale, remainingLocales)) {
+                logger.debug("Returning {} bundle in {} locale", bundleName, candidateLocale);
                 return candidate;
             }
+            if (!candidateLocale.equals(Locale.ROOT)
+                    && matches(locale, DEFAULT_RESOURCE_BUNDLE_LOCALE, remainingLocales)) {
+                return ResourceBundle.getBundle(bundleName, Locale.ROOT, classLoader);
+            }
         }
+        logger.debug("Returning {} bundle in root locale", bundleName);
         return ResourceBundle.getBundle(bundleName, Locale.ROOT, classLoader);
     }
 
     /**
-     * Is the candidate locale the best match for the requested locale? Exclude {@code Locale.ROOT} unless it
-     * is the requested locale, as it should be the fallback only when all locales are tried.
+     * Is the candidate locale the best match for the requested locale? Exclude {@code Locale.ROOT}, as it should be
+     * the fallback only when all locales are tried.
      */
-    private boolean matches(Locale requested, Locale candidate) {
-        return candidate.equals(requested) || (!Locale.ROOT.equals(candidate) && !locales.contains(candidate));
+    private boolean matches(Locale requested, Locale candidate, List<Locale> remainingLocales) {
+        logger.trace("Checking candidate locale {} for match with requested {}", candidate, requested);
+        if (requested.equals(candidate)) {
+            return true;
+        }
+        if (candidate.equals(Locale.ROOT)) {
+            logger.trace("Rejecting root locale as it is the default. Requested {}", requested);
+            return false;
+        }
+        String language = candidate.getLanguage();
+        if (!requested.getLanguage().equals(language)) {
+            return false;
+        }
+        String country = candidate.getCountry();
+        String variant = candidate.getVariant();
+        if (!isNullOrEmpty(variant)
+                && remainingLocales.contains(new Locale(language, country, variant))) {
+            return false;
+        }
+        if ((!isNullOrEmpty(country) || !isNullOrEmpty(variant))
+                && remainingLocales.contains(new Locale(language, country))) {
+            return false;
+        }
+        if (remainingLocales.contains(new Locale(language))) {
+            return false;
+        }
+        return true;
     }
-
 
 }

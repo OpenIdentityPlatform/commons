@@ -1,19 +1,3 @@
-/*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
- *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
- *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions copyright [year] [name of copyright owner]".
- *
- * Copyright 2012-2015 ForgeRock AS.
- */
-
 package org.forgerock.http.routing;
 
 import static java.lang.String.format;
@@ -22,12 +6,12 @@ import static org.forgerock.util.Reject.checkNotNull;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.AbstractContext;
 import org.forgerock.json.JsonValue;
-import org.forgerock.util.Reject;
+import org.forgerock.services.context.AbstractContext;
+import org.forgerock.services.context.Context;
 
 /**
  * A {@link Context} which is created when a request has been routed. The
@@ -41,6 +25,24 @@ import org.forgerock.util.Reject;
  * <li>a map which contains the parsed URI template variables, keyed on the URI
  * template variable name.
  * </ul>
+ *
+ * The {@literal originalUri} represents the incoming request URI, as sent
+ * by the client. So it can be used to generate redirects or links that will
+ * be usable in the context of the caller (user-agent).
+ *
+ * This is considered as the starting point of the current routing process.
+ * Most of the time, that will be the URI received by web server, but it may
+ * happen that the URI received by the web server is not the same one that the
+ * one sent by the user-agent (e.g. : behind a load balancer, in a cloud
+ * environment, ... ). The real URI can be found by other means, it is possible to
+ * ?overwrite? it in other UriRouterContexts that can be accessed in the contexts
+ * chain. Then in that case, we need to start a new routing process by considering
+ * that given URI as the new originalUri.
+ *
+ * Otherwise child {@code UriRouterContext} may just redefine only the
+ * {code matchedUri}, {@code remainingUri}, {@code uriTemplateVariables} as
+ * part of their routing process.
+ *
  */
 public final class UriRouterContext extends AbstractContext {
 
@@ -53,15 +55,20 @@ public final class UriRouterContext extends AbstractContext {
     private final Map<String, String> uriTemplateVariables;
 
     /**
-     * The original message's URI, as received by the web container. This value is set by the receiving servlet and
-     * is immutable.
+     * The original message's URI, considered as the starting of the current process.
+     * Most of the time, that will the URI received by web server, but it may
+     * happen that the URI received by the web server is not the real one that
+     * we want to process.
      */
     private URI originalUri;
 
-        /**
+    /**
      * Creates a new routing context having the provided parent, URI template
      * variables, and an ID automatically generated using
      * {@code UUID.randomUUID()}.
+     *
+     * The parameters provided in this {@link UriRouterContext} will override any
+     * parameters inherited from parent {@link UriRouterContext}s.
      *
      * @param parent
      *            The parent server context.
@@ -83,17 +90,22 @@ public final class UriRouterContext extends AbstractContext {
      * variables, and an ID automatically generated using
      * {@code UUID.randomUUID()}.
      *
+     * The parameters provided in this {@link UriRouterContext} will override any
+     * parameters inherited from parent {@link UriRouterContext}s.
+     *
      * @param parent
-     *            The parent server context.
+     *            The parent server context. (not null)
      * @param matchedUri
      *            The matched URI
      * @param remainingUri
      *            The remaining URI to be matched.
      * @param uriTemplateVariables
      *            A {@code Map} containing the parsed URI template variables,
-     *            keyed on the URI template variable name.
+     *            keyed on the URI template variable name. (not null)
      * @param originalUri
-     *            The original URI
+     *            The original URI. If not {@literal null} it will override the
+     *            {@code originalUri} defined in the closest {@code UriRouterContext}
+     *            referenced in the context's chain.
      */
     public UriRouterContext(final Context parent, final String matchedUri, final String remainingUri,
             final Map<String, String> uriTemplateVariables, URI originalUri) {
@@ -104,11 +116,6 @@ public final class UriRouterContext extends AbstractContext {
         data.put(ATTR_URI_TEMPLATE_VARIABLES, this.uriTemplateVariables);
 
         if (originalUri != null) {
-            if (parent.containsContext(UriRouterContext.class)) {
-                UriRouterContext parentUriRouterContext = parent.asContext(UriRouterContext.class);
-                Reject.ifTrue(parentUriRouterContext.getOriginalUri() != null, "Cannot set the originalUri more than "
-                        + "once in the chain.");
-            }
             this.originalUri = originalUri;
             data.put(ATTR_ORIGINAL_URI, originalUri.toASCIIString());
         }
@@ -214,4 +221,147 @@ public final class UriRouterContext extends AbstractContext {
             return null;
         }
     }
+
+    /**
+     * Return a builder for a new {@link UriRouterContext}.
+     * @param parent parent context
+     * @return a builder for a new {@link UriRouterContext}.
+     */
+    public static Builder uriRouterContext(Context parent) {
+        return new Builder(parent);
+    }
+
+    /**
+     * Ease {@link UriRouterContext} construction.
+     */
+    public static class Builder {
+
+        private final Context parent;
+        private String matchedUri;
+        private String remainingUri;
+        private URI originalUri;
+        private Map<String, String> variables = new LinkedHashMap<>();
+
+        Builder(final Context parent) {
+            this.parent = parent;
+        }
+
+        /**
+         * Set the {@code matchedUri} value.
+         * @param matchedUri matched uri
+         * @return this builder
+         */
+        public Builder matchedUri(String matchedUri) {
+            this.matchedUri = matchedUri;
+            return this;
+        }
+
+        /**
+         * Set the {@code remainingUri} value.
+         * @param remainingUri remaining uri
+         * @return this builder
+         */
+        public Builder remainingUri(String remainingUri) {
+            this.remainingUri = remainingUri;
+            return this;
+        }
+
+        /**
+         * Set the {@code originalUri} value (only first UriRouterContext is expected to have that value set).
+         * @param originalUri original uri
+         * @return this builder
+         */
+        public Builder originalUri(URI originalUri) {
+            this.originalUri = originalUri;
+            return this;
+        }
+
+        /**
+         * Set the {@code variables} value.
+         * @param variables matched variables
+         * @return this builder
+         */
+        public Builder templateVariables(Map<String, String> variables) {
+            this.variables = checkNotNull(variables);
+            return this;
+        }
+
+        /**
+         * Add the given {@code name}:{@code value} pair in the {@code variables} map.
+         * @param name matched variable name
+         * @param value matched variable value
+         * @return this builder
+         */
+        public Builder templateVariable(String name, String value) {
+            this.variables.put(name, value);
+            return this;
+        }
+
+        /**
+         * Returns a new {@link UriRouterContext} build from provided values.
+         * @return a new {@link UriRouterContext}.
+         */
+        public UriRouterContext build() {
+            return new UriRouterContext(parent, matchedUri, remainingUri, variables, originalUri);
+        }
+    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

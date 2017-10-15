@@ -12,12 +12,13 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.header;
 
 import static org.forgerock.http.header.HeaderUtil.*;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -53,13 +54,16 @@ public class ContentTypeHeader extends Header {
      * @return The parsed header.
      */
     public static ContentTypeHeader valueOf(final String string) {
-        List<String> parts = HeaderUtil.split(string, ';');
+        final List<String> parts = HeaderUtil.split(string, ';');
         if (parts.size() > 0) {
-            String type = parts.get(0);
+            // Get/remove first part (type) so as not to be seen as an additional parameter.
+            final String type = parts.remove(0);
             final Map<String, String> parameters = HeaderUtil.parseParameters(parts);
-            String charset = parameters.get("charset");
-            String boundary = parameters.get("boundary");
-            return new ContentTypeHeader(type, charset, boundary);
+            // These two parameters are of special interest so capture them specifically as properties.
+            final String charset = parameters.remove("charset");
+            final String boundary = parameters.remove("boundary");
+            // Any remaining parameters will end up captured as additional parameters.
+            return new ContentTypeHeader(type, charset, boundary, parameters);
         } else {
             return new ContentTypeHeader(null, null, null);
         }
@@ -77,6 +81,9 @@ public class ContentTypeHeader extends Header {
     /** The boundary value provided in multipart messages. */
     private final String boundary;
 
+    /** Any additional parameters provided in the message. */
+    private final Map<String, String> additionalParameters;
+
     /**
      * Constructs a new empty header whose type, charset, and boundary are all
      * {@code null}.
@@ -86,7 +93,7 @@ public class ContentTypeHeader extends Header {
     }
 
     /**
-     * Constructs a new header with the provided parameters.
+     * Constructs a new header based on message type, charset and boundary.
      *
      * @param type
      *            The type/sub-type of the message.
@@ -96,9 +103,26 @@ public class ContentTypeHeader extends Header {
      *            The boundary value provided in multipart messages.
      */
     public ContentTypeHeader(String type, String charset, String boundary) {
+        this(type, charset, boundary, Collections.<String, String>emptyMap());
+    }
+
+    /**
+     * Constructs a new header based on message type, charset, boundary and any additional message parameters.
+     *
+     * @param type
+     *            The type/sub-type of the message.
+     * @param charset
+     *            The character set used in encoding the message.
+     * @param boundary
+     *            The boundary value provided in multipart messages.
+     * @param additionalParameters
+     *            Any additional parameters provided in the message or an empty map if there are none.
+     */
+    public ContentTypeHeader(String type, String charset, String boundary, Map<String, String> additionalParameters) {
         this.type = type;
         this.charset = charset;
         this.boundary = boundary;
+        this.additionalParameters = checkNotNull(additionalParameters);
     }
 
     /**
@@ -136,6 +160,15 @@ public class ContentTypeHeader extends Header {
         return boundary;
     }
 
+    /**
+     * Returns any additional parameters in the message or an empty map if none specified.
+     *
+     * @return Any additional parameters in the message or an empty map if none specified.
+     */
+    public Map<String, String> getAdditionalParameters() {
+        return additionalParameters;
+    }
+
     @Override
     public String getName() {
         return NAME;
@@ -153,6 +186,14 @@ public class ContentTypeHeader extends Header {
         }
         if (boundary != null) {
             sb.append("; boundary=").append(boundary);
+        }
+        for (String key : additionalParameters.keySet()) {
+            sb.append("; ").append(key);
+            String value = additionalParameters.get(key);
+            // Not specifically allowed to be null by the spec but allowing for compatibility with known use-cases.
+            if (value != null) {
+                sb.append("=").append(value);
+            }
         }
         return sb.length() > 0 ? Collections.singletonList(sb.toString()) : Collections.<String>emptyList();
     }

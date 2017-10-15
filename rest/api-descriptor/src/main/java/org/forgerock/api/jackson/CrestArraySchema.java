@@ -111,17 +111,21 @@ public class CrestArraySchema extends ArraySchema implements CrestReadWritePolic
             throw new ValidationException("Array has too few items. Minimum permitted: " + minItems);
         }
         if (items.isSingleItems()) {
-            ValidatableSchema itemSchema = (ValidatableSchema) items.asSingleItems().getSchema();
-            for (JsonValue item : object) {
-                itemSchema.validate(item);
+            if (items.asSingleItems().getSchema() instanceof ValidatableSchema) {
+                ValidatableSchema itemSchema = (ValidatableSchema) items.asSingleItems().getSchema();
+                for (JsonValue item : object) {
+                    itemSchema.validate(item);
+                }
             }
         } else {
             Iterator<JsonValue> arrayItems = object.iterator();
-            for (ValidatableSchema itemSchema : (ValidatableSchema[]) items.asArrayItems().getJsonSchemas()) {
+            for (JsonSchema itemSchema : items.asArrayItems().getJsonSchemas()) {
                 if (!arrayItems.hasNext()) {
                     throw new ValidationException("Not enough items. Expecting " + itemSchema);
                 }
-                itemSchema.validate(arrayItems.next());
+                if (itemSchema instanceof ValidatableSchema) {
+                    ((ValidatableSchema) itemSchema).validate(arrayItems.next());
+                }
             }
         }
     }

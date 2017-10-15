@@ -2,6 +2,7 @@
   "id": "frapi:openig",
   "description": "OpenIG CREST APIs",
   "version": "4.0.0",
+  "paths":{},
   "definitions": {
     "statistics": {
       "type": "objects",

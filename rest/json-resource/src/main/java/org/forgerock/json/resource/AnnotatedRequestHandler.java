@@ -23,7 +23,10 @@ import org.forgerock.api.annotations.Query;
 import org.forgerock.api.annotations.Read;
 import org.forgerock.api.annotations.RequestHandler;
 import org.forgerock.api.annotations.Update;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -31,7 +34,8 @@ import org.forgerock.util.promise.Promise;
  * and/or conventionally-named methods (as per {@link RequestHandler}).
  * {@see org.forgeock.json.resource.annotations}
  */
-class AnnotatedRequestHandler implements org.forgerock.json.resource.RequestHandler {
+class AnnotatedRequestHandler implements org.forgerock.json.resource.RequestHandler,
+        Describable<ApiDescription, Request> {
 
     private final AnnotatedMethod createMethod;
     private final AnnotatedMethod readMethod;
@@ -40,6 +44,7 @@ class AnnotatedRequestHandler implements org.forgerock.json.resource.RequestHand
     private final AnnotatedMethod patchMethod;
     private final AnnotatedMethod queryMethod;
     private final AnnotatedActionMethods actionMethods;
+    private final Describable<ApiDescription, Request> describable;
 
     AnnotatedRequestHandler(Object requestHandler) {
         if (!requestHandler.getClass().isAnnotationPresent(RequestHandler.class)) {
@@ -53,6 +58,9 @@ class AnnotatedRequestHandler implements org.forgerock.json.resource.RequestHand
         this.patchMethod = AnnotatedMethod.findMethod(requestHandler, Patch.class, false);
         this.queryMethod = AnnotatedMethod.findMethod(requestHandler, Query.class, false);
         this.actionMethods = AnnotatedActionMethods.findAll(requestHandler, false);
+        this.describable = requestHandler instanceof Describable
+                ? (Describable<ApiDescription, Request>) requestHandler
+                : null;
     }
 
     @Override
@@ -91,4 +99,35 @@ class AnnotatedRequestHandler implements org.forgerock.json.resource.RequestHand
         return deleteMethod.invoke(context, request);
     }
 
+    @Override
+    public ApiDescription api(ApiProducer<ApiDescription> producer) {
+        if (describable == null) {
+            throw new UnsupportedOperationException(
+                    "The provided request handler does not support API Descriptor methods");
+        }
+        return describable.api(producer);
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        if (describable == null) {
+            throw new UnsupportedOperationException(
+                    "The provided request handler does not support API Descriptor methods");
+        }
+        return describable.handleApiRequest(context, request);
+    }
+
+    @Override
+    public void addDescriptorListener(Listener listener) {
+        if (describable != null) {
+            describable.addDescriptorListener(listener);
+        }
+    }
+
+    @Override
+    public void removeDescriptorListener(Listener listener) {
+        if (describable != null) {
+            describable.removeDescriptorListener(listener);
+        }
+    }
 }

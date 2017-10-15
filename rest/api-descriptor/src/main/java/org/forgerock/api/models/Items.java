@@ -221,15 +221,16 @@ public final class Items {
                     + " annotation. No api descriptor will be available for " + type);
             return null;
         }
-        builder.pathParameter(Parameter.fromAnnotation(provider.pathParam()));
+        builder.pathParameter(Parameter.fromAnnotation(type, provider.pathParam()));
 
         for (final Method m : type.getMethods()) {
+            boolean instanceMethod = Arrays.asList(m.getParameterTypes()).indexOf(String.class) > -1;
             org.forgerock.api.annotations.Action action = m.getAnnotation(org.forgerock.api.annotations.Action.class);
-            if (action != null) {
+            if (action != null && instanceMethod) {
                 builder.actions.add(Action.fromAnnotation(action, m, descriptor, type));
             }
             Actions actions = m.getAnnotation(Actions.class);
-            if (actions != null) {
+            if (actions != null && instanceMethod) {
                 for (org.forgerock.api.annotations.Action a : actions.value()) {
                     builder.actions.add(Action.fromAnnotation(a, null, descriptor, type));
                 }

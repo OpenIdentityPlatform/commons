@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 
 import org.forgerock.http.io.BranchingInputStream;
 import org.forgerock.http.io.Buffer;
+import org.forgerock.http.io.PipeBufferedStream;
 import org.forgerock.util.Factory;
 import org.testng.annotations.Test;
 

@@ -16,6 +16,8 @@
 
 package org.forgerock.api.transform;
 
+import java.util.Objects;
+
 import org.forgerock.util.i18n.LocalizableString;
 
 import io.swagger.models.properties.ObjectProperty;
@@ -26,6 +28,7 @@ import io.swagger.models.properties.ObjectProperty;
 class LocalizableObjectProperty extends ObjectProperty implements LocalizableProperty<ObjectProperty> {
     private LocalizableString title;
     private LocalizableString description;
+    private Object defaultValue;
 
     @Override
     public LocalizableObjectProperty title(LocalizableString title) {
@@ -71,6 +74,53 @@ class LocalizableObjectProperty extends ObjectProperty implements LocalizablePro
     @Override
     public LocalizableString getLocalizableDescription() {
         return description;
+    }
+
+    /**
+     * Sets the default value, and should be used instead of {@link #setDefault(String)}, which is a no-op.
+     *
+     * @param defaultValue Default value or {@code null}
+     */
+    public void setDefault(Object defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * Gets the default value.
+     *
+     * @return Default value or {@code null}
+     */
+    public Object getDefault() {
+        return defaultValue;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+        if (!(o instanceof LocalizableObjectProperty)) {
+            return false;
+        }
+        final LocalizableObjectProperty other = (LocalizableObjectProperty) o;
+        if (!Objects.equals(defaultValue, other.defaultValue)) {
+            return false;
+        }
+        if (!Objects.equals(title, other.title)) {
+            return false;
+        }
+        if (!Objects.equals(description, other.description)) {
+            return false;
+        }
+        if (!Objects.equals(getProperties(), other.getProperties())) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), title, description, defaultValue);
     }
 
 }

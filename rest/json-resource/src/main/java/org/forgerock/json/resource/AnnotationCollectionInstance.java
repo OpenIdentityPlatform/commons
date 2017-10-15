@@ -17,13 +17,12 @@
 package org.forgerock.json.resource;
 
 import org.forgerock.api.annotations.CollectionProvider;
-import org.forgerock.services.context.Context;
-import org.forgerock.util.promise.Promise;
-
 import org.forgerock.api.annotations.Delete;
 import org.forgerock.api.annotations.Patch;
 import org.forgerock.api.annotations.Read;
 import org.forgerock.api.annotations.Update;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Exposes an annotated POJO as collection instance methods {@link org.forgerock.json.resource.RequestHandler} by

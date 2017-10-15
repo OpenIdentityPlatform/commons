@@ -50,7 +50,7 @@ import org.forgerock.api.annotations.ReadOnly;
 import org.forgerock.api.annotations.Title;
 import org.forgerock.api.annotations.UniqueItems;
 import org.forgerock.api.enums.WritePolicy;
-import org.forgerock.guava.common.io.Resources;
+import com.google.common.io.Resources;
 
 import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.JavaType;

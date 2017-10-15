@@ -11,10 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Portions Copyright 2014-2015 ForgeRock AS.
+ * Portions Copyright 2014-2016 ForgeRock AS.
  */
 
-package org.forgerock.json.resource.http;
+package org.forgerock.http.io;
 
 import static org.forgerock.http.io.IO.newBranchingInputStream;
 
@@ -23,16 +23,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.forgerock.http.io.BranchingInputStream;
-import org.forgerock.http.io.Buffer;
-import org.forgerock.http.io.IO;
 import org.forgerock.util.Factory;
 
 /**
  * Represents a pipe for transferring bytes from an {@link java.io.OutputStream} to a
  * {@link org.forgerock.http.io.BranchingInputStream}.
+ * This class is not thread-safe : the buffer has to be fully filled before reading from it : if the consumers reads
+ * faster than the producer writes into it, then the consumer will get to the end of the buffer and that will be
+ * interpreted an end-of-stream.
  */
-final class PipeBufferedStream {
+public final class PipeBufferedStream {
     private final OutputStream outputStream;
     private final BranchingInputStream inputStream;
     /** The buffer will be closed once both the input and output stream are closed. */
@@ -40,11 +40,19 @@ final class PipeBufferedStream {
     private final Buffer buffer;
     private int position = 0;
 
-    PipeBufferedStream() {
+    /**
+     * Constructs a new {@link PipeBufferedStream} with a default {@link Factory<Buffer>}.
+     */
+    public PipeBufferedStream() {
         this(IO.newTemporaryStorage());
     }
 
-    PipeBufferedStream(final Factory<Buffer> bufferFactory) {
+    /**
+     * Constructs a new {@link PipeBufferedStream} with the given {@link Factory<Buffer>}.
+     *
+     * @param bufferFactory The buffer factory to use to create the {@link BranchingInputStream}
+     */
+    public PipeBufferedStream(final Factory<Buffer> bufferFactory) {
         outputStream = new PipeOutputStream();
         inputStream = newBranchingInputStream(new PipeInputStream(), bufferFactory);
         this.buffer = bufferFactory.newInstance();
@@ -76,8 +84,13 @@ final class PipeBufferedStream {
 
     private class PipeOutputStream extends OutputStream {
         @Override
-        public void write(int i) throws IOException {
-            buffer.append(new byte[]{(byte) i}, 0, 1);
+        public void write(final int i) throws IOException {
+            buffer.append((byte) i);
+        }
+
+        @Override
+        public void write(final byte[] b, final int off, final int len) throws IOException {
+            buffer.append(b, off, len);
         }
 
         @Override
@@ -89,13 +102,17 @@ final class PipeBufferedStream {
     private class PipeInputStream extends InputStream {
         @Override
         public int read() throws IOException {
-            if (position >= buffer.length()) {
-                return -1;
-            } else {
-                byte[] b = new byte[1];
-                buffer.read(position++, b, 0, 1);
-                return b[0];
+            return position < buffer.length() ? buffer.read(position++) : -1;
+        }
+
+        @Override
+        public int read(final byte[] b, final int off, final int len) throws IOException {
+            if (position < buffer.length()) {
+                final int readLength = buffer.read(position, b, off, len);
+                position += readLength;
+                return readLength;
             }
+            return -1;
         }
 
         @Override

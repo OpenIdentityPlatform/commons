@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -24,10 +24,6 @@ import java.io.RandomAccessFile;
 
 /**
  * A buffer that uses a local file for data storage.
- * <p>
- * <strong>Note:</strong> This implementation is not synchronized. If multiple threads access
- * a buffer concurrently, threads that append to the buffer should synchronize on the instance
- * of this object.
  */
 final class FileBuffer implements Buffer {
 
@@ -40,6 +36,18 @@ final class FileBuffer implements Buffer {
     FileBuffer(File file, int limit) throws FileNotFoundException {
         raf = new RandomAccessFile(file, "rw");
         this.limit = limit;
+    }
+
+    @Override
+    public byte read(final int pos) throws IOException {
+        notClosed();
+        synchronized (raf) {
+            if (pos < raf.length()) {
+                raf.seek(pos);
+                return (byte) raf.read();
+            }
+        }
+        throw new IndexOutOfBoundsException();
     }
 
     @Override
@@ -59,6 +67,19 @@ final class FileBuffer implements Buffer {
             }
         }
         return n;
+    }
+
+    @Override
+    public void append(final byte b) throws IOException {
+        notClosed();
+        synchronized (raf) {
+            final int rafLength = (int) Math.min(Integer.MAX_VALUE, raf.length());
+            if (rafLength + 1 > limit) {
+                throw new OverflowException();
+            }
+            raf.seek(rafLength);
+            raf.write(b);
+        }
     }
 
     @Override

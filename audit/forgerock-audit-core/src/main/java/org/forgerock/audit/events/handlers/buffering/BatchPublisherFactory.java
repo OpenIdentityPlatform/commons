@@ -9,25 +9,25 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
-
-package org.forgerock.json;
+package org.forgerock.audit.events.handlers.buffering;
 
 /**
- * Interface for transforming JSON values. Applied during the construction of a JSON value,
- * and is inherited (and applied) by its child values.
+ * Batch publisher factory provides new instances of {@link BatchPublisher}.
  */
-public interface JsonTransformer {
+public interface BatchPublisherFactory {
 
     /**
-     * Performs the transformation of the specified JSON value. If a transformation is not
-     * applicable, then this method <strong>must not</strong> modify the value.
+     * Provides a new instance of a buffered batch publisher.
      *
-     * @param value the JSON value to be transformed.
-     * @throws JsonException if an exception occurred applying the transformation.
+     * @param consumer
+     *         the batch consumer
+     *
+     * @return builder instance used to help construct the buffered batch publisher
      */
-    void transform(JsonValue value);
+    BufferedBatchPublisher.Builder newBufferedPublisher(BatchConsumer consumer);
+
 }

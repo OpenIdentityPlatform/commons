@@ -28,7 +28,7 @@ import org.forgerock.util.promise.NeverThrowsException;
  * Iterates over each JsonValue node in the JsonValue structure and if it's a String marked for translation,
  * It replaces the String with a LocalizableString.
  */
-class TranslateJsonSchema implements Function<JsonValue, JsonValue, NeverThrowsException> {
+public class TranslateJsonSchema implements Function<JsonValue, JsonValue, NeverThrowsException> {
 
     private final ClassLoader loader;
 

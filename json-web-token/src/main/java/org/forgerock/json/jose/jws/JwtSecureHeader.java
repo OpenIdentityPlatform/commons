@@ -86,7 +86,10 @@ public abstract class JwtSecureHeader extends JwtHeader {
      */
     public URL getJwkSetUrl() {
         try {
-            return get(JKU.value()).asURI().toURL();
+            String url = get(JKU.value()).asString();
+            return url != null
+                    ? new URL(url)
+                    : null;
         } catch (MalformedURLException e) {
             throw new JwtRuntimeException(e);
         }
@@ -139,7 +142,10 @@ public abstract class JwtSecureHeader extends JwtHeader {
      */
     public URL getX509Url() {
         try {
-            return get(X5U.value()).asURI().toURL();
+            String url = get(X5U.value()).asString();
+            return url != null
+                    ? new URL(url)
+                    : null;
         } catch (MalformedURLException e) {
             throw new JwtRuntimeException(e);
         }

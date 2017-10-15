@@ -22,7 +22,7 @@ import java.net.URISyntaxException;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonTransformer;
+//import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 
 /**
@@ -33,7 +33,8 @@ import org.forgerock.json.JsonValue;
  * can lead to scenarios of infinite recursion and throwing of a {@link StackOverflowError}.
  * Plans for mitigating this are in place and will be implemented within this class.
  */
-public class JsonReferenceTransformer implements JsonTransformer {
+public class JsonReferenceTransformer //implements JsonTransformer 
+{
 
     /** The URI of the referring document or directory where it is located. */
     protected URI base;
@@ -119,7 +120,7 @@ public class JsonReferenceTransformer implements JsonTransformer {
         throw new JsonException("URI cannot be resolved");
     }
 
-    @Override
+    //@Override
     public void transform(JsonValue value) throws JsonException {
         if (JsonReference.isJsonReference(value)) {
             URI ref = new JsonReference().fromJsonValue(value).getURI();
@@ -147,7 +148,7 @@ public class JsonReferenceTransformer implements JsonTransformer {
                 }
                 JsonValue result = resolveFragment(resolve(abs), ref);
                 value.setObject(result.getObject());
-                value.getTransformers().addAll(0, result.getTransformers()); // resolves relative $refs
+                //value.getTransformers().addAll(0, result.getTransformers()); // resolves relative $refs
             } else if (rel != null) {
                 throw new JsonException("No base to resolve relative URI reference");
             }

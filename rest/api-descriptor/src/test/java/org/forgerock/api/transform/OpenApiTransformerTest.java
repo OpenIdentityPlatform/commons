@@ -241,7 +241,7 @@ public class OpenApiTransformerTest {
     public Object[][] buildModelData() {
         return new Object[][]{
                 {null, null, NullPointerException.class},
-                {json(null), null, NullPointerException.class},
+                {json(null), null, org.forgerock.api.transform.TransformerException.class},
                 {json(object(field("type", "not_a_json_schema_type"))), null, TransformerException.class},
                 {json(object(field("type", "object"))), new LocalizableModelImpl().type("object"), null},
                 {json(object(

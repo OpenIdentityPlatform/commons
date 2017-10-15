@@ -13,10 +13,9 @@
  *
  * Copyright 2012-2016 ForgeRock AS.
  */
-
 package org.forgerock.json.resource.http;
 
-import static org.forgerock.http.HttpApplication.LOGGER;
+import static org.forgerock.api.commons.CommonsApi.*;
 import static org.forgerock.json.resource.Applications.simpleCrestApplication;
 import static org.forgerock.json.resource.Requests.newApiRequest;
 import static org.forgerock.json.resource.http.HttpUtils.CONTENT_TYPE_REGEX;
@@ -70,9 +69,10 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.forgerock.api.CrestApiProducer;
+import org.forgerock.api.jackson.PathsModule;
 import org.forgerock.api.models.ApiDescription;
 import org.forgerock.api.transform.OpenApiTransformer;
-import org.forgerock.guava.common.base.Optional;
+import com.google.common.base.Optional;
 import org.forgerock.http.ApiProducer;
 import org.forgerock.http.Handler;
 import org.forgerock.http.header.AcceptLanguageHeader;
@@ -114,6 +114,8 @@ import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.i18n.PreferredLocales;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -155,8 +157,12 @@ import io.swagger.models.Swagger;
 final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.http.protocol.Request>,
         Describable.Listener {
 
-    private static final ObjectMapper API_OBJECT_MAPPER = new ObjectMapper()
-            .registerModules(new Json.LocalizableStringModule(), new Json.JsonValueModule());
+    private static final Logger logger = LoggerFactory.getLogger(HttpAdapter.class);
+    private static final ObjectMapper API_OBJECT_MAPPER = new ObjectMapper().registerModules(
+            new Json.LocalizableStringModule(),
+            new Json.JsonValueModule(),
+            new PathsModule());
+
     private final ConnectionFactory connectionFactory;
     private final HttpContextFactory contextFactory;
     private final String apiId;
@@ -238,7 +244,7 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
                 describable.get().addDescriptorListener(this);
             }
         } catch (ResourceException e) {
-            LOGGER.warn("Could not create connection", e);
+            logger.warn("Could not create connection", e);
         }
 
     }
@@ -662,9 +668,17 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
             context = prepareRequest(context, req, request);
             ApiDescription api = describable.get().handleApiRequest(context, request);
 
-            ObjectWriter writer = API_OBJECT_MAPPER.writer()
-                    .withAttribute(Json.PREFERRED_LOCALES_ATTRIBUTE, request.getPreferredLocales());
-            return newResultPromise(new Response().setStatus(Status.OK).setEntity(writer.writeValueAsBytes(api)));
+            ObjectWriter writer = Json.makeLocalizingObjectWriter(API_OBJECT_MAPPER, request.getPreferredLocales());
+
+            // Enable pretty printer if requested.
+            final List<String> values = getParameter(req, PARAM_PRETTY_PRINT);
+            if (values != null) {
+                if (asBooleanValue(PARAM_PRETTY_PRINT, values)) {
+                    writer = writer.withDefaultPrettyPrinter();
+                }
+            }
+
+            return newResultPromise(new Response(Status.OK).setEntity(writer.writeValueAsBytes(api)));
         } catch (Exception e) {
             return fail(req, e);
         }
@@ -674,7 +688,7 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
     private Optional<Describable<ApiDescription, Request>> getDescribableConnection()
             throws ResourceException {
         if (apiId == null || apiVersion == null) {
-            LOGGER.info("CREST API Descriptor API ID and Version are not set. Not describing.");
+            logger.info("CREST API Descriptor API ID and Version are not set. Not describing.");
             return Optional.absent();
         }
         Connection connection = connectionFactory.getConnection();
@@ -820,7 +834,7 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
             if (describable.isPresent()) {
                 ApiDescription api = describable.get().api(new CrestApiProducer(apiId, apiVersion));
                 if (api != null) {
-                    descriptor = apiProducer.addApiInfo(OpenApiTransformer.execute(api));
+                    descriptor = apiProducer.addApiInfo(OpenApiTransformer.execute(api, COMMONS_API_DESCRIPTION));
                 }
             }
         } catch (ResourceException e) {

@@ -25,7 +25,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executors;
@@ -36,21 +35,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock.ReadLock;
 
 import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration;
-import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration.FileRetention;
-import org.forgerock.audit.events.handlers.FileBasedEventHandlerConfiguration.FileRotation;
-import org.forgerock.audit.retention.DiskSpaceUsedRetentionPolicy;
 import org.forgerock.audit.retention.FileNamingPolicy;
-import org.forgerock.audit.retention.FreeDiskSpaceRetentionPolicy;
 import org.forgerock.audit.retention.RetentionPolicy;
-import org.forgerock.audit.retention.SizeBasedRetentionPolicy;
-import org.forgerock.audit.retention.TimeStampFileNamingPolicy;
-import org.forgerock.audit.rotation.FixedTimeRotationPolicy;
 import org.forgerock.audit.rotation.RotatableObject;
 import org.forgerock.audit.rotation.RotationContext;
 import org.forgerock.audit.rotation.RotationHooks;
 import org.forgerock.audit.rotation.RotationPolicy;
-import org.forgerock.audit.rotation.SizeBasedRotationPolicy;
-import org.forgerock.audit.rotation.TimeLimitRotationPolicy;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.time.Duration;
 import org.joda.time.DateTime;
@@ -64,11 +54,10 @@ import org.slf4j.LoggerFactory;
 public class RotatableWriter implements TextWriter, RotatableObject {
 
     private static final Logger logger = LoggerFactory.getLogger(RotatableWriter.class);
-    private static final Duration ZERO = Duration.duration("zero");
     private static final Duration FIVE_SECONDS = Duration.duration("5s");
 
-    private final List<RotationPolicy> rotationPolicies = new LinkedList<>();
-    private final List<RetentionPolicy> retentionPolicies = new LinkedList<>();
+    private final List<RotationPolicy> rotationPolicies;
+    private final List<RetentionPolicy> retentionPolicies;
     private final FileNamingPolicy fileNamingPolicy;
     private ScheduledExecutorService rotator;
     private DateTime lastRotationTime;
@@ -93,7 +82,7 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      */
     public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
             final boolean append) throws IOException {
-        this(file, configuration, append, getTimeStampFileNamingPolicy(file, configuration));
+        this(file, configuration, append, configuration.getFileRotation().buildTimeStampFileNamingPolicy(file));
     }
 
     /**
@@ -108,7 +97,8 @@ public class RotatableWriter implements TextWriter, RotatableObject {
      */
     public RotatableWriter(final File file, final FileBasedEventHandlerConfiguration configuration,
             final boolean append, final RolloverLifecycleHook rolloverLifecycleHook) throws IOException {
-        this(file, configuration, append, getTimeStampFileNamingPolicy(file, configuration), rolloverLifecycleHook);
+        this(file, configuration, append, configuration.getFileRotation().buildTimeStampFileNamingPolicy(file),
+                rolloverLifecycleHook);
     }
 
     /**
@@ -134,17 +124,9 @@ public class RotatableWriter implements TextWriter, RotatableObject {
                 : DateTime.now(DateTimeZone.UTC);
         this.rolloverLifecycleHook = rolloverLifecycleHook;
         this.writer = constructWriter(file, append);
-        addRetentionPolicies(configuration.getFileRetention());
-        addRotationPolicies(configuration.getFileRotation());
+        retentionPolicies = configuration.getFileRetention().buildRetentionPolicies();
+        rotationPolicies = configuration.getFileRotation().buildRotationPolicies();
         scheduleRotationAndRetentionChecks(configuration);
-    }
-
-    private static TimeStampFileNamingPolicy getTimeStampFileNamingPolicy(final File file,
-            final FileBasedEventHandlerConfiguration configuration) {
-        return new TimeStampFileNamingPolicy(
-                file,
-                configuration.getFileRotation().getRotationFileSuffix(),
-                configuration.getFileRotation().getRotationFilePrefix());
     }
 
     /**
@@ -349,32 +331,6 @@ public class RotatableWriter implements TextWriter, RotatableObject {
         return new BufferedWriter(osw);
     }
 
-    private void addRotationPolicies(final FileRotation fileRotation) {
-        // add SizeBasedRotationPolicy if a non zero size is supplied
-        final long maxFileSize = fileRotation.getMaxFileSize();
-        if (maxFileSize > 0) {
-            rotationPolicies.add(new SizeBasedRotationPolicy(maxFileSize));
-        }
-
-        // add FixedTimeRotationPolicy
-        final List<Duration> dailyRotationTimes = new LinkedList<>();
-        for (final String rotationTime : fileRotation.getRotationTimes()) {
-            Duration duration = parseDuration("rotation time", rotationTime, null);
-            if (duration != null && !duration.isUnlimited()) {
-                dailyRotationTimes.add(duration);
-            }
-        }
-        if (!dailyRotationTimes.isEmpty()) {
-            rotationPolicies.add(new FixedTimeRotationPolicy(dailyRotationTimes));
-        }
-
-        // add TimeLimitRotationPolicy if enabled
-        final Duration rotationInterval = parseDuration("rotation interval", fileRotation.getRotationInterval(), ZERO);
-        if (!(rotationInterval.isZero() || rotationInterval.isUnlimited())) {
-            rotationPolicies.add(new TimeLimitRotationPolicy(rotationInterval));
-        }
-    }
-
     /**
      * Schedule checks for rotations and retention policies.
      * <p>
@@ -433,26 +389,6 @@ public class RotatableWriter implements TextWriter, RotatableObject {
     @VisibleForTesting
     List<RotationPolicy> getRotationPolicies() {
         return rotationPolicies;
-    }
-
-    private void addRetentionPolicies(final FileRetention fileRetention) {
-        // Add SizeBasedRetentionPolicy if the max number of files config value is more than 0
-        final int maxNumberOfHistoryFiles = fileRetention.getMaxNumberOfHistoryFiles();
-        if (maxNumberOfHistoryFiles > 0) {
-            retentionPolicies.add(new SizeBasedRetentionPolicy(maxNumberOfHistoryFiles));
-        }
-
-        // Add DiskSpaceUsedRetentionPolicy if config value > 0
-        final long maxDiskSpaceToUse = fileRetention.getMaxDiskSpaceToUse();
-        if (maxDiskSpaceToUse > 0) {
-            retentionPolicies.add(new DiskSpaceUsedRetentionPolicy(maxDiskSpaceToUse));
-        }
-
-        // Add FreeDiskSpaceRetentionPolicy if config value > 0
-        final long minimumFreeDiskSpace = fileRetention.getMinFreeSpaceRequired();
-        if (minimumFreeDiskSpace > 0) {
-            retentionPolicies.add(new FreeDiskSpaceRetentionPolicy(minimumFreeDiskSpace));
-        }
     }
 
     /**

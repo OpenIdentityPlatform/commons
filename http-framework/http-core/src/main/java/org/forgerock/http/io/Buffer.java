@@ -12,7 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2010–2011 ApexIdentity Inc.
- * Portions Copyright 2011-2015 ForgeRock AS.
+ * Portions Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.http.io;
@@ -27,6 +27,16 @@ import java.io.IOException;
 public interface Buffer extends Closeable {
 
     /**
+     * Reads a single byte of data from the buffer.
+     *
+     * @param pos the offset position, measured in bytes from the beginning of the buffer, at which to read the data.
+     * @return byte at given offset position.
+     * @throws IOException if an I/O exception occurs.
+     * @throws IndexOutOfBoundsException if {@code pos} exceeds the buffer length.
+     */
+    byte read(int pos) throws IOException;
+
+    /**
      * Reads up to {@code len} bytes of data from the buffer into an array of bytes. An
      * attempt is made to read as many as {@code len} bytes, but a smaller number may be read.
      * The number of bytes actually read is returned as an integer.
@@ -35,10 +45,19 @@ public interface Buffer extends Closeable {
      * @param b the array of bytes to write the data to.
      * @param off the start offset in the array at which the data is written.
      * @param len the maximum number of bytes to read.
-     * @return the number of bytes read into the array, or -1 if there is no more data.
+     * @return the number of bytes read into the array.
      * @throws IOException if an I/O exception occurs.
      */
     int read(int pos, byte[] b, int off, int len) throws IOException;
+
+    /**
+     * Appends a single byte to the end of the buffer.
+     *
+     * @param b the byte to append.
+     * @throws IOException if an I/O exception occurs.
+     * @throws OverflowException if appending a single byte to the buffer would exceed its limit.
+     */
+    void append(byte b) throws IOException;
 
     /**
      * Appends {@code len} bytes from the specified byte array starting at offset {@code off}

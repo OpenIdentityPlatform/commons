@@ -41,7 +41,7 @@ public class LocalizableStringTest {
     @Test
     public void testLocalizableStringIsNotTranslatedIfLoaderIsNull() {
         PreferredLocales locales = new PreferredLocales();
-        LocalizableString name = new LocalizableString("i18n:locales/bundle#locale", null);
+        LocalizableString name = new LocalizableString("i18n:locales/bundle#locale");
         assertThat(name.toTranslatedString(locales)).isEqualTo("i18n:locales/bundle#locale");
     }
 

@@ -42,8 +42,9 @@ public class JsonReferenceTest {
         JsonReference ref = new JsonReference().setURI(new URI("#/foo"));
         root.put("foo", "bar");
         root.put("baz", ref.toJsonValue().getObject());
-        root.getTransformers().add(new JsonReferenceTransformer(null, root));
-        root.applyTransformers();
+//        root.getTransformers().add(new JsonReferenceTransformer(null, root));
+//        root.applyTransformers();
+        new JsonReferenceTransformer(null, root).transform(root);
         assertThat(root.get("baz").getObject().equals("bar"));
     }
 }

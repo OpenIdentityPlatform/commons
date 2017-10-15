@@ -20,7 +20,10 @@ import org.forgerock.api.annotations.Patch;
 import org.forgerock.api.annotations.Read;
 import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.api.annotations.Update;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -32,12 +35,13 @@ import org.forgerock.util.promise.Promise;
  * erroneous request to the caller.
  * {@see org.forgeock.json.resource.annotations}
  */
-class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
+class AnnotatedSingletonHandler extends InterfaceSingletonHandler implements Describable<ApiDescription, Request> {
 
     private final AnnotatedMethod readMethod;
     private final AnnotatedMethod updateMethod;
     private final AnnotatedMethod patchMethod;
     private final AnnotatedActionMethods actionMethods;
+    private final Describable<ApiDescription, Request> describable;
 
     public AnnotatedSingletonHandler(Object requestHandler) {
         super(null);
@@ -49,6 +53,9 @@ class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
         this.updateMethod = AnnotatedMethod.findMethod(requestHandler, Update.class, false);
         this.patchMethod = AnnotatedMethod.findMethod(requestHandler, Patch.class, false);
         this.actionMethods = AnnotatedActionMethods.findAll(requestHandler, false);
+        this.describable = requestHandler instanceof Describable
+                ? (Describable<ApiDescription, Request>) requestHandler
+                : null;
     }
 
     @Override
@@ -71,4 +78,35 @@ class AnnotatedSingletonHandler extends InterfaceSingletonHandler {
         return actionMethods.invoke(context, request);
     }
 
+    @Override
+    public ApiDescription api(ApiProducer<ApiDescription> producer) {
+        if (describable == null) {
+            throw new UnsupportedOperationException(
+                    "The provided request handler does not support API Descriptor methods");
+        }
+        return describable.api(producer);
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        if (describable == null) {
+            throw new UnsupportedOperationException(
+                    "The provided request handler does not support API Descriptor methods");
+        }
+        return describable.handleApiRequest(context, request);
+    }
+
+    @Override
+    public void addDescriptorListener(Listener listener) {
+        if (describable != null) {
+            describable.addDescriptorListener(listener);
+        }
+    }
+
+    @Override
+    public void removeDescriptorListener(Listener listener) {
+        if (describable != null) {
+            describable.removeDescriptorListener(listener);
+        }
+    }
 }

@@ -119,12 +119,17 @@ public class CrestObjectSchema extends ObjectSchema implements CrestReadWritePol
             Map.Entry<String, Object> property = propertyIterator.next();
             boolean validated = false;
             if (getProperties().containsKey(property.getKey())) {
-                ((ValidatableSchema) getProperties().get(property.getKey())).validate(json(property.getValue()));
+                final JsonSchema schema = getProperties().get(property.getKey());
+                if (schema instanceof ValidatableSchema && !"reference".equals(property.getKey())) {
+                    ((ValidatableSchema) schema).validate(json(property.getValue()));
+                }
                 validated = true;
             }
             for (Map.Entry<Pattern, JsonSchema> pattern : patternProperties.entrySet()) {
                 if (pattern.getKey().matcher(property.getKey()).matches()) {
-                    ((ValidatableSchema) pattern.getValue()).validate(json(property.getValue()));
+                    if (pattern.getValue() instanceof ValidatableSchema) {
+                        ((ValidatableSchema) pattern.getValue()).validate(json(property.getValue()));
+                    }
                     validated = true;
                 }
             }
@@ -138,8 +143,11 @@ public class CrestObjectSchema extends ObjectSchema implements CrestReadWritePol
                 throw new ValidationException("Did not expect additional properties, but got " + propertyValues);
             }
             SchemaAdditionalProperties schemaAdditionalProperties = (SchemaAdditionalProperties) additionalProperties;
-            for (Object value : propertyValues.values()) {
-                ((ValidatableSchema) schemaAdditionalProperties.getJsonSchema()).validate(json(object));
+            if (schemaAdditionalProperties.getJsonSchema() instanceof ValidatableSchema) {
+                final ValidatableSchema schema = (ValidatableSchema) schemaAdditionalProperties.getJsonSchema();
+                for (Object value : propertyValues.values()) {
+                    schema.validate(json(value));
+                }
             }
         }
     }

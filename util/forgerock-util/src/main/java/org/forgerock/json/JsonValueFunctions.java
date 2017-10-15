@@ -17,6 +17,8 @@
 
 package org.forgerock.json;
 
+import static org.forgerock.util.Reject.checkNotNull;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -43,6 +45,29 @@ import org.forgerock.util.time.Duration;
 public final class JsonValueFunctions {
 
     private JsonValueFunctions() {
+    }
+
+    private static class TypeFunction<V> implements Function<JsonValue, V, JsonValueException> {
+
+        private final Class<V> type;
+
+        TypeFunction(Class<V> type) {
+            this.type = checkNotNull(type);
+        }
+
+        @Override
+        public V apply(JsonValue value) throws JsonValueException {
+            if (value.isNull()) {
+                return null;
+            }
+
+            Object object = value.getObject();
+            if (type.isInstance(object)) {
+                return type.cast(object);
+            }
+
+            throw new JsonValueException(value, "Expecting an element of type " + type.getName());
+        }
     }
 
     //@Checkstyle:off
@@ -137,6 +162,14 @@ public final class JsonValueFunctions {
                     } catch (final IllegalArgumentException iae) {
                         throw new JsonValueException(value, iae);
                     }
+                }
+            };
+
+    private static final Function<JsonValue, JsonValue, JsonValueException> IDENTITY =
+            new Function<JsonValue, JsonValue, JsonValueException>() {
+                @Override
+                public JsonValue apply(JsonValue value) throws JsonValueException {
+                    return value.copy();
                 }
             };
     //@Checkstyle:on
@@ -348,5 +381,55 @@ public final class JsonValueFunctions {
                 return null;
             }
         };
+    }
+
+    /**
+     * Returns the JSON value as a {@link Set} containing objects whose type
+     * (and value) is specified by the parameter {@code type}. If the value is
+     * {@code null}, this method returns {@code null}. If called on an object
+     * which wraps a List, this method will drop duplicates performing element
+     * comparisons using equals/hashCode. If any of the elements of the collection
+     * are not of the appropriate type, or the type-transformation cannot occur,
+     * {@link JsonValueException} is thrown.
+     *
+     * @param <V>
+     *            the type of elements in this set
+     * @param type
+     *            a {@link Class} that specifies the desired type of each element
+     *            in the resultant JsonValue set
+     * @return the set value, or {@code null} if no value.
+     * @throws NullPointerException
+     *             if {@code type} is {@code null}.
+     * @throws JsonValueException
+     *             if the elements of the collection cannot be cast as {@code type}.
+     */
+    public static <V> Function<JsonValue, Set<V>, JsonValueException> setOf(final Class<V> type) {
+        return setOf(new TypeFunction<>(type));
+    }
+
+    /**
+     * Returns the JSON value as the result of a deep JsonValue object-traversal,
+     * applying the provided transform {@code function} to each element.
+     *
+     * @param function
+     *            a {@link Function} that applies the desired element transformation
+     *            in the resultant JsonValue set
+     * @return the transformed JsonValue
+     * @throws JsonValueException
+     *             if the elements of the JsonValue cannot be transformed by {@code function}.
+     */
+    public static Function<JsonValue, JsonValue, JsonValueException> deepTransformBy(
+            Function<JsonValue, ?, JsonValueException> function) {
+        return new JsonValueTraverseFunction(function);
+    }
+
+    /**
+     * Returns an identity function that will copy the input {@link JsonValue}.
+     * @return an identity function that will copy the input {@link JsonValue}.
+     * @throws JsonValueException
+     *             if an error occurred while copying the input.
+     */
+    public static Function<JsonValue, JsonValue, JsonValueException> identity() {
+        return IDENTITY;
     }
 }

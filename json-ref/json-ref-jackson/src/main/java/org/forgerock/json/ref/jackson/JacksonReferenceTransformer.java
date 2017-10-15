@@ -63,7 +63,7 @@ public class JacksonReferenceTransformer extends JsonReferenceTransformer {
         } catch (IOException ioe) {
             throw new JsonException(ioe);
         }
-        result.getTransformers().add(0, new JacksonReferenceTransformer(uri, result)); // support $refs
+        //result.getTransformers().add(0, new JacksonReferenceTransformer(uri, result)); // support $refs
         return result;
     }
 }

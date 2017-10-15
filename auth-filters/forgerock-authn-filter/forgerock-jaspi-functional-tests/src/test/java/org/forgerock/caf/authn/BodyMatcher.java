@@ -113,8 +113,8 @@ final class BodyMatcher {
      * @return A {@code Map} of {@code Matcher}s.
      */
     @SuppressWarnings("unchecked")
-    static Map<JsonPointer, Condition<?>> noData() {
-        return (Map<JsonPointer, Condition<?>>) object(
+    static Map noData() {
+        return (Map) object(
                 field(null, Conditions.equalTo(""))
         );
     }

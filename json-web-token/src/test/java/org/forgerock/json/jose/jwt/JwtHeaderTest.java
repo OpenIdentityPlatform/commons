@@ -177,8 +177,7 @@ public class JwtHeaderTest {
         String jsonString = header.build();
 
         //Then
-        assertThat(jsonString).contains("\"alg\": \"NONE\"", "\"KEY2\": true", "\"KEY1\": \"HEADER1\"",
-                "\"typ\": \"JWT\"");
+        assertThat(jsonString).contains("\"typ\":\"JWT\",\"alg\":\"NONE\",\"KEY1\":\"HEADER1\",\"KEY2\":true");
     }
 
     @Test

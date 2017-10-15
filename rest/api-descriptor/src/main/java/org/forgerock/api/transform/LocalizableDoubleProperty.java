@@ -16,6 +16,8 @@
 
 package org.forgerock.api.transform;
 
+import java.util.Objects;
+
 import org.forgerock.util.i18n.LocalizableString;
 
 import io.swagger.models.properties.DoubleProperty;
@@ -72,6 +74,29 @@ class LocalizableDoubleProperty extends DoubleProperty implements LocalizablePro
     @Override
     public LocalizableString getLocalizableDescription() {
         return description;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+        if (!(o instanceof LocalizableDoubleProperty)) {
+            return false;
+        }
+        final LocalizableDoubleProperty other = (LocalizableDoubleProperty) o;
+        if (!Objects.equals(title, other.title)) {
+            return false;
+        }
+        if (!Objects.equals(description, other.description)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), title, description);
     }
 
 }

@@ -200,6 +200,6 @@ public class JWObjectTest {
         String jwString = jwObject.toString();
 
         //Then
-        assertThat(jwString).contains("\"KEY2\": \"VALUE2\"", "\"KEY1\": \"VALUE1\"");
+        assertThat(jwString).contains("\"KEY1\":\"VALUE1\",\"KEY2\":\"VALUE2\"");
     }
 }

@@ -83,7 +83,7 @@ public abstract class AbstractContext implements Context {
      * @param name The name of the context.
      */
     protected AbstractContext(String id, String name, Context parent) {
-        data = json(object());
+        data = json(object(0));
         data.put(ATTR_CLASS, getClass().getName());
         if (id != null) {
             data.put(ATTR_ID, id);

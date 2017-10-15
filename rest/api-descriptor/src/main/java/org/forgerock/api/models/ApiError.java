@@ -22,7 +22,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 import org.forgerock.api.ApiValidationException;
-import org.forgerock.guava.common.base.Strings;
+import com.google.common.base.Strings;
 import org.forgerock.util.i18n.LocalizableString;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -140,7 +140,7 @@ public final class ApiError {
     public static ApiError fromAnnotation(org.forgerock.api.annotations.ApiError apiError,
                                           ApiDescription descriptor, Class<?> relativeType) {
         ApiError apiErrorDefinition = apiError()
-                .description(new LocalizableString(apiError.description(), relativeType.getClassLoader()))
+                .description(new LocalizableString(apiError.description(), relativeType))
                 .code(apiError.code())
                 .schema(Schema.fromAnnotation(apiError.detailSchema(), descriptor, relativeType))
                 .build();

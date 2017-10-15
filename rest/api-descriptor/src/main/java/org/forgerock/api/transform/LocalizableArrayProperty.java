@@ -16,6 +16,9 @@
 
 package org.forgerock.api.transform;
 
+import java.util.List;
+import java.util.Objects;
+
 import org.forgerock.util.i18n.LocalizableString;
 
 import io.swagger.models.properties.ArrayProperty;
@@ -26,6 +29,7 @@ import io.swagger.models.properties.ArrayProperty;
 class LocalizableArrayProperty extends ArrayProperty implements LocalizableProperty<ArrayProperty> {
     private LocalizableString title;
     private LocalizableString description;
+    private List<Object> defaultValue;
 
     @Override
     public LocalizableArrayProperty title(LocalizableString title) {
@@ -71,6 +75,56 @@ class LocalizableArrayProperty extends ArrayProperty implements LocalizablePrope
     @Override
     public LocalizableString getLocalizableDescription() {
         return description;
+    }
+
+    /**
+     * Sets the default value, and should be used instead of {@link #setDefault(String)}, which is a no-op.
+     *
+     * @param defaultValue Default value or {@code null}
+     */
+    public void setDefault(List<Object> defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * Gets the default value.
+     *
+     * @return Default value or {@code null}
+     */
+    public List<Object> getDefault() {
+        return defaultValue;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (!super.equals(o)) {
+            return false;
+        }
+        if (!(o instanceof LocalizableArrayProperty)) {
+            return false;
+        }
+        final LocalizableArrayProperty other = (LocalizableArrayProperty) o;
+        if (defaultValue == null) {
+            if (other.defaultValue != null) {
+                return false;
+            }
+        } else if (other.defaultValue == null) {
+            return false;
+        } else if (!defaultValue.containsAll(other.defaultValue) || !other.defaultValue.containsAll(defaultValue)) {
+            return false;
+        }
+        if (!Objects.equals(title, other.title)) {
+            return false;
+        }
+        if (!Objects.equals(description, other.description)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), title, description, defaultValue);
     }
 
 }

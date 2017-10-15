@@ -11,10 +11,12 @@
 * Header, with the fields enclosed by brackets [] replaced by your own identifying
 * information: "Portions copyright [year] [name of copyright owner]".
 *
-* Copyright 2014-2015 ForgeRock AS.
+* Copyright 2014-2016 ForgeRock AS.
 */
 
 package org.forgerock.json.resource;
+
+import static org.forgerock.json.JsonValueFunctions.setOf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,7 +78,7 @@ public class AdviceContext extends AbstractContext {
      */
     public AdviceContext(final JsonValue savedContext, final ClassLoader classLoader) {
         super(savedContext, classLoader);
-        restrictedAdviceNames.addAll(data.get(RESTRICTED_ADVICE_NAMES_ATTR).asSet(String.class));
+        restrictedAdviceNames.addAll(data.get(RESTRICTED_ADVICE_NAMES_ATTR).as(setOf(String.class)));
         advice.putAll(data.get(ADVICE_ATTR).asMapOfList(String.class));
     }
 

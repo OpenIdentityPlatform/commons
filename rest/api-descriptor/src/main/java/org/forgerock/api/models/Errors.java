@@ -128,10 +128,11 @@ public final class Errors {
         @JsonAnySetter
         public Builder put(String name, ApiError apiError) {
             if (isEmpty(name) || containsWhitespace(name)) {
-                throw new IllegalArgumentException("name required and may not contain whitespace");
+                throw new IllegalArgumentException("ApiError name is required and may not contain whitespace");
             }
             if (errors.containsKey(name) && !errors.get(name).equals(apiError)) {
-                throw new IllegalStateException("name not unique");
+                throw new IllegalStateException("The give ApiError name already exists but the ApiError objects"
+                        + " are not equal");
             }
             errors.put(name, checkNotNull(apiError));
             return this;

@@ -597,14 +597,14 @@ public class JsonValueTest {
     public void testCoerceListToSet() {
         final JsonValue value = json(array()).add("2").add("3").add("5").add("2");
         assertThat(value.isList()).isTrue();
-        assertThat(value.isSet()).isFalse();
+        //assertThat(value.isSet()).isFalse();
         assertThat(value.asSet()).containsOnly("2", "3", "5"); // Set has no duplicates
     }
 
     @Test
     public void testCoerceSetToList() {
         final JsonValue value = json(set()).add("2").add("3").add("5").add("8");
-        assertThat(value.isList()).isFalse();
+        //assertThat(value.isList()).isFalse();
         assertThat(value.isSet()).isTrue();
         assertThat(value.asList()).containsOnly("2", "3", "5", "8");
     }

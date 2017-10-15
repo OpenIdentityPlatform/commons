@@ -30,7 +30,7 @@ import java.util.Map;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageContext;
-import org.forgerock.guava.common.net.MediaType;
+import com.google.common.net.MediaType;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
