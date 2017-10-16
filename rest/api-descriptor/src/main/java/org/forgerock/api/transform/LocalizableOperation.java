@@ -29,7 +29,7 @@ import io.swagger.models.Operation;
 /**
  * Localizable {@link Operation}.
  */
-class LocalizableOperation extends Operation implements LocalizableDescription<Operation> {
+public class LocalizableOperation extends Operation implements LocalizableDescription<Operation> {
     private LocalizableString description;
     private List<LocalizableString> tags;
 
