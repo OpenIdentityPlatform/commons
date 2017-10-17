@@ -103,6 +103,15 @@
 					<force>false</force>
 					<artifactItems>
 						<artifactItem>
+							<groupId>org.forgerock</groupId>
+			                <artifactId>cddl-license</artifactId>
+			                <version>1.0.0</version>
+			                <packaging>txt</packaging>
+							<downloadUrl>
+								https://repository.jboss.org/licenses/cddl.txt
+                        		</downloadUrl>
+                        	</artifactItem>
+						<artifactItem>
 							<groupId>org.forgerock.commons.ui.libs</groupId>
 			                <artifactId>handlebars</artifactId>
 			                <version>4.0.5</version>
