@@ -7,6 +7,8 @@ matrix:
           jdk: openjdk8
         - os: osx
           osx_image: xcode9.1
+    allow_failures:
+        - os: osx
 before_install:
  - date -u
  - uname -a
@@ -17,8 +19,5 @@ branches:
 notifications:
  email:
   - support@openam.org.ru
-cache:
-  directories:
-  - $HOME/.m2
 script:
-  - mvn -q clean install
+  - mvn -q -B clean install
