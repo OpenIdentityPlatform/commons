@@ -20,6 +20,8 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
+import org.slf4j.LoggerFactory;
+
 import com.google.inject.Stage;
 
 /**
@@ -37,12 +39,17 @@ public final class GuiceInitialisationFilter implements ServletContextListener {
      * @param servletContextEvent {@inheritDoc}
      */
     public void contextInitialized(ServletContextEvent servletContextEvent) {
-        ServletContext servletContext = servletContextEvent.getServletContext();
-        String stageName = servletContext.getInitParameter(Stage.class.getCanonicalName());
-        if (stageName != null) {
-            InjectorConfiguration.setStage(Stage.valueOf(stageName));
-        }
-        InjectorHolder.getInjector();
+    		try {
+	        ServletContext servletContext = servletContextEvent.getServletContext();
+	        String stageName = servletContext.getInitParameter(Stage.class.getCanonicalName());
+	        if (stageName != null) {
+	            InjectorConfiguration.setStage(Stage.valueOf(stageName));
+	        }
+	        InjectorHolder.getInjector();
+    		}catch (Throwable e) {
+			LoggerFactory.getLogger(GuiceInitialisationFilter.class).error("GuiceInitialisationFilter",e);
+			throw e;
+		}
     }
 
     /**

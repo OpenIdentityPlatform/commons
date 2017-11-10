@@ -44,7 +44,7 @@ public enum InjectorConfiguration {
 
     private volatile Class<? extends Annotation> moduleAnnotation = GuiceModule.class;
     private volatile GuiceModuleLoader guiceModuleLoader = new GuiceModuleServiceLoader(new ServiceLoaderWrapper());
-    private volatile Stage stage = Stage.PRODUCTION;
+    private volatile Stage stage = Stage.DEVELOPMENT;
 
     /**
      * Gets the module annotation that all modules MUST be annotated with.

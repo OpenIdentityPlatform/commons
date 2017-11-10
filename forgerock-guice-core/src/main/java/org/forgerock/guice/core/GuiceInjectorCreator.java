@@ -16,6 +16,8 @@
 
 package org.forgerock.guice.core;
 
+import java.util.logging.Logger;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
@@ -38,6 +40,7 @@ class GuiceInjectorCreator {
      * @return A non-null configured Guice Injector instance.
      */
     Injector createInjector(Iterable<? extends Module> modules) {
+    		Logger.getLogger(GuiceInjectorCreator.class.getName()).fine("GuiceInjectorCreator "+modules.toString().replace(",", "\n"));
         return Guice.createInjector(InjectorConfiguration.getStage(), modules);
     }
 }

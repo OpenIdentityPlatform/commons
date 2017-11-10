@@ -16,6 +16,8 @@
 
 package org.forgerock.guice.core;
 
+import java.util.logging.Logger;
+
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -39,12 +41,12 @@ import com.google.inject.Module;
  */
 public enum InjectorHolder {
 
-    /**
+	/**
      * The Singleton instance of the InjectorHolder.
      */
     INSTANCE;
-
-    private Injector injector;
+	
+	private Injector injector;
 
     /**
      * Constructs an instance of the InjectorHolder and initialises the Guice Injector.
@@ -54,6 +56,7 @@ public enum InjectorHolder {
                 new GuiceInjectorCreator(), InjectorConfiguration.getGuiceModuleLoader());
 
         try {
+        		Logger.getLogger(InjectorHolder.class.getName()).fine("InjectorHolder "+InjectorConfiguration.getModuleAnnotation().toString());
             injector = injectorFactory.createInjector(InjectorConfiguration.getModuleAnnotation());
         } catch (Exception e) {
             /*
@@ -67,6 +70,7 @@ public enum InjectorHolder {
         }
     }
 
+   
     /**
      * <p>Uses the Guice injector to return the appropriate instance for the given injection type.</p>
      *
@@ -77,6 +81,7 @@ public enum InjectorHolder {
      * @return A non-null instance of the class.
      */
     public static <T> T getInstance(Class<T> clazz) {
+    		Logger.getLogger(InjectorHolder.class.getName()).fine("getInstance "+clazz.getName());
         return INSTANCE.injector.getInstance(clazz);
     }
 
@@ -90,6 +95,7 @@ public enum InjectorHolder {
      * @return A non-null instance of the class defined by the key.
      */
     public static <T> T getInstance(Key<T> key) {
+    		Logger.getLogger(InjectorHolder.class.getName()).fine("getInstance "+key.toString());
         return INSTANCE.injector.getInstance(key);
     }
 
