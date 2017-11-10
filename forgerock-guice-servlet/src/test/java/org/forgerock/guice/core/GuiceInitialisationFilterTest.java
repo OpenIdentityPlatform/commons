@@ -48,7 +48,7 @@ public class GuiceInitialisationFilterTest {
         initialisationFilter.contextInitialized(servletContextEvent);
 
         //Then
-        assertThat(InjectorConfiguration.getStage()).isEqualTo(Stage.PRODUCTION);
+        assertThat(InjectorConfiguration.getStage()).isEqualTo(Stage.DEVELOPMENT);
     }
 
     @Test

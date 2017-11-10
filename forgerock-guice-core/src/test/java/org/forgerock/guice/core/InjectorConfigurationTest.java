@@ -77,7 +77,7 @@ public class InjectorConfigurationTest {
         Stage stage = InjectorConfiguration.getStage();
 
         //Then
-        assertThat(stage).isEqualTo(Stage.PRODUCTION);
+        assertThat(stage).isEqualTo(Stage.DEVELOPMENT);
     }
 
     @Test
