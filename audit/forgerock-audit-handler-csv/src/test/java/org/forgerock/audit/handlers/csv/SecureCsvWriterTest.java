@@ -239,6 +239,7 @@ public class SecureCsvWriterTest {
             secureCsvWriter.writeEvent(singletonMap(header, "four"));
             secureCsvWriter.writeEvent(singletonMap(header, "five"));
             secureCsvWriter.writeEvent(singletonMap(header, "six"));
+            Thread.sleep(500);
         }
 
         final SecretKey keystorePasswordKey = keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD);
