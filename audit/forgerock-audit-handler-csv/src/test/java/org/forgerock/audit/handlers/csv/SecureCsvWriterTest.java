@@ -230,7 +230,7 @@ public class SecureCsvWriterTest {
         config.getFileRotation().setRotationEnabled(true);
         config.getFileRotation().setRotationFileSuffix("-yyyy.MM.dd-HH.mm.ss.SSS");
         config.getFileRotation().setMaxFileSize(20);
-
+        config.setRotationRetentionCheckInterval("5 minutes");
         try (SecureCsvWriter secureCsvWriter = new SecureCsvWriter(
                 actual, new String[]{header}, CsvPreference.EXCEL_PREFERENCE, config, keyStoreHandler, random)) {
             secureCsvWriter.writeEvent(singletonMap(header, "one"));
@@ -239,7 +239,6 @@ public class SecureCsvWriterTest {
             secureCsvWriter.writeEvent(singletonMap(header, "four"));
             secureCsvWriter.writeEvent(singletonMap(header, "five"));
             secureCsvWriter.writeEvent(singletonMap(header, "six"));
-            Thread.sleep(500);
         }
 
         final SecretKey keystorePasswordKey = keyStoreHandler.readSecretKeyFromKeyStore(ENTRY_PASSWORD);
