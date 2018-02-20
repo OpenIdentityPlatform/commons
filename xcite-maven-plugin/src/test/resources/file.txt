@@ -1,0 +1,30 @@
+// To be included
+
+    This is some arbitrary text
+    that includes an ampersand &,
+    that is surrounded by whitespace,
+        and that has an indent on the last line. 
+
+// To be included
+
+ // Rough indentation
+ This text is indented.
+  But the indentation is not regular.
+       So some of the lines
+    Are indented further than others.
+  And yet all the lines
+               have at least a space of indentation.
+ // Rough indentation
+
+// Start marker only
+Perhaps leading tabs should cause an error,
+because in general we don't know
+how many spaces a tab represents in your editor.
+Convert leading tabs to spaces.
+
+# Tabs and spaces
+
+	This line starts with a tab.
+    This line starts with spaces.
+
+# Tabs and spaces

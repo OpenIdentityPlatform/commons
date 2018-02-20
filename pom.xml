@@ -41,22 +41,22 @@
     </license>
   </licenses>
 
-  <issueManagement>
-    <system>JIRA</system>
-    <url>https://bugster.forgerock.org/jira/browse/COMMONS</url>
-  </issueManagement>
+<!--   <issueManagement> -->
+<!--     <system>JIRA</system> -->
+<!--     <url>https://bugster.forgerock.org/jira/browse/COMMONS</url> -->
+<!--   </issueManagement> -->
 
-  <ciManagement>
-    <system>jenkins</system>
-    <url>https://ci.forgerock.org/job/Commons%20-%20forgerock-commons%20-%20postcommit</url>
-  </ciManagement>
+<!--   <ciManagement> -->
+<!--     <system>jenkins</system> -->
+<!--     <url>https://ci.forgerock.org/job/Commons%20-%20forgerock-commons%20-%20postcommit</url> -->
+<!--   </ciManagement> -->
 
-  <scm>
-    <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-commons.git</connection>
-    <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-commons.git</developerConnection>
-    <url>https://stash.forgerock.org/projects/COMMONS/repos/forgerock-commons/browse</url>
-    <tag>HEAD</tag>
-  </scm>
+<!--   <scm> -->
+<!--     <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-commons.git</connection> -->
+<!--     <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-commons.git</developerConnection> -->
+<!--     <url>https://stash.forgerock.org/projects/COMMONS/repos/forgerock-commons/browse</url> -->
+<!--     <tag>HEAD</tag> -->
+<!--   </scm> -->
 
   <properties>
     <!-- Maven minimal version -->
@@ -80,5 +80,10 @@
     <module>self-service</module>
     <module>util</module>
     <module>security</module>
+    <module>json-fluent</module>
+    <module>doc-maven-plugin</module>
+    <module>doc-default-branding</module>
+    <module>doc-common-content</module>
+    <module>xcite-maven-plugin</module>
   </modules>
 </project>

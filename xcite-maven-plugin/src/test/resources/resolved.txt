@@ -1,0 +1,4 @@
+This is some arbitrary text
+that includes an ampersand &,
+that is surrounded by whitespace,
+    and that has an indent on the last line. 

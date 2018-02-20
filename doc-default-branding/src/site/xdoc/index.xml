@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2013-2014 ForgeRock AS
+-->
+<document xmlns="http://maven.apache.org/XDOC/2.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/XDOC/2.0
+                              http://maven.apache.org/xsd/xdoc-2.0.xsd">
+
+ <properties>
+  <title>ForgeRock Doc Default Branding</title>
+  <author email="docs@forgerock.org">ForgeRock AS</author>
+ </properties>
+
+ <body>
+
+  <section name="About Default Branding">
+
+   <p>
+    By default, ForgeRock core documentation uses the branding from this project.
+
+    The branding project contains CSS for in-progress and released docs,
+    and custom docbkx stylesheets for supported output formats.
+   </p>
+
+   <p>
+    In order to use the default branding, get a common content artifact
+    by using the <code>maven-dependency-plugin</code> goal, <code>unpack</code>.
+   </p>
+
+  </section>
+
+ </body>
+
+</document>

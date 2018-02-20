@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<targetset>
+ <sitemap>
+  <dir name='doc'>
+   <document targetdoc='guide' baseuri='ForgeRock-1.0.0-Guide.epub'>
+    <xi:include
+      href='/path/to/target/docbkx/epub/guide/index.epub.target.db'
+      xmlns:xi='http://www.w3.org/2001/XInclude'
+    />
+   </document>
+   <document targetdoc='reference' baseuri='ForgeRock-1.0.0-Reference.epub'>
+    <xi:include
+      href='/path/to/target/docbkx/epub/reference/index.epub.target.db'
+      xmlns:xi='http://www.w3.org/2001/XInclude'
+    />
+   </document>
+  </dir>
+ </sitemap>
+</targetset>

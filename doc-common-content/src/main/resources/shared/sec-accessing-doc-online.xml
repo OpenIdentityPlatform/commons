@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011-2015 ForgeRock AS
+  !
+-->
+ <section xml:id="accessing-doc-online"
+          xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
+          xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+          xsi:schemaLocation='http://docbook.org/ns/docbook
+                              http://docbook.org/xml/5.0/xsd/docbook.xsd'
+          xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>Accessing Documentation Online</title>
+
+ <para>
+  ForgeRock core documentation, such as this document, aims to be
+  technically accurate and complete with respect to the software documented.
+ </para>
+
+ <itemizedlist>
+  <para>
+   Core documentation therefore follows a three-phase review process
+   designed to eliminate errors:
+  </para>
+
+  <listitem>
+   <para>
+    Product managers and software architects review project documentation design
+    with respect to the readers' software lifecycle needs.
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+    Subject matter experts review proposed documentation changes for
+    technical accuracy and completeness
+    with respect to the corresponding software.
+   </para>
+  </listitem>
+
+  <listitem>
+   <para>
+    Quality experts validate implemented documentation changes
+    for technical accuracy, completeness in scope,
+    and usability for the readership.
+   </para>
+  </listitem>
+ </itemizedlist>
+
+ <para>
+  The review process helps to ensure that documentation published for
+  a ForgeRock release is technically accurate and complete.
+ </para>
+
+ <para>
+  Fully reviewed, published core documentation is available at
+  <link xlink:show="new" xlink:href="http://backstage.forgerock.com/" />.
+  Use this documentation when working with a ForgeRock Enterprise release.
+ </para>
+
+ <para>
+  You can find pre-release draft documentation at the online
+  <link
+   xlink:show="new"
+   xlink:href="http://forgerock.org"
+  >community resource center</link>.
+  Use this documentation when trying a nightly build.
+ </para>
+</section>

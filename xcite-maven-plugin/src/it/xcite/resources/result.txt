@@ -1,0 +1,62 @@
+Let's cite some JSON.
+
+    {
+        &quot;name&quot;: &quot;LoginChain&quot;,
+        &quot;type&quot;: &quot;Chain&quot;,
+        &quot;config&quot;: {
+            &quot;filters&quot;: [
+                {
+                    &quot;type&quot;: &quot;StaticRequestFilter&quot;,
+                    &quot;config&quot;: {
+                        &quot;method&quot;: &quot;POST&quot;,
+                        &quot;uri&quot;: &quot;http://www.example.com:8081&quot;,
+                        &quot;form&quot;: {
+                            &quot;username&quot;: [
+                                &quot;demo&quot;
+                            ],
+                            &quot;password&quot;: [
+                                &quot;changeit&quot;
+                            ]
+                        }
+                    }
+                }
+            ],
+            &quot;handler&quot;: &quot;ClientHandler&quot;
+        }
+    }
+
+Let's cite some text.
+
+    This is some arbitrary text
+    that includes an ampersand &amp;,
+    that is surrounded by whitespace,
+        and that has an indent on the last line. 
+
+    This text is indented.
+     But the indentation is not regular.
+          So some of the lines
+       Are indented further than others.
+     And yet all the lines
+                  have at least a space of indentation.
+
+    Perhaps leading tabs should cause an error.
+
+Let's cite some LDIF.
+
+    dn: uid=bjensen,ou=People,dc=example,dc=com
+    objectClass: person
+    objectClass: inetOrgPerson
+    objectClass: organizationalPerson
+    objectClass: top
+    uid: bjensen
+    userpassword: hifalutin
+    givenname: Barbara
+    cn: Barbara Jensen
+    sn: Jensen
+    ou: People
+    jpegPhoto:&lt;file:///path/to/photo.jpg
+
+    dn: ou=Groups,dc=example,dc=com
+    objectClass: organizationalunit
+    objectClass: top
+    ou: Groups
