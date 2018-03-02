@@ -12,7 +12,5 @@ id="draft_alert">
   <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
   <strong><span aria-hidden="true" class="glyphicon glyphicon-exclamation-sign">
   </span>&nbsp;Pre-Release Draft Documentation</strong><br />
-  For Release documentation see the <a href="https://backstage.forgerock.com/#!/docs"
-  class="alert-link" target="_blank">ForgeRock BackStage</a> website.
 </div>
 </body>
