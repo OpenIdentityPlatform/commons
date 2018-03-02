@@ -906,7 +906,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
     /**
      * Favicon link element for the pre-site version of the HTML.
      */
-    @Parameter(defaultValue = "<link rel=\"shortcut icon\" href=\"http://forgerock.org/favicon.ico\">")
+    @Parameter(defaultValue = "<link rel=\"shortcut icon\" href=\"https://assets-cdn.github.com/favicon.ico\">")
     private String faviconLink;
 
     /**
@@ -1077,7 +1077,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
      *
      * The identifier for docs.forgerock.org is {@code UA-23412190-14}.
      */
-    @Parameter(defaultValue = "UA-23412190-14")
+    @Parameter(defaultValue = "")
     private String googleAnalyticsId;
 
     /**
@@ -1609,7 +1609,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
     /**
      * Favicon link element for the release version of the HTML.
      */
-    @Parameter(defaultValue = "<link rel=\"shortcut icon\" href=\"http://forgerock.org/favicon.ico\">")
+    @Parameter(defaultValue = "<link rel=\"shortcut icon\" href=\"https://assets-cdn.github.com/favicon.ico\">")
     private String releaseFaviconLink;
 
     /**
@@ -1643,7 +1643,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
      * @return The path to the release version directory.
      */
     public final String getReleaseVersionPath() {
-        return getReleaseDirectory().getPath() + File.separator + getReleaseVersion();
+        return getReleaseDirectory().getPath() + File.separator + getProjectName() + "-" + getReleaseVersion()+"-docs";
     }
 
     /**
