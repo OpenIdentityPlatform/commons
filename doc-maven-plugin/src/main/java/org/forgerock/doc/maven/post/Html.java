@@ -233,26 +233,7 @@ public class Html {
                 + "<a href=\"JIRA-URL\">Log a documentation bug.</a></p></div>";
 
         // https://confluence.atlassian.com/display/JIRA/Creating+Issues+via+direct+HTML+links
-        String jiraURL = "https://bugster.forgerock.org/jira/secure/CreateIssueDetails!init.jspa";
-
-        if (m.getProjectName().equalsIgnoreCase("OpenAM")) {
-            jiraURL += "?pid=10000&components=10007&issuetype=1";
-        }
-        if (m.getProjectName().equalsIgnoreCase("OpenDJ")) {
-            jiraURL += "?pid=10040&components=10132&issuetype=1";
-        }
-        if (m.getProjectName().equalsIgnoreCase("OpenICF")) {
-            jiraURL += "?pid=10041&components=10170&issuetype=1";
-        }
-        if (m.getProjectName().equalsIgnoreCase("OpenIDM")) {
-            jiraURL += "?pid=10020&components=10164&issuetype=1";
-        }
-        if (m.getProjectName().equalsIgnoreCase("OpenIG")) {
-            jiraURL += "?pid=10060&components=10220&issuetype=1";
-        }
-        if (m.getProjectName().equalsIgnoreCase("ForgeRock")) { // Just testing
-            jiraURL += "?pid=10010&issuetype=1";
-        }
+        String jiraURL = "https://github.com/OpenIdentityPlatform/"+m.getProjectName()+"/issues/new";
 
         if (!jiraURL.contains("pid")) {
             link = "";
