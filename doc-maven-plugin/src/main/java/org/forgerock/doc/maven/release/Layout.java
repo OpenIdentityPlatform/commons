@@ -111,7 +111,7 @@ public class Layout {
          * @throws MojoExecutionException Failed to lay out documents.
          */
         public void layout() throws MojoExecutionException {
-            final File outputDir = new File(m.getReleaseDirectory(), m.getReleaseVersion());
+            final File outputDir = new File(m.getReleaseVersionPath());
 
             executeMojo(
                     plugin(
