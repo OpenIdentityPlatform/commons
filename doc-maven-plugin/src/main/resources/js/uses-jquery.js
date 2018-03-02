@@ -123,22 +123,22 @@ $(document).ready(function () {
      * the latest published projectName/projectVersion,
      * then show a link.
      */
-    var project = "PROJECT_NAME";       // E.g. "OpenAM"
-    var version = "PROJECT_VERSION";    // E.g. "11.0.0"
-    var jsonUrl = "LATEST_JSON";        // E.g. "http://docs.forgerock.org/latest.json"
-    var language = "en";
-    var latestUrl, latest;
+//    var project = "PROJECT_NAME";       // E.g. "OpenAM"
+//    var version = "PROJECT_VERSION";    // E.g. "11.0.0"
+//    var jsonUrl = "LATEST_JSON";        // E.g. "http://docs.forgerock.org/latest.json"
+//    var language = "en";
+//    var latestUrl, latest;
 
-    $.getJSON(jsonUrl, function( data ) {
-        latest = data[project];
-        latestUrl = "DOCS_SITE" + language + "/" + project + "/" + latest + "/";
-
-        if (latest !== version) {
-            $("<div><p class=\"latest\"><a href=\"" + latestUrl +
-                "\">Latest release: " + latest + "</a></p></div>").
-                appendTo("body");
-        }
-    });
+//    $.getJSON(jsonUrl, function( data ) {
+//        latest = data[project];
+//        latestUrl = "DOCS_SITE" + language + "/" + project + "/" + latest + "/";
+//
+//        if (latest !== version) {
+//            $("<div><p class=\"latest\"><a href=\"" + latestUrl +
+//                "\">Latest release: " + latest + "</a></p></div>").
+//                appendTo("body");
+//        }
+//    });
 
     /*
      * DOCS-187: Documentation for legacy versions should not have the report bug footer
@@ -146,13 +146,13 @@ $(document).ready(function () {
      * If the projectName/projectVersion is EOSL, then hide the footer,
      * which makes it easy to file JIRA issues on this documentation.
      */
-    jsonUrl = "EOSL_JSON";        // E.g. "http://docs.forgerock.org/eosl.json"
-
-    $.getJSON(jsonUrl, function( data ) {
-        var eoslVersions = data[project];
-
-        if (eoslVersions.indexOf(version) !== -1) { // Matched EOSL version.
-            $("#footer").addClass("nodisplay");
-        }
-    });
+//    jsonUrl = "EOSL_JSON";        // E.g. "http://docs.forgerock.org/eosl.json"
+//
+//    $.getJSON(jsonUrl, function( data ) {
+//        var eoslVersions = data[project];
+//
+//        if (eoslVersions.indexOf(version) !== -1) { // Matched EOSL version.
+//            $("#footer").addClass("nodisplay");
+//        }
+//    });
 });
