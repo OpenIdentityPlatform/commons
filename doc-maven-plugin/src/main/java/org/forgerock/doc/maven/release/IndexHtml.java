@@ -57,6 +57,7 @@ public class IndexHtml {
                 String content = IOUtils.toString(getClass().getResource("/dfo.index.html"), "UTF-8");
                 content = content.replace("PRODUCT", m.getProjectName().toLowerCase());
                 content = content.replace("VERSION", m.getReleaseVersion());
+                content = content.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());
 
                 FileUtils.writeStringToFile(indexHtml, content, "UTF-8");
             } catch (IOException e) {
