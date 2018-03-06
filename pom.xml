@@ -43,19 +43,19 @@
     <packaging>pom</packaging>
 
     <inceptionYear>2012</inceptionYear>
-    <scm>
-        <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-ui.git</connection>
-        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-ui.git</developerConnection>
-        <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-ui/browse</url>
-      <tag>HEAD</tag>
-  </scm>
-    <distributionManagement>
-        <site>
-            <id>community.internal.forgerock.com</id>
-            <name>ForgeRock Community Server</name>
-            <url>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-ui</url>
-        </site>
-    </distributionManagement>
+<!--     <scm> -->
+<!--         <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-ui.git</connection> -->
+<!--         <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-ui.git</developerConnection> -->
+<!--         <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-ui/browse</url> -->
+<!--       <tag>HEAD</tag> -->
+<!--   </scm> -->
+<!--     <distributionManagement> -->
+<!--         <site> -->
+<!--             <id>community.internal.forgerock.com</id> -->
+<!--             <name>ForgeRock Community Server</name> -->
+<!--             <url>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-ui</url> -->
+<!--         </site> -->
+<!--     </distributionManagement> -->
 <!--     <repositories> -->
 <!--         <repository> -->
 <!--             <id>forgerock-staging-repository</id> -->
@@ -98,8 +98,8 @@
 					<stagingDirectory>
 						${project.build.directory}/dependencies/
                     </stagingDirectory>
-					<createChecksum>true</createChecksum>
-					<skipChecksumVerification>false</skipChecksumVerification>
+					<createChecksum>false</createChecksum>
+					<skipChecksumVerification>true</skipChecksumVerification>
 					<force>false</force>
 					<artifactItems>
 						<artifactItem>
