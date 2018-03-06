@@ -1643,7 +1643,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
      * @return The path to the release version directory.
      */
     public final String getReleaseVersionPath() {
-        return getReleaseDirectory().getPath() + File.separator + getProjectName() + "-" + getReleaseVersion()+"-docs";
+        return getReleaseDirectory().getPath() + File.separator + getProjectName().toLowerCase() + "-" + getReleaseVersion()+"-docs";
     }
 
     /**
