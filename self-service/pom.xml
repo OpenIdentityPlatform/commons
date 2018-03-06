@@ -32,10 +32,10 @@
         Common implementation of self service including such features as password reset and user self service.
     </description>
 
-    <issueManagement>
-        <system>JIRA</system>
-        <url>https://bugster.forgerock.org/jira/browse/USS</url>
-    </issueManagement>
+<!--     <issueManagement> -->
+<!--         <system>JIRA</system> -->
+<!--         <url>https://bugster.forgerock.org/jira/browse/USS</url> -->
+<!--     </issueManagement> -->
 
     <modules>
         <module>forgerock-selfservice-core</module>
@@ -83,8 +83,8 @@
 					<stagingDirectory>
 						${project.build.directory}/dependencies/
                     </stagingDirectory>
-					<createChecksum>true</createChecksum>
-					<skipChecksumVerification>false</skipChecksumVerification>
+					<createChecksum>false</createChecksum>
+					<skipChecksumVerification>true</skipChecksumVerification>
 					<force>false</force>
 					<artifactItems>
 						<artifactItem>
