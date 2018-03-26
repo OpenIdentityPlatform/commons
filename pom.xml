@@ -53,8 +53,6 @@
     <maven.min.version>3.0.1</maven.min.version>
 
     <!-- Repository Deployment URLs -->
-    <forgerockDistMgmtSnapshotsUrl>http://maven.forgerock.org/repo/snapshots</forgerockDistMgmtSnapshotsUrl>
-    <forgerockDistMgmtReleasesUrl>http://maven.forgerock.org/repo/releases</forgerockDistMgmtReleasesUrl>
 
     <!-- Third party components versions -->
     <assertj.version>2.1.0</assertj.version>
@@ -206,88 +204,6 @@
         <artifactId>jackson-module-jaxb-annotations</artifactId>
         <version>${jackson.version}</version>
       </dependency>
-
-      <!-- ForgeRock Guava dependency -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-all</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-annotations</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-base</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-cache</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-collect</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-concurrent</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-escape</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-eventbus</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-hash</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-io</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-math</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-net</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-primitives</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-reflect</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
-<!--       <dependency> -->
-<!--         <groupId>org.forgerock.commons.guava</groupId> -->
-<!--         <artifactId>forgerock-guava-xml</artifactId> -->
-<!--         <version>${forgerock-guava.version}</version> -->
-<!--       </dependency> -->
 
       <!-- ForgeRock Util dependencies -->
       <dependency>
