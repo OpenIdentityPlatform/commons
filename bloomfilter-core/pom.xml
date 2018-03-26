@@ -31,10 +31,6 @@
             <artifactId>forgerock-util</artifactId>
         </dependency>
 
-<!--         <dependency> -->
-<!--             <groupId>org.forgerock.commons.guava</groupId> -->
-<!--             <artifactId>forgerock-guava-hash</artifactId> -->
-<!--         </dependency> -->
 		<dependency>
 		    <groupId>com.google.guava</groupId>
 		    <artifactId>guava</artifactId>
