@@ -128,7 +128,7 @@
                 <executions>
                     <execution>
                         <id>copy</id>
-                        <!--phase>pre-integration-test</phase-->
+                        <phase>process-test-resources</phase>
                         <goals>
                             <goal>copy</goal>
                         </goals>

@@ -328,7 +328,9 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                 } else {
                     throw new IllegalArgumentException(
                             "Boot OSGi configuration file does not exists: "
-                                    + _configFile.getAbsolutePath());
+                                    + getFileForPath(configFile, projectLocation).getAbsolutePath() +" "
+                            		   + getFileForPath(configFile, installLocation).getAbsolutePath()
+                            		   );
                 }
             } else {
                 input =
