@@ -22,7 +22,7 @@
         <version>21.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>forgerock-audit-handler-json</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>Commons - ForgeRock Audit JSON Event Handler</name>
     <description />
 
