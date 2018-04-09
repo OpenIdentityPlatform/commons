@@ -20,6 +20,6 @@ notifications:
  email:
   - support@openam.org.ru
 install:
-  -echo install
+  - echo 'install'
 script:
   - mvn -q -B install
