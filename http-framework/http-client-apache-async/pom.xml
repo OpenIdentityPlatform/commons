@@ -39,11 +39,14 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpasyncclient-osgi</artifactId>
       <version>${apache-httpasyncclient.version}</version>
-      <!-- Dependencies packaged within the OSGi bundle: no need to transitively duplicates them -->
       <exclusions>
         <exclusion>
           <groupId>org.apache.httpcomponents</groupId>
           <artifactId>httpasyncclient</artifactId>
+        </exclusion>
+        <exclusion>
+        		<groupId>commons-logging</groupId>
+          	<artifactId>commons-logging</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -51,6 +54,11 @@
       <groupId>org.forgerock.http</groupId>
       <artifactId>chf-client-apache-common</artifactId>
     </dependency>
+<!--      <dependency> -->
+<!--       <groupId>commons-logging</groupId> -->
+<!--       <artifactId>commons-logging</artifactId> -->
+<!--       <version>1.2</version> -->
+<!--     </dependency> -->
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
