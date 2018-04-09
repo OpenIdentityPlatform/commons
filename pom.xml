@@ -74,8 +74,6 @@
     <animal-sniffer.signature.version>1.0</animal-sniffer.signature.version>
     <version.animal-sniffer.plugin>1.11</version.animal-sniffer.plugin>
     <version.maven-license.plugin>2.6</version.maven-license.plugin>
-    <forgerockDistMgmtSnapshotsUrl>http://maven.forgerock.org/repo/snapshots</forgerockDistMgmtSnapshotsUrl>
-    <forgerockDistMgmtReleasesUrl>http://maven.forgerock.org/repo/releases</forgerockDistMgmtReleasesUrl>
   </properties>
 
   <dependencyManagement>
