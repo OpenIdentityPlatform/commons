@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012-2013 ForgeRock AS
+  !
+-->
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>About the ForgeRock Script libraries</title>
+    <author>ForgeRock AS</author>
+  </properties>
+  <body>
+    <section name="About the ForgeRock Script libraries">
+      <p>
+        This project provides common scripting resource-oriented libraries used by
+        ForgeRock projects. It includes the following sub-modules:
+      </p>
+        <item name="Script Common" href="script-common/index.html" />
+        <item name="JavaScript Module" href="script-javascript/index.html" />
+        <item name="Groovy Module" href="script-groovy/index.html" />
+        <item name="JRuby Module" href="script-jruby/index.html" />
+      <ul>
+        <li>
+          <a href="script-common/index.html">script-common</a> : Script Common.
+        </li>
+        <li>
+          <a href="script-javascript/index.html">script-javascript</a> : JavaScript Module.
+        </li>
+        <li>
+          <a href="script-groovy/index.html">script-groovy</a> : Groovy Module.
+        </li>
+        <li>
+          <a href="script-jruby/index.html">script-jruby</a> : JRuby Module.
+        </li>
+      </ul>
+    </section>
+  </body>
+</document>

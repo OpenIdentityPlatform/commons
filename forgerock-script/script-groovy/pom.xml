@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright (c) 2012-2013 ForgeRock AS. All rights reserved.
+  ~
+  ~ The contents of this file are subject to the terms
+  ~ of the Common Development and Distribution License
+  ~ (the License). You may not use this file except in
+  ~ compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at
+  ~ http://forgerock.org/license/CDDLv1.0.html
+  ~ See the License for the specific language governing
+  ~ permission and limitations under the License.
+  ~
+  ~ When distributing Covered Code, include this CDDL
+  ~ Header Notice in each file and include the License file
+  ~ at http://forgerock.org/license/CDDLv1.0.html
+  ~ If applicable, add the following below the CDDL Header,
+  ~ with the fields enclosed by brackets [] replaced by
+  ~ your own identifying information:
+  ~ "Portions Copyrighted [year] [name of copyright owner]"
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.forgerock.commons</groupId>
+        <artifactId>forgerock-script</artifactId>
+        <version>3.0.3</version>
+    </parent>
+    <artifactId>script-groovy</artifactId>
+    <packaging>bundle</packaging>
+    <name>ForgeRock Script - Groovy</name>
+
+    <properties>
+        <commons.script.osgi.import.defaults>
+            org.codehaus.groovy*;version="[1.8,3)",groovy*;version="[1.8,3)"
+        </commons.script.osgi.import.defaults>
+    </properties>
+
+    <dependencies>
+        <!--
+            mvn versions:display-plugin-updates
+            mvn versions:display-dependency-updates
+            mvn versions:use-latest-versions
+        -->
+
+        <!-- ForgeRock Commons -->
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>2.1.3</version>
+        </dependency>
+
+        <!-- Provided Dependencies -->
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easytesting</groupId>
+            <artifactId>fest-assert-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-common</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Activator>org.forgerock.script.groovy.internal.Activator</Bundle-Activator>
+                    </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>gmaven-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generateStubs</goal>
+                            <goal>compile</goal>
+                            <goal>generateTestStubs</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                        <configuration>
+                            <providerSelection>2.0</providerSelection>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

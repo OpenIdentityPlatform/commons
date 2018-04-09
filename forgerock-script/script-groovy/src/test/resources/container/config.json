@@ -1,0 +1,82 @@
+{
+    "_id": "org/forgerock/script/groovy/MyClass.js",
+    "_rev": "depends on the SourceManager implementation.",
+    "type": "text/javascript",
+    "source": "println \"this is \";",
+    "__ENCRYPT__secureScope": {
+        "key1": "value1"
+    },
+    "secureScope": {
+        "$crypto": {
+            "value": {
+                "iv": "sL0KM93PmvvvaQQ8rP+QAQ==",
+                "data": "eSH8YgeezoWsDDIvX1WQ2A==",
+                "cipher": "AES/CBC/PKCS5Padding",
+                "key": "default-sym-key"
+            },
+            "type": "x-simple-encryption"
+        }
+    },
+    "inherit": "org/forgerock/script/groovy/SuperScript",
+    "dependencies": [
+        "comment: Change of these script object trigger the reload of this script",
+        "org/forgerock/script/groovy/SubClass1",
+        "org/forgerock/script/groovy/SubClass2"
+    ],
+
+
+    "sourceManager1": {
+        "_id": "default",
+        "source": "println \"this is \";"
+    },
+    "sourceManager2": {
+        "_id": "config/router/router",
+        "readOnly": true,
+        "source": {
+            "$ref": "config/router/router#/filters/0/onRequest"
+        }
+    },
+    "sourceManager3": {
+        "_id": "bundle://17:1/",
+        "readOnly": true,
+        "source": {
+            "$ref": ""
+        }
+    },
+    "sourceManager4": {
+        "_id": "dir-scripts-random-vale",
+        "root": "${openidm.deploy.dir/scripts}",
+        "readOnly": false,
+        "createable": false,
+        "source": {
+            "$ref": ""
+        }
+    },
+
+
+    "classLoader": {
+        "URLClassLoader": {
+            "url": [
+                {
+                    "comment": "Load the jars or classes from a folder.",
+                    "directory": "Sets the absolute or relative location from the work directory.",
+                    "includes": "Ant-style path expression",
+                    "excludes": "Ant-style path expression"
+                },
+                "mvn:org.apache.felix/org.apache.felix.main/4.0.2"
+            ]
+        },
+        "GroovyClassLoader": {
+            "enabled": true
+        }
+    },
+    "engineConfiguration": {
+        "systemProperties": {
+            "org.jruby.embed.localvariable.behavior": "transient",
+            "org.jruby.embed.localcontext.scope": "threadsafe"
+        },
+        "initProperties": {},
+        "engineScope": {},
+        "classLoader": {}
+    }
+}
