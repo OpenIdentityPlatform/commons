@@ -129,6 +129,30 @@
     </dependencies>
     <build>
         <plugins>
+            	<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>restore permissions fix</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                            		<exec executable="ls" dir="${project.build.directory}/../../script-javascript/ext">
+                                	   <arg value="-laht" />
+                                </exec>
+								<chmod file="${project.build.directory}/../../script-javascript/ext/*.jar" perm="ugo+r" verbose="true" />
+								<exec executable="ls" dir="${project.build.directory}/../../script-javascript/ext">
+                                	   <arg value="-laht" />
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
