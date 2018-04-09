@@ -143,6 +143,30 @@
     <build>
         <!-- http://svn.apache.org/repos/asf/aries/trunk/spi-fly/spi-fly-dynamic-bundle/pom.xml -->
         <plugins>
+        	      <plugin>
+	                <groupId>org.apache.maven.plugins</groupId>
+	                <artifactId>maven-antrun-plugin</artifactId>
+	                <executions>
+	                    <execution>
+	                        <id>chmod</id>
+	                        <phase>validate</phase>
+	                        <goals>
+	                            <goal>run</goal>
+	                        </goals>
+	                        <configuration>
+	                            <target>
+	                            		<exec executable="ls" dir="${project.build.directory}/../ext">
+	                                	   <arg value="-laht" />
+	                                </exec>
+									<chmod file="${project.build.directory}/../ext/*.jar" perm="ugo+r" verbose="true" />
+									<exec executable="ls" dir="${project.build.directory}/../ext">
+	                                	   <arg value="-laht" />
+	                                </exec>
+	                            </target>
+	                        </configuration>
+	                    </execution>
+	                </executions>
+	            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
