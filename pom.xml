@@ -121,28 +121,28 @@
         <coberturaPluginVersion>2.7</coberturaPluginVersion>
 
         <!-- maven-dependency-plugin -->
-        <mavenDependencyPluginVersion>2.10</mavenDependencyPluginVersion>
+        <mavenDependencyPluginVersion>3.1.0</mavenDependencyPluginVersion>
 
         <!-- maven-clean-plugin http://maven.apache.org/components/plugins/maven-clean-plugin -->
-        <mavenCleanPluginVersion>2.6.1</mavenCleanPluginVersion>
+        <mavenCleanPluginVersion>3.0.0</mavenCleanPluginVersion>
 
         <!-- maven-jar-plugin http://maven.apache.org/plugins/maven-jar-plugin/ -->
-        <mavenJarPluginVersion>2.6</mavenJarPluginVersion>
+        <mavenJarPluginVersion>3.0.0</mavenJarPluginVersion>
 
         <!-- maven-war-plugin http://maven.apache.org/plugins/maven-war-plugin/ -->
-        <mavenWarPluginVersion>2.6</mavenWarPluginVersion>
+        <mavenWarPluginVersion>3.2.0</mavenWarPluginVersion>
 
         <!-- maven-assembly-plugin http://maven.apache.org/plugins/maven-assembly-plugin/ -->
-        <mavenAssemblyPluginVersion>2.5.3</mavenAssemblyPluginVersion>
+        <mavenAssemblyPluginVersion>3.1.0</mavenAssemblyPluginVersion>
 
         <!-- maven-surefire-plugin http://maven.apache.org/surefire/maven-surefire-plugin/ -->
-        <mavenSurefirePluginVersion>2.18.1</mavenSurefirePluginVersion>
+        <mavenSurefirePluginVersion>2.21.0</mavenSurefirePluginVersion>
 
         <!-- maven-source-plugin http://maven.apache.org/plugins/maven-source-plugin/ -->
-        <mavenSourcePluginVersion>2.4</mavenSourcePluginVersion>
+        <mavenSourcePluginVersion>3.0.1</mavenSourcePluginVersion>
 
         <!-- maven-resources-plugin http://maven.apache.org/plugins/maven-resources-plugin/ -->
-        <mavenResourcesPluginVersion>2.7</mavenResourcesPluginVersion>
+        <mavenResourcesPluginVersion>3.0.2</mavenResourcesPluginVersion>
 
         <!-- maven-remote-resources-plugin http://maven.apache.org/plugins/maven-remote-resources-plugin/ -->
         <mavenRemoteResourcesPluginVersion>1.5</mavenRemoteResourcesPluginVersion>
@@ -154,16 +154,16 @@
         <mavenInstallPluginVersion>2.5.2</mavenInstallPluginVersion>
 
         <!-- maven-scm-plugin http://maven.apache.org/plugins/maven-scm-plugin/ -->
-        <mavenSCMPluginVersion>1.9.4</mavenSCMPluginVersion>
+        <mavenSCMPluginVersion>1.9.5</mavenSCMPluginVersion>
 
         <!-- license-maven-plugin http://mojo.codehaus.org/license-maven-plugin/ -->
-        <licenseMavenPluginVersion>1.8</licenseMavenPluginVersion>
+        <licenseMavenPluginVersion>1.16</licenseMavenPluginVersion>
 
         <!-- maven-enforcer-plugin http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
         <mavenEnforcerPluginVersion>1.4</mavenEnforcerPluginVersion>
 
         <!-- maven-release-plugin http://maven.apache.org/plugins/maven-release-plugin/ -->
-        <mavenReleasePluginVersion>2.5.1</mavenReleasePluginVersion>
+        <mavenReleasePluginVersion>2.5.3</mavenReleasePluginVersion>
 
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
