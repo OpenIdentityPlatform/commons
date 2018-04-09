@@ -4,6 +4,7 @@
 
 # Package Files #
 *.jar
+!bundle*.jar
 *.war
 *.ear
 
