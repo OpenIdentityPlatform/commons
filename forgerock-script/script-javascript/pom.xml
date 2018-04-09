@@ -73,7 +73,7 @@
             <!--scope>provided</scope-->
             <optional>true</optional>
             <scope>system</scope>
-            <systemPath>${project.build.directory}/../ext/org.eclipse.wst.jsdt.debug.rhino.debugger_1.0.600.v201604292217.jar</systemPath>
+            <systemPath>${project.basedir}/ext/org.eclipse.wst.jsdt.debug.rhino.debugger_1.0.600.v201604292217.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.eclipse.wst.jsdt.debug</groupId>
@@ -81,7 +81,7 @@
             <version>1.0.300.v201502261613</version>
             <optional>true</optional>
             <scope>system</scope>
-            <systemPath>${project.build.directory}/../ext/org.eclipse.wst.jsdt.debug.transport_1.0.300.v201502261613.jar</systemPath>
+            <systemPath>${project.basedir}/ext/org.eclipse.wst.jsdt.debug.transport_1.0.300.v201502261613.jar</systemPath>
         </dependency>
 
         <!-- SLF4J -->
