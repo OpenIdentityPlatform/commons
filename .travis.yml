@@ -19,5 +19,7 @@ branches:
 notifications:
  email:
   - support@openam.org.ru
+install:
+  -echo install
 script:
-  - mvn -q -B clean install
+  - mvn -q -B install
