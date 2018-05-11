@@ -22,4 +22,4 @@ notifications:
 install:
   - echo 'install'
 script:
-  - mvn -B install
+  - mvn -q -B install
