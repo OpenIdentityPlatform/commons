@@ -77,6 +77,7 @@ public class Client {
 				}
 			}.start();
 		} catch (Throwable e) {
+			logger.error("error initializing client: {}", e.getMessage());
 			throw new RuntimeException("init", e);
 		}
 	}

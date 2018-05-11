@@ -129,7 +129,7 @@
 					</execution>
 					<execution>
 						<id>resolve-install-external-dependencies</id>
-						<phase>initialize</phase>
+						<phase>generate-resources</phase>
 						<goals>
 							<goal>resolve-external</goal>
 							<goal>install-external</goal>
@@ -153,7 +153,7 @@
 				<executions>
 					<execution>
 						<id>copy to resources</id>
-						<phase>process-resources</phase>
+						<phase>generate-resources</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
