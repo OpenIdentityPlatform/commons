@@ -491,6 +491,20 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            
+            <!-- Open Identity Platform Dependencies -->
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>httpdump</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
         </dependencies>
     </dependencyManagement>
 </project>
