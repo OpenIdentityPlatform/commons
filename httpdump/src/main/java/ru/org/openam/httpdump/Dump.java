@@ -22,7 +22,7 @@ public class Dump {
 	public static String toString(HttpServletRequest request) {
 		try{
 			BufferedRequestWrapper requestWithBody=(BufferedRequestWrapper)request.getAttribute(BufferedRequestWrapper.class.getName());
-			return MessageFormat.format("{0}: {1} {2}?{3}\n{4}Params: {5}\n{6}", 
+			return MessageFormat.format("{0}: {1} {2}?{3} {4} Params: {5} {6}", 
 					new Object[]{
 						Client.get(request),
 						request.getMethod(),
@@ -48,7 +48,7 @@ public class Dump {
 			Enumeration<String> values=request.getHeaders(header);
 			while(values.hasMoreElements())
 				vres=vres.concat(MessageFormat.format("[{0}];", values.nextElement()));
-			res=res.concat(MessageFormat.format("{0}: {1}\n", new Object[]{header,vres}));
+			res=res.concat(MessageFormat.format("{0}: {1} ", new Object[]{header,vres}));
 		}
 		return res;
 	}
@@ -59,7 +59,7 @@ public class Dump {
 		Enumeration<String> params=request.getParameterNames();
 		while(params.hasMoreElements()){
 			final String param=params.nextElement();
-			res=res.concat(MessageFormat.format("{0}: {1}; ", new Object[]{param,(request.getParameterValues(param)==null)?null:Arrays.asList(request.getParameterValues(param))}));
+			res=res.concat(MessageFormat.format("{0}={1}; ", new Object[]{param,(request.getParameterValues(param)==null)?null:Arrays.asList(request.getParameterValues(param))}));
 		}
 		return res;
 	}
