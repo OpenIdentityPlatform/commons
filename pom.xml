@@ -89,7 +89,7 @@
 				            <packaging>js</packaging>
 				            <classifier>min</classifier>
 				            <downloadUrl>
-								https://github.com/cloudflare/backgrid-select-all/blob/{version}/{artifactId}.{classifier}.{packaging}
+								https://raw.githubusercontent.com/cloudflare/backgrid-select-all/{version}/{artifactId}.{classifier}.{packaging}
                         		</downloadUrl>
 				        </artifactItem>
 			            <artifactItem>
