@@ -109,12 +109,13 @@ public final class SystemUtils {
         if (JAVA_VERSION_TRIMMED == null) {
             return 0f;
         }
-        String str = JAVA_VERSION_TRIMMED.substring(0, 3);
-        if (JAVA_VERSION_TRIMMED.length() >= 5) {
-            str = str + JAVA_VERSION_TRIMMED.substring(4, 5);
-        }
+        String[] versionParts = JAVA_VERSION_TRIMMED.split("\\.");
+        StringBuilder builder = new StringBuilder();
+        builder.append(versionParts[0]);
+        if(versionParts.length > 2) 
+        	builder.append(".").append(versionParts[1]);
         try {
-            return Float.parseFloat(str);
+            return Float.parseFloat(builder.toString());
         } catch (Exception ex) {
             return 0;
         }
