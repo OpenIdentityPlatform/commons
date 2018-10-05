@@ -136,7 +136,7 @@
         <mavenAssemblyPluginVersion>3.1.0</mavenAssemblyPluginVersion>
 
         <!-- maven-surefire-plugin http://maven.apache.org/surefire/maven-surefire-plugin/ -->
-        <mavenSurefirePluginVersion>2.21.0</mavenSurefirePluginVersion>
+        <mavenSurefirePluginVersion>2.22.0</mavenSurefirePluginVersion>
 
         <!-- maven-source-plugin http://maven.apache.org/plugins/maven-source-plugin/ -->
         <mavenSourcePluginVersion>3.0.1</mavenSourcePluginVersion>
@@ -441,7 +441,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.12.4</version>
+                    <version>2.22.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -743,7 +743,7 @@
             <id>precommit</id>
             <build>
                 <plugins>
-                    <plugin>
+<!--                     <plugin> -->
                         <!-- Enforce Checkstyle during compilation -->
 
                         <!-- Strictly speaking Checkstyle should be invoked as a
@@ -753,27 +753,27 @@
                              the site is generated (which may never occur for some
                              projects).     
                         -->
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-checkstyle-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>check-src-and-tests</id>
-                                <configuration>
-                                    <configLocation>${checkstyleSourceConfigLocation}</configLocation>
-                                    <headerLocation>${checkstyleHeaderLocation}</headerLocation>
-                                    <suppressionsLocation>${checkstyleUnitTestSuppressionsLocation}</suppressionsLocation>
-                                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                                    <!-- Only output errors if we're not expecting any -->
-                                    <consoleOutput>${checkstyleFailOnError}</consoleOutput>
-                                    <failsOnError>${checkstyleFailOnError}</failsOnError>
-                                </configuration>
-                                <phase>process-test-classes</phase>
-                                <goals>
-                                    <goal>checkstyle</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
+<!--                         <groupId>org.apache.maven.plugins</groupId> -->
+<!--                         <artifactId>maven-checkstyle-plugin</artifactId> -->
+<!--                         <executions> -->
+<!--                             <execution> -->
+<!--                                 <id>check-src-and-tests</id> -->
+<!--                                 <configuration> -->
+<!--                                     <configLocation>${checkstyleSourceConfigLocation}</configLocation> -->
+<!--                                     <headerLocation>${checkstyleHeaderLocation}</headerLocation> -->
+<!--                                     <suppressionsLocation>${checkstyleUnitTestSuppressionsLocation}</suppressionsLocation> -->
+<!--                                     <includeTestSourceDirectory>true</includeTestSourceDirectory> -->
+<!--                                     Only output errors if we're not expecting any -->
+<!--                                     <consoleOutput>${checkstyleFailOnError}</consoleOutput> -->
+<!--                                     <failsOnError>${checkstyleFailOnError}</failsOnError> -->
+<!--                                 </configuration> -->
+<!--                                 <phase>process-test-classes</phase> -->
+<!--                                 <goals> -->
+<!--                                     <goal>checkstyle</goal> -->
+<!--                                 </goals> -->
+<!--                             </execution> -->
+<!--                         </executions> -->
+<!--                     </plugin> -->
                     <plugin>
                         <!-- Check Open Source licenses for all the dependencies -->
                         <groupId>org.codehaus.mojo</groupId>
