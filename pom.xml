@@ -37,27 +37,27 @@
   <version>1.4.2</version>
   <name>ForgeRock I18N Framework</name>
   <description>A common framework for embedding localizable messages in applications</description>
-  <url>http://commons.forgerock.org/i18n-framework</url>
+<!--   <url>http://commons.forgerock.org/i18n-framework</url> -->
   <packaging>pom</packaging>
-  <issueManagement>
-    <system>Jira</system>
-    <url>https://bugster.forgerock.org/jira/browse/CINTFR</url>
-  </issueManagement>
-  <mailingLists>
-    <mailingList>
-      <!-- TODO: need mailing list -->
-      <name>I18N Mailing List</name>
-      <archive>http://lists.forgerock.org/pipermail/opendj/</archive>
-      <subscribe>https://lists.forgerock.org/mailman/listinfo/opendj/</subscribe>
-      <unsubscribe>https://lists.forgerock.org/mailman/listinfo/opendj/</unsubscribe>
-      <post>opendj@forgerock.org</post>
-    </mailingList>
-  </mailingLists>
-  <scm>
-    <url>https://svn.forgerock.org/commons/i18n-framework/tags/1.4.2</url>
-    <connection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/tags/1.4.2</connection>
-    <developerConnection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/tags/1.4.2</developerConnection>
-  </scm>
+<!--   <issueManagement> -->
+<!--     <system>Jira</system> -->
+<!--     <url>https://bugster.forgerock.org/jira/browse/CINTFR</url> -->
+<!--   </issueManagement> -->
+<!--   <mailingLists> -->
+<!--     <mailingList> -->
+<!--       TODO: need mailing list -->
+<!--       <name>I18N Mailing List</name> -->
+<!--       <archive>http://lists.forgerock.org/pipermail/opendj/</archive> -->
+<!--       <subscribe>https://lists.forgerock.org/mailman/listinfo/opendj/</subscribe> -->
+<!--       <unsubscribe>https://lists.forgerock.org/mailman/listinfo/opendj/</unsubscribe> -->
+<!--       <post>opendj@forgerock.org</post> -->
+<!--     </mailingList> -->
+<!--   </mailingLists> -->
+<!--   <scm> -->
+<!--     <url>https://svn.forgerock.org/commons/i18n-framework/tags/1.4.2</url> -->
+<!--     <connection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/tags/1.4.2</connection> -->
+<!--     <developerConnection>scm:svn:https://svn.forgerock.org/commons/i18n-framework/tags/1.4.2</developerConnection> -->
+<!--   </scm> -->
   <ciManagement>
     <system>jenkins</system>
     <url>http://builds.forgerock.org/job/Commons%20-%20I18N%20Framework/</url>
@@ -73,13 +73,13 @@
       </notifier>
     </notifiers>
   </ciManagement>
-  <distributionManagement>
-    <site>
-      <id>forgerock.org</id>
-      <name>OpenDJ Community</name>
-      <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/i18n-framework</url>
-    </site>
-  </distributionManagement>
+<!--   <distributionManagement> -->
+<!--     <site> -->
+<!--       <id>forgerock.org</id> -->
+<!--       <name>OpenDJ Community</name> -->
+<!--       <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/i18n-framework</url> -->
+<!--     </site> -->
+<!--   </distributionManagement> -->
   <modules>
     <module>i18n-maven-plugin</module>
     <module>i18n-core</module>
