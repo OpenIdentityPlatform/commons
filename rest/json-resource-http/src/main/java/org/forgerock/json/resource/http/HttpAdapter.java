@@ -845,7 +845,8 @@ final class HttpAdapter implements Handler, Describable<Swagger, org.forgerock.h
     @Override
     public Swagger handleApiRequest(Context context, org.forgerock.http.protocol.Request request) {
         return descriptor != null
-                ? SwaggerUtils.clone(descriptor).host(context.asContext(ClientContext.class).getLocalAddress())
+                //? SwaggerUtils.clone(descriptor).host(context.asContext(ClientContext.class).getLocalAddress())
+        		? SwaggerUtils.clone(descriptor)
                 : null;
     }
 
