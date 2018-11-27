@@ -88,7 +88,7 @@
         <findbugsPluginVersion>3.0.1</findbugsPluginVersion>
 
         <!-- maven-javadoc-plugin -->
-        <javadocPluginVersion>2.9</javadocPluginVersion>
+        <javadocPluginVersion>3.0.1</javadocPluginVersion>
         <!-- forgerock-build-tools stylesheet org/forgerock/javadoc/javadoc.css
              does not work with JDK7 -->
         <javadocStylesheet />
