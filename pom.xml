@@ -160,7 +160,7 @@
         <licenseMavenPluginVersion>1.16</licenseMavenPluginVersion>
 
         <!-- maven-enforcer-plugin http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
-        <mavenEnforcerPluginVersion>1.4</mavenEnforcerPluginVersion>
+        <mavenEnforcerPluginVersion>3.0.0-M2</mavenEnforcerPluginVersion>
 
         <!-- maven-release-plugin http://maven.apache.org/plugins/maven-release-plugin/ -->
         <mavenReleasePluginVersion>2.5.3</mavenReleasePluginVersion>
