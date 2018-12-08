@@ -32,6 +32,9 @@
             <url>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-util</url>
         </site>
     </distributionManagement>
+    <properties>
+    	<doclint>none</doclint>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>org.slf4j</groupId>
