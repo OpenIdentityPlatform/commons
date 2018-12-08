@@ -391,6 +391,10 @@ public final class HeaderUtil {
             return date;
         }
         date = parseDate(s, LEGACY_RFC_850_DATE_FORMAT);
+        
+        if (date == null) //fix jdk11 day of week parse
+        	date = parseDate(s.replace("day,", ","), LEGACY_RFC_850_DATE_FORMAT);
+        
         if (date != null) {
             return date;
         }
