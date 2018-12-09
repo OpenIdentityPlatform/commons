@@ -5,8 +5,14 @@ matrix:
           jdk: oraclejdk8
         - os: linux
           jdk: openjdk8
+        - os: linux
+          jdk: oraclejdk11
+        - os: linux
+          jdk: openjdk11
         - os: osx
-          osx_image: xcode9.1
+          osx_image: xcode9.3
+        - os: osx
+          osx_image: xcode10.1
     allow_failures:
         - os: osx
 before_install:
@@ -18,7 +24,7 @@ branches:
    - master
 notifications:
  email:
-  - support@openam.org.ru
+  - open-identity-platform@googlegroups.com
 install:
   - echo 'install'
 script:
