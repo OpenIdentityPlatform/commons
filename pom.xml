@@ -127,7 +127,7 @@
         <mavenCleanPluginVersion>3.0.0</mavenCleanPluginVersion>
 
         <!-- maven-jar-plugin http://maven.apache.org/plugins/maven-jar-plugin/ -->
-        <mavenJarPluginVersion>3.0.0</mavenJarPluginVersion>
+        <mavenJarPluginVersion>3.0.2</mavenJarPluginVersion>
 
         <!-- maven-war-plugin http://maven.apache.org/plugins/maven-war-plugin/ -->
         <mavenWarPluginVersion>3.2.0</mavenWarPluginVersion>
@@ -151,7 +151,7 @@
         <mavenDeployPluginVersion>2.8.2</mavenDeployPluginVersion>
 
         <!-- maven-install-plugin http://maven.apache.org/plugins/maven-install-plugin/ -->
-        <mavenInstallPluginVersion>2.5.2</mavenInstallPluginVersion>
+        <mavenInstallPluginVersion>3.0.0-M1</mavenInstallPluginVersion>
 
         <!-- maven-scm-plugin http://maven.apache.org/plugins/maven-scm-plugin/ -->
         <mavenSCMPluginVersion>1.9.5</mavenSCMPluginVersion>
