@@ -89,7 +89,7 @@
   <mavenAssemblyVersion>2.5.3</mavenAssemblyVersion>
   <mavenFilteringVersion>1.3</mavenFilteringVersion>
   <mavenDependencyVersion>2.10</mavenDependencyVersion>
-  <mavenPluginPluginVersion>3.4</mavenPluginPluginVersion>
+  <mavenPluginPluginVersion>3.6.0</mavenPluginPluginVersion>
   <mavenResourcesVersion>2.7</mavenResourcesVersion>
   <plantUmlVersion>7993</plantUmlVersion>
   <plexusUtilsVersion>3.0.22</plexusUtilsVersion>
