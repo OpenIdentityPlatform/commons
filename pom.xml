@@ -72,7 +72,7 @@
     <animal-sniffer.signature.groupId>org.codehaus.mojo.signature</animal-sniffer.signature.groupId>
     <animal-sniffer.signature.artifactId>java17</animal-sniffer.signature.artifactId>
     <animal-sniffer.signature.version>1.0</animal-sniffer.signature.version>
-    <version.animal-sniffer.plugin>1.11</version.animal-sniffer.plugin>
+    <version.animal-sniffer.plugin>1.16</version.animal-sniffer.plugin>
     <version.maven-license.plugin>2.6</version.maven-license.plugin>
   </properties>
 
