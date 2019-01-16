@@ -25,69 +25,47 @@
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
+			<artifactId>javax.servlet-api</artifactId>
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>RELEASE</version>
+			<version>4.13-beta-1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.maxmind.geoip</groupId>
-			<artifactId>geoip-api</artifactId>
-			<version>RELEASE</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache-core</artifactId>
-			<version>RELEASE</version>
-			<scope>provided</scope>
+			<groupId>com.maxmind.geoip2</groupId>
+			<artifactId>geoip2</artifactId>
+			<version>2.12.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>RELEASE</version>
+			<version>3.8.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
 			<artifactId>commons-io</artifactId>
-			<version>RELEASE</version>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+		  <groupId>com.google.guava</groupId>
+		  <artifactId>guava</artifactId>
 		</dependency>
 	</dependencies>
 	<build>
-		<extensions>
-			<extension>
-				<groupId>org.apache.maven.wagon</groupId>
-				<artifactId>wagon-ssh</artifactId>
-				<version>2.2</version>
-			</extension>
-		</extensions>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>com.savage7.maven.plugins</groupId>
 				<artifactId>maven-external-dependency-plugin</artifactId>
 				<version>0.6-SNAPSHOT</version>
 				<inherited>false</inherited>
-				<dependencies>
-					<dependency>
-			          <groupId>org.codehaus.plexus</groupId>
-			          <artifactId>plexus-archiver</artifactId>
-			          <version>RELEASE</version>
-			        </dependency>
-				</dependencies>
 				<configuration>
 					<stagingDirectory>
 						${project.build.directory}/dependencies/
@@ -99,23 +77,21 @@
 					<artifactItems>
 						<artifactItem>
 							<groupId>com.maxmind.geoip</groupId>
-							<artifactId>GeoIPCityFree</artifactId>
+							<artifactId>GeoLite2-City</artifactId>
 							<version>${project.version}</version>
-							<packaging>dat</packaging>
+							<packaging>tar.gz</packaging>
 							<downloadUrl><![CDATA[
-								http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+								http://geolite.maxmind.com/download/geoip/database/{artifactId}.{packaging}
 							]]></downloadUrl>
-							<extractFile>{artifactId}</extractFile>
 						</artifactItem>
 						<artifactItem>
 							<groupId>com.maxmind.geoip</groupId>
-							<artifactId>GeoIPASNum</artifactId>
+							<artifactId>GeoLite2-ASN</artifactId>
 							<version>${project.version}</version>
-							<packaging>dat</packaging>
+							<packaging>tar.gz</packaging>
 							<downloadUrl><![CDATA[
-								http://geolite.maxmind.com/download/geoip/database/asnum/{artifactId}.dat.gz
+								http://geolite.maxmind.com/download/geoip/database/{artifactId}.{packaging}
 							]]></downloadUrl>
-							<extractFile>{artifactId}</extractFile>
 						</artifactItem>
 					</artifactItems>
 				</configuration>
@@ -152,32 +128,54 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>copy to resources</id>
-						<phase>generate-resources</phase>
-						<goals>
-							<goal>copy</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
+						<id>extract **/*.mmdb</id>
+		                <phase>generate-resources</phase>
+		                <goals>
+		                	<goal>unpack</goal>
+		                </goals>
+		                <configuration>
+		                	<artifactItems>
+			            		<artifactItem>
 									<groupId>com.maxmind.geoip</groupId>
-									<artifactId>GeoIPCityFree</artifactId>
+									<artifactId>GeoLite2-City</artifactId>
 									<version>${project.version}</version>
-									<type>dat</type>
-									<outputDirectory>src/main/resources</outputDirectory>
+									<type>tar.gz</type>
+									<includes>**/*.mmdb</includes>
 								</artifactItem>
 								<artifactItem>
 									<groupId>com.maxmind.geoip</groupId>
-									<artifactId>GeoIPASNum</artifactId>
+									<artifactId>GeoLite2-ASN</artifactId>
 									<version>${project.version}</version>
-									<type>dat</type>
-									<outputDirectory>src/main/resources</outputDirectory>
+									<type>tar.gz</type>
+									<includes>**/*.mmdb</includes>
 								</artifactItem>
 							</artifactItems>
-						</configuration>
-					</execution>
+		                </configuration>
+		            </execution>
 				</executions>
 			</plugin>
+			<plugin>
+		        <artifactId>maven-antrun-plugin</artifactId>
+		        <version>1.8</version>
+		        <executions>
+		          <execution>
+		            <id>copy **/*.mmdb</id>
+		            <phase>generate-resources</phase>
+		            <configuration>
+		              <target>
+						<copy todir="src/main/resources" flatten="true">
+						    <fileset dir="target/dependency">
+						        <include name="**/*.mmdb"/>
+						    </fileset>
+						</copy>
+		              </target>
+		            </configuration>
+		            <goals>
+		              <goal>run</goal>
+		            </goals>
+		          </execution>
+		        </executions>
+		      </plugin>
 		</plugins>
 	</build>
 </project>
