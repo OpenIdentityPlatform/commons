@@ -15,7 +15,7 @@
  */
 package org.forgerock.i18n.slf4j;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import org.forgerock.i18n.LocalizableMessage;
@@ -84,8 +84,8 @@ public class LocalizedMarker implements Marker {
 
     /** {@inheritDoc} */
     @Override
-    public Iterator<?> iterator() {
-        return Collections.emptySet().iterator();
+    public Iterator<Marker> iterator() {
+        return Arrays.asList(new Marker[] {}).iterator();
     }
 
     /** {@inheritDoc} */
