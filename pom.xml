@@ -348,6 +348,7 @@
 <!--                         </dependency> -->
 <!--                     </dependencies> -->
                     <configuration>
+                    	<source>8</source>
                         <author>false</author>
                         <quiet>true</quiet>
                         <windowtitle>${javadocWindowTitle}</windowtitle>
