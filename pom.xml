@@ -59,7 +59,7 @@
     <fest-assert.version>1.4</fest-assert.version>
     <jackson.version>2.9.2</jackson.version>
     <servlet-api.version>3.0.1</servlet-api.version>
-    <slf4j.version>1.7.12</slf4j.version>
+    <slf4j.version>1.7.25</slf4j.version>
     <testng.version>6.14.3</testng.version>
 
     <!-- Shared components versions -->
