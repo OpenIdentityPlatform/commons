@@ -104,10 +104,8 @@ public final class VersionedPath {
      * @param resource The resource.
      */
     void addVersion(Version v, Resource resource) {
-        if (paths.containsKey(v)) {
-            throw new IllegalArgumentException("Trying to redefine version: " + v);
-        }
-        paths.put(v, Reject.checkNotNull(resource));
+    	if (!paths.containsKey(v))
+    		paths.put(v, Reject.checkNotNull(resource));
     }
 
     @Override
