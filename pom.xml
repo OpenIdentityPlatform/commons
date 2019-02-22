@@ -136,7 +136,7 @@
         <mavenAssemblyPluginVersion>3.1.0</mavenAssemblyPluginVersion>
 
         <!-- maven-surefire-plugin http://maven.apache.org/surefire/maven-surefire-plugin/ -->
-        <mavenSurefirePluginVersion>2.22.0</mavenSurefirePluginVersion>
+        <mavenSurefirePluginVersion>3.0.0-M3</mavenSurefirePluginVersion>
 
         <!-- maven-source-plugin http://maven.apache.org/plugins/maven-source-plugin/ -->
         <mavenSourcePluginVersion>3.0.1</mavenSourcePluginVersion>
@@ -446,7 +446,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>2.22.0</version>
+                    <version>3.0.0-M3</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.plexus</groupId>
