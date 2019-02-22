@@ -127,7 +127,7 @@
         <mavenCleanPluginVersion>3.0.0</mavenCleanPluginVersion>
 
         <!-- maven-jar-plugin http://maven.apache.org/plugins/maven-jar-plugin/ -->
-        <mavenJarPluginVersion>3.0.0</mavenJarPluginVersion>
+        <mavenJarPluginVersion>3.0.2</mavenJarPluginVersion>
 
         <!-- maven-war-plugin http://maven.apache.org/plugins/maven-war-plugin/ -->
         <mavenWarPluginVersion>3.2.0</mavenWarPluginVersion>
@@ -151,7 +151,7 @@
         <mavenDeployPluginVersion>2.8.2</mavenDeployPluginVersion>
 
         <!-- maven-install-plugin http://maven.apache.org/plugins/maven-install-plugin/ -->
-        <mavenInstallPluginVersion>2.5.2</mavenInstallPluginVersion>
+        <mavenInstallPluginVersion>3.0.0-M1</mavenInstallPluginVersion>
 
         <!-- maven-scm-plugin http://maven.apache.org/plugins/maven-scm-plugin/ -->
         <mavenSCMPluginVersion>1.9.5</mavenSCMPluginVersion>
@@ -189,6 +189,17 @@
 			    <artifactId>guava</artifactId>
 		<!-- 	    If you need support for JDK 1.7 or Android, use the Android flavor -->
 		    		<version>23.2-android</version>
+			</dependency>
+			<dependency>
+			  <groupId>org.mockito</groupId>
+			  <artifactId>mockito-core</artifactId>
+			  <version>2.23.4</version>
+			  <scope>test</scope>
+			</dependency>
+			<dependency>
+			  <groupId>org.slf4j</groupId>
+			  <artifactId>slf4j-api</artifactId>
+			  <version>1.7.25</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -337,6 +348,7 @@
 <!--                         </dependency> -->
 <!--                     </dependencies> -->
                     <configuration>
+                    	<source>8</source>
                         <author>false</author>
                         <quiet>true</quiet>
                         <windowtitle>${javadocWindowTitle}</windowtitle>
@@ -352,7 +364,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-plugin-plugin</artifactId>
-                    <version>3.2</version>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -689,23 +701,23 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-enforcer-plugin</artifactId>
                         <executions>
-                            <execution>
-                                <id>enforce-plugin-versions</id>
-                                <goals>
-                                    <goal>enforce</goal>
-                                </goals>
-                                <configuration>
-                                    <rules>
-                                        <requirePluginVersions>
-                                            <message>Best practice is to always define plugin versions!</message>
-                                            <banLatest>true</banLatest>
-                                            <banRelease>true</banRelease>
-                                            <banSnapshots>false</banSnapshots>
-                                            <phases>deploy,site</phases>
-                                        </requirePluginVersions>
-                                    </rules>
-                                </configuration>
-                            </execution>
+<!--                             <execution> -->
+<!--                                 <id>enforce-plugin-versions</id> -->
+<!--                                 <goals> -->
+<!--                                     <goal>enforce</goal> -->
+<!--                                 </goals> -->
+<!--                                 <configuration> -->
+<!--                                     <rules> -->
+<!--                                         <requirePluginVersions> -->
+<!--                                             <message>Best practice is to always define plugin versions!</message> -->
+<!--                                             <banLatest>true</banLatest> -->
+<!--                                             <banRelease>true</banRelease> -->
+<!--                                             <banSnapshots>false</banSnapshots> -->
+<!--                                             <phases>deploy,site</phases> -->
+<!--                                         </requirePluginVersions> -->
+<!--                                     </rules> -->
+<!--                                 </configuration> -->
+<!--                             </execution> -->
                             <execution>
                                 <id>enforce-java-version</id>
                                 <goals>
