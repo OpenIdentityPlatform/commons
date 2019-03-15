@@ -104,7 +104,7 @@
         <targetJdk>${maven.compiler.target}</targetJdk>
 
         <!-- maven-checkstyle-plugin -->
-        <checkstylePluginVersion>2.16</checkstylePluginVersion>
+        <checkstylePluginVersion>3.0.0</checkstylePluginVersion>
         <checkstyleSourceConfigLocation>org/forgerock/checkstyle/check-src-default.xml</checkstyleSourceConfigLocation>
         <checkstyleDocTargetConfigLocation>org/forgerock/checkstyle/check-src-doc-target.xml</checkstyleDocTargetConfigLocation>
         <checkstyleUnitTestSuppressionsLocation>org/forgerock/checkstyle/unit-test-suppressions.xml</checkstyleUnitTestSuppressionsLocation>
