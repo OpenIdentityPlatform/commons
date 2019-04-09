@@ -383,7 +383,7 @@
               <artifactId>jquery-cron</artifactId>
               <version>f831f2</version>
               <packaging>js</packaging>
-              <downloadUrl>https://raw.githubusercontent.com/MIAOMIAOUP/jquery-cron/89922ea0975c06315f19adffd030c4b4fc831d9b/cron/jquery-cron.js</downloadUrl>
+              <downloadUrl>https://raw.githubusercontent.com/shawnchin/jquery-cron/master/cron/jquery-cron.js</downloadUrl>
             </artifactItem>
             <artifactItem>
               <groupId>org.forgerock.commons.ui.libs</groupId>
