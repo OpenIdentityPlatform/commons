@@ -60,9 +60,9 @@ class StandardCsvWriter implements CsvWriter {
                 if (actualHeaders == null) {
                     fileAlreadyInitialized = false;
                 } else {
-                    if (actualHeaders.length != headers.length) {
-                        throw new IOException("Resuming an existing CSV file but the headers do not match.");
-                    }
+//                    if (actualHeaders.length != headers.length) {
+//                        throw new IOException("Resuming an existing CSV file but the headers do not match.");
+//                     }
                     for (int idx = 0; idx < actualHeaders.length; idx++) {
                         if (!actualHeaders[idx].equals(headers[idx])) {
                             throw new IOException("Resuming an existing CSV file but the headers do not match.");
