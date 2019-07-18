@@ -112,6 +112,7 @@
                         <properties>
                             <cargo.servlet.port>${servlet.port}</cargo.servlet.port>
                             <cargo.tomcat.ajp.port>${servlet.ajp.port}</cargo.tomcat.ajp.port>
+                            <cargo.rmi.port>8206</cargo.rmi.port>
                         </properties>
                     </configuration>
                     <deployables>
