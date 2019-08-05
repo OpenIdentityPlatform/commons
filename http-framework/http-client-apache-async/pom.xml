@@ -39,16 +39,6 @@
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpasyncclient-osgi</artifactId>
       <version>${apache-httpasyncclient.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpasyncclient</artifactId>
-        </exclusion>
-        <exclusion>
-        		<groupId>commons-logging</groupId>
-          	<artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.forgerock.http</groupId>
