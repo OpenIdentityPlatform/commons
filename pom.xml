@@ -291,7 +291,7 @@
             <artifactItem>
               <groupId>org.forgerock.commons.ui.libs</groupId>
               <artifactId>backgrid-filter.min</artifactId>
-              <version>0.3.5</version>
+              <version>0.3.7</version>
               <classifier>min</classifier>
               <packaging>js</packaging>
               <downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
@@ -299,7 +299,7 @@
             <artifactItem>
               <groupId>org.forgerock.commons.ui.libs</groupId>
               <artifactId>backgrid-filter.min</artifactId>
-              <version>0.3.5</version>
+              <version>0.3.7</version>
               <packaging>css</packaging>
               <downloadUrl>https://raw.githubusercontent.com/cloudflare/backgrid-filter/{version}/{artifactId}.{packaging}</downloadUrl>
             </artifactItem>
@@ -787,14 +787,14 @@
       <dependency>
         <groupId>org.forgerock.commons.ui.libs</groupId>
         <artifactId>backgrid-filter.min</artifactId>
-        <version>0.3.5</version>
+        <version>0.3.7</version>
         <classifier>min</classifier>
         <type>js</type>
       </dependency>
       <dependency>
         <groupId>org.forgerock.commons.ui.libs</groupId>
         <artifactId>backgrid-filter.min</artifactId>
-        <version>0.3.5</version>
+        <version>0.3.7</version>
         <type>css</type>
       </dependency>
       <dependency>
