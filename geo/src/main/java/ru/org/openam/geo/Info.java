@@ -39,7 +39,7 @@ public class Info {
 					(ip!=null)?ip.getHostAddress():ipString,
 					l.getCountry().getName(),//countryName,
 					l.getCity().getName(),//city,
-					o.getAutonomousSystemOrganization()
+					o==null?null:o.getAutonomousSystemOrganization()
 					);
 		else if (e!=null)
 			return MessageFormat.format("{0} ({1})",(ip!=null)?ip.getHostAddress():ipString,e.getMessage());
