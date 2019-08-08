@@ -26,4 +26,5 @@ notifications:
 install:
   - echo 'install'
 script:
-  - mvn -q -B install
+  - mvn -B -DskipTests install
+  - mvn -q -B test
