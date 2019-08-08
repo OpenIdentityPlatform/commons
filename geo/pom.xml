@@ -70,7 +70,7 @@
 					<stagingDirectory>
 						${project.build.directory}/dependencies/
 					</stagingDirectory>
-					<force>false</force>
+					<force>true</force>
 					<install>true</install>
 					<createChecksum>false</createChecksum>
 					<skipChecksumVerification>true</skipChecksumVerification>
@@ -156,7 +156,6 @@
 			</plugin>
 			<plugin>
 		        <artifactId>maven-antrun-plugin</artifactId>
-		        <version>1.8</version>
 		        <executions>
 		          <execution>
 		            <id>copy **/*.mmdb</id>
