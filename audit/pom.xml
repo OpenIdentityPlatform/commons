@@ -39,7 +39,6 @@
 
         <jodaTime.version>2.1</jodaTime.version>
         <supercsv.version>2.4.0</supercsv.version>
-        <javax.servlet-api.version>3.0.1</javax.servlet-api.version>
         <javax.inject.version>1_2</javax.inject.version>
         <hikaricp.version>2.4.1</hikaricp.version>
     </properties>
@@ -85,7 +84,6 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>${javax.servlet-api.version}</version>
                 <scope>provided</scope>
             </dependency>
         </dependencies>
