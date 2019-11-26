@@ -99,7 +99,7 @@ public class CrestHttpApplication implements DescribedHttpApplication {
 
                         final String html;
                         synchronized (asciidoctor) {
-                            html = asciidoctor.render(asciiDocMarkup,
+                            html = asciidoctor.convert(asciiDocMarkup,
                                     OptionsBuilder.options()
                                             .attributes(AttributesBuilder.attributes()
                                                     .tableOfContents(Placement.LEFT)

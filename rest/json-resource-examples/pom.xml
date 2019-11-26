@@ -53,7 +53,7 @@
     <dependency>
       <groupId>org.asciidoctor</groupId>
       <artifactId>asciidoctorj</artifactId>
-      <version>1.5.4</version>
+      <version>2.1.0</version>
     </dependency>
     <dependency>
       <groupId>org.forgerock.http</groupId>

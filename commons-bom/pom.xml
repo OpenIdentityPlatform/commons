@@ -36,7 +36,7 @@
         <!-- Third party components versions -->
         <assertj.version>2.4.1</assertj.version>
         <forgerock-guava.version>18.0.4</forgerock-guava.version>
-        <jackson.version>2.9.2</jackson.version>
+        <jackson.version>2.9.10</jackson.version>
         <mockito.version>1.10.19</mockito.version>
         <slf4j.version>1.7.25</slf4j.version>
         <testng.version>6.14.3</testng.version>
