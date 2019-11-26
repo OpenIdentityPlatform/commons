@@ -547,7 +547,7 @@
               </goals>
               <phase>initialize</phase>
               <configuration>
-                <arguments>install --registry=https://r.cnpmjs.org/</arguments>
+                <arguments>install</arguments>
               </configuration>
             </execution>
             <execution>
