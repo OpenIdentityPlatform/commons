@@ -18,7 +18,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.forgerock.commons</groupId>
+        <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>forgerock-authn-filter</artifactId>
         <version>21.0.0-SNAPSHOT</version>
     </parent>
@@ -48,12 +48,12 @@
             <artifactId>javax.security.auth.message</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.http</groupId>
+            <groupId>org.openidentityplatform.http</groupId>
             <artifactId>chf-http-core</artifactId>
         </dependency>
 
         <dependency> <!-- Required for JsonValue and ResourceException -->
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.openidentityplatform.commons</groupId>
             <artifactId>json-resource</artifactId>
         </dependency>
         

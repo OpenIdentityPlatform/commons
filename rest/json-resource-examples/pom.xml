@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.forgerock.commons</groupId>
+    <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>forgerock-rest</artifactId>
     <version>21.0.0-SNAPSHOT</version>
   </parent>
@@ -27,25 +27,25 @@
   <packaging>war</packaging>
   <dependencies>
       <dependency>
-          <groupId>org.forgerock.http</groupId>
+          <groupId>org.openidentityplatform.http</groupId>
           <artifactId>chf-http-servlet</artifactId>
       </dependency>
     <dependency>
-      <groupId>org.forgerock.commons</groupId>
+      <groupId>org.openidentityplatform.commons</groupId>
       <artifactId>forgerock-util</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.forgerock.commons</groupId>
+      <groupId>org.openidentityplatform.commons</groupId>
       <artifactId>json-resource</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.forgerock.commons</groupId>
+      <groupId>org.openidentityplatform.commons</groupId>
       <artifactId>json-resource-http</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.forgerock.commons</groupId>
+      <groupId>org.openidentityplatform.commons</groupId>
       <artifactId>openapi-war-overlay</artifactId>
       <version>${project.version}</version>
       <type>war</type>
@@ -56,7 +56,7 @@
       <version>2.1.0</version>
     </dependency>
     <dependency>
-      <groupId>org.forgerock.http</groupId>
+      <groupId>org.openidentityplatform.http</groupId>
       <artifactId>http-descriptor-example</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -96,7 +96,7 @@
               <classifier>servlet</classifier>
               <overlays>
                 <overlay>
-                  <groupId>org.forgerock.commons</groupId>
+                  <groupId>org.openidentityplatform.commons</groupId>
                   <artifactId>openapi-war-overlay</artifactId>
                 </overlay>
               </overlays>

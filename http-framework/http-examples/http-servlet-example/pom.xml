@@ -17,7 +17,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.forgerock.http</groupId>
+    <groupId>org.openidentityplatform.http</groupId>
     <artifactId>chf-http-examples</artifactId>
     <version>21.0.0-SNAPSHOT</version>
   </parent>
@@ -33,7 +33,7 @@
   </description>
   <dependencies>
     <dependency>
-      <groupId>org.forgerock.http</groupId>
+      <groupId>org.openidentityplatform.http</groupId>
       <artifactId>chf-http-servlet</artifactId>
     </dependency>
     <dependency>
@@ -50,7 +50,7 @@
       <artifactId>swagger-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.forgerock.http</groupId>
+      <groupId>org.openidentityplatform.http</groupId>
       <artifactId>http-descriptor-example</artifactId>
       <version>${project.version}</version>
     </dependency>
