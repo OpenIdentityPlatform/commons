@@ -27,7 +27,7 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>i18n-framework</artifactId>
-    <groupId>org.forgerock.commons</groupId>
+    <groupId>org.openidentityplatform.commons</groupId>
     <version>1.4.2</version>
   </parent>
   <artifactId>i18n-slf4j</artifactId>
@@ -36,7 +36,7 @@
   <packaging>bundle</packaging>
   <dependencies>
     <dependency>
-      <groupId>org.forgerock.commons</groupId>
+      <groupId>org.openidentityplatform.commons</groupId>
       <artifactId>i18n-core</artifactId>
       <version>${project.version}</version>
       <scope>compile</scope>
@@ -51,7 +51,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>org.forgerock.commons</groupId>
+        <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>i18n-maven-plugin</artifactId>
         <version>${project.version}</version>
         <executions>
