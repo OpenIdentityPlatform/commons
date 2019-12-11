@@ -18,11 +18,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>org.forgerock.commons</groupId>
+    <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>commons-parent</artifactId>
     <version>21.0.0-SNAPSHOT</version>
   </parent>
-  <groupId>org.forgerock.http</groupId>
+  <groupId>org.openidentityplatform.http</groupId>
   <artifactId>forgerock-http-framework-parent</artifactId>
   <packaging>pom</packaging>
   <name>Commons HTTP Framework</name>
@@ -71,7 +71,7 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>org.forgerock.http</groupId>
+        <groupId>org.openidentityplatform.http</groupId>
         <artifactId>binding-test-utils</artifactId>
         <version>${project.version}</version>
       </dependency>

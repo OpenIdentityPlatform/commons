@@ -26,7 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>forgerock-selfservice</artifactId>
-        <groupId>org.forgerock.commons</groupId>
+        <groupId>org.openidentityplatform.commons</groupId>
         <version>21.0.0-SNAPSHOT</version>
     </parent>
 
@@ -98,7 +98,7 @@
                         <configuration>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.forgerock.commons.ui</groupId>
+                                    <groupId>org.openidentityplatform.commons.ui</groupId>
                                     <artifactId>forgerock-ui-user</artifactId>
                                     <version>${forgerock-ui.version}</version>
                                     <type>zip</type>
@@ -217,7 +217,7 @@
 					<force>false</force>
 					<artifactItems>
 						<artifactItem>
-							<groupId>org.forgerock.commons.ui.libs</groupId>
+							<groupId>org.openidentityplatform.commons.ui.libs</groupId>
 				            <artifactId>less</artifactId>
 				            <version>1.5.1</version>
 				            <classifier>rhino</classifier>
@@ -258,14 +258,14 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.commons.ui</groupId>
+            <groupId>org.openidentityplatform.commons.ui</groupId>
             <artifactId>forgerock-ui-user</artifactId>
             <version>${forgerock-ui.version}</version>
             <type>zip</type>
             <classifier>www</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>less</artifactId>
             <version>1.5.1</version>
             <classifier>rhino</classifier>

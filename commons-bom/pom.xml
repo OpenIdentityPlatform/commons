@@ -17,13 +17,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock</groupId>
+        <groupId>org.openidentityplatform</groupId>
         <artifactId>forgerock-parent</artifactId>
         <version>2.0.6</version>
         <relativePath>../..</relativePath>
     </parent>
 
-    <groupId>org.forgerock.commons</groupId>
+    <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>commons-bom</artifactId>
     <version>21.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
@@ -186,13 +186,13 @@
 
             <!-- ForgeRock Util dependencies -->
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-util</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-test-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -200,124 +200,124 @@
 
             <!-- ForgeRock HTTP Framework dependencies -->
             <dependency>
-                <groupId>org.forgerock.http</groupId>
+                <groupId>org.openidentityplatform.http</groupId>
                 <artifactId>chf-client-apache-async</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.http</groupId>
+                <groupId>org.openidentityplatform.http</groupId>
                 <artifactId>chf-client-apache-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.http</groupId>
+                <groupId>org.openidentityplatform.http</groupId>
                 <artifactId>chf-client-apache-sync</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.http</groupId>
+                <groupId>org.openidentityplatform.http</groupId>
                 <artifactId>chf-http-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.http</groupId>
+                <groupId>org.openidentityplatform.http</groupId>
                 <artifactId>chf-http-servlet</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.http</groupId>
+                <groupId>org.openidentityplatform.http</groupId>
                 <artifactId>chf-http-grizzly</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- ForgeRock json-* dependencies -->
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-crypto-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-crypto-cli</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-patch</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-ref-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-ref-jackson</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-schema-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-schema-cli</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-web-token</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- ForgeRock REST dependencies -->
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-resource-descriptor</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-resource</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-resource</artifactId>
                 <version>${project.version}</version>
                 <type>test-jar</type>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-resource-http</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-resource-examples</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>api-descriptor</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -325,135 +325,135 @@
 
             <!-- ForgeRock Auth filters dependencies -->
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-jaspi-iwa-module</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-jaspi-jwt-session-module</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-jaspi-openam-session-module</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-jaspi-openid-connect-module</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-jaspi-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>authz-framework</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>authz-framework-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-authz-oauth2-module</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-authz-oauth2-restlet</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- ForgeRock Audit dependencies -->
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-json</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-handler-csv</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-handler-elasticsearch</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-handler-jdbc</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-handler-jms</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-handler-syslog</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-handler-splunk</artifactId>
                 <version>${project.version}</version>
             </dependency>
   
               <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-audit-handler-json</artifactId>
                 <version>${project.version}</version>
             </dependency>          
             <!-- ForgeRock User Self-Service dependencies -->
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-selfservice-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-selfservice-stages</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>forgerock-selfservice-json</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
             <!-- ForgeRock Security Dependencies -->
             <dependency>
-                <groupId>org.forgerock.commons</groupId>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>security</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -19,7 +19,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.forgerock.commons</groupId>
+        <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>commons-parent</artifactId>
         <version>21.0.0-SNAPSHOT</version>
     </parent>
@@ -88,7 +88,7 @@
 					<force>false</force>
 					<artifactItems>
 						<artifactItem>
-				            <groupId>org.forgerock.commons.ui.libs</groupId>
+				            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
 				            <artifactId>less</artifactId>
 				            <version>1.5.1</version>
 				            <classifier>rhino</classifier>

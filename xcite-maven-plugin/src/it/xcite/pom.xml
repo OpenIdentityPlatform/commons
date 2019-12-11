@@ -26,7 +26,7 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.forgerock.maven.plugins.it</groupId>
+  <groupId>org.openidentityplatform.maven.plugins.it</groupId>
   <artifactId>xcite-it</artifactId>
   <version>1.0.0-SNAPSHOT</version>
 
