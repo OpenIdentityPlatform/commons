@@ -25,7 +25,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock.commons.ui</groupId>
+        <groupId>org.openidentityplatform.commons.ui</groupId>
         <artifactId>forgerock-ui</artifactId>
         <version>16.0.1-SNAPSHOT</version>
     </parent>
@@ -100,7 +100,7 @@
                             <outputDirectory>${project.build.directory}</outputDirectory>
                             <artifactItems>
                                 <artifactItem>
-                                    <groupId>org.forgerock.commons.ui.libs</groupId>
+                                    <groupId>org.openidentityplatform.commons.ui.libs</groupId>
                                     <artifactId>font-awesome</artifactId>
                                     <type>zip</type>
                                 </artifactItem>
@@ -115,91 +115,91 @@
  
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>jquery.ba-dotimeout</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>moment</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>handlebars</artifactId>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>i18next</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>requirejs</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backbone</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backbone.paginator.min</artifactId>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backbone-relational</artifactId>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
 
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backgrid.min</artifactId>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backgrid.min</artifactId>
             <type>less</type>
         </dependency>
 
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backgrid-paginator.min</artifactId>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backgrid-paginator.min</artifactId>
             <type>css</type>
         </dependency>
 
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backgrid-filter.min</artifactId>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backgrid-filter.min</artifactId>
             <type>css</type>
         </dependency>
 
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>backgrid-select-all</artifactId>
             <version>0.3.5</version>
             <classifier>min</classifier>
@@ -207,107 +207,107 @@
         </dependency>
 
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>jquery</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>lodash</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>spin</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>xdate</artifactId>
             <type>js</type>
             <classifier>min</classifier>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>js2form</artifactId>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>form2js</artifactId>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>jquery.placeholder</artifactId>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>bootstrap</artifactId>
             <classifier>custom</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>bootstrap</artifactId>
             <classifier>custom</classifier>
             <type>css</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>titatoggle</artifactId>
             <version>1.2.6</version>
             <classifier>min</classifier>
             <type>css</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>selectize</artifactId>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>dragula</artifactId>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>selectize</artifactId>
             <classifier>bootstrap3</classifier>
             <type>css</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>bootstrap-dialog</artifactId>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>bootstrap-dialog</artifactId>
             <classifier>min</classifier>
             <type>css</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>font-awesome</artifactId>
             <type>zip</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>react</artifactId>
             <version>15.2.1</version>
             <classifier>min</classifier>
             <type>js</type>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
             <artifactId>react-dom</artifactId>
             <version>15.2.1</version>
             <classifier>min</classifier>
