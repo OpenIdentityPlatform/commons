@@ -25,7 +25,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.forgerock</groupId>
+    <groupId>org.openidentityplatform</groupId>
     <artifactId>forgerock-parent</artifactId>
     <version>2.0.6</version>
     <packaging>pom</packaging>
@@ -248,7 +248,7 @@
                     <version>${checkstylePluginVersion}</version>
                     <dependencies>
                         <dependency>
-                            <groupId>org.forgerock</groupId>
+                            <groupId>org.openidentityplatform</groupId>
                             <artifactId>forgerock-build-tools</artifactId>
                             <version>${forgerockBuildToolsVersion}</version>
                         </dependency>
@@ -342,7 +342,7 @@
                     <version>${javadocPluginVersion}</version>
 <!--                     <dependencies> -->
 <!--                         <dependency> -->
-<!--                             <groupId>org.forgerock</groupId> -->
+<!--                             <groupId>org.openidentityplatform</groupId> -->
 <!--                             <artifactId>forgerock-build-tools</artifactId> -->
 <!--                             <version>${forgerockBuildToolsVersion}</version> -->
 <!--                         </dependency> -->
@@ -449,7 +449,7 @@
                     <version>${mavenSurefirePluginVersion}</version>
                     <dependencies>
                         <dependency>
-                            <groupId>org.forgerock</groupId>
+                            <groupId>org.openidentityplatform</groupId>
                             <artifactId>forgerock-build-tools</artifactId>
                             <version>${forgerockBuildToolsVersion}</version>
                         </dependency>
@@ -491,7 +491,7 @@
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>org.forgerock.commons</groupId>
+                                        <groupId>org.openidentityplatform.commons</groupId>
                                         <artifactId>i18n-maven-plugin</artifactId>
                                         <versionRange>[1.2.0,)</versionRange>
                                         <goals>
