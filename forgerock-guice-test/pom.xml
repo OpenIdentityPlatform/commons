@@ -20,7 +20,7 @@
 
     <parent>
         <artifactId>forgerock-guice</artifactId>
-        <groupId>org.forgerock.commons</groupId>
+        <groupId>org.openidentityplatform.commons</groupId>
         <version>2.0.0</version>
     </parent>
 
@@ -32,7 +32,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.forgerock.commons</groupId>
+            <groupId>org.openidentityplatform.commons</groupId>
             <artifactId>forgerock-guice-core</artifactId>
         </dependency>
         <dependency>
