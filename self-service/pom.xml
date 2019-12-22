@@ -74,8 +74,8 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
             </plugin>
-                    			<plugin>
-				<groupId>com.savage7.maven.plugins</groupId>
+            <plugin>
+				<groupId>org.openidentityplatform.commons</groupId>
 				<artifactId>maven-external-dependency-plugin</artifactId>
 				<version>0.6-SNAPSHOT</version>
 				<inherited>false</inherited>
@@ -115,13 +115,13 @@
 							<goal>install-external</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>deploy-external-dependencies</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>deploy-external</goal>
-						</goals>
-					</execution>
+<!-- 					<execution> -->
+<!-- 						<id>deploy-external-dependencies</id> -->
+<!-- 						<phase>deploy</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>deploy-external</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
 				</executions>
 			</plugin>
         </plugins>

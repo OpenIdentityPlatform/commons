@@ -185,7 +185,7 @@
   </dependency>
 
   <dependency>
-   <groupId>org.codice.org.openidentityplatform.commons</groupId>
+   <groupId>org.openidentityplatform.commons</groupId>
    <artifactId>json-fluent</artifactId>
    <version>${jsonFluentVersion}</version>
   </dependency>

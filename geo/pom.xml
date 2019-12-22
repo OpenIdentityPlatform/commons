@@ -61,7 +61,7 @@
 	<build>
 		<plugins>
 			<plugin>
-				<groupId>com.savage7.maven.plugins</groupId>
+				<groupId>org.openidentityplatform.commons</groupId>
 				<artifactId>maven-external-dependency-plugin</artifactId>
 				<version>0.6-SNAPSHOT</version>
 				<inherited>false</inherited>
@@ -75,7 +75,7 @@
 					<skipChecksumVerification>true</skipChecksumVerification>
 					<artifactItems>
 						<artifactItem>
-							<groupId>com.maxmind.geoip</groupId>
+							<groupId>org.openidentityplatform.commons.geoip</groupId>
 							<artifactId>GeoLite2-City</artifactId>
 							<version>${project.version}</version>
 							<packaging>tar.gz</packaging>
@@ -84,7 +84,7 @@
 							]]></downloadUrl>
 						</artifactItem>
 						<artifactItem>
-							<groupId>com.maxmind.geoip</groupId>
+							<groupId>org.openidentityplatform.commons.geoip</groupId>
 							<artifactId>GeoLite2-ASN</artifactId>
 							<version>${project.version}</version>
 							<packaging>tar.gz</packaging>
