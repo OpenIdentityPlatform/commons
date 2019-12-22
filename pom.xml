@@ -48,7 +48,7 @@
   <build>
     <plugins>
       <plugin>
-        <groupId>com.savage7.maven.plugins</groupId>
+        <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>maven-external-dependency-plugin</artifactId>
         <version>0.6-SNAPSHOT</version>
         <inherited>false</inherited>
@@ -450,13 +450,6 @@
             </artifactItem>
             <artifactItem>
               <groupId>org.openidentityplatform.commons.ui.libs</groupId>
-              <artifactId>r</artifactId>
-              <version>2.1.10</version>
-              <packaging>js</packaging>
-              <downloadUrl>https://raw.githubusercontent.com/requirejs/{artifactId}.{packaging}/{version}/dist/{artifactId}.{packaging}</downloadUrl>
-            </artifactItem>
-            <artifactItem>
-              <groupId>org.openidentityplatform.commons.ui.libs</groupId>
               <artifactId>moment-timezone-with-data</artifactId>
               <version>0.5.4</version>
               <packaging>js</packaging>
@@ -497,13 +490,13 @@
               <goal>install-external</goal>
             </goals>
           </execution>
-          <execution>
-            <id>deploy-external-dependencies</id>
-            <phase>deploy</phase>
-            <goals>
-              <goal>deploy-external</goal>
-            </goals>
-          </execution>
+<!--           <execution> -->
+<!--             <id>deploy-external-dependencies</id> -->
+<!--             <phase>deploy</phase> -->
+<!--             <goals> -->
+<!--               <goal>deploy-external</goal> -->
+<!--             </goals> -->
+<!--           </execution> -->
         </executions>
       </plugin>
     </plugins>
