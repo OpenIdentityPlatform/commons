@@ -43,19 +43,6 @@
     <tag>4.3.1</tag>
   </scm>
 
-  <distributionManagement>
-    <snapshotRepository>
-      <id>forgerock-snapshots</id>
-      <name>ForgeRock Snapshot Repository</name>
-      <url>${forgerockDistMgmtSnapshotsUrl}</url>
-    </snapshotRepository>
-    <repository>
-      <id>forgerock-staging</id>
-      <name>ForgeRock Release Repository</name>
-      <url>${forgerockDistMgmtReleasesUrl}</url>
-    </repository>
-  </distributionManagement>
-  
   <repositories>
 <!--     <repository> -->
 <!--       <id>forgerock-staging-repository</id> -->
