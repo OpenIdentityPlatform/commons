@@ -19,7 +19,7 @@ under the License.
 --> 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.savage7.maven.plugins</groupId>
+    <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>maven-external-dependency-plugin</artifactId>
     <version>0.6-SNAPSHOT</version>
     <name>Maven External Dependency Plugin</name>
@@ -236,12 +236,12 @@ under the License.
     <repository>
        <id>ossrh</id>
        <name>Sonatype OSS Repository</name>
-       <url>http://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
     </repository>
     <snapshotRepository>
        <id>ossrh</id>
        <name>Sonatype OSS Repository</name>
-       <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
     </snapshotRepository>
     <site>
        <id>savage7-site-docs</id>
