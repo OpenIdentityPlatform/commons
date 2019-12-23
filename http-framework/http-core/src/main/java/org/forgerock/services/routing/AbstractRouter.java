@@ -17,10 +17,11 @@ package org.forgerock.services.routing;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.forgerock.http.ApiProducer;
 import org.forgerock.http.routing.RoutingMode;
@@ -52,7 +53,7 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
     private final Map<RouteMatcher<R>, H> routes = new ConcurrentHashMap<>();
     /** Matches the current route. */
     protected final RouteMatcher<R> thisRouterUriMatcher = uriMatcher(RoutingMode.EQUALS, "");
-    private final List<Describable.Listener> apiListeners = new CopyOnWriteArrayList<>();
+    private final Set<Describable.Listener> apiListeners = ConcurrentHashMap.newKeySet();
     private volatile H defaultRoute;
     private ApiProducer<D> apiProducer;
     /** Api of the current router. */
@@ -304,8 +305,9 @@ public abstract class AbstractRouter<T extends AbstractRouter<T, R, H, D>, R, H,
     }
 
     private void notifyListeners() {
-        for (Describable.Listener listener : apiListeners) {
-            listener.notifyDescriptorChange();
+        for (Describable.Listener listener : new HashSet<Describable.Listener>(apiListeners)) {
+        	if (!this.equals(listener))
+        		listener.notifyDescriptorChange();
         }
     }
 
