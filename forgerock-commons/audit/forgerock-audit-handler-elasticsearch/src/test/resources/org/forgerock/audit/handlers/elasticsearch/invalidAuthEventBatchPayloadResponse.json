@@ -1,0 +1,22 @@
+{
+    "took":2,
+    "errors":true,
+    "items":[
+        {
+            "index":{
+                "_index":"audit",
+                "_type":"authentication",
+                "_id":"46696922-e569-4319-9ca5-dea2006c5f36-216",
+                "status":400,
+                "error":{
+                    "type":"mapper_parsing_exception",
+                    "reason":"failed to parse",
+                    "caused_by":{
+                        "type":"not_x_content_exception",
+                        "reason":"Compressor detection can only be called on some xcontent bytes or compressed xcontent bytes"
+                    }
+                }
+            }
+        }
+    ]
+}

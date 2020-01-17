@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter>
+ <title>Chapter</title>
+ <para condition="release">Release</para>
+ <para condition="draft">Draft</para>
+ <para os="linux">Linux</para>
+ <para os="unix">UNIX</para>
+ <para os="windows">Windows</para>
+</chapter>

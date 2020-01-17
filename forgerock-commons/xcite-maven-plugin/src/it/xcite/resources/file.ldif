@@ -1,0 +1,37 @@
+# Sample small LDIF file for dc=example,dc=com
+
+dn: dc=com
+objectClass: domain
+objectClass: top
+dc: com
+
+dn: dc=example,dc=com
+objectClass: domain
+objectClass: top
+dc: example
+
+dn: ou=People,dc=example,dc=com
+objectClass: organizationalunit
+objectClass: top
+ou: People
+
+# Include bjensen
+dn: uid=bjensen,ou=People,dc=example,dc=com
+objectClass: person
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: top
+uid: bjensen
+userpassword: hifalutin
+givenname: Barbara
+cn: Barbara Jensen
+sn: Jensen
+ou: People
+jpegPhoto:<file:///path/to/photo.jpg
+# Include bjensen
+
+# Get ou=Groups
+dn: ou=Groups,dc=example,dc=com
+objectClass: organizationalunit
+objectClass: top
+ou: Groups

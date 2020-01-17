@@ -1,0 +1,16 @@
+<style>
+  #draft_alert {
+      position: fixed;
+      right: 15px;
+      top: 66px;
+      width: 320px;
+      z-index: 999999;
+  }
+</style>
+<div class="alert alert-warning alert-dismissible fade in out" role="alert"
+id="draft_alert">
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+  <strong><span aria-hidden="true" class="glyphicon glyphicon-exclamation-sign">
+  </span>&nbsp;Pre-Release Draft Documentation</strong><br />
+</div>
+</body>

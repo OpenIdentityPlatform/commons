@@ -1,0 +1,581 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="jumbotron styleguide-jumbotron">
+    <div class="container">
+        <h1>UI Styleguide</h1>
+        <p class="lead">This styleguide will be a resource for designers, product managers, and developers, providing a common language around ForgeRock’s UI patterns. We will use it to maintain modular front-end code and visual consistency across all apps.</p>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        <div class="col-md-9">
+            <section class="resource-section">
+                <h1 id="colors">Colors</h1>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="swatch" style="background-color:#eeea07;">
+                                    <div class="inner">
+                                        Vivid Yellow #eeea07
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch dark" style="background-color:#519387;">
+                                    <div class="inner">
+                                        Sea Green #519387
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch bordered" style="background-color:#f7f7f7;">
+                                    <div class="inner">
+                                        Off-White #f7f7f7
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch" style="background-color:#eee;">
+                                    <div class="inner">
+                                        Light Gray #eee
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch" style="background-color:#ddd;">
+                                    <div class="inner">
+                                        Border Gray #ddd
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch dark" style="background-color:#979797;">
+                                    <div class="inner">
+                                        Medium Gray #999
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch dark" style="background-color:#777;">
+                                    <div class="inner">
+                                        Dark Gray #777
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch dark" style="background-color:#1f2223;">
+                                    <div class="inner">
+                                        Charcoal #1f2223
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-4">
+                                <div class="swatch dark" style="background-color:#a94442;">
+                                    <div class="inner">
+                                        Dashboard Red #a94442
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch dark" style="background-color:#f0ad4e;">
+                                    <div class="inner">
+                                        Dashboard Yellow #f0ad4e
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="swatch dark" style="background-color:#337ab7;">
+                                    <div class="inner">
+                                        Dashboard Blue #337ab7
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="typography">
+                    Typography
+                </h1>
+                <div class="panel panel-default">
+<!--HTML intentionally unindented to remove whitespace in snippets-->
+<div class="snippet panel-body">
+    <h1>H1 Header Example</h1>
+    <h2>H2 Header Example</h2>
+    <h3>H3 Header Example</h3>
+    <h4>H4 Header Example</h4>
+    <p>
+        Here is a p tag with a <a href="#">Link</a>
+    </p>
+</div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="tabs">
+                    Nav Tabs
+                </h1>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">
+                            Basic Tabs
+                        </h4>
+<div class="snippet">
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#tab1" aria-controls="tab1" role="tab" data-toggle="tab">Tab 1</a></li>
+        <li role="presentation"><a href="#tab2" aria-controls="tab2" role="tab" data-toggle="tab">Tab 2</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="tab1">
+            Tab one
+        </div>
+        <div role="tabpanel" class="tab-pane" id="tab2">
+            Tab two
+        </div>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">
+                            Tab With Panel
+                        </h4>
+<div class="snippet">
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#tabpanel1" aria-controls="tabpanel1" role="tab" data-toggle="tab">Tab Panel 1</a></li>
+        <li role="presentation"><a href="#tabpanel2" aria-controls="tabpanel2" role="tab" data-toggle="tab">Tab Panel 2</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="tabpanel1">
+            <div class="panel panel-default fr-panel-tab">
+                <div class="panel-body">
+                    Body
+                </div>
+                <div class="panel-footer">
+                    Footer
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="tabpanel2">
+            <div class="panel panel-default fr-panel-tab">
+                <div class="panel-body">
+                    Body 2
+                </div>
+                <div class="panel-footer">
+                    Footer 2
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="panels">
+                    Panels
+                </h1>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">
+                            Default Panel
+                        </h4>
+<div class="snippet">
+    <div class="panel panel-default">
+        <div class="panel-body">
+        </div>
+        <div class="panel-footer">
+        </div>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="toggles">
+                    Toggles
+                </h1>
+                <p class="text-muted">Library: <a href="http://kleinejan.github.io/titatoggle/">http://kleinejan.github.io/titatoggle/</a></p>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">
+                            Toggles <span class="admin-only">Admin Only</span>
+                        </h4>
+
+                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-lg">
+                            <label>
+                                <input type="checkbox"><span></span>
+                            </label>
+                        </div>
+<div class="snippet">
+    <div class="checkbox checkbox-slider-warning checkbox-slider checkbox-slider--b checkbox-slider-lg">
+        <label>
+            <input type="checkbox"><span></span>
+        </label>
+    </div>
+    <div class="checkbox checkbox-slider-danger checkbox-slider checkbox-slider--b checkbox-slider-lg">
+        <label>
+            <input type="checkbox"><span></span>
+        </label>
+    </div>
+    <div class="checkbox checkbox-slider-info checkbox-slider checkbox-slider--b checkbox-slider-lg">
+        <label>
+            <input type="checkbox"><span></span>
+        </label>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="buttons">
+                    Buttons
+                </h1>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">Normal Button Group</h4>
+<div class="snippet">
+    <div class="btn-group">
+        <button type="button" class="btn btn-default active">One</button>
+        <button type="button" class="btn btn-default">Two</button>
+        <button type="button" class="btn btn-default">Three</button>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">Dark Button Group <span class="admin-only">Admin Only</span></h4>
+<div class="snippet">
+    <div class="btn-group btn-icon" data-toggle="btns">
+        <a class="btn toggle-view-btn fr-btn-secondary active" href="#connectorCardContainer" data-toggle="tab">
+            <i class="fa fa-th"></i>
+        </a>
+        <a class="btn toggle-view-btn fr-btn-secondary" href="#connectorGridContainer" data-toggle="tab">
+            <i class="fa fa-list"></i>
+        </a>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">Button Types</h4>
+<div class="snippet">
+    <button type="button" class="btn btn-default">Default</button>
+    <button type="button" class="btn btn-default disabled">Default Disable</button>
+    <button type="button" class="btn btn-primary">Primary</button>
+    <button type="button" class="btn btn-primary disabled">Primary</button>
+    <button type="button" class="btn btn-danger">Danger</button>
+    <button type="button" class="btn btn-danger disabled">Danger Disable</button>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="alerts">
+                    Alerts
+                </h1>
+                <div class="panel panel-default">
+<div class="snippet panel-body">
+    <div class="alert alert-message alert-success" role="alert">
+        <i class="alert-message-icon"></i>Sucess
+    </div>
+    <div class="alert alert-message alert-info" role="alert">
+        <i class="alert-message-icon"></i>Info
+    </div>
+    <div class="alert alert-message alert-warning" role="alert">
+        <i class="alert-message-icon"></i>Warning
+    </div>
+    <div class="alert alert-message alert-danger" role="alert">
+        <i class="alert-message-icon"></i>Danger
+    </div></div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="selectize">
+                    Selectize
+                </h1>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">
+                            Normal Selectize
+                        </h4>
+<div class="snippet">
+    <select id="selectizeExample">
+        <option value="One">One</option>
+        <option value="Two">Two</option>
+        <option value="Three">Three</option>
+    </select>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+<div class="code">
+    this.$el.find('#selectizeExample').selectize({
+        create: true
+    });
+</div>
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">
+                            Pill Selectize
+                        </h4>
+<div class="snippet">
+    <select id="selectizePillExample">
+        <option value="One">One</option>
+        <option value="Two">Two</option>
+        <option value="Three">Three</option>
+    </select>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+<div class="code">
+    this.$el.find('#selectizePillExample').selectize({
+        create: true,
+        maxItems: 3
+    });
+</div>
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="grids">
+                    Grids
+                </h1>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">Backgrid</h4>
+<div class="snippet">
+    <table class="backgrid table">
+        <thead>
+            <th>Column</th>
+            <th>Column</th>
+            <th>Column</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Cell</td>
+                <td>Cell</td>
+                <td>Cell</td>
+            </tr>
+            <tr>
+                <td>Cell</td>
+                <td>Cell</td>
+                <td>Cell</td>
+            </tr>
+            <tr>
+                <td>Cell</td>
+                <td>Cell</td>
+                <td>Cell</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="headers">
+                    Headers
+                </h1>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="sub-header">Page Information Header</h4>
+<div class="snippet">
+    <div class="page-header clearfix">
+        <span class="header-icon pull-left"><i class="fa fa-rocket"></i></span>
+        <h4 class="page-type">Sub page header</h4>
+        <div class="page-header-button-group">
+            <a href="#mapping/add/connector/ldap">
+                <button type="button" class="btn btn-primary btn-actions">
+                    Button
+                </button>
+            </a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-default dropdown-toggle btn-actions" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-ellipsis-v fa-lg"></i>
+                </button>
+                <ul class="dropdown-menu pull-rightAd" role="menu">
+                    <li class="data-link"><a href="#">Dropdown Item</a></li>
+                </ul>
+            </div>
+        </div>
+        <h1>Page Header</h1>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="forms">
+                    Forms
+                </h1>
+                <div class="panel panel-default">
+<div class="snippet panel-body">
+    <form class="form-horizontal" id="userProfileForm">
+        <h4 class="page-type">Error form field</h4>
+        <div class="form-group has-feedback has-error">
+            <label class="col-sm-3 control-label" for="error">Error</label>
+            <div class="col-sm-6">
+                <input class="form-control" type="text" id="error" name="error" value="" autofocus="" data-validation-status="error" required="" data-original-title="" title=""/>
+                <div class="validation-message"></div>
+                <span class="form-control-feedback"><i class="fa validation-icon"></i></span>
+            </div>
+        </div>
+    </form>
+</div>
+                </div>
+                <div class="example">
+                </div>
+                <div class="panel panel-default">
+<div class="snippet panel-body">
+    <form class="form-horizontal" id="userProfileForm">
+        <h4 class="page-type">Normal form field</h4>
+        <div class="form-group has-feedback">
+            <label class="col-sm-3 control-label" for="normal">Normal</label>
+            <div class="col-sm-6">
+                <input class="form-control" type="text" id="normal" name="normal" value="" autofocus=""  required="" data-original-title="" title="">
+                <div class="validation-message"></div>
+                <span class="form-control-feedback"><i class="fa validation-icon"></i></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="checkboxSlider">Active</label>
+            <div class="col-sm-6">
+                <div class="control-group">
+                    <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-lg">
+                        <label>
+                            <input id="checkboxSlider" type="checkbox" data-field="active" checked>
+                            <span></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+            <section class="resource-section">
+                <h1 id="dialog">
+                    Dialog
+                </h1>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="page-type">Normal Dialog</h4>
+<div class="snippet">
+    <div class="bootstrap-dialog type-default">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="bootstrap-dialog-header">
+                        <div class="bootstrap-dialog-close-button" style="display: block;"><button class="close">×</button></div>
+                        <div class="bootstrap-dialog-title">Normal Dialog</div>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="bootstrap-dialog-body">
+                        <div class="bootstrap-dialog-message">Some text here</div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="display: block;">
+                    <div class="bootstrap-dialog-footer">
+                        <div class="bootstrap-dialog-footer-buttons">
+                            <button class="btn btn-default">Cancel</button>
+                            <button class="btn btn-primary">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <h4 class="page-type">Delete Dialog</h4>
+<div class="snippet">
+    <div class="bootstrap-dialog type-danger">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="bootstrap-dialog-header">
+                        <div class="bootstrap-dialog-close-button" style="display: block;"><button class="close">×</button></div>
+                        <div class="bootstrap-dialog-title">Danger Dialog</div>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <div class="bootstrap-dialog-body">
+                        <div class="bootstrap-dialog-message">Some text here</div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="display: block;">
+                    <div class="bootstrap-dialog-footer">
+                        <div class="bootstrap-dialog-footer-buttons">
+                            <button class="btn btn-default">Cancel</button>
+                            <button class="btn btn-danger">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+                    </div>
+                </div>
+                <div class="example">
+                </div>
+            </section>
+        </div>
+        <div class="col-md-3" id="rightCol">
+            <ul class="nav nav-stacked" id="sidebar">
+                <li class="active"><a href="#colors">Colors</a></li>
+                <li><a href="#typography">Typography</a></li>
+                <li><a href="#tabs">Tabs</a></li>
+                <li><a href="#panels">Panels</a></li>
+                <li><a href="#toggles">Toggles</a></li>
+                <li><a href="#buttons">Buttons</a></li>
+                <li><a href="#alerts">Alerts</a></li>
+                <li><a href="#selectize">Selectize</a></li>
+                <li><a href="#grids">Grids</a></li>
+                <li><a href="#headers">Headers</a></li>
+                <li><a href="#forms">Forms</a></li>
+                <li><a href="#dialog">Dialog</a></li>
+            </ul>
+        </div>
+    </div>
+</div>

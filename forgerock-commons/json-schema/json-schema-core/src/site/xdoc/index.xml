@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<document
+ xmlns="http://maven.apache.org/XDOC/2.0"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+ <properties>
+  <title>About Json Schema</title>
+ </properties>
+ <body>
+  <section name="About Json Schema">
+   <p>The JSON Schema Validator is a tool to validates simple java object against the <a
+        href="http://tools.ietf.org/html/draft-fge-json-schema-validation-00"
+        title="A JSON Media Type for Describing the Structure and Meaning of JSON Documents" target="_new">draft-fge-json-schema-validation-00</a>
+    schema. </p>
+
+<p>The instance object is a simple Java object.</p>
+<table>
+    <tbody>
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 5px;">
+            <strong>JSON</strong>
+        </td>
+        <td style="border: 1px solid #ccc; padding: 5px;">
+            <strong>Java</strong>
+        </td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 5px;">string</td>
+        <td style="border: 1px solid #ccc; padding: 5px;">java.lang.String</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 5px;">number</td>
+        <td style="border: 1px solid #ccc; padding: 5px;">java.lang.Number</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 5px;">true|false</td>
+        <td style="border: 1px solid #ccc; padding: 5px;">java.lang.Boolean</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 5px;">null</td>
+        <td style="border: 1px solid #ccc; padding: 5px;">null</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 5px;">array</td>
+        <td style="border: 1px solid #ccc; padding: 5px;">java.util.List</td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid #ccc; padding: 5px;">object</td>
+        <td style="border: 1px solid #ccc; padding: 5px;">java.util.Map</td>
+    </tr>
+    </tbody>
+</table>
+<p>The schema MUST be a Map&lt;String, Object&gt;. </p>
+
+<p>Simple example of how to use the sample implementation:</p>
+<blockquote>
+  <p>
+     <code>
+Map&lt;String, Object&gt; schema = {initialize the schema};<br/>
+Object instance = {the instance to validate};<br/>
+<br/>
+if (ObjectValidator.validate(instance, schema)) {<br/>
+    //Object is valid<br/>
+} else {<br/>
+    //object violates the schema<br/>
+}<br/>
+    </code>
+  </p>
+</blockquote>
+<p>Use this tool to integrate it to custom environment and optimise the reuse of the validators. It was designed to be
+    thread safe an single instance of the Validators can be reused.</p>
+
+<p>More advanced sample:</p>
+<blockquote>
+  <p>
+    <code>
+Map&lt;String, Object&gt; schema = {initialize the schema};<br/>
+Object instance = {the instance to validate};<br/>
+<br/>
+try {<br/>
+    Validator v = ObjectValidatorFactory.getTypeValidator(schema);<br/>
+    ErrorHandler handler = new FailFastErrorHandler();<br/>
+    v.validate(instance, null, handler);<br/>
+} catch (Throwable e) {<br/>
+    isValid = false;<br/>
+}
+    </code></p>
+</blockquote>
+  </section>  
+ </body>
+</document>
+

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions Copyrighted [year] [name of copyright owner]".
+
+  Copyright 2012-2016 ForgeRock AS.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>commons-parent</artifactId>
+        <version>21.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>forgerock-rest</artifactId>
+    <packaging>pom</packaging>
+    <name>ForgeRock REST libraries</name>
+    <description>Common resource-oriented libraries used by ForgeRock projects</description>
+    <url>http://commons.forgerock.org/forgerock-rest</url>
+    <issueManagement>
+        <system>JIRA</system>
+        <url>https://bugster.forgerock.org/jira/browse/CREST</url>
+    </issueManagement>
+    <distributionManagement>
+        <site>
+            <id>forgerock.org</id>
+            <name>ForgeRock Community</name>
+            <url>scp://forgerock.org/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-rest</url>
+        </site>
+    </distributionManagement>
+    <properties>
+        <commons.forgerock-bom.version>6.0</commons.forgerock-bom.version>
+        <i18nFrameworkVersion>1.4.2</i18nFrameworkVersion>
+    </properties>
+    <modules>
+        <module>api-descriptor</module>
+        <module>forgerock-rest-docbook</module>
+        <module>json-resource</module>
+        <module>json-resource-examples</module>
+        <module>json-resource-http</module>
+        <module>openapi-war-overlay</module>
+    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>i18n-core</artifactId>
+                <version>${i18nFrameworkVersion}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>javax.mail</artifactId>
+                <version>1.5.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>mailing-list</report>
+                            <report>issue-tracking</report>
+                            <report>license</report>
+                            <report>scm</report>
+                            <report>cim</report>
+                            <report>distribution-management</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+</project>

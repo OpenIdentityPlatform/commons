@@ -1,0 +1,67 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE targetset [
+<!-- targetdatabase.dtd -->
+<!-- A DTD for managing cross reference target information -->
+
+<!ELEMENT targetset (targetsetinfo?, sitemap*, document*) >
+
+<!ELEMENT targetsetinfo ANY >
+
+<!ELEMENT sitemap (dir) >
+
+<!ELEMENT dir ((dir|document)*) >
+<!ATTLIST dir
+        name      CDATA   #REQUIRED
+>
+
+<!ELEMENT document (div*) >
+<!ATTLIST document
+        targetdoc CDATA   #REQUIRED
+        uri       CDATA   #IMPLIED
+        baseuri   CDATA   #IMPLIED
+        href      CDATA   #IMPLIED
+        dir       CDATA   #IMPLIED
+>
+
+<!ELEMENT div (ttl?, objttl?, xreftext?, (div|obj)*)>
+<!ATTLIST div
+        targetptr  CDATA   #IMPLIED
+        element   CDATA   #IMPLIED
+        name      CDATA   #IMPLIED
+        number    CDATA   #IMPLIED
+        href      CDATA   #IMPLIED
+        lang      CDATA   #IMPLIED
+        page      CDATA   #IMPLIED
+>
+
+
+<!ELEMENT ttl ANY >
+<!ELEMENT objttl ANY >
+<!ELEMENT xreftext ANY >
+
+<!ELEMENT obj (ttl?, objttl?, xreftext?)>
+<!ATTLIST obj
+        targetptr  CDATA   #IMPLIED
+        element   CDATA   #IMPLIED
+        name      CDATA   #IMPLIED
+        number    CDATA   #IMPLIED
+        href      CDATA   #IMPLIED
+        lang      CDATA   #IMPLIED
+        page      CDATA   #IMPLIED
+>
+
+<!ENTITY guide SYSTEM '/path/to/target/docbkx/pdf/guide/index.fo.target.db'>
+<!ENTITY reference SYSTEM '/path/to/target/docbkx/pdf/reference/index.fo.target.db'>
+]>
+<targetset>
+ <sitemap>
+  <dir name='doc'>
+   <document targetdoc='guide' baseuri='ForgeRock-1.0.0-Guide.pdf'>
+    &guide;
+   </document>
+   <document targetdoc='reference' baseuri='ForgeRock-1.0.0-Reference.pdf'>
+    &reference;
+   </document>
+  </dir>
+ </sitemap>
+</targetset>

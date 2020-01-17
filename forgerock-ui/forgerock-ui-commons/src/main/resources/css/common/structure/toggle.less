@@ -1,0 +1,119 @@
+/**
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015 ForgeRock AS.
+ */
+
+/*
+ Animation
+*/
+.checkbox-slider input+span:before {
+  transition: background .2s ease-out;
+  box-shadow: none;
+}
+
+.checkbox-slider input:not(:checked)+span:after {
+  animation: popOut ease-in 0s normal;
+}
+
+.checkbox-slider input:checked+span:after {
+  animation: popIn ease-in 0s normal;
+}
+
+
+/*
+  Adjust colors
+*/
+.checkbox-slider-info.checkbox-slider--default input:checked + span:after,
+.checkbox-slider-info.checkbox-slider--c-weight input:checked + span:after {
+  background: #5bc0de;
+  background-clip: content-box;
+}
+
+.checkbox-slider-info.checkbox-slider--b input:checked + span:before,
+.checkbox-slider-info.checkbox-slider--b-flat input:checked + span:before {
+  background: #5bc0de;
+}
+.checkbox-slider-warning.checkbox-slider--default input:checked + span:after {
+  background: #f0ad4e;
+  background-clip: content-box;
+}
+
+.checkbox-slider-warning.checkbox-slider--b input:checked + span:before,
+.checkbox-slider-warning.checkbox-slider--b-flat input:checked + span:before {
+  background: #f0ad4e;
+}
+.checkbox-slider-danger.checkbox-slider--default input:checked + span:after {
+  background: @failure-color;
+  background-clip: content-box;
+}
+
+.checkbox-slider-danger.checkbox-slider--b input:checked + span:before,
+.checkbox-slider-danger.checkbox-slider--b-flat input:checked + span:before {
+  background: @failure-color;
+}
+
+.checkbox-slider-primary.checkbox-slider--default input:checked + span:after {
+  background: @base-theme-color;
+  background-clip: content-box;
+}
+
+.checkbox-slider-primary.checkbox-slider--b input:checked + span,
+.checkbox-slider-primary.checkbox-slider--b-flat input:checked + span {
+    font: normal normal normal 11px/1 FontAwesome;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.checkbox-slider-primary.checkbox-slider--b input:checked + span:before,
+.checkbox-slider-primary.checkbox-slider--b-flat input:checked + span:before {
+  background: @base-theme-color;
+  content: "\f00c";
+  color: #fff;
+  padding: 5px 0 0 8px;
+}
+
+.checkbox-slider-primary.checkbox-slider-md input:checked + span {
+    font-size: 14px;
+}
+
+.checkbox-slider-primary.checkbox-slider-md input:checked + span:before {
+    padding: 0 0 0 12px;
+}
+
+.checkbox-slider-primary.checkbox-slider--b input:not(:checked) + span:before,
+.checkbox-slider-primary.checkbox-slider--b-flat input:not(:checked) + span:before {
+    background: #737373;
+}
+
+.checkbox-slider-primary.checkbox-slider--b input[disabled] + span:before,
+.checkbox-slider-primary.checkbox-slider--b-flat input[disabled] + span:before {
+    background: #D5D5D5;
+    color: darken(#D5D5D5, 30%);
+    cursor: not-allowed;
+}
+
+.checkbox-slider-primary.checkbox-slider--b input[disabled] + span:after,
+.checkbox-slider-primary.checkbox-slider--b-flat input[disabled] + span:after {
+    background: #BDBDBD;
+    border: solid #D5D5D5 2px;
+    cursor: not-allowed;
+}
+
+/*
+  Fixed default bootstrap styles
+*/
+.form-horizontal .checkbox.checkbox-slider {
+  padding-top: 0;
+}

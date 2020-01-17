@@ -1,0 +1,960 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2015 ForgeRock AS.
+  !
+-->
+ <section xml:id="sec-about-crest"
+          xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://docbook.org/ns/docbook
+                              http://docbook.org/xml/5.0/xsd/docbook.xsd">
+ <title>About ForgeRock Common REST</title>
+
+ <para>
+  For many REST APIs that are not defined by external standards,
+  ForgeRock products provide common ways
+  to access web resources and collections of resources.
+  This section covers what is common across products.
+  Adapt the examples to your types of resources and to your deployment.
+ </para>
+
+ <section xml:id="about-crest-resources">
+  <title>Common REST Resources</title>
+
+  <para>
+   Servers generally return JSON-format resources,
+   though resource formats can depend on the implementation.
+  </para>
+
+  <para>
+   Resources in collections can be found by their unique identifiers (IDs).
+   IDs are exposed in the resource URIs.
+   For example, if a server has a user collection under <literal>/users</literal>,
+   then you can access a user at
+   <literal>/users/<replaceable>user-id</replaceable></literal>.
+   The ID is also the value of the "_id" field of the resource.
+  </para>
+
+  <para>
+   Resources are versioned using revision numbers.
+   A revision is specified in the resource's "_rev" field.
+   Revisions make it possible to figure out whether to apply changes
+   without resource locking and without distributed transactions.
+  </para>
+ </section>
+
+ <section xml:id="about-crest-verbs">
+  <title>Common REST Verbs</title>
+
+  <variablelist>
+   <para>
+    The common REST APIs use the following verbs,
+    sometimes referred to collectively as <acronym>CRUDPAQ</acronym>.
+    For details and HTTP-based examples of each,
+    follow the links to the sections for each verb.
+   </para>
+
+   <varlistentry>
+    <term>Create</term>
+    <listitem>
+     <para>
+      Add a new resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP PUT or HTTP POST.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-create" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Read</term>
+    <listitem>
+     <para>
+      Retrieve a single resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP GET.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-read" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Update</term>
+    <listitem>
+     <para>
+      Replace an existing resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP PUT.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-update" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Delete</term>
+    <listitem>
+     <para>
+      Remove an existing resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP DELETE.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-delete" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Patch</term>
+    <listitem>
+     <para>
+      Modify part of an existing resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP PATCH.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-patch" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Action</term>
+    <listitem>
+     <para>
+      Perform a predefined action.
+     </para>
+
+     <para>
+      This verb maps to HTTP POST.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-action" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Query</term>
+    <listitem>
+     <para>
+      Search a collection of resources.
+     </para>
+
+     <para>
+      This verb maps to HTTP GET.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-query" />.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-parameters">
+  <title>Common REST Parameters</title>
+
+  <para>
+   Common REST query string parameter names all start with an underscore,
+   <literal>_</literal>.
+  </para>
+
+  <para>
+   Reserved query string parameters include the following.
+  </para>
+
+  <simplelist>
+   <member><literal>_action</literal></member>
+   <member><literal>_fields</literal></member>
+   <member><literal>_mimeType</literal></member>
+   <member><literal>_pageSize</literal></member>
+   <member><literal>_pagedResultsCookie</literal></member>
+   <member><literal>_pagedResultsOffset</literal></member>
+   <member><literal>_prettyPrint</literal></member>
+   <member><literal>_queryFilter</literal></member>
+   <member><literal>_queryId</literal></member>
+   <member><literal>_sortKeys</literal></member>
+  </simplelist>
+
+  <note>
+   <para>
+    Some parameter values are not safe for URLs,
+    so URL encode parameter values as necessary.
+   </para>
+  </note>
+
+  <para>
+   Continue reading for details about how to use each parameter.
+  </para>
+ </section>
+
+ <section xml:id="about-crest-extensions">
+  <title>Common REST Extension Points</title>
+
+  <para>
+   The <emphasis>action</emphasis> verb is the main vehicle for extensions.
+   For example, to create a new user with HTTP POST rather than HTTP PUT,
+   you might use <literal>/users?_action=create</literal>.
+   A server can define additional actions.
+   For example, <literal>/tasks/1?_action=cancel</literal>.
+  </para>
+
+  <para>
+   A server can define <emphasis>stored queries</emphasis> to call by ID.
+   For example, <literal>/groups?_queryId=hasDeletedMembers</literal>.
+   Stored queries can call for additional parameters.
+   The parameters are also passed in the query string.
+   Which parameters are valid depends on the stored query.
+  </para>
+ </section>
+
+ <section xml:id="about-crest-create">
+  <title>Create</title>
+
+  <para>
+   There are two ways to create a resource,
+   either with an HTTP POST or with an HTTP PUT.
+  </para>
+
+  <para>
+   To create a resource using POST, perform an HTTP POST
+   with the query string parameter <literal>_action=create</literal>
+   and the JSON resource as a payload.
+   Accept a JSON response.
+   The server creates the identifier if not specified.
+  </para>
+
+  <programlisting language="http">
+POST /users?_action=create  HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+{ <replaceable>JSON resource</replaceable> }
+  </programlisting>
+
+  <para>
+   To create a resource using PUT, perform an HTTP PUT
+   including the case-sensitive identifier (<literal>_id</literal>)
+   for the resource with the JSON resource as a payload.
+   Use the <literal>If-None-Match: *</literal> header.
+   Accept a JSON response.
+  </para>
+
+  <programlisting language="http">
+PUT /users/some-id  HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+If-None-Match: *
+{ <replaceable>JSON resource</replaceable> }
+  </programlisting>
+
+  <para>
+   The <literal>_id</literal> and content of the resource
+   depend on the server implementation.
+  </para>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters.
+   </para>
+
+   <varlistentry>
+    <term><literal>_prettyPrint=true</literal></term>
+    <listitem>
+     <para>
+      Format the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Return only the specified fields in the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-read">
+  <title>Read</title>
+
+  <para>
+   To retrieve a single resource, perform an HTTP GET on the resource
+   by its case-sensitive identifier (<literal>_id</literal>)
+   and accept a JSON response.
+  </para>
+
+  <programlisting language="http">
+GET /users/some-id  HTTP/1.1
+Host: example.com
+Accept: application/json
+  </programlisting>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters.
+   </para>
+
+   <varlistentry>
+    <term><literal>_prettyPrint=true</literal></term>
+    <listitem>
+     <para>
+      Format the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Return only the specified fields in the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_mimeType=<replaceable>mime-type</replaceable></literal></term>
+    <listitem>
+     <para>
+      Some resources have fields whose values are multi-media resources
+      such as a profile photo for example.
+     </para>
+
+     <para>
+      By specifying both a single <replaceable>field</replaceable>
+      and also the <replaceable>mime-type</replaceable> for the response content,
+      you can read a single field value that is a multi-media resource.
+     </para>
+
+     <para>
+      In this case, the content type of the field value returned
+      matches the <replaceable>mime-type</replaceable> that you specify,
+      and the body of the response is the multi-media resource.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-update">
+  <title>Update</title>
+
+  <para>
+   To update a resource, perform an HTTP PUT
+   including the case-sensitive identifier (<literal>_id</literal>)
+   for the resource with the JSON resource as a payload.
+   Use the <literal>If-Match: <replaceable>_rev</replaceable></literal> header
+   to check that you are actually updating the version you modified.
+   Accept a JSON response.
+  </para>
+
+  <programlisting language="http">
+PUT /users/some-id  HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+If-Match: <replaceable>_rev</replaceable>
+{ <replaceable>JSON resource</replaceable> }
+  </programlisting>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters.
+   </para>
+
+   <varlistentry>
+    <term><literal>_prettyPrint=true</literal></term>
+    <listitem>
+     <para>
+      Format the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Return only the specified fields in the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-delete">
+  <title>Delete</title>
+
+  <para>
+   To delete a single resource, perform an HTTP DELETE
+   by its case-sensitive identifier (<literal>_id</literal>)
+   and accept a JSON response.
+  </para>
+
+  <programlisting language="http">
+DELETE /users/some-id  HTTP/1.1
+Host: example.com
+Accept: application/json
+  </programlisting>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters.
+   </para>
+
+   <varlistentry>
+    <term><literal>_prettyPrint=true</literal></term>
+    <listitem>
+     <para>
+      Format the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Return only the specified fields in the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-patch">
+  <title>Patch</title>
+
+  <para>
+   To patch a resource, send an HTTP PATCH request
+   including the patch for the resource as the payload.
+   Optionally set the <literal>If-Match</literal> header to the revision
+   if the patch should only operate on that version of the resource.
+   Accept a JSON response.
+  </para>
+
+  <programlisting language="http">
+PATCH /users/some-id  HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+If-Match: <replaceable>_rev</replaceable>
+{ <replaceable>JSON resource</replaceable> }
+  </programlisting>
+
+  <note>
+   <para>
+    Some HTTP client libraries do not support the HTTP PATCH operation.
+    Make sure that the library you use supports HTTP PATCH
+    before using this REST operation.
+   </para>
+
+   <para>
+    For example, the Java Development Kit HTTP client
+    does not support PATCH as a valid HTTP method.
+    Instead, the method <literal>HttpURLConnection.setRequestMethod("PATCH")</literal>
+    throws <literal>ProtocolException</literal>.
+   </para>
+  </note>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters.
+   </para>
+
+   <varlistentry>
+    <term><literal>_prettyPrint=true</literal></term>
+    <listitem>
+     <para>
+      Format the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Return only the specified fields in the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-action">
+  <title>Action</title>
+
+  <para>
+   Actions are a means of extending common REST APIs
+   and are defined by the resource provider,
+   so the actions you can use depend on the implementation.
+  </para>
+
+  <para>
+   The standard action indicated by <literal>_action=create</literal>
+   is described in <xref linkend="about-crest-create" />.
+  </para>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters.
+    Other parameters might depend on the specific action implementation.
+   </para>
+
+   <varlistentry>
+    <term><literal>_prettyPrint=true</literal></term>
+    <listitem>
+     <para>
+      Format the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Return only the specified fields in the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-query">
+  <title>Query</title>
+
+  <para>
+   To query a resource collection
+   (or resource container if you prefer to think of it that way),
+   perform an HTTP GET and accept a JSON response, including at least
+   a <literal>_queryFilter</literal> or <literal>_queryId</literal> parameter.
+  </para>
+
+  <programlisting language="http">
+GET /users?_queryFilter=true  HTTP/1.1
+Host: example.com
+Accept: application/json
+  </programlisting>
+
+  <para>
+   The server returns the result as a JSON object
+   including a "results" array and other fields
+   related to the query string parameters that you specify.
+  </para>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters.
+   </para>
+
+   <varlistentry>
+    <term><literal>_queryFilter=<replaceable>filter-expression</replaceable></literal></term>
+    <listitem>
+     <para>
+      Query filters request that the server return entries
+      that match the filter expression.
+      You must URL-escape the filter expression.
+     </para>
+
+     <para>
+      The string representation is summarized as follows.
+      Continue reading for additional explanation.
+     </para>
+
+     <programlisting language="none">
+Expr           = OrExpr
+OrExpr         = AndExpr ( 'or' AndExpr ) *
+AndExpr        = NotExpr ( 'and' NotExpr ) *
+NotExpr        = '!' PrimaryExpr | PrimaryExpr
+PrimaryExpr    = '(' Expr ')' | ComparisonExpr | PresenceExpr | LiteralExpr
+ComparisonExpr = Pointer OpName JsonValue
+PresenceExpr   = Pointer 'pr'
+LiteralExpr    = 'true' | 'false'
+Pointer        = JSON pointer
+OpName         = 'eq' |  # equal to
+                 'co' |  # contains
+                 'sw' |  # starts with
+                 'lt' |  # less than
+                 'le' |  # less than or equal to
+                 'gt' |  # greater than
+                 'ge' |  # greater than or equal to
+                 STRING  # extended operator
+JsonValue      = NUMBER | BOOLEAN | '"' UTF8STRING '"'
+STRING         = ASCII string not containing white-space
+UTF8STRING     = UTF-8 string possibly containing white-space
+     </programlisting>
+
+     <para>
+      A simple filter expression can represent a comparison, presence,
+      or a literal value.
+     </para>
+
+     <para>
+      For comparisons expression use
+      <replaceable>json-pointer comparator json-value</replaceable>,
+      where the <replaceable>comparator</replaceable> is one of the following.
+     </para>
+
+     <simplelist>
+      <member><literal>eq</literal> (equals)</member>
+      <member><literal>co</literal> (contains)</member>
+      <member><literal>sw</literal> (starts with)</member>
+      <member><literal>lt</literal> (less than)</member>
+      <member><literal>le</literal> (less than or equal to)</member>
+      <member><literal>gt</literal> (greater than)</member>
+      <member><literal>ge</literal> (greater than or equal to)</member>
+     </simplelist>
+
+     <para>
+      For presence, use <replaceable>json-pointer pr</replaceable>
+      to match resources where the JSON pointer is present.
+     </para>
+
+     <para>
+      Literal values include true (match anything) and false (match nothing).
+     </para>
+
+     <para>
+      Complex expressions employ <literal>and</literal>,
+      <literal>or</literal>,
+      and <literal>!</literal> (not),
+      with parentheses, <literal>(<replaceable>expression</replaceable>)</literal>,
+      to group expressions.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_queryId=<replaceable>identifier</replaceable></literal></term>
+    <listitem>
+     <para>
+      Specify a query by its identifier.
+     </para>
+
+     <para>
+      Specific queries can take their own query string parameter arguments,
+      which depend on the implementation.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_pagedResultsCookie=<replaceable>string</replaceable></literal></term>
+    <listitem>
+     <para>
+      The string is an opaque cookie used by the server
+      to keep track of the position in the search results.
+      The server returns the cookie in the JSON response
+      as the value of "pagedResultsCookie".
+     </para>
+
+     <para>
+      In the request <literal>_pageSize</literal> must also be set and non-zero.
+      You receive the cookie value from the provider on the first request,
+      and then supply the cookie value in subsequent requests
+      until the server returns a <literal>null</literal> cookie,
+      meaning that the final page of results has been returned.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_pagedResultsOffset=<replaceable>integer</replaceable></literal></term>
+    <listitem>
+     <para>
+      When <literal>_pageSize</literal> is non-zero,
+      use this as an index in the result set indicating the first page to return.
+      When the value of <literal>_pagedResultsOffset</literal> is less than 1,
+      the server returns the next page after the last page returned.
+      When the value is greater than or equal to 1,
+      the server returns the page starting from the specified index.
+     </para>
+
+     <para>
+      When this value is specified and greater than or equal to zero,
+      the server calculates "remainingPagedResults",
+      and provides the value as part of the response.
+      The "remainingPagedResults" reflects
+      an estimate of the number of remaining paged results.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_pageSize=<replaceable>integer</replaceable></literal></term>
+    <listitem>
+     <para>
+      Return query results in pages of this size.
+      After the initial request,
+      use <literal>_pagedResultsCookie</literal> to page through the results.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_sortKeys=[+-]<replaceable>field</replaceable>[,[+-]<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Sort the resources returned based on the specified field(s),
+      either in <literal>+</literal> (ascending, default) order,
+      or in <literal>-</literal> (descending) order.
+     </para>
+
+     <para>
+      The <literal>_sortKeys</literal> parameter is not supported
+      for predefined queries (<literal>_queryId</literal>).
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_prettyPrint=true</literal></term>
+    <listitem>
+     <para>
+      Format the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Return only the specified fields in the body of the response.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-response-codes">
+  <title>HTTP Status Codes</title>
+
+  <para>
+   When working with a common REST API over HTTP,
+   you can expect the following HTTP status codes.
+   Not all servers necessarily return all status codes identified here.
+  </para>
+
+  <variablelist>
+   <varlistentry>
+    <term>200 OK</term>
+    <listitem>
+     <para>
+      The request was successful and a resource returned, depending on the request.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>201 Created</term>
+    <listitem>
+     <para>
+      The request succeeded and the resource was created.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>400 Bad Request</term>
+    <listitem>
+     <para>
+      The request was malformed.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>401 Unauthorized</term>
+    <listitem>
+     <para>
+      The request requires user authentication.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>403 Forbidden</term>
+    <listitem>
+     <para>
+      Access was forbidden during an operation on a resource.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>404 Not Found</term>
+    <listitem>
+     <para>
+      The specified resource could not be found, perhaps because it does not exist.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>405 Method Not Allowed</term>
+    <listitem>
+     <para>
+      The HTTP method is not allowed for the requested resource.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>406 Not Acceptable</term>
+    <listitem>
+     <para>
+      The request contains parameters that are not acceptable,
+      such as a resource or protocol version that is not available.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>409 Conflict</term>
+    <listitem>
+     <para>
+      The request would have resulted in a conflict
+      with the current state of the resource.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>410 Gone</term>
+    <listitem>
+     <para>
+      The requested resource is no longer available,
+      and will not become available again.
+      This can happen when resources expire for example.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>412 Precondition Failed</term>
+    <listitem>
+     <para>
+      The resource's current version does not match the version provided.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>415 Unsupported Media Type</term>
+    <listitem>
+     <para>
+      The request is in a format not supported
+      by the requested resource for the requested method.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>428 Precondition Required</term>
+    <listitem>
+     <para>
+      The resource requires a version, but no version was supplied in the request.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>500 Internal Server Error</term>
+    <listitem>
+     <para>
+      The server encountered an unexpected condition
+      that prevented it from fulfilling the request.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>501 Not Implemented</term>
+    <listitem>
+     <para>
+      The resource does not support the functionality
+      required to fulfill the request.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>503 Service Unavailable</term>
+    <listitem>
+     <para>
+      The requested resource was temporarily unavailable.
+      The service may have been disabled, for example.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+</section>

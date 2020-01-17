@@ -1,0 +1,168 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>commons-parent</artifactId>
+        <version>21.0.0-SNAPSHOT</version>
+    </parent>
+	<artifactId>geo</artifactId>
+	<name>org.openidentityplatform.commons.geo</name>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.13-beta-1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.maxmind.geoip2</groupId>
+			<artifactId>geoip2</artifactId>
+			<version>2.12.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.8.1</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+		  <groupId>com.google.guava</groupId>
+		  <artifactId>guava</artifactId>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.openidentityplatform.commons</groupId> -->
+<!-- 				<artifactId>maven-external-dependency-plugin</artifactId> -->
+<!-- 				<version>0.6-SNAPSHOT</version> -->
+<!-- 				<inherited>false</inherited> -->
+<!-- 				<configuration> -->
+<!-- 					<stagingDirectory> -->
+<!-- 						${project.build.directory}/dependencies/ -->
+<!-- 					</stagingDirectory> -->
+<!-- 					<force>false</force> -->
+<!-- 					<install>true</install> -->
+<!-- 					<createChecksum>false</createChecksum> -->
+<!-- 					<skipChecksumVerification>true</skipChecksumVerification> -->
+<!-- 					<artifactItems> -->
+<!-- 						<artifactItem> -->
+<!-- 							<groupId>org.openidentityplatform.commons.geoip</groupId> -->
+<!-- 							<artifactId>GeoLite2-City</artifactId> -->
+<!-- 							<version>${project.version}</version> -->
+<!-- 							<packaging>tar.gz</packaging> -->
+<!-- 							<downloadUrl><![CDATA[ -->
+<!-- 								http://geolite.maxmind.com/download/geoip/database/{artifactId}.{packaging} -->
+<!-- 							]]></downloadUrl> -->
+<!-- 						</artifactItem> -->
+<!-- 						<artifactItem> -->
+<!-- 							<groupId>org.openidentityplatform.commons.geoip</groupId> -->
+<!-- 							<artifactId>GeoLite2-ASN</artifactId> -->
+<!-- 							<version>${project.version}</version> -->
+<!-- 							<packaging>tar.gz</packaging> -->
+<!-- 							<downloadUrl><![CDATA[ -->
+<!-- 								http://geolite.maxmind.com/download/geoip/database/{artifactId}.{packaging} -->
+<!-- 							]]></downloadUrl> -->
+<!-- 						</artifactItem> -->
+<!-- 					</artifactItems> -->
+<!-- 				</configuration> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>clean-external-dependencies</id> -->
+<!-- 						<phase>clean</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>clean-external</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 					<execution> -->
+<!-- 						<id>resolve-install-external-dependencies</id> -->
+<!-- 						<phase>generate-resources</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>resolve-external</goal> -->
+<!-- 							<goal>install-external</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 					<execution> -->
+<!-- 						<id>deploy-external-dependencies</id> -->
+<!-- 						<phase>deploy</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>deploy-external</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<configuration>
+					<stripVersion>true</stripVersion>
+				</configuration>
+				<executions>
+					<execution>
+						<id>extract **/*.mmdb</id>
+		                <phase>generate-resources</phase>
+		                <goals>
+		                	<goal>unpack</goal>
+		                </goals>
+		                <configuration>
+		                	<artifactItems>
+			            		<artifactItem>
+									<groupId>org.openidentityplatform.commons.geoip</groupId>
+									<artifactId>GeoLite2-City</artifactId>
+									<version>${project.version}</version>
+									<type>tar.gz</type>
+									<includes>**/*.mmdb</includes>
+								</artifactItem>
+								<artifactItem>
+									<groupId>org.openidentityplatform.commons.geoip</groupId>
+									<artifactId>GeoLite2-ASN</artifactId>
+									<version>${project.version}</version>
+									<type>tar.gz</type>
+									<includes>**/*.mmdb</includes>
+								</artifactItem>
+							</artifactItems>
+		                </configuration>
+		            </execution>
+				</executions>
+			</plugin>
+			<plugin>
+		        <artifactId>maven-antrun-plugin</artifactId>
+		        <executions>
+		          <execution>
+		            <id>copy **/*.mmdb</id>
+		            <phase>generate-resources</phase>
+		            <configuration>
+		              <target>
+						<copy todir="src/main/resources" flatten="true">
+						    <fileset dir="target/dependency">
+						        <include name="**/*.mmdb"/>
+						    </fileset>
+						</copy>
+		              </target>
+		            </configuration>
+		            <goals>
+		              <goal>run</goal>
+		            </goals>
+		          </execution>
+		        </executions>
+		      </plugin>
+		</plugins>
+	</build>
+</project>

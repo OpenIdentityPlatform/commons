@@ -1,0 +1,20 @@
+{
+    "took":4,
+    "errors":false,
+    "items":[
+        {
+            "index":{
+                "_index":"audit",
+                "_type":"authentication",
+                "_id":"177c080f-5f21-467e-bf1a-26c54d62f355-215",
+                "_version":1,
+                "_shards":{
+                    "total":2,
+                    "successful":1,
+                    "failed":0
+                },
+                "status":201
+            }
+        }
+    ]
+}

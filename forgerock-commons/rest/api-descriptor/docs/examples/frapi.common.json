@@ -1,0 +1,116 @@
+{
+  "id" : "frapi:common",
+  "description" : "Collection of common ForgeRock CREST definitions and errors",
+  "version" : "1.0.0", 
+  "paths":{},
+  "errors" : {
+    "badRequest" : {
+      "code" : 400,
+      "description" : "Indicates that the request could not be understood by the resource due to malformed syntax."
+    },
+    "unauthorized" : {
+      "code" : 401,
+      "description" : "Unauthorized - Missing or bad authentication"
+    },
+    "paymentRequired" : {
+      "code" : 402,
+      "description" : "Payment Required"
+    },
+    "forbidden" : {
+      "code" : 403,
+      "description" : "Indicates that the resource understood the request, but is refusing to fulfill it."
+    },
+    "notFound" : {
+      "code" : 404,
+      "description" : "Indicates that the resource could not be found."
+    },
+    "methodNotAllowed" : {
+      "code" : 405,
+      "description" : "Method Not Allowed"
+    },
+    "notAcceptable" : {
+      "code" : 406,
+      "description" : "Not Acceptable"
+    },
+    "proxyAuthRequired" : {
+      "code" : 407,
+      "description" : "Proxy Authentication Required"
+    },
+    "requestTimeout" : {
+      "code" : 408,
+      "description" : "Indicates the request could not be completed due to a request-timeout."
+    },
+    "conflict" : {
+      "code" : 409,
+      "description" : "Indicates the request could not be completed due to a conflict with the current state of the resource."
+    },
+    "gone" : {
+      "code" : 410,
+      "description" : "Gone"
+    },
+    "lengthRequired" : {
+      "code" : 411,
+      "description" : "Length Required"
+    },
+    "versionMismatch" : {
+      "code" : 412,
+      "description" : "Indicates that the resource's current version does not match the version provided."
+    },
+    "preconditionFailed" : {
+      "code" : 412,
+      "description" : "The server does not meet one of the preconditions that the requester put on the request."
+    },
+    "requestEntityTooLarge" : {
+      "code" : 413,
+      "description" : "Request Entity Too Large"
+    },
+    "requestUriTooLarge" : {
+      "code" : 414,
+      "description" : "Request-URI Too Large"
+    },
+    "unsupportedMediaType" : {
+      "code" : 415,
+      "description" : "Unsupported Media Type"
+    },
+    "rangeNotSatisfiable" : {
+      "code" : 416,
+      "description" : "Requested range not satisfiable"
+    },
+    "expectationFailed" : {
+      "code" : 417,
+      "description" : "Expectation Failed"
+    },
+    "versionRequired" : {
+      "code" : 428,
+      "description" : "Indicates that the resource requires a version, but no version was supplied in the request."
+    },
+    "preconditionRequired" : {
+      "code" : 428,
+      "description" : "The origin server requires the request to be conditional."
+    },
+    "internalServerError" : {
+      "code" : 500,
+      "description" : "Indicates that a resource encountered an unexpected condition which prevented it from fulfilling the request."
+    },
+    "notSupported" : {
+      "code" : 501,
+      "description" : "Indicates that the resource does not implement/support the feature to fulfill the request."
+    },
+    "badGateway" : {
+      "code" : 502,
+      "description" : "Indicates that the resource does not implement/support the feature to fulfill the request."
+    },
+    "unavailable" : {
+      "code" : 503,
+      "description" : "Indicates that the resource is temporarily unable to handle the request."
+    },
+    "gatewayTimeout" : {
+      "code" : 504,
+      "description" : "Indicates a request could not be completed due to a gateway-timeout."
+    },
+    "httpVersionNotSupported" : {
+      "code" : 505,
+      "description" : "HTTP Version not supported"
+    }
+  }
+}

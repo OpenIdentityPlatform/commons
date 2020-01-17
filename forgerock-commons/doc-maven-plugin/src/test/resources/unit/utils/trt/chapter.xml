@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<chapter xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://docbook.org/ns/docbook
+                             http://docbook.org/xml/5.0/xsd/docbook.xsd">
+ <title>Chapter With Table</title>
+
+ <table>
+  <title>A Table</title>
+
+  <tgroup cols="2">
+   <thead>
+    <row>
+     <entry>Header</entry>
+     <entry>Header</entry>
+    </row>
+   </thead>
+
+   <tbody>
+    <row>
+     <entry>Data</entry>
+     <entry>Data</entry>
+    </row>
+   </tbody>
+  </tgroup>
+ </table>
+</chapter>

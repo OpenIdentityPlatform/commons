@@ -1,0 +1,68 @@
+{
+  "stageConfigs": [
+    {
+      "name" : "termsAndConditions",
+      "termsTranslations" : {
+        "en" : "Some fake terms",
+        "fr" : "More fake terms"
+      }
+    },
+    {
+      "class" : "org.forgerock.selfservice.custom.MathProblemStageConfig",
+      "leftValue" : 12,
+      "rightValue" : 4
+    },
+    {
+      "name" : "emailValidation",
+      "emailServiceUrl": "/email",
+      "from": "info@admin.org",
+      "mimeType": "text/html",
+      "subjectTranslations": {
+        "en": "Register new account",
+        "fr": "Créer un nouveau compte"
+      },
+      "messageTranslations": {
+        "en": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+        "fr": "<h3>Ceci est votre mail d'inscription.</h3><h4><a href=\"%link%\">Lien de vérification Email</a></h4>"
+      },
+      "verificationLinkToken": "%link%",
+      "verificationLink": "http://localhost:9999/example/#register/",
+      "identityEmailField" : "mail"
+    },
+    {
+      "name" : "userDetails",
+      "identityEmailField" : "mail"
+    },
+    {
+      "name" : "kbaSecurityAnswerDefinitionStage",
+      "kbaConfig": {
+        "kbaPropertyName" : "kbaInfo",
+        "questions": {
+          "1": {
+            "en": "What's your favorite color?",
+            "en_GB": "What's your favorite colour?",
+            "fr": "Quelle est votre couleur préférée?"
+          },
+          "2": {
+            "en": "Who was your first employer?"
+          }
+        }
+      }
+    },
+    {
+      "name" : "selfRegistration",
+      "identityServiceUrl" : "/users"
+    }
+  ],
+  "snapshotToken" : {
+    "type": "jwt",
+    "sharedKey" : "!tHiSsOmEsHaReDkEy!",
+    "keyPairAlgorithm" : "RSA",
+    "keyPairSize" : 1024,
+    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+    "encryptionMethod" : "A128CBC_HS256",
+    "jwsAlgorithm" : "HS256",
+    "tokenExpiry": 180
+  },
+  "storage": "stateless"
+}

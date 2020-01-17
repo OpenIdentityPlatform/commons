@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The contents of this file are subject to the terms of the Common Development and
+  ~ Distribution License (the License). You may not use this file except in compliance with the License.
+  ~
+  ~ You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  ~ specific language governing permission and limitations under the License.
+  ~
+  ~ When distributing Covered Software, include this CDDL Header Notice in each file and include
+  ~ the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
+  ~ information: "Portions copyright [year] [name of copyright owner]".
+  ~
+  ~ Copyright 2015 ForgeRock AS.
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>commons-parent</artifactId>
+        <version>21.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>forgerock-utilities</artifactId>
+    <name>ForgeRock Utility Classes Parent</name>
+    <description>Miscellaneous utility classes used within ForgeRock projects.</description>
+    <packaging>pom</packaging>
+    <url>http://commons.forgerock.org/forgerock-util</url>
+    <issueManagement>
+        <system>JIRA</system>
+        <url>https://bugster.forgerock.org/jira/browse/COMMONS</url>
+    </issueManagement>
+    <distributionManagement>
+        <site>
+            <id>community.internal.forgerock.com</id>
+            <name>ForgeRock Community</name>
+            <url>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-util</url>
+        </site>
+    </distributionManagement>
+    <properties>
+        <clirrComparisonVersion>3.0.0</clirrComparisonVersion>
+    </properties>
+    <modules>
+        <module>forgerock-util</module>
+        <module>forgerock-test-utils</module>
+    </modules>
+    <build>
+        <plugins>
+            <plugin>
+              <artifactId>maven-compiler-plugin</artifactId>
+              <version>3.3</version>
+              <configuration>
+                <compilerId>eclipse</compilerId>
+              </configuration>
+              <dependencies>
+                <dependency>
+                  <groupId>org.codehaus.plexus</groupId>
+                  <artifactId>plexus-compiler-eclipse</artifactId>
+                  <version>2.5</version>
+                </dependency>
+              </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+</project>

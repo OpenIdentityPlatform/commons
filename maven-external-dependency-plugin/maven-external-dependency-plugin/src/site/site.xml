@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="${project.name}">
+  
+  <publishDate position="left"/>
+  <version position="left"/>
+  
+  <bannerLeft>
+    <name>maven-external-dependency-plugin</name>
+    <href>http:\\code.google.com\p\maven-external-dependency-plugin\</href>
+  </bannerLeft>
+  <bannerRight>
+    <src>http:\\code.google.com\images\code_logo.png</src>
+    <href>http:\\code.google.com\p\maven-external-dependency-plugin\</href>
+  </bannerRight>
+  <body>
+    <links>
+      <item name="Home" href="http:\\code.google.com/p/maven-external-dependency-plugin/" />
+      <item name="Wiki" href="http:\\code.google.com/p/maven-external-dependency-plugin/w/"/>
+      <item name="Issues" href="http:\\code.google.com/p/maven-external-dependency-plugin/issues/"/>
+      <item name="Source" href="http:\\code.google.com/p/maven-external-dependency-plugin/source/checkout"/>
+    </links>
+
+    <menu name="Overview">
+      <item name="Introduction" href="index.html"/>
+      <item name="Goals" href="plugin-info.html"/>
+    </menu>
+
+    <menu name="API Documentation">
+      <item name="JavaDoc" href="apidocs/index.html"/>
+    </menu>
+    
+    <menu ref="reports" collapse="false"/>
+    
+    <menu ref="modules" collapse="false"/>
+    
+  </body>
+</project>

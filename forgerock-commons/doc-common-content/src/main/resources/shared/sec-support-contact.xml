@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2015 ForgeRock AS.
+  !
+-->
+<section xml:id="sec-support-contact"
+         xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
+         xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+         xsi:schemaLocation='http://docbook.org/ns/docbook
+                              http://docbook.org/xml/5.0/xsd/docbook.xsd'
+         xmlns:xlink='http://www.w3.org/1999/xlink'>
+
+ <title>Getting Support and Contacting ForgeRock</title>
+ <para>
+  ForgeRock provides support services, professional services, classes through
+  ForgeRock University, and partner services to assist you in setting up and
+  maintaining your deployments.
+  For a general overview of these services, see
+  <link xlink:show="new"
+        xlink:href="https://www.forgerock.com/en-us/services">ForgeRock Services</link>.
+ </para>
+ <para>
+  ForgeRock has staff members around the globe who
+  support our international customers and partners.
+  If you have any questions, contact ForgeRock using the address or telephone number
+  nearest to you at
+  <link
+   xlink:show="new"
+   xlink:href="https://www.forgerock.com/en-us/contact/">https://www.forgerock.com/en-us/contact/</link>
+  or send an email to ForgeRock at
+  <link xlink:show="new" xlink:href="mailto:info@forgerock.com">info@forgerock.com</link>.
+ </para>
+
+</section>

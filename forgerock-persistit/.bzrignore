@@ -1,0 +1,13 @@
+target
+bin
+.classpath
+.project
+.settings
+./akiban-persistit.iml
+./akiban-persistit.ipr
+./akiban-persistit.iws
+./bench/akiban-persistit-bench.iml
+./core/akiban-persistit-core.iml
+.DS_Store
+maven-eclipse.xml
+

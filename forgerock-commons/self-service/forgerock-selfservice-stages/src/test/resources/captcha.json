@@ -1,0 +1,6 @@
+{
+  "name" : "captcha",
+  "recaptchaSiteKey" : "6Le4og4TAAAAACWetDto1152-_JEhn5aG8NhZ3ej",
+  "recaptchaSecretKey" : "6Le4og4TAAAAAFPprcsXlHE9bYYPAMX794A6R3Mv",
+  "recaptchaUri" : "https://www.google.com/recaptcha/api/siteverify"
+}

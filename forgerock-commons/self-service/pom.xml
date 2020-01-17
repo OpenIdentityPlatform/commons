@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The contents of this file are subject to the terms of the Common Development and
+  ~ Distribution License (the License). You may not use this file except in compliance with the
+  ~ License.
+  ~
+  ~ You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  ~ specific language governing permission and limitations under the License.
+  ~
+  ~ When distributing Covered Software, include this CDDL Header Notice in each file and include
+  ~ the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
+  ~ information: "Portions copyright [year] [name of copyright owner]".
+  ~
+  ~ Copyright 2016 ForgeRock AS.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>commons-parent</artifactId>
+        <version>21.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>forgerock-selfservice</artifactId>
+    <packaging>pom</packaging>
+
+    <name>Commons Self Service Framework</name>
+    <description>
+        Common implementation of self service including such features as password reset and user self service.
+    </description>
+
+<!--     <issueManagement> -->
+<!--         <system>JIRA</system> -->
+<!--         <url>https://bugster.forgerock.org/jira/browse/USS</url> -->
+<!--     </issueManagement> -->
+
+    <modules>
+        <module>forgerock-selfservice-core</module>
+        <module>forgerock-selfservice-custom-stage</module>
+        <module>forgerock-selfservice-example</module>
+        <module>forgerock-selfservice-example-ui</module>
+        <module>forgerock-selfservice-json</module>
+        <module>forgerock-selfservice-stages</module>
+    </modules>
+
+    <properties>
+        <javax.inject.version>1_2</javax.inject.version>
+        <commons-lang3.version>3.4</commons-lang3.version>
+        <jackson-mapper-asl.version>1.9.2</jackson-mapper-asl.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+                <version>${javax.inject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+            <plugin>
+				<groupId>org.openidentityplatform.commons</groupId>
+				<artifactId>maven-external-dependency-plugin</artifactId>
+				<version>0.6-SNAPSHOT</version>
+				<inherited>false</inherited>
+				<configuration>
+					<stagingDirectory>
+						${project.build.directory}/dependencies/
+                    </stagingDirectory>
+					<createChecksum>false</createChecksum>
+					<skipChecksumVerification>true</skipChecksumVerification>
+					<force>false</force>
+					<artifactItems>
+						<artifactItem>
+				            <groupId>org.openidentityplatform.commons.ui.libs</groupId>
+				            <artifactId>less</artifactId>
+				            <version>1.5.1</version>
+				            <classifier>rhino</classifier>
+				            <packaging>js</packaging>
+				            <downloadUrl>
+								https://raw.githubusercontent.com/{artifactId}/{artifactId}.{packaging}/v1.7.5/dist/{artifactId}-{classifier}-{version}.{packaging}
+                        		</downloadUrl>		
+				        </artifactItem>
+					</artifactItems>
+				</configuration>
+				<executions>
+					<execution>
+						<id>clean-external-dependencies</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean-external</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>resolve-install-external-dependencies</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>resolve-external</goal>
+							<goal>install-external</goal>
+						</goals>
+					</execution>
+<!-- 					<execution> -->
+<!-- 						<id>deploy-external-dependencies</id> -->
+<!-- 						<phase>deploy</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>deploy-external</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+				</executions>
+			</plugin>
+        </plugins>
+    </build>
+</project>

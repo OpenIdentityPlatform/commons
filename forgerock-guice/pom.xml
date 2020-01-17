@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+The contents of this file are subject to the terms of the Common Development and
+Distribution License (the License). You may not use this file except in compliance with the
+License.
+
+You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+specific language governing permission and limitations under the License.
+
+When distributing Covered Software, include this CDDL Header Notice in each file and include
+the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+Header, with the fields enclosed by brackets [] replaced by your own identifying
+information: "Portions Copyrighted [year] [name of copyright owner]".
+
+Copyright 2014-2015 ForgeRock AS.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.openidentityplatform</groupId>
+        <artifactId>forgerock-parent</artifactId>
+        <version>2.0.6</version>
+    </parent>
+
+    <groupId>org.openidentityplatform.commons</groupId>
+    <artifactId>forgerock-guice</artifactId>
+    <version>2.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>ForgeRock Guice Library</name>
+    <description>Common Guice implementation used by ForgeRock projects</description>
+    <url>http://commons.forgerock.org/forgerock-guice</url>
+
+    <licenses>
+        <license>
+            <name>CDDL 1.0</name>
+            <url>http://www.opensource.org/licenses/CDDL-1.0</url>
+            <comments>Common Development and Distribution License (CDDL) 1.0.
+                This license applies as indicated in the source files.</comments>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <properties>
+        <guice.version>4.0</guice.version>
+    </properties>
+
+    <modules>
+        <module>forgerock-guice-core</module>
+        <module>forgerock-guice-servlet</module>
+        <module>forgerock-guice-test</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+		  <groupId>org.mockito</groupId>
+		  <artifactId>mockito-core</artifactId>
+		  <scope>test</scope>
+		</dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>forgerock-bom</artifactId>
+                <version>4.1.1</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>forgerock-guice-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>forgerock-guice-servlet</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.inject</groupId>
+                <artifactId>guice</artifactId>
+                <version>${guice.version}</version>
+                <!-- Exclude aopalliance dependency due to ambiguous licensing. -->
+                <classifier>no_aop</classifier>
+                <exclusions>
+                    <exclusion>
+                        <groupId>aopalliance</groupId>
+                        <artifactId>aopalliance</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${servlet-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-nop</artifactId>
+                <version>1.7.12</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>mailing-list</report>
+                            <report>issue-tracking</report>
+                            <report>license</report>
+                            <report>scm</report>
+                            <report>cim</report>
+                            <report>distribution-management</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
+    <profiles>
+        <profile>
+            <id>precommit</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!-- Check Open Source licenses for all the dependencies -->
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>1.7</version>
+                        <executions>
+                            <execution>
+                                <id>generate-oss-license-report</id>
+                                <goals>
+                                    <goal>add-third-party</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

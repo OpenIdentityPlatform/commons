@@ -1,0 +1,837 @@
+{
+  "id": "example:sub-resources",
+  "description": "Users can have devices, but the devices are their own resources.",
+  "version": "1.0.0",
+  "definitions": {
+    "user": {
+      "title": "User",
+      "description": "User with device sub-resources",
+      "type": "object",
+      "required": [
+        "uid",
+        "name",
+        "password"
+      ],
+      "properties": {
+        "_id": {
+          "type": "string",
+          "title": "Unique Identifier",
+          "writePolicy": "WRITE_ON_CREATE",
+          "errorOnWritePolicyFailure": true
+        },
+        "_rev": {
+          "type": "string",
+          "title": "Revision Identifier",
+          "readOnly": "true"
+        },
+        "uid": {
+          "type": "string",
+          "title": "User unique identifier",
+          "description": "Unique user identifier"
+        },
+        "name": {
+          "type": "string",
+          "title": "User name",
+          "description": "The user name"
+        },
+        "password": {
+          "type": "string",
+          "title": "Password",
+          "description": "Password of the user"
+        },
+        "devices": {
+          "type": "array",
+          "title": "Devices",
+          "description": "Devices belonging to this user",
+          "items": {
+            "$ref": "#/definitions/device"
+          },
+          "readOnly": false,
+          "uniqueItems": true
+        }
+      }
+    },
+    "device": {
+      "title": "Device",
+      "description": "Device",
+      "type": "object",
+      "required": [
+        "did",
+        "name",
+        "type"
+      ],
+      "properties": {
+        "_id": {
+          "type": "string",
+          "title": "Unique Identifier",
+          "writePolicy": "WRITE_ON_CREATE",
+          "errorOnWritePolicyFailure": true
+        },
+        "_rev": {
+          "type": "string",
+          "title": "Revision Identifier",
+          "readOnly": "true"
+        },
+        "did": {
+          "type": "string",
+          "title": "Unique Identifier of the device"
+        },
+        "name": {
+          "type": "string",
+          "title": "Device name"
+        },
+        "type": {
+          "type": "string",
+          "title": "Device type"
+        },
+        "stolen": {
+          "type": "boolean",
+          "title": "Stolen flag",
+          "description": "Set to true if the device has been stolen"
+        },
+        "rollOutDate": {
+          "type": "date",
+          "title": "Roll-out date",
+          "description": "Accountancy roll-out date"
+        }
+      }
+    }
+  },
+  "errors" : {
+    "badRequest" : {
+      "code" : 400,
+      "description" : "Indicates that the request could not be understood by the resource due to malformed syntax."
+    },
+    "unauthorized": {
+      "code": 401,
+      "description": "Unauthorized - Missing or bad authentication"
+    }
+  },
+  "services": {
+    "users:1.0": {
+      "description": "This example version 1.0 user service represents a Users resource with CQ operations on the users collection and CRUDPA operations available for the user item. Action is to reset the password. Items can have devices version 1.0 subresources. This service is populated by the /users endpoint and the /admins endpoint",
+      "mvccSupported": true,
+      "resourceSchema": {
+        "$ref": "#/definitions/user"
+      },
+      "create": {
+        "mode": "ID_FROM_SERVER",
+        "description": "User create operation",
+        "singleton" : false,
+        "supportedLocales": [
+          "en-GB",
+          "en-US"
+        ],
+        "errors": [
+          {
+            "$ref": "#/errors/badRequest"
+          },
+          {
+            "$ref": "#/errors/unauthorized"
+          }
+        ]
+      },
+      "queries": [
+        {
+          "type": "FILTER",
+          "queryableFields": [
+            "uid",
+            "name",
+            "password"
+          ],
+          "pagingModes": [
+            "COOKIE",
+            "OFFSET"
+          ],
+          "countPolicies": [
+            "NONE"
+          ],
+          "description": "Query the user collection",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        }
+      ],
+      "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
+        "create": {
+          "mode": "ID_FROM_CLIENT",
+          "description": "User create operation",
+          "singleton" : false,
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "read": {
+          "description": "User read operation",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            },
+            {
+              "code": 404,
+              "description": "User not found"
+            }
+          ]
+        },
+        "update": {
+          "description": "User update operation",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "delete": {
+          "description": "User delete operation",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "patch": {
+          "description": "User patch operation",
+          "operations": [
+            "ADD",
+            "REMOVE"
+          ],
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "name": "resetPassword",
+            "description": "Reset user password",
+            "supportedLocales": [
+              "en-GB",
+              "en-US"
+            ],
+            "errors": [
+              {
+                "$ref": "#/errors/badRequest"
+              },
+              {
+                "$ref": "#/errors/unauthorized"
+              },
+              {
+                "code": 501,
+                "description": "Action `resetPassword` reached. As it is an example service it has not been implemented."
+              }
+            ]
+          }
+        ]
+      },
+      "subresources": {
+        "/{userId}/devices": {
+          "$ref": "#/services/devices:1.0"
+        }
+      }
+    },
+    "users:2.0": {
+      "description": "Users example service version 2.0 has the same features as the 1.0 but the subresource or the item is pointing to the devices service version 2.0",
+      "mvccSupported": true,
+      "resourceSchema": {
+        "$ref": "#/definitions/user"
+      },
+      "create": {
+        "mode": "ID_FROM_SERVER",
+        "description": "User create operation",
+        "singleton" : false,
+        "supportedLocales": [
+          "en-GB",
+          "en-US"
+        ],
+        "errors": [
+          {
+            "$ref": "#/errors/badRequest"
+          },
+          {
+            "$ref": "#/errors/unauthorized"
+          }
+        ]
+      },
+      "queries": [
+        {
+          "type": "FILTER",
+          "queryableFields": [
+            "uid",
+            "name",
+            "password"
+          ],
+          "pagingModes": [
+            "COOKIE",
+            "OFFSET"
+          ],
+          "countPolicies": [
+            "NONE"
+          ],
+          "description": "Query the user collection",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        }
+      ],
+      "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
+        "create": {
+          "mode": "ID_FROM_CLIENT",
+          "description": "User create operation",
+          "singleton" : false,
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "read": {
+          "description": "User read operation",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            },
+            {
+              "code": 404,
+              "description": "User not found"
+            }
+          ]
+        },
+        "update": {
+          "description": "User update operation",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "delete": {
+          "description": "User delete operation",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "patch": {
+          "description": "User patch operation",
+          "operations": [
+            "ADD",
+            "REMOVE"
+          ],
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "name": "resetPassword",
+            "description": "Reset user password",
+            "supportedLocales": [
+              "en-GB",
+              "en-US"
+            ],
+            "errors": [
+              {
+                "$ref": "#/errors/badRequest"
+              },
+              {
+                "$ref": "#/errors/unauthorized"
+              },
+              {
+                "code": 501,
+                "description": "Action `resetPassword` reached. As it is an example service it has not been implemented."
+              }
+            ]
+          }
+        ]
+      },
+      "subresources": {
+        "/{userId}/devices": {
+          "$ref": "#/services/devices:2.0"
+        }
+      }
+    },
+    "devices:1.0": {
+      "description": "Devices 1.0 example service has the CQ operations on the collection and CRUDPA operations on the items where the Action is to mark the device as stolen. This service is the subresource of the Users v1.0 items.",
+      "mvccSupported" : true,
+      "resourceSchema": {
+        "$ref": "#/definitions/device"
+      },
+      "create": {
+        "mode": "ID_FROM_SERVER",
+        "description": "Device create operation",
+        "singleton" : false,
+        "supportedLocales": [
+          "en-GB",
+          "en-US"
+        ],
+        "errors": [
+          {
+            "$ref": "#/errors/badRequest"
+          },
+          {
+            "$ref": "#/errors/unauthorized"
+          }
+        ]
+      },
+      "queries": [
+        {
+          "type": "FILTER",
+          "queryableFields": [
+            "did",
+            "name",
+            "type",
+            "rollOutDate",
+            "stolen"
+          ],
+          "pagingModes": [
+            "COOKIE",
+            "OFFSET"
+          ],
+          "countPolicies": [
+            "NONE"
+          ],
+          "description": "Query the device collection",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        }
+      ],
+      "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
+        "create": {
+          "mode": "ID_FROM_CLIENT",
+          "description": "Create new device",
+          "singleton" : false,
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "read": {
+          "description": "Read one device",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            },
+            {
+              "code": 404,
+              "description": "Device not found"
+            }
+          ]
+        },
+        "update": {
+          "description": "Update a device",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "delete": {
+          "description": "Delete a device",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "patch": {
+          "description": "Patch a device",
+          "operations": [
+            "ADD",
+            "REMOVE"
+          ],
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "name": "markAsStolen",
+            "description": "Mark device as stolen",
+            "supportedLocales": [
+              "en-GB",
+              "en-US"
+            ],
+            "errors": [
+              {
+                "$ref": "#/errors/badRequest"
+              },
+              {
+                "$ref": "#/errors/unauthorized"
+              },
+              {
+                "code": 501,
+                "description": "Action `markAsStolen` reached. As it is an example service it has not been implemented."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "devices:2.0": {
+      "description": "Devices 2.0 example service has the same features as version 1.0 with an additional collection and item action. This service is a subresource of the Users 2.0 service items.",
+      "mvccSupported": true,
+      "resourceSchema": {
+        "$ref": "#/definitions/device"
+      },
+      "create": {
+        "mode": "ID_FROM_SERVER",
+        "description": "Device create operation",
+        "singleton" : false,
+        "supportedLocales": [
+          "en-GB",
+          "en-US"
+        ],
+        "errors": [
+          {
+            "$ref": "#/errors/badRequest"
+          },
+          {
+            "$ref": "#/errors/unauthorized"
+          }
+        ]
+      },
+      "queries": [
+        {
+          "type": "FILTER",
+          "queryableFields": [
+            "did",
+            "name",
+            "type",
+            "rollOutDate",
+            "stolen"
+          ],
+          "pagingModes": [
+            "COOKIE",
+            "OFFSET"
+          ],
+          "countPolicies": [
+            "NONE"
+          ],
+          "description": "Query the device collection",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        }
+      ],
+      "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
+        "create": {
+          "mode": "ID_FROM_CLIENT",
+          "description": "Create new device",
+          "singleton" : false,
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "read": {
+          "description": "Read one device",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            },
+            {
+              "code": 404,
+              "description": "Device not found"
+            }
+          ]
+        },
+        "update": {
+          "description": "Update a device",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "delete": {
+          "description": "Delete a device",
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "patch": {
+          "description": "Patch a device",
+          "operations": [
+            "ADD",
+            "REMOVE"
+          ],
+          "supportedLocales": [
+            "en-GB",
+            "en-US"
+          ],
+          "errors": [
+            {
+              "$ref": "#/errors/badRequest"
+            },
+            {
+              "$ref": "#/errors/unauthorized"
+            }
+          ]
+        },
+        "actions": [
+          {
+            "name": "markAsStolen",
+            "description": "Mark device as stolen",
+            "supportedLocales": [
+              "en-GB",
+              "en-US"
+            ],
+            "errors": [
+              {
+                "$ref": "#/errors/badRequest"
+              },
+              {
+                "$ref": "#/errors/unauthorized"
+              },
+              {
+                "code": 501,
+                "description": "Action `markAsStolen` reached. As it is an example service it has not been implemented."
+              }
+            ]
+          },
+          {
+            "name": "rollOut",
+            "description": "Rollout the device",
+            "supportedLocales": [
+              "en-GB",
+              "en-US"
+            ],
+            "errors": [
+              {
+                "$ref": "#/errors/badRequest"
+              },
+              {
+                "$ref": "#/errors/unauthorized"
+              },
+              {
+                "code": 501,
+                "description": "Action `rollOut` reached. As it is an example service it has not been implemented."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "paths": {
+    "/users": {
+      "1.0": {
+        "$ref": "#/services/users:1.0"
+      },
+      "2.0": {
+        "$ref": "#/services/users:2.0"
+      }
+    },
+    "/admins": {
+      "1.0": {
+        "$ref": "#/services/users:1.0"
+      }
+    }
+  }
+}

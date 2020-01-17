@@ -1,0 +1,240 @@
+{
+  "id": "frapi:openig",
+  "description": "OpenIG CREST APIs",
+  "version": "4.0.0",
+  "paths":{},
+  "definitions": {
+    "statistics": {
+      "type": "objects",
+      "title": "Monitoring Statistics",
+      "description": "Summarizes information about requests handled by a Route",
+      "properties": {
+        "requests": {
+          "type": "object",
+          "description": "Total requests.",
+          "properties": {
+            "total": {
+              "type": "number",
+              "description": "Total requests."
+            },
+            "active": {
+              "type": "number",
+              "description": "Requests being processed."
+            }
+          }
+        },
+        "responses": {
+          "type": "object",
+          "description": "Total responses.",
+          "properties": {
+            "total": {
+              "type": "number",
+              "description": "Total responses"
+            },
+            "info": {
+              "type": "number",
+              "description": "Informational responses (1xx)"
+            },
+            "success": {
+              "type": "number",
+              "description": "Successful responses    (2xx)"
+            },
+            "redirect": {
+              "type": "number",
+              "description": "Redirection responses   (3xx)"
+            },
+            "clientError": {
+              "type": "number",
+              "description": "Client error responses  (4xx)"
+            },
+            "serverError": {
+              "type": "number",
+              "description": "Server error responses  (5xx)"
+            },
+            "other": {
+              "type": "number",
+              "description": "Responses with status code >= 600"
+            },
+            "errors": {
+              "type": "number",
+              "description": "An exception was thrown"
+            },
+            "null": {
+              "type": "number",
+              "description": "Responses not handled by OpenIG"
+            }
+          }
+        },
+        "responseTime": {
+          "type": "object",
+          "description": "Response times in milliseconds.",
+          "properties": {
+            "mean": {
+              "type": "number",
+              "description": "Mean (average) response time"
+            },
+            "median": {
+              "type": "number",
+              "description": "Median response time"
+            },
+            "standardDeviation": {
+              "type": "number",
+              "description": "Std. dev. for response time"
+            },
+            "total": {
+              "type": "number",
+              "description": "Cumulative resp. processing time"
+            },
+            "percentiles": {
+              "type": "object",
+              "description": "Response times in ms after which the proportion of responses were sent",
+              "patternProperties": {
+                "^0.[0-9]+$": {
+                  "type": "number",
+                  "description": "Proportion of responses sent. The properties depend on the route configuration for monitoring."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "throughput": {
+          "type": "object",
+          "description": "Responses per second.",
+          "properties": {
+            "mean": {
+              "type": "number",
+              "description": "Mean (average) since monitoring started"
+            },
+            "lastMinute": {
+              "type": "number",
+              "description": "One-minute moving average rate"
+            },
+            "last5Minutes": {
+              "type": "number",
+              "description": "Five-minute moving average rate"
+            },
+            "last15Minutes": {
+              "type": "number",
+              "description": "15-minute moving average rate"
+            }
+          }
+        }
+      }
+    },
+    "share": {
+      "title": "UMA Share",
+      "description": "Specifies what resource owners share with end users",
+      "required": [
+        "path",
+        "pat"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "A pattern matching the path to protected resources, such as `/photos/.*`. This pattern must match a pattern defined in the UmaService for this API."
+        },
+        "pat": {
+          "type": "string",
+          "description": "A PAT granted by the UMA authorization server given consent by the resource owner. In the present implementation, OpenIG has access only to the PAT, not to any refresh tokens."
+        },
+        "id": {
+          "type": "string",
+          "description": "This uniquely identifies the share. This value is set by the service when the share is created, and can be used when reading or deleting a share.",
+          "readOnly": true,
+          "errorOnWritePolicyFailure": true
+        },
+        "resource_set_id": {
+          "type": "string",
+          "description": "This uniquely identifies the UMA resource set registered with the authorization server. This value is obtained by the service when the resource set is registered, and can be used when setting access policy permissions.",
+          "readOnly": true,
+          "errorOnWritePolicyFailure": true
+        },
+        "user_access_policy_uri": {
+          "type": "string",
+          "description": "This URI indicates the location on the UMA authorization server where the resource owner can set or modify access policies. This value is obtained by the service when the resource set is registered.",
+          "readOnly": true,
+          "errorOnWritePolicyFailure": true
+        }
+      }
+    }
+  },
+  "services": {
+    "monitoring:0.0": {
+      "description": "Monitoring statistics for a Route",
+      "resourceSchema": {
+        "$ref": "#/definitions/statistics"
+      },
+      "mvccSupported": false,
+      "read": {}
+    },
+    "share:0.0": {
+      "description": "User-Managed Access share management",
+      "resourceSchema": {
+        "$ref": "#/definitions/share"
+      },
+      "mvccSupported": false,
+      "create": {
+        "singleton" : false,
+        "mode": "ID_FROM_SERVER",
+        "errors": [
+          {
+            "$ref": "frapi:common#/errors/badRequest"
+          },
+          {
+            "$ref": "frapi:common#/errors/notSupported"
+          }
+        ]
+      },
+      "queries": [
+        {
+          "type": "FILTER",
+          "queryableFields": [
+            "path",
+            "pat"
+          ],
+          "pagingModes": [
+            "OFFSET"
+          ],
+          "description": "Return resources matching the filter expression. At present, the only supported filter is `true` (return all resources).",
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/badRequest"
+            },
+            {
+              "$ref": "frapi:common#/errors/notSupported"
+            }
+          ]
+        }
+      ],
+      "items": {
+        "pathParameter" : {
+          "name" : "id",
+          "type" : "string",
+          "source" : "PATH",
+          "required" : true
+        },
+        "read": {
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/notSupported"
+            }
+          ]
+        },
+        "delete": {
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/notSupported"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

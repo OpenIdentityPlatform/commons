@@ -1,0 +1,134 @@
+<html>
+<body>
+The ForgeRock I18N Framework for Java provides an easy to use type safe
+API for obtaining localizable messages.
+<br>
+<h1>Getting started</h1>
+In order to get started using this framework you should first define some
+localized messages in property files and locate these in your resource
+directory. For example, consider the following simple properties files:
+<ul>
+  <li><b><pre>src/main/resources/com/example/myapp/core.properties</pre></b>
+    <table bgcolor="#cccccc" border="0" cellpadding="2" cellspacing="2" width="100%">
+      <tbody>
+        <tr>
+          <pre>MESSAGE_WITH_NO_ARGS=Message with no args
+MESSAGE_WITH_STRING=Arg1=%s
+MESSAGE_WITH_STRING_AND_NUMBER=Arg1=%s Arg2=%d</pre>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li><b><pre>src/main/resources/com/example/myapp/core_fr.properties</pre></b>
+    <table bgcolor="#cccccc" border="0" cellpadding="2" cellspacing="2" width="100%">
+      <tbody>
+        <tr>
+          <pre>MESSAGE_WITH_NO_ARGS=French message with no args
+MESSAGE_WITH_STRING=French Arg1=%s
+MESSAGE_WITH_STRING_AND_NUMBER=French Arg1=%s Arg2=%d</pre>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+Once you have your property files defined you can use the
+<b>i18n-maven-plugin</b> to generate the messages. To do this, add the
+following lines to your pom.xml:
+<pre>  &lt;repositories>
+    &lt;repository>
+      &lt;id>forgerock-staging-repository&lt;/id>
+      &lt;name>ForgeRock Release Repository&lt;/name>
+      &lt;url>http://maven.forgerock.org/repo/releases&lt;/url>
+      &lt;snapshots>
+        &lt;enabled>false&lt;/enabled>
+      &lt;/snapshots>
+    &lt;/repository>
+  &lt;/repositories>
+  
+  &lt;build>
+    &lt;plugins>
+      &lt;plugin>
+        &lt;groupId>${project.groupId}&lt;/groupId>
+        &lt;artifactId>i18n-maven-plugin&lt;/artifactId>
+        &lt;version>${project.version}&lt;/version>
+        &lt;executions>
+          &lt;execution>
+            &lt;phase>generate-sources&lt;/phase>
+            &lt;goals>
+              &lt;goal>generate-messages&lt;/goal>
+            &lt;/goals>
+            &lt;configuration>
+              &lt;messageFiles>
+                &lt;messageFile>com/example/myapp/core.properties&lt;/messageFile>
+              &lt;/messageFiles>
+            &lt;/configuration>
+          &lt;/execution>
+        &lt;/executions>
+      &lt;/plugin>
+  &lt;/build></pre>
+This will generate a Java file in
+<b>target/generated-sources/messages/com/example/myapp/CoreMessages.java</b>
+containing {@link org.forgerock.i18n.LocalizableMessageDescriptor}s for each
+message contained in the property file. For example:
+<pre>  public final class CoreMessages
+  {
+    ...
+  
+    /**
+     * Message with no args
+     */
+    public static final LocalizableMessageDescriptor.Arg0 MESSAGE_WITH_NO_ARGS =
+            new LocalizableMessageDescriptor.Arg0(CoreMessages.class,RESOURCE,"MESSAGE_WITH_NO_ARGS",-1);
+
+    /**
+     * Arg1=%s
+     */
+    public static final LocalizableMessageDescriptor.Arg1&lt;CharSequence> MESSAGE_WITH_STRING =
+            new LocalizableMessageDescriptor.Arg1&lt;CharSequence>(CoreMessages.class,RESOURCE,"MESSAGE_WITH_STRING",-1);
+
+    /**
+     * Arg1=%s Arg2=%d
+     */
+    public static final LocalizableMessageDescriptor.Arg2&lt;CharSequence,Number> MESSAGE_WITH_STRING_AND_NUMBER =
+            new LocalizableMessageDescriptor.Arg2&lt;CharSequence,Number>(CoreMessages.class,RESOURCE,"MESSAGE_WITH_STRING_AND_NUMBER",-1);
+
+  }</pre>
+To use the generated messages you'll need the following dependency:
+<pre>  &lt;groupId>${project.groupId}&lt;/groupId>
+  &lt;artifactId>i18n-core&lt;/artifactId>
+  &lt;version>${project.version}&lt;/version>
+  &lt;scope>compile&lt;/scope></pre>
+Messages can then be instantiated in a type safe manner which is enforced at
+compile time (unlike CAL10N) as well as avoiding runtime errors due to
+missing properties (CAL10N has this too):
+<pre>  LocalizableMessage m = MESSAGE_WITH_STRING_AND_NUMBER.get("a string", 123);
+  String s1 = m.toString(); // Default locale.
+  String s2 = m.toString(Locale.FRENCH);
+
+  // Using SLF4J support: using logger "com.example.mayapp.core" and default locale.
+  LocalizedLogger logger = LocalizedLoggerFactory.getInstance(CoreMessages.resourceName());
+  logger.error(MESSAGE_WITH_STRING_AND_NUMBER, "a string", 123);</pre>
+Note that it is also possible to associated an ordinal with each message by
+appending a number to the end of the property name. For example, the following
+message will have the ordinal 389:
+<ul>
+  <li><b><pre>src/main/resources/com/example/myapp/core.properties</pre></b>
+    <table bgcolor="#cccccc" border="0" cellpadding="2" cellspacing="2" width="100%">
+      <tbody>
+        <tr bgcolor="#cccccc">
+          <pre>MESSAGE_WITH_ORDINAL_389=Message with ordinal</pre>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+</ul>
+The ordinal can be retrieved by calling the method
+{@link org.forgerock.i18n.LocalizableMessage#ordinal()}. This allows each
+message to be uniquely identified by its ordinal and its resource name
+(e.g. "com.example.mayapp.core"), the latter being obtained by calling the
+method {@link org.forgerock.i18n.LocalizableMessage#resourceName()} which is
+also available in each generated message file. The ability to uniquely identify
+log messages is useful when diagnosing log messages which have been output in a
+locale that you don't understand.
+</body>
+</html>

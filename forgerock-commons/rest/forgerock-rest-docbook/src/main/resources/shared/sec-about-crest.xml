@@ -1,0 +1,1339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  The contents of this file are subject to the terms of the Common Development and
+  Distribution License (the License). You may not use this file except in compliance with the
+  License.
+
+  You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  specific language governing permission and limitations under the License.
+
+  When distributing Covered Software, include this CDDL Header Notice in each file and include
+  the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  Header, with the fields enclosed by brackets [] replaced by your own identifying
+  information: "Portions Copyrighted [year] [name of copyright owner]".
+
+  Copyright 2015-2016 ForgeRock AS.
+-->
+ <section xml:id="sec-about-crest"
+          xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://docbook.org/ns/docbook
+                              http://docbook.org/xml/5.0/xsd/docbook.xsd"
+          xmlns:xinclude='http://www.w3.org/2001/XInclude'>
+ <title>About ForgeRock Common REST</title>
+
+ <para>
+  For many REST APIs that are not defined by external standards,
+  ForgeRock products provide common ways
+  to access web resources and collections of resources.
+  This section covers what is common across products.
+  Adapt the examples to your types of resources and to your deployment.
+ </para>
+
+ <section xml:id="about-crest-resources">
+  <title>Common REST Resources</title>
+
+  <para>
+   Servers generally return JSON-format resources,
+   though resource formats can depend on the implementation.
+  </para>
+
+  <para>
+   Resources in collections can be found by their unique identifiers (IDs).
+   IDs are exposed in the resource URIs.
+   For example, if a server has a user collection under <literal>/users</literal>,
+   then you can access a user at
+   <literal>/users/<replaceable>user-id</replaceable></literal>.
+   The ID is also the value of the <literal>_id</literal> field of the resource.
+  </para>
+
+  <para>
+   Resources are versioned using revision numbers.
+   A revision is specified in the resource's <literal>_rev</literal> field.
+   Revisions make it possible to figure out whether to apply changes
+   without resource locking and without distributed transactions.
+  </para>
+ </section>
+
+ <section xml:id="about-crest-verbs">
+  <title>Common REST Verbs</title>
+
+  <variablelist>
+   <para>
+    The common REST APIs use the following verbs,
+    sometimes referred to collectively as <acronym>CRUDPAQ</acronym>.
+    For details and HTTP-based examples of each,
+    follow the links to the sections for each verb.
+   </para>
+
+   <varlistentry>
+    <term>Create</term>
+    <listitem>
+     <para>
+      Add a new resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP PUT or HTTP POST.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-create" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Read</term>
+    <listitem>
+     <para>
+      Retrieve a single resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP GET.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-read" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Update</term>
+    <listitem>
+     <para>
+      Replace an existing resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP PUT.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-update" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Delete</term>
+    <listitem>
+     <para>
+      Remove an existing resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP DELETE.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-delete" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Patch</term>
+    <listitem>
+     <para>
+      Modify part of an existing resource.
+     </para>
+
+     <para>
+      This verb maps to HTTP PATCH.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-patch" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Action</term>
+    <listitem>
+     <para>
+      Perform a predefined action.
+     </para>
+
+     <para>
+      This verb maps to HTTP POST.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-action" />.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>Query</term>
+    <listitem>
+     <para>
+      Search a collection of resources.
+     </para>
+
+     <para>
+      This verb maps to HTTP GET.
+     </para>
+
+     <para>
+      For details, see <xref linkend="about-crest-query" />.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-parameters">
+  <title>Common REST Parameters</title>
+
+  <para>
+   Common REST reserved query string parameter names start with an underscore,
+   <literal>_</literal>.
+  </para>
+
+  <para>
+   Reserved query string parameters include, but are not limited to,
+   the following names:
+  </para>
+
+  <simplelist>
+   <member><literal>_action</literal></member>
+   <member><literal>_fields</literal></member>
+   <member><literal>_mimeType</literal></member>
+   <member><literal>_pageSize</literal></member>
+   <member><literal>_pagedResultsCookie</literal></member>
+   <member><literal>_pagedResultsOffset</literal></member>
+   <member><literal>_prettyPrint</literal></member>
+   <member><literal>_queryExpression</literal></member>
+   <member><literal>_queryFilter</literal></member>
+   <member><literal>_queryId</literal></member>
+   <member><literal>_sortKeys</literal></member>
+   <member><literal>_totalPagedResultsPolicy</literal></member>
+  </simplelist>
+
+  <note>
+   <para>
+    Some parameter values are not safe for URLs,
+    so URL-encode parameter values as necessary.
+   </para>
+  </note>
+
+  <para>
+   Continue reading for details about how to use each parameter.
+  </para>
+ </section>
+
+ <section xml:id="about-crest-extensions">
+  <title>Common REST Extension Points</title>
+
+  <para>
+   The <emphasis>action</emphasis> verb is the main vehicle for extensions.
+   For example, to create a new user with HTTP POST rather than HTTP PUT,
+   you might use <literal>/users?_action=create</literal>.
+   A server can define additional actions.
+   For example, <literal>/tasks/1?_action=cancel</literal>.
+  </para>
+
+  <para>
+   A server can define <emphasis>stored queries</emphasis> to call by ID.
+   For example, <literal>/groups?_queryId=hasDeletedMembers</literal>.
+   Stored queries can call for additional parameters.
+   The parameters are also passed in the query string.
+   Which parameters are valid depends on the stored query.
+  </para>
+ </section>
+
+ <section xml:id="about-crest-create">
+  <title>Create</title>
+
+  <para>
+   There are two ways to create a resource,
+   either with an HTTP POST or with an HTTP PUT.
+  </para>
+
+  <para>
+   To create a resource using POST, perform an HTTP POST
+   with the query string parameter <literal>_action=create</literal>
+   and the JSON resource as a payload.
+   Accept a JSON response.
+   The server creates the identifier if not specified:
+  </para>
+
+  <programlisting language="http">
+POST /users?_action=create HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+{ <replaceable>JSON resource</replaceable> }
+  </programlisting>
+
+  <para>
+   To create a resource using PUT, perform an HTTP PUT
+   including the case-sensitive identifier for the resource in the URL path,
+   and the JSON resource as a payload.
+   Use the <literal>If-None-Match: *</literal> header.
+   Accept a JSON response:
+  </para>
+
+  <programlisting language="http">
+PUT /users/some-id HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+If-None-Match: *
+{ <replaceable>JSON resource</replaceable> }
+  </programlisting>
+
+  <para>
+   The <literal>_id</literal> and content of the resource depend on the server implementation.
+   The server is not required to use the <literal>_id</literal> that the client provides.
+   The server response to the create request indicates the resource location
+   as the value of the <literal>Location</literal> header.
+  </para>
+
+  <para>
+   If you include the <literal>If-None-Match</literal> header, its value must be
+   <literal>*</literal>. In this case, the request creates the object if it
+   does not exist, and fails if the object does exist. If you include the
+   <literal>If-None-Match</literal> header with any value other than
+   <literal>*</literal>, the server returns an HTTP 400 Bad Request error. For
+   example, creating an object with
+   <literal>If-None-Match: <replaceable>revision</replaceable></literal> returns
+   a bad request error. If you do not include <literal>If-None-Match: *</literal>,
+   the request creates the object if it does not exist, and
+   <emphasis>updates</emphasis> the object if it does exist.
+  </para>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters:
+   </para>
+
+   <xinclude:include href="varlistentry-pretty-print.xml" />
+
+   <xinclude:include href="varlistentry-fields.xml" />
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-read">
+  <title>Read</title>
+
+  <para>
+   To retrieve a single resource, perform an HTTP GET on the resource
+   by its case-sensitive identifier (<literal>_id</literal>)
+   and accept a JSON response:
+  </para>
+
+  <programlisting language="http">
+GET /users/some-id HTTP/1.1
+Host: example.com
+Accept: application/json
+  </programlisting>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters:
+   </para>
+
+   <xinclude:include href="varlistentry-pretty-print.xml" />
+
+   <xinclude:include href="varlistentry-fields.xml" />
+
+   <varlistentry>
+    <term><literal>_mimeType=<replaceable>mime-type</replaceable></literal></term>
+    <listitem>
+     <para>
+      Some resources have fields whose values are multi-media resources
+      such as a profile photo for example.
+     </para>
+
+     <para>
+      By specifying both a single <replaceable>field</replaceable>
+      and also the <replaceable>mime-type</replaceable> for the response content,
+      you can read a single field value that is a multi-media resource.
+     </para>
+
+     <para>
+      In this case, the content type of the field value returned
+      matches the <replaceable>mime-type</replaceable> that you specify,
+      and the body of the response is the multi-media resource.
+     </para>
+
+     <para>
+      The <literal>Accept</literal> header is not used in this case.
+      For example, <literal>Accept: image/png</literal> does not work.
+      Use the <literal>_mimeType</literal> query string parameter instead.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-update">
+  <title>Update</title>
+
+  <para>
+   To update a resource, perform an HTTP PUT
+   including the case-sensitive identifier (<literal>_id</literal>)
+   for the resource with the JSON resource as a payload.
+   Use the <literal>If-Match: <replaceable>_rev</replaceable></literal> header
+   to check that you are actually updating the version you modified.
+   Use <literal>If-Match: *</literal> if the version does not matter.
+   Accept a JSON response:
+  </para>
+
+  <programlisting language="http">
+PUT /users/some-id HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+If-Match: <replaceable>_rev</replaceable>
+{ <replaceable>JSON resource</replaceable> }
+  </programlisting>
+
+  <para>
+   When updating a resource, include all the attributes to be retained.
+   Omitting an attribute in the resource amounts to deleting the attribute
+   unless it is not under the control of your application.
+   Attributes not under the control of your application include
+   private and read-only attributes.
+   In addition, virtual attributes and relationship references
+   might not be under the control of your application.
+  </para>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters:
+   </para>
+
+   <xinclude:include href="varlistentry-pretty-print.xml" />
+
+   <xinclude:include href="varlistentry-fields.xml" />
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-delete">
+  <title>Delete</title>
+
+  <para>
+   To delete a single resource, perform an HTTP DELETE
+   by its case-sensitive identifier (<literal>_id</literal>)
+   and accept a JSON response:
+  </para>
+
+  <programlisting language="http">
+DELETE /users/some-id HTTP/1.1
+Host: example.com
+Accept: application/json
+  </programlisting>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters:
+   </para>
+
+   <xinclude:include href="varlistentry-pretty-print.xml" />
+
+   <xinclude:include href="varlistentry-fields.xml" />
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-patch">
+  <title>Patch</title>
+
+  <para>
+   To patch a resource, send an HTTP PATCH request with the following parameters:
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <para><literal>operation</literal></para>
+   </listitem>
+   <listitem>
+    <para><literal>field</literal></para>
+   </listitem>
+   <listitem>
+    <para><literal>value</literal></para>
+   </listitem>
+   <listitem>
+    <para><literal>from</literal> (optional with copy and move operations)</para>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   You can include these parameters in the payload for a PATCH request, or in
+   a JSON PATCH file. If successful, you'll see a JSON response similar to:
+  </para>
+
+  <programlisting language="http">
+PATCH /users/some-id HTTP/1.1
+Host: example.com
+Accept: application/json
+Content-Length: ...
+Content-Type: application/json
+If-Match: <replaceable>_rev</replaceable>
+{ <replaceable>JSON array of patch operations</replaceable> }
+  </programlisting>
+
+  <para>
+   PATCH operations apply to three types of targets:
+  </para>
+
+  <itemizedlist>
+   <listitem>
+    <para>
+     <emphasis role="bold">single-valued</emphasis>, such as an object,
+     string, boolean, or number.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <emphasis role="bold">list semantics array</emphasis>, where the
+     elements are ordered, and duplicates are allowed.
+    </para>
+   </listitem>
+   <listitem>
+    <para>
+     <emphasis role="bold">set semantics array</emphasis>, where the elements
+     are not ordered, and duplicates are not allowed.
+    </para>
+   </listitem>
+  </itemizedlist>
+
+  <para>
+   ForgeRock PATCH supports several different <literal>operations</literal>.
+   The following sections show each of these operations, along with options
+   for the <literal>field</literal> and <literal>value</literal>:
+  </para>
+
+  <section xml:id="crest-patch-add">
+   <title>Patch Operation: Add</title>
+
+   <para>
+    The <literal>add</literal> operation ensures that the target field contains
+    the value provided, creating parent fields as necessary.
+   </para>
+
+   <para>
+    If the target field is single-valued, then the value you include in the
+    PATCH replaces the value of the target. Examples of a single-valued field
+    include: object, string, boolean, or number.
+   </para>
+
+   <itemizedlist>
+    <para>
+     An <literal>add</literal> operation has different results on two standard
+     types of arrays:
+    </para>
+    <listitem>
+     <itemizedlist>
+      <para>
+       <emphasis role="bold">List semantic arrays</emphasis>: you can run
+       any of these <literal>add</literal> operations on that type of array:
+      </para>
+      <listitem>
+       <para>
+        If you <literal>add</literal> an array of values, the PATCH operation
+        appends it to the existing list of values.
+       </para>
+      </listitem>
+      <listitem>
+       <para>
+        If you <literal>add</literal> a single value, specify an ordinal
+        element in the target array, or use the <literal>{-}</literal> special
+        index to add that value to the end of the list.
+       </para>
+      </listitem>
+     </itemizedlist>
+    </listitem>
+    <listitem>
+     <para>
+      <emphasis role="bold">Set semantic arrays</emphasis>: The list of values
+      included in a patch are merged with the existing set of values. Any
+      duplicates within the array are removed.
+     </para>
+    </listitem>
+   </itemizedlist>
+
+   <para>
+    As an example, start with the following list semantic array resource:
+   </para>
+
+   <programlisting language="javascript">{
+    "fruits" : [ "orange", "apple" ]
+}</programlisting>
+
+   <para>
+    The following add operation includes the pineapple to the end of the list of
+    fruits, as indicated by the <literal>-</literal> at the end of the
+    <literal>fruits</literal> array.
+   </para>
+
+   <programlisting language="javascript">{
+    "operation" : "add",
+    "field" : "/fruits/-",
+    "value" : "pineapple"
+}</programlisting>
+
+   <para>
+    The following is the resulting resource:
+   </para>
+
+   <programlisting language="javascript">{
+    "fruits" : [ "orange", "apple", "pineapple" ]
+}</programlisting>
+
+  </section>
+
+  <section xml:id="crest-patch-copy">
+   <title>Patch Operation: Copy</title>
+
+   <para>
+    The copy operation takes one or more existing values from the source field.
+    It then adds those same values on the target field. Once the values are
+    known, it is equivalent to performing an <literal>add</literal> operation
+    on the target.
+   </para>
+
+   <para>
+    The following <literal>copy</literal> operation takes the value from the
+    source named <literal>/hot/potato</literal>, and then runs a
+    <literal>replace</literal> operation on the target value,
+    <literal>/hot/tamale</literal>.
+   </para>
+
+
+   <programlisting language="javascript">[
+  {
+    "operation" : "copy",
+    "field" : "/hot/potato",
+    "value" : "/hot/tamale"
+  }
+]</programlisting>
+
+   <para>
+    If the source and value are configured as arrays, the result depends
+    on whether the array has list semantics or set semantics, as described in
+    <xref linkend="crest-patch-add" />.
+   </para>
+
+  </section>
+
+  <section xml:id="crest-patch-increment">
+   <title>Patch Operation: Increment</title>
+
+   <para>
+    The <literal>increment</literal> operation changes the value or values of
+    the target field by the amount you specify. The value that you include
+    must be one number, and may be positive or negative. The value of the
+    target field must accept numbers. The following <literal>increment</literal>
+    operation adds <literal>1000</literal> to the target value of
+    <literal>/user/payment</literal>.
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "operation" : "increment",
+    "field" : "/user/payment",
+    "value" : "1000"
+  }
+]</programlisting>
+
+   <para>
+    Since the <literal>value</literal> of the <literal>increment</literal> is
+    a single number, arrays do not apply.
+   </para>
+
+  </section>
+
+  <section xml:id="crest-patch-move">
+   <title>Patch Operation: Move</title>
+
+   <para>
+    The move operation removes existing values on the source field. It
+    then adds those same values on the target field. It is equivalent to
+    performing a <literal>remove</literal> operation on the source, followed
+    by an <literal>add</literal> operation with the same values, on the target.
+   </para>
+
+   <para>
+    The following <literal>move</literal> operation is equivalent to a
+    <literal>remove</literal> operation on the source named
+    <literal>/hot/potato</literal>, followed by a <literal>replace</literal>
+    operation on the target value, <literal>/hot/tamale</literal>.
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "operation" : "move",
+    "field" : "/hot/potato",
+    "value" : "/hot/tamale"
+  }
+]</programlisting>
+
+   <para>
+    To apply a <literal>move</literal> operation on an array, you need a
+    compatible single-value, list semantic array, or set semantic array on
+    both the source and the target. For details, see the criteria described
+    in <xref linkend="crest-patch-add" />.
+   </para>
+
+  </section>
+
+  <section xml:id="crest-patch-remove">
+   <title>Patch Operation: Remove</title>
+
+   <para>
+    The <literal>remove</literal> operation ensures that the target field no
+    longer contains the value provided. If the remove operation does not include
+    a value, the operation removes the field. The following
+    <literal>remove</literal> deletes the value of the
+    <literal>phoneNumber</literal>, along with the field.
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "operation" : "remove",
+    "field" : "phoneNumber"
+  }
+]</programlisting>
+
+   <para>
+    If the object has more than one <literal>phoneNumber</literal>, those
+    values are stored as an array.
+   </para>
+
+   <itemizedlist>
+    <para>
+     A <literal>remove</literal> operation has different results on two standard
+     types of arrays:
+    </para>
+    <listitem>
+     <para>
+      <emphasis role="bold">List semantic arrays</emphasis>: A
+      <literal>remove</literal> operation deletes the specified element in the
+      array. For example, the following operation removes the first phone
+      number, based on its array index (zero-based):
+     </para>
+     <programlisting language="javascript">[
+   {
+      "operation" : "remove",
+      "field" : "/phoneNumber/0"
+   }
+]</programlisting>
+    </listitem>
+    <listitem>
+     <para>
+      <emphasis role="bold">Set semantic arrays</emphasis>: The list of values
+      included in a patch are removed from the existing array.
+     </para>
+    </listitem>
+   </itemizedlist>
+
+  </section>
+
+  <section xml:id="crest-patch-replace">
+   <title>Patch Operation: Replace</title>
+
+   <para>
+    The <literal>replace</literal> operation removes any existing value(s) of
+    the targeted field, and replaces them with the provided value(s). It is
+    essentially equivalent to a <literal>remove</literal> followed by a
+    <literal>add</literal> operation. If the arrays are used, the criteria is
+    based on <xref linkend="crest-patch-add" />. However, indexed updates are
+    not allowed, even when the target is an array.
+   </para>
+
+   <para>
+    The following <literal>replace</literal> operation removes the existing
+    <literal>telephoneNumber</literal> value for the user, and then adds the
+    new value of <literal>+1 408 555 9999</literal>.
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "operation" : "replace",
+    "field" : "/telephoneNumber",
+    "value" : "+1 408 555 9999"
+  }
+]</programlisting>
+
+   <para>
+    A PATCH replace operation on a list semantic array works in the same
+    fashion as a PATCH remove operation. The following example demonstrates
+    how the effect of both operations. Start with the following resource:
+   </para>
+
+   <programlisting language="javascript">{
+    "fruits" : [ "apple", "orange", "kiwi", "lime" ],
+}</programlisting>
+
+   <para>
+    Apply the following operations on that resource:
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "operation" : "remove",
+    "field" : "/fruits/0",
+    "value" : ""
+  },
+  {
+    "operation" : "replace",
+    "field" : "/fruits/1",
+    "value" : "pineapple"
+  }
+]</programlisting>
+
+   <para>
+    The PATCH operations are applied sequentially. The <literal>remove</literal>
+    operation removes the first member of that resource, based on its array
+    index, (<literal>fruits/0</literal>), with the following result:
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "fruits" : [ "orange", "kiwi", "lime" ],
+  }
+]</programlisting>
+
+   <para>
+    The second PATCH operation, a <literal>replace</literal>, is applied on the
+    second member (<literal>fruits/1</literal>) of the intermediate resource,
+    with the following result:
+   </para>
+
+   <programlisting>[
+  {
+    "fruits" : [ "orange", "pineapple", "lime" ],
+  }
+]</programlisting>
+
+  </section>
+
+  <section xml:id="crest-patch-transform">
+   <title>Patch Operation: Transform</title>
+
+   <para>
+    The <literal>transform</literal> operation changes the value of a field
+    based on a script or some other data transformation command. The following
+    <literal>transform</literal> operation takes the value from the field
+    named <literal>/objects</literal>, and applies the
+    <filename>something.js</filename> script as shown:
+   </para>
+
+   <programlisting language="javascript">[
+  {
+    "operation" : "transform",
+    "field" : "/objects",
+    "value" : {
+      "script" : {
+        "type" : "text/javascript",
+        "file" : "something.js"
+      }
+    }
+  },
+]</programlisting>
+  </section>
+
+  <section xml:id="crest-patch-limitations">
+   <title>Patch Operation Limitations</title>
+
+    <para>
+     Some HTTP client libraries do not support the HTTP PATCH operation.
+     Make sure that the library you use supports HTTP PATCH
+     before using this REST operation.
+    </para>
+
+    <para>
+     For example, the Java Development Kit HTTP client does not support
+     PATCH as a valid HTTP method. Instead, the method
+     <literal>HttpURLConnection.setRequestMethod("PATCH")</literal>
+     throws <literal>ProtocolException</literal>.
+    </para>
+
+   <variablelist>
+    <title>Parameters</title>
+
+    <para>
+     You can use the following parameters.
+     Other parameters might depend on the specific action implementation:
+    </para>
+
+    <xinclude:include href="varlistentry-pretty-print.xml" />
+
+    <xinclude:include href="varlistentry-fields.xml" />
+   </variablelist>
+
+  </section>
+
+ </section>
+
+ <section xml:id="about-crest-action">
+  <title>Action</title>
+
+  <para>
+   Actions are a means of extending common REST APIs
+   and are defined by the resource provider,
+   so the actions you can use depend on the implementation.
+  </para>
+
+  <para>
+   The standard action indicated by <literal>_action=create</literal>
+   is described in <xref linkend="about-crest-create" />.
+  </para>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters.
+    Other parameters might depend on the specific action implementation:
+   </para>
+
+   <xinclude:include href="varlistentry-pretty-print.xml" />
+
+   <xinclude:include href="varlistentry-fields.xml" />
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-query">
+  <title>Query</title>
+
+  <para>
+   To query a resource collection
+   (or resource container if you prefer to think of it that way),
+   perform an HTTP GET and accept a JSON response, including at least
+   a <literal>_queryExpression</literal>,
+   <literal>_queryFilter</literal>, or <literal>_queryId</literal> parameter.
+   These parameters cannot be used together:
+  </para>
+
+  <programlisting language="http">
+GET /users?_queryFilter=true HTTP/1.1
+Host: example.com
+Accept: application/json
+  </programlisting>
+
+  <para>
+   The server returns the result as a JSON object
+   including a "results" array and other fields
+   related to the query string parameters that you specify.
+  </para>
+
+  <variablelist>
+   <title>Parameters</title>
+
+   <para>
+    You can use the following parameters:
+   </para>
+
+   <varlistentry>
+    <term><literal>_queryFilter=<replaceable>filter-expression</replaceable></literal></term>
+    <listitem>
+     <para>
+      Query filters request that the server return entries
+      that match the filter expression.
+      You must URL-escape the filter expression.
+     </para>
+
+     <para>
+      The string representation is summarized as follows.
+      Continue reading for additional explanation:
+     </para>
+
+     <programlisting language="none">
+Expr           = OrExpr
+OrExpr         = AndExpr ( 'or' AndExpr ) *
+AndExpr        = NotExpr ( 'and' NotExpr ) *
+NotExpr        = '!' PrimaryExpr | PrimaryExpr
+PrimaryExpr    = '(' Expr ')' | ComparisonExpr | PresenceExpr | LiteralExpr
+ComparisonExpr = Pointer OpName JsonValue
+PresenceExpr   = Pointer 'pr'
+LiteralExpr    = 'true' | 'false'
+Pointer        = JSON pointer
+OpName         = 'eq' |  # equal to
+                 'co' |  # contains
+                 'sw' |  # starts with
+                 'lt' |  # less than
+                 'le' |  # less than or equal to
+                 'gt' |  # greater than
+                 'ge' |  # greater than or equal to
+                 STRING  # extended operator
+JsonValue      = NUMBER | BOOLEAN | '"' UTF8STRING '"'
+STRING         = ASCII string not containing white-space
+UTF8STRING     = UTF-8 string possibly containing white-space
+     </programlisting>
+
+     <para>
+      Note that white space, double quotes (<literal>"</literal>), parentheses,
+      and exclamation characters need URL encoding in HTTP query strings.
+     </para>
+
+     <para>
+      A simple filter expression can represent a comparison, presence,
+      or a literal value.
+     </para>
+
+     <para>
+      For comparison expressions use
+      <replaceable>json-pointer comparator json-value</replaceable>,
+      where the <replaceable>comparator</replaceable> is one of the following:
+     </para>
+
+     <simplelist>
+      <member><literal>eq</literal> (equals)</member>
+      <member><literal>co</literal> (contains)</member>
+      <member><literal>sw</literal> (starts with)</member>
+      <member><literal>lt</literal> (less than)</member>
+      <member><literal>le</literal> (less than or equal to)</member>
+      <member><literal>gt</literal> (greater than)</member>
+      <member><literal>ge</literal> (greater than or equal to)</member>
+     </simplelist>
+
+     <para>
+      For presence, use <replaceable>json-pointer pr</replaceable>
+      to match resources where the JSON pointer is present.
+     </para>
+
+     <para>
+      Literal values include true (match anything) and false (match nothing).
+     </para>
+
+     <para>
+      Complex expressions employ <literal>and</literal>,
+      <literal>or</literal>,
+      and <literal>!</literal> (not),
+      with parentheses, <literal>(<replaceable>expression</replaceable>)</literal>,
+      to group expressions.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_queryId=<replaceable>identifier</replaceable></literal></term>
+    <listitem>
+     <para>
+      Specify a query by its identifier.
+     </para>
+
+     <para>
+      Specific queries can take their own query string parameter arguments,
+      which depend on the implementation.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_pagedResultsCookie=<replaceable>string</replaceable></literal></term>
+    <listitem>
+     <para>
+      The string is an opaque cookie used by the server
+      to keep track of the position in the search results.
+      The server returns the cookie in the JSON response
+      as the value of <literal>pagedResultsCookie</literal>.
+     </para>
+
+     <para>
+      In the request <literal>_pageSize</literal> must also be set and non-zero.
+      You receive the cookie value from the provider on the first request,
+      and then supply the cookie value in subsequent requests
+      until the server returns a <literal>null</literal> cookie,
+      meaning that the final page of results has been returned.
+     </para>
+
+     <para>
+      The <literal>_pagedResultsCookie</literal> parameter is supported
+      when used with the <literal>_queryFilter</literal> parameter.
+      The <literal>_pagedResultsCookie</literal> parameter
+      is not guaranteed to work when used with the
+      <literal>_queryExpression</literal> and <literal>_queryId</literal> parameters.
+     </para>
+
+     <para>
+      The <literal>_pagedResultsCookie</literal>
+      and <literal>_pagedResultsOffset</literal> parameters
+      are mutually exclusive, and not to be used together.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_pagedResultsOffset=<replaceable>integer</replaceable></literal></term>
+    <listitem>
+     <para>
+      When <literal>_pageSize</literal> is non-zero,
+      use this as an index in the result set indicating the first page to return.
+     </para>
+
+     <para>
+      The <literal>_pagedResultsCookie</literal>
+      and <literal>_pagedResultsOffset</literal> parameters
+      are mutually exclusive, and not to be used together.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_pageSize=<replaceable>integer</replaceable></literal></term>
+    <listitem>
+     <para>
+      Return query results in pages of this size.
+      After the initial request, use
+      <literal>_pagedResultsCookie</literal> or <literal>_pageResultsOffset</literal>
+      to page through the results.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_totalPagedResultsPolicy=<replaceable>string</replaceable></literal></term>
+    <listitem>
+     <para>
+      When a <literal>_pageSize</literal> is specified, and non-zero, the server
+      calculates the "totalPagedResults",  in accordance with the
+      <literal>totalPagedResultsPolicy</literal>, and provides the value as part
+      of the response. The "totalPagedResults" is either an estimate of the total
+      number of paged results (<literal>_totalPagedResultsPolicy=ESTIMATE</literal>),
+      or the exact total result count (<literal>_totalPagedResultsPolicy=EXACT</literal>).
+      If no count policy is specified in the query, or if
+      <literal>_totalPagedResultsPolicy=NONE</literal>, result counting is
+      disabled, and the server returns value of -1 for "totalPagedResults".
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term><literal>_sortKeys=[+-]<replaceable>field</replaceable>[,[+-]<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Sort the resources returned based on the specified field(s),
+      either in <literal>+</literal> (ascending, default) order,
+      or in <literal>-</literal> (descending) order.
+     </para>
+
+     <para>
+      The <literal>_sortKeys</literal> parameter is not supported
+      for predefined queries (<literal>_queryId</literal>).
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <xinclude:include href="varlistentry-pretty-print.xml" />
+
+   <varlistentry>
+    <term><literal>_fields=<replaceable>field</replaceable>[,<replaceable>field</replaceable>...]</literal></term>
+    <listitem>
+     <para>
+      Return only the specified fields in each element
+      of the "results" array in the response.
+     </para>
+
+     <para>
+      The <literal>field</literal> values are JSON pointers.
+      For example if the resource is <literal>{"parent":{"child":"value"}}</literal>,
+      <literal>parent/child</literal> refers to the <literal>"child":"value"</literal>.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+
+ <section xml:id="about-crest-response-codes">
+  <title>HTTP Status Codes</title>
+
+  <para>
+   When working with a common REST API over HTTP,
+   client applications should expect at least the following HTTP status codes.
+   Not all servers necessarily return all status codes identified here:
+  </para>
+
+  <variablelist>
+   <varlistentry>
+    <term>200 OK</term>
+    <listitem>
+     <para>
+      The request was successful and a resource returned, depending on the request.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>201 Created</term>
+    <listitem>
+     <para>
+      The request succeeded and the resource was created.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>204 No Content</term>
+    <listitem>
+     <para>
+      The action request succeeded, and there was no content to return.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>304 Not Modified</term>
+    <listitem>
+     <para>
+      The read request included an <literal>If-None-Match</literal> header,
+      and the value of the header matched the revision value of the resource.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>400 Bad Request</term>
+    <listitem>
+     <para>
+      The request was malformed.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>401 Unauthorized</term>
+    <listitem>
+     <para>
+      The request requires user authentication.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>403 Forbidden</term>
+    <listitem>
+     <para>
+      Access was forbidden during an operation on a resource.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>404 Not Found</term>
+    <listitem>
+     <para>
+      The specified resource could not be found, perhaps because it does not exist.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>405 Method Not Allowed</term>
+    <listitem>
+     <para>
+      The HTTP method is not allowed for the requested resource.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>406 Not Acceptable</term>
+    <listitem>
+     <para>
+      The request contains parameters that are not acceptable,
+      such as a resource or protocol version that is not available.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>409 Conflict</term>
+    <listitem>
+     <para>
+      The request would have resulted in a conflict
+      with the current state of the resource.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>410 Gone</term>
+    <listitem>
+     <para>
+      The requested resource is no longer available,
+      and will not become available again.
+      This can happen when resources expire for example.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>412 Precondition Failed</term>
+    <listitem>
+     <para>
+      The resource's current version does not match the version provided.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>415 Unsupported Media Type</term>
+    <listitem>
+     <para>
+      The request is in a format not supported
+      by the requested resource for the requested method.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>428 Precondition Required</term>
+    <listitem>
+     <para>
+      The resource requires a version, but no version was supplied in the request.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>500 Internal Server Error</term>
+    <listitem>
+     <para>
+      The server encountered an unexpected condition
+      that prevented it from fulfilling the request.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>501 Not Implemented</term>
+    <listitem>
+     <para>
+      The resource does not support the functionality
+      required to fulfill the request.
+     </para>
+    </listitem>
+   </varlistentry>
+
+   <varlistentry>
+    <term>503 Service Unavailable</term>
+    <listitem>
+     <para>
+      The requested resource was temporarily unavailable.
+      The service may have been disabled, for example.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </section>
+</section>

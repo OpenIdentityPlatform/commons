@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! legal/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2012 ForgeRock AS
+  !    
+-->
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>About the ForgeRock REST libraries</title>
+    <author>ForgeRock AS</author>
+  </properties>
+  <body>
+    <section name="About the ForgeRock REST libraries">
+      <p>
+        This project provides common resource-oriented libraries used by
+        ForgeRock projects. It includes the following sub-modules:
+      </p>
+      <ul>
+        <li>
+          <a href="json-fluent/index.html">json-fluent</a> : JSON fluent.
+        </li>
+        <li>
+          <a href="json-patch/index.html">json-patch</a> : JSON patch.
+        </li>
+        <li>
+          <a href="json-ref/index.html">json-ref</a> : JSON reference.
+        </li>
+        <li>
+          <a href="json-ref-jackson/index.html">json-ref-jackson</a> : JSON reference Jackson integration.
+        </li>
+        <li>
+          <a href="json-schema/index.html">json-schema</a> : JSON schema.
+        </li>
+        <li>
+          <a href="json-schema-cli/index.html">json-schema-cli</a> : JSON schema CLI.
+        </li>
+        <li>
+          <a href="json-crypto/index.html">json-crypto</a> : JSON cryptographic.
+        </li>
+        <li>
+          <a href="json-crypto-cli/index.html">json-crypto-cli</a> : JSON cryptographic CLI.
+        </li>
+        <li>
+          <a href="json-resource/index.html">json-resource</a> : JSON based REST framework.
+        </li>
+        <li>
+          <a href="json-resource-servlet/index.html">json-resource-servlet</a> : JSON resource Servlet integration.
+        </li>
+      </ul>
+    </section>
+  </body>
+</document>

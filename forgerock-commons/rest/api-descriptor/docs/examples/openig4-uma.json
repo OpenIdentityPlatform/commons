@@ -1,0 +1,114 @@
+{
+  "id": "frapi:openig:uma",
+  "description": "User-Managed Access",
+  "version": "1.0.0",
+  "definitions": {
+    "share": {
+      "title": "UMA Share",
+      "description": "This resource and its associated service is statically defined, independently of any routes that expose the service at runtime.",
+      "required": ["path", "pat"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "A pattern matching the path to protected resources, such as `/photos/.*`. This pattern must match a pattern defined in the UmaService for this API."
+        },
+        "pat": {
+          "type": "string",
+          "description": "A PAT granted by the UMA authorization server given consent by the resource owner. In the present implementation, OpenIG has access only to the PAT, not to any refresh tokens."
+        },
+        "id": {
+          "type": "string",
+          "description": "This uniquely identifies the share. This value is set by the service when the share is created, and can be used when reading or deleting a share.",
+          "readOnly": true,
+          "errorOnWritePolicyFailure": true
+        },
+        "resource_set_id": {
+          "type": "string",
+          "description": "This uniquely identifies the UMA resource set registered with the authorization server. This value is obtained by the service when the resource set is registered, and can be used when setting access policy permissions.",
+          "readOnly": true,
+          "errorOnWritePolicyFailure": true
+        },
+        "user_access_policy_uri": {
+          "type": "string",
+          "description": "This URI indicates the location on the UMA authorization server where the resource owner can set or modify access policies. This value is obtained by the service when the resource set is registered.",
+          "readOnly": true,
+          "errorOnWritePolicyFailure": true
+        }
+      }
+    }
+  },
+  "paths": {
+    "/openig/api/system/objects/router-name/routes/route-name/objects/umaservice/share": {
+      "0.0": {
+        "description": "This path as an example. The actual location depends on your configuration.",
+        "mvccSupported": false,
+        "resourceSchema": {
+          "$ref": "#/definitions/share"
+        },
+        "create": {
+          "mode": "ID_FROM_SERVER",
+          "singleton" : false,
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/notSupported"
+            }
+          ]
+        },
+        "queries": [
+          {
+            "type": "FILTER",
+            "queryableFields": [
+              "path",
+              "pat",
+              "id",
+              "resource_set_id",
+              "user_access_policy_uri"
+            ],
+            "description": "Return resources matching the filter expression. At present, the only supported filter is `true` (return all resources).",
+            "errors": [
+              {
+                "$ref": "frapi:common#/errors/badRequest"
+              },
+              {
+                "$ref": "frapi:common#/errors/notSupported"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "/openig/api/system/objects/router-name/routes/route-name/objects/umaservice/share/{id}": {
+      "0.0": {
+        "description": "This path as an example. The actual location depends on your configuration.",
+        "resourceSchema": {
+          "$ref": "#/definitions/share"
+        },
+        "mvccSupported": false,
+        "read": {
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/notSupported"
+            }
+          ]
+
+        },
+        "delete": {
+          "errors": [
+            {
+              "$ref": "frapi:common#/errors/notFound"
+            },
+            {
+              "$ref": "frapi:common#/errors/notSupported"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

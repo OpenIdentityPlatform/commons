@@ -1,0 +1,72 @@
+{
+  "stageConfigs": [
+    {
+      "name" : "userQuery",
+      "validQueryFields" : [
+        "userName",
+        "mail"
+      ],
+      "identityIdField" : "_id",
+      "identityEmailField" : "mail",
+      "identityUsernameField" : "userName",
+      "identityServiceUrl" : "/users"
+    },
+    {
+      "name" : "emailValidation",
+      "emailServiceUrl": "/email",
+      "from": "info@admin.org",
+      "mimeType": "text/html",
+      "subjectTranslations": {
+        "en": "Reset your password",
+        "fr": "Réinitialisez votre mot de passe"
+      },
+      "messageTranslations": {
+        "en": "<h3>Click to reset your password</h3><h4><a href=\"%link%\">Password reset link</a></h4>",
+        "fr": "<h3>Cliquez pour réinitialiser votre mot de passe</h3><h4><a href=\"%link%\">Mot de passe lien de réinitialisation</a></h4>"
+      },
+      "verificationLinkToken": "%link%",
+      "verificationLink": "http://localhost:9999/example/#passwordReset/",
+      "identityEmailField" : "mail"
+    },
+    {
+      "name" : "captcha",
+      "recaptchaSiteKey": "6Le4og4TAAAAACWetDto1152-_JEhn5aG8NhZ3ej",
+      "recaptchaSecretKey": "6Le4og4TAAAAAFPprcsXlHE9bYYPAMX794A6R3Mv",
+      "recaptchaUri" : "https://www.google.com/recaptcha/api/siteverify"
+    },
+    {
+      "name" : "kbaSecurityAnswerVerificationStage",
+      "identityServiceUrl" : "/users",
+      "numberOfQuestionsUserMustAnswer" : "1",
+      "kbaConfig": {
+        "kbaPropertyName" : "kbaInfo",
+        "questions": {
+          "1": {
+            "en": "What's your favorite color?",
+            "en_GB": "What's your favorite colour?",
+            "fr": "Quelle est ta couleur préférée?"
+          },
+          "2": {
+            "en": "Who was your first employer?"
+          }
+        }
+      }
+    },
+    {
+      "name" : "resetStage",
+      "identityServiceUrl" : "/users",
+      "identityPasswordField" : "password"
+    }
+  ],
+  "snapshotToken" : {
+    "type": "jwt",
+    "sharedKey" : "!tHiSsOmEsHaReDkEy!",
+    "keyPairAlgorithm" : "RSA",
+    "keyPairSize" : 1024,
+    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+    "encryptionMethod" : "A128CBC_HS256",
+    "jwsAlgorithm" : "HS256",
+    "tokenExpiry": 180
+  },
+  "storage": "stateless"
+}

@@ -1,0 +1,68 @@
+    {
+        "myObjects": [
+            {
+                "result": [
+                    {
+                        "_id": "53fbf0c5-aa37-4845-a4b3-92a21810a36d",
+                        "_rev": "0"
+                    },
+                    {
+                        "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+                        "_rev": "0"
+                    }
+                ],
+                "resultCount": 2,
+                "pagedResultsCookie": null,
+                "remainingPagedResults": -1
+            },
+            {
+                "result": [
+                    {
+                        "_id": "53fbf0c5-aa37-4845-a4b3-92a21810a36d",
+                        "_rev": "0"
+                    },
+                    {
+                        "_id": "56f0fb7e-3837-464d-b9ec-9d3b6af665c3",
+                        "_rev": "0"
+                    }
+                ],
+                "resultCount": 2,
+                "pagedResultsCookie": null,
+                "remainingPagedResults": -1
+            },
+            {
+                "heap": {
+                    "objects": [
+                        {"comment": "#start"},
+                        {
+                            "name": "LoginChain",
+                            "type": "Chain",
+                            "config": {
+                                "filters": [
+                                    {
+                                        "type": "StaticRequestFilter",
+                                        "config": {
+                                            "method": "POST",
+                                            "uri": "http://www.example.com:8081",
+                                            "form": {
+                                                "username": [
+                                                    "demo"
+                                                ],
+                                                "password": [
+                                                    "changeit"
+                                                ]
+                                            }
+                                        }
+                                    }
+                                ],
+                                "handler": "ClientHandler"
+                            }
+                        }
+                        ,{"comment": "#end"}
+                    ]
+                },
+                "handler": "LoginChain",
+                "condition": "${matches(exchange.request.uri.path, '^/static')}"
+            }
+        ]
+    }

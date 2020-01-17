@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! You can also obtain a copy of the license at
+  ! trunk/opendj3/legal-notices/CC-BY-NC-ND.txt.
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2011 ForgeRock AS
+  !    
+-->
+<document xmlns="http://maven.apache.org/XDOC/2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/XDOC/2.0 http://maven.apache.org/xsd/xdoc-2.0.xsd">
+  <properties>
+    <title>About I18N Framework</title>
+    <author email="opendj-dev@forgerock.org">ForgeRock AS</author>
+  </properties>
+  <body>
+    <section name="About the I18N Framework">
+      <p>
+        This module provides a framework for embedding and using
+        localizable messages in applications. It includes the following
+        sub-modules:
+      </p>
+      <ul>
+        <li>
+          <a href="i18n-maven-plugin/index.html">i18n-maven-plugin</a>
+          : A Maven plugin which generates I18N messages from property files.
+        </li>
+        <li>
+          <a href="i18n-core/index.html">i18n-core</a>
+          : Core Java APIs for embedding and using localizable messages in applications.
+        </li>
+        <li>
+          <a href="i18n-jul/index.html">i18n-jul</a>
+          : An interface for efficiently writing localized messages out to a Java Logger.
+        </li>
+        <li>
+          <a href="i18n-slf4j/index.html">i18n-slf4j</a>
+          : An interface for efficiently writing localized messages out to a SLF4J Logger.
+        </li>
+      </ul>
+    </section>
+    <section name="Usage">
+      <p>
+        This page provides instructions on how to use the I18N Framework.
+      </p>
+      <subsection name="Create a properties file">
+        <p>
+          Before using the I18N framework you first need to define some
+          localizable messages. Lets create the properties file
+          "src/main/resources/com/example/my_tool.properties"" containing the
+          single property "PURCHASE_ITEM":
+        </p>
+        <source>PURCHASE_ITEM=Purchasing "%s" for %d %s?</source>
+        <p>
+          This property has three parameters: the item name, the price (float),
+          and the currency string.
+        </p>
+        <p>
+          Localized versions of the property file should be created next and
+          these should be named such that the locale appears before the
+          ".properties" suffix. For example, the file "my_tool_fr.properties"
+          should contain the same messages localized in French.
+        </p>
+      </subsection>
+      <subsection name="Prepare your pom.xml for the I18N Framework">
+        <p>
+          In order to use the I18N Framework you'll need to ensure that the
+          ForgeRock repositories are listed in your pom.xml file: 
+        </p>
+        <source>&lt;repositories>
+  &lt;repository>
+    &lt;id>forgerock-staging-repository&lt;/id>
+    &lt;name>ForgeRock Release Repository&lt;/name>
+    &lt;url>http://maven.forgerock.org/repo/releases&lt;/url>
+    &lt;snapshots>
+      &lt;enabled>false&lt;/enabled>
+    &lt;/snapshots>
+  &lt;/repository>
+  &lt;repository>
+    &lt;id>forgerock-snapshots-repository&lt;/id>
+    &lt;name>ForgeRock Snapshot Repository&lt;/name>
+    &lt;url>http://maven.forgerock.org/repo/snapshots&lt;/url>
+    &lt;releases>
+      &lt;enabled>false&lt;/enabled>
+    &lt;/releases>
+  &lt;/repository>
+&lt;repositories>
+&lt;pluginRepositories>
+  &lt;pluginRepository>
+    &lt;id>forgerock-plugins-repository&lt;/id>
+    &lt;name>ForgeRock Plugin Repository&lt;/name>
+    &lt;url>http://maven.forgerock.org/repo/repo&lt;/url>
+  &lt;/pluginRepository>
+&lt;/pluginRepositories></source>
+      </subsection>
+      <subsection name="Generate the message descriptors using the Maven plugin">
+        <p>
+          The next step is to generate the messages descriptors using the
+          I18N Maven Plugin. Add the following lines to your Maven pom.xml file: 
+        </p>
+        <source>&lt;build>
+  &lt;plugins>
+    &lt;plugin>
+      &lt;groupId>org.forgerock.commons&lt;/groupId>
+      &lt;artifactId>i18n-maven-plugin&lt;/artifactId>
+      &lt;version>${project.version}&lt;/version>
+      &lt;executions>
+        &lt;execution>
+          &lt;phase>generate-sources&lt;/phase>
+          &lt;goals>
+            &lt;goal>generate-messages&lt;/goal>
+          &lt;/goals>
+          &lt;configuration>
+            &lt;messageFiles>
+              &lt;messageFile>com/example/my_tool.properties&lt;/messageFile>
+            &lt;/messageFiles>
+          &lt;/configuration>
+        &lt;/execution>
+      &lt;/executions>
+    &lt;/plugin>
+  &lt;/plugins>
+&lt;/build></source>
+      <p>
+        It is possible to process many message files in one go. Note that you
+        only need to reference the non-localized message file.
+      </p>
+      <p>
+        After saving the changes to the pom.xml file, generate the message
+        descriptors by invoking "mvn generate-sources". Once mvn completes you
+        should find that a new Java source file has been generated and put in
+        "target/generated-sources/messages/com/example/MyToolMessages.java".
+      </p>
+      <p>
+        <b>NOTE:</b> depending on your IDE, you may need to explicitly configure
+        "target/generated-sources/messages" as a source folder for your project.
+      </p>
+      <p>
+        Once generated, the MyToolMessages.java should look like this:
+      </p>
+      <source>package com.example;
+
+import org.forgerock.i18n.LocalizableMessageDescriptor;
+
+/**
+ * This file contains localizable message descriptors having the resource
+ * name {@code com.example.my_tool}. This file was generated
+ * automatically by the {@code i18n-maven-plugin} from the property file
+ * {@code com/example/my_tool.properties} and it should not be manually edited.
+ */
+public final class MyToolMessages
+{
+  // The name of the resource bundle.
+  private static final String RESOURCE = "com.example.my_tool";
+
+  // Prevent instantiation.
+  private MyToolMessages()
+  {
+    // Do nothing.
+  }
+  
+  /**
+   * Returns the name of the resource associated with the messages contained
+   * in this class. The resource name may be used for obtaining named loggers,
+   * e.g. using SLF4J's {@code org.slf4j.LoggerFactory#getLogger(String name)}.
+   *
+   * @return The name of the resource associated with the messages contained
+   *         in this class.
+   */
+  public String resourceName()
+  {
+    return RESOURCE;
+  }
+
+  /**
+   * Purchasing "%s" for %d %s?
+   */
+  public static final LocalizableMessageDescriptor.Arg2&lt;CharSequence,Number,CharSequence> PURCHASE_ITEM =
+          new LocalizableMessageDescriptor.Arg2&lt;CharSequence,Number,CharSequence>(MyToolMessages.class,RESOURCE,"PURCHASE_ITEM",-1);
+
+}</source>
+      </subsection>
+      <subsection name="Use the generated message from within your application">
+        <p>
+          Now that the message descriptors are generated, you can reference them
+          directly from within your application code. First though you need to
+          declare a dependency on the I18N Framework core APIs in your pom.xml
+          file: 
+        </p>
+        <source>&lt;dependencies>
+  &lt;dependency>
+    &lt;groupId>org.forgerock.commons&lt;/groupId>
+    &lt;artifactId>i18n-core&lt;/artifactId>
+    &lt;version>${project.version}&lt;/version>
+  &lt;/dependency>
+&lt;/dependencies></source>
+      <p>
+        The following example shows how the generated messages may be used:
+      </p>
+      <source>import org.forgerock.i18n.LocalizableMessage;
+
+import java.util.Locale;
+import java.util.logging.Logger;
+import java.util.logging.Level;
+        
+// Messages generated using i18n-maven-plugin.         
+import com.example.MyToolMessages;
+import static com.example.MyToolMessages.PURCHASE_ITEM;
+
+// Create a parameterized error message: PURCHASE_ITEM is the descriptor for
+// the message "Purchasing "%s" for %d %s?" and it will be strongly
+// typed &lt;String, Number, String&gt;, so invalid message parameters will
+// result in a compilation error.
+String item     = "bicycle";
+float price     = 199.99;
+String currency = "USD";
+
+LocalizableMessage message = PURCHASE_ITEM.get(item, price, currency);
+
+// Get a logger for this tool (the resource name can be used in order to
+// categorize messages) and log the message using the US locale. Note that
+// Java logging integration can make this easier - see below.
+Logger logger = Logger.getLogger(MyToolMessages.resourceName());
+logger.log(Level.INFO, message.toString(Locale.US));
+
+// Now display the message to the user in their locale.
+System.out.println(message.toString()); // Default locale.</source>
+      </subsection>
+      <subsection name="Clean up unused messages">
+        <p>
+          As your project gets bigger the property files will become harder
+          to maintain. Whilst missing messages will be spotted very quickly
+          due to the resulting compilation failures, tracking unused messages
+          can become quite difficult. Not only that, but unused messages
+          waste localization effort.
+        </p>
+        <p>
+          Help is at hand through the use of the I18N Maven plugin's
+          <a href="i18n-maven-plugin/clean-messages-mojo.html">clean-messages</a>
+          goal which can be invoked as follows: 
+        </p>
+        <source>mvn org.forgerock.commons:i18n-maven-plugin:${project.version}:clean-messages -DmessageFile=src/main/resources/com/example/my_tool.properties</source>
+      </subsection>
+      <subsection name="Java logging integration">
+        <p>
+          If your application needs to log localized
+          messages to a java.util.logging.Logger then consider using the
+          <a href="i18n-jul/index.html">i18n-jul</a> module. To use the
+          i18n-jul module include the following dependency in your pom.xml file:
+        </p>
+        <source>&lt;dependencies>
+  &lt;dependency>
+    &lt;groupId>org.forgerock.commons&lt;/groupId>
+    &lt;artifactId>i18n-jul&lt;/artifactId>
+    &lt;version>${project.version}&lt;/version>
+  &lt;/dependency>
+&lt;/dependencies></source>
+      <p>
+        The following example shows how the I18N Java Logging module may be used to
+        log a localized message:
+        </p>
+      <source>import org.forgerock.i18n.LocalizableMessage;
+import org.forgerock.i18n.jul.LocalizedLogger;
+        
+// Message generated using i18n-maven-plugin.        
+import static com.example.MyMessages.MY_MESSAGE;
+
+// Get a localized logger wrapping A Java Logger for the current
+// class and the default locale.
+LocalizedLogger logger = LocalizedLogger.getLocalizedLogger(this.class.getName());
+        
+// Log a parameterized error message.
+LocalizableMessage message = MY_MESSAGE.get("a message parameter");
+logger.warning(message);
+        
+// This is more efficient because it will only construct (format) the
+// message if error logging is enabled for this logger.
+logger.warning(MY_MESSAGE, "a message parameter");</source>
+      </subsection>
+      <subsection name="SLF4j integration">
+        <p>
+          If your application needs to log localized
+          messages to SLF4J then consider using the
+          <a href="i18n-slf4j/index.html">i18n-slf4j</a> module. To use the
+          i18n-slf4j module include the following dependency in your pom.xml file:
+        </p>
+        <source>&lt;dependencies>
+  &lt;dependency>
+    &lt;groupId>org.forgerock.commons&lt;/groupId>
+    &lt;artifactId>i18n-slf4j&lt;/artifactId>
+    &lt;version>${project.version}&lt;/version>
+  &lt;/dependency>
+&lt;/dependencies></source>
+      <p>
+        The following example shows how the I18N SLF4J module may be used to
+        log a localized message:
+        </p>
+      <source>import org.forgerock.i18n.LocalizableMessage;
+import org.forgerock.i18n.slf4j.LocalizedLogger;
+        
+// Message generated using i18n-maven-plugin.        
+import static com.example.MyMessages.MY_MESSAGE;
+
+// Get a localized logger wrapping the SLF4J logger for the current
+// class for the default locale.
+LocalizedLogger logger = LocalizedLogger.getLocalizedLogger(this.class);
+        
+// Log a parameterized error message.
+LocalizableMessage message = MY_MESSAGE.get("a message parameter");
+logger.error(message);
+        
+// This is more efficient because it will only construct (format) the
+// message if error logging is enabled for this logger.
+logger.error(MY_MESSAGE, "a message parameter");</source>
+      </subsection>
+    </section>
+  </body>
+</document>

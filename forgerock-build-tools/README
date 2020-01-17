@@ -1,0 +1,3 @@
+These build tools contain a patch for the Checkstyle indentation checker which
+should be removed once Checkstyle issue #934551 is resolved (see
+https://sourceforge.net/tracker/index.php?func=detail&aid=934551&group_id=29721&atid=397081).

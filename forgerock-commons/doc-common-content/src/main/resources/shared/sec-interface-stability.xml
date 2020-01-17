@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ! CCPL HEADER START
+  !
+  ! This work is licensed under the Creative Commons
+  ! Attribution-NonCommercial-NoDerivs 3.0 Unported License.
+  ! To view a copy of this license, visit
+  ! http://creativecommons.org/licenses/by-nc-nd/3.0/
+  ! or send a letter to Creative Commons, 444 Castro Street,
+  ! Suite 900, Mountain View, California, 94041, USA.
+  !
+  ! See the License for the specific language governing permissions
+  ! and limitations under the License.
+  !
+  ! If applicable, add the following below this CCPL HEADER, with the fields
+  ! enclosed by brackets "[]" replaced with your own identifying information:
+  !      Portions Copyright [yyyy] [name of copyright owner]
+  !
+  ! CCPL HEADER END
+  !
+  !      Copyright 2013-2015 ForgeRock AS
+  !
+-->
+ <section xml:id="interface-stability"
+          xmlns='http://docbook.org/ns/docbook' version='5.0' xml:lang='en'
+          xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+          xsi:schemaLocation='http://docbook.org/ns/docbook
+                              http://docbook.org/xml/5.0/xsd/docbook.xsd'
+          xmlns:xlink='http://www.w3.org/1999/xlink'>
+ <title>ForgeRock Product Interface Stability</title>
+
+ <para>
+  ForgeRock products support many protocols, APIs, GUIs,
+  and command-line interfaces.
+
+  Some of these interfaces are standard and very stable.
+
+  Others offer new functionality that is continuing to evolve.
+ </para>
+
+ <para>
+  We realize that you invest in these interfaces,
+  and therefore must know when and how ForgeRock expects them to change.
+
+  For that reason, ForgeRock defines interface stability labels
+  and uses these definitions in ForgeRock products.
+ </para>
+
+ <variablelist>
+  <varlistentry>
+   <term>Stable</term>
+   <listitem>
+    <para>
+     This documented interface is expected to undergo only
+     backwards-compatible changes between major releases.
+
+     Changes are announced at least one minor release before they take effect.
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry>
+   <term>Evolving</term>
+   <listitem>
+    <para>
+     This documented interface is continuing to evolve
+     and so is expected to change,
+     potentially in backwards-incompatible ways even in a minor release.
+
+     Changes are documented at the time of product release.
+    </para>
+
+    <para>
+     While new protocols and APIs are still in the process of standardization,
+     they are Evolving.
+
+     This applies for example to recent Internet-Draft implementations,
+     and also to newly developed functionality.
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry>
+   <term>Deprecated</term>
+   <listitem>
+    <para>
+     This interface is deprecated
+     and likely to be removed in a future release.
+
+     For previously stable interfaces,
+     the change was likely announced in a previous release.
+
+     Deprecated interfaces will be removed from ForgeRock products.
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry>
+   <term>Removed</term>
+   <listitem>
+    <para>
+     This interface was deprecated in a previous release
+     and has now been removed from the product.
+    </para>
+   </listitem>
+  </varlistentry>
+
+  <varlistentry>
+   <term>Internal/Undocumented</term>
+   <listitem>
+    <para>
+     Internal and undocumented interfaces can change without notice.
+
+     If you depend on one of these interfaces,
+     contact ForgeRock support
+     or email <link xlink:href="mailto:info@forgerock.com">info@forgerock.com</link>
+     to discuss your needs.
+    </para>
+   </listitem>
+  </varlistentry>
+ </variablelist>
+</section>

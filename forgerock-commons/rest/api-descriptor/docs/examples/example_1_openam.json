@@ -1,0 +1,418 @@
+{
+    "id": "example:1-openam.json",
+    "description": "OPENAM 1 example",
+    "version": "1.0.0",
+    "definitions": {
+        "frapi:openam:restsms:services:audit": {
+            "title": "OpenAM Audit Service schema",
+            "schema": {
+                "type": "object",
+                "required": [
+                    "auditEnabled"
+                ],
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The id of the service.",
+                        "readOnly": true
+                    },
+                    "auditEnabled": {
+                        "type": "boolean",
+                        "title": "Audit Enabled",
+                        "description": "Whether the audit service is enabled",
+                        "propertyOrder": 1
+                    },
+                    "fieldFilterPolicy": {
+                        "type": "array",
+                        "title": "Field exclusion policies",
+                        "description": "A list of fields or values (JSON pointers) to exclude from the audit event.",
+                        "propertyOrder": 2,
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "frapi:openam:restsms:services:audit:csv": {
+            "title": "OpenAM Audit Service CSV handler schema",
+            "schema": {
+                "type": "object",
+                "required": [
+                    "_id",
+                    "topics"
+                ],
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The id of the service.",
+                        "propertyOrder": 0,
+                        "readOnly": false,
+                        "writePolicy": "WRITE_ON_CREATE"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "Audit Handler Enabled",
+                        "description": "Whether the CSV audit handler is enabled",
+                        "propertyOrder": 1
+                    },
+                    "topics": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "access",
+                                "activity",
+                                "authentication",
+                                "config"
+                            ],
+                            "options": {
+                                "enum_titles": [
+                                    "Access",
+                                    "Activity",
+                                    "Authentication",
+                                    "Configuration"
+                                ]
+                            }
+                        },
+                        "title": "Topics",
+                        "description": "The audit topics to publish events for",
+                        "propertyOrder": 2
+                    },
+                    "location": {
+                        "type": "string",
+                        "title": "Location",
+                        "description": "The location to save CSV files in.",
+                        "propertyOrder": 3
+                    }
+                }
+            }
+        },
+        "frapi:openam:restsms:services:audit:syslog": {
+            "title": "OpenAM Audit Service SysLog handler schema",
+            "schema": {
+                "type": "object",
+                "required": [
+                    "_id",
+                    "topics"
+                ],
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The id of the service.",
+                        "propertyOrder": 0,
+                        "readOnly": false,
+                        "writePolicy": "WRITE_ON_CREATE"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "Audit Handler Enabled",
+                        "description": "Whether the audit handler is enabled",
+                        "propertyOrder": 1
+                    },
+                    "topics": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "enum": [
+                                "access",
+                                "activity",
+                                "authentication",
+                                "config"
+                            ],
+                            "options": {
+                                "enum_titles": [
+                                    "Access",
+                                    "Activity",
+                                    "Authentication",
+                                    "Configuration"
+                                ]
+                            }
+                        },
+                        "title": "Topics",
+                        "description": "The audit topics to publish events for",
+                        "propertyOrder": 2
+                    },
+                    "host": {
+                        "type": "string",
+                        "title": "Host",
+                        "description": "The host for the syslog connections.",
+                        "propertyOrder": 3
+                    }
+                }
+            }
+        },
+        "frapi:openam:restsms:service": {
+            "title": "OpenAM Common REST SMS schema",
+            "schema": {
+                "type": "object",
+                "required": [
+                    "_id"
+                ],
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The name of the entry that is being set."
+                    }
+                }
+            }
+        },
+        "frapi:openam:restsms:service:type": {
+            "title": "OpenAM Common REST SMS schema type",
+            "schema": {
+                "type": "object",
+                "required": [
+                    "_id",
+                    "name"
+                ],
+                "properties": {
+                    "_id": {
+                        "type": "string",
+                        "title": "Resource name",
+                        "description": "The resource identifier of the SMS type"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "The human-readable name of the SMS type"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description",
+                        "description": "Additional information about the type."
+                    }
+                }
+            }
+        },
+        "frapi:openam:restsms:service:typeresults": {
+            "title": "OpenAM Common REST SMS schema types",
+            "schema": {
+                "type": "object",
+                "required": [
+                    "result"
+                ],
+                "properties": {
+                    "result": {
+                        "type": "array",
+                        "title": "Type array",
+                        "description": "The array of type objects",
+                        "items": {
+                            "$ref": "frapi:openam:restsms:service:type"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "paths":{
+        "/realm-config/services":{
+            "1.0":{
+                "mvccSupported": false,
+                "actions":[
+                    {
+                        "name":"getAllTypes",
+                        "description":"Get all the types that are children of this endpoint",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:typeresults"
+                        }
+                    },
+                    {
+                        "name":"getCreatableTypes",
+                        "description":"Get all the types that are children of this endpoint that can be created",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:typeresults"
+                        }
+                    },
+                    {
+                        "name":"nextdescendents",
+                        "description":"Get all the types that are children of this endpoint",
+                        "response":{
+                            "type":"object",
+                            "required":[
+                                "result"
+                            ],
+                            "properties":{
+                                "result":{
+                                    "type":"array",
+                                    "title":"Type array",
+                                    "description":"The array of instance objects",
+                                    "items":{
+                                        "oneOf":[
+                                            {
+                                                "$ref":"frapi:openam:restsms:services:audit"
+                                            },
+                                            {
+                                                "$ref":"frapi:openam:restsms:services:etc..."
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        "/realm-config/services/audit":{
+            "1.0":{
+                "mvccSupported": false,
+                "resourceSchema":{
+                    "$ref":"frapi:openam:restsms:services:audit"
+                },
+                "create":{
+                    "mode":"ID_FROM_CLIENT",
+                    "singleton": false
+                },
+                "read":{
+                },
+                "update":{
+                },
+                "delete":{
+                },
+                "actions":[
+                    {
+                        "name":"getAllTypes",
+                        "description":"Get all the types that are children of this endpoint",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    },
+                    {
+                        "name":"getCreatableTypes",
+                        "description":"Get all the types that are children of this endpoint that can be created",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    },
+                    {
+                        "name":"getType",
+                        "description":"Get the type of this endpoint",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    },
+                    {
+                        "name":"nextdescendents",
+                        "description":"Get all the types that are children of this endpoint",
+                        "response":{
+                            "type":"object",
+                            "required":[
+                                "result"
+                            ],
+                            "properties":{
+                                "result":{
+                                    "type":"array",
+                                    "title":"Type array",
+                                    "description":"The array of instance objects",
+                                    "items":{
+                                        "oneOf":[
+                                            {
+                                                "$ref":"frapi:openam:restsms:services:audit:csv"
+                                            },
+                                            {
+                                                "$ref":"frapi:openam:restsms:services:audit:jdbc"
+                                            },
+                                            {
+                                                "$ref":"frapi:openam:restsms:services:audit:syslog"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "name":"template",
+                        "description":"Get a template for this service",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:services:audit"
+                        }
+                    }
+                ]
+            }
+        },
+        "/realm-config/services/audit/CSV":{
+            "1.0":{
+                "mvccSupported":false,
+                "resourceSchema":{
+                    "$ref":"frapi:openam:restsms:services:audit:csv"
+                },
+                "actions":[
+                    {
+                        "name":"getAllTypes",
+                        "description":"Get all the types that are children of this endpoint",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    },
+                    {
+                        "name":"getCreatableTypes",
+                        "description":"Get all the types that are children of this endpoint that can be created",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    },
+                    {
+                        "name":"getType",
+                        "description":"Get the type description for this endpoint",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    },
+                    {
+                        "name":"nextdescendents",
+                        "description":"Get all the types that are children of this endpoint",
+                        "response":{
+                            "$ref":"frapi:openam:restsms:service:type"
+                        }
+                    }
+                ],
+                "queries":[
+                    {
+                        "type":"FILTER",
+                        "queryableFields":[
+                            "enabled",
+                            "topics",
+                            "location"
+                        ],
+                        "pagingModes": [
+                            "OFFSET"
+                        ],
+                        "description":"Allows query of the CSV instances - the only supported query is `true`."
+                    }
+                ]
+            }
+        },
+        "/realm-config/services/audit/CSV/{id}":{
+            "1.0":{
+                "mvccSupported":false,
+                "resourceSchema":{
+                    "$ref":"frapi:openam:restsms:services:audit:csv"
+                },
+                "create":{
+                    "parameters":[
+                        {
+                            "name":"id",
+                            "type":"string",
+                            "description":"The identifier of the instance. If a `_id` property is provided in the request body, these values must match.",
+                            "source":"PATH",
+                            "required":true
+                        }
+                    ],
+                    "mode":"ID_FROM_SERVER",
+                    "singleton": false
+                },
+                "read":{
+                },
+                "update":{
+                },
+                "delete":{
+                }
+            }
+        }
+    }
+}

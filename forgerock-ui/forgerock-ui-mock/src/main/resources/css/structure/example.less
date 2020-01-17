@@ -1,0 +1,180 @@
+/**
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015 ForgeRock AS.
+ */
+
+/*
+    Styles for style guide header
+*/
+.styleguide-jumbotron {
+    background-color: #519387;
+    color:#fff;
+    font-weight:100;
+}
+
+.styleguide-jumbotron h1 {
+    font-weight:100;
+}
+
+/*
+    Styles for style guide navigation
+*/
+#sidebar li a {
+    color:black;
+}
+
+#sidebar>li>a {
+    padding: 10px 15px;
+    font-size: 14px;
+    margin-left: 30px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+#sidebar>li.active>a {
+    text-decoration: none;
+    background-color: #eeea07;
+}
+
+#sidebar>li.active>a:before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-top: 20px solid transparent;
+    border-right: 18px solid #eeea07;
+    border-bottom: 20px solid transparent;
+    position: absolute;
+    top: 0;
+    left: -18px;
+}
+
+#sidebar>li>a:hover, .nav>li>a:focus {
+    text-decoration: none;
+    background-color: transparent;
+    color: #519387;
+}
+
+#sidebar>li.active>a:hover,
+#sidebar>li.active>a:focus {
+    background-color: #eeea07;
+}
+
+@media (min-width: 979px) {
+    #sidebar.affix-top {
+        position: static;
+        margin-top:0;
+        width:228px;
+    }
+    #sidebar.affix {
+        position: fixed;
+        top:0;
+        width:228px;
+    }
+}
+
+/*
+    Subsection spacing
+*/
+.sub-header {
+    margin-top:15px;
+    margin-bottom:15px;
+}
+
+.sub-header .admin-only {
+    font-size:10px;
+    font-weight:bold;
+    color:#777;
+    text-transform: uppercase;
+}
+
+.sub-header .under-discussion {
+    font-size:10px;
+    font-weight:bold;
+    color:#a94442;
+    text-transform: uppercase;
+}
+
+/*
+    Swatch
+*/
+.swatch {
+    text-align: center;
+    margin-bottom: 30px;
+    min-height: 120px;
+    display: table;
+    width: 100%;
+}
+
+.swatch .inner {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.swatch.dark {
+    color: #fff;
+}
+
+.swatch.bordered {
+    border: 1px solid #ddd;
+}
+
+.example {
+  margin-top: -16px;
+  margin-left: 0px;
+  margin-right: 0px;
+  margin-bottom: 15px;
+  border-width: 1px;
+  border-bottom-right-radius: 4px;
+  border-bottom-left-radius: 4px;
+  background-color: #f7f7f9;
+  border: 1px solid #e1e1e8;
+}
+
+.panel {
+    margin-bottom: 0px;
+}
+
+.panel-body {
+    margin-bottom: 15px;
+}
+
+// pre {
+//   margin: 0px;
+//   border-top-right-radius: 0px;
+//   border-top-left-radius: 0px;
+// }
+
+.CodeMirror {
+    height: auto;
+    border: 1px
+    solid #ddd;
+    background: #eee;
+}
+
+.CodeMirror-scroll {
+    overflow-y: hidden;
+    overflow-x: auto;
+// fixes issue -> code snippets were scrolling slightly on mouse over
+    position: static;
+}
+
+.CodeMirror pre {
+    padding-left: 7px;
+    line-height: 1.25;
+}
+
+.CodeMirror-code {
+    position: absolute;
+}

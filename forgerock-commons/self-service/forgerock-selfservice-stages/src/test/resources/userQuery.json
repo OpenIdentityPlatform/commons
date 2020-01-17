@@ -1,0 +1,8 @@
+{
+  "name" : "userQuery",
+  "identityServiceUrl" : "/users",
+  "identityIdField" : "userId",
+  "identityEmailField" : "email",
+  "identityUsernameField" : "username",
+  "validQueryFields" : ["username", "email"]
+}

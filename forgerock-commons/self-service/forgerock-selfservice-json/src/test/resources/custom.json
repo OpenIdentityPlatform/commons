@@ -1,0 +1,20 @@
+{
+  "stageConfigs": [
+    {
+      "class" : "org.forgerock.selfservice.custom.MathProblemStageConfig",
+      "leftValue" : 5,
+      "rightValue" : 3
+    }
+  ],
+  "snapshotToken" : {
+    "type": "jwt",
+    "sharedKey" : "1234abcd",
+    "keyPairAlgorithm" : "RSA",
+    "keyPairSize" : 1024,
+    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+    "encryptionMethod" : "A128CBC_HS256",
+    "jwsAlgorithm" : "HS256",
+    "tokenExpiry": 180
+  },
+  "storage": "stateless"
+}

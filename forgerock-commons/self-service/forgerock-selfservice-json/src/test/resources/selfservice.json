@@ -1,0 +1,92 @@
+{
+  "stageConfigs": [
+    {
+      "name" : "termsAndConditions",
+      "termsTranslations" : {
+        "en" : "Some fake terms",
+        "fr" : "More fake terms"
+      }
+    },
+    {
+      "name" : "emailValidation",
+      "emailServiceUrl": "/email",
+      "subjectTranslations": {
+        "en": "Register new account",
+        "fr": "Créer un nouveau compte"
+      },
+      "messageTranslations": {
+        "en": "Click this link to register: %link%",
+        "fr": "Clicker le linke a registre: %link%"
+      },
+      "mimeType": "text/plain",
+      "from": "noreply@example.com",
+      "verificationLink": "/verifyemail",
+      "verificationLinkToken": "abc123",
+      "identityEmailField" : "mail"
+    },
+    {
+      "name" : "userQuery",
+      "identityServiceUrl" : "/users",
+      "identityIdField" : "userId",
+      "identityEmailField" : "email",
+      "identityUsernameField" : "username",
+      "validQueryFields" : ["username", "email"]
+    },
+    {
+      "name" : "retrieveUsername"
+    },
+    {
+      "name" : "emailUsername",
+      "emailServiceUrl": "/email",
+      "from": "info@admin.org",
+      "mimeType": "text/html",
+      "subjectTranslations": {
+        "en": "Account Information - username"
+      },
+      "messageTranslations": {
+        "en": "<h3>Username is:</h3><br />%username%"
+      },
+      "usernameToken": "%username%"
+    },
+    {
+      "name" : "userDetails",
+      "identityEmailField" : "mail"
+    },
+    {
+      "name" : "kbaSecurityAnswerDefinitionStage",
+      "kbaConfig": {
+        "kbaPropertyName" : "kbaInfo",
+        "questions": {
+          "1": {
+            "en": "What's your favorite color?",
+            "en_GB": "What's your favorite colour?",
+            "fr": "Quelle est votre couleur préférée?"
+          },
+          "2": {
+            "en": "Who was your first employer?"
+          }
+        }
+      }
+    },
+    {
+      "name" : "selfRegistration",
+      "identityServiceUrl" : "/users"
+    },
+    {
+      "name" : "resetStage",
+      "identityServiceUrl" : "/users",
+      "identityPasswordField" : "password"
+    }
+  ],
+  "snapshotToken" : {
+    "type": "jwt",
+    "sharedKey" : "1234abcd",
+    "keyPairAlgorithm" : "RSA",
+    "keyPairSize" : 1024,
+    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+    "encryptionMethod" : "A128CBC_HS256",
+    "jwsAlgorithm" : "HS256",
+    "tokenExpiry": 180
+  },
+  "storage": "stateless"
+}

@@ -1,0 +1,17 @@
+Let's cite some JSON.
+
+[file.json%#start%#end]
+
+Let's cite some text.
+
+[file.txt:// To be included]
+
+[file.txt:// Rough indentation]
+
+[file.txt:(:)]
+
+Let's cite some LDIF.
+
+[file.ldif:# Include bjensen]
+
+[file.ldif:# Get ou=Groups]
