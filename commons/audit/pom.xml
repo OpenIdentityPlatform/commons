@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ The contents of this file are subject to the terms of the Common Development and
+  ~ Distribution License (the License). You may not use this file except in compliance with the
+  ~ License.
+  ~
+  ~ You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  ~ specific language governing permission and limitations under the License.
+  ~
+  ~ When distributing Covered Software, include this CDDL Header Notice in each file and include
+  ~ the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
+  ~ information: "Portions copyright [year] [name of copyright owner]".
+  ~
+  ~ Copyright 2015-2016 ForgeRock AS.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+	<parent>
+        <groupId>org.openidentityplatform.commons</groupId>
+    	<artifactId>commons</artifactId>
+        <version>2.0.7-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>audit</artifactId>
+    <packaging>pom</packaging>
+
+    <name>${project.groupId}.${project.artifactId}</name>
+    <description>Implements the commons audit framework.</description>
+
+    <properties>
+        <jodaTime.version>2.1</jodaTime.version>
+        <supercsv.version>2.4.0</supercsv.version>
+        <javax.inject.version>1_2</javax.inject.version>
+        <hikaricp.version>2.4.1</hikaricp.version>
+    </properties>
+
+    <modules>
+        <module>core</module>
+        <module>json</module>
+        <module>servlet</module>
+        <module>handler-csv</module>
+        <module>handler-syslog</module>
+        <module>handler-jms</module>
+        <module>handler-jdbc</module>
+        <module>handler-elasticsearch</module>
+        <module>handler-json</module>
+        <module>handler-splunk</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Open Identity Platform Communitycommons dependencies -->
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+                <version>${javax.inject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikaricp.version}</version>
+            </dependency>
+
+            <!-- Third party dependencies -->
+            <dependency>
+                <groupId>net.sf.supercsv</groupId>
+                <artifactId>super-csv</artifactId>
+                <version>${supercsv.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${jodaTime.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>${servlet-api.version}</version>
+                <scope>provided</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>
