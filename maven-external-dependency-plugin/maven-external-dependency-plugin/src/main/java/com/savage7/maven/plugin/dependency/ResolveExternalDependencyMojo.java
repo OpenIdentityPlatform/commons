@@ -112,7 +112,7 @@ public class ResolveExternalDependencyMojo extends
             // Set<Artifact> projectArtifacts = project.createArtifacts(
             // artifactFactory, null, null );
 
-            Map<URL, File> cachedDownloads = new HashMap<URL, File>();
+            Map<String, File> cachedDownloads = new HashMap<String, File>();
 
             // loop over and process all configured artifacts
             for (final ArtifactItem artifactItem : artifactItems)
@@ -155,12 +155,9 @@ public class ResolveExternalDependencyMojo extends
                     //
                     if (artifactItem.getDownloadUrl() != null)
                     {
-                        URL downloadUrl = new URL(artifactItem.getDownloadUrl());
-
                         final File tempDownloadFile;
-
-                        if (cachedDownloads.containsKey(downloadUrl)) {
-                            tempDownloadFile = cachedDownloads.get(downloadUrl);
+                        if (cachedDownloads.containsKey(artifactItem.getDownloadUrl())) {
+                            tempDownloadFile = cachedDownloads.get(artifactItem.getDownloadUrl());
                             getLog().info(
                                 "Artifact already downloaded from URL: "
                                     + artifactItem.getDownloadUrl());
@@ -170,7 +167,7 @@ public class ResolveExternalDependencyMojo extends
                         } else {
                             // create a temporary download file
                             tempDownloadFile = File.createTempFile(
-                            artifactItem.getLocalFile(), "." + getExtension(downloadUrl));
+                            artifactItem.getLocalFile(), "." + getExtension(artifactItem.getDownloadUrl()));
 
                             getLog().info(
                                 "downloading artifact from URL: "
@@ -181,42 +178,46 @@ public class ResolveExternalDependencyMojo extends
 
                             // download file from URL
                             //FileUtils.copyURLToFile(downloadUrl, tempDownloadFile);
-
-                            //vharseko@openam.org.ru
-                            String endPointUrl = downloadUrl.getProtocol() + "://"+ downloadUrl.getAuthority();
-                            Repository repository = new Repository("additonal-configs", endPointUrl);
-                            Wagon wagon = wagonManager.getWagon(downloadUrl.getProtocol());
-                            if (getLog().isDebugEnabled())
-                            {
-                                Debug debug = new Debug();
-                                wagon.addSessionListener(debug);
-                                wagon.addTransferListener(debug);
-                            }
-                            wagon.setTimeout(artifactItem.getTimeout());
-                            Settings settings = mavenSettingsBuilder.buildSettings();
-                            ProxyInfo proxyInfo = null;
-                            if (settings != null&& settings.getActiveProxy() != null)
-                            {
-                                Proxy settingsProxy = settings.getActiveProxy();
-                                proxyInfo = new ProxyInfo();
-                                proxyInfo.setHost(settingsProxy.getHost());
-                                proxyInfo.setType(settingsProxy.getProtocol());
-                                proxyInfo.setPort(settingsProxy.getPort());
-                                proxyInfo.setNonProxyHosts(settingsProxy.getNonProxyHosts());
-                                proxyInfo.setUserName(settingsProxy.getUsername());
-                                proxyInfo.setPassword(settingsProxy.getPassword());
-                            }
-
-                            if (proxyInfo != null)
-                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()),proxyInfo);
-                            else
-                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
                             
-                            wagon.get(downloadUrl.getPath().substring(1), tempDownloadFile);
-
-                            getLog().debug(
-                                "caching temporary file for later");
-                            cachedDownloads.put(downloadUrl, tempDownloadFile);
+                            //vharseko@openam.org.ru
+                            if (!new File(artifactItem.getDownloadUrl()).exists()) {
+                            	URL downloadUrl = new URL(artifactItem.getDownloadUrl());
+	                            String endPointUrl = downloadUrl.getProtocol() + "://"+ downloadUrl.getAuthority();
+	                            Repository repository = new Repository("additonal-configs", endPointUrl);
+	                            Wagon wagon = wagonManager.getWagon(downloadUrl.getProtocol());
+	                            if (getLog().isDebugEnabled())
+	                            {
+	                                Debug debug = new Debug();
+	                                wagon.addSessionListener(debug);
+	                                wagon.addTransferListener(debug);
+	                            }
+	                            wagon.setTimeout(artifactItem.getTimeout());
+	                            Settings settings = mavenSettingsBuilder.buildSettings();
+	                            ProxyInfo proxyInfo = null;
+	                            if (settings != null&& settings.getActiveProxy() != null)
+	                            {
+	                                Proxy settingsProxy = settings.getActiveProxy();
+	                                proxyInfo = new ProxyInfo();
+	                                proxyInfo.setHost(settingsProxy.getHost());
+	                                proxyInfo.setType(settingsProxy.getProtocol());
+	                                proxyInfo.setPort(settingsProxy.getPort());
+	                                proxyInfo.setNonProxyHosts(settingsProxy.getNonProxyHosts());
+	                                proxyInfo.setUserName(settingsProxy.getUsername());
+	                                proxyInfo.setPassword(settingsProxy.getPassword());
+	                            }
+	
+	                            if (proxyInfo != null)
+	                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()),proxyInfo);
+	                            else
+	                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
+	                            
+	                            wagon.get(downloadUrl.getPath().substring(1), tempDownloadFile);
+                            }else {
+                            	FileUtils.copyFile(new File(artifactItem.getDownloadUrl()), tempDownloadFile);
+                            }
+                            	
+                            getLog().debug("caching temporary file for later");
+                            cachedDownloads.put(artifactItem.getDownloadUrl(), tempDownloadFile);
                         }
 
                         // verify file checksum (if a checksum was defined);
@@ -380,9 +381,9 @@ public class ResolveExternalDependencyMojo extends
         }
     }
 
-    private String getExtension(URL downloadUrl)
+    private String getExtension(String downloadUrl)
     {
-        String path = downloadUrl.getPath();
+        String path = downloadUrl;
         if(path.endsWith(".tar.gz")) {
             return "tar.gz";
         }

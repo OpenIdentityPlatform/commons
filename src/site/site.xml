@@ -21,7 +21,7 @@
                         http://maven.apache.org/xsd/decoration-1.4.0.xsd">
     <skin>
         <groupId>org.openidentityplatform.commons</groupId>
-        <artifactId>forgerock-community-skin</artifactId>
+        <artifactId>community-skin</artifactId>
         <version>1.0.0</version>
     </skin>
     <publishDate position="right" format="yyyy.MM.dd"/>

@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+   The contents of this file are subject to the terms of the Common Development and
+   Distribution License (the License). You may not use this file except in compliance with the
+   License.
+
+   You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+   specific language governing permission and limitations under the License.
+
+   When distributing Covered Software, include this CDDL Header Notice in each file and include
+   the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+   Header, with the fields enclosed by brackets [] replaced by your own identifying
+   information: "Portions copyright [year] [name of copyright owner]".
+
+    Copyright 2015 ForgeRock AS.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.openidentityplatform.commons</groupId>
+  <artifactId>bom</artifactId>
+  <version>2.0.7-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>${project.groupId}.${project.artifactId}</name>
+  <description>Provides a list of shared and third party dependencies
+    which are known to be compatible with each other.</description>
+  
+  <properties>
+    <maven.min.version>3.0.1</maven.min.version>
+
+    <!-- Repository Deployment URLs -->
+
+    <!-- Third party components versions -->
+    <assertj.version>2.1.0</assertj.version>
+    <fest-assert.version>1.4</fest-assert.version>
+    <jackson.version>2.9.10</jackson.version>
+    <jackson-databind.version>${jackson.version}.1</jackson-databind.version>
+    <servlet-api.version>4.0.1</servlet-api.version>
+    <slf4j.version>1.7.25</slf4j.version>
+    <testng.version>6.14.3</testng.version>
+
+    <!-- Shared components versions -->
+    <json-crypto.version>3.0.2</json-crypto.version>
+    <json-patch.version>3.0.2</json-patch.version>
+    <json-ref.version>3.0.2</json-ref.version>
+    <json-schema.version>3.0.2</json-schema.version>
+    <json-web-token.version>3.0.2</json-web-token.version>
+  </properties>
+
+  <prerequisites>
+    <maven>${maven.min.version}</maven>
+  </prerequisites>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Third party dependencies -->
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-jdk14</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-nop</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-simple</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jul-to-slf4j</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>${testng.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.easytesting</groupId>
+        <artifactId>fest-assert</artifactId>
+        <version>${fest-assert.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.assertj</groupId>
+        <artifactId>assertj-core</artifactId>
+        <version>${assertj.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson-databind.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-jsonSchema</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-csv</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.datatype</groupId>
+        <artifactId>jackson-datatype-json-org</artifactId>
+        <version>${jackson.version}</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-afterburner</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>com.fasterxml.jackson.module</groupId>
+        <artifactId>jackson-module-jaxb-annotations</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
+
+      <!-- Open Identity Platform CommunityUtil dependencies -->
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>util</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>test-utils</artifactId>
+      </dependency>
+
+
+      <!-- Open Identity Platform CommunityHTTP Framework dependencies -->
+      <dependency>
+        <groupId>org.openidentityplatform.commons.http-framework</groupId>
+        <artifactId>client-apache-async</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.http-framework</groupId>
+        <artifactId>client-apache-common</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.http-framework</groupId>
+        <artifactId>client-apache-sync</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.http-framework</groupId>
+        <artifactId>core</artifactId>
+        </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.http-framework</groupId>
+        <artifactId>servlet</artifactId>
+      </dependency>
+
+      <!-- Open Identity Platform Communityjson-* dependencies -->
+      <dependency>
+        <groupId>org.openidentityplatform.commons.json-crypto</groupId>
+        <artifactId>core</artifactId>
+        <version>${json-crypto.version}</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.json-crypto</groupId>
+        <artifactId>cli</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>json-patch</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.json-ref</groupId>
+        <artifactId>core</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.json-ref</groupId>
+        <artifactId>jackson</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.json-schema</groupId>
+        <artifactId>core</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.json-schema</groupId>
+        <artifactId>cli</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>json-web-token</artifactId>
+      </dependency>
+
+      <!-- Open Identity Platform CommunityREST dependencies -->
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>json-resource-descriptor</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>json-resource</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>json-resource</artifactId>
+        <type>test-jar</type>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>json-resource-http</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>json-resource-examples</artifactId>
+      </dependency>
+
+
+      <!-- Open Identity Platform CommunityAuth filters dependencies -->
+      <dependency>
+        <groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
+    	<artifactId>iwa-module</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
+        <artifactId>jwt-session-module</artifactId>
+       </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
+        <artifactId>openam-session-module</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
+        <artifactId>openid-connect-module</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.authn-filter</groupId>
+        <artifactId>jaspi-runtime</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.auth-filters.authz-filter</groupId>
+        <artifactId>framework</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.auth-filters.authz-filter</groupId>
+        <artifactId>framework-api</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.auth-filters.authz-filter</groupId>
+        <artifactId>oauth2-module</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.auth-filters.authz-filter</groupId>
+        <artifactId>oauth2-restlet</artifactId>
+      </dependency>
+
+      <!-- Open Identity Platform CommunityAudit dependencies -->
+      <dependency>
+        <groupId>org.openidentityplatform.commons.audit</groupId>
+        <artifactId>core</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.audit</groupId>
+        <artifactId>json</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.audit</groupId>
+        <artifactId>handler-csv</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.audit</groupId>
+        <artifactId>handler-syslog</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.audit</groupId>
+        <artifactId>handler-jdbc</artifactId>
+      </dependency>
+
+      <dependency>
+          <groupId>org.openidentityplatform.commons.audit</groupId>
+          <artifactId>handler-splunk</artifactId>
+      </dependency>
+      
+      <dependency>
+          <groupId>org.openidentityplatform.commons.audit</groupId>
+          <artifactId>handler-jms</artifactId>
+      </dependency>
+      
+      <dependency>
+          <groupId>org.openidentityplatform.commons.audit</groupId>
+          <artifactId>handler-elasticsearch</artifactId>
+      </dependency>
+ 
+       <dependency>
+          <groupId>org.openidentityplatform.commons.audit</groupId>
+          <artifactId>handler-json</artifactId>
+      </dependency>
+                 
+      <!-- Open Identity Platform CommunityUser Self-Service dependencies -->
+      <dependency>
+        <groupId>org.openidentityplatform.commons.selfservice</groupId>
+        <artifactId>core</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.selfservice</groupId>
+        <artifactId>stages</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>org.openidentityplatform.commons.selfservice</groupId>
+        <artifactId>json</artifactId>
+      </dependency>
+
+      <dependency>
+        <groupId>javax.servlet</groupId>
+        <artifactId>javax.servlet-api</artifactId>
+        <version>${servlet-api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+</project>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  * The contents of this file are subject to the terms of the Common Development and
+  * Distribution License (the License). You may not use this file except in compliance with the
+  * License.
+  *
+  * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+  * specific language governing permission and limitations under the License.
+  *
+  * When distributing Covered Software, include this CDDL Header Notice in each file and include
+  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+  * Header, with the fields enclosed by brackets [] replaced by your own identifying
+  * information: "Portions copyright [year] [name of copyright owner]".
+  *
+  * Copyright 2014-2016 ForgeRock AS.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>authn-filter</artifactId>
+        <version>2.0.7-SNAPSHOT</version>
+    </parent>
+	<groupId>org.openidentityplatform.commons.authn-filter</groupId>
+    <artifactId>jaspi-functional-tests</artifactId>
+
+    <name>${project.groupId}.${project.artifactId}</name>
+    <description>Functional Test framework for running functional tests against the Jaspi runtime.</description>
+
+    <properties>
+        <hostname>localhost</hostname>
+        <context.uri>jaspi</context.uri>
+    </properties>
+
+    <build>
+        <finalName>${project.groupId}.${project.artifactId}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-install-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <workingDirectory>target/</workingDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*.java</include>
+                    </includes>
+                    <systemPropertyVariables>
+                        <HTTP_PORT>${servlet.http.port}</HTTP_PORT>
+                        <HOSTNAME>${hostname}</HOSTNAME>
+                        <CONTEXT_URI>${context.uri}</CONTEXT_URI>
+                        <ROOT_PATH>${project.build.directory}</ROOT_PATH>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>integration-test</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-ports</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <configuration>
+                            <portNames>
+                                <portName>servlet.http.port</portName>
+                            </portNames>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openidentityplatform.commons.authn-filter</groupId>
+            <artifactId>jaspi-runtime</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openidentityplatform.commons.http-framework</groupId>
+            <artifactId>servlet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openidentityplatform.commons.http-framework</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openidentityplatform.commons</groupId>
+            <artifactId>json-resource-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openidentityplatform.commons.guice</groupId>
+            <artifactId>core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openidentityplatform.commons.guice</groupId>
+            <artifactId>test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jayway.restassured</groupId>
+            <artifactId>rest-assured</artifactId>
+        </dependency>
+		<dependency>
+		    <groupId>com.google.code.findbugs</groupId>
+		    <artifactId>jsr305</artifactId>
+		    <version>RELEASE</version>
+		</dependency>
+    </dependencies>
+</project>

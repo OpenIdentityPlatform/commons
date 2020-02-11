@@ -19,10 +19,14 @@ under the License.
 --> 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.openidentityplatform.commons</groupId>
+    <parent>
+	    <groupId>org.openidentityplatform.commons</groupId>
+	    <artifactId>parent</artifactId>
+	    <version>2.0.7-SNAPSHOT</version>
+	    <relativePath>../..</relativePath>
+	</parent>
     <artifactId>maven-external-dependency-plugin</artifactId>
-    <version>0.6-SNAPSHOT</version>
-    <name>Maven External Dependency Plugin</name>
+    <name>${project.groupId}.${project.artifactId}</name>
     <url>http://code.google.com/p/maven-external-dependency-plugin/</url>
     <inceptionYear>2010</inceptionYear>
     <description>
@@ -31,7 +35,7 @@ under the License.
     <packaging>maven-plugin</packaging>
     <developers>
         <developer> 
-            <name>Robert Savage</name>
+            <name>${project.groupId}.${project.artifactId}</name>
             <email>robert@savage7.com</email>
             <roles>
                 <role>owner</role>
@@ -41,14 +45,14 @@ under the License.
     </developers>
     <contributors>
       <contributor>
-        <name>Marvin Froeder</name>
+        <name>${project.groupId}.${project.artifactId}</name>
         <email>velo.br@gmail.com</email>
         <roles>
           <role>Add support to extra compressed artifacts like bzip2, dir, gzip, tar, tgz, tar.gz, tbz2, tar.bz2</role>
         </roles>
       </contributor>
       <contributor> 
-            <name>Valera Kharseko</name>
+            <name>${project.groupId}.${project.artifactId}</name>
             <email>vharseko@openam.org.ru</email>
             <roles>
                 <role>vagon extension provider</role>
@@ -56,18 +60,6 @@ under the License.
             <url>http://openam.org.ru</url>
         </contributor>
     </contributors>
-    <issueManagement>
-        <system>Google Code - Issue Tracking</system>
-        <url>http://code.google.com/p/maven-external-dependency-plugin/issues/list</url>
-    </issueManagement>    
-	<licenses>
-	  <license>
-	    <name>Apache 2</name>
-	    <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-	    <distribution>repo</distribution>
-	    <comments>A business-friendly OSS license</comments>
-	  </license>
-	</licenses>    
     
     <!-- BUILD PROPERTIES -->
     <properties>
@@ -78,7 +70,7 @@ under the License.
         
     <!--  PLUGINS -->
     
-    <build>
+    <build><finalName>${project.groupId}.${project.artifactId}</finalName>
          <plugins>
             <plugin>
                 <artifactId>maven-plugin-plugin</artifactId>
@@ -139,11 +131,11 @@ under the License.
 	    <id>release-sign-artifacts</id>
 	    <activation>
 	      <property>
-	        <name>performRelease</name>
+	        <name>${project.groupId}.${project.artifactId}</name>
 	        <value>true</value>
 	      </property>
 	    </activation>
-	    <build>
+	    <build><finalName>${project.groupId}.${project.artifactId}</finalName>
 	      <plugins>
 	        <plugin>
 	          <groupId>org.apache.maven.plugins</groupId>
@@ -223,33 +215,7 @@ under the License.
     
     <!--  SOURCE CONTROL -->
 
-    <scm>
-        <connection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</connection>
-        <developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</developerConnection>
-        <url>https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin</url>
-    </scm>
-
-        
-  <!--  MAVEN DEPLOYMENT REPOSITORY -->
-  
-  <distributionManagement>
-    <repository>
-       <id>ossrh</id>
-       <name>Sonatype OSS Repository</name>
-       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-    </repository>
-    <snapshotRepository>
-       <id>ossrh</id>
-       <name>Sonatype OSS Repository</name>
-       <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-    </snapshotRepository>
-    <site>
-       <id>savage7-site-docs</id>
-       <name>Savage7 Site Docs</name>
-       <url>ftp://savage7.com/maven-external-dependency-plugin/</url>
-    </site>
-  </distributionManagement>
-  
+   
         
   <!--  SITE REPORTING / DOCUMENTATION -->
   
