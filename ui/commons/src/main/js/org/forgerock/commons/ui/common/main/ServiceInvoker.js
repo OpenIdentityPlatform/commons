@@ -20,8 +20,9 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/ErrorsHandler",
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function($, _, AbstractConfigurationAware, Constants, ErrorsHandler, EventManager) {
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/i18nManager"
+], function($, _, AbstractConfigurationAware, Constants, ErrorsHandler, EventManager, i18nManager) {
     /**
      * @exports org/forgerock/commons/ui/common/main/ServiceInvoker
      */
@@ -159,6 +160,15 @@ define([
             options.headers["Cache-Control"] = "no-cache";
         }
 
+        /**
+         * Inform the backend the locale we're expecting our results in. If not specified, AJAX default behavior
+         * assumes the default browser locale
+         */
+        if (!_.has(options.headers, "Accept-Language") && i18nManager.lang) {
+            options.headers["Accept-Language"] = i18nManager.lang;
+        }
+
+
         $.ajax(options).then(resolveHandler,rejectHandler);
 
         return promise;
@@ -189,3 +199,4 @@ define([
 
     return obj;
 });
+
