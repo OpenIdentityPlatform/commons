@@ -136,28 +136,28 @@ public class PromiseContractTest {
     public void shouldReturnNewPromiseUsingThenWithFunction(Promise<?, Exception> rootPromise) throws Exception {
         Promise<?, Exception> leafPromise;
 
-        leafPromise = rootPromise.then(mock(Function.class));
+        leafPromise = rootPromise.then((Function)mock(Function.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
 
-        leafPromise = rootPromise.then(mock(Function.class), mock(Function.class));
+        leafPromise = rootPromise.then((Function)mock(Function.class), (Function)mock(Function.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
 
-        leafPromise = rootPromise.thenAsync(mock(AsyncFunction.class));
+        leafPromise = rootPromise.thenAsync((AsyncFunction)mock(AsyncFunction.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
 
-        leafPromise = rootPromise.thenAsync(mock(AsyncFunction.class), mock(AsyncFunction.class));
+        leafPromise = rootPromise.thenAsync((AsyncFunction)mock(AsyncFunction.class), (AsyncFunction)mock(AsyncFunction.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
 
-        leafPromise = rootPromise.thenCatch(mock(Function.class));
+        leafPromise = rootPromise.thenCatch((Function)mock(Function.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
 
-        leafPromise = rootPromise.thenCatchAsync(mock(AsyncFunction.class));
+        leafPromise = rootPromise.thenCatchAsync((AsyncFunction)mock(AsyncFunction.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
 
-        leafPromise = rootPromise.thenCatchRuntimeException(mock(Function.class));
+        leafPromise = rootPromise.thenCatchRuntimeException((Function)mock(Function.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
 
-        leafPromise = rootPromise.thenCatchRuntimeExceptionAsync(mock(AsyncFunction.class));
+        leafPromise = rootPromise.thenCatchRuntimeExceptionAsync((AsyncFunction)mock(AsyncFunction.class));
         assertThat(leafPromise).isNotSameAs(rootPromise);
     }
 
