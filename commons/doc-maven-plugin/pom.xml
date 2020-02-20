@@ -54,7 +54,7 @@
   <mavenResourcesVersion>2.7</mavenResourcesVersion>
   <plantUmlVersion>7993</plantUmlVersion>
   <plexusUtilsVersion>3.0.22</plexusUtilsVersion>
-  <xCiteVersion>1.1.0-SNAPSHOT</xCiteVersion>
+  <xCiteVersion>${project.version}</xCiteVersion>
 
  </properties>
 

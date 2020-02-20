@@ -285,7 +285,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
     /**
      * The groupId of the branding to use.
      */
-    @Parameter(defaultValue = "org.forgerock.commons")
+    @Parameter(defaultValue = "org.openidentityplatform.commons")
     private String brandingGroupId;
 
     /**
@@ -388,7 +388,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
     /**
      * The {@code artifactId} of the common content artifact.
      */
-    @Parameter(defaultValue = "forgerock-doc-common-content")
+    @Parameter(defaultValue = "doc-common-content")
     private String commonContentArtifactId;
 
     /**
@@ -407,7 +407,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
     /**
      * The {@code groupId} of the common content artifact.
      */
-    @Parameter(defaultValue = "org.forgerock.commons")
+    @Parameter(defaultValue = "org.openidentityplatform.commons")
     private String commonContentGroupId;
 
     /**

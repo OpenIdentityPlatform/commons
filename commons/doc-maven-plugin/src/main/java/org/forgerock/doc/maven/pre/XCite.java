@@ -121,7 +121,7 @@ public class XCite {
 
             executeMojo(
                     plugin(
-                            groupId("org.forgerock.maven.plugins"),
+                            groupId("org.openidentityplatform.commons"),
                             artifactId("xcite-maven-plugin"),
                             version(xCiteVersion),
                             dependencies(
