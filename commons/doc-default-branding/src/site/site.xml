@@ -29,18 +29,18 @@
   <body>
 
     <breadcrumbs>
-      <item name="Developer Community" href="http://www.forgerock.org"/>
-      <item name="Commons" href="http://commons.forgerock.org"/>
+      <item name="Developer Community" href="https://www.openidentityplatform.org"/>
+      <item name="Commons" href="https://github.com/OpenIdentityPlatform/commons"/>
       <item name="Doc Default Branding"
-            href="http://commons.forgerock.org/forgerock-doc-default-branding"/>
+            href="https://github.com/OpenIdentityPlatform/commons/tree/master/commons/doc-default-branding"/>
     </breadcrumbs>
 
     <menu name="Development">
       <item name="Join"
-            href="https://sso.forgerock.com/openam/UI/Login"/>
-      <item name="Issue Tracking" href="issue-tracking.html"/>
-      <item name="License" href="license.html"/>
-      <item name="Source Repository" href="source-repository.html"/>
+            href="https://github.com/OpenIdentityPlatform"/>
+      <item name="Issue Tracking" href="https://github.com/OpenIdentityPlatform/commons/issues"/>
+      <item name="License" href="https://github.com/OpenIdentityPlatform/commons/blob/master/README.md"/>
+      <item name="Source Repository" href="https://github.com/OpenIdentityPlatform/commons/"/>
     </menu>
 
     <menu ref="reports"/>

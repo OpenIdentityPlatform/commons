@@ -266,7 +266,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
     /**
      * The artifactId of the branding to use.
      */
-    @Parameter(defaultValue = "forgerock-doc-default-branding")
+    @Parameter(defaultValue = "doc-default-branding")
     private String brandingArtifactId;
 
     /**
@@ -274,7 +274,7 @@ abstract public class AbstractDocbkxMojo extends AbstractMojo {
      *
      * <br>
      *
-     * Default: {@code forgerock-doc-default-branding}.
+     * Default: {@code doc-default-branding}.
      *
      * @return The branding artifactId.
      */
