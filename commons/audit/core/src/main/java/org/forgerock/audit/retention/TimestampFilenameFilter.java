@@ -67,7 +67,7 @@ public class TimestampFilenameFilter implements FilenameFilter {
 
         final String timestamp = name.substring(newFileName.length());
         try {
-            suffixDateFormat.parseDateTime(timestamp);
+            suffixDateFormat.parseDateTime(timestamp.replace(".gz",""));
         } catch (IllegalArgumentException | UnsupportedOperationException e) {
             // not a valid timestamp for the given timestamp suffix
             return false;

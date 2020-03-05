@@ -47,7 +47,7 @@ public class RotatableWriterTest {
 
     private static final String ONE_SECOND = "1 second";
     private static final int MAX_BYTES_TO_WRITE = 100;
-    private static final String ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-HH.mm.ss.SSS";
+    private static final String ROTATION_FILE_SUFFIX = "-yyyy.MM.dd-HH.mm.ss.SSS.gz";
 
     private RotatableWriter rotatableWriter;
 
@@ -348,7 +348,7 @@ public class RotatableWriterTest {
 
     private Set<File> getRetainedHistoricalFiles(File file, String prefix) {
         final TimestampFilenameFilter timestampFilenameFilter =
-                new TimestampFilenameFilter(file, prefix, DateTimeFormat.forPattern(ROTATION_FILE_SUFFIX));
+                new TimestampFilenameFilter(file, prefix, DateTimeFormat.forPattern(ROTATION_FILE_SUFFIX.replace(".gz","")));
         assertThat(file.getParentFile()).isDirectory();
         final File[] historicalFiles = file.getParentFile().listFiles(timestampFilenameFilter);
         cleanupFilesWhenDone(historicalFiles);

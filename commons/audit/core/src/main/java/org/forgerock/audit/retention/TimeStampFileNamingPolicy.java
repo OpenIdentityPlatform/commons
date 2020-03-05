@@ -44,6 +44,7 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
 
     private final File initialFile;
     private DateTimeFormatter suffixDateFormat;
+    private String suffix="";
     private final String prefix;
     private final TimestampFilenameFilter timestampFilenameFilter;
     private final LastModifiedTimeFileComparator lastModifiedTimeFileComparator = new LastModifiedTimeFileComparator();
@@ -62,14 +63,18 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
 
         if (timeStampFormat != null && timeStampFormat.trim().length() > 0) {
             try {
-                suffixDateFormat = DateTimeFormat.forPattern(timeStampFormat);
+                suffixDateFormat = DateTimeFormat.forPattern(timeStampFormat.replace(".gz", ""));
+                if (timeStampFormat.endsWith(".gz"))
+                	suffix=".gz";
             } catch (IllegalArgumentException iae) {
                 logger.info("Date format invalid: {}", timeStampFormat, iae);
             }
         }
         if (suffixDateFormat == null) {
             // fallback to a default date format, so the filenames will differ
-            suffixDateFormat = DateTimeFormat.forPattern(DEFAULT_ROTATION_FILE_SUFFIX);
+            suffixDateFormat = DateTimeFormat.forPattern(DEFAULT_ROTATION_FILE_SUFFIX.replace(".gz", ""));
+            if (DEFAULT_ROTATION_FILE_SUFFIX.endsWith(".gz"))
+            	suffix=".gz";
         }
         this.timestampFilenameFilter = new TimestampFilenameFilter(initialFile, prefix, suffixDateFormat);
     }
@@ -100,7 +105,7 @@ public class TimeStampFileNamingPolicy implements FileNamingPolicy {
         newFileName.append(path.getFileName());
 
         if (suffixDateFormat != null) {
-            newFileName.append(LocalDateTime.now().toString(suffixDateFormat));
+            newFileName.append(LocalDateTime.now().toString(suffixDateFormat)).append(suffix);
         }
 
         Path newFilePath = path.resolveSibling(newFileName.toString());

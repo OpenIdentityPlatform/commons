@@ -23,7 +23,7 @@
           "autoFlush": "true"
         },
         "fileRotation" : {
-          "rotationFileSuffix" : "-yyyy.MM.dd-HH.mm.ss",
+          "rotationFileSuffix" : "-yyyy.MM.dd-HH.mm.ss.gz",
           "rotationEnabled" : true,
           "rotationInterval" : "5 seconds",
           "maxFileSize" : 1024,
