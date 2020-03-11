@@ -1,0 +1,217 @@
+{
+  "eventHandlers" : [
+    {
+      "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+      "config" : {
+        "name" : "csv",
+        "enabled" : true,
+        "topics": [ "access", "activity", "config", "authentication" ],
+        "logDirectory" : "/tmp/audit",
+        "formatting" : {
+          "quoteChar" : "\"",
+          "delimiterChar" : ",",
+          "endOfLineSymbols" : "\n"
+        },
+        "security" : {
+          "enabled" : "false",
+          "filename" : "/path/to/keystore.jks",
+          "password" : "correcthorsebatterystaple",
+          "signatureInterval" : "3 seconds"
+        },
+        "buffering" : {
+          "enabled": "true",
+          "autoFlush": "true"
+        },
+        "fileRotation" : {
+          "rotationFileSuffix" : "-yyyy.MM.dd-HH.mm.ss.gz",
+          "rotationEnabled" : true,
+          "rotationInterval" : "5 seconds",
+          "maxFileSize" : 1024,
+          "rotationFilePrefix" : "prefix-"
+        },
+        "fileRetention" : {
+          "maxNumberOfHistoryFiles": 0
+        }
+      }
+    },
+    {
+      "class" : "org.forgerock.audit.handlers.syslog.SyslogAuditEventHandler",
+      "config" : {
+        "name" : "syslog",
+        "enabled" : true,
+        "topics": [ "access", "activity", "config", "authentication" ],
+        "protocol" : "UDP",
+        "host" : "localhost",
+        "port" : 514,
+        "facility" : "LOCAL0",
+        "severityFieldMappings": [{
+          "topic" : "system-status",
+          "field"  : "level",
+          "valueMappings" : {
+            "SEVERE" : "EMERGENCY",
+            "WARNING" : "WARNING",
+            "INFO" : "INFORMATIONAL"
+          }
+        }],
+        "buffering" : {
+          "enabled" : "true"
+        }
+      }
+    },
+    {
+      "class" : "org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandler",
+      "config" : {
+        "name" : "jdbc",
+        "enabled" : false,
+        "topics": [ "access", "activity", "config", "authentication" ],
+        "databaseType" : "mysql",
+        "connectionPool" : {
+          "jdbcUrl" : "jdbc:mysql://localhost:3306/audit?allowMultiQueries=true&characterEncoding=utf8",
+          "username" : "auditAdmin",
+          "password" : "auditAdminPassword"
+        },
+        "tableMappings" : [
+          {
+            "event": "authentication",
+            "table": "auditauthentication",
+            "fieldToColumn": {
+              "_id" : "id",
+              "transactionId" : "transactionid",
+              "timestamp" : "timestamp_",
+              "userId" : "userid",
+              "eventName" : "eventname",
+              "result" : "result",
+              "principal" : "principals",
+              "context" : "context",
+              "entries" : "entries",
+              "trackingIds" : "trackingids"
+            }
+          },
+          {
+            "event": "activity",
+            "table": "auditactivity",
+            "fieldToColumn": {
+              "_id" : "id",
+              "timestamp" : "timestamp_",
+              "eventName" : "eventname",
+              "transactionId" : "transactionid",
+              "userId" : "userid",
+              "trackingIds" : "trackingids",
+              "runAs" : "runas",
+              "objectId" : "objectid",
+              "operation" : "operation",
+              "before" : "beforeObject",
+              "after" : "afterObject",
+              "changedFields" : "changedfields",
+              "revision" : "rev"
+            }
+          },
+          {
+            "event": "access",
+            "table": "auditaccess",
+            "fieldToColumn": {
+              "_id" : "id",
+              "timestamp" : "timestamp_",
+              "eventName" : "eventname",
+              "transactionId" : "transactionid",
+              "userId" : "userid",
+              "trackingIds" : "trackingids",
+              "server/ip" : "server_ip",
+              "server/port" : "server_port",
+              "client/host" : "client_host",
+              "client/ip" : "client_ip",
+              "client/port" : "client_port",
+              "request/protocol" : "request_protocol",
+              "request/operation" : "request_operation",
+              "request/detail" : "request_detail",
+              "http/request/secure" : "http_request_secure",
+              "http/request/method" : "http_request_method",
+              "http/request/path" : "http_request_path",
+              "http/request/queryParameters" : "http_request_queryparameters",
+              "http/request/headers" : "http_request_headers",
+              "http/request/cookies" : "http_request_cookies",
+              "http/response/headers" : "http_response_headers",
+              "response/status" : "response_status",
+              "response/statusCode" : "response_statuscode",
+              "response/elapsedTime" : "response_elapsedtime",
+              "response/elapsedTimeUnits" : "response_elapsedtimeunits"
+            }
+          },
+          {
+            "event": "config",
+            "table": "auditconfig",
+            "fieldToColumn": {
+              "_id" : "id",
+              "timestamp" : "timestamp_",
+              "eventName" : "eventname",
+              "transactionId" : "transactionid",
+              "userId" : "userid",
+              "trackingIds" : "trackingids",
+              "runas" : "runas",
+              "objectId" : "objectid",
+              "operation" : "operation",
+              "before" : "beforeObject",
+              "after" : "afterObject",
+              "changedFields": "changedfields",
+              "revision" : "rev"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "class" : "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
+      "config" : {
+        "name" : "elasticsearch",
+        "enabled" : false,
+        "topics": [ "access", "activity", "config", "authentication" ],
+        "connection" : {
+          "useSSL" : false,
+          "host" : "localhost",
+          "port" : 9200,
+          "username" : "myUsername",
+          "password" : "myPassword"
+        },
+        "indexMapping" : {
+          "indexName" : "audit"
+        },
+        "buffering" : {
+          "enabled" : true,
+          "maxSize" : 10000,
+          "writeInterval" : "250 millis",
+          "maxBatchedEvents" : 500
+        }
+      }
+    },
+    {
+      "class" : "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
+      "config" : {
+        "name": "jms",
+        "enabled" : false,
+        "topics": [
+          "access",
+          "activity",
+          "config",
+          "authentication"
+        ],
+        "deliveryMode": "NON_PERSISTENT",
+        "sessionMode": "AUTO",
+        "batch": {
+          "batchEnabled": true,
+          "capacity": 1000,
+          "threadCount": 3,
+          "maxBatchedEvents": 100
+        },
+        "jndi": {
+          "contextProperties": {
+            "java.naming.factory.initial": "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+            "java.naming.provider.url": "tcp://localhost:61616",
+            "topic.audit": "audit"
+          },
+          "topicName": "audit",
+          "connectionFactoryName": "ConnectionFactory"
+        }
+      }
+    }
+  ]
+}

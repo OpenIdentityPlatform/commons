@@ -25,71 +25,59 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>org.openidentityplatform</groupId>
-    <artifactId>forgerock-parent</artifactId>
-    <version>2.0.6</version>
+    <groupId>org.openidentityplatform.commons</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.0.7-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>ForgeRock Parent</name>
-    <description>Parent POM for ForgeRock projects. Provides default project build configuration.</description>
-     <url>https://github.com/OpenIdentityPlatform/forgerock-parent/</url>
-    <licenses>
-        <license>
-            <name>CDDL-1.0</name>
-            <url>http://opensource.org/licenses/CDDL-1.0</url>
-            <comments>Common Development and Distribution License (CDDL) 1.0</comments>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
+    <name>${project.groupId}.${project.artifactId}</name>
+    <description>Parent POM for Open Identity Platform Community projects. Provides default project build configuration.</description>
+    <url>https://github.com/OpenIdentityPlatform/commons/</url>
+
     <organization>
         <name>Open Identity Platform Community</name>
         <url>https://github.com/OpenIdentityPlatform</url>
     </organization>
+    <licenses>
+        <license>
+            <name>CDDL-1.0</name>
+            <url>http://www.opensource.org/licenses/CDDL-1.0</url>
+            <comments>Common Development and Distribution License (CDDL) 1.0.
+                This license applies to source code as indicated in the
+                source files.
+            </comments>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/OpenIdentityPlatform/forgerock-parent/issues</url>
+        <url>https://github.com/OpenIdentityPlatform/commons/issues</url>
     </issueManagement>
     <scm>
-        <connection>scm:git:https://github.com/OpenIdentityPlatform/forgerock-parent.git</connection>
-        <developerConnection>scm:git:git@github.com/OpenIdentityPlatform/forgerock-parent.git</developerConnection>
-        <url>https://github.com/OpenIdentityPlatform/forgerock-parent</url>
-        <tag>2.0.6</tag>
+        <connection>scm:git:https://github.com/OpenIdentityPlatform/commons.git</connection>
+        <developerConnection>scm:git:git@github.com/OpenIdentityPlatform/commons.git</developerConnection>
+        <url>https://github.com/OpenIdentityPlatform/commons</url>
+        <tag>HEAD</tag>
     </scm>
-    <repositories>
-		<repository>
-			<id>ossrh-releases</id>
-			<name>Sonatype OSS</name>
-			<url>https://oss.sonatype.org/service/local/repositories/orgopenidentityplatform-1000/content/</url>
-		</repository>
-		<repository>
-			<id>ossrh-snapshots</id>
-			<name>Sonatype OSS Repository</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-			<snapshots><enabled>true</enabled></snapshots>
-		</repository>
-	</repositories>
 	<distributionManagement>
 		<repository>
 			<id>ossrh</id>
-			<name>Sonatype OSS Repository</name>
 			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
 		</repository>
 		<snapshotRepository>
 			<id>ossrh</id>
-			<name>Sonatype OSS Repository</name>
 			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 	<modules>
 		<module>maven-external-dependency-plugin/maven-external-dependency-plugin</module>
-		<module>forgerock-bom</module>
-		<module>forgerock-build-tools</module>
-		<module>forgerock-i18n-framework</module>
-		<module>forgerock-guice</module>
-		<module>forgerock-ui</module>
-		<module>forgerock-commons</module>
-		<module>forgerock-bloomfilter</module>
-		<module>forgerock-persistit</module>
-		<module>forgerock-script</module>
+		<module>build-tools</module>
+		<module>i18n-framework</module>
+		<module>guice</module>
+		<module>ui</module>
+		<module>commons</module>
+		<module>bloomfilter</module>
+		<module>persistit</module>
+		<module>script</module>
 	</modules>
     <properties>
         <!-- ************** -->
@@ -102,8 +90,8 @@
 
         <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
         <mavenCompilerPluginVersion>3.3</mavenCompilerPluginVersion>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <maven.compiler.source>1.7</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
 
         <!-- maven-enforcer-plugin -->
         <maven.min.version>3.0.1</maven.min.version>
@@ -114,7 +102,7 @@
 
         <!-- maven-javadoc-plugin -->
         <javadocPluginVersion>3.0.1</javadocPluginVersion>
-        <!-- forgerock-build-tools stylesheet org/forgerock/javadoc/javadoc.css
+        <!-- build-tools stylesheet org/forgerock/javadoc/javadoc.css
              does not work with JDK7 -->
         <javadocStylesheet />
         <javadocWindowTitle>${project.name} ${project.version} Documentation</javadocWindowTitle>
@@ -187,9 +175,6 @@
         <!-- maven-enforcer-plugin http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
         <mavenEnforcerPluginVersion>3.0.0-M2</mavenEnforcerPluginVersion>
 
-        <!-- maven-release-plugin http://maven.apache.org/plugins/maven-release-plugin/ -->
-        <mavenReleasePluginVersion>2.5.3</mavenReleasePluginVersion>
-
         <!-- ***************** -->
         <!-- Repository Deployment URLs -->
         <!-- ***************** -->
@@ -197,11 +182,12 @@
         <!-- this property makes sure NetBeans 6.8+ picks up some formatting rules from checkstyle -->
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
-        <!--  ForgeRock build tools version -->
-        <forgerockBuildToolsVersion>1.0.3</forgerockBuildToolsVersion>
-
-        <!-- Forgerock binary license name -->
-        <binary.license.name>Forgerock_License.txt</binary.license.name>
+        <jackson.version>2.10.3</jackson.version>
+        <slf4j.version>1.7.30</slf4j.version>
+        <swagger.version>1.5.9</swagger.version>
+        <apache-httpcore.version>4.4.11</apache-httpcore.version>
+        <apache-httpclient.version>4.5.9</apache-httpclient.version>
+        <apache-httpasyncclient.version>4.1.4</apache-httpasyncclient.version>
     </properties>
 
     <prerequisites>
@@ -209,26 +195,514 @@
     </prerequisites>
 	<dependencyManagement>
 		<dependencies>
+
 			<dependency>
-			    <groupId>com.google.guava</groupId>
-			    <artifactId>guava</artifactId>
-		<!-- 	    If you need support for JDK 1.7 or Android, use the Android flavor -->
-		    		<version>28.1-android</version>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-jdk14</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-nop</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+			
+			<dependency>
+				<groupId>com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<!-- If you need support for JDK 1.7 or Android, use the Android flavor -->
+				<version>28.1-android</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>2.23.4</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>6.14.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-core</artifactId>
+				<version>2.4.1</version>
+			</dependency>
+
+            <dependency>
+                <groupId>com.sun.mail</groupId>
+                <artifactId>javax.mail</artifactId>
+                <version>1.6.2</version>
+            </dependency>
+            
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>${jackson.version}</version>
 			</dependency>
 			<dependency>
-			  <groupId>org.mockito</groupId>
-			  <artifactId>mockito-core</artifactId>
-			  <version>2.23.4</version>
-			  <scope>test</scope>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jsonSchema</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-csv</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-json-org</artifactId>
+                <version>${jackson.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.json</groupId>
+                        <artifactId>json</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-afterburner</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-xml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-cbor</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-joda</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
+
+            
+			<dependency>
+				<groupId>org.openidentityplatform.commons.guice</groupId>
+				<artifactId>core</artifactId>
+				<version>${project.version}</version>
 			</dependency>
 			<dependency>
-			  <groupId>org.slf4j</groupId>
-			  <artifactId>slf4j-api</artifactId>
-			  <version>1.7.25</version>
+				<groupId>org.openidentityplatform.commons.guice</groupId>
+				<artifactId>test</artifactId>
+				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>org.openidentityplatform.commons.guice</groupId>
+				<artifactId>servlet</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>test-utils</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+             <dependency>
+                <groupId>org.openidentityplatform.commons.ui</groupId>
+                <artifactId>user</artifactId>
+                <classifier>www</classifier>
+            	<type>zip</type>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.http-framework</groupId>
+                <artifactId>client-apache-async</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.http-framework</groupId>
+                <artifactId>client-apache-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.http-framework</groupId>
+                <artifactId>client-apache-sync</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.http-framework</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.http-framework</groupId>
+                <artifactId>servlet</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.http-framework</groupId>
+                <artifactId>grizzly</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.http-framework</groupId>
+                <artifactId>oauth2</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.json-crypto</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.json-crypto</groupId>
+                <artifactId>cli</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>json-patch</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.json-ref</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.json-ref</groupId>
+                <artifactId>jackson</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.json-schema</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.json-schema</groupId>
+                <artifactId>cli</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>json-web-token</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>json-resource-descriptor</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>json-resource</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>json-resource</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>json-resource-http</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>json-resource-examples</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>api-descriptor</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
+                <artifactId>iwa-module</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
+                <artifactId>jwt-session-module</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
+                <artifactId>openam-session-module</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
+                <artifactId>openid-connect-module</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.authn-filter</groupId>
+                <artifactId>jaspi-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.auth-filters.authz-filter</groupId>
+                <artifactId>framework</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.auth-filters.authz-filter</groupId>
+                <artifactId>framework-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>oauth2-module</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>oauth2-restlet</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>json</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>handler-csv</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>handler-elasticsearch</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>handler-jdbc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>handler-jms</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>handler-syslog</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>handler-splunk</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+             <dependency>
+                <groupId>org.openidentityplatform.commons.audit</groupId>
+                <artifactId>handler-json</artifactId>
+                <version>${project.version}</version>
+            </dependency>          
+            <dependency>
+                <groupId>org.openidentityplatform.commons.selfservice</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.selfservice</groupId>
+                <artifactId>stages</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.selfservice</groupId>
+                <artifactId>json</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+		    <dependency>
+		      <groupId>org.openidentityplatform.commons.ui</groupId>
+		      <artifactId>commons</artifactId>
+		      <type>zip</type>
+		      <classifier>www</classifier>
+		      <version>${project.version}</version>
+		    </dependency>
+            <dependency>
+                <groupId>javax.servlet</groupId>
+                <artifactId>javax.servlet-api</artifactId>
+                <version>4.0.1</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${swagger.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.swagger</groupId>
+                        <artifactId>swagger-annotations</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>io.swagger</groupId>
+                <artifactId>swagger-core</artifactId>
+                <version>${swagger.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.datatype</groupId>
+                        <artifactId>jackson-datatype-joda</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.dataformat</groupId>
+                        <artifactId>jackson-dataformat-yaml</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>geo</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>httpdump</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.openidentityplatform.commons.i18n-framework</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.i18n-framework</groupId>
+                <artifactId>slf4j</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>build-tools</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+             <dependency>
+                <groupId>org.openidentityplatform.commons.persistit</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+                <groupId>org.openidentityplatform.commons.bloomfilter</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.bloomfilter</groupId>
+                <artifactId>monitoring</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            
+            <dependency>
+		        <groupId>com.maxmind.geoip2</groupId>
+		        <artifactId>geoip2</artifactId>
+		        <version>2.13.0</version>
+		        <exclusions>
+		          <exclusion>
+		            <groupId>org.apache.httpcomponents</groupId>
+		            <artifactId>httpcore</artifactId>
+		          </exclusion>
+		          <exclusion>
+		            <groupId>org.apache.httpcomponents</groupId>
+		            <artifactId>httpclient</artifactId>
+		          </exclusion>
+		        </exclusions>
+		      </dependency>
+		      <dependency>
+		        <groupId>com.sun.xml.fastinfoset</groupId>
+		        <artifactId>FastInfoset</artifactId>
+		        <version>1.2.17</version>
+		      </dependency>
 		</dependencies>
 	</dependencyManagement>
-    <build>
+    <build><finalName>${project.groupId}.${project.artifactId}</finalName>
         <pluginManagement>
             <!--    mvn versions:display-plugin-updates
                     mvn versions:display-dependency-updates
@@ -274,13 +748,13 @@
                     <dependencies>
                         <dependency>
                             <groupId>org.openidentityplatform</groupId>
-                            <artifactId>forgerock-build-tools</artifactId>
+                            <artifactId>build-tools</artifactId>
                             <version>${forgerockBuildToolsVersion}</version>
                         </dependency>
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>8.18</version>
+                            <version>[8.29,)</version>
                         </dependency>
                     </dependencies>
 
@@ -368,7 +842,7 @@
 <!--                     <dependencies> -->
 <!--                         <dependency> -->
 <!--                             <groupId>org.openidentityplatform</groupId> -->
-<!--                             <artifactId>forgerock-build-tools</artifactId> -->
+<!--                             <artifactId>build-tools</artifactId> -->
 <!--                             <version>${forgerockBuildToolsVersion}</version> -->
 <!--                         </dependency> -->
 <!--                     </dependencies> -->
@@ -388,11 +862,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-plugin-plugin</artifactId>
-                    <version>3.6.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-pmd-plugin</artifactId>
                     <version>${pmdPluginVersion}</version>
                 </plugin>
@@ -403,24 +872,8 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>${mavenReleasePluginVersion}</version>
-                    <inherited>true</inherited>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.apache.maven.scm</groupId>
-                            <artifactId>maven-scm-provider-gitexe</artifactId>
-                            <version>1.8.1</version>
-                        </dependency>
-                    </dependencies>
-                    <configuration>
-                        <autoVersionSubmodules>true</autoVersionSubmodules>
-                        <mavenExecutorId>forked-path</mavenExecutorId>
-                        <releaseProfiles>enforce,forgerock-release</releaseProfiles>
-                        <suppressCommitBeforeTag>false</suppressCommitBeforeTag>
-                        <goals>deploy</goals>
-                        <tagNameFormat>@{project.version}</tagNameFormat>
-                    </configuration>
+			        <artifactId>maven-release-plugin</artifactId>
+			        <version>3.0.0-M1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -472,13 +925,13 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${mavenSurefirePluginVersion}</version>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.openidentityplatform</groupId>
-                            <artifactId>forgerock-build-tools</artifactId>
-                            <version>${forgerockBuildToolsVersion}</version>
-                        </dependency>
-                    </dependencies>
+<!--                     <dependencies> -->
+<!--                         <dependency> -->
+<!--                             <groupId>org.openidentityplatform</groupId> -->
+<!--                             <artifactId>build-tools</artifactId> -->
+<!--                             <version>${forgerockBuildToolsVersion}</version> -->
+<!--                         </dependency> -->
+<!--                     </dependencies> -->
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -516,8 +969,8 @@
                                 </pluginExecution>
                                 <pluginExecution>
                                     <pluginExecutionFilter>
-                                        <groupId>org.openidentityplatform.commons</groupId>
-                                        <artifactId>i18n-maven-plugin</artifactId>
+                                        <groupId>org.openidentityplatform.commons.i18n-framework</groupId>
+                                        <artifactId>maven-plugin</artifactId>
                                         <versionRange>[1.2.0,)</versionRange>
                                         <goals>
                                             <goal>generate-messages</goal>
@@ -717,10 +1170,10 @@
             <id>enforce</id>
             <activation>
                 <property>
-                    <name>!skip-enforce</name>
+                    <name>${project.groupId}.${project.artifactId}</name>
                 </property>
             </activation>
-            <build>
+            <build><finalName>${project.groupId}.${project.artifactId}</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -778,7 +1231,7 @@
         </profile>
         <profile>
             <id>precommit</id>
-            <build>
+            <build><finalName>${project.groupId}.${project.artifactId}</finalName>
                 <plugins>
 <!--                     <plugin> -->
                         <!-- Enforce Checkstyle during compilation -->
@@ -833,7 +1286,7 @@
             <properties>
                 <testReportsDirectory>${project.build.directory}/surefire-reports/cobertura</testReportsDirectory>
             </properties>
-            <build>
+            <build><finalName>${project.groupId}.${project.artifactId}</finalName>
                 <plugins>
                     <!-- Enforce Checkstyle during compilation -->
                     <plugin>
@@ -920,7 +1373,7 @@
         </profile>
         <profile>
             <id>sign</id>
-            <build>
+            <build><finalName>${project.groupId}.${project.artifactId}</finalName>
                 <plugins>
                     <!-- We want to sign the artifact, the POM, and all attached artifacts -->
                     <plugin>
@@ -944,8 +1397,8 @@
             </build>
         </profile>
         <profile>
-            <id>forgerock-release</id>
-            <build>
+            <id>release</id>
+            <build><finalName>${project.groupId}.${project.artifactId}</finalName>
                 <plugins>
                     <plugin>
                         <inherited>true</inherited>
@@ -1004,7 +1457,7 @@
                     <exists>${basedir}</exists>
                 </file>
             </activation>
-            <build>
+            <build><finalName>${project.groupId}.${project.artifactId}</finalName>
                 <pluginManagement>
                     <plugins>
                         <plugin>
@@ -1041,10 +1494,10 @@
             <id>generate-javadoc-jar</id>
             <activation>
                 <property>
-                    <name>env.JOB_NAME</name>
+                    <name>${project.groupId}.${project.artifactId}</name>
                 </property>
             </activation>
-            <build>
+            <build><finalName>${project.groupId}.${project.artifactId}</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -1111,7 +1564,7 @@
             <id>ci-build</id>
             <activation>
                 <property>
-                    <name>env.SCM_REVISION</name>
+                    <name>${project.groupId}.${project.artifactId}</name>
                 </property>
             </activation>
             <properties>
@@ -1123,7 +1576,7 @@
             <id>non-ci-build</id>
             <activation>
                 <property>
-                    <name>!env.SCM_REVISION</name>
+                    <name>${project.groupId}.${project.artifactId}</name>
                 </property>
             </activation>
             <properties>
@@ -1139,7 +1592,7 @@
               <exists>clirr-ignored-api-changes.xml</exists><!-- this file name is duplicated due to MNG-4471 -->
             </file>
           </activation>
-          <build>
+          <build><finalName>${project.groupId}.${project.artifactId}</finalName>
             <plugins>
               <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -1190,10 +1643,10 @@
           <id>get-binary-license</id>
           <activation>
              <property>
-                <name>binary.license.url</name>
+                <name>${project.groupId}.${project.artifactId}</name>
              </property>
           </activation>
-          <build>
+          <build><finalName>${project.groupId}.${project.artifactId}</finalName>
              <plugins>
                 <plugin>
                    <groupId>org.apache.maven.plugins</groupId>

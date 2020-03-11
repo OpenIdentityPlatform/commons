@@ -4,8 +4,8 @@
 	<groupId>com.savage7.maven.plugins</groupId>
 	<artifactId>maven-external-dependency-plugin-test</artifactId>
 	<packaging>jar</packaging>
-	<version>0.6-SNAPSHOT</version>
-	<name>maven-external-dependency-plugin-test</name>
+	<version>2.0.7-SNAPSHOT</version>
+	<name>${project.groupId}.${project.artifactId}</name>
 	<url>http://code.google.com/p/maven-external-dependency-plugin/</url>
 	
     <!-- BUILD PROPERTIES -->
@@ -15,7 +15,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
     
-	<build>
+	<build><finalName>${project.groupId}.${project.artifactId}</finalName>
 		<extensions>
 			<extension>
 				<!-- allow follow redirects -->
@@ -42,7 +42,7 @@
 			<plugin>
 				<groupId>com.savage7.maven.plugins</groupId>
 				<artifactId>maven-external-dependency-plugin</artifactId>
-				<version>0.6-SNAPSHOT</version>
+				<version>2.0.7-SNAPSHOT</version>
 				<inherited>false</inherited>
 				<configuration>
 					<stagingDirectory>
@@ -266,66 +266,4 @@
 		</dependency>		
 
 	</dependencies>
-
-
-	<!-- MAVEN PLUGIN REPOSITORIES -->
-
-	<pluginRepositories>
-		<pluginRepository>
-			<id>ossrh</id>
-			<name>Sonatype OSS Repository</name>
-			<url>http://oss.sonatype.org/content/groups/public</url>
-			<layout>default</layout>
-		</pluginRepository>
-	</pluginRepositories>
-
-	<repositories>
-		<repository>
-			<id>artifactory-snapshots</id>
-			<name>libs-snapshots</name>
-			<url>http://localhost:8081/artifactory/libs-snapshots-local</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>artifactory-releases</id>
-			<name>libs-releases</name>
-			<url>http://localhost:8081/artifactory/libs-releases-local</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-
-
-	<!-- SOURCE CONTROL -->
-
-	<scm>
-		<connection>scm:svn:http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</connection>
-		<developerConnection>scm:svn:https://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</developerConnection>
-		<url>http://maven-external-dependency-plugin.googlecode.com/svn/trunk/maven-external-dependency-plugin-test/</url>
-	</scm>
-
-
-	<!-- PRIVATE REPOSITORY -->
-
-	<!-- this section is defined for testing the deployment to a private repository, 
-		please update this section for your own repository -->
-
-	<distributionManagement>
-		<repository>
-			<id>artifactory-releases</id>
-			<name>libs-releases</name>
-			<url>http://localhost:8081/artifactory/libs-releases-local</url>
-		</repository>
-		<snapshotRepository>
-			<uniqueVersion>false</uniqueVersion>
-			<id>artifactory-snapshots</id>
-			<name>libs-snapshots</name>
-			<url>http://localhost:8081/artifactory/libs-snapshots-local</url>
-		</snapshotRepository>
-	</distributionManagement>
-
-
 </project>
