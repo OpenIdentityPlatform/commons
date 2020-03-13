@@ -24,6 +24,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.json.JsonValue;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.mockito.ArgumentCaptor;
@@ -94,4 +95,3 @@ public final class RetrieveUsernameStageTest {
     }
 
 }
-

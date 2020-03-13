@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -26,7 +27,7 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private void readBody(){
-    	if (body==null 
+    	if (body==null
     			&& !StringUtils.containsIgnoreCase(getContentType(), "application/x-www-form-urlencoded")
     			&& !StringUtils.containsIgnoreCase(getContentType(), "multipart/form-data")
     		)
@@ -38,7 +39,7 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
 	         	logger.warn("{}: {}",e.getMessage(),Dump.toString(getRequest()));
 	         }
     }
-    
+
     @Override
     public ServletInputStream getInputStream() throws IOException {
     	readBody();
@@ -60,6 +61,36 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
     private class ServletInputStreamImpl extends ServletInputStream {
         private InputStream is;
 
+        @Override
+        public boolean isFinished() {
+            return false;
+        }
+
+        @Override
+        public boolean isReady() {
+            // This implementation will never block
+            // We also never need to call the readListener from this method, as this method will never return false
+            return isFinished();
+        }
+
+        @Override
+        public void setReadListener(ReadListener readListener) {
+            // this.readListener = readListener;
+            // if (!isFinished()) {
+            //     try {
+            //         readListener.onDataAvailable();
+            //     } catch (IOException e) {
+            //         readListener.onError(e);
+            //     }
+            // } else {
+            //     try {
+            //         readListener.onAllDataRead();
+            //     } catch (IOException e) {
+            //         readListener.onError(e);
+            //     }
+            // }
+				}
+
         public ServletInputStreamImpl(InputStream is) {
             this.is = is;
         }
@@ -80,7 +111,7 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
             throw new IOException("mark/reset not supported");
         }
     }
-    
+
     public String getRequestBody() {
     	readBody();
     	if (body==null)
@@ -91,7 +122,7 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
 			StringBuilder inputBuffer = new StringBuilder();
 			do {
 				line = reader.readLine();
-				if (null != line) 
+				if (null != line)
 					inputBuffer.append(line.trim());
 			} while (line != null);
 			reader.close();
@@ -102,4 +133,3 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
 	}
 
 }
-

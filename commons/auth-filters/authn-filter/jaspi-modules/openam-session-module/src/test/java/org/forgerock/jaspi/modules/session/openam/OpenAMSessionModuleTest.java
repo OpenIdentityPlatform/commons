@@ -35,6 +35,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.Client;

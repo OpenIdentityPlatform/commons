@@ -38,8 +38,8 @@ Copyright 2014 ForgeRock AS.
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
-            <version>4.0.1</version>
+            <version>${javax.servlet-api.version}</version>
         </dependency>
     </dependencies>
-    
+
 </project>

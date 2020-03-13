@@ -60,19 +60,19 @@
     <dependency>
      <groupId>commons-io</groupId>
      <artifactId>commons-io</artifactId>
-     <version>2.4</version>
+     <version>${commons-io.version}</version>
      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
-      <version>1.6.1</version>
+      <version>${assertj-core.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.8.8</version>
+      <version>${org.testng.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -82,6 +82,7 @@
 
       <plugin>
         <artifactId>maven-plugin-plugin</artifactId>
+        <version>${apache.maven-plugin.version}</version>
         <configuration>
           <goalPrefix>xcite</goalPrefix>
           <skipErrorNoDescriptorsFound>true</skipErrorNoDescriptorsFound>

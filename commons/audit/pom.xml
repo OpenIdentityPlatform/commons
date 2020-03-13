@@ -29,13 +29,6 @@
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Implements the commons audit framework.</description>
 
-    <properties>
-        <jodaTime.version>2.1</jodaTime.version>
-        <supercsv.version>2.4.0</supercsv.version>
-        <javax.inject.version>1_2</javax.inject.version>
-        <hikaricp.version>2.4.1</hikaricp.version>
-    </properties>
-
     <modules>
         <module>core</module>
         <module>json</module>
@@ -55,29 +48,29 @@
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-                <version>${javax.inject.version}</version>
+                <version>${apache.servicemix.javax-inject.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>${hikaricp.version}</version>
+                <version>${zaxxer.hikaricp.version}</version>
             </dependency>
 
             <!-- Third party dependencies -->
             <dependency>
                 <groupId>net.sf.supercsv</groupId>
                 <artifactId>super-csv</artifactId>
-                <version>${supercsv.version}</version>
+                <version>${net.sf.super-csv.version}</version>
             </dependency>
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>${jodaTime.version}</version>
+                <version>${joda-time.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
+                <version>${javax.servlet-api.version}</version>
                 <scope>provided</scope>
             </dependency>
         </dependencies>

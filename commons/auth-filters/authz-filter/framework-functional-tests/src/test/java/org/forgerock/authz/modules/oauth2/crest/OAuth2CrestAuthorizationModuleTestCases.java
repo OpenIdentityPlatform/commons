@@ -16,9 +16,9 @@
 
 package org.forgerock.authz.modules.oauth2.crest;
 
-import static com.jayway.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
+import io.restassured.RestAssured;
 import org.forgerock.authz.AuthzTestCase;
 import org.testng.annotations.Test;
 
@@ -28,7 +28,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void createNotAllowedWhenNoAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "create").
@@ -44,7 +44,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void readNotAllowedWhenNoAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
             expect().
                 statusCode(403).
                 body("code", equalTo(403)).
@@ -57,7 +57,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void updateNotAllowedWhenNoAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
             expect().
@@ -72,7 +72,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void deleteNotAllowedWhenNoAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
             expect().
                 statusCode(403).
@@ -86,7 +86,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void patchNotAllowedWhenNoAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
             expect().
@@ -101,7 +101,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void actionCollectionNotAllowedWhenNoAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -117,7 +117,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void actionInstanceNotAllowedWhenNoAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -133,7 +133,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void queryAllowNotAllowedWhenNoAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 queryParam("_queryId", "QUERY_ID").
             expect().
@@ -148,7 +148,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void createAllowedWhenAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer VALID").
                 body("{}").
@@ -163,7 +163,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void readAllowedWhenAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Authorization", "Bearer VALID").
             expect().
                 statusCode(200).
@@ -175,7 +175,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void updateAllowedWhenAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer VALID").
                 header("If-Match", "*").
@@ -190,7 +190,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void deleteAllowedWhenAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer VALID").
             expect().
@@ -203,7 +203,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void patchAllowedWhenAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer VALID").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
@@ -217,7 +217,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void actionCollectionAllowedWhenAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer VALID").
                 body("{}").
@@ -232,7 +232,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void actionInstanceAllowedWhenAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer VALID").
                 body("{}").
@@ -247,7 +247,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void queryAllowedWhenAccessTokenHeaderSet() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer VALID").
                 queryParam("_queryId", "QUERY_ID").
@@ -261,7 +261,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void createNotAllowedWhenAccessTokenHeaderIsNotBearer() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "NotBearer VALID").
                 body("{}").
@@ -278,7 +278,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void readNotAllowedWhenAccessTokenHeaderIsNotBearer() {
 
-        given().
+        RestAssured.given().
                 header("Authorization", "NotBearer VALID").
             expect().
                 statusCode(403).
@@ -292,7 +292,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void updateNotAllowedWhenAccessTokenHeaderIsNotBearer() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "NotBearer VALID").
                 body("{}").
@@ -308,7 +308,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void deleteNotAllowedWhenAccessTokenHeaderIsNotBearer() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "NotBearer VALID").
             expect().
@@ -323,7 +323,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void patchNotAllowedWhenAccessTokenHeaderIsNotBearer() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "NotBearer VALID").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
@@ -339,7 +339,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void actionCollectionNotAllowedWhenAccessTokenHeaderIsNotBearer() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "NotBearer VALID").
                 body("{}").
@@ -356,7 +356,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void actionInstanceNotAllowedWhenAccessTokenHeaderIsNotBearer() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "NotBearer VALID").
                 body("{}").
@@ -373,7 +373,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void queryNotAllowedWhenAccessTokenHeaderIsNotBearer() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "NotBearer VALID").
                 queryParam("_queryId", "QUERY_ID").
@@ -389,7 +389,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void createNotAllowedWhenAccessTokenIsInvalid() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer INVALID").
                 body("{}").
@@ -406,7 +406,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void readNotAllowedWhenAccessTokenIsInvalid() {
 
-        given().
+        RestAssured.given().
                 header("Authorization", "Bearer INVALID").
             expect().
                 statusCode(403).
@@ -420,7 +420,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void updateNotAllowedWhenAccessTokenIsInvalid() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer INVALID").
                 body("{}").
@@ -436,7 +436,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void deleteNotAllowedWhenAccessTokenIsInvalid() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer INVALID").
             expect().
@@ -451,7 +451,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void patchNotAllowedWhenAccessTokenIsInvalid() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer INVALID").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
@@ -467,7 +467,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void actionCollectionNotAllowedWhenAccessTokenIsInvalid() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer INVALID").
                 body("{}").
@@ -484,7 +484,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void actionInstanceNotAllowedWhenAccessTokenIsInvalid() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer INVALID").
                 body("{}").
@@ -501,7 +501,7 @@ public class OAuth2CrestAuthorizationModuleTestCases extends AuthzTestCase {
     @Test
     public void queryNotAllowedWhenAccessTokenIsInvalid() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("Authorization", "Bearer INVALID").
                 queryParam("_queryId", "QUERY_ID").

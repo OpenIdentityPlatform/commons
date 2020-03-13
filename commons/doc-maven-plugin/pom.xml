@@ -28,7 +28,7 @@
 
  <name>${project.groupId}.${project.artifactId}</name>
  <description>Common machinery for generating core documentation from DocBook XML sources</description>
- 
+
  <properties>
 
   <jsonFluentVersion>${project.version}</jsonFluentVersion>
@@ -45,15 +45,12 @@
   <commonContentVersion>${project.version}</commonContentVersion>
   <docbkxVersion>2.0.17</docbkxVersion>
   <fopHyphVersion>1.2</fopHyphVersion>
-  <jCiteVersion>1.13.0</jCiteVersion>
   <linkTesterVersion>1.3.0</linkTesterVersion>
   <mavenAssemblyVersion>2.5.3</mavenAssemblyVersion>
   <mavenFilteringVersion>1.3</mavenFilteringVersion>
-  <mavenDependencyVersion>2.10</mavenDependencyVersion>
   <mavenPluginPluginVersion>3.6.0</mavenPluginPluginVersion>
   <mavenResourcesVersion>2.7</mavenResourcesVersion>
   <plantUmlVersion>7993</plantUmlVersion>
-  <plexusUtilsVersion>3.0.22</plexusUtilsVersion>
   <xCiteVersion>${project.version}</xCiteVersion>
 
  </properties>
@@ -102,7 +99,7 @@
   <dependency>
    <groupId>org.apache.maven.plugin-testing</groupId>
    <artifactId>maven-plugin-testing-harness</artifactId>
-   <version>3.3.0</version>
+   <version>${apache.maven.plugin-testing-harness.version}</version>
    <scope>test</scope>
   </dependency>
 
@@ -121,7 +118,7 @@
   <dependency>
    <groupId>junit</groupId>
    <artifactId>junit</artifactId>
-   <version>4.12</version>
+   <version>${junit4.version}</version>
    <scope>test</scope>
   </dependency>
 
@@ -130,19 +127,19 @@
   <dependency>
    <groupId>commons-io</groupId>
    <artifactId>commons-io</artifactId>
-   <version>2.4</version>
+   <version>${commons-io.version}</version>
   </dependency>
 
   <dependency>
    <groupId>org.codehaus.plexus</groupId>
    <artifactId>plexus-utils</artifactId>
-   <version>${plexusUtilsVersion}</version>
+   <version>${codehaus.plexus-utils.version}</version>
   </dependency>
 
   <dependency>
    <groupId>org.freemarker</groupId>
    <artifactId>freemarker</artifactId>
-   <version>2.3.22</version>
+   <version>${freemarker.version}</version>
   </dependency>
 
   <dependency>
@@ -154,7 +151,7 @@
   <dependency>
    <groupId>org.twdata.maven</groupId>
    <artifactId>mojo-executor</artifactId>
-   <version>2.2.0</version>
+   <version>${twdata.mojo-executor.version}</version>
   </dependency>
 
  <!-- Runtime -->
@@ -162,7 +159,7 @@
   <dependency>
    <groupId>org.mcraig</groupId>
    <artifactId>jcite</artifactId>
-   <version>${jCiteVersion}</version>
+   <version>${mcraig.jcite.version}</version>
    <scope>runtime</scope>
   </dependency>
 
@@ -178,13 +175,13 @@
     <plugin>
      <groupId>org.apache.maven.plugins</groupId>
      <artifactId>maven-antrun-plugin</artifactId>
-     <version>1.7</version>
+     <version>${apache.maven-antrun.version}</version>
     </plugin>
 
     <plugin>
      <groupId>org.apache.maven.plugins</groupId>
      <artifactId>maven-dependency-plugin</artifactId>
-     <version>${mavenDependencyVersion}</version>
+     <version>${apache.maven-dependency.version}</version>
     </plugin>
 
     <plugin>
@@ -221,25 +218,25 @@
     <plugin>
      <groupId>org.apache.maven.plugins</groupId>
      <artifactId>maven-project-info-reports-plugin</artifactId>
-     <version>2.7</version>
+     <version>${apache.maven-project-info-reports.version}</version>
     </plugin>
 
     <plugin>
      <groupId>org.apache.maven.plugins</groupId>
      <artifactId>maven-shade-plugin</artifactId>
-     <version>2.3</version>
+     <version>${apache.maven-shade.version}</version>
     </plugin>
 
     <plugin>
      <groupId>org.apache.maven.plugins</groupId>
      <artifactId>maven-site-plugin</artifactId>
-     <version>3.3</version>
+     <version>${apache.maven-site.version}</version>
     </plugin>
 
     <plugin>
      <groupId>org.openidentityplatform.maven.plugins</groupId>
      <artifactId>javadoc-updater-maven-plugin</artifactId>
-     <version>1.0.0</version>
+     <version>${openidentityplatform.javadoc-updater.version}</version>
     </plugin>
 
    </plugins>
@@ -330,7 +327,7 @@
      <dependency>
       <groupId>org.apache.maven.doxia</groupId>
       <artifactId>doxia-module-markdown</artifactId>
-      <version>1.4</version>
+      <version>${apache.doxia-module-markdow.versionn}</version>
      </dependency>
     </dependencies>
    </plugin>
@@ -358,7 +355,7 @@
    <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-jxr-plugin</artifactId>
-    <version>2.2</version>
+    <version>${apache.maven-jxr-plugin.version}</version>
     <reportSets>
      <reportSet>
       <reports>

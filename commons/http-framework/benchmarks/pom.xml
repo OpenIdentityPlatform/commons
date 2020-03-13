@@ -30,12 +30,12 @@
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-core</artifactId>
-      <version>${jmh.version}</version>
+      <version>${openjdk.jmh.version}</version>
     </dependency>
     <dependency>
       <groupId>org.openjdk.jmh</groupId>
       <artifactId>jmh-generator-annprocess</artifactId>
-      <version>${jmh.version}</version>
+      <version>${openjdk.jmh.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -44,26 +44,19 @@
     </dependency>
   </dependencies>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <jmh.version>1.12</jmh.version>
-    <javac.target>1.7</javac.target>
-    <uberjar.name>benchmarks</uberjar.name>
-  </properties>
-
   <build><finalName>${project.groupId}.${project.artifactId}</finalName>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
-          <compilerVersion>${javac.target}</compilerVersion>
+          <compilerVersion>${jre.version}</compilerVersion>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>2.2</version>
+        <version>${apache.maven-shade.version}</version>
         <executions>
           <execution>
             <phase>package</phase>

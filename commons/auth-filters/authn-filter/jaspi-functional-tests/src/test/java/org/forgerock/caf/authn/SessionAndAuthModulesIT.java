@@ -28,6 +28,7 @@ import static org.forgerock.caf.authn.test.modules.SessionAuthModule.*;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Condition;
 import org.forgerock.caf.authn.test.modules.AuthModuleOne;
 import org.forgerock.caf.authn.test.modules.AuthModuleTwo;

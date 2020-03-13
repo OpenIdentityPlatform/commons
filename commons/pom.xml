@@ -25,15 +25,6 @@
   <packaging>pom</packaging>
   <name>${project.groupId}.${project.artifactId}</name>
 
-  <properties>
-    <!-- Maven minimal version -->
-    <maven.min.version>3.0.1</maven.min.version>
-  </properties>
-
-  <prerequisites>
-    <maven>${maven.min.version}</maven>
-  </prerequisites>
-
   <modules>
     <module>audit</module>
     <module>auth-filters</module>

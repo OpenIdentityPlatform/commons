@@ -18,6 +18,8 @@ package org.forgerock.maven.plugins.xcite;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.assertj.core.api.FileAssert;
+import org.assertj.core.api.StringAssert;
 import org.forgerock.maven.plugins.xcite.utils.FileUtils;
 import org.forgerock.maven.plugins.xcite.utils.StringUtils;
 import org.testng.annotations.Test;

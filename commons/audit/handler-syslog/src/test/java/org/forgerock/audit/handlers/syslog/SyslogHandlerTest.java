@@ -18,6 +18,7 @@ package org.forgerock.audit.handlers.syslog;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.events.handlers.AuditEventHandler;

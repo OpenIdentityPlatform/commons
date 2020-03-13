@@ -16,6 +16,8 @@
 
 package org.forgerock.caf.http;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractIterableAssert;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.AfterMethod;

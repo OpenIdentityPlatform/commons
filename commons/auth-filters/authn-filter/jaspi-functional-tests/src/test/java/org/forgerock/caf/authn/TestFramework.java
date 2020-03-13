@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.assertj.core.api.Condition;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.http.Handler;
 import org.forgerock.http.header.ContentTypeHeader;
@@ -84,8 +85,8 @@ class TestFramework {
         request.getHeaders().add("If-Match", "*");
         Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
                 request);
-        assertThat(result).succeeded();
-        assertThat(result.get().getStatus()).isEqualTo(Status.OK);
+        AssertionsForClassTypes.assertThat(result).isNotNull();
+        AssertionsForClassTypes.assertThat(result.get().getStatus()).isEqualTo(Status.OK);
     }
 
     /**
@@ -101,8 +102,8 @@ class TestFramework {
         request.getHeaders().add(ContentTypeHeader.valueOf("application/json; charset=UTF-8"));
         Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
                 request);
-        assertThat(result).succeeded();
-        assertThat(result.get().getStatus()).isEqualTo(Status.OK);
+        AssertionsForClassTypes.assertThat(result).isNotNull();
+        AssertionsForClassTypes.assertThat(result.get().getStatus()).isEqualTo(Status.OK);
         return json(result.get().getEntity().getJson());
     }
 
@@ -176,7 +177,7 @@ class TestFramework {
 
         Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
                 request);
-        assertThat(result).succeeded();
+        AssertionsForClassTypes.assertThat(result).isNotNull();
 
         Response response = result.get();
 

@@ -30,6 +30,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.Set;
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
@@ -300,4 +301,3 @@ public final class UserQueryStageTest {
     }
 
 }
-

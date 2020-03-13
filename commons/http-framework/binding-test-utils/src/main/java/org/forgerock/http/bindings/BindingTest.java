@@ -33,6 +33,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.SoftAssertionError;
 import org.assertj.core.api.SoftAssertions;
 import org.forgerock.http.ApiProducer;

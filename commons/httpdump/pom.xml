@@ -12,12 +12,12 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-		
+
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${javax.servlet-api.version}</version>
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
@@ -36,13 +36,13 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>RELEASE</version>
+			<version>${junit4.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>RELEASE</version>
+			<version>${apache.commons-lang3.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openidentityplatform.commons</groupId>
@@ -59,7 +59,7 @@
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>2.2</version>
+				<version>${apache.wagon-ssh.version}</version>
 			</extension>
 		</extensions>
 		<plugins>

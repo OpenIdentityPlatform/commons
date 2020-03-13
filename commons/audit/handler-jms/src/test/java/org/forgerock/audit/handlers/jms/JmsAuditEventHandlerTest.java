@@ -16,7 +16,7 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.audit.json.AuditJsonConfig.parseAuditEventHandlerConfiguration;
 import static org.forgerock.json.JsonValue.*;
@@ -40,6 +40,7 @@ import javax.jms.Topic;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;

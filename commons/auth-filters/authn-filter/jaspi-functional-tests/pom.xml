@@ -130,13 +130,14 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.jayway.restassured</groupId>
+            <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
+            <version>${io.rest-assured.version}</version>
         </dependency>
 		<dependency>
 		    <groupId>com.google.code.findbugs</groupId>
 		    <artifactId>jsr305</artifactId>
-		    <version>RELEASE</version>
+            <version>${google.code.findbugs.jsr305.version}</version>
 		</dependency>
     </dependencies>
 </project>

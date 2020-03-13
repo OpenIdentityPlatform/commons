@@ -24,6 +24,7 @@ import com.persistit.PersistitUnitTestCase;
 import com.persistit.Value;
 import com.persistit.exception.PersistitException;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.junit.Test;
 
 import java.io.Serializable;

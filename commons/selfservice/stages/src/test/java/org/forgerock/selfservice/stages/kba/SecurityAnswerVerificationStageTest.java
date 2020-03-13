@@ -25,6 +25,7 @@ import static org.mockito.Matchers.any;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;

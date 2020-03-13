@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.openidentityplatform.commons</groupId>
+    <artifactId>properties</artifactId>
+    <version>2.0.7-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Open Identity Platform Common Properties</name>
+    <description>Common properties for Open Identity Platform Common</description>
+    <url>https://github.com/OpenIdentityPlatform/commons/</url>
+    <licenses>
+        <license>
+            <name>CDDL-1.0</name>
+            <url>http://opensource.org/licenses/CDDL-1.0</url>
+            <comments>Common Development and Distribution License (CDDL) 1.0</comments>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <organization>
+        <name>Open Identity Platform Community</name>
+        <url>https://github.com/OpenIdentityPlatform</url>
+    </organization>
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/OpenIdentityPlatform/forgerock-parent/issues</url>
+    </issueManagement>
+
+
+    <!-- Thanks to the usage of properties, each project using this POM as parent-pom can easily use its own plugin version
+            (useful when you have some constraints on a given version and if the parent doesn't give you the one you need ...) -->
+    <properties>
+        <jre.version>1.8</jre.version>
+        <jre.release>8</jre.release>
+        <jdk.min.version>${jre.version}</jdk.min.version>
+        <apache.maven.version>3.3.1</apache.maven.version>
+        <maven.min.version>3.3.1</maven.min.version>
+
+        <binary.license.name>Forgerock_License.txt</binary.license.name>
+
+        <!-- Cross plugins settings -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- sub-modules' versions -->
+        <openidentityplatform.commons.version>21.0.0-SNAPSHOT</openidentityplatform.commons.version>
+
+        <forgerock-audit.version>${openidentityplatform.commons.version}</forgerock-audit.version>
+        <forgerock-auth-filters.version>${openidentityplatform.commons.version}</forgerock-auth-filters.version>
+        <forgerock-bloomfilter.version>1.0.2-SNAPSHOT</forgerock-bloomfilter.version>
+        <forgerock-bom.version>4.1.1</forgerock-bom.version>
+        <forgerock-build-tools.version>1.0.3</forgerock-build-tools.version>
+        <forgerock-http-framework.version>21.0.0-SNAPSHOT</forgerock-http-framework.version>
+        <forgerock.guice.version>2.0.0</forgerock.guice.version>
+        <forgerock-rest.version>21.0.0-SNAPSHOT</forgerock-rest.version>
+        <forgerock-selfservice.version>1.0.3</forgerock-selfservice.version>
+        <forgerock-ui.version>16.0.1-SNAPSHOT</forgerock-ui.version>
+        <forgerock-util.version>21.0.0-SNAPSHOT</forgerock-util.version>
+
+        <openidentityplatform.commons.i18n.version>1.4.2</openidentityplatform.commons.i18n.version>
+        <openidentityplatform.commons.external-dependency-plugin.version>0.6-SNAPSHOT</openidentityplatform.commons.external-dependency-plugin.version>
+        <openidentityplatform.commons.ui.libs.less.version>1.5.1</openidentityplatform.commons.ui.libs.less.version>
+        <openidentityplatform.javadoc-updater.version>1.0.0</openidentityplatform.javadoc-updater.version>
+
+        <universalmediaserver.external-maven-plugin.version>0.3</universalmediaserver.external-maven-plugin.version>
+
+        <!-- ************** -->
+        <!-- Main POM Build settings -->
+        <!-- ************** -->
+
+        <!-- dependencyManagement -->
+        <google.guava.version>28.2-jre</google.guava.version>
+        <mockito-core.version>3.3.0</mockito-core.version>
+        <slf4j.version>1.7.30</slf4j.version>
+
+
+        <!-- build pluginManagement -->
+        <codehaus.cobertura.version>2.7</codehaus.cobertura.version>
+        <codehaus.findbugs.version>3.0.5</codehaus.findbugs.version>
+
+        <apache.maven-plugin-api.version>3.6.3</apache.maven-plugin-api.version>
+        <apache.maven-project.version>3.0-alpha-2</apache.maven-project.version>
+
+        <apache.maven-checkstyle.version>3.1.1</apache.maven-checkstyle.version>
+        <apache.maven-clean.version>3.1.0</apache.maven-clean.version>
+        <apache.maven-war.version>3.2.3</apache.maven-war.version>
+        <apache.maven-compiler.version>3.8.1</apache.maven-compiler.version>
+        <apache.maven-dependency.version>3.1.1</apache.maven-dependency.version>
+        <apache.maven-deploy.version>3.0.0-M1</apache.maven-deploy.version>
+        <apache.maven-docck.version>1.1</apache.maven-docck.version>
+        <apache.maven-eclipse.version>2.10</apache.maven-eclipse.version>
+        <apache.maven-enforcer.version>3.0.0-M3</apache.maven-enforcer.version>
+        <apache.maven-gpg.version>1.6</apache.maven-gpg.version>
+        <apache.maven-install.version>3.0.0-M1</apache.maven-install.version>
+        <apache.maven-invoker.version>3.0.1</apache.maven-invoker.version>
+        <apache.maven-jar.version>3.2.0</apache.maven-jar.version>
+        <apache.maven-jarsigner.version>3.0.0</apache.maven-jarsigner.version>
+        <apache.maven-javadoc.version>3.1.1</apache.maven-javadoc.version>
+        <apache.maven-plugin.version>3.6.0</apache.maven-plugin.version>
+        <apache.maven-pmd.version>3.13.0</apache.maven-pmd.version>
+        <apache.maven-project-info-reports.version>3.0.0</apache.maven-project-info-reports.version>
+        <apache.maven-release.version>3.0.0-M1</apache.maven-release.version>
+        <apache.maven-remote-resources.version>1.7.0</apache.maven-remote-resources.version>
+        <apache.maven-resources.version>3.1.0</apache.maven-resources.version>
+        <apache.maven-scm.version>1.11.2</apache.maven-scm.version>
+        <apache.maven-scm-provider-gitexe.version>1.11.2</apache.maven-scm-provider-gitexe.version>
+        <apache.maven-shade.version>3.2.2</apache.maven-shade.version>
+        <apache.maven-site.version>3.8.2</apache.maven-site.version>
+        <apache.maven-source.version>3.2.1</apache.maven-source.version>
+        <apache.maven-surefire.version>3.0.0-M4</apache.maven-surefire.version>
+        <apache.maven-failsafe.version>3.0.0-M4</apache.maven-failsafe.version>
+        <apache.wagon-ssh.version>3.3.4</apache.wagon-ssh.version>
+
+        <codehaus.plexus-maven.version>1.3.8</codehaus.plexus-maven.version>
+        <codehaus.license-maven.version>2.0.0</codehaus.license-maven.version>
+
+        <!-- maven-checkstyle-plugin configuration -->
+        <checkstyleSourceConfigLocation>org/forgerock/checkstyle/check-src-default.xml</checkstyleSourceConfigLocation>
+        <checkstyleDocTargetConfigLocation>org/forgerock/checkstyle/check-src-doc-target.xml</checkstyleDocTargetConfigLocation>
+        <checkstyleUnitTestSuppressionsLocation>org/forgerock/checkstyle/unit-test-suppressions.xml</checkstyleUnitTestSuppressionsLocation>
+        <checkstyleHeaderLocation>org/forgerock/checkstyle/default-java-header</checkstyleHeaderLocation>
+        <checkstyleFailOnError>false</checkstyleFailOnError>
+        <puppycrawl.checkstyle.version>8.29</puppycrawl.checkstyle.version>
+
+        <!-- maven-javadoc-plugin configuration -->
+        <!-- forgerock-build-tools stylesheet org/forgerock/javadoc/javadoc.css does not work with JDK7 -->
+        <javadocStylesheet />
+        <javadocWindowTitle>${project.name} ${project.version} Documentation</javadocWindowTitle>
+        <javadocDocTitle>${javadocWindowTitle}</javadocDocTitle>
+
+        <!-- end of build pluginManagement -->
+
+
+        <!-- profile Clirr, build plugins -->
+        <clirrComparisonVersion>3.0.0</clirrComparisonVersion>
+        <codehaus.clirr-maven.version>2.6.1</codehaus.clirr-maven.version>
+
+        <!-- profile get-binary-license, build plugins -->
+        <apache.ant-nodeps.version>1.8.1</apache.ant-nodeps.version>
+
+        <!-- maven-idea-plugin & maven-eclipse-plugin -->
+        <downloadSources>true</downloadSources>
+        <downloadJavadocs>true</downloadJavadocs>
+
+
+        <!-- ***************** -->
+        <!-- sub-modules' dependencies -->
+        <!-- ***************** -->
+
+        <!-- Shared components versions -->
+        <args4j.version>2.33</args4j.version>
+        <apache.commons-lang3.version>3.9</apache.commons-lang3.version>
+        <apache.felix.configadmin.version>1.9.16</apache.felix.configadmin.version>
+        <apache.felix.fileinstall.version>3.6.4</apache.felix.fileinstall.version>
+        <apache.felix.framework.version>6.0.3</apache.felix.framework.version>
+        <apache.felix.maven-bundle.version>4.2.1</apache.felix.maven-bundle.version>
+        <apache.felix.maven-scr.version>1.26.4</apache.felix.maven-scr.version>
+        <apache.maven-antrun.version>1.8</apache.maven-antrun.version>
+        <apache.maven-assembly.version>3.2.0</apache.maven-assembly.version>
+        <apache.maven-jxr-plugin.version>3.0.0</apache.maven-jxr-plugin.version>
+        <apache.maven-plugin-annotations.version>3.6.0</apache.maven-plugin-annotations.version>
+        <apache.servicemix.javax-inject.version>1_3</apache.servicemix.javax-inject.version>
+        <assertj-core.version>3.15.0</assertj-core.version>
+        <!-- <assertj-core.version>2.4.1</assertj-core.version> -->
+
+        <codehaus.animal-sniffer.version>1.18</codehaus.animal-sniffer.version>
+        <codehaus.build-helper.version>3.0.0</codehaus.build-helper.version>
+        <codehaus.rmic-maven-plugin.version>1.3</codehaus.rmic-maven-plugin.version>
+        <commons-cli.version>1.4</commons-cli.version>
+        <commons-io.version>2.6</commons-io.version>
+
+        <eclipse.jetty.version>9.4.26.v20200117</eclipse.jetty.version>
+        <easytesting.fest-assert.version>1.4</easytesting.fest-assert.version>
+        <easytesting.fest-assert-core.version>2.0M10</easytesting.fest-assert-core.version>
+
+        <glassfish.security.auth.message.version>3.1.1</glassfish.security.auth.message.version>
+        <google.code.findbugs.jsr305.version>3.0.2</google.code.findbugs.jsr305.version>
+        <google.inject.guice.version>4.2.2</google.inject.guice.version>
+        <googlecode.json-simple.version>1.1.1</googlecode.json-simple.version>
+
+        <hdrhistogram.version>2.1.12</hdrhistogram.version>
+
+        <io.rest-assured.version>4.2.0</io.rest-assured.version>
+        <fasterxml.jackson.version>2.10.3</fasterxml.jackson.version>
+        <fasterxml.jackson-databind.version>${fasterxml.jackson.version}</fasterxml.jackson-databind.version>
+
+        <javax.servlet-api.version>4.0.1</javax.servlet-api.version>
+        <javax.xml.jaxb-api.version>2.3.1</javax.xml.jaxb-api.version>
+        <joda-time.version>2.10.5</joda-time.version>
+        <junit4.version>4.13</junit4.version>
+        <junit.junit-jupiter-api.version>5.6.0</junit.junit-jupiter-api.version>
+
+        <!-- <mockito.mockito-all.version>2.0.2-beta</mockito.mockito-all.version> -->
+        <mockito.mockito-all.version>1.10.19</mockito.mockito-all.version>
+        <mozilla.rhino.version>1.7.12</mozilla.rhino.version>
+        <net.sf.super-csv.version>2.4.0</net.sf.super-csv.version>
+
+        <org.json.version>20190722</org.json.version>
+        <org.osgi.core.version>6.0.0</org.osgi.core.version>
+        <org.testng.version>7.1.0</org.testng.version>
+
+        <slf4j-api.version>${slf4j.version}</slf4j-api.version>
+        <sun.javax.mail.version>1.6.2</sun.javax.mail.version>
+        <sun.xml.jaxb-core.version>2.3.0.1</sun.xml.jaxb-core.version>
+        <sun.xml.jaxb-impl.version>2.3.2</sun.xml.jaxb-impl.version>
+
+        <xebialabs.restito.version>0.9.3</xebialabs.restito.version>
+        <zaxxer.hikaricp.version>3.4.2</zaxxer.hikaricp.version>
+
+        <!-- bloomfilter -->
+        <slf4j-jcl.version>1.7.30</slf4j-jcl.version>
+
+        <!-- bom -->
+
+        <!-- build-toopls -->
+
+        <!-- commons -->
+        <!-- TODO: to 1.6.0, some broken tests in commons/rest/api-descriptor -->
+        <io.swagger.version>1.5.9</io.swagger.version>
+        <!-- commons/audit -->
+        <h2database.version>1.4.200</h2database.version>
+        <javax.jms-api>2.0.1</javax.jms-api>
+        <!-- commons/auth-filters -->
+        <codehaus.cargo-maven2-plugin.version>1.7.10</codehaus.cargo-maven2-plugin.version>
+        <!-- commons/doc-maven-plugin -->
+        <apache.maven.plugin-testing-harness.version>3.3.0</apache.maven.plugin-testing-harness.version>
+        <apache.doxia-module-markdow.versionn>1.9.1</apache.doxia-module-markdow.versionn>
+        <codehaus.plexus-utils.version>3.3.0</codehaus.plexus-utils.version>
+        <freemarker.version>2.3.30</freemarker.version>
+        <mcraig.jcite.version>1.13.0</mcraig.jcite.version>
+        <twdata.mojo-executor.version>2.3.1</twdata.mojo-executor.version>
+        <!-- commons/geo -->
+        <maxmind.geoip2.version>2.13.1</maxmind.geoip2.version>
+        <!-- commons/http-framework -->
+        <apache.httpasyncclient-osgi.version>4.1.4</apache.httpasyncclient-osgi.version>
+        <apache.httpclient-osgi.version>4.5.12</apache.httpclient-osgi.version>
+        <apache.httpcore-osgi.version>4.4.13</apache.httpcore-osgi.version>
+        <codehaus.groovy-jsr223.version>3.0.2</codehaus.groovy-jsr223.version>
+        <glassfish.grizzly-http-server.version>2.4.4</glassfish.grizzly-http-server.version>
+        <openjdk.jmh.version>1.23</openjdk.jmh.version>
+        <!-- commons/httpdump -->
+        <springframework.spring-core.version>5.2.4.RELEASE</springframework.spring-core.version>
+        <springframework.spring-mock.version>2.0.8</springframework.spring-mock.version>
+        <!-- commons/launcher -->
+        <apache.felix.log.version>1.2.2</apache.felix.log.version>
+        <apache.felix.metatype.version>1.2.2</apache.felix.metatype.version>
+        <apache.felix.scr.version>2.1.16</apache.felix.scr.version>
+        <apache.felix.shell.version>1.4.3</apache.felix.shell.version>
+        <apache.felix.webconsole.version>4.3.16</apache.felix.webconsole.version>
+        <apache.felix.webconsole.plugins.ds.version>2.1.0</apache.felix.webconsole.plugins.ds.version>
+        <commons-fileupload.version>1.4</commons-fileupload.version>
+        <ops4j.pax-web-jetty-bundle.version>7.3.4</ops4j.pax-web-jetty-bundle.version>
+        <!-- commons/rest -->
+        <asciidoctor.asciidoctorj.version>2.2.0</asciidoctor.asciidoctorj.version>
+        <glassfish.grizzly-http-servlet.version>2.4.4</glassfish.grizzly-http-servlet.version>
+        <!-- commons/selfservice -->
+        <codehaus.jslint-maven-plugin.version>1.0.1</codehaus.jslint-maven-plugin.version>
+        <matrixweb.osgi-wrapped-rhino.version>1.7R4</matrixweb.osgi-wrapped-rhino.version>
+        <!-- commons/util -->
+        <codehaus.plexus-compiler-eclipse.version>2.8.6</codehaus.plexus-compiler-eclipse.version>
+
+        <!-- persist -->
+        <codehaus.mojo.signature.java18.version>1.0</codehaus.mojo.signature.java18.version>
+        <glassfish.corba.rmic.version>4.2.1</glassfish.corba.rmic.version>
+        <mycila.license-maven.version>3.0</mycila.license-maven.version>
+
+        <!-- script -->
+        <apache.servicemix.bundles.rhino.version>1.7.12_1</apache.servicemix.bundles.rhino.version>
+        <codehaus.gmaven-plugin.version>1.5</codehaus.gmaven-plugin.version>
+        <codehaus.groovy-all.version>3.0.2</codehaus.groovy-all.version>
+        <eclipse.wst.jsdt.debugger.version>1.0.301</eclipse.wst.jsdt.debugger.version>
+        <eclipse.wst.jsdt.transport.version>1.0.101</eclipse.wst.jsdt.transport.version>
+        <ops4j.ops4j-base-spi.version>1.5.0</ops4j.ops4j-base-spi.version>
+        <ops4j.pax-swissbox-extender.version>1.8.3</ops4j.pax-swissbox-extender.version>
+        <zeroturnaround.jrebel-maven-plugin.version>1.1.10</zeroturnaround.jrebel-maven-plugin.version>
+
+        <!-- ui -->
+        <github.eirslett.frontend-maven-plugin.version>1.9.1</github.eirslett.frontend-maven-plugin.version>
+        <node.version>v13.8.0</node.version>
+        <npm.version>6.13.6</npm.version>
+
+        <!-- external-dependency -->
+        <apache.maven-changelog-plugin.version>2.3</apache.maven-changelog-plugin.version>
+        <apache.maven-settings.version>3.6.3</apache.maven-settings.version>
+        <apache.wagon-ftp.version>3.3.4</apache.wagon-ftp.version>
+        <apache.wagon-http-lightweight.version>3.3.4</apache.wagon-http-lightweight.version>
+        <apache.wagon-provider-api.version>3.3.4</apache.wagon-provider-api.version>
+        <codehaus.plexus-archiver.version>4.2.1</codehaus.plexus-archiver.version>
+        <codehaus.plexus-digest.version>1.1</codehaus.plexus-digest.version>
+        <commons-logging.version>1.2</commons-logging.version>
+
+        <!-- end pf sub-projects' dependencies -->
+
+    </properties>
+
+    <prerequisites>
+        <maven>${maven.min.version}</maven>
+    </prerequisites>
+
+
+</project>

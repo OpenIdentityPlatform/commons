@@ -28,6 +28,7 @@ import static org.hamcrest.Matchers.*;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Condition;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.caf.authn.test.modules.AuthModuleOne;

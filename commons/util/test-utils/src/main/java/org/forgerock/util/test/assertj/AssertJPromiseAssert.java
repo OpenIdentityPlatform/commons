@@ -23,7 +23,7 @@ import java.util.Map;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractBooleanAssert;
-import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.AbstractDoubleAssert;
 import org.assertj.core.api.AbstractFileAssert;
 import org.assertj.core.api.AbstractInputStreamAssert;
@@ -35,6 +35,7 @@ import org.assertj.core.api.AbstractMapAssert;
 import org.assertj.core.api.AbstractObjectArrayAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ObjectAssert;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -90,7 +91,7 @@ public final class AssertJPromiseAssert
          * @return A {@link AbstractIterableAssert} instance for making assertions on the value.
          */
         @SuppressWarnings("unchecked")
-        public <T> AbstractIterableAssert<?, ? extends Iterable<? extends T>, T> withIterable() {
+        public <T> AbstractIterableAssert<?, ? extends Iterable<? extends T>, T, ObjectAssert<T>> withIterable() {
             isInstanceOf(Iterable.class);
             return Assertions.assertThat((Iterable<T>) actual);
         }
@@ -102,16 +103,16 @@ public final class AssertJPromiseAssert
          * @return A {@link AbstractListAssert} instance for making assertions on the value.
          */
         @SuppressWarnings("unchecked")
-        public <T> AbstractListAssert<?, ? extends List<? extends T>, T> withList() {
+        public <T> AbstractListAssert<?, ? extends List<? extends T>, T, ObjectAssert<T>> withList() {
             isInstanceOf(List.class);
             return Assertions.assertThat((List<T>) actual);
         }
 
         /**
          * Asserts that the value was a {@link String} instance.
-         * @return A {@link AbstractCharSequenceAssert} instance for making assertions on the value.
+         * @return A {@link AbstractStringAssert} instance for making assertions on the value.
          */
-        public AbstractCharSequenceAssert<?, String> withString() {
+        public AbstractStringAssert<?> withString() {
             isInstanceOf(String.class);
             return Assertions.assertThat((String) actual);
         }

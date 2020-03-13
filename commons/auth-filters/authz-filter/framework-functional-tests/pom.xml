@@ -92,6 +92,7 @@
             <plugin>
                 <groupId>org.codehaus.cargo</groupId>
                 <artifactId>cargo-maven2-plugin</artifactId>
+                <version>${codehaus.cargo-maven2-plugin.version}</version>
                 <configuration>
                     <!-- Container configuration -->
                     <container>
@@ -176,13 +177,14 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
+            <artifactId>javax.servlet-api</artifactId>
+            <version>${javax.servlet-api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.jayway.restassured</groupId>
+            <groupId>io.rest-assured</groupId>
             <artifactId>rest-assured</artifactId>
+            <version>${io.rest-assured.version}</version>
         </dependency>
 
         <!-- Module Dependencies -->

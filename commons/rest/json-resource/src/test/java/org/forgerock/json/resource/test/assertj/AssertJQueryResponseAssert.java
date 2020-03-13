@@ -16,7 +16,7 @@
 package org.forgerock.json.resource.test.assertj;
 
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.AbstractIntegerAssert;
 import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
@@ -101,9 +101,9 @@ public class AssertJQueryResponseAssert extends AbstractAssert<AssertJQueryRespo
 
     /**
      * Assert the value of the paged results cookie.
-     * @return A {@code AbstractCharSequenceAssert} for the paged results cookie.
+     * @return A {@code AbstractStringAssert} for the paged results cookie.
      */
-    public AbstractCharSequenceAssert<?, String> withPagedResultsCookie() {
+    public AbstractStringAssert<?> withPagedResultsCookie() {
         return Assertions.assertThat(actual.getPagedResultsCookie());
     }
 

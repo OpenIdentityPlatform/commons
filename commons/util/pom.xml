@@ -24,7 +24,7 @@
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Miscellaneous utility classes used within Open Identity Platform Communityprojects.</description>
     <packaging>pom</packaging>
-    
+
     <properties>
         <clirrComparisonVersion>3.0.0</clirrComparisonVersion>
     </properties>
@@ -36,7 +36,7 @@
         <plugins>
             <plugin>
               <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.3</version>
+              <version>${apache.maven-compiler.version}</version>
               <configuration>
                 <compilerId>eclipse</compilerId>
               </configuration>

@@ -7,14 +7,14 @@
 	<version>2.0.7-SNAPSHOT</version>
 	<name>${project.groupId}.${project.artifactId}</name>
 	<url>http://code.google.com/p/maven-external-dependency-plugin/</url>
-	
+
     <!-- BUILD PROPERTIES -->
     <properties>
         <!-- PROJECT ENCODING PROPERTIES -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-    
+
 	<build><finalName>${project.groupId}.${project.artifactId}</finalName>
 		<extensions>
 			<extension>
@@ -53,7 +53,7 @@
 					<force>false</force>
 					<artifactItems>
 
-						<!-- THIS JAR IS HOSTED ON GOOGLE CODE, BUT IS NOT AVAILABLE IN A MAVEN 
+						<!-- THIS JAR IS HOSTED ON GOOGLE CODE, BUT IS NOT AVAILABLE IN A MAVEN
 							REPO -->
 						<artifactItem>
 							<groupId>com.google.code</groupId>
@@ -65,7 +65,7 @@
                         </downloadUrl>
 						</artifactItem>
 
-						<!-- HERE IS AN EXAMPLE OF AN ADOBE FLASH LIBRARY (SWC) HOSTED ON GOOGLE 
+						<!-- HERE IS AN EXAMPLE OF AN ADOBE FLASH LIBRARY (SWC) HOSTED ON GOOGLE
 							CODE, BUT NOT AVAILABLE IN A MAVEN REPO -->
 						<artifactItem>
 							<groupId>org.papervision3d</groupId>
@@ -77,7 +77,7 @@
                         </downloadUrl>
 						</artifactItem>
 
-						<!-- HERE IS AN EXAMPLE OF A FILE USING A CLASSIFIER AND A CHECKSUM 
+						<!-- HERE IS AN EXAMPLE OF A FILE USING A CLASSIFIER AND A CHECKSUM
 							VERIFICATION ON THE DOWNLOADED FILE -->
 						<artifactItem>
 							<groupId>org.apache.ant</groupId>
@@ -114,18 +114,18 @@
 							]]></downloadUrl>
 							<extractFile>{artifactId}</extractFile>
 						</artifactItem>
-						<!-- HERE IS AN EXAMPLE OF AN ARTIFACT DEFINED THAT DOWNLOADS A FILE 
-							THAT CONTAINS A SHA1 CHECKSUM USED BY ANOTHER ALREADY MAVEN HOSTED ARTIFACT. 
-							PLEASE NOTE, THIS DEPENDENCY WILL FAIL TO INSTALL SINCE THE GROUP ID, ARTIFACT 
+						<!-- HERE IS AN EXAMPLE OF AN ARTIFACT DEFINED THAT DOWNLOADS A FILE
+							THAT CONTAINS A SHA1 CHECKSUM USED BY ANOTHER ALREADY MAVEN HOSTED ARTIFACT.
+							PLEASE NOTE, THIS DEPENDENCY WILL FAIL TO INSTALL SINCE THE GROUP ID, ARTIFACT
 							ID, and VERSION ARE A MISMATCH -->
-						<!-- <artifactItem> <groupId>com.imaginary</groupId> <artifactId>non-existant</artifactId> 
-							<version>1.0.0</version> <packaging>jar</packaging> <downloadUrl> http://repo1.maven.org/maven2/org/apache/ant/ant/1.8.0/ant-1.8.0.jar 
-							</downloadUrl> <skipChecksumVerification>false</skipChecksumVerification> 
+						<!-- <artifactItem> <groupId>com.imaginary</groupId> <artifactId>non-existant</artifactId>
+							<version>1.0.0</version> <packaging>jar</packaging> <downloadUrl> http://repo1.maven.org/maven2/org/apache/ant/ant/1.8.0/ant-1.8.0.jar
+							</downloadUrl> <skipChecksumVerification>false</skipChecksumVerification>
 							</artifactItem> -->
 
 
 						<!-- DIFFERENT CHECKSUMS FOR DOWNLOAD FILE AND EXTRACTED FILE -->
-						<!-- 
+						<!--
 						<artifactItem>
 							<groupId>de.innosystec</groupId>
 							<artifactId>java-unrar</artifactId>
@@ -258,12 +258,12 @@
 			<version>3.8.1</version>
 			<scope>test</scope>
 		</dependency>
-		
+
 		<dependency>
 		    <groupId>org.json</groupId>
 		    <artifactId>json</artifactId>
-		    <version>20090211</version>
-		</dependency>		
+				<version>${org.json.version}</version>
+		</dependency>
 
 	</dependencies>
 </project>

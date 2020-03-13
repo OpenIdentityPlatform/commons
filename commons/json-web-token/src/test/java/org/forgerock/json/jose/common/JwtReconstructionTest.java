@@ -18,6 +18,7 @@ package org.forgerock.json.jose.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.helper.KeysHelper;
 import org.forgerock.json.jose.jwe.EncryptedJwt;

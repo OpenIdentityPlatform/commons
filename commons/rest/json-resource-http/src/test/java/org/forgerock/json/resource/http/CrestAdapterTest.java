@@ -52,6 +52,7 @@ import static org.forgerock.util.query.QueryFilter.present;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
@@ -911,7 +912,7 @@ public class CrestAdapterTest {
                 @Override
                 public Promise<ResourceResponse, ResourceException> handleRead(final Context context,
                                                                                final ReadRequest request) {
-                	
+
                     return newResourceResponse("ae32f", "1", request.toJsonValue()).asPromise();
                 }
 

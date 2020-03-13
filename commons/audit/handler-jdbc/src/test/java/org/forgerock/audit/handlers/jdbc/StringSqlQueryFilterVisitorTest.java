@@ -18,6 +18,7 @@ package org.forgerock.audit.handlers.jdbc;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.util.query.QueryFilter.*;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.util.query.QueryFilter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -96,4 +97,3 @@ public class StringSqlQueryFilterVisitorTest {
         return new JsonPointer(jsonPointer);
     }
 }
-

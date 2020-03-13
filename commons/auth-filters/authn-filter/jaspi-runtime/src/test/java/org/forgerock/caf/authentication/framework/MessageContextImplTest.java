@@ -23,6 +23,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.message.AuthStatus;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AuthContextWithState;
 import org.forgerock.caf.authentication.api.AuthenticationException;

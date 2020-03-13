@@ -26,6 +26,7 @@ import java.util.Map;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.json.schema.validator.validators.AnyTypeValidator;
 import org.forgerock.json.schema.validator.validators.ArrayTypeValidator;
 import org.forgerock.json.schema.validator.validators.BooleanTypeValidator;

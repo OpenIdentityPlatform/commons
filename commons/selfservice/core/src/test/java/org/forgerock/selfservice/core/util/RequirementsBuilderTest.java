@@ -19,6 +19,7 @@ import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.core.util.RequirementsBuilder.*;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.Test;
 
@@ -100,4 +101,3 @@ public final class RequirementsBuilderTest {
         assertThat(jsonValue).stringAt("properties/user/type").isEqualTo("object");
     }
 }
-

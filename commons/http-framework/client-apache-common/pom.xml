@@ -39,7 +39,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpclient-osgi</artifactId>
-      <version>${apache-httpclient.version}</version>
+      <version>${apache.httpclient-osgi.version}</version>
       <!-- Dependencies packaged within the OSGi bundle: no need to transitively duplicates them -->
       <exclusions>
         <exclusion>
@@ -67,7 +67,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpcore-osgi</artifactId>
-      <version>${apache-httpcore.version}</version>
+      <version>${apache.httpcore-osgi.version}</version>
       <!-- Dependencies packaged within the OSGi bundle: no need to transitively duplicates them -->
       <exclusions>
         <exclusion>

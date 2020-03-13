@@ -29,6 +29,9 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractIterableAssert;
+import org.assertj.core.api.AbstractListAssert;
 import org.forgerock.http.Client;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.Handler;

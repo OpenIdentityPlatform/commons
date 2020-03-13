@@ -25,6 +25,7 @@ import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

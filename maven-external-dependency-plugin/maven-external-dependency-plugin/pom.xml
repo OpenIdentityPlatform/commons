@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- 
+<!--
 Licensed to the Apache Software Foundation (ASF) under one
 or more contributor license agreements.  See the NOTICE file
 distributed with this work for additional information
@@ -16,7 +16,7 @@ software distributed under the License is distributed on an
 KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License.
---> 
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
@@ -30,11 +30,11 @@ under the License.
     <url>http://code.google.com/p/maven-external-dependency-plugin/</url>
     <inceptionYear>2010</inceptionYear>
     <description>
-        This Maven plugin allows downloading, installing, and deploying dependency artifacts that are not stored in a Maven repository. 
+        This Maven plugin allows downloading, installing, and deploying dependency artifacts that are not stored in a Maven repository.
     </description>
     <packaging>maven-plugin</packaging>
     <developers>
-        <developer> 
+        <developer>
             <name>${project.groupId}.${project.artifactId}</name>
             <email>robert@savage7.com</email>
             <roles>
@@ -51,7 +51,7 @@ under the License.
           <role>Add support to extra compressed artifacts like bzip2, dir, gzip, tar, tgz, tar.gz, tbz2, tar.bz2</role>
         </roles>
       </contributor>
-      <contributor> 
+      <contributor>
             <name>${project.groupId}.${project.artifactId}</name>
             <email>vharseko@openam.org.ru</email>
             <roles>
@@ -60,16 +60,16 @@ under the License.
             <url>http://openam.org.ru</url>
         </contributor>
     </contributors>
-    
+
     <!-- BUILD PROPERTIES -->
     <properties>
         <!-- PROJECT ENCODING PROPERTIES -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
-        
+
     <!--  PLUGINS -->
-    
+
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
          <plugins>
             <plugin>
@@ -82,13 +82,13 @@ under the License.
                 <configuration>
                     <locales>en</locales>
                     <generateSitemap>true</generateSitemap>
-                    <generateReports>true</generateReports>                        
+                    <generateReports>true</generateReports>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.0</version>
+                <version>${apache.maven-release.version}</version>
                 <configuration>
                     <goals>deploy</goals>
                     <tagBase>https://maven-external-dependency-plugin.googlecode.com/svn/release</tagBase>
@@ -98,14 +98,14 @@ under the License.
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
+        <version>${apache.maven-javadoc.version}</version>
 				<configuration>
 				    <skip>true</skip>
 				</configuration>
-			</plugin>  
-         </plugins>    
-         
-         
+			</plugin>
+         </plugins>
+
+
 	     <extensions>
 	      <!-- Enabling the use of FTP -->
 	      <extension>
@@ -116,9 +116,9 @@ under the License.
 	    </extensions>
 
     </build>
-    
+
     <!--  PROJECT PROFILES -->
-    
+
 	<profiles>
 	  <profile>
 	    <id>release-sign-artifacts</id>
@@ -178,17 +178,17 @@ under the License.
           <groupId>org.codehaus.plexus</groupId>
           <artifactId>plexus-digest</artifactId>
           <version>1.0</version>
-        </dependency>        
+        </dependency>
         <dependency>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.3</version>        
-        </dependency>        
+          <version>${apache.maven-install.version}</version>
+        </dependency>
         <dependency>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-deploy-plugin</artifactId>
-          <version>2.3</version>        
-        </dependency>     
+          <version>${apache.maven-deploy.version}</version>
+        </dependency>
         <dependency>
           <groupId>org.codehaus.plexus</groupId>
           <artifactId>plexus-archiver</artifactId>
@@ -205,13 +205,13 @@ under the License.
         	<version>2.2</version>
         </dependency>
     </dependencies>
-    
+
     <!--  SOURCE CONTROL -->
 
-   
-        
+
+
   <!--  SITE REPORTING / DOCUMENTATION -->
-  
+
   <reporting>
     <plugins>
       <plugin>
@@ -222,21 +222,21 @@ under the License.
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-changelog-plugin</artifactId>
-      </plugin>      
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>2.5</version>
+        <version>${apache.maven-checkstyle.version}</version>
         <configuration>
            <configLocation>${basedir}/checkstyle.xml</configLocation>
            <suppressionsLocation>${basedir}/checkstyle-suppressions.xml</suppressionsLocation>
            <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
-        </configuration>        
-      </plugin>      
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
-        <version>2.4</version>
+        <version>${apache.maven-pmd.version}</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -246,7 +246,7 @@ under the License.
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
-      </plugin>      
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
@@ -258,5 +258,5 @@ under the License.
       </plugin>
     </plugins>
   </reporting>
-  
+
 </project>

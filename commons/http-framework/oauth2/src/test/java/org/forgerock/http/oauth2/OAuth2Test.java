@@ -18,6 +18,7 @@ package org.forgerock.http.oauth2;
 
 import static org.assertj.core.api.Assertions.*;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
