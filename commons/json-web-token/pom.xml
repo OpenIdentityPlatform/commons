@@ -27,10 +27,6 @@
     <description>Open Identity Platform CommunityJSON Web Token library</description>
     <packaging>bundle</packaging>
 
-    <properties>
-        <clirrComparisonVersion>3.0.0</clirrComparisonVersion>
-    </properties>
-
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
         <plugins>
             <plugin>

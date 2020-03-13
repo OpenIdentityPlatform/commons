@@ -35,12 +35,6 @@
     <name>${project.groupId}.${project.artifactId}</name>
 
     <dependencies>
-        <!--
-            mvn versions:display-plugin-updates
-            mvn versions:display-dependency-updates
-            mvn versions:use-latest-versions
-        -->
-
         <!-- Open Identity Platform CommunityCommons -->
         <dependency>
             <groupId>org.openidentityplatform.commons</groupId>
@@ -95,7 +89,7 @@
         <dependency>
             <groupId>org.ops4j.pax.swissbox</groupId>
             <artifactId>pax-swissbox-extender</artifactId>
-            <version>1.6.0</version>
+            <version>${ops4j.pax-swissbox-extender.version}</version>
             <exclusions>
                 <exclusion>
                     <artifactId>pax-swissbox-optional-jcl</artifactId>
@@ -108,7 +102,7 @@
         <dependency>
             <groupId>org.ops4j.base</groupId>
             <artifactId>ops4j-base-spi</artifactId>
-            <version>1.4.0</version>
+            <version>${ops4j.ops4j-base-spi.version}</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>

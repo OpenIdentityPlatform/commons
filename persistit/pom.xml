@@ -21,15 +21,6 @@
     <module>ui</module>
   </modules>
 
-  <properties>
-    <!-- To configure animal-sniffer to check API compat -->
-    <animal-sniffer.signature.groupId>org.codehaus.mojo.signature</animal-sniffer.signature.groupId>
-    <animal-sniffer.signature.artifactId>java17</animal-sniffer.signature.artifactId>
-    <animal-sniffer.signature.version>1.0</animal-sniffer.signature.version>
-    <version.animal-sniffer.plugin>1.16</version.animal-sniffer.plugin>
-    <version.maven-license.plugin>2.6</version.maven-license.plugin>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>
@@ -55,12 +46,13 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
-          <version>${version.animal-sniffer.plugin}</version>
+          <version>${codehaus.animal-sniffer.version}</version>
+          <!-- TODO: to delete, outdated? -->
           <configuration>
             <signature>
-              <groupId>${animal-sniffer.signature.groupId}</groupId>
-              <artifactId>${animal-sniffer.signature.artifactId}</artifactId>
-              <version>${animal-sniffer.signature.version}</version>
+              <groupId>org.codehaus.mojo.signature</groupId>
+              <artifactId>java18</artifactId>
+              <version>1.0</version>
             </signature>
             <skip>${skipSanityChecks}</skip>
           </configuration>
@@ -78,7 +70,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>build-helper-maven-plugin</artifactId>
-          <version>1.8</version>
+          <version>${codehaus.build-helper.version}</version>
           <executions>
             <execution>
               <id>reserve-network-port</id>
@@ -114,7 +106,7 @@
         <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>rmic-maven-plugin</artifactId>
-          <version>1.0</version>
+          <version>${codehaus.rmic-maven-plugin.version}</version>
           <configuration>
             <outputDirectory>target/classes/</outputDirectory>
           </configuration>
@@ -132,7 +124,7 @@
         <plugin>
           <groupId>com.mycila</groupId>
           <artifactId>license-maven-plugin</artifactId>
-          <version>${version.maven-license.plugin}</version>
+          <version>${mycila.license-maven.version}</version>
           <configuration>
             <!-- WORKAROUND: This has been disabled because pattern doesn't match copyright modifications
                  done by ForgeRock. -->

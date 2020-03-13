@@ -30,7 +30,6 @@
     <version>2.0.7-SNAPSHOT</version>
   </parent>
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <node.install.directory>${project.parent.basedir}</node.install.directory>
   </properties>
   <groupId>org.openidentityplatform.commons</groupId>

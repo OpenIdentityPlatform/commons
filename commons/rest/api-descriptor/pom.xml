@@ -27,10 +27,6 @@
     <description>Open Identity Platform CommunityAPI Descriptor library</description>
     <packaging>bundle</packaging>
 
-    <properties>
-        <rhino.version>1.7.11</rhino.version>
-    </properties>
-
     <build>
     	<finalName>${project.groupId}.${project.artifactId}</finalName>
         <plugins>
@@ -78,7 +74,7 @@
         <dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
-            <version>${rhino.version}</version>
+            <version>${mozilla.rhino.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

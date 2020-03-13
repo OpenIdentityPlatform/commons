@@ -30,11 +30,15 @@
 
     <!-- Thanks to the usage of properties, each project using this POM as parent-pom can easily use its own plugin version
             (useful when you have some constraints on a given version and if the parent doesn't give you the one you need ...) -->
+    <!-- use the follow to check for updates
+            mvn versions:display-plugin-updates
+            mvn versions:display-dependency-updates
+    -->
     <properties>
         <jre.version>1.8</jre.version>
         <jre.release>8</jre.release>
         <jdk.min.version>${jre.version}</jdk.min.version>
-        <apache.maven.version>3.3.1</apache.maven.version>
+        <apache.maven.version>3.6.3</apache.maven.version>
         <maven.min.version>3.3.1</maven.min.version>
 
         <binary.license.name>Forgerock_License.txt</binary.license.name>
@@ -224,6 +228,7 @@
         <!-- commons/auth-filters -->
         <codehaus.cargo-maven2-plugin.version>1.7.10</codehaus.cargo-maven2-plugin.version>
         <!-- commons/doc-maven-plugin -->
+        <apache.maven.compat.version>3.6.3</apache.maven.compat.version>
         <apache.maven.plugin-testing-harness.version>3.3.0</apache.maven.plugin-testing-harness.version>
         <apache.doxia-module-markdow.versionn>1.9.1</apache.doxia-module-markdow.versionn>
         <codehaus.plexus-utils.version>3.3.0</codehaus.plexus-utils.version>

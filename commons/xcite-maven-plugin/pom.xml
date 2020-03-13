@@ -44,18 +44,18 @@
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.0.5</version>
+      <version>${apache.maven-plugin-api.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.plugin-tools</groupId>
       <artifactId>maven-plugin-annotations</artifactId>
-      <version>3.3</version>
+      <version>${apache.maven-plugin-annotations.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.codehaus.plexus</groupId>
       <artifactId>plexus-utils</artifactId>
-      <version>3.0.17</version>
+      <version>${codehaus.plexus-utils.version}</version>
     </dependency>
     <dependency>
      <groupId>commons-io</groupId>

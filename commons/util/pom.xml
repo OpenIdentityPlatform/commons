@@ -25,9 +25,6 @@
     <description>Miscellaneous utility classes used within Open Identity Platform Communityprojects.</description>
     <packaging>pom</packaging>
 
-    <properties>
-        <clirrComparisonVersion>3.0.0</clirrComparisonVersion>
-    </properties>
     <modules>
         <module>util</module>
         <module>test-utils</module>
@@ -44,7 +41,7 @@
                 <dependency>
                   <groupId>org.codehaus.plexus</groupId>
                   <artifactId>plexus-compiler-eclipse</artifactId>
-                  <version>2.5</version>
+                  <version>${codehaus.plexus-compiler-eclipse.version}</version>
                 </dependency>
               </dependencies>
             </plugin>

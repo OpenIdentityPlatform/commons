@@ -29,11 +29,6 @@ Copyright 2014-2015 ForgeRock AS.
 
     <name>${project.groupId}.${project.artifactId}</name>
 
-
-    <properties>
-        <guice.version>4.0</guice.version>
-    </properties>
-
     <modules>
         <module>core</module>
         <module>servlet</module>
@@ -81,7 +76,7 @@ Copyright 2014-2015 ForgeRock AS.
             <dependency>
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
-                <version>${guice.version}</version>
+                <version>${google.inject.guice.version}</version>
                 <!-- Exclude aopalliance dependency due to ambiguous licensing. -->
                 <classifier>no_aop</classifier>
                 <exclusions>

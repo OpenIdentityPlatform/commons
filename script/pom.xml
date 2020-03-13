@@ -67,17 +67,12 @@
 
     <dependencyManagement>
         <dependencies>
-            <!--
-                mvn versions:display-plugin-updates
-                mvn versions:display-dependency-updates
-                mvn versions:use-latest-versions
-            -->
             <!-- Provided Dependencies -->
             <!-- Core OSGi -->
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
-                <version>4.3.1</version>
+                <version>${org.osgi.core.version}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -85,7 +80,7 @@
             <dependency>
                 <groupId>org.easytesting</groupId>
                 <artifactId>fest-assert-core</artifactId>
-                <version>2.0M10</version>
+                <version>${easytesting.fest-assert-core.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -112,8 +107,7 @@
                     <configuration>
                         <author>false</author>
                         <links>
-                            <!-- http://docs.oracle.com/javase/6/docs/api/package-list -->
-                            <link>http://docs.oracle.com/javase/6/docs/api</link>
+                            <link>http://docs.oracle.com/javase/8/docs/api</link>
                         </links>
                     </configuration>
                     <executions>
@@ -144,7 +138,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jxr-plugin</artifactId>
-                <version>2.3</version>
+                <version>${apache.maven-jxr-plugin.version}</version>
                 <configuration>
                     <aggregate>true</aggregate>
                     <windowTitle>Open Identity Platform CommunityCommon Script ${project.version} Reference</windowTitle>
@@ -158,7 +152,7 @@
                 <configuration>
                     <author>false</author>
                     <links>
-                        <link>http://docs.oracle.com/javase/6/docs/api</link>
+                        <link>http://docs.oracle.com/javase/8/docs/api</link>
                     </links>
                 </configuration>
                 <reportSets>
@@ -187,7 +181,7 @@
                     <plugin>
                         <groupId>org.zeroturnaround</groupId>
                         <artifactId>jrebel-maven-plugin</artifactId>
-                        <version>1.1.3</version>
+                        <version>${zeroturnaround.jrebel-maven-plugin.version}</version>
                         <configuration>
                             <packaging>jar</packaging>
                         </configuration>
