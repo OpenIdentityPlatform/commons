@@ -9,12 +9,6 @@ function handleCaptchaCallback(response) {
 }
 </script>
 
-<style>
-.g-recaptcha>div>div {
-    display: inline-block;
-}
-</style>
-
 <div class="g-recaptcha"
     data-sitekey="{{requirements.properties.response.recaptchaSiteKey}}"
     data-callback="handleCaptchaCallback"></div>
