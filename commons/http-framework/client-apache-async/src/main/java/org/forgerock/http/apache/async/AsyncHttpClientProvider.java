@@ -21,6 +21,8 @@ import static org.forgerock.http.handler.HttpClientHandler.OPTION_CONNECT_TIMEOU
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_HOSTNAME_VERIFIER;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_KEY_MANAGERS;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_MAX_CONNECTIONS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_PROXY;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_PROXY_SYSTEM;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_REUSE_CONNECTIONS;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_SO_TIMEOUT;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_SSLCONTEXT_ALGORITHM;
@@ -33,19 +35,31 @@ import static org.forgerock.http.util.Lists.asArrayOrNull;
 import java.security.GeneralSecurityException;
 import java.util.List;
 
+import java.net.ProxySelector;
+import java.net.URI;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthenticationStrategy;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.impl.NoConnectionReuseStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.http.impl.nio.client.CloseableHttpAsyncClient;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.apache.http.impl.nio.client.HttpAsyncClients;
@@ -60,6 +74,7 @@ import org.apache.http.nio.reactor.IOReactorException;
 import org.apache.http.protocol.HttpContext;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.NoAuthenticationStrategy;
+import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.spi.HttpClient;
 import org.forgerock.http.spi.HttpClientProvider;
@@ -179,6 +194,33 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
             builder.setConnectionReuseStrategy(NoConnectionReuseStrategy.INSTANCE);
         }
 
+        // Apply proxy settings if necessary
+        AuthenticationStrategy proxyStrategy = NoAuthenticationStrategy.INSTANCE;
+        ProxyAuthenticationStrategy proxyAuthenticationStrategy = null;
+
+        // Read the proxy info from options
+        HttpClientHandler.ProxyInfo proxyInfo = (HttpClientHandler.ProxyInfo)options.get(OPTION_PROXY);
+        if (proxyInfo != null) {
+            // We have some proxy settings, apply them
+            URI uri = proxyInfo.getProxyUri();
+            builder.setProxy(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
+
+            // Is it an authenticated proxy?
+            if (proxyInfo.hasCredentials()) {
+                // It is an authentication proxy, create the authentication strategy
+                // using the supplied credentials
+                UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(proxyInfo.getUsername(), proxyInfo.getPassword());
+                AuthScope authScope = new AuthScope(uri.getHost(), uri.getPort());
+                BasicCredentialsProvider basicCredentialsProvider = new BasicCredentialsProvider();
+                basicCredentialsProvider.setCredentials(authScope, usernamePasswordCredentials);
+                builder.setDefaultCredentialsProvider(basicCredentialsProvider);
+                proxyAuthenticationStrategy = ProxyAuthenticationStrategy.INSTANCE;
+            }
+        } else if (((Boolean)options.get(OPTION_PROXY_SYSTEM)).booleanValue()) {
+            // We don't have explicit proxy settings, but we have been asked to use the system settings
+            builder.setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()));
+        }
+
         // TODO Uncomment when we'll have a user-agent Option
         // builder.setUserAgent("CHF/1.0");
 
@@ -186,7 +228,7 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
                 .disableCookieManagement()
                 .setRedirectStrategy(DISABLE_REDIRECT)
                 .setTargetAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE)
-                .setProxyAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE)
+                .setProxyAuthenticationStrategy(proxyAuthenticationStrategy)
                 .build();
         client.start();
         return new AsyncHttpClient(client, storage);
