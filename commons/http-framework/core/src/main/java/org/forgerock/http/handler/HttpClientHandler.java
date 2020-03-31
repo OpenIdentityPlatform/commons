@@ -117,7 +117,7 @@ public final class HttpClientHandler implements Handler, Closeable {
     /**
      * If true and OPTION_PROXY is null, uses the system proxy settings
      */
-    public static final Option<Boolean> OPTION_PROXY_SYSTEM = Option.withDefault(Boolean.valueOf(false));
+    public static final Option<Boolean> OPTION_PROXY_SYSTEM = Option.withDefault(false);
 
     /** The client implementation. */
     private final HttpClient httpClient;
