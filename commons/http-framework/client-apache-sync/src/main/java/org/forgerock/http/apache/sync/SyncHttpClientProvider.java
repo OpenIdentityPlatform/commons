@@ -23,6 +23,8 @@ import static org.forgerock.http.handler.HttpClientHandler.OPTION_CONNECT_TIMEOU
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_HOSTNAME_VERIFIER;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_KEY_MANAGERS;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_MAX_CONNECTIONS;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_PROXY;
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_PROXY_SYSTEM;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_RETRY_REQUESTS;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_REUSE_CONNECTIONS;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_SO_TIMEOUT;
@@ -33,20 +35,33 @@ import static org.forgerock.http.handler.HttpClientHandler.OPTION_TEMPORARY_STOR
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_TRUST_MANAGERS;
 import static org.forgerock.http.util.Lists.asArrayOrNull;
 
+import java.net.ProxySelector;
+import java.net.URI;
 import java.security.GeneralSecurityException;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
 
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.AuthenticationStrategy;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.conn.routing.HttpRoutePlanner;
 import org.apache.http.conn.ssl.DefaultHostnameVerifier;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.NoConnectionReuseStrategy;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.ProxyAuthenticationStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.NoAuthenticationStrategy;
+import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.spi.HttpClient;
 import org.forgerock.http.spi.HttpClientProvider;
@@ -116,9 +131,36 @@ public final class SyncHttpClientProvider implements HttpClientProvider {
         builder.setSSLSocketFactory(new SSLConnectionSocketFactory(context, asArrayOrNull(protocols),
                 asArrayOrNull(ciphers), hostnameVerifier));
 
+        // Apply proxy settings if necessary
+        AuthenticationStrategy proxyStrategy = NoAuthenticationStrategy.INSTANCE;
+        ProxyAuthenticationStrategy proxyAuthenticationStrategy = null;
+
+        // Read the proxy info from options
+        HttpClientHandler.ProxyInfo proxyInfo = (HttpClientHandler.ProxyInfo)options.get(OPTION_PROXY);
+        if (proxyInfo != null) {
+            // We have some proxy settings, apply them
+            URI uri = proxyInfo.getProxyUri();
+            builder.setProxy(new HttpHost(uri.getHost(), uri.getPort(), uri.getScheme()));
+
+            // Is it an authenticated proxy?
+            if (proxyInfo.hasCredentials()) {
+                // It is an authentication proxy, create the authentication strategy
+                // using the supplied credentials
+                UsernamePasswordCredentials usernamePasswordCredentials = new UsernamePasswordCredentials(proxyInfo.getUsername(), proxyInfo.getPassword());
+                AuthScope authScope = new AuthScope(uri.getHost(), uri.getPort());
+                BasicCredentialsProvider basicCredentialsProvider = new BasicCredentialsProvider();
+                basicCredentialsProvider.setCredentials(authScope, usernamePasswordCredentials);
+                builder.setDefaultCredentialsProvider(basicCredentialsProvider);
+                proxyAuthenticationStrategy = ProxyAuthenticationStrategy.INSTANCE;
+            }
+        } else if (((Boolean)options.get(OPTION_PROXY_SYSTEM)).booleanValue()) {
+            // We don't have explicit proxy settings, but we have been asked to use the system settings
+            builder.setRoutePlanner(new SystemDefaultRoutePlanner(ProxySelector.getDefault()));
+        }
+
         // FIXME: is this equivalent to original OpenIG config?
         builder.disableCookieManagement();
-        builder.setProxyAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
+        builder.setProxyAuthenticationStrategy(proxyAuthenticationStrategy);
         builder.setTargetAuthenticationStrategy(NoAuthenticationStrategy.INSTANCE);
 
         return new SyncHttpClient(builder.build(), storage);

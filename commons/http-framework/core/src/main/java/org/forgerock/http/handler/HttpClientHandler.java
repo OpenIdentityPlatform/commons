@@ -20,6 +20,7 @@ import static org.forgerock.util.time.Duration.duration;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
@@ -107,6 +108,16 @@ public final class HttpClientHandler implements Handler, Closeable {
      * SSL/TLS connections. By default the system trust manager(s) will be used.
      */
     public static final Option<TrustManager[]> OPTION_TRUST_MANAGERS = Option.of(TrustManager[].class, null);
+
+    /**
+     * Holds the proxy configuration attributes
+     */
+    public static final Option<ProxyInfo> OPTION_PROXY = Option.of(ProxyInfo.class, null);
+
+    /**
+     * If true and OPTION_PROXY is null, uses the system proxy settings
+     */
+    public static final Option<Boolean> OPTION_PROXY_SYSTEM = Option.withDefault(false);
 
     /** The client implementation. */
     private final HttpClient httpClient;
@@ -215,5 +226,64 @@ public final class HttpClientHandler implements Handler, Closeable {
     @Override
     public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
         return httpClient.sendAsync(request);
+    }
+
+    /**
+     * Holds the proxy configuration attributes
+     */
+    public static final class ProxyInfo {
+        private final URI proxyUri;
+
+        private final String username;
+
+        private final String password;
+
+        /**
+         * Initializes an anonymous proxy
+         */
+        public static ProxyInfo proxyInfo(URI proxyUri) {
+            return new ProxyInfo(proxyUri, null, null);
+        }
+
+        /**
+         * Initializes an authenticated proxy
+         */
+        public static ProxyInfo proxyInfo(URI proxyUri, String username, String password) {
+            return new ProxyInfo(proxyUri, username, password);
+        }
+
+        private ProxyInfo(URI uri, String username, String password) {
+            this.proxyUri = (URI)Reject.checkNotNull(uri);
+            this.username = username;
+            this.password = password;
+        }
+
+        /**
+         * Gets the proxy URI
+         */
+        public URI getProxyUri() {
+            return this.proxyUri;
+        }
+
+        /**
+         * Gets the proxy authentication user name
+         */
+        public String getUsername() {
+            return this.username;
+        }
+
+        /**
+         * Gets the proxy authentication password
+         */
+        public String getPassword() {
+            return this.password;
+        }
+
+        /**
+         * True if authentication credentials are set
+         */
+        public boolean hasCredentials() {
+            return (this.username != null && this.password != null);
+        }
     }
 }
