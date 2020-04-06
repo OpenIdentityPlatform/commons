@@ -110,7 +110,8 @@ define([
         getFormContent: function () {
             if (this.$el.find("form").attr("id") === "userQuery") {
                 return {
-                    queryFilter: this.$el.find(":input[name=queryFilter]").val()
+                    queryFilter: this.$el.find(":input[name=queryFilter]").val(),
+                    querystringParams: this.$el.find(":input[name=querystringParams]").val() || ''
                 };
             } else {
                 return form2js($(this.element).find("form")[0]);
