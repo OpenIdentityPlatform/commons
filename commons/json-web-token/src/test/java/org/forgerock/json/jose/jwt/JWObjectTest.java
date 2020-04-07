@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.testng.annotations.Test;
 

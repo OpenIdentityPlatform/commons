@@ -27,10 +27,6 @@
     <description>Open Identity Platform CommunityJSON Web Token library</description>
     <packaging>bundle</packaging>
 
-    <properties>
-        <clirrComparisonVersion>3.0.0</clirrComparisonVersion>
-    </properties>
-
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
         <plugins>
             <plugin>
@@ -99,17 +95,17 @@
         <dependency>
 		  <groupId>javax.xml.bind</groupId>
 		  <artifactId>jaxb-api</artifactId>
-		  <version>2.3.1</version>
+		  <version>${javax.xml.jaxb-api.version}</version>
 		</dependency>
 		<dependency>
 		  <groupId>com.sun.xml.bind</groupId>
 		  <artifactId>jaxb-core</artifactId>
-		  <version>2.3.0.1</version>
+		  <version>${sun.xml.jaxb-core.version}</version>
 		</dependency>
 		<dependency>
 		  <groupId>com.sun.xml.bind</groupId>
 		  <artifactId>jaxb-impl</artifactId>
-		  <version>2.3.1</version>
+		  <version>${sun.xml.jaxb-impl.version}</version>
 		</dependency>
     </dependencies>
 

@@ -25,6 +25,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.util.concurrent.CountDownLatch;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.http.Client;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.protocol.Request;
@@ -61,8 +62,8 @@ public class AsyncClientTest {
         // Clear mocked invocations between tests
         // So we can reuse the server instance (less traces) still having isolation
         if (server != null) {
-            server.getCalls().clear();
-            server.getStubs().clear();
+            server.clearCalls();
+            server.clearStubs();
         }
     }
 

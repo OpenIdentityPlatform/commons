@@ -37,10 +37,6 @@
     <inceptionYear>2012</inceptionYear>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
-
         <!-- Documentation and site properties -->
         <docTargetVersion>1.0.0</docTargetVersion>
         <releaseDate />
@@ -57,12 +53,12 @@
             <dependency>
                 <groupId>org.osgi</groupId>
                 <artifactId>org.osgi.core</artifactId>
-                <version>6.0.0</version>
+                <version>${org.osgi.core.version}</version>
             </dependency>
             <dependency>
 	            <groupId>org.openidentityplatform.commons</groupId>
 	            <artifactId>util</artifactId>
-	            <version>2.0.7-SNAPSHOT</version>
+                <version>${project.version}</version>
 	        </dependency>
             <!--dependency>
                 <groupId>org.osgi</groupId>
@@ -74,19 +70,19 @@
             <dependency>
                 <groupId>org.easytesting</groupId>
                 <artifactId>fest-assert-core</artifactId>
-                <version>2.0M8</version>
+                <version>${easytesting.fest-assert-core.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.9.8</version>
+                <version>${org.testng.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
-                <version>4.0.3</version>
+                <version>${apache.felix.framework.version}</version>
 				<scope>test</scope>
             </dependency>
         </dependencies>
@@ -97,7 +93,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9</version>
+                <version>${apache.maven-javadoc.version}</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -110,7 +106,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.4</version>
+                <version>${apache.maven-project-info-reports.version}</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -127,7 +123,7 @@
             <plugin>
                 <groupId>org.openidentityplatform.maven.plugins</groupId>
                 <artifactId>javadoc-updater-maven-plugin</artifactId>
-                <version>1.0.0</version>
+                <version>${openidentityplatform.javadoc-updater.version}</version>
                 <configuration>
                     <directory>${project.reporting.outputDirectory}</directory>
                 </configuration>

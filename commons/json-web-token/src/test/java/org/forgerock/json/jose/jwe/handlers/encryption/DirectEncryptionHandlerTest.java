@@ -25,6 +25,7 @@ import java.security.Key;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwe.JweEncryption;
 import org.mockito.Mock;

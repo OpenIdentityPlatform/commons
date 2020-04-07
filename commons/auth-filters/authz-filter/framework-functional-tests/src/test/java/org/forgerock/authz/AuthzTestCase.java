@@ -18,10 +18,10 @@ package org.forgerock.authz;
 
 import org.testng.annotations.BeforeClass;
 
-import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.EncoderConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.parsing.Parser;
+import io.restassured.RestAssured;
+import io.restassured.config.EncoderConfig;
+import io.restassured.config.RestAssuredConfig;
+import io.restassured.parsing.Parser;
 
 public class AuthzTestCase {
 

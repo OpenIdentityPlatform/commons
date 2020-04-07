@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;

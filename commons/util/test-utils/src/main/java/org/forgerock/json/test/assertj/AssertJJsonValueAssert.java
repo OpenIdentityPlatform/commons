@@ -21,7 +21,7 @@ import java.util.Map;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.AbstractBooleanAssert;
-import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.AbstractDoubleAssert;
 import org.assertj.core.api.AbstractIntegerAssert;
 import org.assertj.core.api.AbstractIterableAssert;
@@ -30,6 +30,7 @@ import org.assertj.core.api.AbstractLongAssert;
 import org.assertj.core.api.AbstractMapAssert;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
+import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -127,7 +128,7 @@ public final class AssertJJsonValueAssert {
          * Check that the {@link JsonValue} is a set.
          * @return The {@link AbstractIterableAssert} representation of this Assert instance.
          */
-        public AbstractIterableAssert<?, ? extends Iterable<?>, Object> isSet() {
+        public AbstractIterableAssert<?, ? extends Iterable<?>, Object, ObjectAssert<Object>> isSet() {
             isNotNull();
             if (!actual.isSet()) {
                 failWithMessage("Expected %s to be a set", actual.getPointer());
@@ -137,9 +138,9 @@ public final class AssertJJsonValueAssert {
 
         /**
          * Check that the {@link JsonValue} is a string.
-         * @return The {@link AbstractCharSequenceAssert} representation of this Assert instance.
+         * @return The {@link AbstractStringAssert} representation of this Assert instance.
          */
-        public AbstractCharSequenceAssert<?, String> isString() {
+        public AbstractStringAssert<?> isString() {
             isNotNull();
             if (!actual.isString()) {
                 failWithMessage("Expected %s to be a string", actual.getPointer());
@@ -303,12 +304,12 @@ public final class AssertJJsonValueAssert {
         }
 
         /**
-         * Get a {@link AbstractCharSequenceAssert} for the referenced {@link JsonValue} is a string, to check its
+         * Get a {@link AbstractStringAssert} for the referenced {@link JsonValue} is a string, to check its
          * value.
          * @param path The {@link JsonPointer} path to the expected value.
-         * @return This {@link AbstractCharSequenceAssert} instance.
+         * @return This {@link AbstractStringAssert} instance.
          */
-        public AbstractCharSequenceAssert<?, String> stringAt(String path) {
+        public AbstractStringAssert<?> stringAt(String path) {
             return hasPath(path).isString();
         }
 
@@ -534,7 +535,7 @@ public final class AssertJJsonValueAssert {
 
     /** Class for assertions on array {@link JsonValue}. */
     public static final class ArrayJsonValueAssert extends AbstractJsonValueAssert<ArrayJsonValueAssert> {
-        private AbstractListAssert<?, ? extends List<?>, Object> listAssert;
+        private AbstractListAssert<?, ? extends List<?>, Object, ObjectAssert<Object>> listAssert;
 
         private ArrayJsonValueAssert(JsonValue value) {
             super(ArrayJsonValueAssert.class, value);

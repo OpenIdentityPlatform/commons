@@ -15,7 +15,7 @@
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.newAuditService;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.DependencyProviderBase;

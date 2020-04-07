@@ -34,27 +34,23 @@
         <module>authz-filter</module>
     </modules>
 
-    <properties>
-        <restlet.version>2.1.2</restlet.version>
-    </properties>
-
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
         <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <version>1.7.4</version>
+                    <version>${apache.felix.maven-scr.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.3.7</version>
+                    <version>${apache.felix.maven-bundle.version}</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>1.10</version>
+                    <version>${codehaus.build-helper.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -63,11 +59,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>${apache.maven-dependency.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.openidentityplatform.maven.plugins</groupId>
                 <artifactId>javadoc-updater-maven-plugin</artifactId>
-                <version>1.0.0</version>
+                <version>${openidentityplatform.javadoc-updater.version}</version>
                 <executions>
                     <execution>
                         <phase>site</phase>
@@ -105,12 +102,12 @@
             <dependency>
                 <groupId>org.glassfish</groupId>
                 <artifactId>javax.security.auth.message</artifactId>
-                <version>3.1</version>
+                <version>${glassfish.security.auth.message.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.jayway.restassured</groupId>
+                <groupId>io.rest-assured</groupId>
                 <artifactId>rest-assured</artifactId>
-                <version>2.3.0</version>
+                <version>${io.rest-assured.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>

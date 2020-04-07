@@ -198,8 +198,11 @@
                 </executions>
             </plugin>
 			<plugin>
-				<groupId>org.openidentityplatform.commons</groupId>
-				<artifactId>maven-external-dependency-plugin</artifactId>
+				<!-- <groupId>org.openidentityplatform.commons</groupId>
+				<artifactId>maven-external-dependency-plugin</artifactId> -->
+				<groupId>com.universalmediaserver</groupId>
+				<artifactId>external-maven-plugin</artifactId>
+				<version>${universalmediaserver.external-maven-plugin.version}</version>
 				<inherited>false</inherited>
 				<configuration>
 					<stagingDirectory>
@@ -226,15 +229,15 @@
 						<id>clean-external-dependencies</id>
 						<phase>clean</phase>
 						<goals>
-							<goal>clean-external</goal>
+							<goal>clean</goal>
 						</goals>
 					</execution>
 					<execution>
 						<id>resolve-install-external-dependencies</id>
 						<phase>process-resources</phase>
 						<goals>
-							<goal>resolve-external</goal>
-							<goal>install-external</goal>
+							<goal>resolve</goal>
+							<goal>install</goal>
 						</goals>
 					</execution>
 <!-- 					<execution> -->

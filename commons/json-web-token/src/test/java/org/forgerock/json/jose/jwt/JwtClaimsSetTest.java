@@ -18,6 +18,9 @@ package org.forgerock.json.jose.jwt;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractListAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.json.jose.exceptions.JwtRuntimeException;
 import org.testng.annotations.Test;
 

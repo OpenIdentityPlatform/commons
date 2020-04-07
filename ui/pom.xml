@@ -30,7 +30,6 @@
     <version>2.0.7-SNAPSHOT</version>
   </parent>
   <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <node.install.directory>${project.parent.basedir}</node.install.directory>
   </properties>
   <groupId>org.openidentityplatform.commons</groupId>
@@ -47,8 +46,11 @@
   <build><finalName>${project.groupId}.${project.artifactId}</finalName>
     <plugins>
       <plugin>
-        <groupId>org.openidentityplatform.commons</groupId>
-        <artifactId>maven-external-dependency-plugin</artifactId>
+        <!-- <groupId>org.openidentityplatform.commons</groupId>
+        <artifactId>maven-external-dependency-plugin</artifactId> -->
+				<groupId>com.universalmediaserver</groupId>
+				<artifactId>external-maven-plugin</artifactId>
+				<version>${universalmediaserver.external-maven-plugin.version}</version>
         <inherited>false</inherited>
         <configuration>
           <stagingDirectory>${project.build.directory}/dependencies/</stagingDirectory>
@@ -477,15 +479,15 @@
             <id>clean-external-dependencies</id>
             <phase>clean</phase>
             <goals>
-              <goal>clean-external</goal>
+              <goal>clean</goal>
             </goals>
           </execution>
           <execution>
             <id>resolve-install-external-dependencies</id>
             <phase>process-resources</phase>
             <goals>
-              <goal>resolve-external</goal>
-              <goal>install-external</goal>
+              <goal>resolve</goal>
+              <goal>install</goal>
             </goals>
           </execution>
 <!--           <execution> -->
@@ -502,7 +504,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-release-plugin</artifactId>
-          <version>2.3.2</version>
+          <version>${apache.maven-release.version}</version>
           <configuration>
             <mavenExecutorId>forked-path</mavenExecutorId>
             <useReleaseProfile>false</useReleaseProfile>

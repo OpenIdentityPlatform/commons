@@ -25,6 +25,7 @@ import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 
+import org.assertj.core.api.AbstractAssert;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwe.EncryptionMethod;
 import org.forgerock.json.jose.jwe.JweEncryption;

@@ -25,6 +25,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.providers.LocalHostNameProvider;
 import org.forgerock.audit.providers.ProductInfoProvider;

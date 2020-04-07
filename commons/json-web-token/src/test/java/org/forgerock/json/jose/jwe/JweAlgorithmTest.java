@@ -18,6 +18,7 @@ package org.forgerock.json.jose.jwe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 

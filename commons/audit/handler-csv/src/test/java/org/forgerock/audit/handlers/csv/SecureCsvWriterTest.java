@@ -36,6 +36,8 @@ import java.util.concurrent.TimeUnit;
 
 import javax.crypto.SecretKey;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractListAssert;
 import org.forgerock.audit.handlers.csv.CsvSecureVerifier.VerificationResult;
 import org.forgerock.audit.retention.FileNamingPolicy;
 import org.forgerock.audit.retention.TimeStampFileNamingPolicy;

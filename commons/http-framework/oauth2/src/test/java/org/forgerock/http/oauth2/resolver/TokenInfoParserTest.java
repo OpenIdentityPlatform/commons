@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.*;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.http.oauth2.AccessTokenException;
 import org.forgerock.http.oauth2.AccessTokenInfo;
 import org.forgerock.json.JsonValue;

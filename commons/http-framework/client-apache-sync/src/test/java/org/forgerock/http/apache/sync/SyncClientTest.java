@@ -24,8 +24,12 @@ import static com.xebialabs.restito.semantics.Condition.withPostBodyContaining;
 import static java.lang.String.format;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.xebialabs.restito.semantics.Predicate;
+import com.xebialabs.restito.semantics.Call;
+import com.xebialabs.restito.semantics.Condition;
 import com.xebialabs.restito.semantics.Predicates;
+import com.xebialabs.restito.server.StubServer;
+import java.util.function.Predicate;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.http.Client;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.protocol.Request;
@@ -35,10 +39,6 @@ import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
-
-import com.xebialabs.restito.semantics.Call;
-import com.xebialabs.restito.semantics.Condition;
-import com.xebialabs.restito.server.StubServer;
 
 @SuppressWarnings("javadoc")
 public class SyncClientTest {
@@ -63,9 +63,8 @@ public class SyncClientTest {
         // Clear mocked invocations between tests
         // So we can reuse the server instance (less traces) still having isolation
         if (server != null) {
-            server.getCalls().clear();
-            server.getStubs().clear();
-        }
+            server.clearCalls();
+            server.clearStubs();        }
     }
 
     @Test

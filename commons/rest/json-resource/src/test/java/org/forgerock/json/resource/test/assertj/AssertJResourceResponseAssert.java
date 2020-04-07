@@ -19,7 +19,7 @@ package org.forgerock.json.resource.test.assertj;
 import java.util.concurrent.ExecutionException;
 
 import org.assertj.core.api.AbstractAssert;
-import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractStringAssert;
 import org.assertj.core.api.Assertions;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -93,17 +93,17 @@ public class AssertJResourceResponseAssert extends AbstractAssert<AssertJResourc
 
     /**
      * Assert the value of the resource ID.
-     * @return A {@code AbstractCharSequenceAssert} for this Resource's ID.
+     * @return A {@code AbstractStringAssert} for this Resource's ID.
      */
-    public AbstractCharSequenceAssert<?, String> withId() {
+    public AbstractStringAssert<?> withId() {
         return Assertions.assertThat(actual.getId());
     }
 
     /**
      * Assert the value of the resource revision.
-     * @return A {@code AbstractCharSequenceAssert} for this Resource's revision.
+     * @return A {@code AbstractStringAssert} for this Resource's revision.
      */
-    public AbstractCharSequenceAssert<?, String> withRevision() {
+    public AbstractStringAssert<?> withRevision() {
         return Assertions.assertThat(actual.getRevision());
     }
 

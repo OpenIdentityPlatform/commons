@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.assertj.core.api.AbstractIterableAssert;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandlerConfiguration;
 import org.forgerock.audit.handlers.jdbc.JdbcAuditEventHandlerConfiguration;

@@ -16,9 +16,9 @@
 
 package org.forgerock.authz;
 
-import static com.jayway.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
+import io.restassured.RestAssured;
 import org.testng.annotations.Test;
 
 @Test(testName = "BasicCrestTestCases")
@@ -27,7 +27,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysAllowAuthorizationShouldAllowCreateRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "create").
@@ -41,7 +41,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysAllowAuthorizationShouldAllowReadRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
             expect().
                 statusCode(200).
                 body("operation", equalTo("read")).
@@ -52,7 +52,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysAllowAuthorizationShouldAllowUpdateRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("If-Match", "*").
                 body("{}").
@@ -66,7 +66,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysAllowAuthorizationShouldAllowDeleteRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
             expect().
                 statusCode(200).
@@ -78,7 +78,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysAllowAuthorizationShouldAllowPatchRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
             expect().
@@ -91,7 +91,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysAllowAuthorizationShouldAllowActionCollectionRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -105,7 +105,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysAllowAuthorizationShouldAllowActionRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -119,7 +119,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysAllowAuthorizationShouldAllowQueryRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 queryParam("_queryId", "QUERY_ID").
             expect().
@@ -132,7 +132,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysDenyAuthorizationShouldDenyCreateRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "create").
@@ -149,7 +149,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysDenyAuthorizationShouldDenyReadRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
             expect().
                 statusCode(403).
                 body("code", equalTo(403)).
@@ -163,7 +163,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysDenyAuthorizationShouldDenyUpdateRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
             expect().
@@ -179,7 +179,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysDenyAuthorizationShouldDenyDeleteRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
             expect().
                 statusCode(403).
@@ -194,7 +194,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysDenyAuthorizationShouldDenyPatchRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
             expect().
@@ -210,7 +210,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysDenyAuthorizationShouldDenyActionCollectionRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -227,7 +227,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysDenyAuthorizationShouldDenyActionRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -244,7 +244,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void alwaysDenyAuthorizationShouldDenyQueryRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 queryParam("_queryId", "QUERY_ID").
             expect().
@@ -260,7 +260,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notActionAuthorizationShouldAllowCreateRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "create").
@@ -274,7 +274,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notActionAuthorizationShouldAllowReadRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
             expect().
                 statusCode(200).
                 body("operation", equalTo("read")).
@@ -285,7 +285,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notActionAuthorizationShouldAllowUpdateRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("If-Match", "*").
                 body("{}").
@@ -299,7 +299,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notActionAuthorizationShouldAllowDeleteRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
             expect().
                 statusCode(200).
@@ -311,7 +311,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notActionAuthorizationShouldAllowPatchRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
             expect().
@@ -324,7 +324,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void  notActionAuthorizationShouldDenyActionCollectionRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -341,7 +341,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notActionAuthorizationShouldDenyActionRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -358,7 +358,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notActionAuthorizationShouldAllowQueryRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 queryParam("_queryId", "QUERY_ID").
             expect().
@@ -371,7 +371,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notCreateOrPatchAuthorizationShouldDenyCreateRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "create").
@@ -388,7 +388,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notCreateOrPatchAuthorizationShouldAllowReadRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
             expect().
                 statusCode(200).
                 body("operation", equalTo("read")).
@@ -399,7 +399,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notCreateOrPatchAuthorizationShouldAllowUpdateRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("If-Match", "*").
                 body("{}").
@@ -413,7 +413,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notCreateOrPatchAuthorizationShouldAllowDeleteRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
             expect().
                 statusCode(200).
@@ -425,7 +425,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notCreateOrPatchAuthorizationShouldDenyPatchRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
             expect().
@@ -441,7 +441,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void  notCreateOrPatchAuthorizationShouldAllowActionCollectionRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -455,7 +455,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notCreateOrPatchAuthorizationShouldAllowActionRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -469,7 +469,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void notCreateOrPatchAuthorizationShouldAllowQueryRequestsToUsersEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 queryParam("_queryId", "QUERY_ID").
             expect().
@@ -482,7 +482,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void noneAuthorizationShouldDenyCreateRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "create").
@@ -499,7 +499,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void noneAuthorizationShouldDenyReadRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
             expect().
                 statusCode(403).
                 body("code", equalTo(403)).
@@ -513,7 +513,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void noneAuthorizationShouldDenyUpdateRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 header("If-Match", "*").
                 body("{}").
@@ -530,7 +530,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void noneAuthorizationShouldDenyDeleteRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
             expect().
                 statusCode(403).
@@ -545,7 +545,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void noneAuthorizationShouldDenyPatchRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("[{\"operation\": \"add\", \"field\": \"FIELD\", \"value\": \"VALUE\"}]").
             expect().
@@ -561,7 +561,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void noneAuthorizationShouldDenyActionCollectionRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -578,7 +578,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void noneAuthorizationShouldDenyActionRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 body("{}").
                 queryParam("_action", "ACTION").
@@ -595,7 +595,7 @@ public class BasicCrestTestCases extends AuthzTestCase {
     @Test
     public void noneAuthorizationShouldDenyQueryRequestsToRolesEndpoint() {
 
-        given().
+        RestAssured.given().
                 header("Content-Type", "application/json").
                 queryParam("_queryId", "QUERY_ID").
             expect().

@@ -9,40 +9,36 @@
 	<groupId>org.openidentityplatform.commons</groupId>
 	<artifactId>httpdump</artifactId>
 	<name>${project.groupId}.${project.artifactId}</name>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-		
 	<dependencies>
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-			<version>2.5</version>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${javax.servlet-api.version}</version>
 			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-mock</artifactId>
-			<version>2.0.8</version>
+			<version>${springframework.spring-mock.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<version>3.0.6.RELEASE</version>
+			<version>${springframework.spring-core.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>RELEASE</version>
+			<version>${junit4.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>RELEASE</version>
+			<version>${apache.commons-lang3.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openidentityplatform.commons</groupId>
@@ -59,7 +55,7 @@
 			<extension>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-ssh</artifactId>
-				<version>2.2</version>
+				<version>${apache.wagon-ssh.version}</version>
 			</extension>
 		</extensions>
 		<plugins>
@@ -67,8 +63,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>${jre.version}</source>
+					<target>${jre.version}</target>
+					<!-- <release>${jre.release}</release> -->
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>

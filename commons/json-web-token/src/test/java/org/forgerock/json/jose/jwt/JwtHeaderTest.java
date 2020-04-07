@@ -23,6 +23,7 @@ import static org.testng.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.json.jose.jws.JwsAlgorithm;
 import org.forgerock.json.jose.jws.JwsHeader;
 import org.testng.annotations.Test;

@@ -18,6 +18,7 @@ package org.forgerock.selfservice.stages.user;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import org.forgerock.selfservice.core.config.StageConfig;

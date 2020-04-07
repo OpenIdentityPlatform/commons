@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractIterableAssert;
 import org.forgerock.selfservice.core.StorageType;
 import org.forgerock.selfservice.core.config.ProcessInstanceConfig;
 import org.forgerock.json.JsonValue;

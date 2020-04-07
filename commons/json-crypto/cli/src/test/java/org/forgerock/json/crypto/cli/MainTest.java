@@ -18,6 +18,7 @@ package org.forgerock.json.crypto.cli;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.Test;

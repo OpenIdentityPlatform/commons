@@ -3,7 +3,7 @@
   "description": "ForgeRock UI Demonstration",
   "private": true,
   "devDependencies": {
-    "eslint": "4.18.2",
+    "eslint": "^6.8.0",
     "eslint-config-forgerock": "^1.0.0",
     "eslint-formatter-warning-summary": "^1.0.1",
     "grunt": "0.4.5",

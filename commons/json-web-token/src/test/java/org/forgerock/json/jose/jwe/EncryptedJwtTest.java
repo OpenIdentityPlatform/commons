@@ -34,6 +34,8 @@ import java.util.Set;
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractIterableAssert;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.exceptions.JweDecryptionException;

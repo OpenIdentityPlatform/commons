@@ -33,6 +33,7 @@ import javax.security.auth.message.MessagePolicy;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.assertj.core.api.Assertions;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;

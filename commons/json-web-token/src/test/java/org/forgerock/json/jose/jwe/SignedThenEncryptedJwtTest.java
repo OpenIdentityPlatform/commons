@@ -22,6 +22,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.util.Date;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.json.jose.builders.JwtBuilderFactory;
 import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.jose.exceptions.JwsVerifyingException;

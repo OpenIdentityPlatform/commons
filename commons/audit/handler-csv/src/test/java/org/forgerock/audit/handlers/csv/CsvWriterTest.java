@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractObjectArrayAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.CsvSecurity;
 import org.forgerock.audit.handlers.csv.CsvAuditEventHandlerConfiguration.EventBufferingConfiguration;
 import org.forgerock.audit.retention.TimestampFilenameFilter;

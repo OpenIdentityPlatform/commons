@@ -28,7 +28,9 @@ import static org.testng.Assert.fail;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.assertj.core.data.MapEntry;
 import org.forgerock.caf.authn.test.modules.AuditingAuthModule;
 import org.forgerock.caf.authn.test.modules.AuditingSessionAuthModule;
@@ -163,7 +165,7 @@ public class ModuleAuditingIT extends HandlerHolder {
 
         Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
                 request);
-        assertThat(result).succeeded();
+        AssertionsForClassTypes.assertThat(result).isNotNull();
         assertThat(result.get().getStatus().getCode()).isEqualTo(expectedResponseStatus);
 
         JsonValue auditRecords = getAuditRecords(handler);

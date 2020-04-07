@@ -22,6 +22,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.http.oauth2.AccessTokenException;
 import org.forgerock.http.oauth2.AccessTokenInfo;
 import org.forgerock.http.Handler;

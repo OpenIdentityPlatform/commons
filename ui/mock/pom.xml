@@ -34,10 +34,6 @@
     <name>${project.groupId}.${project.artifactId}</name>
     <packaging>pom</packaging>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
         <resources>
             <resource>

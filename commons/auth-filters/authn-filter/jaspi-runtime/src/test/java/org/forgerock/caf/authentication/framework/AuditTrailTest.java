@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.json.JsonValue;
 import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.RootContext;

@@ -17,7 +17,7 @@
 package org.forgerock.audit.handlers.csv;
 
 import static java.nio.charset.StandardCharsets.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.forgerock.audit.AuditServiceBuilder.*;
 import static org.forgerock.audit.AuditServiceProxy.*;
 import static org.forgerock.audit.handlers.csv.CsvAuditEventHandler.*;
@@ -33,6 +33,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.forgerock.audit.AuditService;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.DependencyProviderBase;

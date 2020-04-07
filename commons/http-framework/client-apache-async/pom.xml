@@ -38,7 +38,7 @@
     <dependency>
       <groupId>org.apache.httpcomponents</groupId>
       <artifactId>httpasyncclient-osgi</artifactId>
-      <version>${apache-httpasyncclient.version}</version>
+      <version>${apache.httpasyncclient-osgi.version}</version>
     </dependency>
     <dependency>
       <groupId>org.openidentityplatform.commons.http-framework</groupId>

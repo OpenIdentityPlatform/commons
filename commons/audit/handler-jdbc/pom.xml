@@ -28,10 +28,6 @@
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Writes audit event to a configured JDBC database</description>
 
-    <properties>
-        <h2database.version>1.4.188</h2database.version>
-    </properties>
-
     <dependencies>
         <!-- Third party dependencies -->
         <dependency>

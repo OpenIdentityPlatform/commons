@@ -30,6 +30,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
 import org.forgerock.http.oauth2.AccessTokenException;
 import org.forgerock.http.oauth2.AccessTokenInfo;
 import org.forgerock.http.oauth2.AccessTokenResolver;

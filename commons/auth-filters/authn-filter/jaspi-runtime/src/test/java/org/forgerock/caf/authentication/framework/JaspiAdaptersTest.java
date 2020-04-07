@@ -16,7 +16,7 @@
 
 package org.forgerock.caf.authentication.framework;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.forgerock.caf.authentication.framework.JaspiAdapters.MESSAGE_INFO_CONTEXT_KEY;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
@@ -35,6 +35,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Assertions;
 import org.forgerock.caf.authentication.api.AsyncServerAuthContext;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;

@@ -32,6 +32,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.assertj.core.api.AbstractCharSequenceAssert;
+import org.assertj.core.api.AbstractObjectAssert;
 import org.assertj.core.api.Condition;
 import org.forgerock.http.Handler;
 import org.forgerock.http.protocol.Request;
