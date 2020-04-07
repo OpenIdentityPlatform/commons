@@ -3,6 +3,7 @@
 
 <form class="form" id="userQuery">
     <input type="hidden" name="queryFilter" data-validator="required" />
+    <input type="hidden" aria-hidden="true" name="querystringParams" id="input-querystringParams" />
 
     <p>{{t 'common.user.userQuery.title'}}</p>
 
@@ -44,3 +45,9 @@
 
     <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.form.submit'}}" />
 </form>
+
+<script>
+  require(["jquery"], function($) {
+    $('#input-querystringParams').val(window.location.search.replace("?", ""));    
+  });
+</script>

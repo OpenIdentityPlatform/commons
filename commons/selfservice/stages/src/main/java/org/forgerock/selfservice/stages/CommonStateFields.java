@@ -47,4 +47,8 @@ public final class CommonStateFields {
      */
     public static final String USERNAME_FIELD = "username";
 
+    /**
+     * The querystring parameters field.
+     */
+    public static final String QUERYSTRING_PARAMS_FIELD = "querystringParams";
 }

@@ -18,6 +18,7 @@ package org.forgerock.selfservice.stages.user;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_ID_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.QUERYSTRING_PARAMS_FIELD;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,6 +54,7 @@ import org.forgerock.util.query.QueryFilterVisitor;
  * @since 0.5.0
  */
 public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
+    static final String REQUIREMENT_KEY_QUERYSTRING_PARAMS = "querystringParams";
 
     private final ConnectionFactory connectionFactory;
 
@@ -82,11 +84,22 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
 
         return RequirementsBuilder.newInstance("Find your account")
                 .addRequireProperty("queryFilter", "filter string to find account")
+                .addProperty(REQUIREMENT_KEY_QUERYSTRING_PARAMS, "hidden", "Querystring params")
                 .build();
     }
 
     @Override
     public StageResponse advance(ProcessContext context, UserQueryConfig config) throws ResourceException {
+        if (!context.containsState(QUERYSTRING_PARAMS_FIELD))
+        {
+            String querystringParams = context
+                .getInput()
+                .get(REQUIREMENT_KEY_QUERYSTRING_PARAMS)
+                .asString();
+
+            context.putState(QUERYSTRING_PARAMS_FIELD, querystringParams);
+        }
+
         JsonValue queryFilter = context.getInput().get("queryFilter").required();
 
         if (!isValidQueryFilter(config, queryFilter)) {
