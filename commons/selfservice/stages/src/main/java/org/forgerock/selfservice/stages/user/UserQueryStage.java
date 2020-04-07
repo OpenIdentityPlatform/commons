@@ -90,14 +90,14 @@ public final class UserQueryStage implements ProgressStage<UserQueryConfig> {
 
     @Override
     public StageResponse advance(ProcessContext context, UserQueryConfig config) throws ResourceException {
-        if (!context.containsState(QUERYSTRING_PARAMS_FIELD))
+        if (!context.containsState(QUERYSTRING_PARAMS_FIELD) && context.getInput() != null)
         {
-            String querystringParams = context
+            JsonValue querystringParams = context
                 .getInput()
-                .get(REQUIREMENT_KEY_QUERYSTRING_PARAMS)
-                .asString();
+                .get(REQUIREMENT_KEY_QUERYSTRING_PARAMS);
 
-            context.putState(QUERYSTRING_PARAMS_FIELD, querystringParams);
+            if (querystringParams != null && querystringParams.asString() != null)
+                context.putState(QUERYSTRING_PARAMS_FIELD, querystringParams.asString());
         }
 
         JsonValue queryFilter = context.getInput().get("queryFilter").required();

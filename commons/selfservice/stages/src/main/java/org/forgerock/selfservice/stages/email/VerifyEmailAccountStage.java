@@ -26,6 +26,7 @@ import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.QUERYSTRING_PARAMS_FIELD;
 import static org.forgerock.selfservice.stages.utils.LocaleUtils.getTranslationFromLocaleMap;
 
+import org.forgerock.http.MutableUri;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -48,7 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Hashtable;
 import java.util.UUID;
@@ -114,16 +114,6 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
 
     @Override
     public StageResponse advance(ProcessContext context, VerifyEmailAccountConfig config) throws ResourceException {
-        if (!context.containsState(QUERYSTRING_PARAMS_FIELD))
-        {
-            String querystringParams = context
-                .getInput()
-                .get(REQUIREMENT_KEY_QUERYSTRING_PARAMS)
-                .asString();
-
-            context.putState(QUERYSTRING_PARAMS_FIELD, querystringParams);
-        }
-
         switch (context.getStageTag()) {
         case INITIAL_TAG:
             return sendEmail(context, config);
@@ -136,6 +126,16 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
 
     private StageResponse sendEmail(ProcessContext context, final VerifyEmailAccountConfig config)
             throws ResourceException {
+        if (!context.containsState(QUERYSTRING_PARAMS_FIELD) && context.getInput() != null)
+        {
+            JsonValue querystringParams = context
+                .getInput()
+                .get(REQUIREMENT_KEY_QUERYSTRING_PARAMS);
+
+            if (querystringParams != null && querystringParams.asString() != null)
+                context.putState(QUERYSTRING_PARAMS_FIELD, querystringParams.asString());
+        }
+
         final String mail = getEmailAsString(context, config);
 
         final String code = UUID.randomUUID().toString();
@@ -228,49 +228,39 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
         // Generate the verification URL
         String emailUrl = config.getVerificationLink() + "&token=" + snapshotToken + "&code=" + code;
 
+        // Apply the stored querystring parameters, if any
         String modifiedEmailUrl = emailUrl;
-        try {
-            // Parse the verification URL into an URI for convenience
-            URI emailUri = new URI(emailUrl);
-
-            // Parse the stored query string and remove any unwanted fields, such as realm, token or code
-            String querystringParams = processContext
-                    .getState(QUERYSTRING_PARAMS_FIELD)
-                    .asString();
-            if (querystringParams != null && querystringParams.length() > 0)
-            {
-                Hashtable<String, String> querystringParamsMap = parseQueryString(querystringParams);
-                querystringParamsMap.remove("realm");
-                querystringParamsMap.remove("token");
-                querystringParamsMap.remove("code");
-                String querystringToPass = joinQueryString(querystringParamsMap);
-
-                // Create a new URI joining the configuration and the query string
-                String uriQuery;
-                if (emailUri.getQuery().length() > 0)
-                {
-                    if (querystringToPass.length() > 0)
-                        uriQuery = emailUri.getQuery() + "&" + querystringToPass;
-                    else
-                        uriQuery = emailUri.getQuery();
-                }
-                else
-                {
-                    if (querystringToPass.length() > 0)
-                        uriQuery = querystringToPass;
-                    else
-                        uriQuery = "";
-                }
-
-                URI modifiedEmailUri = new URI(emailUri.getScheme(),
-                    emailUri.getAuthority(),
-                    emailUri.getPath(), uriQuery, emailUri.getFragment());
-                modifiedEmailUrl = modifiedEmailUri.toString();
-            }
-        }
-        catch (URISyntaxException e)
+        if (processContext.getState(QUERYSTRING_PARAMS_FIELD) != null)
         {
-            logger.error("sendEmail - Error adding querystringParams to emailUrl", e);
+            try {
+                String querystringParams = processContext
+                        .getState(QUERYSTRING_PARAMS_FIELD)
+                        .asString();
+                if (querystringParams != null && querystringParams.length() > 0)
+                {
+                    // Parse the stored query string and remove any unwanted fields, such as realm, token or code
+                    Hashtable<String, String> querystringParamsMap = parseQueryString(querystringParams);
+                    querystringParamsMap.remove("realm");
+                    querystringParamsMap.remove("token");
+                    querystringParamsMap.remove("code");
+
+                    // Concat the configuration and the stored query string parameter maps
+                    MutableUri emailUri = new MutableUri(emailUrl);
+                    Hashtable<String, String> paramsToPassMap = new Hashtable<String, String>();
+                    paramsToPassMap.putAll(parseQueryString(emailUri.getRawQuery()));
+                    paramsToPassMap.putAll(querystringParamsMap);
+
+                    // Set the new URI querystring parameters by joining the map items
+                    String querystringToPass = joinQueryString(paramsToPassMap);
+
+                    emailUri.setRawQuery(querystringToPass);
+                    modifiedEmailUrl = emailUri.toString();
+                }
+            }
+            catch (URISyntaxException e)
+            {
+                logger.error("sendEmail - Error adding querystringParams to emailUrl", e);
+            }
         }
 
         PreferredLocales preferredLocales = processContext.getRequest().getPreferredLocales();
@@ -296,13 +286,15 @@ public final class VerifyEmailAccountStage implements ProgressStage<VerifyEmailA
 
     private static Hashtable<String, String> parseQueryString(String query) {
         Hashtable<String, String> params = new Hashtable<>();
-        for (String param : query.split("&")) {
-            String[] keyValue = param.split("=", 2);
-            String key = keyValue[0];
-            if (key.length() > 0)
-            {
-                String value = keyValue.length > 1 ? keyValue[1] : "";
-                params.put(key, value);
+        if (query != null) {
+            for (String param : query.split("&")) {
+                String[] keyValue = param.split("=", 2);
+                String key = keyValue[0];
+                if (key.length() > 0)
+                {
+                    String value = keyValue.length > 1 ? keyValue[1] : "";
+                    params.put(key, value);
+                }
             }
         }
         return params;
