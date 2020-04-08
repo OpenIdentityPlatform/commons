@@ -23,6 +23,7 @@ import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.core.ServiceUtils.INITIAL_TAG;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
+import static org.forgerock.selfservice.stages.CommonStateFields.QUERYSTRING_PARAMS_FIELD;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -62,6 +63,7 @@ public final class VerifyEmailAccountStageTest {
 
     private static final String TEST_EMAIL_ID = "test@forgerock.com";
     private static final  String INFO_MAIL_ID = "info@admin.org";
+    private static final String TEST_QUERYSTRING_PARAMS = "goto=https://www.google.com";
 
     private VerifyEmailAccountStage verifyEmailStage;
     @Mock
@@ -96,6 +98,22 @@ public final class VerifyEmailAccountStageTest {
         // Given
         given(context.containsState(EMAIL_FIELD)).willReturn(true);
         given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
+
+        // When
+        JsonValue jsonValue = verifyEmailStage.gatherInitialRequirements(context, config);
+
+        // Then
+        assertThat(jsonValue).stringAt("description").isEqualTo("Verify your email address");
+        assertThat(jsonValue).stringAt("properties/querystringParams/type").isEqualTo("hidden");
+    }
+
+    @Test
+    public void testGatherInitialRequirementsWithEmailAndQuerystringParamsInContext() throws Exception {
+        // Given
+        given(context.containsState(EMAIL_FIELD)).willReturn(true);
+        given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
+        given(context.containsState(QUERYSTRING_PARAMS_FIELD)).willReturn(true);
+        given(context.getState(QUERYSTRING_PARAMS_FIELD)).willReturn(newJsonValueWithEmail());
 
         // When
         JsonValue jsonValue = verifyEmailStage.gatherInitialRequirements(context, config);
@@ -198,6 +216,49 @@ public final class VerifyEmailAccountStageTest {
         );
     }
 
+    @Test
+    public void testAdvanceCallbackSendMailWithQuerystringParams() throws Exception {
+        // Given
+        given(context.getStageTag()).willReturn(INITIAL_TAG);
+
+        List<Locale> locales = new ArrayList<>();
+        locales.add(Locale.ENGLISH);
+        PreferredLocales preferredLocales = new PreferredLocales(locales);
+
+        Request request = mock(Request.class);
+        given(request.getPreferredLocales()).willReturn(preferredLocales);
+        given(context.getRequest()).willReturn(request);
+
+        given(context.containsState(EMAIL_FIELD)).willReturn(true);
+        given(context.getState(EMAIL_FIELD)).willReturn(newJsonValueWithEmail());
+
+        given(context.containsState(QUERYSTRING_PARAMS_FIELD)).willReturn(true);
+        given(context.getState(QUERYSTRING_PARAMS_FIELD)).willReturn(newJsonValueWithQuerystringParams());
+
+        given(factory.getConnection()).willReturn(connection);
+
+        // When
+        StageResponse stageResponse = verifyEmailStage.advance(context, config);
+        SnapshotTokenCallback callback = stageResponse.getCallback();
+        callback.snapshotTokenPreview(context, "token1");
+
+        // Then
+        ArgumentCaptor<ActionRequest> actionRequestArgumentCaptor =  ArgumentCaptor.forClass(ActionRequest.class);
+        verify(connection).action(any(Context.class), actionRequestArgumentCaptor.capture());
+        ActionRequest actionRequest = actionRequestArgumentCaptor.getValue();
+
+        assertThat(actionRequest.getAction()).isSameAs("send");
+        assertThat(actionRequest.getContent()).stringAt("/to").isEqualTo(TEST_EMAIL_ID);
+        assertThat(actionRequest.getContent()).stringAt("/from").isEqualTo(INFO_MAIL_ID);
+        assertThat(actionRequest.getContent()).stringAt("/subject")
+                .isEqualTo(config.getSubjectTranslations().get(Locale.ENGLISH));
+        assertThat(actionRequest.getContent()).stringAt("/body").matches(
+                "<h3>This is your reset email\\.</h3><h4>"
+                + "<a href=\"http://localhost:9999/example/\\?goto=https://www\\.google\\.com#passwordReset/&token=token1&code="
+                + "[\\w\\d]{8}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{4}-[\\w\\d]{12}\">Email verification link</a></h4>"
+        );
+    }
+
     @Test (expectedExceptions = BadRequestException.class, expectedExceptionsMessageRegExp = "Input code is missing")
     public void testAdvanceValidateCodeStageWhenInputCodeIsMissing() throws Exception {
         // Given
@@ -247,6 +308,10 @@ public final class VerifyEmailAccountStageTest {
     private JsonValue newJsonValueInputEmail() {
         return json(object(
                 field(VerifyEmailAccountStage.REQUIREMENT_KEY_EMAIL, TEST_EMAIL_ID)));
+    }
+
+    private JsonValue newJsonValueWithQuerystringParams() {
+        return json(TEST_QUERYSTRING_PARAMS);
     }
 
     private JsonValue newJsonValueUser() {
