@@ -25,6 +25,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -419,8 +420,8 @@ public class OpenApiTransformerTest {
                             @Override
                             public Property get() {
                                 final LocalizableLongProperty o = new LocalizableLongProperty();
-                                o.setMinimum(1.0);
-                                o.setMaximum(2.0);
+                                o.setMinimum(BigDecimal.valueOf(1.0));
+                                o.setMaximum(BigDecimal.valueOf(2.0));
                                 o.setExclusiveMinimum(true);
                                 o.setExclusiveMaximum(true);
                                 o.setReadOnly(true);
@@ -447,8 +448,8 @@ public class OpenApiTransformerTest {
                             @Override
                             public Property get() {
                                 final LocalizableDoubleProperty o = new LocalizableDoubleProperty();
-                                o.setMinimum(1.0);
-                                o.setMaximum(2.0);
+                                o.setMinimum(BigDecimal.valueOf(1.0));
+                                o.setMaximum(BigDecimal.valueOf(2.0));
                                 o.setExclusiveMinimum(true);
                                 o.setExclusiveMaximum(true);
                                 return o;
