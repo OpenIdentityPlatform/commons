@@ -182,9 +182,9 @@
         <!-- this property makes sure NetBeans 6.8+ picks up some formatting rules from checkstyle -->
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
-        <jackson.version>2.10.3</jackson.version>
+        <jackson.version>2.11.1</jackson.version>
         <slf4j.version>1.7.30</slf4j.version>
-        <swagger.version>1.5.9</swagger.version>
+        <swagger.version>1.6.2</swagger.version>
         <apache-httpcore.version>4.4.11</apache-httpcore.version>
         <apache-httpclient.version>4.5.9</apache-httpclient.version>
         <apache-httpasyncclient.version>4.1.4</apache-httpasyncclient.version>

@@ -17,6 +17,7 @@
 
 package org.forgerock.json;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.AbstractMap;
 import java.util.AbstractSet;
@@ -407,6 +408,19 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      */
     public Integer asInteger() {
         return (object == null ? null : Integer.valueOf(asNumber().intValue()));
+    }
+    
+    /**
+     * Returns the JSON value as an {@link BigDecimal} object. This may involve
+     * rounding or truncation. If the JSON value is {@code null}, this method
+     * returns {@code null}.
+     *
+     * @return the integer value.
+     * @throws JsonValueException
+     *             if the JSON value is not a number.
+     */
+    public BigDecimal asBigDecimal() {
+        return (object == null ? null : BigDecimal.valueOf(asNumber().doubleValue()));
     }
 
     /**

@@ -1494,8 +1494,8 @@ public class OpenApiTransformer {
             } else {
                 property = new LocalizableIntegerProperty();
             }
-            property.setMinimum(schema.get("minimum").asDouble());
-            property.setMaximum(schema.get("maximum").asDouble());
+            property.setMinimum(schema.get("minimum").asBigDecimal());
+            property.setMaximum(schema.get("maximum").asBigDecimal());
             property.setExclusiveMinimum(schema.get("exclusiveMinimum").asBoolean());
             property.setExclusiveMaximum(schema.get("exclusiveMaximum").asBoolean());
             return (LocalizableProperty) property;
@@ -1522,8 +1522,8 @@ public class OpenApiTransformer {
                     break;
                 }
             }
-            property.setMinimum(schema.get("minimum").asDouble());
-            property.setMaximum(schema.get("maximum").asDouble());
+            property.setMinimum(schema.get("minimum").asBigDecimal());
+            property.setMaximum(schema.get("maximum").asBigDecimal());
             property.setExclusiveMinimum(schema.get("exclusiveMinimum").asBoolean());
             property.setExclusiveMaximum(schema.get("exclusiveMaximum").asBoolean());
             return (LocalizableProperty) property;
