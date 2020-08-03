@@ -28,7 +28,7 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <rhino.version>1.7.11</rhino.version>
+        <rhino.version>1.7.12</rhino.version>
     </properties>
 
     <build>
