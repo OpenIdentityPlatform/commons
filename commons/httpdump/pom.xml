@@ -36,18 +36,15 @@
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>RELEASE</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.openidentityplatform.commons</groupId>
 			<artifactId>geo</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 		<dependency>
            <groupId>org.slf4j</groupId>
