@@ -917,7 +917,7 @@
                         <footer><![CDATA[<b>${javadocDocTitle}</b>]]></footer>
                         <additionalparam>-linksource</additionalparam>
                         <show>protected</show>
-                        <excludePackageNames>com.*</excludePackageNames>
+<!--                         <excludePackageNames>com.*</excludePackageNames> -->
                         <stylesheetfile>${javadocStylesheet}</stylesheetfile>
                     </configuration>
                 </plugin>
