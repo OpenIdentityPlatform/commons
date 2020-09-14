@@ -59,6 +59,14 @@
         <tag>HEAD</tag>
     </scm>
     <developers>
+    	<developer>
+    		<id>Open Identity Platform Community</id>
+    		<name>Open Identity Platform Community</name>
+    		<email>open-identity-platform@googlegroups.com</email>
+    		<organization>Open Identity Platform Community</organization>
+    		<organizationUrl>https://www.openidentityplatform.org/</organizationUrl>
+    		<url>https://github.com/OpenIdentityPlatform/commons</url>
+    	</developer>
     </developers>
 	<distributionManagement>
 		<repository>
