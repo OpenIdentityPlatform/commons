@@ -58,6 +58,8 @@
         <url>https://github.com/OpenIdentityPlatform/commons</url>
         <tag>HEAD</tag>
     </scm>
+    <developers>
+    </developers>
 	<distributionManagement>
 		<repository>
 			<id>ossrh</id>
@@ -1200,7 +1202,7 @@
             </plugins>
         </pluginManagement>
         <plugins>
-        		<plugin>
+        	<plugin>
                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <executions>
@@ -1213,6 +1215,21 @@
 		          </execution>
 		        </executions>
             </plugin>
+             <plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-javadoc-plugin</artifactId>
+			  <executions>
+			    <execution>
+			      <id>attach-javadocs</id>
+			      <goals>
+			        <goal>jar</goal>
+			      </goals>
+			    </execution>
+			  </executions>
+			  <configuration>
+			  	<failOnError>false</failOnError>
+			  </configuration>
+			</plugin>
         </plugins>
     </build>
 
