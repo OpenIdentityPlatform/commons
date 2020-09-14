@@ -31,7 +31,6 @@
  
  <properties>
 
-  <jsonFluentVersion>${project.version}</jsonFluentVersion>
   <mavenVersion>3.3.1</mavenVersion>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -148,7 +147,6 @@
   <dependency>
    <groupId>org.openidentityplatform.commons</groupId>
    <artifactId>json-fluent</artifactId>
-   <version>${jsonFluentVersion}</version>
   </dependency>
 
   <dependency>

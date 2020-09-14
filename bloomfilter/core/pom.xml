@@ -31,7 +31,6 @@
         <dependency>
             <groupId>org.openidentityplatform.commons</groupId>
             <artifactId>util</artifactId>
-            <version>2.0.7-SNAPSHOT</version>
         </dependency>
 
 		<dependency>

@@ -280,11 +280,6 @@
                 <version>${jackson.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.fasterxml.jackson.module</groupId>
                 <artifactId>jackson-module-jsonSchema</artifactId>
                 <version>${jackson.version}</version>
@@ -586,6 +581,11 @@
                 <artifactId>security</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>json-fluent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 		    <dependency>
 		      <groupId>org.openidentityplatform.commons.ui</groupId>
 		      <artifactId>commons</artifactId>
@@ -720,6 +720,22 @@
 				<artifactId>jaxb1-impl</artifactId>
 				<version>2.2.5.1</version>
 			</dependency>
+		    <dependency>
+		        <groupId>com.google.code.findbugs</groupId>
+		        <artifactId>jsr305</artifactId>
+		        <version>3.0.2</version>
+		    </dependency>
+		    <dependency>
+			    <groupId>org.apache.commons</groupId>
+			    <artifactId>commons-lang3</artifactId>
+			    <version>3.11</version>
+			</dependency>
+		    <dependency>
+			    <groupId>junit</groupId>
+			    <artifactId>junit</artifactId>
+			    <version>4.13</version>
+			    <scope>test</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
@@ -730,6 +746,21 @@
             -->
             <plugins>
                 <!-- set versions of common plugins for reproducibility, ordered alphabetically -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-plugin-plugin</artifactId>
+                    <version>2.4.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.cargo</groupId>
+                    <artifactId>cargo-maven2-plugin</artifactId>
+                    <version>1.7.10</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.openidentityplatform.commons</groupId>
+                    <artifactId>maven-external-dependency-plugin</artifactId>
+                    <version>${project.version}</version>
+                </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>cobertura-maven-plugin</artifactId>

@@ -29,7 +29,6 @@
     <packaging>pom</packaging>
     <properties>
         <hdrhistogram.version>2.1.4</hdrhistogram.version>
-        <jsr.305.version>3.0.0</jsr.305.version>
         <slf4j.version>1.7.5</slf4j.version>
     </properties>
 
@@ -40,12 +39,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>com.google.code.findbugs</groupId>
-                <artifactId>jsr305</artifactId>
-                <version>${jsr.305.version}</version>
-                <optional>true</optional>
-            </dependency>
             <dependency>
                 <groupId>org.hdrhistogram</groupId>
                 <artifactId>HdrHistogram</artifactId>

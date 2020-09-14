@@ -136,7 +136,6 @@
 		<dependency>
 		    <groupId>com.google.code.findbugs</groupId>
 		    <artifactId>jsr305</artifactId>
-		    <version>RELEASE</version>
 		</dependency>
     </dependencies>
 </project>
