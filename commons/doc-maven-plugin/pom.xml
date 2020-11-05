@@ -52,7 +52,7 @@
   <mavenPluginPluginVersion>3.6.0</mavenPluginPluginVersion>
   <mavenResourcesVersion>2.7</mavenResourcesVersion>
   <plantUmlVersion>7993</plantUmlVersion>
-  <plexusUtilsVersion>3.0.22</plexusUtilsVersion>
+  <plexusUtilsVersion>3.3.0</plexusUtilsVersion>
   <xCiteVersion>${project.version}</xCiteVersion>
 
  </properties>
