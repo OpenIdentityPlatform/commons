@@ -29,6 +29,7 @@ import java.io.IOException;
 
 /**
  * Copy quotes from source text files into target text files.
+ * @goal cite
  */
 @Mojo(name = "cite", defaultPhase = LifecyclePhase.PROCESS_SOURCES)
 public class XCiteMojo extends AbstractMojo {
