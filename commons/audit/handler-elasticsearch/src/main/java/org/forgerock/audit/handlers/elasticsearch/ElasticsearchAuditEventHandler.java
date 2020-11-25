@@ -88,6 +88,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     private static final String BULK = "/_bulk";
     private static final String HITS = "hits";
     private static final String SOURCE = "_source";
+    private static final String DOC = "_doc/";
     private static final int DEFAULT_PAGE_SIZE = 10;
     private static final String TOTAL = "total";
     private static final String PUT = "PUT";
@@ -212,7 +213,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
                     public QueryResponse apply(Response response) throws ResourceException {
                         if (!response.getStatus().isSuccessful()) {
                             final String message =
-                                    "Elasticsearch response (" + indexName + "/" + topic + SEARCH + "): "
+                                    "Elasticsearch response (" + indexName + "_" + topic + SEARCH + "): "
                                     + response.getEntity();
                             throw newResourceException(response.getStatus().getCode(), message);
                         }
@@ -280,7 +281,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         } else {
             if (!batchIndexer.offer(topic, event)) {
                 return new ServiceUnavailableException("Elasticsearch batch indexer full, so dropping audit event "
-                        + indexName + "/" + topic + "/" + event.get("_id").asString()).asPromise();
+                        + indexName + "_" + topic + "/" + event.get("_id").asString()).asPromise();
             }
             return newResourceResponse(event.get(ResourceResponse.FIELD_CONTENT_ID).asString(), null,
                     event).asPromise();
@@ -303,9 +304,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         try {
             final String jsonPayload = ElasticsearchUtil.normalizeJson(event);
             event.put(FIELD_CONTENT_ID, resourceId);
-
-            final Request request = createRequest(PUT, buildEventUri(topic, resourceId), jsonPayload);
-
+            final Request request = createRequest(POST, buildEventUri(topic, DOC + resourceId), jsonPayload);
             return client.send(request).then(
                     closeSilently(new Function<Response, ResourceResponse, ResourceException>() {
                         @Override
@@ -336,6 +335,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     public void addToBatch(final String topic, final JsonValue event, final StringBuilder payload)
             throws BatchException {
         try {
+            final String fullIndexName = indexName + "_" + topic;
             // _id is a protected Elasticsearch field
             final String resourceId = event.get(FIELD_CONTENT_ID).asString();
             event.remove(FIELD_CONTENT_ID);
@@ -344,8 +344,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
 
             // newlines have special significance in the Bulk API
             // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
-            payload.append("{ \"index\" : { \"_type\" : ")
-                    .append(OBJECT_MAPPER.writeValueAsString(topic))
+            payload.append("{ \"index\" : { \"_index\" : ")
+                    .append(OBJECT_MAPPER.writeValueAsString( fullIndexName ))
                     .append(", \"_id\" : ")
                     .append(OBJECT_MAPPER.writeValueAsString(resourceId))
                     .append(" } }\n")
@@ -436,7 +436,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * @return URI
      */
     protected String buildEventUri(final String topic, final String eventId) {
-        return buildBaseUri() + "/" + topic + "/" + eventId;
+        return buildBaseUri() + "_" + topic + "/" + eventId;
     }
 
     /**
@@ -448,7 +448,8 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         if (bulkUri != null) {
             return bulkUri;
         }
-        return buildBaseUri() + BULK;
+        final ConnectionConfiguration connection = configuration.getConnection();
+        return (connection.isUseSSL() ? "https" : "http") + "://" + connection.getHost() + ":" + connection.getPort() + BULK;
     }
 
     /**
@@ -460,7 +461,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * @return The search uri.
      */
     protected String buildSearchUri(final String topic, final int pageSize, final int offset) {
-        return buildBaseUri() + "/" + topic + SEARCH + "?size=" + pageSize + "&from=" + offset;
+        return buildBaseUri() + "_" + topic + SEARCH + "?size=" + pageSize + "&from=" + offset;
     }
 
     /**
@@ -490,9 +491,9 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
     protected static ResourceException resourceException(
             final String indexName, final String topic, final String resourceId, final Response response) {
         if (response.getStatus().getCode() == ResourceException.NOT_FOUND) {
-            return new NotFoundException("Object " + resourceId + " not found in " + indexName + "/" + topic);
+            return new NotFoundException("Object " + resourceId + " not found in " + indexName + "-" + topic);
         }
-        final String message = "Elasticsearch response (" + indexName + "/" + topic + "/" + resourceId + "): "
+        final String message = "Elasticsearch response (" + indexName + "_" + topic + "/" + resourceId + "): "
                 + response.getEntity();
         return newResourceException(response.getStatus().getCode(), message);
     }
@@ -527,3 +528,4 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
         }
     }
 }
+
