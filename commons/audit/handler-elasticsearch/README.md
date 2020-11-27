@@ -2,290 +2,330 @@ Elasticsearch AuditEventHandler
 ===============================
 
 The `ElasticsearchAuditEventHandler` writes audit events to Elasticsearch. It supports Basic Authentication and
-SSL/TLS through the Elasticsearch Shield plugin. The handler supports Elasticsearch 2.x. The handler uses the
-Elasticsearch [Index Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/docs-index_.html), 
-[Get Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/docs-get.html), 
-and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/2.0/search.html).
+SSL/TLS through the Elasticsearch Shield plugin. The handler supports Elasticsearch 7.x. The handler uses the
+Elasticsearch [Index Api](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/rest-apis.html), 
+[Get Api](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/docs-get.html), 
+and [Search Api](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/search.html).
+
+## About this version
+
+This handler-elasticsearch plugin version allows integration with ElasticSearch 7.
+The main difference about ElasticSearch 7 and previous versions is [removal of mapping types](https://www.elastic.co/guide/en/elasticsearch/reference/7.x/removal-of-types.html).
+
+This upgrade split previous unique index into four indices:
+
+* audit_access
+* audit_activity
+* audit_authenticate
+* audit_config
+
+Index names start with `audit_` prefix, but you can change the prefix assigning a new value to the index name (that works in this version as a prefix).
+
 
 ## How to Configure Elasticsearch
+
 1. Download and install Elasticsearch.
 
-2. Create the audit index.
+2. Create the audit_access index.
 
-        curl -X POST -H "Content-Type: application/json" -d '{
-            "settings" : {},
-            "mappings" : {
-                "access" : {
-                    "_source" : { "enabled" : true },
-                    "properties" : {
-                        "timestamp": {
-                            "type": "date"
-                        },
-                        "eventName": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "transactionId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "userId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "trackingIds": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "server": {
-                            "properties": {
-                                "ip": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "port": {
-                                    "type": "integer"
-                                }
+```
+curl -X PUT -H "Content-Type: application/json" -d '{
+    "settings":{
+
+    },
+    "mappings":{
+        "_source":{
+            "enabled":true
+        },
+        "properties":{
+            "realm":{
+                "type":"keyword"
+            },
+            "component":{
+                "type":"keyword"
+            },
+            "timestamp":{
+                "type":"date"
+            },
+            "eventName":{
+                "type":"keyword"
+            },
+            "transactionId":{
+                "type":"keyword"
+            },
+            "userId":{
+                "type":"keyword"
+            },
+            "trackingIds":{
+                "type":"keyword"
+            },
+            "server":{
+                "properties":{
+                    "ip":{
+                        "type":"keyword"
+                    },
+                    "port":{
+                        "type":"integer"
+                    }
+                }
+            },
+            "client":{
+                "properties":{
+                    "ip":{
+                        "type":"keyword"
+                    },
+                    "port":{
+                        "type":"integer"
+                    }
+                }
+            },
+            "request":{
+                "properties":{
+                    "protocol":{
+                        "type":"keyword"
+                    },
+                    "operation":{
+                        "type":"keyword"
+                    },
+                    "detail":{
+                        "type":"nested"
+                    }
+                }
+            },
+            "http":{
+                "properties":{
+                    "request":{
+                        "properties":{
+                            "secure":{
+                                "type":"boolean"
+                            },
+                            "method":{
+                                "type":"keyword"
+                            },
+                            "path":{
+                                "type":"keyword"
+                            },
+                            "queryParameters":{
+                                "type":"nested"
+                            },
+                            "headers":{
+                                "type":"nested"
+                            },
+                            "cookies":{
+                                "type":"nested"
                             }
-                        },
-                        "client": {
-                            "properties": {
-                                "ip": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "port": {
-                                    "type": "integer"
-                                }
-                            }
-                        },
-                        "request": {
-                            "properties": {
-                                "protocol": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "operation": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "detail": {
-                                    "type" : "nested"
-                                }
-                            }
-                        },
-                        "http": {
-                            "properties": {
-                                "request": {
-                                    "properties": {
-                                        "secure": {
-                                            "type": "boolean"
-                                        },
-                                        "method": {
-                                            "type": "string",
-                                            "index": "not_analyzed"
-                                        },
-                                        "path": {
-                                            "type": "string",
-                                            "index": "not_analyzed"
-                                        },
-                                        "queryParameters": {
-                                            "type" : "nested"
-                                        },
-                                        "headers": {
-                                            "type" : "nested"
-                                        },
-                                        "cookies": {
-                                            "type" : "nested"
-                                        }
-                                    }
-                                },
-                                "response": {
-                                    "properties": {
-                                        "headers": {
-                                            "type" : "nested"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        "response": {
-                            "properties": {
-                                "status": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "statusCode": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "detail": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "elapsedTime": {
-                                    "type": "integer"
-                                },
-                                "elapsedTimeUnits": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                }
+                        }
+                    },
+                    "response":{
+                        "properties":{
+                            "headers":{
+                                "type":"nested"
                             }
                         }
                     }
-                },
-                "activity" : {
-                    "_source" : { "enabled" : true},
-                    "properties" : {
-                        "timestamp": {
-                            "type": "date"
-                        },
-                        "eventName": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "transactionId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "userId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "trackingIds": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "runAs": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "objectId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "operation": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "before": {
-                            "type": "object"
-                        },
-                        "after": {
-                            "type": "object"
-                        },
-                        "changedFields": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "revision": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        }
-                    }
-                },
-                "authentication" : {
-                    "_source" : { "enabled" : true},
-                    "properties" : {
-                        "timestamp": {
-                            "type": "date"
-                        },
-                        "eventName": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "transactionId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "userId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "trackingIds": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "result": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "principal": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "context": {
-                            "type": "nested"
-                        },
-                        "entries": {
-                            "properties": {
-                                "moduleId": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "result": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
-                                },
-                                "info": {
-                                    "type": "nested"
-                                }
-                            }
-                        }    
-                    }
-                },
-                "config" : {
-                    "_source" : { "enabled" : true},
-                    "properties" : {
-                        "timestamp": {
-                            "type": "date"
-                        },
-                        "eventName": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "transactionId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "userId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "trackingIds": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "runAs": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "objectId": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "operation": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "before": {
-                            "type": "object"
-                        },
-                        "after": {
-                            "type": "object"
-                        },
-                        "changedFields": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        },
-                        "revision": {
-                            "type": "string",
-                            "index": "not_analyzed"
-                        }    
+                }
+            },
+            "response":{
+                "properties":{
+                    "status":{
+                        "type":"keyword"
+                    },
+                    "statusCode":{
+                        "type":"keyword"
+                    },
+                    "detail":{
+                        "type":"object"
+                    },
+                    "elapsedTime":{
+                        "type":"integer"
+                    },
+                    "elapsedTimeUnits":{
+                        "type":"keyword"
                     }
                 }
             }
-        }' "http://localhost:9200/audit"
+        }
+    }
+}' "http://localhost:9200/audit_access"
+```
+
+3. Create the audit_activity index.
+
+```
+curl -X PUT -H "Content-Type: application/json" -d '{
+    "settings":{
+
+    },
+    "mappings":{
+        "_source":{
+            "enabled":true
+        },
+        "properties":{
+            "realm":{
+                "type":"keyword"
+            },
+            "component":{
+                "type":"keyword"
+            },
+            "timestamp":{
+                "type":"date"
+            },
+            "eventName":{
+                "type":"keyword"
+            },
+            "transactionId":{
+                "type":"keyword"
+            },
+            "userId":{
+                "type":"keyword"
+            },
+            "trackingIds":{
+                "type":"keyword"
+            },
+            "runAs":{
+                "type":"keyword"
+            },
+            "objectId":{
+                "type":"keyword"
+            },
+            "operation":{
+                "type":"keyword"
+            },
+            "before":{
+                "type":"object"
+            },
+            "after":{
+                "type":"object"
+            },
+            "changedFields":{
+                "type":"keyword"
+            },
+            "revision":{
+                "type":"keyword"
+            }
+        }
+    }
+}' "http://localhost:9200/audit_activity"
+```
+
+3. Create the audit_authentication index.
+
+```
+curl -X PUT -H "Content-Type: application/json" -d '{
+    "settings":{
+
+    },
+    "mappings":{
+        "_source":{
+            "enabled":true
+        },
+        "properties":{
+            "realm":{
+                "type":"keyword"
+            },
+            "component":{
+                "type":"keyword"
+            },
+            "timestamp":{
+                "type":"date"
+            },
+            "eventName":{
+                "type":"keyword"
+            },
+            "transactionId":{
+                "type":"keyword"
+            },
+            "userId":{
+                "type":"keyword"
+            },
+            "trackingIds":{
+                "type":"keyword"
+            },
+            "result":{
+                "type":"keyword"
+            },
+            "principal":{
+                "type":"keyword"
+            },
+            "context":{
+                "type":"nested"
+            },
+            "entries":{
+                "properties":{
+                    "moduleId":{
+                        "type":"keyword"
+                    },
+                    "result":{
+                        "type":"keyword"
+                    },
+                    "info":{
+                        "type":"nested"
+                    }
+                }
+            }
+        }
+    }
+}' "http://localhost:9200/audit_authentication"
+```
+
+4.  Create the audit_config index.
+
+```
+curl -X PUT -H "Content-Type: application/json" -d '{
+    "settings":{
+
+    },
+    "mappings":{
+        "_source":{
+            "enabled":true
+        },
+        "properties":{
+            "realm":{
+                "type":"keyword"
+            },
+            "component":{
+                "type":"keyword"
+            },
+            "timestamp":{
+                "type":"date"
+            },
+            "eventName":{
+                "type":"keyword"
+            },
+            "transactionId":{
+                "type":"keyword"
+            },
+            "userId":{
+                "type":"keyword"
+            },
+            "trackingIds":{
+                "type":"keyword"
+            },
+            "runAs":{
+                "type":"keyword"
+            },
+            "objectId":{
+                "type":"keyword"
+            },
+            "operation":{
+                "type":"keyword"
+            },
+            "before":{
+                "type":"object"
+            },
+            "after":{
+                "type":"object"
+            },
+            "changedFields":{
+                "type":"keyword"
+            },
+            "revision":{
+                "type":"keyword"
+            }
+        }
+    }
+}' "http://localhost:9200/audit_config"
+```
         
 Elasticsearch is now setup to receive audit data.
 
@@ -322,7 +362,7 @@ Elasticsearch environment. The example configuration in that file is as follows:
 ## Create or Index Audit Events
 Audit Events can be indexed or created in Elasticsearch using the following command:
 
-        curl -X POST -H "Content-Type: application/json" -d '{
+        curl -X PUT -H "Content-Type: application/json" -d '{
             "timestamp": "2016-01-27T17:04:18+00:00",
             "eventName": "eventName",
             "transactionId": "transactionId",
@@ -371,7 +411,7 @@ Audit Events can be indexed or created in Elasticsearch using the following comm
                 "elapsedTime": 100,
                 "elapsedTimeUnits": "MS"
             }
-        }' "http://localhost:8080/audit/access?_action=create"
+        }' "http://localhost:8080/audit_access?_action=create"
         
 This command indexes and creates an access event in the configured Elasticsearch index.
 
@@ -379,7 +419,7 @@ This command indexes and creates an access event in the configured Elasticsearch
 
 Audit events can be read from the Elasticsearch audit event handler with the following command.
 
-        curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit/access/{some_ID}"
+        curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit_access/{some_ID}"
         
 This command reads the access audit event with some ID.
 
@@ -387,7 +427,7 @@ This command reads the access audit event with some ID.
 
 Audit events can be queried from Elasticsearch with the following command.
         
-        curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit/access?_queryFilter=true"
+        curl -X GET -H "Content-Type: application/json" "http://localhost:8080/audit_access?_queryFilter=true"
         
 This command retrieves the first 10 access audit events from elastic search.
 
