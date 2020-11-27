@@ -8,3 +8,5 @@ dependency-reduced-pom.xml
 node_modules
 node/
 .DS_Store
+*.releaseBackup
+release.properties
