@@ -103,7 +103,7 @@ public final class DerUtils {
      * Writes a length field to the output.
      *
      * @param output the output buffer.
-     * @param length the length to write.
+     * @param len the length to write.
      */
     public static void writeLength(final ByteBuffer output, final int len) {
         if (len < 128) {
