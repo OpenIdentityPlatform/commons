@@ -1236,7 +1236,7 @@
 			    </execution>
 			  </executions>
 			  <configuration>
-			  	<failOnError>false</failOnError>
+			  	<doclint>none</doclint>
 			  </configuration>
 			</plugin>
 			<plugin>
