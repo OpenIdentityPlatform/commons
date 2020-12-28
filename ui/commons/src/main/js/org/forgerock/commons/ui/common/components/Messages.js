@@ -133,7 +133,7 @@ define([
             }
 
             this.$el.append("<div role='alert' class='alert-system alert-message alert " + alertClass
-                + "'><i class='fa " + alertIcon + "'></i><span class='message'>" + this.list[0].message
+                + "'><i class='fa " + alertIcon + "'></i><span class='message'>" + _.escape(this.list[0].message)
                 + "</span></div>");
             this.$el.find("div:last").fadeIn(300, function () {
                 _this.timer = window.setTimeout(_this.removeAndNext, delay);
