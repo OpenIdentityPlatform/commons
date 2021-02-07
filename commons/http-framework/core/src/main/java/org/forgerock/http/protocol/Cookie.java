@@ -82,6 +82,27 @@ public class Cookie {
     private Integer version;
 
     /**
+     * The SameSite policy for this cookie.
+     */
+    private SameSite sameSite;
+
+    public enum SameSite {
+      STRICT, LAX, NONE;
+
+      public static SameSite parse(String value) {
+        try {
+          return valueOf(value.toUpperCase());
+        } catch (IllegalArgumentException e) {
+          return null;
+        }
+      }
+
+      public String toString() {
+        return name().toLowerCase();
+      }
+    }
+
+    /**
      * Creates a new uninitialized cookie.
      */
     public Cookie() {
@@ -108,6 +129,7 @@ public class Cookie {
                 && objectsAreEqual(path, other.path)
                 && objectsAreEqual(port, other.port)
                 && objectsAreEqual(secure, other.secure)
+                && objectsAreEqual(sameSite, other.sameSite)
                 && objectsAreEqual(value, other.value)
                 && objectsAreEqual(version, other.version);
     }
@@ -241,6 +263,15 @@ public class Cookie {
         return version;
     }
 
+    /**
+     * Returns the SameSite policy for this cookie.
+     *
+     * @return The SameSite policy for this cookie.
+     */
+    public SameSite getSameSite() {
+      return sameSite;
+    }
+
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -256,6 +287,7 @@ public class Cookie {
         result = prime * result + (path == null ? 0 : path.hashCode());
         result = prime * result + (port == null ? 0 : port.hashCode());
         result = prime * result + (secure == null ? 0 : secure.hashCode());
+        result = prime * result + (sameSite == null ? 0 : sameSite.hashCode());
         result = prime * result + (value == null ? 0 : value.hashCode());
         result = prime * result + (version == null ? 0 : version.hashCode());
         return result;
@@ -391,6 +423,11 @@ public class Cookie {
         return this;
     }
 
+    public Cookie setSameSite(final SameSite sameSite) {
+      this.sameSite = sameSite;
+      return this;
+    }
+
     /**
      * Sets the value of the cookie.
      *
@@ -456,6 +493,9 @@ public class Cookie {
         }
         if (secure != null) {
             builder.append("secure=").append(secure).append(" ");
+        }
+        if (sameSite != null) {
+            builder.append("sameSite=").append(sameSite).append(" ");
         }
         if (version != null) {
             builder.append("version=").append(version);

@@ -67,6 +67,8 @@ public class SetCookieHeader extends Header {
                 cookie.setSecure(true);
             } else if ("HttpOnly".equalsIgnoreCase(nvp[0].trim())) {
                 cookie.setHttpOnly(true);
+            } else if ("SameSite".equalsIgnoreCase(nvp[0].trim())) {
+                cookie.setSameSite(Cookie.SameSite.parse(nvp[1].trim()));
             } else if (cookie.getName() == null || cookie.getName().isEmpty()) {
                 cookie.setName(nvp[0].trim());
                 cookie.setValue(nvp[1].trim());
@@ -173,11 +175,15 @@ public class SetCookieHeader extends Header {
             if (cookie.getDomain() != null) {
                 sb.append("; ").append("Domain").append("=").append(cookie.getDomain());
             }
-            if (cookie.isSecure() != null && cookie.isSecure()) {
+            // Cookies with SameSite=NONE MUST be sent as Secure
+            if ((cookie.isSecure() != null && cookie.isSecure()) || cookie.getSameSite() == Cookie.SameSite.NONE) {
                 sb.append("; ").append("Secure");
             }
             if (cookie.isHttpOnly() != null && cookie.isHttpOnly()) {
                 sb.append("; ").append("HttpOnly");
+            }
+            if (cookie.getSameSite() != null) {
+                sb.append("; SameSite=").append(cookie.getSameSite());
             }
         }
         return sb.toString();
