@@ -170,9 +170,6 @@
         <!-- maven-remote-resources-plugin http://maven.apache.org/plugins/maven-remote-resources-plugin/ -->
         <mavenRemoteResourcesPluginVersion>1.5</mavenRemoteResourcesPluginVersion>
 
-        <!-- maven-deploy-plugin http://maven.apache.org/plugins/maven-deploy-plugin/ -->
-        <mavenDeployPluginVersion>2.8.2</mavenDeployPluginVersion>
-
         <!-- maven-install-plugin http://maven.apache.org/plugins/maven-install-plugin/ -->
         <mavenInstallPluginVersion>3.0.0-M1</mavenInstallPluginVersion>
 
@@ -195,9 +192,6 @@
         <jackson.version>2.11.1</jackson.version>
         <slf4j.version>1.7.30</slf4j.version>
         <swagger.version>1.6.2</swagger.version>
-        <apache-httpcore.version>4.4.11</apache-httpcore.version>
-        <apache-httpclient.version>4.5.9</apache-httpclient.version>
-        <apache-httpasyncclient.version>4.1.4</apache-httpasyncclient.version>
     </properties>
 
     <prerequisites>
@@ -205,7 +199,36 @@
     </prerequisites>
 	<dependencyManagement>
 		<dependencies>
-
+			 <dependency>
+		      <groupId>org.apache.httpcomponents</groupId>
+		      <artifactId>httpasyncclient-osgi</artifactId>
+		      <version>4.1.4</version>
+		    </dependency>
+		    <dependency>
+			    <groupId>org.apache.httpcomponents</groupId>
+			    <artifactId>httpcore-osgi</artifactId>
+			    <version>4.4.14</version>
+			</dependency>
+		    <dependency>
+			    <groupId>org.apache.httpcomponents</groupId>
+			    <artifactId>httpcore</artifactId>
+			    <version>4.4.14</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.apache.httpcomponents</groupId>
+			    <artifactId>httpcore-nio</artifactId>
+			    <version>4.4.14</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.apache.httpcomponents</groupId>
+			    <artifactId>httpclient-osgi</artifactId>
+			    <version>4.5.13</version>
+			</dependency>
+			<dependency>
+			    <groupId>org.apache.httpcomponents</groupId>
+			    <artifactId>httpclient</artifactId>
+			    <version>4.5.13</version>
+			</dependency>
 			<dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-jdk14</artifactId>
@@ -241,6 +264,7 @@
                 <artifactId>log4j-over-slf4j</artifactId>
                 <version>${slf4j.version}</version>
             </dependency>
+
 			
 			<dependency>
 				<groupId>com.google.guava</groupId>
@@ -852,7 +876,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>${mavenDeployPluginVersion}</version>
+                    <version>3.0.0-M1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1242,15 +1266,15 @@
 			<plugin>
 		      <groupId>org.sonatype.plugins</groupId>
 		      <artifactId>nexus-staging-maven-plugin</artifactId>
-		      <version>1.6.7</version>
+		      <version>1.6.8</version>
 		      <extensions>true</extensions>
 		      <configuration>
 		        <serverId>ossrh</serverId>
 		        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
 		        <autoReleaseAfterClose>true</autoReleaseAfterClose>
 		        <stagingProgressTimeoutMinutes>15</stagingProgressTimeoutMinutes>
-		        <keepStagingRepositoryOnFailure>true</keepStagingRepositoryOnFailure>
-		        <keepStagingRepositoryOnCloseRuleFailure>true</keepStagingRepositoryOnCloseRuleFailure>
+		        <keepStagingRepositoryOnFailure>false</keepStagingRepositoryOnFailure>
+		        <keepStagingRepositoryOnCloseRuleFailure>false</keepStagingRepositoryOnCloseRuleFailure>
 		      </configuration>
 		    </plugin>
         </plugins>
