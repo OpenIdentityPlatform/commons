@@ -95,12 +95,12 @@
                 <configuration>
                     <!-- Container configuration -->
                     <container>
-                        <containerId>tomcat7x</containerId>
-                        <zipUrlInstaller>
-                            <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.zip</url>
-                            <downloadDir>${project.build.directory}/downloads</downloadDir>
-                            <extractDir>${project.build.directory}/extracts</extractDir>
-                        </zipUrlInstaller>
+                        <containerId>tomcat9x</containerId>
+<!--                         <zipUrlInstaller> -->
+<!--                             <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.zip</url> -->
+<!--                             <downloadDir>${project.build.directory}/downloads</downloadDir> -->
+<!--                             <extractDir>${project.build.directory}/extracts</extractDir> -->
+<!--                         </zipUrlInstaller> -->
                     </container>
                     <!-- Configuration to use with the container or the deployer -->
                     <configuration>
