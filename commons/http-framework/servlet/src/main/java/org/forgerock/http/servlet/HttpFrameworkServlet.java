@@ -238,6 +238,10 @@ public final class HttpFrameworkServlet extends HttpServlet {
                             .thenOnResult(new ResultHandler<Response>() {
                                 @Override
                                 public void handleResult(Response response) {
+                                	//save request and response
+                                	req.setAttribute(request.getClass().getName(), request);
+                                	req.setAttribute(response.getClass().getName(), response);
+                                	
                                     writeResponse(request, response, resp, sessionContext, sync);
                                 }
                             })
@@ -358,7 +362,9 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 }
                 // response entity (if applicable)
                 // TODO does this also set content length?
-                response.getEntity().copyRawContentTo(servletResponse.getOutputStream());
+                if (!response.getEntity().isRawContentEmpty()) {
+                	response.getEntity().copyRawContentTo(servletResponse.getOutputStream());
+                }
             }
         } catch (IOException e) {
             logger.error("Failed to write response", e);
