@@ -269,8 +269,7 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<!-- If you need support for JDK 1.7 or Android, use the Android flavor -->
-				<version>29.0-jre</version>
+				<version>30.1.1-jre</version>
 			</dependency>
 
 			<dependency>
