@@ -1,5 +1,5 @@
 # Open Identity Platform Commons
-[![Build Status](https://travis-ci.org/OpenIdentityPlatform/commons.svg)](https://travis-ci.org/OpenIdentityPlatform/commons)
+[![Build Status](https://travis-ci.com/OpenIdentityPlatform/commons.svg)](https://travis-ci.com/OpenIdentityPlatform/commons)
 
 ## How-to build
 
