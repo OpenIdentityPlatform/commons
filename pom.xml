@@ -147,7 +147,7 @@
         <mavenDependencyPluginVersion>3.1.0</mavenDependencyPluginVersion>
 
         <!-- maven-clean-plugin http://maven.apache.org/components/plugins/maven-clean-plugin -->
-        <mavenCleanPluginVersion>3.0.0</mavenCleanPluginVersion>
+        <mavenCleanPluginVersion>3.1.0</mavenCleanPluginVersion>
 
         <!-- maven-jar-plugin http://maven.apache.org/plugins/maven-jar-plugin/ -->
         <mavenJarPluginVersion>3.0.2</mavenJarPluginVersion>
