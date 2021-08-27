@@ -27,6 +27,7 @@ package org.forgerock.commons.launcher;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
@@ -155,12 +156,20 @@ public class ConfigurationUtil {
             // No includes supplied, so set it to 'matches all'
             includesPatterns = MatchPatterns.from("**");
         } else {
-            includesPatterns = MatchPatterns.from(includes);
+        	final List<String> includes2=new ArrayList<>();
+        	for(String include: includes) {
+        		includes2.add(include.replace("/", java.io.File.separator));
+        	}
+            includesPatterns = MatchPatterns.from(includes2);
         }
         if (excludes == null) {
             excludesPatterns = MatchPatterns.from();
         } else {
-            excludesPatterns = MatchPatterns.from(excludes);
+        	final List<String> excludes2=new ArrayList<>();
+        	for(String exclude: excludes) {
+        		excludes2.add(exclude.replace("/", java.io.File.separator));
+        	}
+            excludesPatterns = MatchPatterns.from(excludes2);
         }
 
         ZipInputStream inputStream = null;
@@ -176,8 +185,8 @@ public class ConfigurationUtil {
                 if (jarEntry != null && !jarEntry.isDirectory()) {
                     String fileName = jarEntry.getName();
 
-                    if (includesPatterns.matches(fileName, false)
-                            && !excludesPatterns.matches(fileName, false)) {
+                    if (includesPatterns.matches(fileName.replace("/", java.io.File.separator), false)
+                            && !excludesPatterns.matches(fileName.replace("/", java.io.File.separator), false)) {
                         files.add(new URL(base, fileName));
                     }
                 }

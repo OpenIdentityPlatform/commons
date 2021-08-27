@@ -163,7 +163,7 @@ public class SecureCsvWriterTest {
             secureCsvWriter.writeEvent(values);
         }
 
-        assertThat(contentOf(actual)).isEqualTo(contentOf(
+        assertThat(contentOf(actual)).isEqualToIgnoringWhitespace(contentOf(
                 new File("target/test-classes/shouldGenerateHMACColumn-expected.txt")));
     }
 
@@ -194,7 +194,7 @@ public class SecureCsvWriterTest {
             // - header
             // - data row with bar + HMAC
             // - signature
-            assertThat(contentOf(actual)).isEqualTo(contentOf(
+            assertThat(contentOf(actual)).isEqualToIgnoringWhitespace(contentOf(
                     new File("target/test-classes/shouldGeneratePeriodicallySignature-partial.txt")));
 
 
@@ -207,7 +207,7 @@ public class SecureCsvWriterTest {
         // - signature
         // - data row with bar + HMAC
         // - signature // because of closing the CsvWriter
-        assertThat(contentOf(actual)).isEqualTo(contentOf(
+        assertThat(contentOf(actual)).isEqualToIgnoringWhitespace(contentOf(
                 new File("target/test-classes/shouldGeneratePeriodicallySignature-expected.txt")));
     }
 

@@ -287,7 +287,7 @@ public class ElasticsearchAuditEventHandlerTest {
         batchHandler.addToBatch("authentication", event, builder);
 
         // then
-        assertThat(builder.toString()).isEqualTo(authEventBatchPayload);
+        assertThat(builder.toString()).isEqualToIgnoringWhitespace(authEventBatchPayload);
     }
 
     @Test
