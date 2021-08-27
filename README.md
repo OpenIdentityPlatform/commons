@@ -1,6 +1,5 @@
 # Open Identity Platform Commons
-[![Build Status](https://travis-ci.com/OpenIdentityPlatform/commons.svg)](https://travis-ci.com/OpenIdentityPlatform/commons)
-
+[![Build](https://github.com/OpenIdentityPlatform/commons/actions/workflows/maven.yml/badge.svg)](https://github.com/OpenIdentityPlatform/commons/actions/workflows/maven.yml)
 ## How-to build
 
 * git clone --recursive  https://github.com/OpenIdentityPlatform/commons.git
