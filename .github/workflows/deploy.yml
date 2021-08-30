@@ -1,0 +1,41 @@
+name: deploy
+
+on:
+    workflow_dispatch
+	repository_dispatch:
+       types: [deploy]
+jobs:
+  publish:
+    runs-on: ubuntu-latest 
+    permissions: 
+      contents: read
+      packages: write 
+    steps:
+      - id: install-secret-key
+        name: Install gpg secret key
+        run: |
+           cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
+           gpg --list-secret-keys --keyid-format LONG
+      - uses: actions/checkout@v2
+      - name: Set up Java for publishing to Maven Central Repository
+        uses: actions/setup-java@v2
+        with:
+          java-version: '8'
+          distribution: 'adopt'
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+      - name: Publish to the Maven Central Repository
+        run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+      - name: Set up Java for publishing to GitHub Packages
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Publish to GitHub Packages
+        run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
