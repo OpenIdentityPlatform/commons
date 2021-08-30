@@ -20,13 +20,6 @@ jobs:
            cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
            gpg --list-secret-keys --keyid-format LONG
       - uses: actions/checkout@v2
-      - name: Set up Java for publishing to GitHub Packages
-        uses: actions/setup-java@v2
-        with:
-          java-version: '8'
-          distribution: 'adopt'
-      - name: Publish to GitHub Packages
-        run: mvn --no-transfer-progress --batch-mode deploy
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v2
         with:
