@@ -1,8 +1,9 @@
-name: deploy
+name: Deploy to Maven
 
 on:
     repository_dispatch:
        types: [deploy]
+    workflow_dispatch:
 jobs:
   publish:
     runs-on: ubuntu-latest 
