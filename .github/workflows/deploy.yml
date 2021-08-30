@@ -21,6 +21,7 @@ jobs:
            cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
            gpg --list-secret-keys --keyid-format LONG
       - uses: actions/checkout@v2
+        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v2
         with:
