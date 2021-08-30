@@ -22,7 +22,6 @@ jobs:
            gpg --list-secret-keys --keyid-format LONG
       - uses: actions/checkout@v2
       - name: Set up Java for publishing to Maven Central Repository
-        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
         uses: actions/setup-java@v2
         with:
           java-version: '8'
@@ -31,11 +30,11 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - name: Publish to the Maven Central Repository
-        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
-        run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' && env.MAVEN_USERNAME!='' && env.MAVEN_PASSWORD!=''}}
+        run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy
       - name: Set up Java for publishing to GitHub Packages
         uses: actions/setup-java@v2
         with:
