@@ -6,22 +6,23 @@ on:
     workflow_dispatch:
 jobs:
   publish:
-	env:
-       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-    if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
-    runs-on: ubuntu-latest 
+	runs-on: ubuntu-latest 
     permissions: 
       contents: read
       packages: write 
     steps:
       - id: install-secret-key
         name: Install gpg secret key
+        env:
+           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
         run: |
            cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
            gpg --list-secret-keys --keyid-format LONG
       - uses: actions/checkout@v2
       - name: Set up Java for publishing to Maven Central Repository
+        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
         uses: actions/setup-java@v2
         with:
           java-version: '8'
@@ -30,6 +31,7 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - name: Publish to the Maven Central Repository
+        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
         run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
@@ -40,6 +42,7 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
       - name: Publish to GitHub Packages
+        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
         run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
