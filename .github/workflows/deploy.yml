@@ -6,7 +6,10 @@ on:
     workflow_dispatch:
 jobs:
   publish:
-    if: ${{ secrets.GPG_PRIVATE_KEY!='' && secrets.GPG_PASSPHRASE!='' }}
+	env:
+       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+    if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
     runs-on: ubuntu-latest 
     permissions: 
       contents: read
