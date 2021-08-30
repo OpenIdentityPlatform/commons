@@ -15,18 +15,12 @@ jobs:
         name: Install gpg secret key
         env:
            GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
+        if: ${{ env.GPG_PRIVATE_KEY!=''}}
         run: |
            cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
            gpg --list-secret-keys --keyid-format LONG
       - uses: actions/checkout@v2
-        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' }}
       - name: Set up Java for publishing to Maven Central Repository
-        env:
-          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
-        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' && env.MAVEN_USERNAME!='' && env.MAVEN_PASSWORD!=''}}
         uses: actions/setup-java@v2
         with:
           java-version: '8'
@@ -35,17 +29,21 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - name: Publish to the Maven Central Repository
-        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' && env.MAVEN_USERNAME!='' && env.MAVEN_PASSWORD!=''}}
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}          
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+        if: ${{ env.GPG_PASSPHRASE!='' && env.MAVEN_USERNAME!='' && env.MAVEN_PASSWORD!=''}}
         run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy
       - name: Set up Java for publishing to GitHub Packages
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' && env.GITHUB_TOKEN!='' }}
         uses: actions/setup-java@v2
         with:
           java-version: '8'
           distribution: 'adopt'
       - name: Publish to GitHub Packages
-        if: ${{ env.GPG_PRIVATE_KEY!='' && env.GPG_PASSPHRASE!='' && env.GITHUB_TOKEN!='' }}
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}          
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ env.GPG_PASSPHRASE!='' && env.GITHUB_TOKEN!='' }}
         run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy
         
