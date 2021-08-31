@@ -35,7 +35,7 @@ jobs:
       run: mvn --batch-mode  --update-snapshots package --file pom.xml
   deploy:
     needs: build
-    if: ${{ github.event=='push' && github.ref=='refs/heads/master'}}
+    if: ${{ github.event_name=='push' && github.ref=='refs/heads/master'}}
     runs-on: 'ubuntu-latest'
     steps:
     - name: Deploy to maven call
