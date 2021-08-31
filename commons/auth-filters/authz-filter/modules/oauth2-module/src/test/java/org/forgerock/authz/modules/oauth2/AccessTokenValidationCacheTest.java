@@ -40,7 +40,7 @@ public class AccessTokenValidationCacheTest {
         //Given
         String accessToken = "ACCESS_TOKEN";
         AccessTokenValidationResponse validationResponse = new AccessTokenValidationResponse(0);
-
+        assertEquals(cache.size(), 0);
         //When
         cache.add(accessToken, validationResponse);
 
