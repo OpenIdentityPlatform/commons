@@ -14,8 +14,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        java: [ '8', '11']
         os: [ 'ubuntu-latest', 'macos-latest', 'windows-latest' ]
+        java: [ '8', '11']
     steps:
     - uses: actions/checkout@v2
     - name: Java ${{ matrix.Java }} (${{ matrix.os }})
@@ -31,8 +31,12 @@ jobs:
          restore-keys: ${{ runner.os }}-m2-repository
     - name: Build with Maven
       run: mvn --batch-mode  --update-snapshots package --file pom.xml
+  deploy:
+    needs: build
+    if: ${{ github.event=='push' && github.ref=='refs/heads/master'}}
+    runs-on: 'ubuntu-latest'
+    steps:
     - name: Deploy to maven call
-      if: success()
       uses: peter-evans/repository-dispatch@v1
       with:
           token: ${{ secrets.GITHUB_TOKEN }}
