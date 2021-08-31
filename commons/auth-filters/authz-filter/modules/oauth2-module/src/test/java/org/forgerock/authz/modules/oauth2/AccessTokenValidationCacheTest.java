@@ -36,7 +36,7 @@ public class AccessTokenValidationCacheTest {
 
     @Test
     public void shouldAddEntryToCache() {
-
+    	setUp();
         //Given
         String accessToken = "ACCESS_TOKEN";
         AccessTokenValidationResponse validationResponse = new AccessTokenValidationResponse(0);
@@ -50,7 +50,7 @@ public class AccessTokenValidationCacheTest {
 
     @Test
     public void shouldReplaceCacheEntry() {
-
+    	setUp();
         //Given
         String accessToken = "ACCESS_TOKEN";
         AccessTokenValidationResponse validationResponse = new AccessTokenValidationResponse(0);
@@ -65,7 +65,7 @@ public class AccessTokenValidationCacheTest {
 
     @Test
     public void shouldRemoveOldestEntryWhenCacheFull() {
-
+    	setUp();
         //Given
         String accessToken1 = "ACCESS_TOKEN_1";
         String accessToken2 = "ACCESS_TOKEN_2";
@@ -87,7 +87,7 @@ public class AccessTokenValidationCacheTest {
 
     @Test
     public void shouldGetEntryFromCache() {
-
+    	setUp();
         //Given
         String accessToken = "ACCESS_TOKEN";
         AccessTokenValidationResponse validationResponse = new AccessTokenValidationResponse(0);
@@ -101,7 +101,7 @@ public class AccessTokenValidationCacheTest {
 
     @Test
     public void shouldReturnNullWhenAccessTokenNotInCache() {
-
+    	setUp();
         //Given
         String accessToken1 = "ACCESS_TOKEN_1";
         String accessToken2 = "ACCESS_TOKEN_2";
@@ -116,7 +116,7 @@ public class AccessTokenValidationCacheTest {
 
     @Test
     public void cacheShouldBeThreadSafe() throws InterruptedException {
-
+    	setUp();
         //Given
         final int runs = 1_000;
         final CountDownLatch latch = new CountDownLatch(runs * 2);
