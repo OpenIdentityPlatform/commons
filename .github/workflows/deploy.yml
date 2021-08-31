@@ -20,6 +20,8 @@ jobs:
            cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
            gpg --list-secret-keys --keyid-format LONG
       - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.client_payload.sha }}
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v2
         with:
@@ -34,4 +36,4 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         if: ${{ env.GPG_PASSPHRASE!='' && env.MAVEN_USERNAME!='' && env.MAVEN_PASSWORD!=''}}
-        run: mvn --no-transfer-progress --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy        
+        run: mvn --batch-mode -Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }} deploy        
