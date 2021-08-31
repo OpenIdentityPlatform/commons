@@ -30,6 +30,8 @@ jobs:
          key: ${{ runner.os }}-m2-repository-${{ hashFiles('**/pom.xml') }}
          restore-keys: ${{ runner.os }}-m2-repository
     - name: Build with Maven
+      env:
+        MAVEN_OPTS: -Dhttps.protocols=TLSv1.2
       run: mvn --batch-mode  --update-snapshots package --file pom.xml
   deploy:
     needs: build
