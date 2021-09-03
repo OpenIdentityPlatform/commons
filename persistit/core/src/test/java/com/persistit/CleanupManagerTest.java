@@ -51,8 +51,10 @@ public class CleanupManagerTest extends PersistitUnitTestCase {
         @Override
         public void performAction(final Persistit persistit, final List<CleanupAction> consequentActions)
                 throws PersistitException {
-            assertEquals(_last + 1, _sequence);
-            _last = _sequence;
+            synchronized (this) {
+        		 assertEquals(_last + 1, _sequence);
+                 _last = _sequence;
+			}
             _counter++;
             if (_sequence == 123) {
                 throw new ExpectedException();
