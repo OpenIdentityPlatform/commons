@@ -32,7 +32,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class TreeTransactionalLifetimeTest extends PersistitUnitTestCase {
-    final static int TIMEOUT_MS = 10000;
+    final static int TIMEOUT_MS = 30000;
 
     final Semaphore semA = new Semaphore(0);
     final Semaphore semB = new Semaphore(0);
