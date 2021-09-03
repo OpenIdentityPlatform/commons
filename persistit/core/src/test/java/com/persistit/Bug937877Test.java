@@ -46,7 +46,7 @@ public class Bug937877Test extends PersistitUnitTestCase {
         final Transaction txn = ex.getTransaction();
         txn.begin();
         ex.getValue().put(RED_FOX);
-        for (int k = 1; k < 10; k++) {
+        for (int k = 1; k < 50; k++) {
             ex.clear().append(k).store();
         }
 
