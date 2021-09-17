@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.google.common.html.HtmlEscapers;
 import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
 import org.forgerock.util.promise.Promise;
@@ -604,7 +605,7 @@ public class ResourceException extends IOException implements Response {
         }
         final String message = getMessage();
         if (message != null) { // should always be present
-            result.put(FIELD_MESSAGE, message);
+            result.put(FIELD_MESSAGE, HtmlEscapers.htmlEscaper().escape(message));
         }
         if (!detail.isNull()) {
             result.put(FIELD_DETAIL, detail.getObject());
