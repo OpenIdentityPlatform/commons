@@ -107,6 +107,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
     private HttpApplication application;
     private Factory<Buffer> storage;
     private DescribableHandler handler;
+    static DescribableHandler rootHandler;
     private ServletRoutingBase routingBase;
 
     /**
@@ -125,6 +126,10 @@ public final class HttpFrameworkServlet extends HttpServlet {
         this.application = application;
     }
 
+    public static DescribableHandler getRootHandler() {
+    	return rootHandler;
+    }
+    
     @Override
     @SuppressWarnings("unchecked")
     public void init() throws ServletException {
@@ -144,6 +149,8 @@ public final class HttpFrameworkServlet extends HttpServlet {
             if (application instanceof DescribedHttpApplication) {
                 ApiProducer<Swagger> apiProducer = ((DescribedHttpApplication) application).getApiProducer();
                 this.handler.api(apiProducer);
+            }else {
+            	rootHandler=this.handler;
             }
         } catch (HttpApplicationException e) {
             logger.error("Error while starting the application.", e);
