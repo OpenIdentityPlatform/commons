@@ -395,6 +395,8 @@ public class JwtClaimsSet extends JWObject implements Payload {
         case EXP: {
             if (isValueOfType(value, Number.class)) {
                 setExpirationTime(((Number) value).longValue());
+            } else if (isValueOfType(value, String.class)) {
+            	setExpirationTime(Long.parseLong((String)value));
             } else {
                 checkValueIsOfType(value, Date.class);
                 setExpirationTime((Date) value);
