@@ -16,7 +16,6 @@
 
 package org.forgerock.json.jose.jws.handlers;
 
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -25,7 +24,6 @@ import java.security.SignatureException;
 import java.security.interfaces.ECKey;
 import java.security.interfaces.ECPrivateKey;
 import java.security.interfaces.ECPublicKey;
-import java.util.Arrays;
 
 import org.forgerock.json.jose.exceptions.JwsException;
 import org.forgerock.json.jose.exceptions.JwsSigningException;
@@ -95,7 +93,7 @@ public class ECDSASigningHandler implements SigningHandler {
             final Signature validator = Signature.getInstance(algorithm.getAlgorithm());
             validator.initVerify(verificationKey);
             validator.update(data);
-            return validator.verify(derEncode(signature));
+            return validator.verify(JOSEToDER(signature));
         } catch (SignatureException | InvalidKeyException e) {
             throw new JwsSigningException(e);
         } catch (NoSuchAlgorithmException e) {
@@ -139,33 +137,75 @@ public class ECDSASigningHandler implements SigningHandler {
         return output;
     }
 
-    /**
-     * Minimal DER encoder for the format expected by the SunEC signature provider.
-     */
-    private static byte[] derEncode(final byte[] signature) {
-        Reject.ifNull(signature);
-        SupportedEllipticCurve curve = SupportedEllipticCurve.forSignature(signature);
+    byte[] JOSEToDER(byte[] joseSignature) throws SignatureException {
+    	SupportedEllipticCurve curve = SupportedEllipticCurve.forSignature(joseSignature);
 
-        final int midPoint = curve.getSignatureSize() >> 1;
-        final BigInteger r = new BigInteger(Arrays.copyOfRange(signature, 0, midPoint));
-        final BigInteger s = new BigInteger(Arrays.copyOfRange(signature, midPoint, signature.length));
+        final int ecNumberSize = curve.getSignatureSize() >> 1;
 
-        // Each integer component needs at most 2 bytes for the length field and 1 byte for the tag, for a total of 6
-        // bytes for both integers.
-        final ByteBuffer params = ByteBuffer.allocate(signature.length + 6);
-        DerUtils.writeInteger(params, r.toByteArray());
-        DerUtils.writeInteger(params, s.toByteArray());
+        // Retrieve R and S number's length and padding.
+        int rPadding = countPadding(joseSignature, 0, ecNumberSize);
+        int sPadding = countPadding(joseSignature, ecNumberSize, joseSignature.length);
+        int rLength = ecNumberSize - rPadding;
+        int sLength = ecNumberSize - sPadding;
 
-        final int size = params.position();
-        // The overall sequence may need up to 4 bytes for the length field plus 1 byte for the sequence tag.
-        final ByteBuffer sequence = ByteBuffer.allocate(size + 5);
-        sequence.put(DerUtils.SEQUENCE_TAG);
-        DerUtils.writeLength(sequence, size);
-        sequence.put((ByteBuffer) params.flip());
+        int length = 2 + rLength + 2 + sLength;
+        if (length > 255) {
+            throw new SignatureException("Invalid JOSE signature format.");
+        }
 
-        final byte[] result = new byte[sequence.position()];
-        ((ByteBuffer) sequence.flip()).get(result);
-        return result;
+        final byte[] derSignature;
+        int offset;
+        if (length > 0x7f) {
+            derSignature = new byte[3 + length];
+            derSignature[1] = (byte) 0x81;
+            offset = 2;
+        } else {
+            derSignature = new byte[2 + length];
+            offset = 1;
+        }
+
+        // DER Structure: http://crypto.stackexchange.com/a/1797
+        // Header with signature length info
+        derSignature[0] = (byte) 0x30;
+        derSignature[offset++] = (byte) (length & 0xff);
+
+        // Header with "min R" number length
+        derSignature[offset++] = (byte) 0x02;
+        derSignature[offset++] = (byte) rLength;
+
+        // R number
+        if (rPadding < 0) {
+            //Sign
+            derSignature[offset++] = (byte) 0x00;
+            System.arraycopy(joseSignature, 0, derSignature, offset, ecNumberSize);
+            offset += ecNumberSize;
+        } else {
+            int copyLength = Math.min(ecNumberSize, rLength);
+            System.arraycopy(joseSignature, rPadding, derSignature, offset, copyLength);
+            offset += copyLength;
+        }
+
+        // Header with "min S" number length
+        derSignature[offset++] = (byte) 0x02;
+        derSignature[offset++] = (byte) sLength;
+
+        // S number
+        if (sPadding < 0) {
+            //Sign
+            derSignature[offset++] = (byte) 0x00;
+            System.arraycopy(joseSignature, ecNumberSize, derSignature, offset, ecNumberSize);
+        } else {
+            System.arraycopy(joseSignature, ecNumberSize + sPadding, derSignature, offset, Math.min(ecNumberSize, sLength));
+        }
+
+        return derSignature;
     }
-
+    
+    private int countPadding(byte[] bytes, int fromIndex, int toIndex) {
+        int padding = 0;
+        while (fromIndex + padding < toIndex && bytes[fromIndex + padding] == 0) {
+            padding++;
+        }
+        return (bytes[fromIndex + padding] & 0xff) > 0x7f ? padding - 1 : padding;
+    }
 }
