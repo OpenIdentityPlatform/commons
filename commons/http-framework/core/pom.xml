@@ -28,6 +28,11 @@
   <name>${project.groupId}.${project.artifactId}</name>
   <dependencies>
     <dependency>
+      <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy</artifactId>
+      <version>3.0.9</version>
+     </dependency>
+    <dependency>
       <groupId>org.openidentityplatform.commons</groupId>
       <artifactId>util</artifactId>
     </dependency>
