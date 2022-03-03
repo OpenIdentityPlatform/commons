@@ -31,7 +31,7 @@ import org.forgerock.util.i18n.LocalizableString;
 
 /** Class that represents the ApiDescription type in API descriptor. */
 @JsonDeserialize(builder = ApiDescription.Builder.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_ABSENT)
 public final class ApiDescription {
 
     private final String id;
@@ -175,7 +175,7 @@ public final class ApiDescription {
      * @return Paths
      */
     // Jackson queries PathsModule.PathsSerializer.isEmpty() to know whether a Paths object is empty
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @JsonInclude(JsonInclude.Include.NON_ABSENT)
     public Paths getPaths() {
         return paths;
     }
