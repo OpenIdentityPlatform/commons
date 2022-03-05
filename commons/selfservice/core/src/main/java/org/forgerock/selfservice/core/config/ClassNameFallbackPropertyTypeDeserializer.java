@@ -58,10 +58,12 @@ class ClassNameFallbackPropertyTypeDeserializer extends AsPropertyTypeDeserializ
      * {@inheritDoc}
      */
     @Override
-    protected Object _deserializeTypedUsingDefaultImpl(JsonParser jsonParser, DeserializationContext context,
-            TokenBuffer tokenBuffer) throws IOException {
+    protected Object  _deserializeTypedUsingDefaultImpl(JsonParser jsonParser,
+                                                        DeserializationContext context,
+                                                        TokenBuffer tokenBuffer,
+                                                        String priorFailureMsg) throws IOException {
         try {
-            return super._deserializeTypedUsingDefaultImpl(jsonParser, context, tokenBuffer);
+            return super._deserializeTypedUsingDefaultImpl(jsonParser, context, tokenBuffer, priorFailureMsg);
         } catch (JsonMappingException e) {
             // fallback
             if (tokenBuffer != null) {
