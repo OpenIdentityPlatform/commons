@@ -1282,7 +1282,7 @@
 			<plugin>
 		      <groupId>org.sonatype.plugins</groupId>
 		      <artifactId>nexus-staging-maven-plugin</artifactId>
-		      <version>1.6.11</version>
+		      <version>1.6.12</version>
 		      <extensions>true</extensions>
 		      <configuration>
 		        <serverId>ossrh</serverId>
@@ -1292,6 +1292,13 @@
 		        <keepStagingRepositoryOnFailure>false</keepStagingRepositoryOnFailure>
 		        <keepStagingRepositoryOnCloseRuleFailure>false</keepStagingRepositoryOnCloseRuleFailure>
 		      </configuration>
+		      <dependencies>
+		      	<dependency>
+			        <groupId>com.google.guava</groupId>
+			        <artifactId>guava</artifactId>
+			        <version>15.0</version>
+			     </dependency>
+		      </dependencies>
 		    </plugin>
         </plugins>
     </build>
