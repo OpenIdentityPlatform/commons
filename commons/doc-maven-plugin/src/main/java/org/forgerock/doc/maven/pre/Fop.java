@@ -173,7 +173,7 @@ public final class Fop {
             for (String font : fonts) {
                 final URL source = getClass().getResource(font);
                 final File destination = new File(
-                        m.getBuildDirectory(), font.replaceAll("/", File.separator));
+                        m.getBuildDirectory(), font.replace("/", File.separator));
                 try {
                     FileUtils.copyURLToFile(source, destination);
                 } catch (IOException e) {
