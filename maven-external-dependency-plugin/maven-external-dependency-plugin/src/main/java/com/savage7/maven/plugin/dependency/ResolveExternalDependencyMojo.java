@@ -166,8 +166,7 @@ public class ResolveExternalDependencyMojo extends
                                     + tempDownloadFile.getCanonicalPath());
                         } else {
                             // create a temporary download file
-                            tempDownloadFile = File.createTempFile(
-                            artifactItem.getLocalFile(), "." + getExtension(artifactItem.getDownloadUrl()));
+                            tempDownloadFile = File.createTempFile(artifactItem.getLocalFile(),artifactItem.getArtifactId());
 
                             getLog().info(
                                 "downloading artifact from URL: "
