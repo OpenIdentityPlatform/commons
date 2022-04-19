@@ -58,3 +58,13 @@ jobs:
           MAVEN_OPTS: -Dhttps.protocols=TLSv1.2 -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dmaven.wagon.http.retryHandler.count=10
         if: ${{ env.MAVEN_USERNAME!='' && env.MAVEN_PASSWORD!='' }}
         run: mvn --batch-mode -Darguments="-Dgpg.passphrase=${{ secrets.GPG_PASSPHRASE }}" -DtagNameFormat="${{ github.event.inputs.releaseVersion }}" -DreleaseVersion=${{ github.event.inputs.releaseVersion }} -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} release:prepare release:perform --file pom.xml
+      - name: Release on GitHub
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ github.event.inputs.releaseVersion }}
+          tag_name: ${{ github.event.inputs.releaseVersion }}
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: false
+          generate_release_notes: true
+ 
