@@ -23,6 +23,9 @@ jobs:
            cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
            gpg --list-secret-keys --keyid-format LONG
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
       - name: Set up Java for publishing to Maven Central Repository OSS
         uses: actions/setup-java@v2
         with:
