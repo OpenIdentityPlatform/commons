@@ -107,11 +107,11 @@ public class AsynchronousTextWriter implements TextWriter {
                     } else {
                         for (String message : drainList) {
                             writeMessage(message);
+                            if (autoFlush) {
+                                flush();
+                            }
                         }
                         drainList.clear();
-                        if (autoFlush) {
-                            flush();
-                        }
                     }
 				} catch (InterruptedException e) {
 					return;
