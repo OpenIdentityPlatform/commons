@@ -1,9 +1,7 @@
 package ru.org.openam.geo;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -53,15 +51,17 @@ public class Client {
 	
 	public static Info get(final String ipAddress) {
 		Info res=null;
-		try {
-			res=cache.get(ipAddress, new Callable<Info>() {
-				@Override
-				public Info call() throws Exception {
-					Info res=new Info(ipAddress);
-					return res;
-				}
-			});
-		}catch (ExecutionException e) {}
+		if (StringUtils.isNotBlank(ipAddress)) {
+			try {
+				res=cache.get(ipAddress, new Callable<Info>() {
+					@Override
+					public Info call() throws Exception {
+						Info res=new Info(ipAddress);
+						return res;
+					}
+				});
+			}catch (ExecutionException e) {}
+		}
 		if (logger.isDebugEnabled())
 			logger.debug("{}", res);
 		return res;
