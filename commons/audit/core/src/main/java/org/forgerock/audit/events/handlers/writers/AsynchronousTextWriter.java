@@ -114,8 +114,19 @@ public class AsynchronousTextWriter implements TextWriter {
                         drainList.clear();
                     }
 				} catch (InterruptedException e) {
-					return;
+					break;
 				}
+            }
+        	//flush after shutdown
+        	queue.drainTo(drainList);
+            if (!drainList.isEmpty()) {
+            	for (String message : drainList) {
+                    writeMessage(message);
+                    if (autoFlush) {
+                        flush();
+                    }
+                }
+                drainList.clear();
             }
         }
     }
