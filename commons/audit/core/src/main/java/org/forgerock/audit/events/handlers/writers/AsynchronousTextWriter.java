@@ -93,40 +93,26 @@ public class AsynchronousTextWriter implements TextWriter {
         @Override
         public void run() {
         	final  List<String> drainList = new ArrayList<>();
-        	while (!stopRequested) {
+        	while (!stopRequested || !queue.isEmpty()) {
         		try {
         			queue.drainTo(drainList);
                     if (drainList.isEmpty()) {
                     	final String message = queue.poll(POLLING_TIMEOUT, POLLING_TIMEOUT_UNIT);
     					if (message != null) {
                             writeMessage(message);
-                            if (autoFlush) {
-                                flush();
-                            }
                         }
                     } else {
                         for (String message : drainList) {
                             writeMessage(message);
-                            if (autoFlush) {
-                                flush();
-                            }
                         }
                         drainList.clear();
                     }
-				} catch (InterruptedException e) {
-					break;
-				}
-            }
-        	//flush after shutdown
-        	queue.drainTo(drainList);
-            if (!drainList.isEmpty()) {
-            	for (String message : drainList) {
-                    writeMessage(message);
                     if (autoFlush) {
                         flush();
                     }
-                }
-                drainList.clear();
+				} catch (InterruptedException e) {
+					stopRequested=true;
+				}
             }
         }
     }
