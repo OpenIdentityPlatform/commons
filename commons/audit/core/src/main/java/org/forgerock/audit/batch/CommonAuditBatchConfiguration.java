@@ -40,7 +40,7 @@ public final class CommonAuditBatchConfiguration {
      * Common Audit Batch log records queue polling timeout.
      * Details: {@link CommonAuditBatchConfiguration}
      */
-    public static final long POLLING_TIMEOUT = 100L;
+    public static final long POLLING_TIMEOUT = 10L;
 
     /**
      * Common Audit Batch log records queue polling timeout unit.

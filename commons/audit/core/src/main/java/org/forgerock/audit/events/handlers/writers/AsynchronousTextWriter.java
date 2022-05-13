@@ -32,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TIMEOUT;
 import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TIMEOUT_UNIT;
-
 /**
  * A Text Writer which writes log records asynchronously to character-based stream.
  * <p>
@@ -44,7 +43,7 @@ public class AsynchronousTextWriter implements TextWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsynchronousTextWriter.class);
     /** Maximum number of messages that can be queued before producers start to block. */
-    private static final int CAPACITY = 5000;
+    private static final int CAPACITY = 256000;
 
     /** The wrapped Text Writer. */
     private final TextWriter writer;
@@ -93,15 +92,13 @@ public class AsynchronousTextWriter implements TextWriter {
          */
         @Override
         public void run() {
-            List<String> drainList = new ArrayList<>(CAPACITY);
-
-            boolean interrupted = false;
-            while (!stopRequested || !queue.isEmpty()) {
-                try {
-                    queue.drainTo(drainList, CAPACITY);
+        	final  List<String> drainList = new ArrayList<>();
+        	while (!stopRequested) {
+        		try {
+        			queue.drainTo(drainList);
                     if (drainList.isEmpty()) {
-                        String message = queue.poll(POLLING_TIMEOUT, POLLING_TIMEOUT_UNIT);
-                        if (message != null) {
+                    	final String message = queue.poll(POLLING_TIMEOUT, POLLING_TIMEOUT_UNIT);
+    					if (message != null) {
                             writeMessage(message);
                             if (autoFlush) {
                                 flush();
@@ -116,14 +113,9 @@ public class AsynchronousTextWriter implements TextWriter {
                             flush();
                         }
                     }
-                } catch (InterruptedException ex) {
-                    // Ignore. We'll rerun the loop
-                    // and presumably fall out.
-                    interrupted = true;
-                }
-            }
-            if (interrupted) {
-                Thread.currentThread().interrupt();
+				} catch (InterruptedException e) {
+					return;
+				}
             }
         }
     }
