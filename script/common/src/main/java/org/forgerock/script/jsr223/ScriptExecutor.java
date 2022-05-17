@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Deprecated
 public abstract class ScriptExecutor {
-    protected final ScriptEngineManager scriptEngineManager = new ScriptEngineManager();
+    protected final ScriptEngineManager scriptEngineManager = new ScriptEngineManager(null);
     protected final String language;
     protected final String scriptSource;
     protected CompiledScript script = null;

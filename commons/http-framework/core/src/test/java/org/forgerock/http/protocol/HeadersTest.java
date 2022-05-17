@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 
+import org.codehaus.groovy.jsr223.GroovyScriptEngineFactory;
 import org.forgerock.http.header.ConnectionHeader;
 import org.forgerock.http.header.ContentLengthHeader;
 import org.forgerock.http.header.CookieHeader;
@@ -41,8 +41,7 @@ public class HeadersTest {
     @Test
     public void testScriptability() throws Exception {
         // Given
-        ScriptEngineManager mgr = new ScriptEngineManager();
-        ScriptEngine engine = mgr.getEngineByName("groovy");
+        ScriptEngine engine = new GroovyScriptEngineFactory().getScriptEngine();
         ByteArrayOutputStream content = new ByteArrayOutputStream();
         IO.stream(HeadersTest.class.getResourceAsStream("HeadersTest.scriptability.groovy"), content);
 

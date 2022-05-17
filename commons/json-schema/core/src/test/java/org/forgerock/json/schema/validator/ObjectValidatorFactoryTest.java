@@ -81,7 +81,7 @@ public class ObjectValidatorFactoryTest {
 
     @Test
     public void enginesTest() {
-        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngineManager manager = new ScriptEngineManager(null);
         List<ScriptEngineFactory> factoryList = manager.getEngineFactories();
         for (ScriptEngineFactory factory : factoryList) {
             System.out.println(factory.getEngineName());
