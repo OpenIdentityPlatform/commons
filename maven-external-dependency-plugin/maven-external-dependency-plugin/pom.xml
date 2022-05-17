@@ -88,7 +88,6 @@ under the License.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.0</version>
                 <configuration>
                     <goals>deploy</goals>
                     <tagBase>https://maven-external-dependency-plugin.googlecode.com/svn/release</tagBase>
@@ -98,7 +97,6 @@ under the License.
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.7</version>
 				<configuration>
 				    <skip>true</skip>
 				</configuration>
