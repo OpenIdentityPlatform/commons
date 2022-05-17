@@ -15,6 +15,7 @@
     "grunt-eslint": "17.3.1",
     "grunt-notify": "0.4.3",
     "grunt-sync": "0.4.1",
-    "less-plugin-clean-css": "1.5.1"
+    "less-plugin-clean-css": "1.5.1",
+    "es5-ext": "0.10.53"
   }
 }
