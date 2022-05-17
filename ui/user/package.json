@@ -8,6 +8,7 @@
     "eslint-formatter-warning-summary": "^1.0.1",
     "grunt": "1.4.1",
     "grunt-cli": "1.4.3",
-    "grunt-eslint": "19.0.0"
+    "grunt-eslint": "19.0.0",
+    "es5-ext": "0.10.53"
   }
 }
