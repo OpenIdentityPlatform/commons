@@ -25,13 +25,18 @@
 package org.forgerock.commons.launcher;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -117,6 +122,29 @@ public class ConfigurationUtil {
         return files;
     }
 
+    static { 
+    	URL.setURLStreamHandlerFactory(protocol -> "jar".equals(protocol) ? new URLStreamHandler() {
+    	    protected URLConnection openConnection(URL url) throws IOException {
+    	        return new JarURLConnection(url) {
+    	        	
+					@Override
+					public InputStream getInputStream() throws IOException {
+						final JarFile jar=getJarFile();
+						return jar.getInputStream(jar.getEntry(getEntryName()));
+					}
+
+					@Override
+					public JarFile getJarFile() throws IOException {
+						return new JarFile(getJarFileURL().toString().replace("file:",""));
+					}
+
+					@Override
+					public void connect() throws IOException {}
+    	           
+    	        };
+    	    }
+    	} : null);
+    }
     /**
      * <p/>
      * Retrieve a list of filepaths from a given directory within a jar file. If

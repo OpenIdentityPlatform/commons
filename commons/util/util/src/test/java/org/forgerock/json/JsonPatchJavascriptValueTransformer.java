@@ -73,7 +73,7 @@ public class JsonPatchJavascriptValueTransformer implements JsonPatchValueTransf
         if (Double.parseDouble(System.getProperty("java.specification.version")) < 15) {
             return new ScriptEngineManager(null).getEngineByName("js");
         } else {
-            return new org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory().getScriptEngine();
+        	return new ScriptEngineManager().getEngineByName("js");
         }
     }
 }
