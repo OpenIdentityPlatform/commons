@@ -39,7 +39,7 @@ class AccessTokenValidationCache {
      * @param maxSize The maximum size of the cache.
      */
     AccessTokenValidationCache(final int maxSize) {
-        cache = new LinkedHashMap<String, AccessTokenValidationResponse>(maxSize) {
+        cache = new LinkedHashMap<String, AccessTokenValidationResponse>(0) {
             /**
              * Serial Version UID.
              */

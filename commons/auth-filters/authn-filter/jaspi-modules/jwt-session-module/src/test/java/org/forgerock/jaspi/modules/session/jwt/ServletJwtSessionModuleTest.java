@@ -494,7 +494,7 @@ public class ServletJwtSessionModuleTest {
         Date issuedAtTime = calendar.getTime();
 
         given(messageInfo.getRequestMessage()).willReturn(request);
-        given(messageInfo.getResponseMessage()).willReturn(response);
+        //given(messageInfo.getResponseMessage()).willReturn(response);
         given(messageInfo.getMap()).willReturn(map);
         map.put(AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT, contextMap);
 

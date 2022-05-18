@@ -22,7 +22,7 @@
     </parent>
     <artifactId>util-parent</artifactId>
     <name>${project.groupId}.${project.artifactId}</name>
-    <description>Miscellaneous utility classes used within Open Identity Platform Communityprojects.</description>
+    <description>Miscellaneous utility classes used within Open Identity Platform Community projects.</description>
     <packaging>pom</packaging>
     
     <properties>
@@ -33,21 +33,6 @@
         <module>test-utils</module>
     </modules>
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
-        <plugins>
-            <plugin>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <version>3.3</version>
-              <configuration>
-                <compilerId>eclipse</compilerId>
-              </configuration>
-              <dependencies>
-                <dependency>
-                  <groupId>org.codehaus.plexus</groupId>
-                  <artifactId>plexus-compiler-eclipse</artifactId>
-                  <version>2.5</version>
-                </dependency>
-              </dependencies>
-            </plugin>
-        </plugins>
+
     </build>
 </project>
