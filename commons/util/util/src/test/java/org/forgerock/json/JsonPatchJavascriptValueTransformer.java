@@ -61,19 +61,12 @@ public class JsonPatchJavascriptValueTransformer implements JsonPatchValueTransf
         }
 
         try {
-            ScriptEngine engine = getJSScriptEngine();
+            ScriptEngineManager factory = new ScriptEngineManager();
+            ScriptEngine engine = factory.getEngineByName("JavaScript");
             String finalScript = "var content = " + content.toString() + "; " + script.getObject();
             return String.valueOf(engine.eval(finalScript));
         } catch (Exception e) {
             throw new JsonValueException(script, "failed to eval script", e);
-        }
-    }
-    
-    public static ScriptEngine getJSScriptEngine() {
-        if (Double.parseDouble(System.getProperty("java.specification.version")) < 15) {
-            return new ScriptEngineManager(null).getEngineByName("js");
-        } else {
-        	return new ScriptEngineManager().getEngineByName("js");
         }
     }
 }
