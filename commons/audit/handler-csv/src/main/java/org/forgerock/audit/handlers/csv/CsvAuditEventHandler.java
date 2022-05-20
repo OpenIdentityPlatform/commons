@@ -313,7 +313,7 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
                     throws IOException {
         writeEntry(topic, csvWriter, event);
         EventBufferingConfiguration bufferConfig = configuration.getBuffering();
-        if (!bufferConfig.isEnabled() || !bufferConfig.isAutoFlush()) {
+        if (!bufferConfig.isEnabled() || bufferConfig.isAutoFlush()) {
             csvWriter.flush();
         }
         return csvWriter;

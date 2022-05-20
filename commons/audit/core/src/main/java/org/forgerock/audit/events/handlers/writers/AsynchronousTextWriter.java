@@ -43,7 +43,7 @@ public class AsynchronousTextWriter implements TextWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsynchronousTextWriter.class);
     /** Maximum number of messages that can be queued before producers start to block. */
-    private static final int CAPACITY = 256000;
+    private static final int CAPACITY = Integer.parseInt(System.getProperty("org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter.CAPACITY","32000"));
 
     /** The wrapped Text Writer. */
     private final TextWriter writer;
@@ -95,6 +95,9 @@ public class AsynchronousTextWriter implements TextWriter {
         	final  List<String> drainList = new ArrayList<>();
         	while (!stopRequested || !queue.isEmpty()) {
         		try {
+        			if (queue.remainingCapacity()==0) {
+        				logger.error("increase queue size -Dorg.forgerock.audit.events.handlers.writers.AsynchronousTextWriter.CAPACITY={}",CAPACITY);
+        			}
         			queue.drainTo(drainList);
                     if (drainList.isEmpty()) {
                     	final String message = queue.poll(POLLING_TIMEOUT, POLLING_TIMEOUT_UNIT);
