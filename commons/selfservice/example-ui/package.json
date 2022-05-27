@@ -3,7 +3,7 @@
   "author": "Jake Feasel <jake.feasel@forgerock.com>",
   "version": "0.0.1",
   "devDependencies": {
-    "grunt": "1.4.1",
+    "grunt": "1.5.3",
     "grunt-contrib-watch": "1.1.0",
     "grunt-contrib-less": "1.4.0",
     "grunt-sync": "0.8.2"
