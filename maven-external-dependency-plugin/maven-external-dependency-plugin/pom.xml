@@ -190,7 +190,7 @@ under the License.
         <dependency>
           <groupId>org.codehaus.plexus</groupId>
           <artifactId>plexus-archiver</artifactId>
-          <version>1.1</version>
+          <version>3.6.0</version>
         </dependency>
         <dependency>
         	<groupId>org.apache.maven</groupId>
