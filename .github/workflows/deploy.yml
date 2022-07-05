@@ -3,7 +3,7 @@ name: Deploy Maven
 on:
   workflow_run:
     branches: [ master ]
-    workflows: ["Build Maven"]
+    workflows: ["Build Maven","Release Maven"]
     types: [completed]
 jobs:
   deploy:
