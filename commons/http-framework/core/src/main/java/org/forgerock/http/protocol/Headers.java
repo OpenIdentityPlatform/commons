@@ -198,7 +198,7 @@ public class Headers implements Map<String, Object> {
     }
 
     private Header putUsingFactory(String key, Object value, HeaderFactory<?> factory) {
-        final Header parsed;
+        Header parsed;
         try {
             parsed = factory.parse(value);
         } catch (MalformedHeaderException e) {
@@ -208,7 +208,7 @@ public class Headers implements Map<String, Object> {
             return putGenericHeader(key, value);
         }
         if (parsed == null) {
-            return remove(key);
+            parsed=new GenericHeader(key,new ArrayList<String>(0));
         }
         return headers.put(key, parsed);
     }
