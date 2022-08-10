@@ -213,7 +213,8 @@ public final class HttpFrameworkServlet extends HttpServlet {
             uriRouterContext = createRouterContext(sessionContext, req, request);
         } catch (URISyntaxException e) {
             Response response = new Response(Status.BAD_REQUEST);
-            response.setEntity(e.getMessage());
+            response.setEntity(e.getReason());
+            logger.warn(e.getMessage());
             writeResponse(response, resp, sessionContext);
             return;
         }
