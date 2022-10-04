@@ -365,6 +365,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                     for (String value : response.getHeaders().get(name).getValues()) {
                         if (value != null && value.length() > 0) {
                             servletResponse.addHeader(name, value);
+                            logger.trace("header {}={}",name, value);
                         }
                     }
                 }
@@ -374,7 +375,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 	response.getEntity().copyRawContentTo(servletResponse.getOutputStream());
                 }
             }
-        } catch (IOException e) {
+        } catch (Throwable e) {
             logger.error("Failed to write response", e);
         } finally {
             closeSilently(response);
