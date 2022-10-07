@@ -120,8 +120,9 @@ public class CrestObjectSchema extends ObjectSchema implements CrestReadWritePol
             boolean validated = false;
             if (getProperties().containsKey(property.getKey())) {
                 final JsonSchema schema = getProperties().get(property.getKey());
-                if (schema instanceof ValidatableSchema && !"reference".equals(property.getKey())) {
-                    ((ValidatableSchema) schema).validate(json(property.getValue()));
+                final JsonValue value=json(property.getValue());
+                if (schema instanceof ValidatableSchema && !"reference".equals(property.getKey()) && value.isMap()) {
+                    ((ValidatableSchema) schema).validate(value);
                 }
                 validated = true;
             }
