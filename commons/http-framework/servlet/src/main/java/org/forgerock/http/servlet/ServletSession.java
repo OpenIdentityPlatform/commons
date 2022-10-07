@@ -39,7 +39,7 @@ import org.forgerock.http.protocol.Response;
  * otherwise will not create one until an attempt is made to put an attribute in
  * it.
  */
-final class ServletSession extends AbstractMap<String, Object> implements Session {
+public final class ServletSession extends AbstractMap<String, Object> implements Session {
 
     /** The servlet request from which to get a servlet session object. */
     private final HttpServletRequest request;
@@ -113,7 +113,7 @@ final class ServletSession extends AbstractMap<String, Object> implements Sessio
         }
     };
 
-    ServletSession(final HttpServletRequest request) {
+    public ServletSession(final HttpServletRequest request) {
         this.request = request;
         // get session if already allocated
         this.httpSession = request.getSession(false);

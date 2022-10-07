@@ -35,7 +35,7 @@ import org.forgerock.http.HttpApplication;
  * given requests which DO contain the relative Servlet context path and
  * therefore will be dependant on the web application configuration.</p>
  */
-enum ServletRoutingBase {
+public enum ServletRoutingBase {
 
     /**
      * Only the context path will be consumed when routing requests to the
@@ -43,6 +43,7 @@ enum ServletRoutingBase {
      */
     CONTEXT_PATH {
         @Override
+		public
         String extractMatchedUri(HttpServletRequest request) {
             String contextPath = forceEmptyIfNull(request.getContextPath());
             return contextPath.startsWith("/") ? contextPath.substring(1) : contextPath;
@@ -55,6 +56,7 @@ enum ServletRoutingBase {
      */
     SERVLET_PATH {
         @Override
+		public
         String extractMatchedUri(HttpServletRequest request) {
             String contextPath = CONTEXT_PATH.extractMatchedUri(request);
             return contextPath + forceEmptyIfNull(request.getServletPath());
@@ -68,7 +70,7 @@ enum ServletRoutingBase {
      * @param request The request.
      * @return The matched portion of the request URI.
      */
-    abstract String extractMatchedUri(HttpServletRequest request);
+    public abstract String extractMatchedUri(HttpServletRequest request);
 
     private static String forceEmptyIfNull(final String s) {
         return s != null ? s : "";

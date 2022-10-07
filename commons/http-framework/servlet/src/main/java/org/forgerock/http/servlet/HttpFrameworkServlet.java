@@ -106,7 +106,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
     private ServletVersionAdapter adapter;
     private HttpApplication application;
     private Factory<Buffer> storage;
-    private DescribableHandler handler;
+    public DescribableHandler handler;
     static DescribableHandler rootHandler;
     private ServletRoutingBase routingBase;
 
@@ -124,8 +124,17 @@ public final class HttpFrameworkServlet extends HttpServlet {
      */
     public HttpFrameworkServlet(HttpApplication application) {
         this.application = application;
+        if (gatewayHttpFrameworkServlet==null) {
+        	gatewayHttpFrameworkServlet=this;
+        }
     }
 
+    static HttpFrameworkServlet gatewayHttpFrameworkServlet=null;
+   
+    public static HttpFrameworkServlet getGatewayHttpFrameworkServlet() {
+    	return gatewayHttpFrameworkServlet;
+    }
+    
     public static DescribableHandler getRootHandler() {
     	return rootHandler;
     }
@@ -246,10 +255,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
                             .thenOnResult(new ResultHandler<Response>() {
                                 @Override
                                 public void handleResult(Response response) {
-                                	//save request and response
-                                	req.setAttribute(request.getClass().getName(), request);
-                                	req.setAttribute(response.getClass().getName(), response);
-                                	
                                     writeResponse(request, response, resp, sessionContext, sync);
                                 }
                             })
@@ -283,7 +288,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         }
     }
 
-    private Request createRequest(HttpServletRequest req) throws IOException, URISyntaxException {
+    public Request createRequest(HttpServletRequest req) throws IOException, URISyntaxException {
         // populate request
         Request request = new Request();
         request.setMethod(req.getMethod());
@@ -313,7 +318,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
         return request;
     }
 
-    private ClientContext createClientContext(Context parent, HttpServletRequest req) {
+    static public ClientContext createClientContext(Context parent, HttpServletRequest req) {
         return ClientContext.buildExternalClientContext(parent)
                 .remoteUser(req.getRemoteUser())
                 .remoteAddress(req.getRemoteAddr())
@@ -326,7 +331,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 .build();
     }
 
-    private UriRouterContext createRouterContext(Context parent, HttpServletRequest req, final Request request)
+    public UriRouterContext createRouterContext(Context parent, HttpServletRequest req, final Request request)
             throws URISyntaxException {
         String matchedUri = routingBase.extractMatchedUri(req);
         final String requestURI = req.getRequestURI();
