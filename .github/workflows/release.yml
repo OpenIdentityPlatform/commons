@@ -46,8 +46,6 @@ jobs:
            cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
            gpg --list-secret-keys --keyid-format LONG
            git config --global user.signingkey B02611B009E5302EB58D102D6C2EDF3C90D33841
-           git config --global commit.gpgsign true
-           gpg --no-tty --batch --passphrase "${{ secrets.GPG_PASSPHRASE }}" --pinentry-mode loopback --output secrets.env --decrypt secrets.env.gpg
       - name: Configure Git User
         run: |
           git config --global user.name "Open Identity Platform Community"
