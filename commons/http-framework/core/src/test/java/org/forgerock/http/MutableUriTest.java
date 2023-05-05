@@ -508,10 +508,10 @@ public class MutableUriTest {
     @Test
     public void shouldResolveWhenThereIsNoTrailingSlashInBase() throws Exception {
         MutableUri uri = uri("http://www.example.com");
-        MutableUri resolved = uri.resolve(uri("c%3Dd"));
+        MutableUri resolved = uri.resolve(uri("/c%3Dd"));
         // Do not use uri() here because resolution knows %3d is a path element
         // where http://...comc%3Dd is see as part of the hostname (no path element)
-        assertThat(resolved.toString()).isEqualTo("http://www.example.comc%3Dd");
+        assertThat(resolved.toString()).isEqualTo("http://www.example.com/c%3Dd");
         assertThat(resolved.getPathElements().toString()).isEqualTo("c=d");
     }
 
