@@ -11,6 +11,7 @@ public class Info {
 	public AsnResponse o;
 	public InetAddress ip;
 	String ipString;
+
 	Throwable e;
 	
 	public Info(String ipString){
@@ -44,6 +45,8 @@ public class Info {
 		else if (e!=null)
 			return MessageFormat.format("{0} ({1})",(ip!=null)?ip.getHostAddress():ipString,e.getMessage());
 		return MessageFormat.format("{0} ({1})",(ip!=null)?ip.getHostAddress():ipString,"UNKNOWN");
-	}	
-
+	}
+	public Throwable getThrowable() {
+		return e;
+	}
 }
