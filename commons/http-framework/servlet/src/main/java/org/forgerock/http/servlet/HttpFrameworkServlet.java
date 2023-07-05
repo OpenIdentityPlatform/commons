@@ -381,7 +381,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 }
             }
         } catch (IOException e) {    
-        	logger.debug("Failed to write response", e.toString());
+        	logger.debug("Failed to write response {}", e.toString());
         } catch (Throwable e) {
             logger.error("Failed to write response", e);
         } finally {
