@@ -380,6 +380,8 @@ public final class HttpFrameworkServlet extends HttpServlet {
                 	response.getEntity().copyRawContentTo(servletResponse.getOutputStream());
                 }
             }
+        } catch (IOException e) {    
+        	logger.debug("Failed to write response {}", e.toString());
         } catch (Throwable e) {
             logger.error("Failed to write response", e);
         } finally {
