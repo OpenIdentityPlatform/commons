@@ -23,8 +23,6 @@ import org.openidentityplatform.commons.cassandra.EmbeddedServer;
 
 public class EmbeddedServerTest {
 
-	static EmbeddedServer cassandra;
-	
 	@BeforeClass
 	public static void init() {
 		System.setProperty("datastax-java-driver.basic.request.timeout", "10 seconds"); //slow ddl
@@ -40,7 +38,8 @@ public class EmbeddedServerTest {
 	@Test
 	public void start_test() {
 		
-		cassandra=new EmbeddedServer();
-		cassandra.run();
+		try (EmbeddedServer cassandra=new EmbeddedServer()){
+			cassandra.run();
+		}
 	}
 }
