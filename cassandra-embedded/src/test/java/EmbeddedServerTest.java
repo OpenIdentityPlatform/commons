@@ -27,6 +27,7 @@ public class EmbeddedServerTest {
 	
 	@BeforeClass
 	public static void init() {
+		System.setProperty("datastax-java-driver.basic.request.timeout", "10 seconds"); //slow ddl
 		System.setProperty("datastax-java-driver.advanced.auth-provider.class","PlainTextAuthProvider");
 		System.setProperty("datastax-java-driver.advanced.auth-provider.username","cassandra");
 		System.setProperty("datastax-java-driver.advanced.auth-provider.password","cassandra");
