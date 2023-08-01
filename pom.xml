@@ -88,6 +88,7 @@
 		<module>bloomfilter</module>
 		<module>persistit</module>
 		<module>script</module>
+		<module>cassandra-embedded</module>
 	</modules>
     <properties>
         <!-- ************** -->
@@ -628,6 +629,11 @@
             <dependency>
                 <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>cassandra-embedded</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
