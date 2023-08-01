@@ -58,6 +58,7 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 			path.mkdirs();
 	        System.setProperty("cassandra-foreground", "true");
 	        System.setProperty("cassandra.storagedir", path.getPath());
+	        
 	        //prepare default keystore
 	        if (!Files.exists(Paths.get("target"))) {
 	        	Files.createDirectory(Paths.get("target"));
@@ -65,19 +66,20 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 	        if (!Files.exists(Paths.get("target"+File.separator+"embedded_keystore"))) {
 	        	Files.copy(this.getClass().getResourceAsStream("/embedded_keystore"),Paths.get("target"+File.separator+"embedded_keystore"),StandardCopyOption.REPLACE_EXISTING);
 	        }
-	        
+	        Files.copy(this.getClass().getResourceAsStream("/cassandra.yaml"),Paths.get("target"+File.separator+"cassandra.yaml"),StandardCopyOption.REPLACE_EXISTING);
+	        System.setProperty("cassandra.config",""+Paths.get("target"+File.separator+"cassandra.yaml").toUri());
 	        //start
-	        final CountDownLatch startupLatch = new CountDownLatch(1) ;
-	        executor.execute( new Runnable(){
-	            @Override
-	            public void run() {
-	                cassandraDaemon = new CassandraDaemon();
+//	        final CountDownLatch startupLatch = new CountDownLatch(1) ;
+//	        executor.execute( new Runnable(){
+//	            @Override
+//	            public void run() {
+	                cassandraDaemon = new CassandraDaemon(true); //run managed
 	                cassandraDaemon.activate();
-	                startupLatch.countDown();
-	            }});
-	        if (!startupLatch.await(5, TimeUnit.MINUTES)) {
-                throw new AssertionError("Cassandra daemon did not start within timeout");
-            }
+//	                startupLatch.countDown();
+//	            }});
+//	        if (!startupLatch.await(5, TimeUnit.MINUTES)) {
+//                throw new AssertionError("Cassandra daemon did not start within timeout");
+//            }
 	        System.setProperty("datastax-java-driver.basic.contact-points.0",DatabaseDescriptor.getRpcAddress().getHostAddress()+":"+DatabaseDescriptor.getNativeTransportPort());
 	        System.setProperty("datastax-java-driver.basic.load-balancing-policy.local-datacenter", DatabaseDescriptor.getLocalDataCenter());
 
@@ -95,24 +97,21 @@ public class EmbeddedServer implements Runnable, AutoCloseable {
 	        //load
 	        String dataSetLocation=System.getProperty(EmbeddedServer.class.getPackage().getName()+".import","cassandra/import.cql");
 	        InputStream inputStream=this.getClass().getResourceAsStream("/" + dataSetLocation);
-	        if (inputStream==null) {
-	        	throw new AssertionError("cannot get resource "+dataSetLocation);
+	        if (inputStream!=null) {
+	        	 try (CqlSession session = CqlSession.builder().withApplicationName("load cassandra/import.cql").build()){
+	 	        	for (String statement : Arrays.asList(StringUtils.normalizeSpace(inputStreamToString(inputStream)).split(";"))) {
+	 		        	try {
+	 		        		session.execute(StringUtils.normalizeSpace(statement));
+	 		        		logger.info("{}",StringUtils.normalizeSpace(statement));
+	 		        	}catch (Exception e) {
+	 						logger.error("{}: {}",StringUtils.normalizeSpace(statement),e.getMessage());
+	 						assert false : "error in import.cql"+e.getMessage();
+	 					}
+	 				} 
+	 	        	session.close();
+	 	        };
+	 	        inputStream.close();
 	        }
-	        
-	        try (CqlSession session = CqlSession.builder().withApplicationName("load cassandra/import.cql").build()){
-	        	for (String statement : Arrays.asList(StringUtils.normalizeSpace(inputStreamToString(inputStream)).split(";"))) {
-		        	try {
-		        		session.execute(StringUtils.normalizeSpace(statement));
-		        		logger.info("{}",StringUtils.normalizeSpace(statement));
-		        	}catch (Exception e) {
-						logger.error("{}: {}",StringUtils.normalizeSpace(statement),e.getMessage());
-						assert false : "error in import.cql"+e.getMessage();
-					}
-				} 
-	        	session.close();
-	        };
-	        inputStream.close();
-	        
 	        //load test
 	        dataSetLocation=System.getProperty(EmbeddedServer.class.getPackage().getName()+".import.test");
 	        if (dataSetLocation!=null) {
