@@ -16,6 +16,7 @@
 
 package org.forgerock.selfservice.stages.utils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -34,7 +35,8 @@ public final class LocaleUtils {
 
     /**
      * Using the user's preferred locales (for example, from the "Accept-Language" header in the HTTP context),
-     * select the most optimal (string) translation from the map.  If there is nothing acceptable, throw an exception.
+     * select the most optimal (string) translation from the map. If it is omitted or matches no supported locales, use the default locale setting.
+	 * If there is nothing acceptable, throw an exception.
      *
      * @param preferredLocales
      *         the preferred locales
@@ -48,7 +50,7 @@ public final class LocaleUtils {
      */
     public static String getTranslationFromLocaleMap(
             PreferredLocales preferredLocales, Map<Locale, String> translations) {
-        List<Locale> locales = preferredLocales.getLocales();
+        List<Locale> locales = getTargetLocales(preferredLocales);
         for (Locale locale : locales) {
             String translation = getTranslation(locales, locale, translations);
             if (translation != null) {
@@ -56,6 +58,42 @@ public final class LocaleUtils {
             }
         }
         throw new IllegalArgumentException("Cannot find suitable translation from given choices");
+    }
+
+    /**
+     * Returns a list of target locales. The default locale(s) will be included at the end of the list.
+     * If {@link Locale.ROOT} is specified, the default locale(s) will be included in its place. In this case, the default locale(s) will not be appended to the end of the list.
+	 * <p>The default locale is specified by:
+	 * <ol>
+	 * <li>The <tt>org.forgerock.selfservice.defaultLocale</tt> system property.</li>
+	 * <li>The JVM's default locale.</li>
+	 * <ol>
+	 * </p>
+     *
+     * @param preferredLocales
+     *         the preferred locales
+     *
+     * @return the target locales, with the default locale(s) included.
+     */
+    private static List<Locale> getTargetLocales(PreferredLocales preferredLocales) {
+        Locale defaultLocale = Locale.forLanguageTag(System.getProperty("org.forgerock.selfservice.defaultLocale", "en-US"));
+        boolean defaultsAdded = false;
+        List<Locale> locales = new ArrayList<>();
+        for (Locale locale : preferredLocales.getLocales()) {
+            if (locale.equals(Locale.ROOT) && !defaultsAdded) {
+                locales.add(defaultLocale);
+                locales.add(Locale.getDefault());
+                defaultsAdded = true;
+                continue;
+            }
+            if (!locale.equals(Locale.ROOT))
+                locales.add(locale);
+        }
+        if (!defaultsAdded) {
+            locales.add(defaultLocale);
+            locales.add(Locale.getDefault());
+        }
+        return locales;
     }
 
     /**
