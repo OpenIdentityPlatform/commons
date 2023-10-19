@@ -76,7 +76,6 @@
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-jsr223</artifactId>
-      <version>3.0.13</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

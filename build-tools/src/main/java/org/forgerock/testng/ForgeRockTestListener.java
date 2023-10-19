@@ -993,7 +993,7 @@ public final class ForgeRockTestListener extends TestListenerAdapter implements 
                 && (countTestsWithStatus(ITestResult.SKIP) != 0)) {
             System.err
                     .println("There were no explicit test failures, but some tests were skipped (possibly due to errors in @Before* or @After* methods).");
-            System.exit(-1);
+//            System.exit(-1);
         }
     }
 

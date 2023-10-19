@@ -46,7 +46,7 @@
   <fopHyphVersion>1.2</fopHyphVersion>
   <jCiteVersion>1.13.0</jCiteVersion>
   <linkTesterVersion>1.3.0</linkTesterVersion>
-  <mavenAssemblyVersion>2.5.3</mavenAssemblyVersion>
+  <mavenAssemblyVersion>3.6.0</mavenAssemblyVersion>
   <mavenFilteringVersion>1.3</mavenFilteringVersion>
   <mavenDependencyVersion>2.10</mavenDependencyVersion>
   <mavenPluginPluginVersion>3.6.0</mavenPluginPluginVersion>
