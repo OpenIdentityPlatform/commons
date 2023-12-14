@@ -1,0 +1,9 @@
+{
+  "class" : "org.forgerock.audit.handlers.json.JsonStdoutAuditEventHandler",
+  "config" : {
+    "name" : "jsonstdout",
+    "topics": [ "access", "activity", "config", "authentication" ],
+    "elasticsearchCompatible" : "true"
+  }
+}
+
