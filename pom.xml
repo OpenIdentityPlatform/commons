@@ -639,6 +639,32 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.openidentityplatform.commons.script</groupId>
+                <artifactId>javascript</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.script</groupId>
+                <artifactId>groovy</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.launcher</groupId>
+                <artifactId>launcher</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.launcher</groupId>
+                <artifactId>launcher-zip</artifactId>
+                <type>zip</type>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.script</groupId>
+                <artifactId>common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
 		        <groupId>org.asciidoctor</groupId>
 		        <artifactId>asciidoctorj</artifactId>
 		        <version>2.5.3</version>
