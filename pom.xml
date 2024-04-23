@@ -187,7 +187,7 @@
         <!-- this property makes sure NetBeans 6.8+ picks up some formatting rules from checkstyle -->
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
-        <jackson.version>2.14.0-rc1</jackson.version>
+        <jackson.version>2.14.3</jackson.version>
         <slf4j.version>1.7.36</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
     </properties>
@@ -686,7 +686,7 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>4.0.1</version>
+                <version>3.1.0</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -1010,7 +1010,6 @@
                         <doctitle>${javadocDocTitle}</doctitle>
                         <header><![CDATA[<b>${javadocDocTitle}</b>]]></header>
                         <footer><![CDATA[<b>${javadocDocTitle}</b>]]></footer>
-                        <additionalparam>-linksource</additionalparam>
                         <show>protected</show>
 <!--                         <excludePackageNames>com.*</excludePackageNames> -->
                         <stylesheetfile>${javadocStylesheet}</stylesheetfile>
