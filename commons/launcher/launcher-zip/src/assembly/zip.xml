@@ -50,7 +50,7 @@
             <outputDirectory>/bin</outputDirectory>
             <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
             <includes>
-                <include>org.openidentityplatform.commons:launcher</include>
+                <include>org.openidentityplatform.commons.launcher:launcher</include>
             </includes>
         </dependencySet>
         <dependencySet>
