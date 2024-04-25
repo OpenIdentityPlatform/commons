@@ -1,8 +1,4 @@
 /*
- * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- *
- * Copyright (c) 2015 ForgeRock AS. All rights reserved.
- *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
  * (the License). You may not use this file except in
@@ -20,6 +16,8 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.script.exception;
@@ -34,6 +32,13 @@ public class ScriptCompilationException extends ScriptException {
 
     /** Serializable class a version number. */
     static final long serialVersionUID = 1L;
+
+    /**
+     * Constructs a new exception with the specified detail message.
+     */
+    public ScriptCompilationException(String message) {
+        super(message);
+    }
 
     /**
      * Constructs a new exception with the specified detail message and cause.
