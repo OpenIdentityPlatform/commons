@@ -29,12 +29,12 @@ module.exports = function(grunt) {
         watch: {
             sync_and_test: {
                 files: [
-                    '<%= forgerockui %>/forgerock-ui-commons/src/main/js/**',
-                    '<%= forgerockui %>/forgerock-ui-commons/src/main/resources/**',
-                    //'<%= forgerockui %>/forgerock-ui-commons/src/test/qunit/**',
-                    '<%= forgerockui %>/forgerock-ui-user/src/main/js/**',
-                    '<%= forgerockui %>/forgerock-ui-user/src/main/resources/**',
-                    //'<%= forgerockui %>/forgerock-ui-user/src/test/qunit/**',
+                    '<%= forgerockui %>/commons/src/main/js/**',
+                    '<%= forgerockui %>/commons/src/main/resources/**',
+                    //'<%= forgerockui %>/commons/src/test/qunit/**',
+                    '<%= forgerockui %>/user/src/main/js/**',
+                    '<%= forgerockui %>/user/src/main/resources/**',
+                    //'<%= forgerockui %>/user/src/test/qunit/**',
                     'src/main/js/**',
                     'src/main/resources/**',
                     //'src/test/qunit/**',
@@ -56,17 +56,17 @@ module.exports = function(grunt) {
             commons: {
                 files: [
                     {
-                        cwd     : '<%= forgerockui %>/forgerock-ui-commons/src/main/js',
+                        cwd     : '<%= forgerockui %>/commons/src/main/js',
                         src     : ['**'],
                         dest    : 'target/www'
                     },
                     {
-                        cwd     : '<%= forgerockui %>/forgerock-ui-commons/src/main/resources',
+                        cwd     : '<%= forgerockui %>/commons/src/main/resources',
                         src     : ['**'],
                         dest    : 'target/www'
                     }/*,
                     {
-                        cwd     : '<%= forgerockui %>/forgerock-ui-commons/src/test/qunit',
+                        cwd     : '<%= forgerockui %>/commons/src/test/qunit',
                         src     : ['**'],
                         dest    : 'target/test/tests'
                     }*/
@@ -75,17 +75,17 @@ module.exports = function(grunt) {
             user: {
                 files: [
                     {
-                        cwd     : '<%= forgerockui %>/forgerock-ui-user/src/main/js',
+                        cwd     : '<%= forgerockui %>/user/src/main/js',
                         src     : ['**'],
                         dest    : 'target/www'
                     },
                     {
-                        cwd     : '<%= forgerockui %>/forgerock-ui-user/src/main/resources',
+                        cwd     : '<%= forgerockui %>/user/src/main/resources',
                         src     : ['**'],
                         dest    : 'target/www'
                     }/*,
                     {
-                        cwd     : '<%= forgerockui %>/forgerock-ui-user/src/test/qunit',
+                        cwd     : '<%= forgerockui %>/user/src/test/qunit',
                         src     : ['**'],
                         dest    : 'target/test/tests'
                     }*/

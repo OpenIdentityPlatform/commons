@@ -20,7 +20,7 @@ define([
     var obj = {
         "required": {
             "name": "Required field",
-            "dependencies": [ ],
+            "dependencies": [],
             "validator": function(el, input, callback) {
                 var v = input.val();
                 if (!v || v === "") {
@@ -33,7 +33,7 @@ define([
         },
         "passwordConfirm": {
             "name": "Password confirmation",
-            "dependencies": [ ],
+            "dependencies": [],
             "validator": function(el, input, callback) {
                 var confirmValue = input.val(),
                     mainInput = el.find(":input#" + input.attr("passwordField"));
@@ -47,7 +47,7 @@ define([
         },
         "minLength": {
             "name": "Minimum number of characters",
-            "dependencies": [ ],
+            "dependencies": [],
             "validator": function(el, input, callback) {
                 var v = input.val(),
                     len = input.attr('minLength');
@@ -61,7 +61,7 @@ define([
         },
         "atLeastXNumbers": {
             "name": "Minimum occurrence of numeric characters in string",
-            "dependencies": [ ],
+            "dependencies": [],
             "validator": function(el, input, callback) {
                 var v = input.val(),
                     minNumbers = input.attr('atLeastXNumbers'),
@@ -76,7 +76,7 @@ define([
         },
         "atLeastXCapitalLetters": {
             "name": "Minimum occurrence of capital letter characters in string",
-            "dependencies": [ ],
+            "dependencies": [],
             "validator": function(el, input, callback) {
                 var v = input.val(),
                     minCapitals = input.attr('atLeastXCapitalLetters'),

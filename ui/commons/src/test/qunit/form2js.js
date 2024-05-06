@@ -21,18 +21,18 @@ define([
 ], function ($, form2js, js2form) {
     QUnit.module('form2js usage');
 
-    QUnit.test("boolean fields", function () {
+    QUnit.test("boolean fields", function (assert) {
         var form = $('<form><input type="checkbox" value="true" name="testBool"></form>')
 
         $("#qunit-fixture").append(form);
 
         js2form(form[0], {testBool: true});
-        QUnit.equal(form.find("[name=testBool]").prop("checked"), true);
-        QUnit.equal(form2js(form[0]).testBool, true);
+        assert.equal(form.find("[name=testBool]").prop("checked"), true);
+        assert.equal(form2js(form[0]).testBool, true);
 
         js2form(form[0], {testBool: false});
-        QUnit.equal(form.find("[name=testBool]").prop("checked"), false);
-        QUnit.equal(form2js(form[0]).testBool, false);
+        assert.equal(form.find("[name=testBool]").prop("checked"), false);
+        assert.equal(form2js(form[0]).testBool, false);
     });
 
 });
