@@ -21,7 +21,7 @@ define([
 ], function (_, Handlebars, UIUtils) {
     QUnit.module('UIUtils Functions');
 
-    QUnit.test("Static Select", function () {
+    QUnit.test("Static Select", function (assert) {
         var template = Handlebars.compile("<select>" +
             "{{#staticSelect testVal}}" +
             "<option value='1'>1</option>" +
@@ -35,21 +35,21 @@ define([
         "</select>");
 
         var testHTML = template({"testVal": "2"});
-        QUnit.equal($(testHTML).val(), "2", "2 option selected");
+        assert.equal($(testHTML).val(), "2", "2 option selected");
 
         testHTML = template({"testVal": "text/html"});
-        QUnit.equal($(testHTML).val(), "text/html", "text/html option selected");
+        assert.equal($(testHTML).val(), "text/html", "text/html option selected");
 
         testHTML = template({"testVal": "tick'test"});
-        QUnit.equal($(testHTML).val(), "tick'test", "tick'test option selected");
+        assert.equal($(testHTML).val(), "tick'test", "tick'test option selected");
 
         testHTML = template({"testVal": "less<test"});
-        QUnit.equal($(testHTML).val(), "less<test", "less<test option selected");
+        assert.equal($(testHTML).val(), "less<test", "less<test option selected");
 
         testHTML = template({"testVal": "and&test"});
-        QUnit.equal($(testHTML).val(), "and&test", "and&test option selected");
+        assert.equal($(testHTML).val(), "and&test", "and&test option selected");
 
         testHTML = template({"testVal": false});
-        QUnit.equal($(testHTML).val(), "false", "boolean&amp;test option selected");
+        assert.equal($(testHTML).val(), "false", "boolean&amp;test option selected");
     });
 });

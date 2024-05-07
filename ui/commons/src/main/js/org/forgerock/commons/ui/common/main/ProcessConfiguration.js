@@ -81,7 +81,8 @@ define([
                 if(service) {
                     service[methodName].apply(service, params || []);
                 }
-            }, function (exception) {
+            },
+            function (exception) {
                 if(params) {
                     params = JSON.stringify(params);
                 }

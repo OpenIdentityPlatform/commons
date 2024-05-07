@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "eslint": "4.18.2",
-    "eslint-config-forgerock": "^1.0.0",
     "eslint-formatter-warning-summary": "^1.0.1",
     "grunt": "1.5.3",
     "grunt-cli": "1.4.3",
