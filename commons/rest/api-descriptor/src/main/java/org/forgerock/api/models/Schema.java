@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.api.models;
@@ -76,9 +77,14 @@ public abstract class Schema {
     }
 
     private boolean isSchemaPropertyMatches(Schema schema1) {
-        return getSchema() != null && schema1.getSchema() != null
-                ? getSchema().isEqualTo(schema1.getSchema())
-                : schema1.getSchema() == getSchema();
+        if(getSchema() == null || schema1.getSchema() == null) {
+            return schema1.getSchema() == getSchema();
+        }
+        try {
+            return getSchema().isEqualTo(schema1.getSchema());
+        } catch (IllegalArgumentException e) {
+            return getSchema().toString().equals(schema1.getSchema().toString());
+        }
     }
 
     @Override

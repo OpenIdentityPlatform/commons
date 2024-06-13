@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.api.models;
@@ -57,6 +58,34 @@ public class SchemaTest {
 
         assertThat(result).doesNotContain("i18n:");
         assertThat(result).contains("Json schema description");
+    }
+
+    @Test
+    public void testEquals() {
+        ApiDescription apiDescription = apiDescription()
+                .id("frapi:test")
+                .version("1.0")
+                .description(new LocalizableString("Default API description."))
+                .build();
+
+        ApiDescription apiDescription2 = apiDescription()
+                .id("frapi:test")
+                .version("1.0")
+                .description(new LocalizableString("Default API description."))
+                .build();
+
+        assertThat(apiDescription).isEqualTo(apiDescription2);
+
+        Schema fromAnno = Schema.fromAnnotation(
+                IdentifiedResponse.class.getAnnotation(org.forgerock.api.annotations.Schema.class),
+                apiDescription, this.getClass());
+
+        Schema fromAnno2 = Schema.fromAnnotation(
+                IdentifiedResponse.class.getAnnotation(org.forgerock.api.annotations.Schema.class),
+                apiDescription2, this.getClass());
+
+        assertThat(apiDescription).isEqualTo(apiDescription2);
+        assertThat(fromAnno).isEqualTo(fromAnno2);
     }
 
     @org.forgerock.api.annotations.Schema(schemaResource = "i18njsonschema.json")
