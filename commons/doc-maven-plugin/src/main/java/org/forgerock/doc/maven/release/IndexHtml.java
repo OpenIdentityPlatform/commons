@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2014 ForgeRock AS
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.doc.maven.release;
@@ -23,6 +24,7 @@ import org.forgerock.doc.maven.AbstractDocbkxMojo;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Add an index.html file to the release layout.
@@ -54,10 +56,14 @@ public class IndexHtml {
             FileUtils.deleteQuietly(indexHtml);
 
             try {
-                String content = IOUtils.toString(getClass().getResource("/dfo.index.html"), "UTF-8");
+                String content = IOUtils.toString(getClass().getResource("/dfo.index.html"), StandardCharsets.UTF_8);
                 content = content.replace("PRODUCT", m.getProjectName().toLowerCase());
                 content = content.replace("VERSION", m.getReleaseVersion());
-                content = content.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());
+                if(m.getGoogleAnalyticsId() != null) {
+                    content = content.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());
+                } else {
+                    content = content.replace("ANALYTICS-ID", "");
+                }
 
                 FileUtils.writeStringToFile(indexHtml, content, "UTF-8");
             } catch (IOException e) {

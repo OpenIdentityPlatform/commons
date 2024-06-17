@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.doc.maven.build;
@@ -153,10 +154,11 @@ public class Fo {
             }
 
             for (String docName : m.getDocNames()) {
-                ArrayList<MojoExecutor.Element> cfg = new ArrayList<MojoExecutor.Element>();
+                ArrayList<MojoExecutor.Element> cfg = new ArrayList<>();
                 cfg.addAll(m.getBaseConfiguration());
                 cfg.add(element(name("xincludeSupported"), m.isXincludeSupported()));
                 cfg.add(element(name("sourceDirectory"), m.path(m.getDocbkxModifiableSourcesDirectory())));
+                cfg.add(element(name("foCustomization"), m.path(m.getFoCustomization())));
                 cfg.add(element(name("fop1Extensions"), "1"));
                 cfg.add(element(name("fopLogLevel"), m.getFopLogLevel()));
                 cfg.add(element(name("collectXrefTargets"), "yes"));

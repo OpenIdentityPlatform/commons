@@ -12,6 +12,7 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2015 ForgeRock AS.
+* Portions copyright 2024 3A Systems LLC.
 */
 
 /***********************************/
@@ -232,6 +233,8 @@ li.L8 {
 
 .navbar-brand {
     padding: 7px 15px;
+    display: flex;
+    align-items: center;
 }
 .navbar-brand > img {
     height: 100%;
