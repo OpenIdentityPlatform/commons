@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.doc.maven;
@@ -30,7 +31,6 @@ import org.forgerock.doc.maven.pre.CustomCss;
 import org.forgerock.doc.maven.pre.CreateThumbs;
 import org.forgerock.doc.maven.pre.Dpi;
 import org.forgerock.doc.maven.pre.Filter;
-import org.forgerock.doc.maven.pre.HeaderColor;
 import org.forgerock.doc.maven.pre.ImageData;
 import org.forgerock.doc.maven.pre.JCite;
 import org.forgerock.doc.maven.pre.KeepTogether;
@@ -77,7 +77,7 @@ public class PreProcessMojo extends AbstractDocbkxMojo {
             new XCite(this).execute();
             new Filter(this).execute();
             new ImageData(this).execute();
-            new HeaderColor(this).execute();
+            //new HeaderColor(this).execute(); //this line corrupts table header and crashes docs build
             new PlantUml(this).execute();
             if (getFormats().contains(Format.pdf) || getFormats().contains(Format.rtf)) {
                 new KeepTogether(this).execute();
