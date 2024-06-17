@@ -1,6 +1,5 @@
 {
     "root": true,
-    "extends": "forgerock",
     "env": {
         "amd": true,
         "browser": true

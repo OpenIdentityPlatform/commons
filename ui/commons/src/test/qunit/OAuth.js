@@ -35,19 +35,19 @@ define([
         URIUtils.getCurrentPathName.restore();
     });
 
-    QUnit.test("oAuth redirect uri", function () {
-        QUnit.equal(OAuth.getRedirectURI(),"http://rp.com/app/oauthReturn.html",
+    QUnit.test("oAuth redirect uri", function (assert) {
+        assert.equal(OAuth.getRedirectURI(),"http://rp.com/app/oauthReturn.html",
             "default oAuth redirect_uri matches"
         );
-        QUnit.equal(OAuth.getRedirectURI('customOAuthReturn.html'),"http://rp.com/app/customOAuthReturn.html",
+        assert.equal(OAuth.getRedirectURI('customOAuthReturn.html'),"http://rp.com/app/customOAuthReturn.html",
             "custom oAuth redirect_uri matches"
         );
     });
-    QUnit.test("oAuth request url", function () {
+    QUnit.test("oAuth request url", function (assert) {
         sinon.stub(OAuth, "generateNonce", function () {
             return "nonceValue";
         });
-        QUnit.equal(OAuth.getRequestURL(
+        assert.equal(OAuth.getRequestURL(
                 "http://idp.com/request",
                 "myClientId",
                 "openid profile email",

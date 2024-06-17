@@ -108,7 +108,7 @@ define([
         {
             startEvent: Constants.EVENT_UNAUTHORIZED,
             description: "",
-            dependencies: [ ],
+            dependencies: [],
             processDescription: function() {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "unauthorized");
             }
