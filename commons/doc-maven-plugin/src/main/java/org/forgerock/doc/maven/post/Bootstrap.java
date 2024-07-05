@@ -112,10 +112,12 @@ public class Bootstrap {
         try {
             HashMap<String, String> replacements = new HashMap<String, String>();
 
-            String gascript = IOUtils.toString(
-                    getClass().getResourceAsStream("/endhead-ga.txt"), "UTF-8");
-            gascript = gascript.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());
-            replacements.put("</head>", gascript);
+            if(m.getGoogleAnalyticsId() != null) {
+                String gascript = IOUtils.toString(
+                        getClass().getResourceAsStream("/endhead-ga.txt"), "UTF-8");
+                gascript = gascript.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());
+                replacements.put("</head>", gascript);
+            }
 
             HtmlUtils.updateHtml(htmlDir, replacements);
         } catch (IOException e) {
