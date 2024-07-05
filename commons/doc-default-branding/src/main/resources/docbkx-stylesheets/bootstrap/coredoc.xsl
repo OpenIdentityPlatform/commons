@@ -122,9 +122,9 @@
  <xsl:param name="toc.list.type">ul</xsl:param>
 
  <xsl:param name="html.script">
-  http://code.jquery.com/jquery-1.11.2.min.js
-  http://code.jquery.com/ui/1.11.4/jquery-ui.min.js
-  http://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js
+  https://code.jquery.com/jquery-1.11.2.min.js
+  https://code.jquery.com/ui/1.11.4/jquery-ui.min.js
+  https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js
  </xsl:param>
 
  <xsl:param name="make.clean.html" select="1" />
