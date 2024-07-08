@@ -13,6 +13,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2014 ForgeRock AS
+ * Portions Copyright 2024 3A Systems LLC
 -->
 <document xmlns="http://maven.apache.org/XDOC/2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,8 +21,8 @@
                               http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
  <properties>
-  <title>ForgeRock Doc Common Content</title>
-  <author email="docs@forgerock.org">ForgeRock AS</author>
+  <title>Open Identity Platform Doc Common Content</title>
+  <author>Open Identity Platform Community</author>
  </properties>
 
  <body>
@@ -29,12 +30,12 @@
   <section name="About Common Content">
 
    <p>
-    Some of the content in ForgeRock core documentation is common to all books.
+    Some of the content in Open Identity Platform core documentation is common to all books.
 
     This common content is provided as a separate Maven project
     that is maintained independently of any particular documentation set.
 
-    The common ForgeRock content includes text and images
+    The common Open Identity Platform content includes text and images
     in formats suitable for inclusion in DocBook 5 XML based core documentation.
    </p>
 

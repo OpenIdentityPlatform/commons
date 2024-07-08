@@ -19,6 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2015 ForgeRock AS.
+  !      Portions Copyright 2024 3A Systems LLC
   !
 -->
  <section xml:id="sec-about-crest"
@@ -26,11 +27,11 @@
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:schemaLocation="http://docbook.org/ns/docbook
                               http://docbook.org/xml/5.0/xsd/docbook.xsd">
- <title>About ForgeRock Common REST</title>
+ <title>About Open Identity Platform Common REST</title>
 
  <para>
   For many REST APIs that are not defined by external standards,
-  ForgeRock products provide common ways
+  Open Identity Platform products provide common ways
   to access web resources and collections of resources.
   This section covers what is common across products.
   Adapt the examples to your types of resources and to your deployment.

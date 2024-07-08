@@ -19,6 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2011-2015 ForgeRock AS
+  !      Portions Copyright 2024 3A Systems LLC
   !
 -->
  <section xml:id="accessing-doc-online"
@@ -66,13 +67,13 @@
 
  <para>
   The review process helps to ensure that documentation published for
-  a ForgeRock release is technically accurate and complete.
+  a Open Identity Platform release is technically accurate and complete.
  </para>
 
  <para>
   Fully reviewed, published core documentation is available at
-  <link xlink:show="new" xlink:href="https://www.openidentityplatform.org/" />.
-  Use this documentation when working with a ForgeRock Enterprise release.
+  <link xlink:show="new" xlink:href="https://doc.openidentityplatform.org/" />.
+  Use this documentation when working with a Open Identity Platform release.
  </para>
 
  <para>

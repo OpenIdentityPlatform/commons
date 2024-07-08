@@ -19,6 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2015 ForgeRock AS.
+  !      Portions Copyright 2024 3A Systems LLC.
   !
 -->
 <section xml:id="sec-support-contact"
@@ -28,7 +29,7 @@
                               http://docbook.org/xml/5.0/xsd/docbook.xsd'
          xmlns:xlink='http://www.w3.org/1999/xlink'>
 
- <title>Getting Support and Contacting ForgeRock</title>
+ <title>Getting Support and Contacting Open Identity Platform Community Members</title>
  <para>
   Open Identity Platform
   <link xlink:href="https://github.com/OpenIdentityPlatform/.github/wiki/Approved-Vendor-List">approved vendors</link>

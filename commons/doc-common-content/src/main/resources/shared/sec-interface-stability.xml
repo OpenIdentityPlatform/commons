@@ -19,6 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2013-2015 ForgeRock AS
+  !      Portions Copyright 2024 3A Systems LLC
   !
 -->
  <section xml:id="interface-stability"
@@ -40,10 +41,10 @@
 
  <para>
   We realize that you invest in these interfaces,
-  and therefore must know when and how ForgeRock expects them to change.
+  and therefore must know when and how Open Identity Platform Community expects them to change.
 
   For that reason, Open Identity Platform Community defines interface stability labels
-  and uses these definitions in ForgeRock products.
+  and uses these definitions in Open Identity Platform products.
  </para>
 
  <variablelist>
