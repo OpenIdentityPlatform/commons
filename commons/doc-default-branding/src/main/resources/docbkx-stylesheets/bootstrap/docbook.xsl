@@ -46,7 +46,7 @@
       <div class="navbar navbar-inverse navbar-fixed-top">
        <nav class="container-fluid">
         <div class="navbar-header">
-         <a href="index.html" class="navbar-brand">
+         <a href="/" class="navbar-brand">
              <span>Open Identity Platform</span>
          </a>
         </div>
@@ -132,8 +132,11 @@
         <div class="footer">
          <div class="container-fluid">
           <div class="footer-left"><span class="footer-item">Copyright ©
-           <xsl:value-of select="db:info/db:copyright/db:year"/>&#160;
-           <xsl:value-of select="db:info/db:copyright/db:holder"/></span></div>
+              <xsl:value-of select="db:info/db:copyright/db:year"/>&#160;
+              <xsl:value-of select="db:info/db:copyright/db:holder"/>;&#160;
+              <xsl:value-of select="db:info/db:copyrightoip/db:year"/>&#160;
+              <xsl:value-of select="db:info/db:copyrightoip/db:holder"/>&#160;
+          </span></div>
           <div class="footer-right">
               <a target="_blank" class="footer-item snap-left" href="legalnotice.html">
                   <i class="glyphicon glyphicon-briefcase"></i> Legal Notice</a>

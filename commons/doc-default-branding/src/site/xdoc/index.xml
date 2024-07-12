@@ -13,6 +13,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2014 ForgeRock AS
+ * Portions Copyright 2024 3A Systems LLC
 -->
 <document xmlns="http://maven.apache.org/XDOC/2.0"
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -20,8 +21,8 @@
                               http://maven.apache.org/xsd/xdoc-2.0.xsd">
 
  <properties>
-  <title>ForgeRock Doc Default Branding</title>
-  <author email="docs@forgerock.org">ForgeRock AS</author>
+  <title>Open Identity Platform Doc Default Branding</title>
+  <author>Open Identity Platform Community</author>
  </properties>
 
  <body>
@@ -29,7 +30,7 @@
   <section name="About Default Branding">
 
    <p>
-    By default, ForgeRock core documentation uses the branding from this project.
+    By default, Open Identity Platform core documentation uses the branding from this project.
 
     The branding project contains CSS for in-progress and released docs,
     and custom docbkx stylesheets for supported output formats.

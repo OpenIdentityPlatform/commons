@@ -19,6 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2013-2015 ForgeRock AS.
+  !      Portions Copyright 2024 3A Systems LLC
   !
 -->
  <section xml:id="release-levels"
@@ -26,10 +27,10 @@
           xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
           xsi:schemaLocation='http://docbook.org/ns/docbook
                               http://docbook.org/xml/5.0/xsd/docbook.xsd'>
- <title>ForgeRock Product Release Levels</title>
+ <title>Open Identity Platform Product Release Levels</title>
 
  <para>
-  ForgeRock defines Major, Minor, and Maintenance product release levels.
+  Open Identity Platform defines Major, Minor, and Maintenance product release levels.
 
   The release level is reflected in the version number.
 

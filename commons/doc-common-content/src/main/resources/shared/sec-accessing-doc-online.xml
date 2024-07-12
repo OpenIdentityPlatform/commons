@@ -19,6 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2011-2015 ForgeRock AS
+  !      Portions Copyright 2024 3A Systems LLC
   !
 -->
  <section xml:id="accessing-doc-online"
@@ -30,7 +31,7 @@
  <title>Accessing Documentation Online</title>
 
  <para>
-  ForgeRock core documentation, such as this document, aims to be
+  Open Identity Platform core documentation, such as this document, aims to be
   technically accurate and complete with respect to the software documented.
  </para>
 
@@ -66,20 +67,20 @@
 
  <para>
   The review process helps to ensure that documentation published for
-  a ForgeRock release is technically accurate and complete.
+  a Open Identity Platform release is technically accurate and complete.
  </para>
 
  <para>
   Fully reviewed, published core documentation is available at
-  <link xlink:show="new" xlink:href="http://backstage.forgerock.com/" />.
-  Use this documentation when working with a ForgeRock Enterprise release.
+  <link xlink:show="new" xlink:href="https://doc.openidentityplatform.org/" />.
+  Use this documentation when working with a Open Identity Platform release.
  </para>
 
  <para>
   You can find pre-release draft documentation at the online
   <link
    xlink:show="new"
-   xlink:href="http://forgerock.org"
+   xlink:href="https://github.com/OpenIdentityPlatform"
   >community resource center</link>.
   Use this documentation when trying a nightly build.
  </para>
