@@ -1307,6 +1307,11 @@
                         </licenseMerges>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.openidentityplatform.commons</groupId>
+                    <artifactId>doc-maven-plugin</artifactId>
+                    <version>${project.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
