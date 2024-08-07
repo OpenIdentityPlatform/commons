@@ -177,9 +177,8 @@ public class Bootstrap {
             + "<li><a href=\"PDF-URL\" target=\"_blank\">"
             + "<span class=\"glyphicon glyphicon-save\"></span> "
             + "Download PDF Version</a></li>";
-
-        String pdfUrl = "../../" + NameUtils.renameDoc(m.getProjectName(),
-                docName, "pdf");
+        String pdfUrl = String.format("https://github.com/OpenIdentityPlatform/%s/wiki/docbkx/pdf/%s",
+                m.getProjectName(), NameUtils.renameDoc(m.getProjectName(), docName, "pdf"));
         link = link.replaceFirst("PDF-URL", pdfUrl);
 
         return link;
