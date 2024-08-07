@@ -22,7 +22,7 @@ under the License.
     <parent>
 	    <groupId>org.openidentityplatform.commons</groupId>
 	    <artifactId>parent</artifactId>
-	    <version>2.1.6-SNAPSHOT</version>
+	    <version>2.1.6</version>
 	    <relativePath>../..</relativePath>
 	</parent>
     <artifactId>maven-external-dependency-plugin</artifactId>
