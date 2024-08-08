@@ -131,12 +131,14 @@
 
         <div class="footer">
          <div class="container-fluid">
-          <div class="footer-left"><span class="footer-item">Copyright ©
-              <xsl:value-of select="db:info/db:copyright/db:year"/>&#160;
-              <xsl:value-of select="db:info/db:copyright/db:holder"/>;&#160;
-              <xsl:value-of select="db:info/db:copyrightoip/db:year"/>&#160;
-              <xsl:value-of select="db:info/db:copyrightoip/db:holder"/>&#160;
-          </span></div>
+          <div class="footer-left">
+<!--              <span class="footer-item">Copyright ©-->
+<!--                <xsl:for-each select="db:info/db:copyright">-->
+<!--                  <xsl:value-of select="db:year"/>&#160;-->
+<!--                  <xsl:value-of select="db:holder"/>;&#160;-->
+<!--                </xsl:for-each>-->
+<!--              </span>-->
+          </div>
           <div class="footer-right">
               <a target="_blank" class="footer-item snap-left" href="legalnotice.html">
                   <i class="glyphicon glyphicon-briefcase"></i> Legal Notice</a>
