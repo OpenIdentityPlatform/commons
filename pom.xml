@@ -21,6 +21,8 @@
  with the fields enclosed by brackets [] replaced by
  your own identifying information:
  "Portions Copyrighted [year] [name of copyright owner]"
+
+   Portions Copyright 2017-2024 3A Systems, LLC.
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -100,7 +102,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
-        <mavenCompilerPluginVersion>3.11.0</mavenCompilerPluginVersion>
+        <mavenCompilerPluginVersion>3.13.0</mavenCompilerPluginVersion>
+        <maven.compiler.release>8</maven.compiler.release>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
 
@@ -839,8 +842,8 @@
 			</dependency>
 			<dependency>
 		      <groupId>org.codehaus.groovy</groupId>
-		      <artifactId>groovy-jsr223</artifactId>
-		      <version>3.0.19</version>
+		      <artifactId>groovy-all</artifactId>
+		      <version>2.4.21</version>
 		    </dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -931,6 +934,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${mavenCompilerPluginVersion}</version>
                     <configuration>
+                        <release>${maven.compiler.release}</release>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
@@ -1004,7 +1008,7 @@
 <!--                         </dependency> -->
 <!--                     </dependencies> -->
                     <configuration>
-                    	<source>8</source>
+                    	<source>1.8</source>
                         <author>false</author>
                         <quiet>true</quiet>
                         <windowtitle>${javadocWindowTitle}</windowtitle>
