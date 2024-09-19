@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons.authn-filter</groupId>
         <artifactId>jaspi-modules</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2-SNAPSHOT</version>
     </parent>
 	<groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
     <artifactId>iwa-module</artifactId>
