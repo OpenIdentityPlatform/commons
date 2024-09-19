@@ -21,7 +21,7 @@
 Open Identity Platform defines Major, Minor, and Maintenance product release levels. The release level is reflected in the version number. The release level tells you what sort of compatibility changes to expect.
 
 [#table-release-levels]
-.Table A.1. Release Level Definitions
+. Release Level Definitions
 [cols="20%,20%,60%"]
 |===
 |Release Label |Version Numbers |Characteristics
