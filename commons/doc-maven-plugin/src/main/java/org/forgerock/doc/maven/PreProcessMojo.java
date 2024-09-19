@@ -72,7 +72,7 @@ public class PreProcessMojo extends AbstractDocbkxMojo {
 
         if (!doUsePreProcessedSources()) {  // Sources require pre-processing.
             new CommonContent(this).execute();
-            new AsciidocToDocBook(this).execute();
+            //new AsciidocToDocBook(this).execute();
             new JCite(this).execute();
             new XCite(this).execute();
             new Filter(this).execute();
