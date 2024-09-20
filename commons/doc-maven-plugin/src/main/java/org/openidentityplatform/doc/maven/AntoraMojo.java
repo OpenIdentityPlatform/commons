@@ -101,10 +101,11 @@ public class AntoraMojo extends AbstractAsciidocMojo {
                 FileUtils.writeStringToFile(navFilePath.toFile(), nav, StandardCharsets.UTF_8);
             } else {
                 Path convertedFilePath = Paths.get(docModulePagesPath.toString(), docFile.getName());
-                adoc = ":leveloffset: -1" + System.lineSeparator() + adoc;
                 adoc = adoc.replace("image::images/", "image::ROOT:");
                 adoc = adoc.replace("image:images/", "image:ROOT:");
                 adoc = adoc.replace("include::../partials/", "include::ROOT:partial$");
+
+                adoc = adoc.replace(":table-caption!:", ":table-caption!:\n:leveloffset: -1\"");
 
                 adoc = convertXrefsToAntora(adoc);
 
