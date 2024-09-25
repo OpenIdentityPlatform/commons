@@ -30,11 +30,20 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mojo(name = "antora", defaultPhase = LifecyclePhase.SITE)
 public class AntoraMojo extends AbstractAsciidocMojo {
+
+    Set<String> copyToRootFolders = new HashSet<>();
+    public AntoraMojo() {
+        copyToRootFolders.add("images");
+        copyToRootFolders.add("partials");
+        copyToRootFolders.add("attachments");
+    }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -49,16 +58,11 @@ public class AntoraMojo extends AbstractAsciidocMojo {
 
             for(File docDir : getAsciidocBuildSourceDirectory().listFiles()) {
                 String document = FilenameUtils.getBaseName(docDir.toString());
-                if(document.equals("images")) {
-                    getLog().info("Copy images to the ROOT module");
-                    copyImagesToRoot(docDir);
-                    continue;
+                if(copyToRootFolders.contains(document)) {
+                    getLog().info("Copy " + document + " to the ROOT module");
+                    copyFolderToRoot(docDir, document);
                 }
-                if(document.equals("partials")) {
-                    getLog().info("Copy partials to the ROOT module");
-                    copyPartialsToRoot(docDir);
-                    continue;
-                }
+
                 if(!getDocuments().contains(document)) {
                     getLog().info("Skip document " + document);
                     continue;
@@ -104,6 +108,7 @@ public class AntoraMojo extends AbstractAsciidocMojo {
                 adoc = adoc.replace("image::images/", "image::ROOT:");
                 adoc = adoc.replace("image:images/", "image:ROOT:");
                 adoc = adoc.replace("include::../partials/", "include::ROOT:partial$");
+                adoc = adoc.replace("link:../attachments/", "xref:ROOT:attachment$");
 
                 adoc = adoc.replace(":table-caption!:", ":table-caption!:\n:leveloffset: -1\"");
 
@@ -153,14 +158,9 @@ public class AntoraMojo extends AbstractAsciidocMojo {
 
     }
 
-    private void copyImagesToRoot(File docDir) throws IOException {
+    private void copyFolderToRoot(File docDir, String folder) throws IOException {
         Path rootPath = getRootModulePath();
-        Path rootImagesPath = Paths.get(rootPath.toString(), "images");
-        FileUtils.copyDirectory(docDir, rootImagesPath.toFile());
-    }
-    private void copyPartialsToRoot(File docDir) throws IOException {
-        Path rootPath = getRootModulePath();
-        Path rootPartialsPath = Paths.get(rootPath.toString(), "partials");
+        Path rootPartialsPath = Paths.get(rootPath.toString(), folder);
         FileUtils.copyDirectory(docDir, rootPartialsPath.toFile());
     }
 

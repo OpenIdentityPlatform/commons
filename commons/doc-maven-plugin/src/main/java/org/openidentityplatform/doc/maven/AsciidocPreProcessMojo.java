@@ -32,6 +32,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,26 +49,31 @@ public class AsciidocPreProcessMojo extends AbstractAsciidocMojo {
         return new File(getSourceOutputDirectory(),  "/partials");
     }
 
+    public File getSourceOutputAttachmentsDirectory() {
+        return new File(getSourceOutputDirectory(),  "/attachments");
+    }
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        final File sourceDir = getSourceOutputDirectory();
         try {
-            if (Files.exists(sourceDir.toPath())) {
-                FileUtils.deleteDirectory(sourceDir);
-            }
             Files.createDirectories(getSourceOutputPartialsDirectory().toPath());
         } catch (Exception e) {
             throw new MojoExecutionException("error creating source directory ", e);
         }
 
+        try {
+            copyResourcesFolder("/asciidoc/partials", getSourceOutputPartialsDirectory());
+        } catch (Exception e) {
+            throw new MojoExecutionException("error copying partials content", e);
+        }
+
         for(File docDir : getAsciidocSourceDirectory().listFiles()) {
             String document = FilenameUtils.getBaseName(docDir.toString());
-            if(document.equals("partials")) {
-                getLog().info("Skip partials");
-                continue;
-            }
-            if(!getDocuments().contains(document) && !document.equals("images")) {
-                getLog().info("Skip document " + document);
+
+            if(!getDocuments().contains(document)
+                    && !document.equals("images")
+                    && !document.equals("attachments")
+                    && !document.equals("partials")) {
                 continue;
             }
             try {
@@ -76,25 +82,21 @@ public class AsciidocPreProcessMojo extends AbstractAsciidocMojo {
                 throw new MojoExecutionException("error copying " + document, e);
             }
         }
+    }
 
-        try {
-            List<Path> files;
-            URL partials = getClass().getResource("/asciidoc/partials");
-            try (FileSystem fs = FileSystems.newFileSystem(partials.toURI(), Collections.emptyMap());
-                 Stream<Path> walk = Files.walk(fs.getPath("/asciidoc/partials"))) {
-                files = walk.filter(Files::isRegularFile)
-                        .collect(Collectors.toList());
+    private void copyResourcesFolder(String resFolder, File outputDir) throws Exception {
+        List<Path> files;
+        URL partials = getClass().getResource(resFolder);
+        try (FileSystem fs = FileSystems.newFileSystem(partials.toURI(), Collections.emptyMap());
+             Stream<Path> walk = Files.walk(fs.getPath(resFolder))) {
+            files = walk.filter(Files::isRegularFile)
+                    .collect(Collectors.toList());
+        }
+        for(Path file : files) {
+            try(InputStream stream = getClass().getResourceAsStream(file.toString())) {
+                File dest = new File(outputDir, file.getFileName().toString());
+                Files.copy(stream, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
-            for(Path file : files) {
-                try(InputStream stream = getClass().getResourceAsStream(file.toString())) {
-                    File dest = new File(getSourceOutputPartialsDirectory(), file.getFileName().toString());
-                    Files.copy(stream, dest.toPath());
-                }
-            }
-
-            //FileUtils.copyDirectory(partialsPath.toFile(), getSourceOutputDirectory());
-        } catch (Exception e) {
-            throw new MojoExecutionException("error copying partials content", e);
         }
     }
 }
