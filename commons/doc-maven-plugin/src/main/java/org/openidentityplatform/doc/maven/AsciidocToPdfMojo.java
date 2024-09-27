@@ -30,6 +30,8 @@ import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.configuration;
@@ -46,6 +48,13 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
 public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
 
 
+    Set<String> skipDirectories = new HashSet<>();
+    public AsciidocToPdfMojo() {
+        skipDirectories.add("images");
+        skipDirectories.add("partials");
+        skipDirectories.add("attachments");
+    }
+
     public File getPdfOutputDirectory() {
         return new File(buildDirectory, "/pdf");
     }
@@ -55,7 +64,7 @@ public class AsciidocToPdfMojo extends AbstractAsciidocMojo {
         String pdfPath = getPdfOutputDirectory().getPath();
         for(File docDir : getAsciidocBuildSourceDirectory().listFiles()) {
             String document = FilenameUtils.getBaseName(docDir.toString());
-            if(document.equals("images") || document.equals("partials")) {
+            if(skipDirectories.contains(document)) {
                 continue;
             }
             if(!getDocuments().contains(document)) {

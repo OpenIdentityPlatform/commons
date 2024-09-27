@@ -30,11 +30,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Mojo(name = "antora", defaultPhase = LifecyclePhase.SITE)
 public class AntoraMojo extends AbstractAsciidocMojo {
+
+    Set<String> copyToRootFolders = new HashSet<>();
+    public AntoraMojo() {
+        copyToRootFolders.add("images");
+        copyToRootFolders.add("attachments");
+    }
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -49,16 +57,16 @@ public class AntoraMojo extends AbstractAsciidocMojo {
 
             for(File docDir : getAsciidocBuildSourceDirectory().listFiles()) {
                 String document = FilenameUtils.getBaseName(docDir.toString());
-                if(document.equals("images")) {
-                    getLog().info("Copy images to the ROOT module");
-                    copyImagesToRoot(docDir);
-                    continue;
+                if(copyToRootFolders.contains(document)) {
+                    getLog().info("Copy " + document + " to the ROOT module");
+                    copyFolderToRoot(docDir, document);
                 }
                 if(document.equals("partials")) {
-                    getLog().info("Copy partials to the ROOT module");
-                    copyPartialsToRoot(docDir);
+                    getLog().info("convert " + document);
+                    convertPartialsForAntora(productPath, docDir);
                     continue;
                 }
+
                 if(!getDocuments().contains(document)) {
                     getLog().info("Skip document " + document);
                     continue;
@@ -70,6 +78,23 @@ public class AntoraMojo extends AbstractAsciidocMojo {
         } catch (IOException e) {
             throw new MojoExecutionException("Error converting to antora: " + e);
         }
+    }
+
+    private void convertPartialsForAntora(Path productPath, File docDir) throws IOException {
+        Path rootPath = Paths.get(productPath.toString(), "ROOT");
+        Files.createDirectories(rootPath);
+
+        Path partialsPath = Paths.get(rootPath.toString(), "partials");
+        Files.createDirectory(partialsPath);
+        File[] docFiles = docDir.listFiles();
+        for (File docFile : docFiles) {
+            String adoc = FileUtils.readFileToString(docFile, StandardCharsets.UTF_8);
+            adoc = convertForAntora(adoc);
+
+            Path convertedFilePath = Paths.get(partialsPath.toString(), docFile.getName());
+            FileUtils.writeStringToFile(convertedFilePath.toFile(), adoc, StandardCharsets.UTF_8);
+        }
+
     }
 
     private void convertDocForAntora(Path productPath, File docDir) throws IOException {
@@ -101,16 +126,20 @@ public class AntoraMojo extends AbstractAsciidocMojo {
                 FileUtils.writeStringToFile(navFilePath.toFile(), nav, StandardCharsets.UTF_8);
             } else {
                 Path convertedFilePath = Paths.get(docModulePagesPath.toString(), docFile.getName());
-                adoc = ":leveloffset: -1" + System.lineSeparator() + adoc;
-                adoc = adoc.replace("image::images/", "image::ROOT:");
-                adoc = adoc.replace("image:images/", "image:ROOT:");
-                adoc = adoc.replace("include::../partials/", "include::ROOT:partial$");
-
-                adoc = convertXrefsToAntora(adoc);
-
+                adoc = convertForAntora(adoc);
                 FileUtils.writeStringToFile(convertedFilePath.toFile(), adoc, StandardCharsets.UTF_8);
             }
         }
+    }
+
+    private String convertForAntora(String adoc) {
+        adoc = adoc.replace("image::images/", "image::ROOT:");
+        adoc = adoc.replace("image:images/", "image:ROOT:");
+        adoc = adoc.replace("include::../partials/", "include::ROOT:partial$");
+        adoc = adoc.replace("link:../attachments/", "xref:ROOT:attachment$");
+        adoc = adoc.replace(":table-caption!:", ":table-caption!:\n:leveloffset: -1\"");
+        adoc = convertXrefsToAntora(adoc);
+        return adoc;
     }
 
     private String convertXrefsToAntora(String adoc) {
@@ -152,14 +181,9 @@ public class AntoraMojo extends AbstractAsciidocMojo {
 
     }
 
-    private void copyImagesToRoot(File docDir) throws IOException {
+    private void copyFolderToRoot(File docDir, String folder) throws IOException {
         Path rootPath = getRootModulePath();
-        Path rootImagesPath = Paths.get(rootPath.toString(), "images");
-        FileUtils.copyDirectory(docDir, rootImagesPath.toFile());
-    }
-    private void copyPartialsToRoot(File docDir) throws IOException {
-        Path rootPath = getRootModulePath();
-        Path rootPartialsPath = Paths.get(rootPath.toString(), "partials");
+        Path rootPartialsPath = Paths.get(rootPath.toString(), folder);
         FileUtils.copyDirectory(docDir, rootPartialsPath.toFile());
     }
 
