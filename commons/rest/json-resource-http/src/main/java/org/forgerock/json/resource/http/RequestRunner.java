@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions copyright 2020-2024 3A Systems, LLC
  */
 
 package org.forgerock.json.resource.http;
@@ -42,6 +43,7 @@ import static org.forgerock.util.Utils.closeSilently;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -513,12 +515,17 @@ final class RequestRunner implements RequestVisitor<Promise<Response, NeverThrow
                 }
             }
 
-            for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
-                final String key = property.getKey();
-                if (!FIELD_CONTENT_ID.equals(key) && !FIELD_CONTENT_REVISION.equals(key)) {
-                    jsonGenerator.writeFieldName(key);
-                    objectWriter.writeValue(jsonGenerator, property.getValue());
+            if (content.isMap()) {
+                for (Map.Entry<String, Object> property : content.asMap().entrySet()) {
+                    final String key = property.getKey();
+                    if (!FIELD_CONTENT_ID.equals(key) && !FIELD_CONTENT_REVISION.equals(key)) {
+                        jsonGenerator.writeFieldName(key);
+                        objectWriter.writeValue(jsonGenerator, property.getValue());
+                    }
                 }
+            }else {
+                jsonGenerator.writeFieldName("content");
+                objectWriter.writeValue(jsonGenerator, Arrays.asList(new String[]{content.asString()}));
             }
             jsonGenerator.writeEndObject();
         } else {
