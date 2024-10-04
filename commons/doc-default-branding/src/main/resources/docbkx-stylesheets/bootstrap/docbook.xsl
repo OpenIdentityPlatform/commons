@@ -46,9 +46,8 @@
       <div class="navbar navbar-inverse navbar-fixed-top">
        <nav class="container-fluid">
         <div class="navbar-header">
-         <a href="index.html" class="navbar-brand">
-          <img src='includes/logos/FR_logo_horiz_FC_rev.png'
-               alt="ForgeRock Documentation"/>
+         <a href="/" class="navbar-brand">
+             <span>Open Identity Platform</span>
          </a>
         </div>
         <ul id="pdf-link">
@@ -132,20 +131,22 @@
 
         <div class="footer">
          <div class="container-fluid">
-          <div class="footer-left"><span class="footer-item">Copyright ©
-           <xsl:value-of select="db:info/db:copyright/db:year"/>&#160;
-           <xsl:value-of select="db:info/db:copyright/db:holder"/></span></div>
-          <div class="footer-right"><a target="_blank"
-                                       class="footer-item snap-left"
-                                       href="legalnotice.html"><i
-           class="glyphicon glyphicon-briefcase"></i> Legal Notice</a> <a
-           target="_blank" class="footer-item snap-left">
-           <xsl:attribute name="href">
-                <xsl:value-of select="'https://bugster.forgerock.org/jira/secure/CreateIssueDetails!init.jspa?pid=10290&amp;issuetype=1&amp;summary=Feedback on: '"/>
-                <xsl:apply-templates select="/*[1]" mode="title.markup"/>
-            </xsl:attribute>
-           <i class="glyphicon glyphicon-ok-sign"></i> Feedback</a>
-           <a target="_blank" class="footer-item snap-left" href="#" data-toggle="modal" data-target="#myModal"><i class="glyphicon glyphicon-info-sign"></i> About</a> </div>
+          <div class="footer-left">
+<!--              <span class="footer-item">Copyright ©-->
+<!--                <xsl:for-each select="db:info/db:copyright">-->
+<!--                  <xsl:value-of select="db:year"/>&#160;-->
+<!--                  <xsl:value-of select="db:holder"/>;&#160;-->
+<!--                </xsl:for-each>-->
+<!--              </span>-->
+          </div>
+          <div class="footer-right">
+              <a target="_blank" class="footer-item snap-left" href="legalnotice.html">
+                  <i class="glyphicon glyphicon-briefcase"></i> Legal Notice</a>
+              <a target="_blank" class="footer-item snap-left" href="https://github.com/OpenIdentityPlatform/OpenAM/issues">
+                  <i class="glyphicon glyphicon-ok-sign"></i> Feedback</a>
+              <a target="_blank" class="footer-item snap-left" href="#" data-toggle="modal" data-target="#myModal">
+                  <i class="glyphicon glyphicon-info-sign"></i> About</a>
+          </div>
          </div>
         </div>
     </body>

@@ -27,13 +27,13 @@
           xsi:schemaLocation='http://docbook.org/ns/docbook
                               http://docbook.org/xml/5.0/xsd/docbook.xsd'
           xmlns:xlink='http://www.w3.org/1999/xlink'>
- <title>Joining the ForgeRock Community</title>
+ <title>Joining the Open Identity Platform Community</title>
 
  <para>
   Visit the
   <link
    xlink:show="new"
-   xlink:href="http://forgerock.org"
+   xlink:href="https://github.com/OpenIdentityPlatform"
   >community resource center</link>
   where you can find information about each project,
   download nightly builds, browse the resource catalog,

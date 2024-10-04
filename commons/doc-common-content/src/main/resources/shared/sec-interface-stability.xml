@@ -19,6 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2013-2015 ForgeRock AS
+  !      Portions Copyright 2024 3A Systems LLC
   !
 -->
  <section xml:id="interface-stability"
@@ -27,10 +28,10 @@
           xsi:schemaLocation='http://docbook.org/ns/docbook
                               http://docbook.org/xml/5.0/xsd/docbook.xsd'
           xmlns:xlink='http://www.w3.org/1999/xlink'>
- <title>ForgeRock Product Interface Stability</title>
+ <title>Open Identity Platform Product Interface Stability</title>
 
  <para>
-  ForgeRock products support many protocols, APIs, GUIs,
+  Open Identity Platform products support many protocols, APIs, GUIs,
   and command-line interfaces.
 
   Some of these interfaces are standard and very stable.
@@ -40,10 +41,10 @@
 
  <para>
   We realize that you invest in these interfaces,
-  and therefore must know when and how ForgeRock expects them to change.
+  and therefore must know when and how Open Identity Platform Community expects them to change.
 
-  For that reason, ForgeRock defines interface stability labels
-  and uses these definitions in ForgeRock products.
+  For that reason, Open Identity Platform Community defines interface stability labels
+  and uses these definitions in Open Identity Platform products.
  </para>
 
  <variablelist>
@@ -90,7 +91,7 @@
      For previously stable interfaces,
      the change was likely announced in a previous release.
 
-     Deprecated interfaces will be removed from ForgeRock products.
+     Deprecated interfaces will be removed from Open Identity Platform products.
     </para>
    </listitem>
   </varlistentry>
@@ -112,8 +113,7 @@
      Internal and undocumented interfaces can change without notice.
 
      If you depend on one of these interfaces,
-     contact ForgeRock support
-     or email <link xlink:href="mailto:info@forgerock.com">info@forgerock.com</link>
+     contact Open Identity Platform <link xlink:href="https://github.com/OpenIdentityPlatform">support</link>
      to discuss your needs.
     </para>
    </listitem>

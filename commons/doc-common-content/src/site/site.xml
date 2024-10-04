@@ -13,6 +13,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2014 ForgeRock AS
+ * Portions Copyright 2024 3A Systems LLC.
 -->
 <project name="${project.name}"
          xmlns="http://maven.apache.org/DECORATION/1.0.1"
@@ -29,15 +30,15 @@
   <body>
 
     <breadcrumbs>
-      <item name="Developer Community" href="http://www.forgerock.org"/>
-      <item name="Commons" href="http://commons.forgerock.org"/>
+      <item name="Developer Community" href="https://github.com/OpenIdentityPlatform"/>
+      <item name="Commons" href="https://github.com/OpenIdentityPlatform/commons"/>
       <item name="Doc Common Content"
-            href="http://commons.forgerock.org/forgerock-doc-common-content"/>
+            href="https://github.com/OpenIdentityPlatform/commons/tree/master/commons/doc-common-content"/>
     </breadcrumbs>
 
     <menu name="Development">
       <item name="Join"
-            href="https://sso.forgerock.com/openam/UI/Login"/>
+            href="https://github.com/OpenIdentityPlatform"/>
       <item name="Issue Tracking" href="issue-tracking.html"/>
       <item name="License" href="license.html"/>
       <item name="Source Repository" href="source-repository.html"/>

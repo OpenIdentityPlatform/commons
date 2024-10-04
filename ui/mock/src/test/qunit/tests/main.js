@@ -26,5 +26,5 @@ define([
     "./commons/Router",
     "./commons/UIUtils",
     "./commons/ValidatorsManager",
-    "./user/AnonymousProcessView"
+    // "./user/AnonymousProcessView"
 ]);

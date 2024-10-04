@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>script</artifactId>
-        <version>2.0.18-SNAPSHOT</version>
+        <version>2.2.3-SNAPSHOT</version>
     </parent>
     <groupId>org.openidentityplatform.commons.script</groupId>
     <artifactId>javascript</artifactId>
@@ -67,7 +67,7 @@
         <dependency>
             <groupId>org.apache.servicemix.bundles</groupId>
             <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-            <version>1.7R4_1</version>
+            <version>${rhino.version}_2</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.wst.jsdt.debug</groupId>
@@ -130,12 +130,12 @@
             <scope>test</scope>
         </dependency>
         <!-- https://bugzilla.mozilla.org/show_bug.cgi?id=379385 -->
-        <dependency>
+        <!--dependency>
             <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
-            <version>1.7.12</version>
+            <version>${rhino.version}</version>
             <scope>test</scope>
-        </dependency>
+        </dependency-->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>

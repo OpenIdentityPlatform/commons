@@ -19,16 +19,16 @@ define([
 ], function (Router) {
     QUnit.module('Router Functions');
 
-    QUnit.test("getLink", function () {
+    QUnit.test("getLink", function (assert) {
         var fakeRoute = {
             url: /fake-(.+)\-(.+)/,
             pattern: "fake-?-?"
         };
 
-        QUnit.equal(Router.getLink(fakeRoute, ["simple", "value"]), "fake-simple-value");
-        QUnit.equal(Router.getLink(fakeRoute, ["comp?lex", "value"]), "fake-comp?lex-value");
-        QUnit.equal(Router.getLink(fakeRoute, ["part?ial"]), "fake-part?ial-");
-        QUnit.equal(Router.getLink(fakeRoute, []), "fake--");
+        assert.equal(Router.getLink(fakeRoute, ["simple", "value"]), "fake-simple-value");
+        assert.equal(Router.getLink(fakeRoute, ["comp?lex", "value"]), "fake-comp?lex-value");
+        assert.equal(Router.getLink(fakeRoute, ["part?ial"]), "fake-part?ial-");
+        assert.equal(Router.getLink(fakeRoute, []), "fake--");
 
     });
 

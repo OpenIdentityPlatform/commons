@@ -4,7 +4,7 @@ This branding module acts as a customization layer on top of the default
 Docbook XSL stylesheets, and can be used to modify the look and feel
 of the output documentation.
 
-ForgeRock-customized stylesheets are provided in
+Open Identity Platform-customized stylesheets are provided in
 `main/resources/docbkx-stylesheets` for the following output
 targets:
 

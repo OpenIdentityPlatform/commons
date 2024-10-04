@@ -19,16 +19,16 @@ define([
 ], function (Queue) {
     QUnit.module('Queue Functions');
 
-    QUnit.test("core operations", function () {
+    QUnit.test("core operations", function (assert) {
         var q = new Queue(["a","b"]);
 
-        QUnit.equal(q.peek(), "a");
-        QUnit.equal(q.remove(), "a");
-        QUnit.equal(q.remove(), "b");
+        assert.equal(q.peek(), "a");
+        assert.equal(q.remove(), "a");
+        assert.equal(q.remove(), "b");
         q.add("c");
-        QUnit.equal(q.remove(), "c");
-        QUnit.equal(q.peek(), undefined);
-        QUnit.equal(q.remove(), undefined);
+        assert.equal(q.remove(), "c");
+        assert.equal(q.peek(), undefined);
+        assert.equal(q.remove(), undefined);
 
     });
 

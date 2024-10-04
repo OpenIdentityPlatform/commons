@@ -12,17 +12,18 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2015 ForgeRock AS.
+* Portions copyright 2024 3A Systems LLC.
 */
 
 /***********************************/
 /* Imported Styles
 /***********************************/
 
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,300,400,700);
-@import url(http://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css);
-@import url(http://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css);
-/* @import url(http://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css); */
-@import url(http://cdnjs.cloudflare.com/ajax/libs/jquery.colorbox/1.4.33/example1/colorbox.css);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,300,400,700);
+@import url(https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css);
+@import url(https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.min.css);
+/* @import url(https://cdnjs.cloudflare.com/ajax/libs/fancybox/2.1.5/jquery.fancybox.min.css); */
+@import url(https://cdnjs.cloudflare.com/ajax/libs/jquery.colorbox/1.4.33/example1/colorbox.css);
 
 /***********************************/
 /* General Styles
@@ -40,8 +41,11 @@ body {
 }
 
 a {
-    /* Sea Green */
-    color: #519387;
+    color: #1e20b4;
+}
+
+a:hover, a:focus {
+    color: #1e20b4;
 }
 
 a.link[href^="http"] {
@@ -61,7 +65,7 @@ a[href].self-link:hover::after
 {
     -moz-osx-font-smoothing: grayscale;
     content: "\e144";
-    color: #519387;
+    color: #1e20b4;
     display: inline-block;
     font-family: "Glyphicons Halflings";
     font-size: 75%;
@@ -101,7 +105,7 @@ li.L8 {
 }
 
 .left-shape-content {
-    background: url("includes/logos/left-shape-4.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
+    background: no-repeat scroll 0 0 rgba(0, 0, 0, 0);
     float: left;
     height: 566px;
     position: fixed;
@@ -149,11 +153,11 @@ li.L8 {
 }
 
 .tooltip.bottom .tooltip-arrow {
-    border-bottom-color: #519387;
+    border-bottom-color: #27297e;
 }
 
 .tooltip-inner {
-    background-color: #519387;
+    background-color: #27297e;
 }
 
 /* List Styles */
@@ -232,6 +236,8 @@ li.L8 {
 
 .navbar-brand {
     padding: 7px 15px;
+    display: flex;
+    align-items: center;
 }
 .navbar-brand > img {
     height: 100%;
@@ -250,7 +256,7 @@ li.L8 {
 
 .jumbotron {
     /* Sea Green */
-    background: url("includes/logos/hero-bg-01.png") no-repeat scroll left top #519387;
+    background: no-repeat scroll left top #00013c;
     color: white;
     box-shadow: 0 0 10px 2px grey;
     margin-top: 50px;
@@ -322,8 +328,8 @@ li.L8 {
     */
     /* Bright Yellow */
 
-    background-color: #eeea07;
-    border-color: #eeea07;
+    background-color: #e2e2fe;
+    border-color: #e2e2fe;
     /* Grey */
 
     color: #2a2f32;
@@ -395,7 +401,7 @@ h1 span {
 #doc-content h1,
 #doc-content .h1 {
     /* Sea Green */
-    border-bottom: 2px solid #70ab9b;
+    border-bottom: 2px solid #27297e;
     font-size: 36px;
     margin-top: 24px;
     padding-bottom: 5px;

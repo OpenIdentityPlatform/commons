@@ -23,7 +23,7 @@ define([
 ], function ($, sinon, AbstractCollection, ServiceInvoker) {
     QUnit.module('AbstractCollection Functions');
 
-    QUnit.test("query operations", function () {
+    QUnit.test("query operations", function (assert) {
         var testCollection = new AbstractCollection(),
             restCallArg;
 
@@ -58,16 +58,16 @@ define([
         testCollection.setTotalPagedResultsPolicy("EXACT");
 
         testCollection.getFirstPage().then(function () {
-            QUnit.equal(ServiceInvoker.restCall.callCount, 1, "Only one REST call produced");
+            assert.equal(ServiceInvoker.restCall.callCount, 1, "Only one REST call produced");
             restCallArg = ServiceInvoker.restCall.args[0][0]; // first invocation, first argument
-            QUnit.equal(testCollection.length, 2, "collection contains two records from the backend");
-            QUnit.equal(testCollection.where({givenName: "Boaty"}).length, 1,
+            assert.equal(testCollection.length, 2, "collection contains two records from the backend");
+            assert.equal(testCollection.where({givenName: "Boaty"}).length, 1,
                 "able to find expected model content in collection");
-            QUnit.ok(testCollection.hasNext(), "response with cookie indicates that hasNext is true");
-            QUnit.equal(testCollection.state.totalRecords, 5, "Total records correctly populated in collection state");
-            QUnit.equal(testCollection.state.totalPages, 3, "Total pages correctly populated in collection state");
-            QUnit.equal(restCallArg.url, "/crestResource", "correct url used to query backend");
-            QUnit.equal(restCallArg.data,
+            assert.ok(testCollection.hasNext(), "response with cookie indicates that hasNext is true");
+            assert.equal(testCollection.state.totalRecords, 5, "Total records correctly populated in collection state");
+            assert.equal(testCollection.state.totalPages, 3, "Total pages correctly populated in collection state");
+            assert.equal(restCallArg.url, "/crestResource", "correct url used to query backend");
+            assert.equal(restCallArg.data,
                 "_queryFilter=true&_pageSize=2&_sortKeys=givenName&_totalPagedResultsPolicy=EXACT",
                 "correct data submitted to backend for first page");
         }).then(function () {
@@ -75,14 +75,14 @@ define([
             return testCollection.getFirstPage();
         }).then(function () {
             restCallArg = ServiceInvoker.restCall.args[1][0]; // second invocation, first argument
-            QUnit.equal(restCallArg.data,
+            assert.equal(restCallArg.data,
                 "_queryFilter=true&_pageSize=2&_sortKeys=-givenName&_totalPagedResultsPolicy=EXACT",
                 "correct data submitted to backend for descending sortKey");
         }).then(function () {
             return testCollection.getNextPage();
         }).then(function () {
             restCallArg = ServiceInvoker.restCall.args[2][0]; // third invocation, first argument
-            QUnit.equal(restCallArg.data,
+            assert.equal(restCallArg.data,
                 "_queryFilter=true&_pageSize=2&_sortKeys=-givenName"+
                 "&_totalPagedResultsPolicy=EXACT&_pagedResultsCookie=2",
                 "correct data submitted to backend for next page");

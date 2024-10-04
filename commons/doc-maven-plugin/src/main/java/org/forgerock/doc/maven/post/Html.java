@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2014 ForgeRock AS
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.doc.maven.post;
@@ -27,6 +28,7 @@ import org.forgerock.doc.maven.utils.SyntaxHighlighterCopier;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 /**
@@ -192,27 +194,31 @@ public class Html {
      */
     final void editBuiltHtml(final String htmlDir) throws MojoExecutionException {
         try {
-            HashMap<String, String> replacements = new HashMap<String, String>();
+            HashMap<String, String> replacements = new HashMap<>();
 
             String doctype = IOUtils.toString(
-                    getClass().getResourceAsStream("/starthtml-doctype.txt"), "UTF-8");
+                    getClass().getResourceAsStream("/starthtml-doctype.txt"), StandardCharsets.UTF_8);
             replacements.put("<html>", doctype);
 
             // See https://developers.google.com/webmasters/control-crawl-index/docs/robots_meta_tag
             String robots = "<head>" + System.getProperty("line.separator")
-                    + IOUtils.toString(getClass().getResourceAsStream("/robots.txt"), "UTF-8");
+                    + IOUtils.toString(getClass().getResourceAsStream("/robots.txt"), StandardCharsets.UTF_8);
             replacements.put("<head>", robots);
 
             String favicon = IOUtils.toString(
-                    getClass().getResourceAsStream("/endhead-favicon.txt"), "UTF-8");
+                    getClass().getResourceAsStream("/endhead-favicon.txt"), StandardCharsets.UTF_8);
             favicon = favicon.replace("FAVICON-LINK", m.getFaviconLink());
             replacements.put("</head>", favicon);
 
             String linkToJira = getLinkToJira();
 
-            String gascript = IOUtils.toString(
-                    getClass().getResourceAsStream("/endbody-ga.txt"), "UTF-8");
-            gascript = gascript.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());
+            String gascript = "";
+            if(m.getGoogleAnalyticsId() != null && !"".equals(m.getGoogleAnalyticsId())) {
+                gascript = IOUtils.toString(
+                        getClass().getResourceAsStream("/endbody-ga.txt"), StandardCharsets.UTF_8);
+                gascript = gascript.replace("ANALYTICS-ID", m.getGoogleAnalyticsId());
+            }
+
             replacements.put("</body>", linkToJira + "\n" + gascript);
 
             HtmlUtils.updateHtml(htmlDir, replacements);
@@ -233,7 +239,7 @@ public class Html {
                 + "<a href=\"JIRA-URL\">Log a documentation bug.</a></p></div>";
 
         // https://confluence.atlassian.com/display/JIRA/Creating+Issues+via+direct+HTML+links
-        String jiraURL = "https://github.com/OpenIdentityPlatform/"+m.getProjectName()+"/issues/new";
+        String jiraURL = "https://github.com/OpenIdentityPlatform/"+m.getProjectName()+"/issues";
 
         if (!jiraURL.contains("pid")) {
             link = "";

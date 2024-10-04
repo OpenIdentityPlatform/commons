@@ -21,13 +21,15 @@
  with the fields enclosed by brackets [] replaced by
  your own identifying information:
  "Portions Copyrighted [year] [name of copyright owner]"
+
+  Portions Copyright 2017-2024 3A Systems, LLC.
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>parent</artifactId>
-    <version>2.0.18-SNAPSHOT</version>
+    <version>2.2.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Parent POM for Open Identity Platform Community projects. Provides default project build configuration.</description>
@@ -88,6 +90,7 @@
 		<module>bloomfilter</module>
 		<module>persistit</module>
 		<module>script</module>
+		<module>cassandra-embedded</module>
 	</modules>
     <properties>
         <!-- ************** -->
@@ -99,7 +102,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
         <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
-        <mavenCompilerPluginVersion>3.10.1</mavenCompilerPluginVersion>
+        <mavenCompilerPluginVersion>3.13.0</mavenCompilerPluginVersion>
+        <maven.compiler.release>8</maven.compiler.release>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
 
@@ -158,9 +162,6 @@
         <!-- maven-assembly-plugin http://maven.apache.org/plugins/maven-assembly-plugin/ -->
         <mavenAssemblyPluginVersion>3.1.0</mavenAssemblyPluginVersion>
 
-        <!-- maven-surefire-plugin http://maven.apache.org/surefire/maven-surefire-plugin/ -->
-        <mavenSurefirePluginVersion>3.0.0-M4</mavenSurefirePluginVersion>
-
         <!-- maven-source-plugin http://maven.apache.org/plugins/maven-source-plugin/ -->
         <mavenSourcePluginVersion>3.0.1</mavenSourcePluginVersion>
 
@@ -189,9 +190,10 @@
         <!-- this property makes sure NetBeans 6.8+ picks up some formatting rules from checkstyle -->
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
-        <jackson.version>2.14.0-rc1</jackson.version>
+        <jackson.version>2.14.3</jackson.version>
         <slf4j.version>1.7.36</slf4j.version>
-        <swagger.version>1.6.2</swagger.version>
+        <swagger.version>1.6.11</swagger.version>
+        <rhino.version>1.7.14</rhino.version>
     </properties>
 
     <prerequisites>
@@ -632,7 +634,38 @@
             </dependency>
             <dependency>
                 <groupId>org.openidentityplatform.commons</groupId>
+                <artifactId>cassandra-embedded</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons</groupId>
                 <artifactId>json-fluent</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.script</groupId>
+                <artifactId>javascript</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.script</groupId>
+                <artifactId>groovy</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.launcher</groupId>
+                <artifactId>launcher</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.launcher</groupId>
+                <artifactId>launcher-zip</artifactId>
+                <type>zip</type>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openidentityplatform.commons.script</groupId>
+                <artifactId>common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -657,7 +690,7 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>4.0.1</version>
+                <version>3.1.0</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -789,19 +822,34 @@
 		    <dependency>
 			    <groupId>org.apache.commons</groupId>
 			    <artifactId>commons-lang3</artifactId>
-			    <version>3.11</version>
+			    <version>3.17.0</version>
 			</dependency>
 			<dependency>
 			   <groupId>commons-io</groupId>
 			   <artifactId>commons-io</artifactId>
-			   <version>2.7</version>
+			   <version>2.16.1</version>
 			 </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-text</artifactId>
+                <version>1.12.0</version>
+            </dependency>
+			 <dependency>
+               <groupId>org.json</groupId>
+               <artifactId>json</artifactId>
+               <version>20231013</version>
+             </dependency>
 		    <dependency>
 			    <groupId>junit</groupId>
 			    <artifactId>junit</artifactId>
 			    <version>4.13.1</version>
 			    <scope>test</scope>
 			</dependency>
+			<dependency>
+		      <groupId>org.codehaus.groovy</groupId>
+		      <artifactId>groovy-all</artifactId>
+		      <version>2.4.21</version>
+		    </dependency>
 		</dependencies>
 	</dependencyManagement>
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
@@ -891,6 +939,7 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${mavenCompilerPluginVersion}</version>
                     <configuration>
+                        <release>${maven.compiler.release}</release>
                         <source>${maven.compiler.source}</source>
                         <target>${maven.compiler.target}</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
@@ -964,14 +1013,13 @@
 <!--                         </dependency> -->
 <!--                     </dependencies> -->
                     <configuration>
-                    	<source>8</source>
+                    	<source>1.8</source>
                         <author>false</author>
                         <quiet>true</quiet>
                         <windowtitle>${javadocWindowTitle}</windowtitle>
                         <doctitle>${javadocDocTitle}</doctitle>
                         <header><![CDATA[<b>${javadocDocTitle}</b>]]></header>
                         <footer><![CDATA[<b>${javadocDocTitle}</b>]]></footer>
-                        <additionalparam>-linksource</additionalparam>
                         <show>protected</show>
 <!--                         <excludePackageNames>com.*</excludePackageNames> -->
                         <stylesheetfile>${javadocStylesheet}</stylesheetfile>
@@ -1046,7 +1094,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>${mavenSurefirePluginVersion}</version>
+                    <version>3.1.2</version>
 <!--                     <dependencies> -->
 <!--                         <dependency> -->
 <!--                             <groupId>org.openidentityplatform</groupId> -->
@@ -1268,6 +1316,11 @@
                         </licenseMerges>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.openidentityplatform.commons</groupId>
+                    <artifactId>doc-maven-plugin</artifactId>
+                    <version>${project.version}</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -1307,7 +1360,7 @@
 		      <configuration>
 		        <serverId>ossrh</serverId>
 		        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-		        <autoReleaseAfterClose>true</autoReleaseAfterClose>
+		        <autoReleaseAfterClose>false</autoReleaseAfterClose>
 		        <stagingProgressTimeoutMinutes>15</stagingProgressTimeoutMinutes>
 		        <keepStagingRepositoryOnFailure>false</keepStagingRepositoryOnFailure>
 		        <keepStagingRepositoryOnCloseRuleFailure>false</keepStagingRepositoryOnCloseRuleFailure>

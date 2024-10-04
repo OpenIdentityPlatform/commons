@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2019 Open Identity Platform Community.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+    <!-- Parent Project -->
+   <parent>
+    <groupId>org.openidentityplatform.commons</groupId>
+    <artifactId>parent</artifactId>
+    <version>2.2.3-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>cassandra-embedded</artifactId>
+  <name>${project.groupId}.${project.artifactId}</name>
+  <properties>
+	  <argLineCassandraServer>
+		-Djdk.attach.allowAttachSelf=true 
+		--add-exports java.base/jdk.internal.misc=ALL-UNNAMED
+		--add-exports java.base/jdk.internal.ref=ALL-UNNAMED
+		--add-exports java.base/sun.nio.ch=ALL-UNNAMED
+		--add-exports java.management.rmi/com.sun.jmx.remote.internal.rmi=ALL-UNNAMED
+		--add-exports java.rmi/sun.rmi.registry=ALL-UNNAMED
+		--add-exports java.rmi/sun.rmi.server=ALL-UNNAMED
+		--add-exports java.sql/java.sql=ALL-UNNAMED
+		--add-exports java.base/java.lang.ref=ALL-UNNAMED
+		--add-exports java.base/jdk.internal.util=ALL-UNNAMED
+		--add-exports jdk.unsupported/sun.misc=ALL-UNNAMED
+		--add-exports jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+		--add-opens java.base/java.lang.module=ALL-UNNAMED
+		--add-opens java.base/jdk.internal.loader=ALL-UNNAMED
+		--add-opens java.base/jdk.internal.ref=ALL-UNNAMED
+		--add-opens java.base/jdk.internal.reflect=ALL-UNNAMED
+		--add-opens java.base/jdk.internal.math=ALL-UNNAMED
+		--add-opens java.base/jdk.internal.module=ALL-UNNAMED
+		--add-opens java.base/jdk.internal.util.jar=ALL-UNNAMED
+		--add-opens jdk.management/com.sun.management.internal=ALL-UNNAMED
+		--add-opens java.base/sun.nio.ch=ALL-UNNAMED
+		--add-opens java.base/java.io=ALL-UNNAMED
+		--add-opens java.base/java.util.concurrent=ALL-UNNAMED
+		--add-opens java.base/java.util=ALL-UNNAMED
+		--add-opens java.base/java.util.concurrent.atomic=ALL-UNNAMED
+		--add-opens java.base/java.lang=ALL-UNNAMED
+		--add-opens java.base/java.math=ALL-UNNAMED
+		--add-opens java.base/java.lang.reflect=ALL-UNNAMED
+		--add-opens java.base/java.net=ALL-UNNAMED
+		--add-opens java.base/java.nio=ALL-UNNAMED
+    </argLineCassandraServer>
+  </properties>
+  <dependencies>
+		<dependency>
+		    <groupId>com.datastax.oss</groupId>
+		    <artifactId>java-driver-core</artifactId>
+		    <version>4.17.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.cassandra</groupId>
+		    <artifactId>cassandra-all</artifactId>
+		    <version>4.1.3</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.lz4</groupId>
+		    <artifactId>lz4-java</artifactId>
+		    <version>1.8.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.xerial.snappy</groupId>
+		    <artifactId>snappy-java</artifactId>
+		    <version>1.1.10.5</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>failureaccess</artifactId>
+		    <version>1.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+		    <groupId>org.slf4j</groupId>
+	    	<artifactId>slf4j-simple</artifactId>
+	    	<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+	      <id>jdk11.options</id>
+	      <activation>
+	        <jdk>[11,)</jdk>
+	      </activation>
+	      <properties>
+	        <argLine>
+				${argLineCassandraServer}
+	        </argLine>
+	      </properties>
+    	</profile>
+    	<profile>
+			<id>not supported: jdk-18+</id>
+			<activation>
+				<jdk>[18,)</jdk>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>not supported: windows</id>
+			<activation>
+				<os>
+				 <family>Windows</family>
+				</os>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

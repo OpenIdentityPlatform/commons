@@ -19,6 +19,7 @@
   ! CCPL HEADER END
   !
   !      Copyright 2015 ForgeRock AS.
+  !      Portions Copyright 2024 3A Systems LLC.
   !
 -->
 <section xml:id="sec-support-contact"
@@ -28,25 +29,16 @@
                               http://docbook.org/xml/5.0/xsd/docbook.xsd'
          xmlns:xlink='http://www.w3.org/1999/xlink'>
 
- <title>Getting Support and Contacting ForgeRock</title>
+ <title>Getting Support and Contacting Open Identity Platform Community Members</title>
  <para>
-  ForgeRock provides support services, professional services, classes through
-  ForgeRock University, and partner services to assist you in setting up and
+  Open Identity Platform
+  <link xlink:href="https://github.com/OpenIdentityPlatform/.github/wiki/Approved-Vendor-List">approved vendors</link>
+  provide support services, professional services, and partner services to assist you in setting up and
   maintaining your deployments.
-  For a general overview of these services, see
-  <link xlink:show="new"
-        xlink:href="https://www.forgerock.com/en-us/services">ForgeRock Services</link>.
  </para>
  <para>
-  ForgeRock has staff members around the globe who
+  Open Identity Platform Community approved vendors have staff members around the globe who
   support our international customers and partners.
-  If you have any questions, contact ForgeRock using the address or telephone number
-  nearest to you at
-  <link
-   xlink:show="new"
-   xlink:href="https://www.forgerock.com/en-us/contact/">https://www.forgerock.com/en-us/contact/</link>
-  or send an email to ForgeRock at
-  <link xlink:show="new" xlink:href="mailto:info@forgerock.com">info@forgerock.com</link>.
  </para>
 
 </section>

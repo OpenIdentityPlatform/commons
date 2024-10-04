@@ -20,7 +20,7 @@ Copyright 2014-2015 ForgeRock AS.
   <parent>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>parent</artifactId>
-    <version>2.0.18-SNAPSHOT</version>
+    <version>2.2.3-SNAPSHOT</version>
   </parent>
 
     <groupId>org.openidentityplatform.commons</groupId>
@@ -90,12 +90,6 @@ Copyright 2014-2015 ForgeRock AS.
                         <artifactId>aopalliance</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${servlet-api.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
