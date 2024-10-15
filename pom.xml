@@ -103,8 +103,8 @@
 
         <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
         <mavenCompilerPluginVersion>3.13.0</mavenCompilerPluginVersion>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
 
         <!-- maven-enforcer-plugin -->
         <maven.min.version>3.0.1</maven.min.version>
@@ -938,8 +938,6 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${mavenCompilerPluginVersion}</version>
                     <configuration>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <compilerArgument>-Xlint:all</compilerArgument>
                         <showWarnings>true</showWarnings>
@@ -1410,6 +1408,15 @@
 	            </plugins>
 	        </build>
 	    </profile>
+        <profile>
+            <id>set-compiler-release</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
 	    <profile>
 	      <id>jdk16.options</id>
 	      <activation>
