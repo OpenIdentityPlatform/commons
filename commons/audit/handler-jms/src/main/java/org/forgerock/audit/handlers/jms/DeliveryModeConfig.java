@@ -15,7 +15,7 @@
  */
 package org.forgerock.audit.handlers.jms;
 
-import javax.jms.DeliveryMode;
+import jakarta.jms.DeliveryMode;
 
 /**
  * Configuration wrapper for JMS {@link DeliveryMode} persistence constants.

@@ -16,8 +16,8 @@
 
 package org.forgerock.http.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * A Servlet API version adapter provides an abstraction which allows Servlet

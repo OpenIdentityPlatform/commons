@@ -16,7 +16,7 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import javax.jms.Session;
+import jakarta.jms.Session;
 
 /**
  * Configuration wrapper for JMS {@link Session#getAcknowledgeMode()} SessionMode setting.

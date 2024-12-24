@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.security.Key;
 
 import javax.crypto.spec.SecretKeySpec;
-import javax.xml.bind.DatatypeConverter;
+import jakarta.xml.bind.DatatypeConverter;
 
 import org.forgerock.json.jose.exceptions.JweDecryptionException;
 import org.forgerock.json.jose.jwe.EncryptionMethod;

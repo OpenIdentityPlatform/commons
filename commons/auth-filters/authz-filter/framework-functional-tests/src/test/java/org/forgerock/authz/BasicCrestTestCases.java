@@ -16,7 +16,7 @@
 
 package org.forgerock.authz;
 
-import static com.jayway.restassured.RestAssured.*;
+import static io.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
 import org.testng.annotations.Test;

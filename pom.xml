@@ -116,8 +116,8 @@
 
         <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
         <mavenCompilerPluginVersion>3.13.0</mavenCompilerPluginVersion>
-        <maven.compiler.target>8</maven.compiler.target>
-        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
 
         <!-- maven-enforcer-plugin -->
         <maven.min.version>3.0.1</maven.min.version>
@@ -206,7 +206,7 @@
         <slf4j.version>1.7.36</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
-        <jetty.version>9.4.57.v20241219</jetty.version>
+        <jetty.version>11.0.24</jetty.version>
         <grizzly-framework.version>2.3.35</grizzly-framework.version>
     </properties>
 
@@ -310,8 +310,8 @@
 
             <dependency>
                 <groupId>com.sun.mail</groupId>
-                <artifactId>javax.mail</artifactId>
-                <version>1.6.2</version>
+                <artifactId>jakarta.mail</artifactId>
+                <version>2.0.1</version>
             </dependency>
             
 			<dependency>
@@ -702,9 +702,9 @@
 		      <version>${project.version}</version>
 		    </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>6.0.0</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -809,19 +809,19 @@
 				<version>1.2.17</version>
 			</dependency>
 			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>2.3.1</version>
+				<groupId>jakarta.xml.bind</groupId>
+				<artifactId>jakarta.xml.bind-api</artifactId>
+				<version>4.0.2</version>
 			</dependency>
 			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
+				<groupId>org.glassfish.jaxb</groupId>
 				<artifactId>jaxb-core</artifactId>
-				<version>2.3.0.1</version>
+				<version>4.0.5</version>
 			</dependency>
 			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>2.3.2</version>
+				<groupId>org.glassfish.jaxb</groupId>
+				<artifactId>jaxb-runtime</artifactId>
+				<version>4.0.5</version>
 			</dependency>
 			<dependency>
 				<groupId>com.sun.xml.bind</groupId>
@@ -1061,7 +1061,7 @@
 <!--                         </dependency> -->
 <!--                     </dependencies> -->
                     <configuration>
-                    	<source>1.8</source>
+                    	<source>11</source>
                         <author>false</author>
                         <quiet>true</quiet>
                         <windowtitle>${javadocWindowTitle}</windowtitle>

@@ -16,9 +16,9 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Session;
-import javax.jms.Topic;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Session;
+import jakarta.jms.Topic;
 import javax.naming.InitialContext;
 import java.util.Collections;
 import java.util.Map;

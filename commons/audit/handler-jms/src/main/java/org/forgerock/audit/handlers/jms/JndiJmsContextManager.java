@@ -16,8 +16,8 @@
 
 package org.forgerock.audit.handlers.jms;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Topic;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Topic;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.Hashtable;

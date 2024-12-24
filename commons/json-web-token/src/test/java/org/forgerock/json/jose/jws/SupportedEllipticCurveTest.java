@@ -17,7 +17,7 @@
 package org.forgerock.json.jose.jws;
 
 import static java.math.BigInteger.ONE;
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
+import static jakarta.xml.bind.DatatypeConverter.printHexBinary;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigInteger;

@@ -23,10 +23,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -108,7 +108,7 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
         public void setReadListener(ReadListener readListener) {
             throw new UnsupportedOperationException();
         }
-    }
+	}
 
     public String getRequestBody() {
         readBody();
