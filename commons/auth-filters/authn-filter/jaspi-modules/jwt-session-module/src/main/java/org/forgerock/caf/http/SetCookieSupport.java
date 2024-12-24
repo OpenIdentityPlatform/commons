@@ -19,6 +19,7 @@
  * Copied from, https://github.com/apache/tomcat/blob/trunk/java/org/apache/tomcat/util/http/SetCookieSupport.java
  *
  * Portions Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.caf.http;
