@@ -2,10 +2,10 @@
 
 ## Supported Versions
 
-| Version                              | Supported                             |
-|--------------------------------------|---------------------------------------|
-| Open Identity Platform Commons 3.x.x | :white_check_mark: Jakarta EE support |
-| Open Identity Platform Commons 2.x.x | :white_check_mark: Java EE support    |
+| Version                              | Java Versions Support | EE          | Support Status      |
+|--------------------------------------|-----------------------|-------------|---------------------|
+| Open Identity Platform Commons 3.x.x | 11 to 21 LTS          | Jakarta EE  | :white_check_mark:  |
+| Open Identity Platform Commons 2.x.x | 8 to 21 LTS           | Java EE     | :white_check_mark:  |
 
 ## Reporting a Vulnerability
 
