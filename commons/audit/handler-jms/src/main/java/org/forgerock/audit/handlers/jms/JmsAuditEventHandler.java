@@ -21,7 +21,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.*;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import jakarta.jms.JMSException;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Session;

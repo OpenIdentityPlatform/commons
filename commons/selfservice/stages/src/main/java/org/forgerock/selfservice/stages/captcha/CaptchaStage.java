@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 package org.forgerock.selfservice.stages.captcha;
 
@@ -35,7 +36,7 @@ import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
 

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.selfservice.stages.reset;
@@ -36,7 +37,7 @@ import org.forgerock.selfservice.core.util.RequirementsBuilder;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * The reset password stage.
