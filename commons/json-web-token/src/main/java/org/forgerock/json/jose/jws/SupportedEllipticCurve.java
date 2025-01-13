@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2025 3A Systems LLC.
  */
 
 package org.forgerock.json.jose.jws;
@@ -24,7 +24,7 @@ import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
 import java.security.spec.EllipticCurve;
 import java.util.Objects;
-import jakarta.xml.bind.DatatypeConverter;
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Enumerates all supported elliptic curve parameters for ESXXX signature formats.

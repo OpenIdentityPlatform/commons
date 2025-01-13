@@ -22,7 +22,7 @@
  your own identifying information:
  "Portions Copyrighted [year] [name of copyright owner]"
 
-  Portions Copyright 2017-2024 3A Systems, LLC.
+  Portions Copyright 2017-2025 3A Systems, LLC.
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -808,21 +808,26 @@
 				<artifactId>FastInfoset</artifactId>
 				<version>1.2.17</version>
 			</dependency>
-			<dependency>
-				<groupId>jakarta.xml.bind</groupId>
-				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>4.0.2</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-core</artifactId>
-				<version>4.0.5</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jaxb</groupId>
-				<artifactId>jaxb-runtime</artifactId>
-				<version>4.0.5</version>
-			</dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-core</artifactId>
+                <version>2.3.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>2.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb1-impl</artifactId>
+                <version>2.2.5.1</version>
+            </dependency>
 		    <dependency>
 		        <groupId>com.google.code.findbugs</groupId>
 		        <artifactId>jsr305</artifactId>

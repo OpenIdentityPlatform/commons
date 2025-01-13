@@ -12,13 +12,13 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2025 3A Systems LLC.
  */
 
 package org.forgerock.json.jose.jws;
 
 import static java.math.BigInteger.ONE;
-import static jakarta.xml.bind.DatatypeConverter.printHexBinary;
+import static javax.xml.bind.DatatypeConverter.printHexBinary;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigInteger;
