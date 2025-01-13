@@ -19,6 +19,7 @@
  * Copied from, https://github.com/apache/tomcat/blob/trunk/java/org/apache/tomcat/util/http/SetCookieSupport.java
  *
  * Portions Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.caf.http;
@@ -61,7 +62,7 @@ public class SetCookieSupport {
      * @param cookie The javax.servlet.http.Cookie instance whose String representation is desired
      * @return the String representation of the cookie parameter
      */
-    public String generateHeader(javax.servlet.http.Cookie cookie) {
+    public String generateHeader(jakarta.servlet.http.Cookie cookie) {
         return generateHeader(Cookie.newCookie(cookie));
     }
 

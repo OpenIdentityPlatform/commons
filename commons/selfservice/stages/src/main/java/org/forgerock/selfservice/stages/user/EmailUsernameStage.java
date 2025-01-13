@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 package org.forgerock.selfservice.stages.user;
 
@@ -20,7 +21,7 @@ import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 import static org.forgerock.selfservice.stages.utils.LocaleUtils.getTranslationFromLocaleMap;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
