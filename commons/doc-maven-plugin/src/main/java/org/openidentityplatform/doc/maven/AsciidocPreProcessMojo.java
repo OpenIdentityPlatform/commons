@@ -76,6 +76,7 @@ public class AsciidocPreProcessMojo extends AbstractAsciidocMojo {
         }
 
         copyDocsDirectories();
+        updateVersionAttributes();
     }
 
     protected void copyDocsDirectories() throws MojoExecutionException {
@@ -96,34 +97,26 @@ public class AsciidocPreProcessMojo extends AbstractAsciidocMojo {
         }
     }
 
-    protected void updateVersionAttributes() throws MojoExecutionException, IOException {
-        String version = null;
+    protected void updateVersionAttributes() {
+        String version;
         String url = String.format("https://api.github.com/repos/OpenIdentityPlatform/%s/releases/latest", this.projectName);
         try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
             HttpGet request = new HttpGet(url);
             try (CloseableHttpResponse response = httpClient.execute(request)) {
-                System.out.println("Status Code: " + response.getStatusLine().getStatusCode());
                 String responseBody = EntityUtils.toString(response.getEntity());
-                System.out.println("Response Body: " + responseBody);
                 String pattern = "\"name\"\\s*:\\s*\"([^\"]+)\"";
-
-                // Compile the regex
                 Pattern regex = Pattern.compile(pattern);
                 Matcher matcher = regex.matcher(responseBody);
 
-                // Find and extract the value
-                if (matcher.find()) {
-                    version = matcher.group(1); // Group 1 contains the captured value
+                if (!matcher.find()) {
+                    return;
                 }
+                version = matcher.group(1);
+                setVersion(version);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            getLog().warn("error occurred while getting version", e);
         }
-        if(version == null) {
-            return;
-        }
-
-        setVersion(version);
     }
 
     protected void setVersion(String version) throws IOException {
@@ -133,11 +126,11 @@ public class AsciidocPreProcessMojo extends AbstractAsciidocMojo {
             for(File docFile : docDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".adoc"))) {
                 System.out.println(docFile);
                 String adoc = FileUtils.readFileToString(docFile, StandardCharsets.UTF_8);
-                String versionRegex = String.format("(:%s-version:)\\s*(.*)\\b", this.projectName);
-                adoc = adoc.replaceAll(versionRegex, "$1" + version);
+                String versionRegex = String.format("(:%s-version:)\\s*(.*)\\b", this.projectName.toLowerCase());
+                adoc = adoc.replaceAll(versionRegex, "$1 " + version);
 
                 String versionShortRegex = String.format("(:%s-version-short:)\\s*(.*)\\b", this.projectName);
-                adoc = adoc.replaceAll(versionShortRegex, "$1" + versionShort);
+                adoc = adoc.replaceAll(versionShortRegex, "$1 " + versionShort);
 
                 FileUtils.writeStringToFile(docFile, adoc, StandardCharsets.UTF_8);
             }
