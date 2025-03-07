@@ -13,7 +13,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2025 3A Systems LLC.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -32,9 +32,15 @@
     <artifactId>doc-maven-plugin</artifactId>
 
     <configuration>
-     <projectName>Test</projectName>
+     <projectName>commons</projectName>
      <projectVersion>1.0.0-SNAPSHOT</projectVersion>
      <releaseVersion>1.0.0</releaseVersion>
+     <asciidocSourceDirectory>${basedir}/src/test/resources/asciidoc</asciidocSourceDirectory>
+     <buildDirectory>${basedir}/target/asciidoc-test</buildDirectory>
+     <documents>
+      <document>reference</document>
+      <document>admin-guide</document>
+     </documents>
     </configuration>
 
     <executions>
@@ -42,14 +48,9 @@
       <id>antora-doc-build</id>
       <phase>site</phase>
       <goals>
+       <goal>asciidoc-pre-process</goal>
        <goal>antora</goal>
       </goals>
-      <configuration>
-       <documents>
-        <document>gateway-guide</document>
-        <document>admin-guide</document>
-       </documents>
-     </configuration>
      </execution>
     </executions>
    </plugin>
