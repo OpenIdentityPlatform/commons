@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2020-2025 3A Systems LLC.
  */
 
 module.exports = function (grunt) {
@@ -85,7 +86,9 @@ module.exports = function (grunt) {
                     args: [
                         "--headless=new",
                         "--allow-file-access-from-files",
-                        "--disable-dev-shm-usage"
+                        "--disable-dev-shm-usage",
+                        "--no-sandbox",
+                        "--disable-setuid-sandbox"
                     ]
                 }
             }
@@ -118,7 +121,7 @@ module.exports = function (grunt) {
         notify_hooks: {
             options: {
                 enabled: true,
-                title: "ForgeRock UI QUnit Tests"
+                title: "UI QUnit Tests"
             }
         },
         /**
