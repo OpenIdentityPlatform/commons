@@ -194,6 +194,7 @@
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
         <jetty.version>9.4.57.v20241219</jetty.version>
+        <grizzly-framework.version>2.4.4</grizzly-framework.version>
     </properties>
 
     <prerequisites>
@@ -865,6 +866,24 @@
                 <artifactId>websocket-server</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
+
+            <!-- Grizzly Dependencies -->
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-framework</artifactId>
+                <version>${grizzly-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-http-server</artifactId>
+                <version>${grizzly-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-http-servlet</artifactId>
+                <version>${grizzly-framework.version}</version>
+            </dependency>
+
 		</dependencies>
 	</dependencyManagement>
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
