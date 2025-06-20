@@ -70,16 +70,19 @@
     		<url>https://github.com/OpenIdentityPlatform/commons</url>
     	</developer>
     </developers>
-	<distributionManagement>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <repositories>
+        <repository>
+            <name>Central Portal Snapshots</name>
+            <id>central-portal-snapshots</id>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 	<modules>
 		<module>maven-external-dependency-plugin/maven-external-dependency-plugin</module>
 		<module>build-tools</module>
@@ -1383,27 +1386,16 @@
 			  	<doclint>none</doclint>
 			  </configuration>
 			</plugin>
-			<plugin>
-		      <groupId>org.sonatype.plugins</groupId>
-		      <artifactId>nexus-staging-maven-plugin</artifactId>
-		      <version>1.6.12</version>
-		      <extensions>true</extensions>
-		      <configuration>
-		        <serverId>ossrh</serverId>
-		        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-		        <autoReleaseAfterClose>false</autoReleaseAfterClose>
-		        <stagingProgressTimeoutMinutes>15</stagingProgressTimeoutMinutes>
-		        <keepStagingRepositoryOnFailure>false</keepStagingRepositoryOnFailure>
-		        <keepStagingRepositoryOnCloseRuleFailure>false</keepStagingRepositoryOnCloseRuleFailure>
-		      </configuration>
-		      <dependencies>
-		      	<dependency>
-			        <groupId>com.google.guava</groupId>
-			        <artifactId>guava</artifactId>
-			        <version>15.0</version>
-			     </dependency>
-		      </dependencies>
-		    </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>ossrh</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
