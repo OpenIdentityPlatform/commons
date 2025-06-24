@@ -1,3 +1,19 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2020-2025 3A Systems LLC.
+ */
+
 package ru.org.openam.httpdump;
 
 import java.io.BufferedReader;
@@ -18,43 +34,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BufferedRequestWrapper extends HttpServletRequestWrapper {
-	final static Logger logger = LoggerFactory.getLogger(BufferedRequestWrapper.class.getName());
-	byte[] body=null;
+    final static Logger logger = LoggerFactory.getLogger(BufferedRequestWrapper.class.getName());
+    byte[] body = null;
 
     public BufferedRequestWrapper(HttpServletRequest httpServletRequest) {
         super(httpServletRequest);
         setAttribute(BufferedRequestWrapper.class.getName(), this);
     }
 
-    private void readBody(){
-    	if (body==null 
-    			&& !StringUtils.containsIgnoreCase(getContentType(), "application/x-www-form-urlencoded")
-    			&& !StringUtils.containsIgnoreCase(getContentType(), "multipart/form-data")
-    		)
-	    	try{
-	 	        InputStream is = super.getInputStream();
-	 	        body = IOUtils.toByteArray(is);
-	 	        is.close();
-	         }catch(IOException e){
-	         	logger.warn("{}: {}",e.getMessage(),Dump.toString(getRequest()));
-	         }
+    private void readBody() {
+        if (body == null
+                && !StringUtils.containsIgnoreCase(getContentType(), "application/x-www-form-urlencoded")
+                && !StringUtils.containsIgnoreCase(getContentType(), "multipart/form-data")
+        )
+            try {
+                InputStream is = super.getInputStream();
+                body = IOUtils.toByteArray(is);
+                is.close();
+            } catch (IOException e) {
+                logger.warn("{}: {}", e.getMessage(), Dump.toString(getRequest()));
+            }
     }
-    
+
     @Override
     public ServletInputStream getInputStream() throws IOException {
-    	readBody();
-    	if (body==null)
-    		return super.getInputStream();
-    	return new ServletInputStreamImpl(new ByteArrayInputStream(body));
+        readBody();
+        if (body == null)
+            return super.getInputStream();
+        return new ServletInputStreamImpl(new ByteArrayInputStream(body));
     }
 
     @Override
     public BufferedReader getReader() throws IOException {
-    	readBody();
-    	if (body==null)
-    		return super.getReader();
+        readBody();
+        if (body == null)
+            return super.getReader();
         String enc = getCharacterEncoding();
-        if(enc == null) enc = "UTF-8";
+        if (enc == null) enc = "UTF-8";
         return new BufferedReader(new InputStreamReader(getInputStream(), enc));
     }
 
@@ -74,45 +90,45 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
         }
 
         @Override
-		public boolean isFinished() {
+        public boolean isFinished() {
             try {
                 return is.available() == 0;
             } catch (IOException e) {
-				logger.warn(e.getMessage());
+                logger.warn(e.getMessage());
             }
-			return false;
+            return false;
         }
 
-		@Override
-		public boolean isReady() {
-			return true;
-		}
+        @Override
+        public boolean isReady() {
+            return true;
+        }
 
-		@Override
-		public void setReadListener(ReadListener readListener) {
-			throw new UnsupportedOperationException();
-		}
-	}
-    
+        @Override
+        public void setReadListener(ReadListener readListener) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     public String getRequestBody() {
-    	readBody();
-    	if (body==null)
-    		return MessageFormat.format("{0}:{1}", getContentType(),getContentLength());
-		try{
-	    	BufferedReader reader = getReader();
-			String line = null;
-			StringBuilder inputBuffer = new StringBuilder();
-			do {
-				line = reader.readLine();
-				if (null != line) 
-					inputBuffer.append(line.trim());
-			} while (line != null);
-			reader.close();
-			return inputBuffer.toString().trim();
-		}catch (IOException e) {
-			return null;
-		}
-	}
+        readBody();
+        if (body == null)
+            return MessageFormat.format("{0}:{1}", getContentType(), getContentLength());
+        try {
+            BufferedReader reader = getReader();
+            String line = null;
+            StringBuilder inputBuffer = new StringBuilder();
+            do {
+                line = reader.readLine();
+                if (null != line)
+                    inputBuffer.append(line.trim());
+            } while (line != null);
+            reader.close();
+            return inputBuffer.toString().trim();
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
 }
 
