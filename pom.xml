@@ -194,7 +194,7 @@
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
         <jetty.version>9.4.57.v20241219</jetty.version>
-        <grizzly-framework.version>2.4.4</grizzly-framework.version>
+        <grizzly-framework.version>2.3.17</grizzly-framework.version>
     </properties>
 
     <prerequisites>
@@ -691,7 +691,7 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>4.0.1</version>
+                <version>3.1.0</version>
                 <scope>provided</scope>
             </dependency>
 
