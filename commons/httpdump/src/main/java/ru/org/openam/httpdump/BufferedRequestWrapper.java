@@ -69,19 +69,11 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
             return is.read();
         }
 
-        public boolean markSupported() {
-            return false;
-        }
-
         public synchronized void mark(int i) {
             throw new RuntimeException(new IOException("mark/reset not supported"));
         }
 
-        public synchronized void reset() throws IOException {
-            throw new IOException("mark/reset not supported");
-        }
-
-		@Override
+        @Override
 		public boolean isFinished() {
             try {
                 return is.available() == 0;
