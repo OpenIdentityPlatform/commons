@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
 
+import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -79,7 +80,27 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
         public synchronized void reset() throws IOException {
             throw new IOException("mark/reset not supported");
         }
-    }
+
+		@Override
+		public boolean isFinished() {
+            try {
+                return is.available() == 0;
+            } catch (IOException e) {
+				logger.warn(e.getMessage());
+            }
+			return false;
+        }
+
+		@Override
+		public boolean isReady() {
+			return true;
+		}
+
+		@Override
+		public void setReadListener(ReadListener readListener) {
+			throw new UnsupportedOperationException();
+		}
+	}
     
     public String getRequestBody() {
     	readBody();
