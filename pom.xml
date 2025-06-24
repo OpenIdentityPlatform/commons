@@ -691,7 +691,7 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
+                <version>4.0.1</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -883,7 +883,11 @@
                 <artifactId>grizzly-http-servlet</artifactId>
                 <version>${grizzly-framework.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-websockets</artifactId>
+                <version>${grizzly-framework.version}</version>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
