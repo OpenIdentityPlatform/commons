@@ -15,8 +15,8 @@
  */
 package org.forgerock.audit.handlers.jms;
 
-import javax.jms.ConnectionFactory;
-import javax.jms.Topic;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Topic;
 
 import org.forgerock.json.resource.InternalServerErrorException;
 
