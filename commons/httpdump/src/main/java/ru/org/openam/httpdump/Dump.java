@@ -42,7 +42,7 @@ public class Dump {
 					new Object[]{
 						Client.get(request),
 						request.getMethod(),
-						request.getAttribute("javax.servlet.forward.request_uri")==null?request.getRequestURI():(String)request.getAttribute("javax.servlet.forward.request_uri"),
+						request.getAttribute("jakarta.servlet.forward.request_uri")==null?request.getRequestURI():(String)request.getAttribute("jakarta.servlet.forward.request_uri"),
 						request.getQueryString(),
 						dump_getHeaders(request),
 						dump_getParameterMap(request),

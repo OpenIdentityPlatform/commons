@@ -206,7 +206,7 @@
         <slf4j.version>1.7.36</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
-        <jetty.version>11.0.24</jetty.version>
+        <jetty.version>11.0.25</jetty.version>
         <grizzly-framework.version>4.0.2</grizzly-framework.version>
     </properties>
 
@@ -1061,7 +1061,7 @@
 <!--                         </dependency> -->
 <!--                     </dependencies> -->
                     <configuration>
-                    	<source>11</source>
+                    	<source>1.8</source>
                         <author>false</author>
                         <quiet>true</quiet>
                         <windowtitle>${javadocWindowTitle}</windowtitle>

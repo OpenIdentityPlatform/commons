@@ -75,9 +75,9 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
     }
 
     private class ServletInputStreamImpl extends ServletInputStream {
-        private InputStream is;
+        private ByteArrayInputStream is;
 
-        public ServletInputStreamImpl(InputStream is) {
+        public ServletInputStreamImpl(ByteArrayInputStream is) {
             this.is = is;
         }
 
@@ -91,12 +91,7 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
 
         @Override
         public boolean isFinished() {
-            try {
-                return is.available() == 0;
-            } catch (IOException e) {
-                logger.warn(e.getMessage());
-            }
-            return false;
+            return is.available() <= 0;
         }
 
         @Override
