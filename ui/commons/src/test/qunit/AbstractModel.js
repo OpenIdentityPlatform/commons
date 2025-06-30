@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 
 define([
@@ -32,14 +33,14 @@ define([
 
         testModel.url = "/crestResource";
 
-        sinon.stub(ServiceInvoker, "restCall", function (opts) {
+        sinon.stub(ServiceInvoker, "restCall").callsFake(function (opts) {
             return $.Deferred().resolve(_.extend(JSON.parse(opts.data), {
                 "_id": 1,
                 "_rev": 1
             }));
         });
 
-        testModel.save(newRecord).then(function () {
+        return testModel.save(newRecord).then(function () {
             restCallArg = ServiceInvoker.restCall.args[0][0]; // first invocation, first argument
             assert.equal(testModel.id, 1, "Newly-created model has id from backend");
             assert.equal(restCallArg.url, "/crestResource?_action=create&", "correct url used to create model");
@@ -60,13 +61,13 @@ define([
         testModel.url = "/crestResource";
         testModel.id = "myCustomId";
 
-        sinon.stub(ServiceInvoker, "restCall", function (opts) {
+        sinon.stub(ServiceInvoker, "restCall").callsFake(function (opts) {
             return $.Deferred().resolve(_.extend(JSON.parse(opts.data), {
                 "_rev": 1
             }));
         });
 
-        testModel.save(newRecord).then(function () {
+        return testModel.save(newRecord).then(function () {
             restCallArg = ServiceInvoker.restCall.args[0][0]; // first invocation, first argument
             assert.equal(testModel.get("_rev"), 1, "Model has new rev from backend");
             assert.equal(restCallArg.url, "/crestResource/myCustomId?", "correct url used to create model");
@@ -74,7 +75,7 @@ define([
             assert.equal(restCallArg.type, "PUT", "correct method used to create model");
 
             ServiceInvoker.restCall.restore();
-        })
+        });
     });
 
     QUnit.test("read operation", function (assert) {
@@ -84,7 +85,7 @@ define([
         testModel.url = "/crestResource";
         testModel.id = 1;
 
-        sinon.stub(ServiceInvoker, "restCall", function () {
+        sinon.stub(ServiceInvoker, "restCall").callsFake(function () {
             return $.Deferred().resolve({
                 "_id": 1,
                 "_rev": 1,
@@ -92,7 +93,7 @@ define([
             });
         });
 
-        testModel.fetch().then(function () {
+        return testModel.fetch().then(function () {
             restCallArg = ServiceInvoker.restCall.args[0][0]; // first invocation, first argument
             assert.equal(testModel.get("name"), "foo", "example data populated from fetch call");
             assert.equal(testModel.get("_rev"), 1, "revision populated from fetch call");
@@ -128,13 +129,13 @@ define([
 
         testModel.url = "/crestResource";
 
-        sinon.stub(ServiceInvoker, "restCall", function (opts) {
+        sinon.stub(ServiceInvoker, "restCall").callsFake(function (opts) {
             return $.Deferred().resolve(_.extend(JSON.parse(opts.data), {
                 "_rev": 2
             }));
         });
 
-        testModel.save().then(function () {
+        return testModel.save().then(function () {
             restCallArg = ServiceInvoker.restCall.args[0][0]; // first invocation, first argument
             assert.equal(testModel.get("_rev"), 2, "Model has new rev from backend");
             assert.equal(restCallArg.url, "/crestResource/1?", "correct url used to update model");
@@ -156,11 +157,11 @@ define([
 
         testModel.url = "/crestResource";
 
-        sinon.stub(ServiceInvoker, "restCall", function (opts) {
+        sinon.stub(ServiceInvoker, "restCall").callsFake(function () {
             return $.Deferred().resolve();
         });
 
-        testModel.destroy().then(function () {
+        return testModel.destroy().then(function () {
             restCallArg = ServiceInvoker.restCall.args[0][0]; // first invocation, first argument
             assert.equal(restCallArg.url, "/crestResource/1?", "correct url used to delete model");
             assert.equal(restCallArg.type, "DELETE", "correct method used to DELETE model");
@@ -180,11 +181,11 @@ define([
 
         testModel.url = "/crestResource";
 
-        sinon.stub(ServiceInvoker, "restCall", function (opts) {
+        sinon.stub(ServiceInvoker, "restCall").callsFake(function () {
             return $.Deferred().resolve();
         });
 
-        testModel.save({"foo": "baz"}, {patch: true}).then(function () {
+        return testModel.save({"foo": "baz"}, {patch: true}).then(function () {
             restCallArg = ServiceInvoker.restCall.args[0][0]; // first invocation, first argument
 
             assert.equal(restCallArg.url, "/crestResource/1?", "correct url used to patch model");
