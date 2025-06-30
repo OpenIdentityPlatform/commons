@@ -23,7 +23,7 @@ import org.forgerock.audit.events.EventTopicsMetaData;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * AuditEventFactory capable of performing construction injection by resolving dependencies using a DependencyProvider.

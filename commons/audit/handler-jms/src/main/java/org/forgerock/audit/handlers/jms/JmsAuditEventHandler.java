@@ -20,7 +20,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.*;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Session;

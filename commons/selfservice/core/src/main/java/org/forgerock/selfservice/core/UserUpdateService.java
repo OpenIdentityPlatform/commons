@@ -21,7 +21,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newPatchRequest;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;

@@ -95,12 +95,7 @@
                 <configuration>
                     <!-- Container configuration -->
                     <container>
-                        <containerId>tomcat9x</containerId>
-<!--                         <zipUrlInstaller> -->
-<!--                             <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.zip</url> -->
-<!--                             <downloadDir>${project.build.directory}/downloads</downloadDir> -->
-<!--                             <extractDir>${project.build.directory}/extracts</extractDir> -->
-<!--                         </zipUrlInstaller> -->
+                        <containerId>tomcat10x</containerId>
                     </container>
                     <!-- Configuration to use with the container or the deployer -->
                     <configuration>
@@ -173,11 +168,6 @@
         <dependency>
             <groupId>org.openidentityplatform.commons</groupId>
             <artifactId>json-resource-http</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.jayway.restassured</groupId>

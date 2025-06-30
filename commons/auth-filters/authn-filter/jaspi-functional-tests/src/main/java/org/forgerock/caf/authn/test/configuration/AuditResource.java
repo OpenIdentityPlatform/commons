@@ -20,7 +20,7 @@ import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.util.promise.Promises.*;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.forgerock.caf.authn.test.runtime.TestAuditApi;
 import org.forgerock.json.JsonValue;

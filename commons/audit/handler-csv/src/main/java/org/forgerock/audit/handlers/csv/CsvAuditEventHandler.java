@@ -52,7 +52,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;

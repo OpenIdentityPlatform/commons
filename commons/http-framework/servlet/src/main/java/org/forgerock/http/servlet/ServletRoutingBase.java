@@ -16,7 +16,7 @@
 
 package org.forgerock.http.servlet;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.forgerock.http.HttpApplication;
 

@@ -21,7 +21,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.net.InetSocketAddress;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;

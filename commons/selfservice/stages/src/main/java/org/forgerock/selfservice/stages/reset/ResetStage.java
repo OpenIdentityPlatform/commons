@@ -36,7 +36,7 @@ import org.forgerock.selfservice.core.util.RequirementsBuilder;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Reject;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * The reset password stage.

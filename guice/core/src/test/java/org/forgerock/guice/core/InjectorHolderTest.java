@@ -18,7 +18,7 @@ package org.forgerock.guice.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;

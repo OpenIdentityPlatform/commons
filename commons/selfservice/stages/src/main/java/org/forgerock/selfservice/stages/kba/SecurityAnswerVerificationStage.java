@@ -38,7 +38,7 @@ import org.forgerock.selfservice.core.util.Answers;
 import org.forgerock.selfservice.core.util.RequirementsBuilder;
 import org.forgerock.util.Reject;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

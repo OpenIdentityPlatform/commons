@@ -20,7 +20,7 @@ import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 import static org.forgerock.selfservice.stages.utils.LocaleUtils.getTranslationFromLocaleMap;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;

@@ -206,8 +206,8 @@
         <slf4j.version>1.7.36</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
-        <jetty.version>9.4.57.v20241219</jetty.version>
-        <grizzly-framework.version>2.3.35</grizzly-framework.version>
+        <jetty.version>11.0.25</jetty.version>
+        <grizzly-framework.version>3.0.1</grizzly-framework.version>
     </properties>
 
     <prerequisites>
@@ -310,8 +310,8 @@
 
             <dependency>
                 <groupId>com.sun.mail</groupId>
-                <artifactId>javax.mail</artifactId>
-                <version>1.6.2</version>
+                <artifactId>jakarta.mail</artifactId>
+                <version>2.0.1</version>
             </dependency>
             
 			<dependency>
@@ -702,9 +702,9 @@
 		      <version>${project.version}</version>
 		    </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>5.0.0</version>
                 <scope>provided</scope>
             </dependency>
 

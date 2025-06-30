@@ -35,7 +35,7 @@ import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.io.IOException;
 import java.net.URI;
 
