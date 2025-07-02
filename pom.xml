@@ -207,7 +207,7 @@
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
         <jetty.version>11.0.24</jetty.version>
-        <grizzly-framework.version>2.3.35</grizzly-framework.version>
+        <grizzly-framework.version>4.0.2</grizzly-framework.version>
     </properties>
 
     <prerequisites>
