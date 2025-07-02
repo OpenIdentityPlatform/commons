@@ -17,25 +17,22 @@
 
 package org.forgerock.caf.http;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
-import java.text.DateFormat;
-import java.text.FieldPosition;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.caf.http.Cookie.addCookie;
 import static org.forgerock.caf.http.Cookie.newCookie;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class CookieTest {
 
@@ -72,16 +69,13 @@ public class CookieTest {
         //When
         addCookie(cookie, response);
 
-        DateFormat df = new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss z", Locale.US);
-        df.setTimeZone(TimeZone.getTimeZone("GMT"));
-
         //Then
-        verify(response, never()).addCookie(Matchers.<jakarta.servlet.http.Cookie>anyObject());
+        verify(response, never()).addCookie(Matchers.anyObject());
         ArgumentCaptor<String> cookieCaptor = ArgumentCaptor.forClass(String.class);
         verify(response).addHeader(eq("Set-Cookie"), cookieCaptor.capture());
-        assertThat(cookieCaptor.getValue()).contains("COOKIE_NAME=COOKIE_VALUE;", "Domain=www.example.com;",
-                "Expires="+df.format(
-                        new Date(System.currentTimeMillis() + 6000 * 1000L)));
+        assertThat(cookieCaptor.getValue()).contains("COOKIE_NAME=COOKIE_VALUE;",
+                "Domain=www.example.com;", "Max-Age=6000;", "Path=/;", "Secure;",
+                "HttpOnly");
     }
 
     @Test

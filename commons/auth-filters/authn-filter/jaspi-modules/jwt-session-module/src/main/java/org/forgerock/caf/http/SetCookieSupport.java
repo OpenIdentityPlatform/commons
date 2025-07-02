@@ -25,7 +25,6 @@
 package org.forgerock.caf.http;
 
 import java.text.DateFormat;
-import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -126,24 +125,9 @@ public class SetCookieSupport {
         // Max-Age=secs ... or use old "Expires" format
         int maxAge = cookie.getMaxAge();
         if (maxAge >= 0) {
-            if (version > 0) {
+            if (version >= 0) {
                 buf.append("; Max-Age=");
                 buf.append(maxAge);
-            }
-            // IE6, IE7 and possibly other browsers don't understand Max-Age.
-            // They do understand Expires, even with V1 cookies!
-            if (version == 0) {
-                // Wdy, DD-Mon-YY HH:MM:SS GMT ( Expires Netscape format )
-                buf.append("; Expires=");
-                // To expire immediately we need to set the time in past
-                if (maxAge == 0) {
-                    buf.append(ANCIENT_DATE);
-                } else {
-                    OLD_COOKIE_FORMAT.get().format(
-                            new Date(System.currentTimeMillis() + maxAge * 1000L),
-                            buf,
-                            new FieldPosition(0));
-                }
             }
         }
 
