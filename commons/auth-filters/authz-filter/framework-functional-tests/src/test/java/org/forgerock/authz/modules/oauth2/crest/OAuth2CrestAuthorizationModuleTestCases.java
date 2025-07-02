@@ -17,7 +17,7 @@
 
 package org.forgerock.authz.modules.oauth2.crest;
 
-import static io.restassured.RestAssured.*;
+import static  com.jayway.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
 import org.forgerock.authz.AuthzTestCase;
