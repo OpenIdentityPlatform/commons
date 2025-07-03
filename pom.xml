@@ -207,7 +207,7 @@
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
         <jetty.version>11.0.25</jetty.version>
-        <grizzly-framework.version>4.0.2</grizzly-framework.version>
+        <grizzly-framework.version>3.0.1</grizzly-framework.version>
     </properties>
 
     <prerequisites>
@@ -704,7 +704,7 @@
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
-                <version>6.0.0</version>
+                <version>5.0.0</version>
                 <scope>provided</scope>
             </dependency>
 
