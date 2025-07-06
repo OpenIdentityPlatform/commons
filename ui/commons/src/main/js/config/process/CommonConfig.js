@@ -22,7 +22,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/SpinnerManager",
     "org/forgerock/commons/ui/common/main/ErrorsHandler"
-], function($, _, Constants, EventManager, spinner,  errorsHandler) {
+], function($, _, Constants, EventManager, spinner, errorsHandler) {
     var obj = [
         {
             startEvent: Constants.EVENT_APP_INITIALIZED,
