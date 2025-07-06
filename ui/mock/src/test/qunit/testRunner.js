@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 
 (function () {
@@ -29,7 +30,7 @@
     stashedRequire.original.config({
         baseUrl: '../www',
         paths: {
-            sinon: "libs/sinon-1.15.4"
+            sinon: "libs/sinon-15.2.0"
         }
     });
 
@@ -43,7 +44,7 @@
             "org/forgerock/commons/ui/common/main/i18nManager",
             "ThemeManager"
         ], function ($, sinon, i18nManager, ThemeManager) {
-            sinon.stub(ThemeManager, "getTheme", function () {
+            sinon.stub(ThemeManager, "getTheme").callsFake(function () {
                 return $.Deferred().resolve({path:""});
             });
             i18nManager.init({

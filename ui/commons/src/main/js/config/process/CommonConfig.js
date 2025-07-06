@@ -12,14 +12,17 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 
 define([
     "jquery",
     "lodash",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager"
-], function($, _, Constants, EventManager) {
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/commons/ui/common/main/SpinnerManager",
+    "org/forgerock/commons/ui/common/main/ErrorsHandler"
+], function($, _, Constants, EventManager, spinner, errorsHandler) {
     var obj = [
         {
             startEvent: Constants.EVENT_APP_INITIALIZED,
@@ -158,11 +161,7 @@ define([
         {
             startEvent: Constants.EVENT_REST_CALL_ERROR,
             description: "",
-            dependencies: [
-                "org/forgerock/commons/ui/common/main/SpinnerManager",
-                "org/forgerock/commons/ui/common/main/ErrorsHandler"
-            ],
-            processDescription: function(event, spinner, errorsHandler) {
+            processDescription: function(event) {
                 errorsHandler.handleError(event.data, event.errorsHandlers);
                 spinner.hideSpinner();
             }
@@ -170,10 +169,7 @@ define([
         {
             startEvent: Constants.EVENT_START_REST_CALL,
             description: "",
-            dependencies: [
-                "org/forgerock/commons/ui/common/main/SpinnerManager"
-            ],
-            processDescription: function(event, spinner) {
+            processDescription: function(event) {
                 if (!event.suppressSpinner) {
                     spinner.showSpinner();
                 }
@@ -182,10 +178,7 @@ define([
         {
             startEvent: Constants.EVENT_END_REST_CALL,
             description: "",
-            dependencies: [
-                "org/forgerock/commons/ui/common/main/SpinnerManager"
-            ],
-            processDescription: function(event, spinner) {
+            processDescription: function() {
                 spinner.hideSpinner();
             }
         },
