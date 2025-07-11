@@ -13,6 +13,7 @@
   ~ information: "Portions copyright [year] [name of copyright owner]".
   ~
   ~ Copyright 2015-2016 ForgeRock AS.
+  ~ Portions copyright 2024 3A Systems LLC.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -32,7 +33,7 @@
     <properties>
         <jodaTime.version>2.1</jodaTime.version>
         <supercsv.version>2.4.0</supercsv.version>
-        <javax.inject.version>1_2</javax.inject.version>
+        <jakarta.inject.version>2.0.1</jakarta.inject.version>
         <hikaricp.version>2.4.1</hikaricp.version>
     </properties>
 
@@ -53,9 +54,9 @@
         <dependencies>
             <!-- Open Identity Platform Communitycommons dependencies -->
             <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
-                <version>${javax.inject.version}</version>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>${jakarta.inject.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.zaxxer</groupId>
@@ -75,8 +76,8 @@
                 <version>${jodaTime.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
                 <scope>provided</scope>
             </dependency>
         </dependencies>

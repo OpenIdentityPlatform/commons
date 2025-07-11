@@ -13,6 +13,7 @@
  *
  * Copyright 2013 Cybernetica AS
  * Portions copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 package org.forgerock.audit.handlers.syslog;
 
@@ -21,7 +22,7 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.notSupported;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.net.InetSocketAddress;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 import org.forgerock.audit.Audit;
 import org.forgerock.audit.events.EventTopicsMetaData;
