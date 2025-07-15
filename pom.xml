@@ -22,7 +22,7 @@
  your own identifying information:
  "Portions Copyrighted [year] [name of copyright owner]"
 
-  Portions Copyright 2017-2024 3A Systems, LLC.
+  Portions Copyright 2017-2025 3A Systems, LLC.
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -208,6 +208,7 @@
         <rhino.version>1.7.14</rhino.version>
         <jetty.version>9.4.57.v20241219</jetty.version>
         <grizzly-framework.version>2.3.35</grizzly-framework.version>
+        <javax.version>3.1.0</javax.version>
     </properties>
 
     <prerequisites>
@@ -704,7 +705,7 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
+                <version>${javax.version}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -1413,6 +1414,7 @@
                 <configuration>
                     <publishingServerId>ossrh</publishingServerId>
                     <autoPublish>true</autoPublish>
+                    <waitMaxTime>5400</waitMaxTime>
                 </configuration>
             </plugin>
         </plugins>

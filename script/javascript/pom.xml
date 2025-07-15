@@ -22,7 +22,7 @@
   ~ your own identifying information:
   ~ "Portions Copyrighted [year] [name of copyright owner]"
   ~
-  ~ Portions Copyrighted 2018-2024 3A Systems, LLC
+  ~ Portions Copyrighted 2018-2025 3A Systems, LLC
   -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
@@ -36,9 +36,7 @@
     <packaging>bundle</packaging>
 
     <name>${project.groupId}.${project.artifactId}</name>
-
-    <properties>
-    </properties>
+    <description>${project.groupId}:${project.artifactId}</description>
 
     <dependencies>
         <!--
@@ -71,11 +69,11 @@
             <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
             <version>${rhino.version}_2</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.eclipse.wst.jsdt.debug</groupId>
             <artifactId>rhino.debugger</artifactId>
             <version>1.0.600.v201604292217</version>
-            <!--scope>provided</scope-->
             <optional>true</optional>
             <scope>system</scope>
             <systemPath>${project.basedir}/ext/org.eclipse.wst.jsdt.debug.rhino.debugger_1.0.600.v201604292217.jar</systemPath>
@@ -88,7 +86,7 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/ext/org.eclipse.wst.jsdt.debug.transport_1.0.300.v201502261613.jar</systemPath>
         </dependency>
-
+        -->
         <!-- SLF4J -->
         <dependency>
             <groupId>org.slf4j</groupId>
