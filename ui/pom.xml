@@ -27,11 +27,13 @@
   <parent>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>parent</artifactId>
-    <version>2.3.1-SNAPSHOT</version>
+    <version>2.4.1-SNAPSHOT</version>
   </parent>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <node.install.directory>${project.parent.basedir}</node.install.directory>
+    <jquery.version>3.7.1</jquery.version>
+    <sinon.version>15.2.0</sinon.version>
   </properties>
   <groupId>org.openidentityplatform.commons</groupId>
   <artifactId>ui</artifactId>
@@ -150,7 +152,7 @@
             <artifactItem>
               <groupId>org.openidentityplatform.commons.ui.libs</groupId>
               <artifactId>sinon</artifactId>
-              <version>1.15.4</version>
+              <version>${sinon.version}</version>
               <packaging>js</packaging>
               <downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/sinon.js/{version}/{artifactId}.{packaging}</downloadUrl>
             </artifactItem>
@@ -304,7 +306,7 @@
             <artifactItem>
               <groupId>org.openidentityplatform.commons.ui.libs</groupId>
               <artifactId>jquery</artifactId>
-              <version>2.1.1</version>
+              <version>${jquery.version}</version>
               <packaging>js</packaging>
               <classifier>min</classifier>
               <downloadUrl>https://cdnjs.cloudflare.com/ajax/libs/jquery/{version}/{artifactId}.{classifier}.{packaging}</downloadUrl>
@@ -584,7 +586,7 @@
       <dependency>
         <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>jquery</artifactId>
-        <version>2.1.1</version>
+        <version>${jquery.version}</version>
         <type>js</type>
         <classifier>min</classifier>
       </dependency>
@@ -805,7 +807,7 @@
       <dependency>
         <groupId>org.openidentityplatform.commons.ui.libs</groupId>
         <artifactId>sinon</artifactId>
-        <version>1.15.4</version>
+        <version>${sinon.version}</version>
         <type>js</type>
       </dependency>
       <dependency>

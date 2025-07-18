@@ -20,7 +20,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons</groupId>
   		<artifactId>http-framework</artifactId>
-        <version>2.3.1-SNAPSHOT</version>
+        <version>2.4.1-SNAPSHOT</version>
     </parent>
     <groupId>org.openidentityplatform.commons.http-framework</groupId>
     <artifactId>binding-test-utils</artifactId>

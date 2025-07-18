@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 
 define([
@@ -22,10 +23,10 @@ define([
     QUnit.module('OAuth Functions');
 
     QUnit.moduleStart(function() {
-        sinon.stub(URIUtils, "getCurrentOrigin", function () {
+        sinon.stub(URIUtils, "getCurrentOrigin").callsFake(function () {
             return "http://rp.com";
         });
-        sinon.stub(URIUtils, "getCurrentPathName", function () {
+        sinon.stub(URIUtils, "getCurrentPathName").callsFake(function () {
             return "/app/index.html";
         });
     });
@@ -44,7 +45,7 @@ define([
         );
     });
     QUnit.test("oAuth request url", function (assert) {
-        sinon.stub(OAuth, "generateNonce", function () {
+        sinon.stub(OAuth, "generateNonce").callsFake(function () {
             return "nonceValue";
         });
         assert.equal(OAuth.getRequestURL(

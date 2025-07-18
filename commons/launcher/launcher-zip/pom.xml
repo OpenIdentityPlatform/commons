@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>launcher</artifactId>
-        <version>2.3.1-SNAPSHOT</version>
+        <version>2.4.1-SNAPSHOT</version>
     </parent>
     <groupId>org.openidentityplatform.commons.launcher</groupId>
     <artifactId>launcher-zip</artifactId>
@@ -107,7 +107,6 @@
                 <dependency>
                     <groupId>commons-fileupload</groupId>
                     <artifactId>commons-fileupload</artifactId>
-                    <version>1.5</version>
                 </dependency>
                 <dependency>
                     <groupId>commons-io</groupId>

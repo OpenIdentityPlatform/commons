@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
 
 define([
@@ -37,6 +38,9 @@ define([
 
     obj.callRegisterListenerFromConfig = function (config) {
         eventManager.registerListener(config.startEvent, function (event) {
+            if (!config.dependencies) {
+                return config.processDescription(event);
+            }
             return $.when.apply($, _.map(config.dependencies, function (dep) {
                 return ModuleLoader.load(dep);
             })).then(function () {

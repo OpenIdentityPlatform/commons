@@ -29,7 +29,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>parent</artifactId>
-    <version>2.3.1-SNAPSHOT</version>
+    <version>2.4.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Parent POM for Open Identity Platform Community projects. Provides default project build configuration.</description>
@@ -202,12 +202,13 @@
         <!-- this property makes sure NetBeans 6.8+ picks up some formatting rules from checkstyle -->
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
-        <jackson.version>2.14.3</jackson.version>
+        <jackson.version>2.15.4</jackson.version>
         <slf4j.version>1.7.36</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
         <jetty.version>11.0.25</jetty.version>
         <grizzly-framework.version>3.0.1</grizzly-framework.version>
+        <servlet-api.version>3.1.0</servlet-api.version>
     </properties>
 
     <prerequisites>
@@ -704,7 +705,7 @@
             <dependency>
                 <groupId>jakarta.servlet</groupId>
                 <artifactId>jakarta.servlet-api</artifactId>
-                <version>5.0.0</version>
+                <version>${servlet-api.version}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -836,13 +837,18 @@
 		    <dependency>
 			    <groupId>org.apache.commons</groupId>
 			    <artifactId>commons-lang3</artifactId>
-			    <version>3.17.0</version>
+			    <version>3.18.0</version>
 			</dependency>
 			<dependency>
 			   <groupId>commons-io</groupId>
 			   <artifactId>commons-io</artifactId>
 			   <version>2.16.1</version>
 			 </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>1.6.0</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-text</artifactId>
@@ -1117,7 +1123,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.0</version>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1408,6 +1414,7 @@
                 <configuration>
                     <publishingServerId>ossrh</publishingServerId>
                     <autoPublish>true</autoPublish>
+                    <waitMaxTime>5400</waitMaxTime>
                 </configuration>
             </plugin>
         </plugins>
