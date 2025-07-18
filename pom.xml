@@ -208,7 +208,7 @@
         <rhino.version>1.7.14</rhino.version>
         <jetty.version>11.0.25</jetty.version>
         <grizzly-framework.version>3.0.1</grizzly-framework.version>
-        <servlet-api.version>3.1.0</servlet-api.version>
+        <servlet-api.version>5.0.0</servlet-api.version>
     </properties>
 
     <prerequisites>
