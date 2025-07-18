@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.audit.events.handlers;
@@ -23,7 +24,7 @@ import org.forgerock.audit.events.EventTopicsMetaData;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 /**
  * AuditEventFactory capable of performing construction injection by resolving dependencies using a DependencyProvider.

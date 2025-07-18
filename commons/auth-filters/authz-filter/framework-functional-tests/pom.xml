@@ -96,12 +96,7 @@
                 <configuration>
                     <!-- Container configuration -->
                     <container>
-                        <containerId>tomcat9x</containerId>
-<!--                         <zipUrlInstaller> -->
-<!--                             <url>http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.47/bin/apache-tomcat-7.0.47.zip</url> -->
-<!--                             <downloadDir>${project.build.directory}/downloads</downloadDir> -->
-<!--                             <extractDir>${project.build.directory}/extracts</extractDir> -->
-<!--                         </zipUrlInstaller> -->
+                        <containerId>tomcat10x</containerId>
                     </container>
                     <!-- Configuration to use with the container or the deployer -->
                     <configuration>
@@ -176,14 +171,15 @@
             <artifactId>json-resource-http</artifactId>
         </dependency>
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
             <version>${servlet-api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- Module Dependencies -->
