@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.http.servlet;
@@ -27,14 +28,14 @@ package org.forgerock.http.servlet;
  * IO (NIO)
  * </ul>
  *
- * @see ServletVersionAdapter#createServletSynchronizer(javax.servlet.http.HttpServletRequest,
- *      javax.servlet.http.HttpServletResponse)
+ * @see ServletVersionAdapter#createServletSynchronizer(jakarta.servlet.http.HttpServletRequest,
+ *      jakarta.servlet.http.HttpServletResponse)
  */
 interface ServletSynchronizer {
 
     /**
      * If this synchronizer is non-blocking then this method registers an
-     * {@link javax.servlet.AsyncListener call-back} which will be invoked once
+     * {@link jakarta.servlet.AsyncListener call-back} which will be invoked once
      * the request has completed, failed, or timed out.
      * <p>
      * This method should be used to register call-backs for releasing resources
@@ -60,7 +61,7 @@ interface ServletSynchronizer {
 
     /**
      * Releases any waiting threads blocked on {@link #awaitIfNeeded()}, as well
-     * as completing the underlying {@link javax.servlet.AsyncContext
+     * as completing the underlying {@link jakarta.servlet.AsyncContext
      * AsyncContext} if this synchronizer is non-blocking. This method should be
      * called after a writing out content and setting the response status.
      */
