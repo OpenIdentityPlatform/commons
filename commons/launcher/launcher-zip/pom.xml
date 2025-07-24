@@ -97,7 +97,7 @@
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>osgi-over-slf4j</artifactId>
-                    <version>1.7.2</version>
+                    <version>${slf4j.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.ops4j.pax.web</groupId>

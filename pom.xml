@@ -203,7 +203,7 @@
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
         <jackson.version>2.15.4</jackson.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
         <jetty.version>11.0.25</jetty.version>
