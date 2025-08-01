@@ -12,22 +12,27 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.caf.http;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.caf.http.Cookie.addCookie;
 import static org.forgerock.caf.http.Cookie.newCookie;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class CookieTest {
 
@@ -56,7 +61,8 @@ public class CookieTest {
 
         //Given
         Cookie.isServlet3xPresent = false;
-        Cookie cookie = createCookie("COOKIE_NAME", "COOKIE_VALUE", "/", "www.example.com", 0, "COOKIE_COMMENT", 6000,
+        Cookie cookie = createCookie("COOKIE_NAME", "COOKIE_VALUE", "/",
+                "www.example.com", 0, "COOKIE_COMMENT", 6000,
                 true, true);
         HttpServletResponse response = mock(HttpServletResponse.class);
 
@@ -64,11 +70,11 @@ public class CookieTest {
         addCookie(cookie, response);
 
         //Then
-        verify(response, never()).addCookie(Matchers.<javax.servlet.http.Cookie>anyObject());
+        verify(response, never()).addCookie(Matchers.anyObject());
         ArgumentCaptor<String> cookieCaptor = ArgumentCaptor.forClass(String.class);
         verify(response).addHeader(eq("Set-Cookie"), cookieCaptor.capture());
-        assertThat(cookieCaptor.getValue()).contains("COOKIE_NAME=COOKIE_VALUE;", "Version=1;",
-                "Comment=COOKIE_COMMENT;", "Domain=www.example.com;", "Max-Age=6000;", "Path=/;", "Secure;",
+        assertThat(cookieCaptor.getValue()).contains("COOKIE_NAME=COOKIE_VALUE;",
+                "Domain=www.example.com;", "Max-Age=6000;", "Path=/;", "Secure;",
                 "HttpOnly");
     }
 
@@ -86,16 +92,16 @@ public class CookieTest {
 
         //Then
         verify(response, never()).addHeader(eq("Set-Cookie"), anyString());
-        ArgumentCaptor<javax.servlet.http.Cookie> cookieCaptor =
-                ArgumentCaptor.forClass(javax.servlet.http.Cookie.class);
+        ArgumentCaptor<jakarta.servlet.http.Cookie> cookieCaptor =
+                ArgumentCaptor.forClass(jakarta.servlet.http.Cookie.class);
         verify(response).addCookie(cookieCaptor.capture());
-        javax.servlet.http.Cookie servletCookie = cookieCaptor.getValue();
+        jakarta.servlet.http.Cookie servletCookie = cookieCaptor.getValue();
         assertThat(servletCookie.getName()).isEqualTo("COOKIE_NAME");
         assertThat(servletCookie.getValue()).isEqualTo("COOKIE_VALUE");
         assertThat(servletCookie.getPath()).isEqualTo("/");
         assertThat(servletCookie.getDomain()).isEqualTo("www.example.com");
-        assertThat(servletCookie.getVersion()).isEqualTo(0);
-        assertThat(servletCookie.getComment()).isEqualTo("COOKIE_COMMENT");
+//        assertThat(servletCookie.getVersion()).isEqualTo(0); //these are depreceated since 6.0 Servlet
+//        assertThat(servletCookie.getComment()).isEqualTo("COOKIE_COMMENT");
         assertThat(servletCookie.getMaxAge()).isEqualTo(6000);
         assertThat(servletCookie.getSecure()).isEqualTo(true);
         assertThat(servletCookie.isHttpOnly()).isEqualTo(true);
@@ -106,8 +112,8 @@ public class CookieTest {
 
         //Given
         HttpServletRequest request = mock(HttpServletRequest.class);
-        javax.servlet.http.Cookie[] cookies = new javax.servlet.http.Cookie[] {
-            new javax.servlet.http.Cookie("mycookie", "somevalue")
+        jakarta.servlet.http.Cookie[] cookies = new jakarta.servlet.http.Cookie[] {
+            new jakarta.servlet.http.Cookie("mycookie", "somevalue")
         };
 
         //When

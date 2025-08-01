@@ -13,6 +13,7 @@
  *
  * Copyright 2010?2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 package org.forgerock.http.servlet;
 
@@ -34,12 +35,12 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.ServiceLoader;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletConfig;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.forgerock.http.ApiProducer;
 import org.forgerock.http.DescribedHttpApplication;
@@ -89,7 +90,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
     private static final long serialVersionUID = 3524182656424860912L;
 
     /** Standard specified request attribute name for retrieving X509 Certificates. */
-    private static final String SERVLET_REQUEST_X509_ATTRIBUTE = "javax.servlet.request.X509Certificate";
+    private static final String SERVLET_REQUEST_X509_ATTRIBUTE = "jakarta.servlet.request.X509Certificate";
 
     /** Methods that should not include an entity body. */
     private static final CaseInsensitiveSet NON_ENTITY_METHODS = new CaseInsensitiveSet(
