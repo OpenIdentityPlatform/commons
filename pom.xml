@@ -935,7 +935,7 @@
                 <plugin>
                     <groupId>org.codehaus.cargo</groupId>
                     <artifactId>cargo-maven3-plugin</artifactId>
-                    <version>1.9.8</version>
+                    <version>1.10.20</version>
                 </plugin>
                 <plugin>
                     <groupId>org.openidentityplatform.commons</groupId>

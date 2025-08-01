@@ -32,6 +32,7 @@
     <properties>
         <hostname>localhost</hostname>
         <context.uri>framework</context.uri>
+        <maven.cargo.containerId>tomcat10x</maven.cargo.containerId>
     </properties>
 
     <build>
@@ -96,7 +97,7 @@
                 <configuration>
                     <!-- Container configuration -->
                     <container>
-                        <containerId>tomcat10x</containerId>
+                        <containerId>${maven.cargo.containerId}</containerId>
                     </container>
                     <!-- Configuration to use with the container or the deployer -->
                     <configuration>
@@ -189,4 +190,15 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+    <profiles>
+        <profile>
+            <id>jdk17.options</id>
+            <activation>
+                <jdk>[17,)</jdk>
+            </activation>
+            <properties>
+                <maven.cargo.containerId>tomcat11x</maven.cargo.containerId>
+            </properties>
+        </profile>
+    </profiles>
 </project>
