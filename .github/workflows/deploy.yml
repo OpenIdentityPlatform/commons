@@ -2,7 +2,7 @@ name: Deploy Maven
 
 on:
   workflow_run:
-    branches: [ master ]
+    branches: [ 'master','release/3.0.0-SNAPSHOT' ]
     workflows: ["Build Maven","Release Maven"]
     types: [completed]
 jobs:
@@ -26,6 +26,7 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+          ref: ${{ github.event.workflow_run.head_branch }}
       - name: Set up Java for publishing to Maven Central Repository OSS
         uses: actions/setup-java@v4
         with:
