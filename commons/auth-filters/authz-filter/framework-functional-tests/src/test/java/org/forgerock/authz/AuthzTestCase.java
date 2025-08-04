@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.authz;
@@ -19,9 +20,9 @@ package org.forgerock.authz;
 import org.testng.annotations.BeforeClass;
 
 import com.jayway.restassured.RestAssured;
-import com.jayway.restassured.config.EncoderConfig;
-import com.jayway.restassured.config.RestAssuredConfig;
-import com.jayway.restassured.parsing.Parser;
+import  com.jayway.restassured.config.EncoderConfig;
+import  com.jayway.restassured.config.RestAssuredConfig;
+import  com.jayway.restassured.parsing.Parser;
 
 public class AuthzTestCase {
 
