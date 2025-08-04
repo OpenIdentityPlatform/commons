@@ -3,7 +3,7 @@ name: Build Maven
 on:
   push:
   pull_request:
-    branches: [ master ]
+    branches: [ 'master','release/3.0.0-SNAPSHOT' ]
 jobs:
   build-maven:
     runs-on: ${{ matrix.os }}
