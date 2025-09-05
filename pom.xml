@@ -29,7 +29,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>parent</artifactId>
-    <version>2.4.2-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Parent POM for Open Identity Platform Community projects. Provides default project build configuration.</description>
@@ -116,8 +116,8 @@
 
         <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
         <mavenCompilerPluginVersion>3.13.0</mavenCompilerPluginVersion>
-        <maven.compiler.target>8</maven.compiler.target>
-        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
 
         <!-- maven-enforcer-plugin -->
         <maven.min.version>3.0.1</maven.min.version>
@@ -203,12 +203,12 @@
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
         <jackson.version>2.15.4</jackson.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <slf4j.version>2.0.17</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
-        <jetty.version>9.4.57.v20241219</jetty.version>
-        <grizzly-framework.version>2.3.35</grizzly-framework.version>
-        <servlet-api.version>3.1.0</servlet-api.version>
+        <jetty.version>11.0.25</jetty.version>
+        <grizzly-framework.version>3.0.1</grizzly-framework.version>
+        <servlet-api.version>5.0.0</servlet-api.version>
     </properties>
 
     <prerequisites>
@@ -286,7 +286,17 @@
 			<dependency>
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava</artifactId>
-				<version>32.1.1-jre</version>
+				<version>33.4.8-jre</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.j2objc</groupId>
+                        <artifactId>j2objc-annotations</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>com.google.guava</groupId>
+                        <artifactId>listenablefuture</artifactId>
+                    </exclusion>
+                </exclusions>
 			</dependency>
 
 			<dependency>
@@ -311,8 +321,8 @@
 
             <dependency>
                 <groupId>com.sun.mail</groupId>
-                <artifactId>javax.mail</artifactId>
-                <version>1.6.2</version>
+                <artifactId>jakarta.mail</artifactId>
+                <version>2.0.1</version>
             </dependency>
             
 			<dependency>
@@ -703,8 +713,8 @@
 		      <version>${project.version}</version>
 		    </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
                 <version>${servlet-api.version}</version>
                 <scope>provided</scope>
             </dependency>
@@ -809,26 +819,26 @@
 				<artifactId>FastInfoset</artifactId>
 				<version>1.2.17</version>
 			</dependency>
-			<dependency>
-				<groupId>javax.xml.bind</groupId>
-				<artifactId>jaxb-api</artifactId>
-				<version>2.3.1</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-core</artifactId>
-				<version>2.3.0.1</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb-impl</artifactId>
-				<version>2.3.2</version>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.xml.bind</groupId>
-				<artifactId>jaxb1-impl</artifactId>
-				<version>2.2.5.1</version>
-			</dependency>
+            <dependency>
+                <groupId>javax.xml.bind</groupId>
+                <artifactId>jaxb-api</artifactId>
+                <version>2.3.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-core</artifactId>
+                <version>2.3.0.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb-impl</artifactId>
+                <version>2.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.sun.xml.bind</groupId>
+                <artifactId>jaxb1-impl</artifactId>
+                <version>2.2.5.1</version>
+            </dependency>
 		    <dependency>
 		        <groupId>com.google.code.findbugs</groupId>
 		        <artifactId>jsr305</artifactId>
@@ -882,7 +892,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.jetty.websocket</groupId>
-                <artifactId>websocket-server</artifactId>
+                <artifactId>websocket-jetty-server</artifactId>
                 <version>${jetty.version}</version>
             </dependency>
 
@@ -925,7 +935,7 @@
                 <plugin>
                     <groupId>org.codehaus.cargo</groupId>
                     <artifactId>cargo-maven3-plugin</artifactId>
-                    <version>1.9.8</version>
+                    <version>1.10.20</version>
                 </plugin>
                 <plugin>
                     <groupId>org.openidentityplatform.commons</groupId>
@@ -955,7 +965,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.3.7</version>
+                    <version>5.1.9</version>
                     <configuration>
                         <instructions>
                             <Implementation-Build>${ci.build.number}</Implementation-Build>
@@ -1462,7 +1472,7 @@
                 <jdk>[9,)</jdk>
             </activation>
             <properties>
-                <maven.compiler.release>8</maven.compiler.release>
+                <maven.compiler.release>11</maven.compiler.release>
             </properties>
         </profile>
 	    <profile>

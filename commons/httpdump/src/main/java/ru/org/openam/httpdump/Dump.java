@@ -20,8 +20,8 @@ import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Enumeration;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class Dump {
 					new Object[]{
 						Client.get(request),
 						request.getMethod(),
-						request.getAttribute("javax.servlet.forward.request_uri")==null?request.getRequestURI():(String)request.getAttribute("javax.servlet.forward.request_uri"),
+						request.getAttribute("jakarta.servlet.forward.request_uri")==null?request.getRequestURI():(String)request.getAttribute("jakarta.servlet.forward.request_uri"),
 						request.getQueryString(),
 						dump_getHeaders(request),
 						dump_getParameterMap(request),
