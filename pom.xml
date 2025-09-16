@@ -22,14 +22,14 @@
  your own identifying information:
  "Portions Copyrighted [year] [name of copyright owner]"
 
-  Portions Copyright 2017-2024 3A Systems, LLC.
+  Portions Copyright 2017-2025 3A Systems, LLC.
 -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>parent</artifactId>
-    <version>2.2.3-SNAPSHOT</version>
+    <version>2.4.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.groupId}.${project.artifactId}</name>
     <description>Parent POM for Open Identity Platform Community projects. Provides default project build configuration.</description>
@@ -70,16 +70,29 @@
     		<url>https://github.com/OpenIdentityPlatform/commons</url>
     	</developer>
     </developers>
-	<distributionManagement>
-		<repository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-		</repository>
-		<snapshotRepository>
-			<id>ossrh</id>
-			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <repositories>
+	<repository>
+	    <name>Central Portal Snapshots</name>
+	    <id>central-portal-snapshots</id>
+	    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+	    <releases>
+		<enabled>false</enabled>
+	    </releases>
+	    <snapshots>
+		<enabled>true</enabled>
+	    </snapshots>
+	</repository>
+    </repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<name>Central Portal Snapshots</name>
+		    <id>central-portal-snapshots</id>
+		    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
 	<modules>
 		<module>maven-external-dependency-plugin/maven-external-dependency-plugin</module>
 		<module>build-tools</module>
@@ -103,9 +116,8 @@
 
         <!-- maven-compiler-plugin http://maven.apache.org/plugins/maven-compiler-plugin -->
         <mavenCompilerPluginVersion>3.13.0</mavenCompilerPluginVersion>
-        <maven.compiler.release>8</maven.compiler.release>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
 
         <!-- maven-enforcer-plugin -->
         <maven.min.version>3.0.1</maven.min.version>
@@ -115,7 +127,7 @@
         <findbugsPluginVersion>3.0.1</findbugsPluginVersion>
 
         <!-- maven-javadoc-plugin -->
-        <javadocPluginVersion>3.0.1</javadocPluginVersion>
+        <javadocPluginVersion>3.10.1</javadocPluginVersion>
         <!-- build-tools stylesheet org/forgerock/javadoc/javadoc.css
              does not work with JDK7 -->
         <javadocStylesheet />
@@ -190,10 +202,13 @@
         <!-- this property makes sure NetBeans 6.8+ picks up some formatting rules from checkstyle -->
         <netbeans.checkstyle.format>true</netbeans.checkstyle.format>
 
-        <jackson.version>2.14.3</jackson.version>
+        <jackson.version>2.15.4</jackson.version>
         <slf4j.version>1.7.36</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.14</rhino.version>
+        <jetty.version>9.4.57.v20241219</jetty.version>
+        <grizzly-framework.version>2.3.35</grizzly-framework.version>
+        <servlet-api.version>3.1.0</servlet-api.version>
     </properties>
 
     <prerequisites>
@@ -690,7 +705,7 @@
             <dependency>
                 <groupId>javax.servlet</groupId>
                 <artifactId>javax.servlet-api</artifactId>
-                <version>3.1.0</version>
+                <version>${servlet-api.version}</version>
                 <scope>provided</scope>
             </dependency>
 
@@ -822,13 +837,18 @@
 		    <dependency>
 			    <groupId>org.apache.commons</groupId>
 			    <artifactId>commons-lang3</artifactId>
-			    <version>3.17.0</version>
+			    <version>3.18.0</version>
 			</dependency>
 			<dependency>
 			   <groupId>commons-io</groupId>
 			   <artifactId>commons-io</artifactId>
 			   <version>2.16.1</version>
 			 </dependency>
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>1.6.0</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-text</artifactId>
@@ -850,6 +870,43 @@
 		      <artifactId>groovy-all</artifactId>
 		      <version>2.4.21</version>
 		    </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-servlet</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty.websocket</groupId>
+                <artifactId>websocket-server</artifactId>
+                <version>${jetty.version}</version>
+            </dependency>
+
+            <!-- Grizzly Dependencies -->
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-framework</artifactId>
+                <version>${grizzly-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-http-server</artifactId>
+                <version>${grizzly-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-http-servlet</artifactId>
+                <version>${grizzly-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.glassfish.grizzly</groupId>
+                <artifactId>grizzly-websockets</artifactId>
+                <version>${grizzly-framework.version}</version>
+            </dependency>
 		</dependencies>
 	</dependencyManagement>
     <build><finalName>${project.groupId}.${project.artifactId}</finalName>
@@ -939,9 +996,6 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${mavenCompilerPluginVersion}</version>
                     <configuration>
-                        <release>${maven.compiler.release}</release>
-                        <source>${maven.compiler.source}</source>
-                        <target>${maven.compiler.target}</target>
                         <encoding>${project.build.sourceEncoding}</encoding>
                         <compilerArgument>-Xlint:all</compilerArgument>
                         <showWarnings>true</showWarnings>
@@ -1069,7 +1123,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.0</version>
+                    <version>3.6.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -1352,27 +1406,17 @@
 			  	<doclint>none</doclint>
 			  </configuration>
 			</plugin>
-			<plugin>
-		      <groupId>org.sonatype.plugins</groupId>
-		      <artifactId>nexus-staging-maven-plugin</artifactId>
-		      <version>1.6.12</version>
-		      <extensions>true</extensions>
-		      <configuration>
-		        <serverId>ossrh</serverId>
-		        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-		        <autoReleaseAfterClose>false</autoReleaseAfterClose>
-		        <stagingProgressTimeoutMinutes>15</stagingProgressTimeoutMinutes>
-		        <keepStagingRepositoryOnFailure>false</keepStagingRepositoryOnFailure>
-		        <keepStagingRepositoryOnCloseRuleFailure>false</keepStagingRepositoryOnCloseRuleFailure>
-		      </configuration>
-		      <dependencies>
-		      	<dependency>
-			        <groupId>com.google.guava</groupId>
-			        <artifactId>guava</artifactId>
-			        <version>15.0</version>
-			     </dependency>
-		      </dependencies>
-		    </plugin>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.8.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>ossrh</publishingServerId>
+                    <autoPublish>true</autoPublish>
+                    <waitMaxTime>5400</waitMaxTime>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <profiles>
@@ -1412,6 +1456,15 @@
 	            </plugins>
 	        </build>
 	    </profile>
+        <profile>
+            <id>set-compiler-release</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
 	    <profile>
 	      <id>jdk16.options</id>
 	      <activation>

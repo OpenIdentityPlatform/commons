@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2025 3A Systems LLC.
  */
  /*globals QUnit */
 
@@ -29,7 +30,7 @@ define([
 
         testCollection.url = "/crestResource?_queryFilter=true";
 
-        sinon.stub(ServiceInvoker, "restCall", function (options) {
+        sinon.stub(ServiceInvoker, "restCall").callsFake(function (options) {
             var response = {
                 "result": [{
                     "_id": 1,
@@ -57,7 +58,7 @@ define([
         testCollection.setPagingType("cookie");
         testCollection.setTotalPagedResultsPolicy("EXACT");
 
-        testCollection.getFirstPage().then(function () {
+        return testCollection.getFirstPage().then(function () {
             assert.equal(ServiceInvoker.restCall.callCount, 1, "Only one REST call produced");
             restCallArg = ServiceInvoker.restCall.args[0][0]; // first invocation, first argument
             assert.equal(testCollection.length, 2, "collection contains two records from the backend");

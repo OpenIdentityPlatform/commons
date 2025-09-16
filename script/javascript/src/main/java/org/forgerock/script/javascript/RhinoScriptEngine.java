@@ -18,6 +18,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2018-2025 3A Systems, LLC
  */
 
 package org.forgerock.script.javascript;
@@ -272,7 +273,7 @@ public class RhinoScriptEngine extends AbstractScriptEngine {
         if (null == debugInitialised) {
             // Get here only once when the first factory initialised.
             if (null != configString) {
-                try {
+                /*try {
                     if (null == debugListener) {
                         debugListener = new org.eclipse.wst.jsdt.debug.rhino.debugger.RhinoDebugger(configString);
                         Context.enter().getFactory().addListener(debugListener);
@@ -292,12 +293,12 @@ public class RhinoScriptEngine extends AbstractScriptEngine {
                         // RhinoDebugger class
                         logger.warn("RhinoDebugger can not be started because the JSDT RhinoDebugger and Transport bundles must be deployed.");
                     }
-                }
+                }*/
                 debugInitialised = null == debugInitialised ? Boolean.FALSE : debugInitialised;
             } else if (false /* TODO How to stop */) {
                 try {
-                    ((org.eclipse.wst.jsdt.debug.rhino.debugger.RhinoDebugger) debugListener)
-                            .stop();
+                    /*((org.eclipse.wst.jsdt.debug.rhino.debugger.RhinoDebugger) debugListener)
+                            .stop();*/
                 } catch (Throwable ex) {
                     // We do not care about the NoClassDefFoundError when we
                     // "Stop"
