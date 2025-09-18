@@ -2,7 +2,7 @@ name: Deploy Maven
 
 on:
   workflow_run:
-    branches: [ 'master','release/3.0.0-SNAPSHOT' ]
+    branches: [ 'sustaining/2.4.x','master' ]
     workflows: ["Build Maven","Release Maven"]
     types: [completed]
 jobs:
@@ -30,7 +30,7 @@ jobs:
       - name: Set up Java for publishing to Maven Central Repository OSS
         uses: actions/setup-java@v4
         with:
-          java-version: '11'
+          java-version: ${{ github.event.workflow_run.head_branch == 'sustaining/2.4.x' && '8' || '11'}}
           distribution: 'temurin'
           server-id: ossrh
           server-username: MAVEN_USERNAME
