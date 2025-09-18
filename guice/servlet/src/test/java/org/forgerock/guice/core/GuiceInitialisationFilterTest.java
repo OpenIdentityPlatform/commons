@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.guice.core;
@@ -20,8 +21,8 @@ import com.google.inject.Stage;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;

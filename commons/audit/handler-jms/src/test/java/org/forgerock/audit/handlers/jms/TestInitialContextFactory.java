@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.audit.handlers.jms;
@@ -21,9 +22,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Hashtable;
-import javax.jms.Connection;
-import javax.jms.ConnectionFactory;
-import javax.jms.Topic;
+import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.Topic;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.naming.spi.InitialContextFactory;

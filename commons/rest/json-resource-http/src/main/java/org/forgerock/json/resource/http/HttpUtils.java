@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.json.resource.http;
@@ -36,14 +37,14 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.activation.DataSource;
-import javax.mail.BodyPart;
-import javax.mail.MessagingException;
-import javax.mail.internet.ContentDisposition;
-import javax.mail.internet.ContentType;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.ParseException;
+import jakarta.activation.DataSource;
+import jakarta.mail.BodyPart;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.ContentDisposition;
+import jakarta.mail.internet.ContentType;
+import jakarta.mail.internet.MimeBodyPart;
+import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.internet.ParseException;
 
 import org.forgerock.http.header.AcceptApiVersionHeader;
 import org.forgerock.http.header.ContentTypeHeader;

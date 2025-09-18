@@ -12,11 +12,12 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.authz.modules.oauth2.crest;
 
-import static com.jayway.restassured.RestAssured.*;
+import static  com.jayway.restassured.RestAssured.*;
 import static org.hamcrest.Matchers.*;
 
 import org.forgerock.authz.AuthzTestCase;

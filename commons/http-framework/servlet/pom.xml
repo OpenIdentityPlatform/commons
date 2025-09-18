@@ -20,7 +20,7 @@
   <parent>
   	<groupId>org.openidentityplatform.commons</groupId>
   	<artifactId>http-framework</artifactId>
-    <version>2.4.2-SNAPSHOT</version>
+    <version>3.0.0-SNAPSHOT</version>
   </parent>
   <groupId>org.openidentityplatform.commons.http-framework</groupId>
   <artifactId>servlet</artifactId>
@@ -32,8 +32,8 @@
       <artifactId>core</artifactId>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
       <version>${servlet-api.version}</version>
       <scope>provided</scope>
     </dependency>
@@ -71,8 +71,26 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-servlet</artifactId>
-      <version>9.4.51.v20230217</version>
+      <version>${jetty.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Import-Package>
+              jakarta.servlet;version="[5.0,7)",
+              jakarta.servlet.http;version="[5.0,7)",
+              *
+            </Import-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>

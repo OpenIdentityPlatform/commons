@@ -12,12 +12,13 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.http.servlet;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * A Servlet API version adapter provides an abstraction which allows Servlet

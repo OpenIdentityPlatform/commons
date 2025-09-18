@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.caf.http;
@@ -20,8 +21,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionCookie;
 
@@ -29,7 +30,7 @@ import org.forgerock.jaspi.modules.session.jwt.JwtSessionCookie;
  * This class creates an API which bridges the differences between the Servlet 2.5 and 3.0 Cookie APIs, as the Servlet
  * 2.5 API does not support HttpOnly cookies and provides no methods to create a HttpOnly cookie.
  *
- * @see javax.servlet.http.Cookie
+ * @see jakarta.servlet.http.Cookie
  * @since 1.5.0
  */
 //@Checkstyle:ignore
@@ -38,13 +39,13 @@ public class Cookie implements JwtSessionCookie {
     //So as to test both Servlet 2.5 or 3.0 being present
     static boolean isServlet3xPresent = isHttpOnlyCookieSupported();
 
-    private final javax.servlet.http.Cookie cookie;
+    private final jakarta.servlet.http.Cookie cookie;
 
     private Cookie(String name, String value) {
-        this.cookie = new javax.servlet.http.Cookie(name, value);
+        this.cookie = new jakarta.servlet.http.Cookie(name, value);
     }
 
-    private Cookie(javax.servlet.http.Cookie cookie) {
+    private Cookie(jakarta.servlet.http.Cookie cookie) {
         this.cookie = cookie;
     }
 
@@ -271,7 +272,7 @@ public class Cookie implements JwtSessionCookie {
             super(name, value);
         }
 
-        private CookieV2x(javax.servlet.http.Cookie cookie) {
+        private CookieV2x(jakarta.servlet.http.Cookie cookie) {
             super(cookie);
         }
 
@@ -310,7 +311,7 @@ public class Cookie implements JwtSessionCookie {
         }
     }
 
-    static Cookie newCookie(javax.servlet.http.Cookie cookie) {
+    static Cookie newCookie(jakarta.servlet.http.Cookie cookie) {
 
         if (isServlet3xPresent) {
             return new Cookie(cookie);
@@ -349,7 +350,7 @@ public class Cookie implements JwtSessionCookie {
     /**
      * <p>Gets all of the {@code Cookie}s from the provided {@code HttpServletRequest}.</p>
      *
-     * <p>Use this method to convert {@link javax.servlet.http.Cookie}s into {@link Cookie}s so as to use as API which
+     * <p>Use this method to convert {@link jakarta.servlet.http.Cookie}s into {@link Cookie}s so as to use as API which
      * supports both the Servlet 2.5 and 3.0 Cookie API.</p>
      *
      * @param request The request to get the cookies from.
@@ -358,7 +359,7 @@ public class Cookie implements JwtSessionCookie {
     public static Set<Cookie> getCookies(HttpServletRequest request) {
         Set<Cookie> cookies = new HashSet<>();
         if (request.getCookies() != null) {
-            for (javax.servlet.http.Cookie cookie : request.getCookies()) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
                 cookies.add(newCookie(cookie));
             }
         }
@@ -367,7 +368,7 @@ public class Cookie implements JwtSessionCookie {
 
     private static boolean isHttpOnlyCookieSupported() {
         try {
-            javax.servlet.http.Cookie.class.getMethod("setHttpOnly", boolean.class);
+            jakarta.servlet.http.Cookie.class.getMethod("setHttpOnly", boolean.class);
             return true;
         } catch (NoSuchMethodException e) {
             return false;

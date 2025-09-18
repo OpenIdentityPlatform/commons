@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>launcher</artifactId>
-        <version>2.4.2-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
     <groupId>org.openidentityplatform.commons.launcher</groupId>
     <artifactId>launcher-zip</artifactId>
@@ -97,7 +97,7 @@
                 <dependency>
                     <groupId>org.slf4j</groupId>
                     <artifactId>osgi-over-slf4j</artifactId>
-                    <version>1.7.2</version>
+                    <version>${slf4j.version}</version>
                 </dependency>
                 <dependency>
                     <groupId>org.ops4j.pax.web</groupId>

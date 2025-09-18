@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.audit.handlers.jms;
@@ -20,10 +21,10 @@ import static org.forgerock.audit.util.ResourceExceptionsUtil.*;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import javax.inject.Inject;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
+import jakarta.inject.Inject;
+import jakarta.jms.JMSException;
+import jakarta.jms.MessageProducer;
+import jakarta.jms.Session;
 import java.util.Collections;
 import java.util.List;
 

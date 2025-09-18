@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2024-2025 3A Systems LLC.
  */
 
 package org.forgerock.api.jackson;
@@ -24,8 +25,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
+import jakarta.mail.internet.AddressException;
+import jakarta.mail.internet.InternetAddress;
 import javax.validation.ValidationException;
 import javax.xml.bind.DatatypeConverter;
 

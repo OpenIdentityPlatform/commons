@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.selfservice.core.annotations;
@@ -22,7 +23,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.PARAMETER;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import javax.inject.Qualifier;
+import jakarta.inject.Qualifier;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 

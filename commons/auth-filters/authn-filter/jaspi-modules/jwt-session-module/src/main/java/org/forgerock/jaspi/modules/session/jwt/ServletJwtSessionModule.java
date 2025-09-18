@@ -12,13 +12,13 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2024 3A Systems LLC.
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
 
 import static org.forgerock.caf.http.Cookie.getCookies;
 import static org.forgerock.caf.http.Cookie.newCookie;
-import static org.forgerock.jaspi.modules.session.jwt.AbstractJwtSessionModule.LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
@@ -27,8 +27,8 @@ import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessageInfo;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.module.ServerAuthModule;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
