@@ -28,7 +28,7 @@
   <parent>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>i18n-framework</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>3.0.1</version>
   </parent>
   <groupId>org.openidentityplatform.commons.i18n-framework</groupId>
   <artifactId>core</artifactId>
