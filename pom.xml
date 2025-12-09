@@ -205,7 +205,8 @@
         <jackson.version>2.15.4</jackson.version>
         <slf4j.version>2.0.17</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
-        <rhino.version>1.7.14</rhino.version>
+        <rhino.version>1.7.15.1</rhino.version>
+        <rhino.servicemix.version>1.7.15_1</rhino.servicemix.version>
         <jetty.version>11.0.25</jetty.version>
         <grizzly-framework.version>3.0.1</grizzly-framework.version>
         <servlet-api.version>5.0.0</servlet-api.version>
