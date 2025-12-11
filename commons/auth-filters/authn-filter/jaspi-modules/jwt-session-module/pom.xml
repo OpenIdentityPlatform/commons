@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons.authn-filter</groupId>
         <artifactId>jaspi-modules</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.3-SNAPSHOT</version>
     </parent>
 	<groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
     <artifactId>jwt-session-module</artifactId>

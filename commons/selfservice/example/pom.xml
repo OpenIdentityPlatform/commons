@@ -22,7 +22,7 @@
     <parent>
         <artifactId>selfservice</artifactId>
         <groupId>org.openidentityplatform.commons</groupId>
-        <version>3.0.2</version>
+        <version>3.0.3-SNAPSHOT</version>
     </parent>
 	<groupId>org.openidentityplatform.commons.selfservice</groupId>
     <artifactId>example</artifactId>

@@ -21,7 +21,7 @@ Portions copyright 2024 3A Systems LLC.
   <parent>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>parent</artifactId>
-    <version>3.0.2</version>
+    <version>3.0.3-SNAPSHOT</version>
   </parent>
 
     <groupId>org.openidentityplatform.commons</groupId>

@@ -21,7 +21,7 @@ Portions Copyrighted 2020-2025 3A Systems LLC.
     <parent>
         <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>guice</artifactId>
-        <version>3.0.2</version>
+        <version>3.0.3-SNAPSHOT</version>
     </parent>
 	<groupId>org.openidentityplatform.commons.guice</groupId>
     <artifactId>servlet</artifactId>

@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>ui</artifactId>
-       <version>3.0.2</version>
+       <version>3.0.3-SNAPSHOT</version>
     </parent>
 	<groupId>org.openidentityplatform.commons.ui</groupId>
     <artifactId>mock</artifactId>

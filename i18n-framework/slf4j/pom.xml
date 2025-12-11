@@ -28,7 +28,7 @@
   <parent>
     <artifactId>i18n-framework</artifactId>
     <groupId>org.openidentityplatform.commons</groupId>
-    <version>3.0.2</version>
+    <version>3.0.3-SNAPSHOT</version>
   </parent>
   <groupId>org.openidentityplatform.commons.i18n-framework</groupId>
   <artifactId>slf4j</artifactId>
