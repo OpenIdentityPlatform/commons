@@ -20,7 +20,7 @@
     <parent>
         <artifactId>audit</artifactId>
         <groupId>org.openidentityplatform.commons</groupId>
-        <version>3.0.2-SNAPSHOT</version>
+        <version>3.0.2</version>
     </parent>
 	<groupId>org.openidentityplatform.commons.audit</groupId>
     <artifactId>handler-jdbc</artifactId>

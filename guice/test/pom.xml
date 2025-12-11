@@ -21,7 +21,7 @@
     <parent>
         <artifactId>guice</artifactId>
         <groupId>org.openidentityplatform.commons</groupId>
-        <version>3.0.2-SNAPSHOT</version>
+        <version>3.0.2</version>
     </parent>
 	<groupId>org.openidentityplatform.commons.guice</groupId>
     <artifactId>test</artifactId>

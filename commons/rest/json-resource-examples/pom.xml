@@ -19,7 +19,7 @@
   <parent>
     <groupId>org.openidentityplatform.commons</groupId>
     <artifactId>rest</artifactId>
-    <version>3.0.2-SNAPSHOT</version>
+    <version>3.0.2</version>
   </parent>
   <artifactId>json-resource-examples</artifactId>
   <name>${project.groupId}.${project.artifactId}</name>

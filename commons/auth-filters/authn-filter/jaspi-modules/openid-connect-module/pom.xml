@@ -22,7 +22,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons.authn-filter</groupId>
         <artifactId>jaspi-modules</artifactId>
-        <version>3.0.2-SNAPSHOT</version>
+        <version>3.0.2</version>
     </parent>
 	<groupId>org.openidentityplatform.commons.authn-filter.jaspi-modules</groupId>
     <artifactId>openid-connect-module</artifactId>

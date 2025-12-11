@@ -29,7 +29,7 @@
     <parent>
         <groupId>org.openidentityplatform.commons</groupId>
         <artifactId>script</artifactId>
-        <version>3.0.2-SNAPSHOT</version>
+        <version>3.0.2</version>
     </parent>
     <groupId>org.openidentityplatform.commons.script</groupId>
     <artifactId>common</artifactId>
