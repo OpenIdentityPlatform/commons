@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.json.resource;
@@ -22,7 +23,6 @@ import static org.forgerock.http.routing.RoutingMode.EQUALS;
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.resource.RouteMatchers.requestUriMatcher;
 import static org.forgerock.json.resource.Router.uriTemplate;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
@@ -33,6 +33,7 @@ import java.util.Collections;
 import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -297,7 +298,7 @@ public class RouterTest {
         Promise<ResourceResponse, ResourceException> promise = router.handleCreate(context, request);
 
         //Then
-        assertThat(promise).failedWithException();
+        AssertJPromiseAssert.assertThat(promise).failedWithException();
         try {
             promise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(ResourceException.class);
@@ -320,7 +321,7 @@ public class RouterTest {
         Promise<ResourceResponse, ResourceException> promise = router.handleRead(context, request);
 
         //Then
-        assertThat(promise).failedWithException();
+        AssertJPromiseAssert.assertThat(promise).failedWithException();
         try {
             promise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(ResourceException.class);
@@ -343,7 +344,7 @@ public class RouterTest {
         Promise<ResourceResponse, ResourceException> promise = router.handleUpdate(context, request);
 
         //Then
-        assertThat(promise).failedWithException();
+        AssertJPromiseAssert.assertThat(promise).failedWithException();
         try {
             promise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(ResourceException.class);
@@ -366,7 +367,7 @@ public class RouterTest {
         Promise<ResourceResponse, ResourceException> promise = router.handleDelete(context, request);
 
         //Then
-        assertThat(promise).failedWithException();
+        AssertJPromiseAssert.assertThat(promise).failedWithException();
         try {
             promise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(ResourceException.class);
@@ -389,7 +390,7 @@ public class RouterTest {
         Promise<ResourceResponse, ResourceException> promise = router.handlePatch(context, request);
 
         //Then
-        assertThat(promise).failedWithException();
+        AssertJPromiseAssert.assertThat(promise).failedWithException();
         try {
             promise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(ResourceException.class);
@@ -412,7 +413,7 @@ public class RouterTest {
         Promise<ActionResponse, ResourceException> promise = router.handleAction(context, request);
 
         //Then
-        assertThat(promise).failedWithException();
+        AssertJPromiseAssert.assertThat(promise).failedWithException();
         try {
             promise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(ResourceException.class);
@@ -436,7 +437,7 @@ public class RouterTest {
         Promise<QueryResponse, ResourceException> promise = router.handleQuery(context, request, resultHandler);
 
         //Then
-        assertThat(promise).failedWithException();
+        AssertJPromiseAssert.assertThat(promise).failedWithException();
         try {
             promise.getOrThrowUninterruptibly();
             failBecauseExceptionWasNotThrown(ResourceException.class);

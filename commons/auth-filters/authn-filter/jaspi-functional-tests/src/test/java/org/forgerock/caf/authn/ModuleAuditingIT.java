@@ -12,12 +12,12 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.caf.authn;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleArray;
 import static org.forgerock.caf.authn.AuthModuleParameters.moduleParams;
@@ -42,6 +42,7 @@ import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.DataProvider;
@@ -163,7 +164,7 @@ public class ModuleAuditingIT extends HandlerHolder {
 
         Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
                 request);
-        assertThat(result).succeeded();
+        AssertJPromiseAssert.assertThat(result).succeeded();
         assertThat(result.get().getStatus().getCode()).isEqualTo(expectedResponseStatus);
 
         JsonValue auditRecords = getAuditRecords(handler);
