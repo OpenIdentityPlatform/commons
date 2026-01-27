@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.json.test.assertj;
@@ -127,7 +128,7 @@ public final class AssertJJsonValueAssert {
          * Check that the {@link JsonValue} is a set.
          * @return The {@link AbstractIterableAssert} representation of this Assert instance.
          */
-        public AbstractIterableAssert<?, ? extends Iterable<?>, Object> isSet() {
+        public AbstractIterableAssert<?, ? extends Iterable<?>, Object, ?> isSet() {
             isNotNull();
             if (!actual.isSet()) {
                 failWithMessage("Expected %s to be a set", actual.getPointer());
@@ -534,7 +535,7 @@ public final class AssertJJsonValueAssert {
 
     /** Class for assertions on array {@link JsonValue}. */
     public static final class ArrayJsonValueAssert extends AbstractJsonValueAssert<ArrayJsonValueAssert> {
-        private AbstractListAssert<?, ? extends List<?>, Object> listAssert;
+        private AbstractListAssert<?, ? extends List<?>, Object, ?> listAssert;
 
         private ArrayJsonValueAssert(JsonValue value) {
             super(ArrayJsonValueAssert.class, value);

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.util.test.assertj;
@@ -90,7 +91,7 @@ public final class AssertJPromiseAssert
          * @return A {@link AbstractIterableAssert} instance for making assertions on the value.
          */
         @SuppressWarnings("unchecked")
-        public <T> AbstractIterableAssert<?, ? extends Iterable<? extends T>, T> withIterable() {
+        public <T> AbstractIterableAssert<?, ? extends Iterable<? extends T>, T, ?> withIterable() {
             isInstanceOf(Iterable.class);
             return Assertions.assertThat((Iterable<T>) actual);
         }
@@ -102,7 +103,7 @@ public final class AssertJPromiseAssert
          * @return A {@link AbstractListAssert} instance for making assertions on the value.
          */
         @SuppressWarnings("unchecked")
-        public <T> AbstractListAssert<?, ? extends List<? extends T>, T> withList() {
+        public <T> AbstractListAssert<?, ? extends List<? extends T>, T, ?> withList() {
             isInstanceOf(List.class);
             return Assertions.assertThat((List<T>) actual);
         }

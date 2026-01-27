@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
@@ -22,7 +23,6 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -64,6 +64,7 @@ import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeTest;
@@ -170,7 +171,7 @@ public class ElasticsearchAuditEventHandlerTest {
                 handler.queryEvents(mock(Context.class), "access", queryRequest, queryResourceHandler);
 
         // then
-        assertThat(result).failedWithException().isInstanceOf(InternalServerErrorException.class);
+        AssertJPromiseAssert.assertThat(result).failedWithException().isInstanceOf(InternalServerErrorException.class);
     }
 
     @Test
@@ -213,7 +214,7 @@ public class ElasticsearchAuditEventHandlerTest {
                 handler.readEvent(context, "authentication", "fake-id-that-does-not-exist");
 
         // then
-        assertThat(responsePromise).failedWithException().isInstanceOf(NotFoundException.class);
+        AssertJPromiseAssert.assertThat(responsePromise).failedWithException().isInstanceOf(NotFoundException.class);
     }
 
     @Test

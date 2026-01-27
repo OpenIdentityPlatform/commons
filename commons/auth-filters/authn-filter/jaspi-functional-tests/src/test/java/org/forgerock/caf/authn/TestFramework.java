@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.caf.authn;
@@ -20,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.*;
 import static org.forgerock.caf.authn.test.ProtectedResource.*;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.testng.Assert.fail;
 
 import java.util.ArrayList;
@@ -43,6 +43,7 @@ import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 
 /**
  * Test framework for running tests and verifing results against the JASPI runtime.
@@ -84,7 +85,7 @@ class TestFramework {
         request.getHeaders().add("If-Match", "*");
         Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
                 request);
-        assertThat(result).succeeded();
+        AssertJPromiseAssert.assertThat(result).succeeded();
         assertThat(result.get().getStatus()).isEqualTo(Status.OK);
     }
 
@@ -101,7 +102,7 @@ class TestFramework {
         request.getHeaders().add(ContentTypeHeader.valueOf("application/json; charset=UTF-8"));
         Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
                 request);
-        assertThat(result).succeeded();
+        AssertJPromiseAssert.assertThat(result).succeeded();
         assertThat(result.get().getStatus()).isEqualTo(Status.OK);
         return json(result.get().getEntity().getJson());
     }
@@ -176,7 +177,7 @@ class TestFramework {
 
         Promise<Response, NeverThrowsException> result = handler.handle(new AttributesContext(new RootContext()),
                 request);
-        assertThat(result).succeeded();
+        AssertJPromiseAssert.assertThat(result).succeeded();
 
         Response response = result.get();
 
