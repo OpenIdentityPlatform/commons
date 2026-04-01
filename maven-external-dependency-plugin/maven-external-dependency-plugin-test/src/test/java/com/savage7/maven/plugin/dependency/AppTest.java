@@ -45,7 +45,7 @@ public class AppTest {
     /** Example 1 – basic JAR downloaded via URL template. */
     @Test
     public void testCommonsIoDownloaded() {
-        assertStagedFileExists("commons-io-2.11.0.jar");
+        assertStagedFileExists("commons-io-2.14.0.jar");
     }
 
     /** Example 2 – JAR downloaded with explicit SHA-1 checksum verification. */

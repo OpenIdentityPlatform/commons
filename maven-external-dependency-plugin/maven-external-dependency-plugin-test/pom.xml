@@ -88,12 +88,12 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
      EXAMPLE 1: Basic JAR download using URL template variables.
      Supported tokens: {groupId}, {artifactId}, {version},
                        {packaging}, {classifier}, {type}, {_version}
-     ({_version} replaces dots with underscores, e.g. 2_11_0)
+     ({_version} replaces dots with underscores, e.g. 2_14_0)
      ============================================================ -->
 <artifactItem>
 <groupId>commons-io</groupId>
 <artifactId>commons-io</artifactId>
-<version>2.11.0</version>
+<version>2.14.0</version>
 <packaging>jar</packaging>
 <downloadUrl>https://repo1.maven.org/maven2/commons-io/commons-io/{version}/{artifactId}-{version}.{packaging}</downloadUrl>
 <install>true</install>
@@ -349,7 +349,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/ma
 <dependency>
 <groupId>commons-io</groupId>
 <artifactId>commons-io</artifactId>
-<version>2.11.0</version>
+<version>2.14.0</version>
 </dependency>
 
 <dependency>
