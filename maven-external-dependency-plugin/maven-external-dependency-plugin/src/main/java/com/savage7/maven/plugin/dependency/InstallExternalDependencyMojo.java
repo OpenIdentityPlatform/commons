@@ -186,18 +186,38 @@ public class InstallExternalDependencyMojo extends
                                 }
                                 else
                                 {
-                                    // dynamically create a new POM file for
-                                    // this artifact
-                                    generatedPomFile = generatePomFile(artifactItem);
-                                    ArtifactMetadata pomMetadata = new ProjectArtifactMetadata(
-                                        artifact, generatedPomFile);
-
-                                    if (artifactItem.getGeneratePom() == true)
+                                    // try to extract POM from within the JAR
+                                    File extractedPom = null;
+                                    if (artifactItem.getExtractPom() == true
+                                        && "jar".equals(artifactItem.getPackaging()))
                                     {
+                                        extractedPom = extractPomFromJar(
+                                            artifactItem, stagedArtifactFile);
+                                    }
+
+                                    if (extractedPom != null)
+                                    {
+                                        getLog().debug(
+                                            "installing POM extracted from JAR: "
+                                                + extractedPom.getAbsolutePath());
+                                        ArtifactMetadata pomMetadata =
+                                            new ProjectArtifactMetadata(
+                                                artifact, extractedPom);
+                                        artifact.addMetadata(pomMetadata);
+                                        generatedPomFile = extractedPom;
+                                    }
+                                    else if (artifactItem.getGeneratePom() == true)
+                                    {
+                                        // dynamically create a new POM file for
+                                        // this artifact
+                                        generatedPomFile = generatePomFile(artifactItem);
+                                        ArtifactMetadata pomMetadata =
+                                            new ProjectArtifactMetadata(
+                                                artifact, generatedPomFile);
                                         getLog().debug(
                                             "installing generated POM file: "
                                                 + generatedPomFile
-                                                    .getCanonicalPath());
+                                                    .getAbsolutePath());
                                         artifact.addMetadata(pomMetadata);
                                     }
                                 }

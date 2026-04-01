@@ -20,9 +20,14 @@
 package com.savage7.maven.plugin.dependency;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -514,5 +519,57 @@ public abstract class AbstractExternalDependencyMojo extends
                     + "\n\n Please verify that the GAV defined on the target artifact is correct.\n"
                     );
         }
+    }
+
+    /**
+     * Attempts to extract a POM file from within the JAR artifact.
+     * Maven-built JARs contain their POM at
+     * META-INF/maven/{groupId}/{artifactId}/pom.xml.
+     *
+     * @param artifactItem
+     *            the artifact configuration
+     * @param jarFile
+     *            the JAR file to search within
+     * @return extracted POM File, or <code>null</code> if not found
+     * @throws IOException
+     *             if an I/O error occurs while reading the JAR
+     */
+    protected File extractPomFromJar(ArtifactItem artifactItem, File jarFile)
+        throws IOException
+    {
+        String pomPath = "META-INF/maven/" + artifactItem.getGroupId()
+            + "/" + artifactItem.getArtifactId() + "/pom.xml";
+
+        getLog().debug("looking for embedded POM in JAR at: " + pomPath);
+
+        try (JarFile jar = new JarFile(jarFile))
+        {
+            JarEntry entry = jar.getJarEntry(pomPath);
+            if (entry != null)
+            {
+                File tempPom = File.createTempFile(
+                    artifactItem.getGroupId() + "." + artifactItem.getArtifactId(),
+                    ".pom");
+                tempPom.deleteOnExit();
+
+                try (InputStream is = jar.getInputStream(entry);
+                     OutputStream os = new FileOutputStream(tempPom))
+                {
+                    byte[] buffer = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = is.read(buffer)) != -1)
+                    {
+                        os.write(buffer, 0, bytesRead);
+                    }
+                }
+
+                getLog().info(
+                    "extracted POM from JAR: " + pomPath);
+                return tempPom;
+            }
+        }
+
+        getLog().debug("no embedded POM found in JAR at: " + pomPath);
+        return null;
     }
 }

@@ -181,6 +181,16 @@ public class ArtifactItem
      * @parameter
      */
     private boolean repack = false;
+
+    /**
+     * Flag whether to attempt extracting POM from the JAR's META-INF directory.
+     * When true (default), the plugin will look for an embedded POM at
+     * META-INF/maven/{groupId}/{artifactId}/pom.xml inside the JAR and use it
+     * instead of generating a minimal one.
+     *
+     * @parameter default-value="true"
+     */
+    private Boolean extractPom = true;
     
     /**
      * default constructor.
@@ -666,6 +676,23 @@ public class ArtifactItem
     public void setRepack(boolean repack)
     {
         this.repack = repack;
+    }
+
+    /**
+     * @return ExtractPom.
+     */
+    public final Boolean getExtractPom()
+    {
+        return extractPom;
+    }
+
+    /**
+     * @param extractPom
+     *            ExtractPom.
+     */
+    public final void setExtractPom(final Boolean extractPom)
+    {
+        this.extractPom = extractPom;
     }
 
 }
