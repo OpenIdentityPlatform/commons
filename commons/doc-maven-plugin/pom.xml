@@ -13,7 +13,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
- * Portions copyright 2024-2025 3A Systems LLC.
+ * Portions copyright 2020-2026 3A Systems LLC.
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
  <modelVersion>4.0.0</modelVersion>
@@ -53,7 +53,7 @@
   <mavenPluginPluginVersion>3.6.0</mavenPluginPluginVersion>
   <mavenResourcesVersion>2.7</mavenResourcesVersion>
   <plantUmlVersion>7993</plantUmlVersion>
-  <plexusUtilsVersion>3.3.0</plexusUtilsVersion>
+  <plexusUtilsVersion>4.0.3</plexusUtilsVersion>
   <xCiteVersion>${project.version}</xCiteVersion>
 
  </properties>
@@ -89,7 +89,11 @@
     <version>${mavenPluginPluginVersion}</version>
     <scope>provided</scope>
    </dependency>
-
+  <dependency>
+   <groupId>org.codehaus.plexus</groupId>
+   <artifactId>plexus-xml</artifactId>
+   <version>3.0.1</version>
+  </dependency>
   <!-- Testing -->
 
   <dependency>
