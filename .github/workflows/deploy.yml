@@ -22,7 +22,7 @@ jobs:
         run: |
            cat <(echo -e "${{ secrets.GPG_PRIVATE_KEY }}") | gpg --batch --import
            gpg --list-secret-keys --keyid-format LONG
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
           submodules: recursive
@@ -36,7 +36,7 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
       - name: Cache Maven packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
          path: ~/.m2/repository
          key: ${{ runner.os }}-m2-repository-${{ hashFiles('**/pom.xml') }}
