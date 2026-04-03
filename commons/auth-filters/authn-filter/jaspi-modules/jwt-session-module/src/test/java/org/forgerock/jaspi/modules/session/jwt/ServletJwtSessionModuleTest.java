@@ -491,7 +491,7 @@ public class ServletJwtSessionModuleTest {
         int idleTimeoutSeconds = new Long(idleTimeout.getTime() / 1_000L).intValue();
         calendar.setTime(new Date());
         calendar.set(Calendar.MILLISECOND, 0);
-        calendar.add(Calendar.MINUTE, -1);
+        calendar.add(Calendar.SECOND, -5);
         Date issuedAtTime = calendar.getTime();
 
         given(messageInfo.getRequestMessage()).willReturn(request);
