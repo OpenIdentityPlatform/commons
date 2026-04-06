@@ -210,6 +210,8 @@
         <jetty.version>11.0.25</jetty.version>
         <grizzly-framework.version>3.0.1</grizzly-framework.version>
         <servlet-api.version>5.0.0</servlet-api.version>
+        <cassandra.version>4.19.2</cassandra.version>
+        <cassandra-all.version>5.0.6</cassandra-all.version>
     </properties>
 
     <prerequisites>
@@ -918,6 +920,27 @@
                 <groupId>org.glassfish.grizzly</groupId>
                 <artifactId>grizzly-websockets</artifactId>
                 <version>${grizzly-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cassandra</groupId>
+                <artifactId>java-driver-core</artifactId>
+                <version>${cassandra.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cassandra</groupId>
+                <artifactId>java-driver-query-builder</artifactId>
+                <version>${cassandra.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.cassandra</groupId>
+                <artifactId>cassandra-all</artifactId>
+                <version>${cassandra-all.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.lz4</groupId>
+                        <artifactId>lz4-java</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 		</dependencies>
 	</dependencyManagement>
