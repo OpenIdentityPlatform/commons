@@ -17,6 +17,8 @@
 
 package org.forgerock.json;
 
+import org.mozilla.javascript.engine.RhinoScriptEngineFactory;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 
@@ -74,7 +76,7 @@ public class JsonPatchJavascriptValueTransformer implements JsonPatchValueTransf
         if (Double.parseDouble(System.getProperty("java.specification.version")) < 15) {
             return new ScriptEngineManager(null).getEngineByName("js");
         } else {
-        	return new ScriptEngineManager().getEngineByName("rhino");
+        	return new RhinoScriptEngineFactory().getScriptEngine();
         }
     }
 }
