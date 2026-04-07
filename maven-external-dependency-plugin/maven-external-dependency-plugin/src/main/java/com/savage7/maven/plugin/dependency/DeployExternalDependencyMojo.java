@@ -142,14 +142,34 @@ public class DeployExternalDependencyMojo extends
                             }
                             else
                             {
-                                // dynamically create a new POM file for this
-                                // artifact
-                                generatedPomFile = generatePomFile(artifactItem);
-                                ArtifactMetadata pomMetadata = new ProjectArtifactMetadata(
-                                        artifact, generatedPomFile);
-
-                                if (artifactItem.getGeneratePom() == true)
+                                // try to extract POM from within the JAR
+                                File extractedPom = null;
+                                if (artifactItem.getExtractPom() == true
+                                    && "jar".equals(artifactItem.getPackaging()))
                                 {
+                                    extractedPom = extractPomFromJar(
+                                        artifactItem, installedArtifactFile);
+                                }
+
+                                if (extractedPom != null)
+                                {
+                                    getLog().debug(
+                                        "deploying POM extracted from JAR: "
+                                            + extractedPom.getAbsolutePath());
+                                    ArtifactMetadata pomMetadata =
+                                        new ProjectArtifactMetadata(
+                                            artifact, extractedPom);
+                                    artifact.addMetadata(pomMetadata);
+                                    generatedPomFile = extractedPom;
+                                }
+                                else if (artifactItem.getGeneratePom() == true)
+                                {
+                                    // dynamically create a new POM file for this
+                                    // artifact
+                                    generatedPomFile = generatePomFile(artifactItem);
+                                    ArtifactMetadata pomMetadata =
+                                        new ProjectArtifactMetadata(
+                                            artifact, generatedPomFile);
                                     artifact.addMetadata(pomMetadata);
                                 }
                             }
@@ -192,6 +212,11 @@ public class DeployExternalDependencyMojo extends
                 {
                     throw new MojoExecutionException(
                             "Deployment of external dependency failed.", e);
+                }
+                catch (IOException e)
+                {
+                    throw new MojoExecutionException(
+                            "Error reading artifact file for deployment.", e);
                 }
 
             }
