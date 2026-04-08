@@ -12,9 +12,12 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.json;
+
+import org.mozilla.javascript.engine.RhinoScriptEngineFactory;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -73,7 +76,7 @@ public class JsonPatchJavascriptValueTransformer implements JsonPatchValueTransf
         if (Double.parseDouble(System.getProperty("java.specification.version")) < 15) {
             return new ScriptEngineManager(null).getEngineByName("js");
         } else {
-        	return new ScriptEngineManager().getEngineByName("js");
+        	return new RhinoScriptEngineFactory().getScriptEngine();
         }
     }
 }
