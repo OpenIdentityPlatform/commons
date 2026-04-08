@@ -12,7 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
- * Portions Copyrighted 2020 3A Systems LLC.
+ * Portions Copyrighted 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.json;
