@@ -211,7 +211,7 @@
         <grizzly-framework.version>3.0.1</grizzly-framework.version>
         <servlet-api.version>5.0.0</servlet-api.version>
         <cassandra.version>4.19.2</cassandra.version>
-        <cassandra-all.version>5.0.6</cassandra-all.version>
+        <cassandra-all.version>5.0.7</cassandra-all.version>
     </properties>
 
     <prerequisites>
