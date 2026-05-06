@@ -91,6 +91,24 @@ public class ArtifactItem
     private Integer timeout;
 
     /**
+     * Per-artifact override for the number of attempts to download this
+     * artifact in case of transient network failures. When unset, the
+     * Mojo-level {@code downloadRetryAttempts} parameter (default 5) is used.
+     *
+     * @parameter
+     */
+    private Integer retryAttempts;
+
+    /**
+     * Per-artifact override for the delay in millis between download retry
+     * attempts. When unset, the Mojo-level {@code downloadRetryDelay}
+     * parameter (default 2000 ms) is used.
+     *
+     * @parameter
+     */
+    private Integer retryDelay;
+
+    /**
      * Packaging type of the artifact to be installed.
      * 
      * @parameter default-value="jar"
@@ -387,7 +405,17 @@ public class ArtifactItem
      */
     public final Integer getTimeout()
     {
-        return (timeout==null||timeout<=0)?5000:timeout;
+        return (timeout==null||timeout<=0)?10000:timeout;
+    }
+
+    /**
+     * @return Raw timeout value as configured (may be null) so callers can
+     *         distinguish an explicitly set per-artifact timeout from the
+     *         default fallback returned by {@link #getTimeout()}.
+     */
+    public final Integer getTimeoutRaw()
+    {
+        return timeout;
     }
 
     /**
@@ -397,6 +425,41 @@ public class ArtifactItem
     public final void setTimeout(final Integer timeout)
     {
         this.timeout = timeout;
+    }
+
+    /**
+     * @return Raw retry attempts value as configured (may be null).
+     */
+    public final Integer getRetryAttempts()
+    {
+        return retryAttempts;
+    }
+
+    /**
+     * @param retryAttempts
+     *            Number of attempts to download the artifact in case of
+     *            transient network failures.
+     */
+    public final void setRetryAttempts(final Integer retryAttempts)
+    {
+        this.retryAttempts = retryAttempts;
+    }
+
+    /**
+     * @return Raw retry delay value (in millis) as configured (may be null).
+     */
+    public final Integer getRetryDelay()
+    {
+        return retryDelay;
+    }
+
+    /**
+     * @param retryDelay
+     *            Delay in millis between download retry attempts.
+     */
+    public final void setRetryDelay(final Integer retryDelay)
+    {
+        this.retryDelay = retryDelay;
     }
 
     /**

@@ -96,6 +96,31 @@ public class ResolveExternalDependencyMojo extends
      * @readonly 
      */ 
     private MavenSettingsBuilder mavenSettingsBuilder; 
+
+    /**
+     * Default number of attempts to download an external artifact in case
+     * of transient network failures (e.g. connection timeouts). Used when
+     * an {@code <artifactItem>} does not define its own {@code retryAttempts}.
+     *
+     * @parameter default-value="5"
+     */
+    private Integer downloadRetryAttempts;
+
+    /**
+     * Default timeout in milliseconds for artifact download attempts. Used
+     * when an {@code <artifactItem>} does not define its own {@code timeout}.
+     *
+     * @parameter default-value="10000"
+     */
+    private Integer downloadTimeout;
+
+    /**
+     * Default delay in milliseconds between download retry attempts. Used
+     * when an {@code <artifactItem>} does not define its own {@code retryDelay}.
+     *
+     * @parameter default-value="2000"
+     */
+    private Integer downloadRetryDelay;
     
     public void execute() throws MojoExecutionException, MojoFailureException
     {
@@ -183,14 +208,6 @@ public class ResolveExternalDependencyMojo extends
                             	URL downloadUrl = new URL(artifactItem.getDownloadUrl());
 	                            String endPointUrl = downloadUrl.getProtocol() + "://"+ downloadUrl.getAuthority();
 	                            Repository repository = new Repository("additonal-configs", endPointUrl);
-	                            Wagon wagon = wagonManager.getWagon(downloadUrl.getProtocol());
-	                            if (getLog().isDebugEnabled())
-	                            {
-	                                Debug debug = new Debug();
-	                                wagon.addSessionListener(debug);
-	                                wagon.addTransferListener(debug);
-	                            }
-	                            wagon.setTimeout(artifactItem.getTimeout());
 	                            Settings settings = mavenSettingsBuilder.buildSettings();
 	                            ProxyInfo proxyInfo = null;
 	                            if (settings != null&& settings.getActiveProxy() != null)
@@ -204,13 +221,93 @@ public class ResolveExternalDependencyMojo extends
 	                                proxyInfo.setUserName(settingsProxy.getUsername());
 	                                proxyInfo.setPassword(settingsProxy.getPassword());
 	                            }
-	
-	                            if (proxyInfo != null)
-	                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()),proxyInfo);
-	                            else
-	                                wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
-	                            
-	                            wagon.get(downloadUrl.getPath().substring(1), tempDownloadFile);
+
+	                            // resolve effective retry / timeout settings:
+	                            // per-artifact value (if set) wins over the
+	                            // Mojo-level default.
+	                            int effectiveAttempts = resolveRetryAttempts(artifactItem);
+	                            int effectiveTimeout = resolveTimeout(artifactItem);
+	                            long effectiveRetryDelay = resolveRetryDelay(artifactItem);
+
+	                            Exception lastFailure = null;
+	                            for (int attempt = 1; attempt <= effectiveAttempts; attempt++)
+	                            {
+	                                Wagon wagon = wagonManager.getWagon(downloadUrl.getProtocol());
+	                                if (getLog().isDebugEnabled())
+	                                {
+	                                    Debug debug = new Debug();
+	                                    wagon.addSessionListener(debug);
+	                                    wagon.addTransferListener(debug);
+	                                }
+	                                wagon.setTimeout(effectiveTimeout);
+	                                try
+	                                {
+	                                    if (proxyInfo != null)
+	                                        wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()),proxyInfo);
+	                                    else
+	                                        wagon.connect(repository, wagonManager.getAuthenticationInfo(repository.getId()));
+
+	                                    wagon.get(downloadUrl.getPath().substring(1), tempDownloadFile);
+	                                    // success: stop retrying
+	                                    lastFailure = null;
+	                                    break;
+	                                }
+	                                catch (org.apache.maven.wagon.authorization.AuthorizationException ae)
+	                                {
+	                                    // authorization issues are not transient, fail fast
+	                                    throw ae;
+	                                }
+	                                catch (Exception ex)
+	                                {
+	                                    lastFailure = ex;
+	                                    getLog().warn(
+	                                        "download attempt " + attempt + "/" + effectiveAttempts
+	                                            + " failed for URL: " + artifactItem.getDownloadUrl()
+	                                            + " - " + ex.getClass().getName() + ": " + ex.getMessage());
+
+	                                    // discard partial download before retrying
+	                                    if (tempDownloadFile.exists() && !tempDownloadFile.delete())
+	                                    {
+	                                        getLog().debug("could not delete partial temp file: "
+	                                            + tempDownloadFile.getAbsolutePath());
+	                                    }
+
+	                                    if (attempt < effectiveAttempts && effectiveRetryDelay > 0)
+	                                    {
+	                                        try
+	                                        {
+	                                            Thread.sleep(effectiveRetryDelay);
+	                                        }
+	                                        catch (InterruptedException ie)
+	                                        {
+	                                            Thread.currentThread().interrupt();
+	                                            throw new MojoExecutionException(
+	                                                "Interrupted while waiting to retry download of "
+	                                                    + artifactItem.getDownloadUrl(), ie);
+	                                        }
+	                                    }
+	                                }
+	                                finally
+	                                {
+	                                    try
+	                                    {
+	                                        wagon.disconnect();
+	                                    }
+	                                    catch (Exception ignored)
+	                                    {
+	                                        getLog().debug("error while disconnecting wagon: "
+	                                            + ignored.getMessage());
+	                                    }
+	                                }
+	                            }
+
+	                            if (lastFailure != null)
+	                            {
+	                                throw new MojoExecutionException(
+	                                    "Failed to download artifact " + artifactItem.getDownloadUrl()
+	                                        + " after " + effectiveAttempts + " attempt(s)",
+	                                    lastFailure);
+	                            }
                             }else {
                             	FileUtils.copyFile(new File(artifactItem.getDownloadUrl()), tempDownloadFile);
                             }
@@ -439,5 +536,62 @@ public class ResolveExternalDependencyMojo extends
         }
 
         return artifactResolved;
+    }
+
+    /**
+     * Resolve effective number of download attempts for the given artifact.
+     * Per-artifact value (if set and positive) takes precedence over the
+     * Mojo-level {@code downloadRetryAttempts} parameter. Falls back to 5.
+     */
+    private int resolveRetryAttempts(ArtifactItem artifactItem)
+    {
+        Integer perArtifact = artifactItem.getRetryAttempts();
+        if (perArtifact != null && perArtifact > 0)
+        {
+            return perArtifact;
+        }
+        if (downloadRetryAttempts != null && downloadRetryAttempts > 0)
+        {
+            return downloadRetryAttempts;
+        }
+        return 5;
+    }
+
+    /**
+     * Resolve effective download timeout (in millis) for the given artifact.
+     * Per-artifact value (if explicitly set and positive) takes precedence
+     * over the Mojo-level {@code downloadTimeout} parameter.
+     */
+    private int resolveTimeout(ArtifactItem artifactItem)
+    {
+        Integer perArtifact = artifactItem.getTimeoutRaw();
+        if (perArtifact != null && perArtifact > 0)
+        {
+            return perArtifact;
+        }
+        if (downloadTimeout != null && downloadTimeout > 0)
+        {
+            return downloadTimeout;
+        }
+        return 10000;
+    }
+
+    /**
+     * Resolve effective delay (in millis) between retry attempts for the
+     * given artifact. Per-artifact value (if set and non-negative) takes
+     * precedence over the Mojo-level {@code downloadRetryDelay} parameter.
+     */
+    private long resolveRetryDelay(ArtifactItem artifactItem)
+    {
+        Integer perArtifact = artifactItem.getRetryDelay();
+        if (perArtifact != null && perArtifact >= 0)
+        {
+            return perArtifact;
+        }
+        if (downloadRetryDelay != null && downloadRetryDelay >= 0)
+        {
+            return downloadRetryDelay;
+        }
+        return 2000L;
     }
 }
