@@ -28,7 +28,7 @@ jobs:
           submodules: recursive
           ref: ${{ github.event.workflow_run.head_branch }}
       - name: Set up Java for publishing to Maven Central Repository OSS
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ github.event.workflow_run.head_branch == 'sustaining/2.4.x' && '8' || '11'}}
           distribution: 'temurin'
