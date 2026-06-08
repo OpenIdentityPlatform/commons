@@ -65,6 +65,7 @@
         <module>common</module>
         <module>javascript</module>
         <module>groovy</module>
+        <module>rhino</module>
     </modules>
 
     <dependencyManagement>
