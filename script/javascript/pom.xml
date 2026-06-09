@@ -65,9 +65,12 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.servicemix.bundles</groupId>
-            <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-            <version>${rhino.servicemix.version}</version>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino-engine</artifactId>
         </dependency>
         <!--
         <dependency>

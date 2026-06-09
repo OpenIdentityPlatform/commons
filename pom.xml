@@ -206,7 +206,6 @@
         <slf4j.version>2.0.17</slf4j.version>
         <swagger.version>1.6.11</swagger.version>
         <rhino.version>1.7.15.1</rhino.version>
-        <rhino.servicemix.version>1.7.15_1</rhino.servicemix.version>
         <jetty.version>11.0.25</jetty.version>
         <grizzly-framework.version>3.0.1</grizzly-framework.version>
         <servlet-api.version>5.0.0</servlet-api.version>
@@ -626,6 +625,16 @@
                 <groupId>org.openidentityplatform.commons.script</groupId>
                 <artifactId>common</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino</artifactId>
+                <version>${rhino.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino-engine</artifactId>
+                <version>${rhino.version}</version>
             </dependency>
             <dependency>
 		        <groupId>org.asciidoctor</groupId>
