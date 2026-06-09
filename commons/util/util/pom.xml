@@ -35,8 +35,12 @@
             <artifactId>slf4j-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.openidentityplatform.commons.script</groupId>
+            <groupId>org.mozilla</groupId>
             <artifactId>rhino</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.mozilla</groupId>
+            <artifactId>rhino-engine</artifactId>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
