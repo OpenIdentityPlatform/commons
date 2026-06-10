@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.json.resource;
@@ -161,25 +162,36 @@ public final class ResourcesTest {
             {
                     filter("/a/b"),
                     content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                    expected(object(field("b", "1")))
+                    expected(object(field("a", object(field("b", "1")))))
             },
 
             {
                     filter("/a/b", "/d"),
                     content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                    expected(object(field("b", "1"), field("d", "3")))
+                    expected(object(field("a", object(field("b", "1"))), field("d", "3")))
             },
 
             {
                     filter("/a/b", "/a"),
                     content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                    expected(object(field("b", "1"), field("a", object(field("b", "1"), field("c", "2")))))
+                    expected(object(field("a", object(field("b", "1"), field("c", "2")))))
             },
 
             {
                     filter("/a", "/a/b"),
                     content(object(field("a", object(field("b", "1"), field("c", "2"))), field("d", "3"))),
-                    expected(object(field("a", object(field("b", "1"), field("c", "2"))), field("b", "1")))
+                    expected(object(field("a", object(field("b", "1"), field("c", "2")))))
+            },
+
+            // Same-named leaf fields at different levels of nesting must coexist
+            // (see OpenIDM discussion #183): the top-level "userName" must not be
+            // overwritten by the nested "manager/userName".
+            {
+                    filter("/userName", "/manager", "/manager/userName"),
+                    content(object(field("userName", "bjensen"),
+                            field("manager", object(field("userName", "jdoe"))))),
+                    expected(object(field("userName", "bjensen"),
+                            field("manager", object(field("userName", "jdoe")))))
             },
 
         };
@@ -190,6 +202,23 @@ public final class ResourcesTest {
     public void testFilter(List<JsonPointer> filter, JsonValue content, JsonValue expected) {
         Assertions.assertThat(Resources.filterResource(content, filter).getObject()).isEqualTo(
                 expected.getObject());
+    }
+
+    @Test
+    public void testFilterPreservesNestedFieldsWithCollidingLeafNames() {
+        // Given a resource with a "userName" both at the top level and nested
+        // inside "manager" (see OpenIDM discussion #183).
+        final JsonValue content = content(object(
+                field("userName", "bjensen"),
+                field("manager", object(field("userName", "jdoe")))));
+
+        // When projecting userName, manager and manager/userName.
+        final JsonValue result = Resources.filterResource(content,
+                filter("/userName", "/manager", "/manager/userName"));
+
+        // Then the nested structure is preserved and the leaf names do not collide.
+        assertThat(result.get("userName").asString()).isEqualTo("bjensen");
+        assertThat(result.get("manager").get("userName").asString()).isEqualTo("jdoe");
     }
 
     @DataProvider
