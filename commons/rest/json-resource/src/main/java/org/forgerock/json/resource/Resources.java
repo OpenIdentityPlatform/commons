@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.json.resource;
@@ -28,7 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.Map;
 
 import org.forgerock.api.annotations.CollectionProvider;
 import org.forgerock.api.annotations.Path;
@@ -99,6 +99,15 @@ public final class Resources {
      * <b>NOTE:</b> this method only performs a shallow copy of extracted
      * fields, so changes to the filtered JSON value may impact the original
      * JSON value, and vice-versa.
+     * <p>
+     * The projection preserves the nested structure of the requested fields:
+     * each requested {@link JsonPointer} is written back under its full path
+     * rather than being collapsed to its leaf name. As a result, leaf fields
+     * that share the same name at different levels of nesting do not conflict.
+     * For example, projecting {@code userName} and {@code manager/userName}
+     * over <code>{ "userName": "bjensen", "manager": { "userName": "jdoe" } }</code>
+     * yields <code>{ "userName": "bjensen", "manager": { "userName": "jdoe" } }</code>,
+     * i.e. the top-level {@code userName} is not overwritten by the nested one.
      *
      * @param resource
      *            The JSON value whose fields are to be filtered.
@@ -111,21 +120,24 @@ public final class Resources {
         if (fields.isEmpty() || resource.isNull() || resource.size() == 0) {
             return resource;
         } else {
-            final Map<String, Object> filtered = new LinkedHashMap<>(fields.size());
+            final JsonValue filtered = new JsonValue(new LinkedHashMap<String, Object>(fields.size()));
             for (final JsonPointer field : fields) {
                 if (field.isEmpty()) {
                     // Special case - copy resource fields (assumes Map).
-                    filtered.putAll(resource.asMap());
+                    filtered.asMap().putAll(resource.asMap());
                 } else {
-                    // FIXME: what should we do if the field refers to an array element?
                     final JsonValue value = resource.get(field);
                     if (value != null) {
-                        final String key = field.leaf();
-                        filtered.put(key, value.getObject());
+                        // Preserve the nested structure of the requested field
+                        // instead of collapsing it to its leaf name. This keeps
+                        // same-named leaf fields at different levels of nesting
+                        // (e.g. "userName" and "manager/userName") from
+                        // overwriting each other.
+                        filtered.putPermissive(field, value.getObject());
                     }
                 }
             }
-            return new JsonValue(filtered);
+            return filtered;
         }
     }
 
