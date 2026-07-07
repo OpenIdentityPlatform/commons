@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +23,7 @@ import static com.persistit.TransactionStatus.TIMED_OUT;
 import static com.persistit.TransactionStatus.UNCOMMITTED;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -1088,9 +1087,7 @@ class TransactionIndex implements TransactionIndexMXBean {
      */
     void checkpointAccumulatorSnapshots(final long timestamp, final List<Accumulator> accumulators)
             throws InterruptedException {
-        final Map<Accumulator, Accumulator> lookupMap = new HashMap<Accumulator, Accumulator>();
         for (final Accumulator accumulator : accumulators) {
-            lookupMap.put(accumulator, accumulator);
             accumulator.setCheckpointValueAndTimestamp(accumulator.getBaseValue(), Long.MIN_VALUE);
         }
         for (final TransactionIndexBucket bucket : _hashTable) {

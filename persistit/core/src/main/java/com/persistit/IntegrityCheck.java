@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -246,15 +247,6 @@ public class IntegrityCheck extends Task {
         }
         final long startTimestamp = _persistit.getTimestampAllocator().updateTimestamp();
         try {
-            final ArrayList<Volume> volumes = new ArrayList<Volume>();
-            long _totalPages = 0;
-
-            for (final Volume volume : _persistit.getVolumes()) {
-                if (_treeSelector.isSelected(volume)) {
-                    volumes.add(volume);
-                    _totalPages += volume.getStorage().getNextAvailablePage();
-                }
-            }
             Volume previousVolume = null;
             for (final Tree tree : _persistit.getSelectedTrees(_treeSelector)) {
                 final Volume volume = tree.getVolume();
