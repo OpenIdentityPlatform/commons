@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.jaspi.modules.session.openam;
@@ -286,7 +287,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
 
         final String tokenId = getSsoTokenId(messageInfo.getRequest());
         LOG.debug("SSO Token found.");
-        LOG.trace("SSO Token value, {}", tokenId);
+        // Do not log the SSO token value (CWE-532: sensitive data in logs).
 
         if (tokenId == null) {
             LOG.trace("SSO Token not found on request.");

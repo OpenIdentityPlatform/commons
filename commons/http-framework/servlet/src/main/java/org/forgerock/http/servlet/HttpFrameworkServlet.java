@@ -13,7 +13,7 @@
  *
  * Copyright 2010?2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 package org.forgerock.http.servlet;
 
@@ -371,7 +371,9 @@ public final class HttpFrameworkServlet extends HttpServlet {
                     for (String value : response.getHeaders().get(name).getValues()) {
                         if (value != null && value.length() > 0) {
                             servletResponse.addHeader(name, value);
-                            logger.trace("header {}={}",name, value);
+                            // Log only the header name; values may carry secrets such as
+                            // Set-Cookie / Authorization (CWE-532: sensitive data in logs).
+                            logger.trace("header {}", name);
                         }
                     }
                 }

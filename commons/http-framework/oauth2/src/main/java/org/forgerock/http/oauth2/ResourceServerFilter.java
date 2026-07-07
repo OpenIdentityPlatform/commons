@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems LLC.
  */
 
 package org.forgerock.http.oauth2;
@@ -159,7 +160,8 @@ public class ResourceServerFilter implements Filter {
         return new AsyncFunction<AccessTokenException, Response, NeverThrowsException>() {
             @Override
             public Promise<? extends Response, ? extends NeverThrowsException> apply(AccessTokenException e) {
-                logger.debug("Access Token '{}' cannot be resolved", token, e);
+                // Do not log the bearer token value (CWE-532: sensitive data in logs).
+                logger.debug("Access token could not be resolved", e);
                 return newResponsePromise(invalidToken(realm));
             }
         };
@@ -174,14 +176,16 @@ public class ResourceServerFilter implements Filter {
             public Promise<? extends Response, ? extends NeverThrowsException> apply(AccessTokenInfo accessToken) {
                 // Validate the token (expiration + scopes)
                 if (isExpired(accessToken)) {
-                    logger.debug("Access Token {} is expired", accessToken);
+                    // Do not log the token value/details (CWE-532: sensitive data in logs).
+                    logger.debug("Access token is expired");
                     return newResponsePromise(invalidToken(realm));
                 }
 
                 try {
                     final Set<String> scopesNeeded = resourceAccess.getRequiredScopes(context, request);
                     if (!accessToken.getScopes().containsAll(scopesNeeded)) {
-                        logger.debug("Access Token {} is missing required scopes", accessToken);
+                        // Do not log the token value/details (CWE-532: sensitive data in logs).
+                        logger.debug("Access token is missing required scopes");
                         return newResponsePromise(insufficientScope(realm, scopesNeeded));
                     }
                 } catch (ResponseException e) {
