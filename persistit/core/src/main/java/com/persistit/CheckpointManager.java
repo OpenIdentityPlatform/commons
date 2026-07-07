@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,6 +88,11 @@ class CheckpointManager extends IOTaskRunnable implements CheckpointManagerMXBea
             }
             final Checkpoint cp = (Checkpoint) object;
             return cp._systemTime == _systemTime && cp._timestamp == _timestamp;
+        }
+
+        @Override
+        public int hashCode() {
+            return (int) (_timestamp ^ (_timestamp >>> 32) ^ _systemTime ^ (_systemTime >>> 32));
         }
     }
 
