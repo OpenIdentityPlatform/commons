@@ -309,10 +309,9 @@ public abstract class Task implements Runnable {
         _messageLogVerbosity = verbosity;
         if (maxTime > 0) {
             final long now = now();
-            _expirationTime = now + maxTime;
-            if (_expirationTime < now) {
-                _expirationTime = Long.MAX_VALUE;
-            }
+            // Guard the tainted operand before the addition so it cannot overflow:
+            // if now + maxTime would exceed Long.MAX_VALUE, clamp to an unbounded expiration.
+            _expirationTime = maxTime > Long.MAX_VALUE - now ? Long.MAX_VALUE : now + maxTime;
         } else {
             _expirationTime = Long.MAX_VALUE;
         }
