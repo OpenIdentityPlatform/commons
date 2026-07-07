@@ -72,7 +72,7 @@ public class DeployExternalDependencyMojo extends
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         // update base configuration parameters
-        // (not sure why this is needed, but doesn't see to work otherwise?)
+        // (not sure why this is needed, but doesn't seem to work otherwise?)
         super.localRepository = this.localRepository;
 
         getLog()
@@ -83,7 +83,7 @@ public class DeployExternalDependencyMojo extends
         for (ArtifactItem artifactItem : artifactItems)
         {
             getLog().info(
-                    "resolving artifact in locale repository for deployment: "
+                    "resolving artifact in local repository for deployment: "
                             + artifactItem.toString());
 
             //
@@ -235,7 +235,7 @@ public class DeployExternalDependencyMojo extends
                 catch (IOException e)
                 {
                     throw new MojoExecutionException(
-                            "Unable to resolve dependency path in locale repository.",
+                            "Unable to resolve dependency path in local repository.",
                             e);
                 }
             }
@@ -257,12 +257,7 @@ public class DeployExternalDependencyMojo extends
     private ArtifactRepository getDeploymentRepository()
             throws MojoExecutionException, MojoFailureException
     {
-        ArtifactRepository repo = null;
-
-        if (repo == null)
-        {
-            repo = project.getDistributionManagementArtifactRepository();
-        }
+        ArtifactRepository repo = project.getDistributionManagementArtifactRepository();
 
         if (repo == null)
         {
