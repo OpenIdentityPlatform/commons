@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.api.transform;
@@ -74,6 +75,15 @@ class LocalizableIntegerProperty extends IntegerProperty implements LocalizableP
     @Override
     public LocalizableString getLocalizableDescription() {
         return description;
+    }
+
+    @Override
+    public LocalizableIntegerProperty clone() {
+        try {
+            return (LocalizableIntegerProperty) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
