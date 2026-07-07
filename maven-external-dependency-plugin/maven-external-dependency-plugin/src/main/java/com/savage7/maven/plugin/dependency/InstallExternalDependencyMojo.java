@@ -76,7 +76,7 @@ public class InstallExternalDependencyMojo extends
         try
         {
             // update base configuration parameters
-            // (not sure why this is needed, but doesn't see to work otherwise?)
+            // (not sure why this is needed, but doesn't seem to work otherwise?)
             super.localRepository = this.localRepository;
             super.createChecksum = this.createChecksum;
             super.md5Digester = this.md5Digester;
@@ -266,7 +266,7 @@ public class InstallExternalDependencyMojo extends
                 {
                     getLog()
                         .info(
-                            "this aritifact already exists in the local repository; no download is needed: "
+                            "this artifact already exists in the local repository; no download is needed: "
                                 + artifactItem.toString());
                 }
             }
