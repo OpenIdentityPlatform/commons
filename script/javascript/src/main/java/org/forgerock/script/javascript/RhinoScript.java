@@ -18,6 +18,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions copyright 2026 3A Systems LLC.
  */
 
 package org.forgerock.script.javascript;
@@ -26,7 +27,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.SecureClassLoader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -243,14 +243,12 @@ public class RhinoScript implements CompiledScript {
                     operationParameter);
 
             Set<String> safeAttributes = null != request ? request.keySet() : Collections.EMPTY_SET;
-            Map<String, Object> scope = new HashMap<String, Object>();
             for (Map<String, Object> next : scopes) {
                 if (null == next) {
                     continue;
                 }
                 for (Map.Entry<String, Object> entry : next.entrySet()) {
-                    if (scope.containsKey(entry.getKey())
-                            || safeAttributes.contains(entry.getKey())) {
+                    if (safeAttributes.contains(entry.getKey())) {
                         continue;
                     }
                     long index = ScriptRuntime.indexFromString(entry.getKey());
