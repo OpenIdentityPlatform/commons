@@ -2,6 +2,7 @@
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012-2013 ForgeRock AS. All rights reserved.
+ * Portions copyright 2026 3A Systems LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -90,11 +91,12 @@ public class Utils {
      *             when the source {@code file} can not be read
      */
     public final static String readLargeFile(File file) throws IOException {
-        FileChannel channel = new FileInputStream(file).getChannel();
-        ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
-        channel.read(buffer);
-        channel.close();
-        return new String(buffer.array());
+        try (FileInputStream stream = new FileInputStream(file)) {
+            FileChannel channel = stream.getChannel();
+            ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
+            channel.read(buffer);
+            return new String(buffer.array());
+        }
     }
 
     /**

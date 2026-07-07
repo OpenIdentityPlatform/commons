@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema;
@@ -183,7 +184,10 @@ public final class Main {
     }
 
     private void loadSchema(URI base, File schemaFile) throws IOException {
-        JsonValue schemaMap = new JsonValue(MAPPER.readValue(new FileInputStream(schemaFile), Map.class));
+        final JsonValue schemaMap;
+        try (final FileInputStream in = new FileInputStream(schemaFile)) {
+            schemaMap = new JsonValue(MAPPER.readValue(in, Map.class));
+        }
         URI id = schemaMap.get(Constants.ID).required().asURI();
         Validator v = ObjectValidatorFactory.getTypeValidator(schemaMap.asMap());
         if (!id.isAbsolute()) {

@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -259,16 +260,17 @@ public class CLI {
             throw new IllegalArgumentException("Invalid host or port specified by " + args[0]);
         }
 
-        final Socket socket = new Socket(host, port);
-        final OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
-        writer.write(sb.toString());
-        writer.flush();
-        final InputStreamReader reader = new InputStreamReader(socket.getInputStream());
-        int c;
-        while ((c = reader.read()) != -1) {
-            System.out.print((char) c);
+        try (final Socket socket = new Socket(host, port)) {
+            final OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
+            writer.write(sb.toString());
+            writer.flush();
+            final InputStreamReader reader = new InputStreamReader(socket.getInputStream());
+            int c;
+            while ((c = reader.read()) != -1) {
+                System.out.print((char) c);
+            }
+            System.out.println();
         }
-        System.out.println();
     }
 
     /**
@@ -605,7 +607,7 @@ public class CLI {
             if (!_sourceStack.isEmpty()) {
                 input = _sourceStack.peek().readLine();
                 if (input == null) {
-                    _sourceStack.pop();
+                    _sourceStack.pop().close();
                     continue;
                 }
             } else {
@@ -870,7 +872,9 @@ public class CLI {
                     postMessage(String.format("Source is %s", fileName), LOG_NORMAL);
                     return;
                 } else {
-                    _sourceStack.clear();
+                    while (!_sourceStack.isEmpty()) {
+                        _sourceStack.pop().close();
+                    }
                     postMessage("Source is console", LOG_NORMAL);
                     return;
                 }

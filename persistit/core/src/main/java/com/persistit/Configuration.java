@@ -1,5 +1,6 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -760,7 +761,9 @@ public class Configuration {
         try {
             if (propertiesFileName.contains(DEFAULT_PROPERTIES_FILE_SUFFIX)
                     || propertiesFileName.contains(File.separator)) {
-                properties.load(new FileInputStream(propertiesFileName));
+                try (final FileInputStream is = new FileInputStream(propertiesFileName)) {
+                    properties.load(is);
+                }
             } else {
                 final ResourceBundle bundle = ResourceBundle.getBundle(propertiesFileName);
                 for (final Enumeration<String> e = bundle.getKeys(); e.hasMoreElements();) {
