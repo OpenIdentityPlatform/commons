@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script;
@@ -40,7 +41,7 @@ public interface Script extends Scope {
      * a Thread-Safe Java Language Binding to be used in the execution of
      * scripts or be used in some other way, depending on whether the key is
      * reserved.
-     * <p/>
+     * <p>
      * The {@link org.forgerock.script.Scope#put(String, Object)} suppress the
      * value with the same key.
      * 

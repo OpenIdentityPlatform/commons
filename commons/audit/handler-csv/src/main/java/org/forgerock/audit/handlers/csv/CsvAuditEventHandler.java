@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -289,10 +289,10 @@ public class CsvAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * Lookup CsvWriter for specified topic.
-     * <br/>
+     * <br>
      * Uses lazy synchronization in case another thread may be resetting the writer. If the writer is still null
      * after synchronizing then the writer is reset.
-     * <br/>
+     * <br>
      * This method is only intended for use by {@link #publishEventWithRetry(String, JsonValue)}.
      */
     private CsvWriter getWriter(String topic) throws BadRequestException {

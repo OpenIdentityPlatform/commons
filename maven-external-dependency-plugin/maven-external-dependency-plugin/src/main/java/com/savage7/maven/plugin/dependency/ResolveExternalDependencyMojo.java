@@ -10,6 +10,7 @@
  * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  **/
 
 package com.savage7.maven.plugin.dependency;
@@ -45,10 +46,8 @@ import org.codehaus.plexus.util.FileUtils;
  * 
  * @goal resolve-external
  * @author <a href="mailto:robert@savage7.com">Robert Savage</a>
- * @see http://code.google.com/p/maven-external-dependency-plugin/
+ * @see <a href="http://code.google.com/p/maven-external-dependency-plugin/">http://code.google.com/p/maven-external-dependency-plugin/</a>
  * @version 0.1
- * @category Maven Plugin
- * @ThreadSafe
  */
 public class ResolveExternalDependencyMojo extends
     AbstractExternalDependencyMojo
@@ -491,8 +490,7 @@ public class ResolveExternalDependencyMojo extends
 
     /**
      * resolve the artifact in local or remote repository
-     * 
-     * @param artifactItem
+     *
      * @param artifact
      * @return
      * @throws MojoFailureException

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.bloomfilter;
@@ -28,7 +29,7 @@ import java.util.Collection;
  * a database) or where some level of false positives is tolerable. The expected usage pattern for the former case
  * would be something like the following psuedo-code:
  * <pre>
- *     BloomFilter&lt;T&gt filter = ...;
+ *     BloomFilter&lt;T&gt; filter = ...;
  *     Set&lt;T&gt; expensiveSet = ...; // e.g. database, web-service
  *     if (filter.mightContain(element)) {
  *         // Perform the more expensive check to be sure
@@ -38,7 +39,7 @@ import java.util.Collection;
  * </pre>
  * Note: this assumes that the Bloom Filter is kept in-sync with the definitive set! How this is accomplished is
  * outside of the scope of this package.
- * <p/>
+ * <p>
  * All Bloom Filter implementations in this package allow the probability of false positives (FPP) to be specified,
  * and the implementation will adjust the amount of memory used to ensure the given level of accuracy for the
  * expected number of elements.

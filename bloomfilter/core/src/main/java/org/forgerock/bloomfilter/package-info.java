@@ -15,13 +15,13 @@
  */
 
 /**
- * <h1>ForgeRock Bloom Filters</h1>
+ * <h2>ForgeRock Bloom Filters</h2>
  * Implementations of thread-safe, scalable and rolling Bloom Filters. These are Set-like data structures that can
  * scale to very large numbers of entries while only using a small amount of memory (a few bits) per element. The
  * trade-off is that the set membership operation may report false positives (i.e., it may claim that an item is a
  * member of the set when it isn't). The probability of false positives can be tuned by increasing the amount of
  * memory used.
- * <p/>
+ * <p>
  * The {@link org.forgerock.bloomfilter.BloomFilter} interface describes the general contract of bloom filters in
  * more detail, and the {@link org.forgerock.bloomfilter.BloomFilters} utility class provides static factory and
  * builder methods for constructing bloom filters for various requirements.
@@ -50,7 +50,7 @@
  * Almeida et al., <em>Information Processing Letters</em>, 101(6), p.255&ndash;261, 2007. The latter are a
  * time-limited variation on this idea, whereby buckets in the scalable bloom filter can expire over time, freeing up
  * memory. The buckets are then recycled ensuring that memory usage is kept reasonable.
- * <p/>
+ * <p>
  * Scalable Bloom Filters are useful for storing sets of objects where you do not know <em>a priori</em> the number
  * of elements you might need to store. By dynamically expanding the capacity of the Bloom Filter, as well as
  * reducing the false positive probability of subsequent buckets according to a geometric series, the Scalable Bloom
@@ -60,7 +60,7 @@
  * {@link org.forgerock.bloomfilter.BloomFilters.BloomFilterBuilder#withCapacityGrowthFactor(double)} builder methods
  * to configure the scale factors for capacity and false positive probability in these implementations. The defaults
  * (0.8 and 2.0 respectively) provide a good trade off of memory growth and performance.
- * <p/>
+ * <p>
  * Rolling Bloom Filters allow elements in a Bloom Filter to expire over time. Use the {@link
  * org.forgerock.bloomfilter.BloomFilters.BloomFilterBuilder#withExpiryStrategy(org.forgerock.bloomfilter.ExpiryStrategy)}
  * method to configure how elements in your Bloom Filter will expire. By default, elements do not expire.
@@ -96,5 +96,6 @@
  * {@link org.forgerock.bloomfilter.BloomFilters.BloomFilterBuilder#withWriteBatchSize(int)} to enable write batching.
  *
  * @see <a href="http://en.wikipedia.org/wiki/Bloom_filter">Bloom Filter Wikipedia entry</a>
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.bloomfilter;
