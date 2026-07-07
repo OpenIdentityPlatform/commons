@@ -47,6 +47,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.openidentityplatform.commons</groupId>
+            <artifactId>util</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.glassfish</groupId>
             <artifactId>javax.security.auth.message</artifactId>
         </dependency>

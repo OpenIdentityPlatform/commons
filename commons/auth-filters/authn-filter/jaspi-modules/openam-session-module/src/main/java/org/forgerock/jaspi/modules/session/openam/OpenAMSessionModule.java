@@ -29,10 +29,7 @@ import static org.forgerock.util.promise.Promises.*;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.security.KeyStore;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -67,6 +64,7 @@ import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
 import org.forgerock.util.Utils;
 import org.forgerock.util.annotations.VisibleForTesting;
+import org.forgerock.util.crypto.SecretHash;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 
@@ -292,7 +290,7 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
         LOG.debug("SSO Token found.");
         // Log only a one-way hash of the SSO token, never the value (CWE-532: sensitive data in logs).
         if (LOG.isTraceEnabled()) {
-            LOG.trace("SSO Token hash={}", secretHash(tokenId));
+            LOG.trace("SSO Token hash={}", SecretHash.hash(tokenId));
         }
 
         if (tokenId == null) {
@@ -468,26 +466,5 @@ public class OpenAMSessionModule implements AsyncServerAuthModule {
     @Override
     public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject clientSubject) {
         return newResultPromise(null);
-    }
-
-    /**
-     * Returns a short, one-way SHA-256 hash of a sensitive value so it can be correlated across log
-     * lines without exposing the value itself (CWE-532: sensitive data in logs). Never logs the input.
-     */
-    private static String secretHash(String value) {
-        if (value == null) {
-            return "null";
-        }
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(16);
-            for (int i = 0; i < 8 && i < digest.length; i++) {
-                hex.append(Character.forDigit((digest[i] >> 4) & 0xF, 16));
-                hex.append(Character.forDigit(digest[i] & 0xF, 16));
-            }
-            return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            return "unavailable";
-        }
     }
 }

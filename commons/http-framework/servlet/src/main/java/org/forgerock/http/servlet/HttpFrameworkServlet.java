@@ -30,9 +30,6 @@ import static org.forgerock.util.Utils.closeSilently;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -66,6 +63,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RequestAuditContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Factory;
+import org.forgerock.util.crypto.SecretHash;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -377,7 +375,7 @@ public final class HttpFrameworkServlet extends HttpServlet {
                             // Log the header name in clear and only a one-way hash of the value; values may
                             // carry secrets such as Set-Cookie / Authorization (CWE-532: sensitive data in logs).
                             if (logger.isTraceEnabled()) {
-                                logger.trace("header {}={}", name, secretHash(value));
+                                logger.trace("header {}={}", name, SecretHash.hash(value));
                             }
                         }
                     }
@@ -400,27 +398,6 @@ public final class HttpFrameworkServlet extends HttpServlet {
     @Override
     public void destroy() {
         application.stop();
-    }
-
-    /**
-     * Returns a short, one-way SHA-256 hash of a sensitive value so it can be correlated across log
-     * lines without exposing the value itself (CWE-532: sensitive data in logs). Never logs the input.
-     */
-    private static String secretHash(String value) {
-        if (value == null) {
-            return "null";
-        }
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(16);
-            for (int i = 0; i < 8 && i < digest.length; i++) {
-                hex.append(Character.forDigit((digest[i] >> 4) & 0xF, 16));
-                hex.append(Character.forDigit(digest[i] & 0xF, 16));
-            }
-            return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            return "unavailable";
-        }
     }
 }
 

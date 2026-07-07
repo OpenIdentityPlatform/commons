@@ -35,9 +35,6 @@ import static org.forgerock.caf.authentication.framework.AuthenticationFramework
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.Principal;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
@@ -51,6 +48,7 @@ import javax.security.auth.login.LoginContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.crypto.SecretHash;
 import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
@@ -267,7 +265,7 @@ public class WDSSO {
             header = header.substring("Negotiate".length()).trim();
             // Log only a one-way hash of the SPNEGO/Authorization token, never the value (CWE-532: sensitive data in logs).
             if (LOG.isDebugEnabled()) {
-                LOG.debug("IWA WDSSO: \"Authorization\" header set, token hash={}", secretHash(header));
+                LOG.debug("IWA WDSSO: \"Authorization\" header set, token hash={}", SecretHash.hash(header));
             }
             try {
                 spnegoToken = Base64.decode(header);
@@ -411,27 +409,6 @@ public class WDSSO {
                 LOG.error("IWA WDSSO: Key Tab File does not exist");
                 throw new RuntimeException();
             }
-        }
-    }
-
-    /**
-     * Returns a short, one-way SHA-256 hash of a sensitive value so it can be correlated across log
-     * lines without exposing the value itself (CWE-532: sensitive data in logs). Never logs the input.
-     */
-    private static String secretHash(String value) {
-        if (value == null) {
-            return "null";
-        }
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(16);
-            for (int i = 0; i < 8 && i < digest.length; i++) {
-                hex.append(Character.forDigit((digest[i] >> 4) & 0xF, 16));
-                hex.append(Character.forDigit(digest[i] & 0xF, 16));
-            }
-            return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            return "unavailable";
         }
     }
 

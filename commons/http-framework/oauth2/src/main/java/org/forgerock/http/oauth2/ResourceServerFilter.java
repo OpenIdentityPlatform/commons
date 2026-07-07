@@ -19,9 +19,6 @@ package org.forgerock.http.oauth2;
 
 import static org.forgerock.http.protocol.Response.newResponsePromise;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -36,6 +33,7 @@ import org.forgerock.http.protocol.ResponseException;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
+import org.forgerock.util.crypto.SecretHash;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.time.TimeService;
@@ -165,7 +163,7 @@ public class ResourceServerFilter implements Filter {
             public Promise<? extends Response, ? extends NeverThrowsException> apply(AccessTokenException e) {
                 // Log only a one-way hash of the bearer token, never the value (CWE-532: sensitive data in logs).
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Access token '{}' could not be resolved", secretHash(token), e);
+                    logger.debug("Access token '{}' could not be resolved", SecretHash.hash(token), e);
                 }
                 return newResponsePromise(invalidToken(realm));
             }
@@ -183,7 +181,7 @@ public class ResourceServerFilter implements Filter {
                 if (isExpired(accessToken)) {
                     // Log only a one-way hash of the token, never the value (CWE-532: sensitive data in logs).
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Access token '{}' is expired", secretHash(accessToken.getToken()));
+                        logger.debug("Access token '{}' is expired", SecretHash.hash(accessToken.getToken()));
                     }
                     return newResponsePromise(invalidToken(realm));
                 }
@@ -193,7 +191,7 @@ public class ResourceServerFilter implements Filter {
                     if (!accessToken.getScopes().containsAll(scopesNeeded)) {
                         // Log only a one-way hash of the token, never the value (CWE-532: sensitive data in logs).
                         if (logger.isDebugEnabled()) {
-                            logger.debug("Access token '{}' is missing required scopes", secretHash(accessToken.getToken()));
+                            logger.debug("Access token '{}' is missing required scopes", SecretHash.hash(accessToken.getToken()));
                         }
                         return newResponsePromise(insufficientScope(realm, scopesNeeded));
                     }
@@ -232,26 +230,5 @@ public class ResourceServerFilter implements Filter {
                     "Can't use more than 1 'Authorization' Header to convey the OAuth2 AccessToken");
         }
         return OAuth2.getBearerAccessToken(headers.getFirst("Authorization"));
-    }
-
-    /**
-     * Returns a short, one-way SHA-256 hash of a sensitive value so it can be correlated across log
-     * lines without exposing the value itself (CWE-532: sensitive data in logs). Never logs the input.
-     */
-    private static String secretHash(String value) {
-        if (value == null) {
-            return "null";
-        }
-        try {
-            byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
-            StringBuilder hex = new StringBuilder(16);
-            for (int i = 0; i < 8 && i < digest.length; i++) {
-                hex.append(Character.forDigit((digest[i] >> 4) & 0xF, 16));
-                hex.append(Character.forDigit(digest[i] & 0xF, 16));
-            }
-            return hex.toString();
-        } catch (NoSuchAlgorithmException e) {
-            return "unavailable";
-        }
     }
 }
