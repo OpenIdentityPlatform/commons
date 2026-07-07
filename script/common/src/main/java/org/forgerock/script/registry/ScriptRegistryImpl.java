@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -703,7 +704,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         } else if (unit instanceof SourceContainer) {
             sourceCacheLock.writeLock().lock();
             try {
-                sourceCache.remove(unit);
+                sourceCache.remove(unit.getName());
             } finally {
                 sourceCacheLock.writeLock().lock();
             }
