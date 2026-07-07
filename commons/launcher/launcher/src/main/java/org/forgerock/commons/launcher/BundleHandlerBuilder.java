@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Portions copyright 2026 3A Systems LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -84,15 +85,6 @@ public class BundleHandlerBuilder {
 
     public BundleHandler build(String bundleURL) throws MalformedURLException {
         return build(new URL(bundleURL));
-    }
-
-    public boolean equals(BundleHandlerBuilder that) {
-        if (this == that)
-            return true;
-        if ((that == null)
-                || (!actions.equals(that.actions) || !startLevel.equals(that.startLevel)))
-            return false;
-        return true;
     }
 
 }
