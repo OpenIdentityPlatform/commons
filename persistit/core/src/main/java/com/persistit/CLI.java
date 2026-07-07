@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1119,7 +1120,7 @@ public class CLI {
             @Override
             protected void runTask() throws Exception {
                 long currentPage = pageAddress;
-                int count = 0;
+                long count = 0;
                 while (currentPage > 0 && count++ < maxcount) {
                     if (_currentVolume == null) {
                         postMessage("Select a volume", LOG_NORMAL);
