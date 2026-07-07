@@ -2,6 +2,7 @@
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012-2014 ForgeRock AS. All rights reserved.
+ * Portions copyright 2026 3A Systems LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -48,7 +49,7 @@ public class GroovyScriptEngineFactory implements ScriptEngineFactory {
 
     public static final String LANGUAGE_NAME = "Groovy";
 
-    private GroovyScriptEngineImpl engine = null;
+    private volatile GroovyScriptEngineImpl engine = null;
 
     static {
         names = new ArrayList<String>(2);
