@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions copyright 2026 3A Systems LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1223,78 +1224,77 @@ public class CLI {
 
                 final ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(target),
                         BUFFER_SIZE));
-                final String basePath = "PersistitDump_" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
-                final long baseTime = System.currentTimeMillis();
+                try (final DataOutputStream stream = new DataOutputStream(zos)) {
+                    final String basePath = "PersistitDump_" + new SimpleDateFormat("yyyyMMddHHmm").format(new Date());
+                    final long baseTime = System.currentTimeMillis();
 
-                zos.setLevel(ZipEntry.DEFLATED);
-                ZipEntry ze = new ZipEntry(JournalManager.generationToFile(basePath, 0).getPath());
-                ze.setSize(Integer.MAX_VALUE);
-                ze.setTime(baseTime);
-                zos.putNextEntry(ze);
+                    zos.setLevel(ZipEntry.DEFLATED);
+                    ZipEntry ze = new ZipEntry(JournalManager.generationToFile(basePath, 0).getPath());
+                    ze.setSize(Integer.MAX_VALUE);
+                    ze.setTime(baseTime);
+                    zos.putNextEntry(ze);
 
-                final DataOutputStream stream = new DataOutputStream(zos);
-
-                final ByteBuffer bb = ByteBuffer.allocate(BUFFER_SIZE);
-                {
-                    JH.putType(bb);
-                    JH.putTimestamp(bb, 0);
-                    JH.putVersion(bb, JournalManagerMXBean.VERSION);
-                    JH.putBlockSize(bb, HUGE_BLOCK_SIZE);
-                    JH.putBaseJournalAddress(bb, 0);
-                    JH.putCurrentJournalAddress(bb, 0);
-                    JH.putJournalCreatedTime(bb, 0);
-                    JH.putFileCreatedTime(bb, 0);
-                    JH.putPath(bb, basePath);
-                    bb.position(JH.getLength(bb));
-                }
-
-                final List<BufferPool> pools = new ArrayList<BufferPool>(_persistit.getBufferPoolHashMap().values());
-                for (final BufferPool pool : pools) {
-                    pool.dump(stream, bb, secure, verbose);
-                }
-
-                {
-                    CP.putLength(bb, CP.OVERHEAD);
-                    CP.putType(bb);
-                    CP.putTimestamp(bb, _persistit.getTimestampAllocator().getCurrentTimestamp() + 1);
-                    CP.putSystemTimeMillis(bb, baseTime);
-                    CP.putBaseAddress(bb, 0);
-                    bb.position(CP.OVERHEAD);
-                }
-
-                bb.flip();
-                stream.write(bb.array(), 0, bb.limit());
-                stream.flush();
-                zos.closeEntry();
-                bb.clear();
-
-                final PrintWriter writer = new PrintWriter(zos);
-                ze = new ZipEntry(basePath + ".txt");
-                ze.setSize(Integer.MAX_VALUE);
-                ze.setTime(baseTime);
-                zos.putNextEntry(ze);
-                final List<Volume> volumes = _persistit.getVolumes();
-
-                writer.printf("@volumes=%d\n", volumes.size());
-                for (final Volume volume : volumes) {
-                    writer.printf("%s\n", volume.toString());
-                    final List<Tree> trees = volume.getStructure().referencedTrees();
-                    writer.printf("@trees=%d\n", trees.size());
-                    for (final Tree tree : trees) {
-                        writer.printf("%s\n", tree.toString());
+                    final ByteBuffer bb = ByteBuffer.allocate(BUFFER_SIZE);
+                    {
+                        JH.putType(bb);
+                        JH.putTimestamp(bb, 0);
+                        JH.putVersion(bb, JournalManagerMXBean.VERSION);
+                        JH.putBlockSize(bb, HUGE_BLOCK_SIZE);
+                        JH.putBaseJournalAddress(bb, 0);
+                        JH.putCurrentJournalAddress(bb, 0);
+                        JH.putJournalCreatedTime(bb, 0);
+                        JH.putFileCreatedTime(bb, 0);
+                        JH.putPath(bb, basePath);
+                        bb.position(JH.getLength(bb));
                     }
-                }
-                writer.printf("@bufferPools=%d\n", pools.size());
-                for (final BufferPool pool : pools) {
-                    writer.printf("%s\n", pool.toString());
-                    writer.printf("@buffers=%d\n", pool.getBufferCount());
-                    for (int i = 0; i < pool.getBufferCount(); i++) {
-                        writer.printf("%s\n", pool.toString(i, false));
+
+                    final List<BufferPool> pools = new ArrayList<BufferPool>(_persistit.getBufferPoolHashMap().values());
+                    for (final BufferPool pool : pools) {
+                        pool.dump(stream, bb, secure, verbose);
                     }
+
+                    {
+                        CP.putLength(bb, CP.OVERHEAD);
+                        CP.putType(bb);
+                        CP.putTimestamp(bb, _persistit.getTimestampAllocator().getCurrentTimestamp() + 1);
+                        CP.putSystemTimeMillis(bb, baseTime);
+                        CP.putBaseAddress(bb, 0);
+                        bb.position(CP.OVERHEAD);
+                    }
+
+                    bb.flip();
+                    stream.write(bb.array(), 0, bb.limit());
+                    stream.flush();
+                    zos.closeEntry();
+                    bb.clear();
+
+                    final PrintWriter writer = new PrintWriter(zos);
+                    ze = new ZipEntry(basePath + ".txt");
+                    ze.setSize(Integer.MAX_VALUE);
+                    ze.setTime(baseTime);
+                    zos.putNextEntry(ze);
+                    final List<Volume> volumes = _persistit.getVolumes();
+
+                    writer.printf("@volumes=%d\n", volumes.size());
+                    for (final Volume volume : volumes) {
+                        writer.printf("%s\n", volume.toString());
+                        final List<Tree> trees = volume.getStructure().referencedTrees();
+                        writer.printf("@trees=%d\n", trees.size());
+                        for (final Tree tree : trees) {
+                            writer.printf("%s\n", tree.toString());
+                        }
+                    }
+                    writer.printf("@bufferPools=%d\n", pools.size());
+                    for (final BufferPool pool : pools) {
+                        writer.printf("%s\n", pool.toString());
+                        writer.printf("@buffers=%d\n", pool.getBufferCount());
+                        for (int i = 0; i < pool.getBufferCount(); i++) {
+                            writer.printf("%s\n", pool.toString(i, false));
+                        }
+                    }
+                    writer.flush();
+                    zos.closeEntry();
                 }
-                writer.flush();
-                zos.closeEntry();
-                stream.close();
             }
 
             @Override

@@ -2,6 +2,7 @@
  * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012-2013 ForgeRock AS. All rights reserved.
+ * Portions copyright 2026 3A Systems LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -66,17 +67,10 @@ public class Utils {
     }
 
     public static void copyURLToFile(URL in, File out) throws IOException {
-        ReadableByteChannel inChannel = Channels.newChannel(in.openStream());
-        FileChannel outChannel = new FileOutputStream(out).getChannel();
-        try {
+        try (ReadableByteChannel inChannel = Channels.newChannel(in.openStream());
+                FileOutputStream outStream = new FileOutputStream(out);
+                FileChannel outChannel = outStream.getChannel()) {
             outChannel.transferFrom(inChannel, 0, 1 << 24);
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            if (inChannel != null) {
-                inChannel.close();
-            }
-            outChannel.close();
         }
     }
 
