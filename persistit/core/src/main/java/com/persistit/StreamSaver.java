@@ -115,8 +115,6 @@ public class StreamSaver extends Task {
     protected long _dataRecordCount = 0;
     protected long _otherRecordCount = 0;
     protected int _cycleCount = DEFAULT_CYCLE_COUNT;
-    protected boolean _stop;
-    protected Exception _lastException;
     protected int _recordCount;
     protected TreeSelector _treeSelector;
 
@@ -244,7 +242,7 @@ public class StreamSaver extends Task {
      */
     public void close() throws IOException {
         writeTimestamp();
-        if (!_stop && _lastException == null)
+        if (!_stop.get() && _lastException == null)
             _dos.writeChar(RECORD_TYPE_COMPLETION);
         _lastTree = null;
         _lastVolume = null;
@@ -456,7 +454,7 @@ public class StreamSaver extends Task {
         }
         final Key key = exchange.getKey();
         key.clear().append(Key.BEFORE);
-        while (exchange.traverse(Key.GT, filter, Integer.MAX_VALUE) & !_stop) {
+        while (exchange.traverse(Key.GT, filter, Integer.MAX_VALUE) & !_stop.get()) {
             writeData(exchange);
         }
         writeRecordCount(_dataRecordCount, _otherRecordCount);
@@ -497,7 +495,7 @@ public class StreamSaver extends Task {
     public void saveTrees(final Volume volume, final String[] selectedTreeNames) throws PersistitException, IOException {
         final String[] treeNames = volume.getTreeNames();
         writeComment("Volume " + volume.getPath());
-        for (int index = 0; index < treeNames.length & !_stop; index++) {
+        for (int index = 0; index < treeNames.length & !_stop.get(); index++) {
             boolean selected = true;
             if (selectedTreeNames != null) {
                 for (int index2 = 0; selected && index2 < selectedTreeNames.length; index2++) {
@@ -567,7 +565,7 @@ public class StreamSaver extends Task {
     public void saveAll() throws PersistitException, IOException {
 
         for (final Volume volume : _persistit.getVolumes()) {
-            if (_stop) {
+            if (_stop.get()) {
                 break;
             }
             saveTrees(volume, null);
