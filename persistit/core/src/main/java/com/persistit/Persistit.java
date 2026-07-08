@@ -1736,12 +1736,10 @@ public class Persistit {
    */
   public void crash() {
     final JournalManager journalManager = _journalManager;
-    if (journalManager != null) {
-      try {
-        journalManager.crash();
-      } catch (final IOException e) {
-        _logBase.exception.log(e);
-      }
+    try {
+      journalManager.crash();
+    } catch (final IOException e) {
+      _logBase.exception.log(e);
     }
     //
     // Even on simulating a crash we need to try to close
@@ -1757,10 +1755,8 @@ public class Persistit {
       }
     }
     final Map<Integer, BufferPool> buffers = _bufferPoolTable;
-    if (buffers != null) {
-      for (final BufferPool pool : buffers.values()) {
-        pool.crash();
-      }
+    for (final BufferPool pool : buffers.values()) {
+      pool.crash();
     }
     _transactionIndex.crash();
     _cleanupManager.crash();
