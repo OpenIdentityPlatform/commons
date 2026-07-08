@@ -18,7 +18,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
  * Copyright 2012-2016 ForgeRock AS.
- * Portions Copyrighted 2018-2025 3A Systems, LLC
+ * Portions Copyrighted 2018-2026 3A Systems, LLC
  */
 
 package org.forgerock.script.javascript;
@@ -96,8 +96,17 @@ public class RhinoScriptEngine extends AbstractScriptEngine {
         this.factory = factory;
         final JsonValue jsonValueConfig = new JsonValue(configuration);
         initDebugListener(jsonValueConfig.get(CONFIG_DEBUG_PROPERTY).defaultTo(null).asString());
-        minimumRecompilationInterval = Long.valueOf(
-                jsonValueConfig.get(CONFIG_RECOMPILE_MINIMUM_INTERVAL_PROPERTY).defaultTo("-1").asString());
+        final String recompileInterval =
+                jsonValueConfig.get(CONFIG_RECOMPILE_MINIMUM_INTERVAL_PROPERTY).defaultTo("-1").asString();
+        long minimumRecompilationIntervalValue;
+        try {
+            minimumRecompilationIntervalValue = Long.parseLong(recompileInterval);
+        } catch (final NumberFormatException e) {
+            logger.warn("Invalid {} configuration value '{}'; using default -1.",
+                    CONFIG_RECOMPILE_MINIMUM_INTERVAL_PROPERTY, recompileInterval);
+            minimumRecompilationIntervalValue = -1;
+        }
+        minimumRecompilationInterval = minimumRecompilationIntervalValue;
         scriptExceptionGenerator = jsonValueConfig.get(CONFIG_EXCEPTION_DEBUG_INFO).defaultTo(true).asBoolean()
                 ? DEBUG_SCRIPT_EXCEPTION_GENERATOR
                 : NON_DEBUG_SCRIPT_EXCEPTION_GENERATOR;

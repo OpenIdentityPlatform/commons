@@ -113,13 +113,23 @@ public class ManagementTableModel extends AbstractTableModel {
         for (int index = 0; index < columnSpecs.length; index++) {
             final StringTokenizer st = new StringTokenizer(columnSpecs[index], ":");
             final String methodName = st.nextToken();
-            final int width = Integer.parseInt(st.nextToken());
+            final int width;
+            try {
+                width = Integer.parseInt(st.nextToken());
+            } catch (final NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid width in column specification: " + columnSpecs[index], e);
+            }
             final String flags = st.nextToken();
             final String header = st.nextToken();
             String rendererName = null;
             int minWidth = width / 2;
             if (st.hasMoreTokens()) {
-                minWidth = Integer.parseInt(st.nextToken());
+                try {
+                    minWidth = Integer.parseInt(st.nextToken());
+                } catch (final NumberFormatException e) {
+                    throw new IllegalArgumentException(
+                            "Invalid minimum width in column specification: " + columnSpecs[index], e);
+                }
             }
             if (st.hasMoreTokens()) {
                 rendererName = st.nextToken();

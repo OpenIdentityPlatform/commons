@@ -13,6 +13,7 @@
  *
  *      Copyright 2006-2008 Sun Microsystems, Inc.
  *      Portions Copyright 2013-2015 ForgeRock AS.
+ *      Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.events.handlers.writers;
 
@@ -42,8 +43,24 @@ import static org.forgerock.audit.batch.CommonAuditBatchConfiguration.POLLING_TI
 public class AsynchronousTextWriter implements TextWriter {
 
     private static final Logger logger = LoggerFactory.getLogger(AsynchronousTextWriter.class);
+    /** System property overriding the default queue capacity. */
+    private static final String CAPACITY_PROPERTY =
+            "org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter.CAPACITY";
+    /** Default queue capacity used when {@link #CAPACITY_PROPERTY} is unset or invalid. */
+    private static final int DEFAULT_CAPACITY = 32000;
     /** Maximum number of messages that can be queued before producers start to block. */
-    private static final int CAPACITY = Integer.parseInt(System.getProperty("org.forgerock.audit.events.handlers.writers.AsynchronousTextWriter.CAPACITY","32000"));
+    private static final int CAPACITY = readCapacity();
+
+    private static int readCapacity() {
+        final String value = System.getProperty(CAPACITY_PROPERTY, String.valueOf(DEFAULT_CAPACITY));
+        try {
+            return Integer.parseInt(value);
+        } catch (final NumberFormatException e) {
+            logger.warn("Invalid value '{}' for system property {}; using default {}.",
+                    value, CAPACITY_PROPERTY, DEFAULT_CAPACITY);
+            return DEFAULT_CAPACITY;
+        }
+    }
 
     /** The wrapped Text Writer. */
     private final TextWriter writer;
