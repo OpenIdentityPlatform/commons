@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.resource;
@@ -360,9 +361,9 @@ public final class MemoryBackend implements CollectionResourceProvider {
             final String s2 = (String) v2;
             return s1.compareToIgnoreCase(s2);
         } else if (v1 instanceof Number && v2 instanceof Number) {
-            final Double n1 = ((Number) v1).doubleValue();
-            final Double n2 = ((Number) v2).doubleValue();
-            return n1.compareTo(n2);
+            final double n1 = ((Number) v1).doubleValue();
+            final double n2 = ((Number) v2).doubleValue();
+            return Double.compare(n1, n2);
         } else if (v1 instanceof Boolean && v2 instanceof Boolean) {
             final Boolean b1 = (Boolean) v1;
             final Boolean b2 = (Boolean) v2;
