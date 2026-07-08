@@ -1,6 +1,7 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,6 +128,7 @@ class TransactionPlayer {
             address = continuation.longValue();
             _support.read(address, TX.OVERHEAD);
             recordSize = TX.getLength(_support.getReadBuffer());
+            type = TX.getType(_support.getReadBuffer());
             if (recordSize < TX.OVERHEAD || recordSize > Transaction.TRANSACTION_BUFFER_SIZE + TX.OVERHEAD
                     || type != TX.TYPE) {
                 throw new CorruptJournalException("Transaction record at " + addressToString(address)

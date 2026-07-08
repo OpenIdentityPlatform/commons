@@ -13,6 +13,7 @@
  *
  * Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
  * Portions Copyrighted 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 
 package org.forgerock.json;
@@ -853,7 +854,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         if (index < 0) {
             throw new JsonValueException(this, "List index out of range: " + index);
         }
-        if (isList() && index >= 0) {
+        if (isList()) {
             final List<Object> list = asList();
             if (index < list.size()) {
                 result = list.get(index);

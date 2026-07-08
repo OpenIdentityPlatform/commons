@@ -670,7 +670,7 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         if (index < 0) {
             throw new JsonValueException(this, "List index out of range: " + index);
         }
-        if (isList() && index >= 0) {
+        if (isList()) {
             List<Object> list = asList();
             if (index < list.size()) {
                 result = list.get(index);

@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3264,7 +3265,7 @@ public final class Key implements Comparable<Object> {
             index = 0;
         for (int i = index; i < _size; i++) {
             if (_bytes[i] == 0) {
-                return i < _size ? i + 1 : -1;
+                return i + 1;
             }
         }
         // return index < _size ? _size : -1;
@@ -4008,8 +4009,6 @@ public final class Key implements Comparable<Object> {
             if (neg)
                 lowBits = -lowBits;
             for (int j = 0; j < 2 && index >= 0; j++) {
-                if (index < 0)
-                    break;
                 for (int k = 0; k < 4; k++) {
                     final int hundred = (int) (lowBits % 100);
                     final int bcd = (hundred / 10) * 16 + (hundred % 10);

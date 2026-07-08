@@ -1,6 +1,7 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,10 +115,7 @@ class LongRecordHelper {
                 buffer = null;
 
                 if (count > MAX_LONG_RECORD_CHAIN) {
-                    if (count > MAX_LONG_RECORD_CHAIN) {
-                        corrupt("LONG_RECORD chain starting at " + startAtPage + " is too long");
-                    }
-
+                    corrupt("LONG_RECORD chain starting at " + startAtPage + " is too long");
                 }
             }
             value.setLongSize(rawSize);

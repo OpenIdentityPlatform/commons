@@ -1,6 +1,7 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -264,7 +265,7 @@ class IOMeter implements IOMeterMXBean {
                 if (op == -1) {
                     break;
                 }
-                final String opName = op >= 0 && op < OPERATIONS.length ? OPERATIONS[op] : "??";
+                final String opName = op < OPERATIONS.length ? OPERATIONS[op] : "??";
                 final long time = is.readLong();
                 final int volumeHandle = is.readInt();
                 final long pageAddress = is.readLong();
