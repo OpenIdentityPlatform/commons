@@ -117,6 +117,7 @@ public class IWAModule implements AsyncServerAuthModule {
                     LOG.debug("IWAModule: IWA successful with username, {}", username);
 
                     clientSubject.getPrincipals().add(new Principal() {
+                        @Override
                         public String getName() {
                             return username;
                         }

@@ -49,6 +49,7 @@ public class SLF4JErrorReporter implements ErrorReporter {
         this.chainedReporter = chainedReporter;
     }
 
+    @Override
     public void warning(String message, String sourceName, int line, String lineSource,
             int lineOffset) {
         logger.warn("{} ({}#{}): {} [offset {}]", new Object[] { message, sourceName, line, lineSource, lineOffset });
@@ -57,6 +58,7 @@ public class SLF4JErrorReporter implements ErrorReporter {
         }
     }
 
+    @Override
     public void error(String message, String sourceName, int line, String lineSource, int lineOffset) {
         logger.error("{} ({}#{}): {} [offset {}]", new Object[] { message, sourceName, line, lineSource, lineOffset });
         if (chainedReporter != null) {
@@ -66,6 +68,7 @@ public class SLF4JErrorReporter implements ErrorReporter {
         }
     }
 
+    @Override
     public EvaluatorException runtimeError(String message, String sourceName, int line,
             String lineSource, int lineOffset) {
         if (chainedReporter != null) {

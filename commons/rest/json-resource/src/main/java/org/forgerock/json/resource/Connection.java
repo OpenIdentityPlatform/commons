@@ -12,6 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.resource;
@@ -76,6 +77,7 @@ public interface Connection extends Closeable {
      * Calling {@code close} on a connection that is already closed has no
      * effect.
      */
+    @Override
     void close();
 
     /**

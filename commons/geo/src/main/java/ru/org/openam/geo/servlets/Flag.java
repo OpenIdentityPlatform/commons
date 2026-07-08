@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2020-2024 3A Systems LLC.
+ * Copyright 2020-2026 3A Systems LLC.
  */
 
 package ru.org.openam.geo.servlets;
@@ -34,6 +34,7 @@ public class Flag extends HttpServlet {
 		super();
 	}
 
+	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		if (request.getPathInfo()==null||!request.getPathInfo().matches("/[a-z]{2}\\.png"))
 			response.sendError(404);
@@ -53,6 +54,7 @@ public class Flag extends HttpServlet {
 		}
 	}
 
+	@Override
 	protected void doHead(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doGet(request, response);
 	}

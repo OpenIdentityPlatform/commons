@@ -119,6 +119,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
      * @param auditEvent The event to convert to a JMS TextMessage and publish on the JMS Topic.
      * @return a promise with either a response or an exception
      */
+    @Override
     public Promise<ResourceResponse, ResourceException> publishEvent(Context context, String auditTopic,
             JsonValue auditEvent) {
         try {

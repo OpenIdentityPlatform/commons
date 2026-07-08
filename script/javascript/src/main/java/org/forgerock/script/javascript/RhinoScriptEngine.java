@@ -213,6 +213,7 @@ public class RhinoScriptEngine extends AbstractScriptEngine {
         throw new ScriptException("Script is not found:" + scriptName);
     }
 
+    @Override
     public void compileScript(CompilationHandler handler) throws ScriptException {
         try {
             boolean sharedScope = true;// config.get("sharedScope").defaultTo(true).asBoolean();
@@ -266,6 +267,7 @@ public class RhinoScriptEngine extends AbstractScriptEngine {
         }
     }
 
+    @Override
     public ScriptEngineFactory getFactory() {
         return factory;
     }

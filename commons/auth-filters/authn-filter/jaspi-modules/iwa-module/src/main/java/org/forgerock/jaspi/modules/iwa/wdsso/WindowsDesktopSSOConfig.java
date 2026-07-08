@@ -26,6 +26,7 @@
  * $Id: WindowsDesktopSSOConfig.java,v 1.3 2009/04/07 22:55:13 beomsuk Exp $
  *
  * Portions Copyrighted 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 
@@ -96,6 +97,7 @@ public class WindowsDesktopSSOConfig extends Configuration {
      * @param appName The app name.
      * @return Array of AppConfigurationEntry
      */
+    @Override
     public AppConfigurationEntry[] getAppConfigurationEntry(String appName) {
         if (appName.equals(DEFAULT_APP_NAME)) {
             Map<String, String> hashmap = new HashMap<>();
@@ -125,6 +127,7 @@ public class WindowsDesktopSSOConfig extends Configuration {
     /**
      * Do a config refresh.
      */
+    @Override
     public void refresh() {
         config.refresh();
     }

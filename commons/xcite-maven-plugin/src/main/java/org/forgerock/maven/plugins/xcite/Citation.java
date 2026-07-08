@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.maven.plugins.xcite;
@@ -317,6 +318,7 @@ public class Citation {
      *
      * @return The string representation of this citation.
      */
+    @Override
     public String toString() {
         String start =
                 (isNullOrEmpty(getStart()) ? "" : getDelimiter() + getStart());

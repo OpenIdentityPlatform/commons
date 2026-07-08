@@ -126,6 +126,7 @@ public class ConfigurationUtil {
 
     static { 
     	URL.setURLStreamHandlerFactory(protocol -> "jar".equals(protocol) ? new URLStreamHandler() {
+    	    @Override
     	    protected URLConnection openConnection(URL url) throws IOException {
     	        return new JarURLConnection(url) {
     	        	

@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwk;
@@ -191,6 +192,7 @@ public class EcJWK extends JWK {
      * Prints the JWK as a String json object.
      * @return a json string object
      */
+    @Override
     public String toJsonString() {
         return super.toString();
     }

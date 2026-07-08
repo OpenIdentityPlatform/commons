@@ -13,6 +13,7 @@
  *
  *      Copyright 2009 Sun Microsystems, Inc.
  *      Portions copyright 2011-2012 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.i18n;
@@ -193,6 +194,7 @@ public final class LocalizableMessage implements CharSequence, Formattable,
      *             If the {@code index} argument is negative or not less than
      *             {@code length()}.
      */
+    @Override
     public char charAt(final int index) {
         return charAt(Locale.getDefault(), index);
     }
@@ -226,6 +228,7 @@ public final class LocalizableMessage implements CharSequence, Formattable,
      * @return A negative integer, zero, or a positive integer as this object is
      *         less than, equal to, or greater than the specified object.
      */
+    @Override
     public int compareTo(final LocalizableMessage message) {
         return toString().compareTo(message.toString());
     }
@@ -287,6 +290,7 @@ public final class LocalizableMessage implements CharSequence, Formattable,
      *             href="../util/Formatter.html#detail">Details</a> section of
      *             the formatter class specification.
      */
+    @Override
     public void formatTo(final Formatter formatter, final int flags,
             final int width, final int precision) {
         // Ignores flags, width and precision for now.
@@ -314,6 +318,7 @@ public final class LocalizableMessage implements CharSequence, Formattable,
      * @return The length of the {@code String} representation of this message
      *         in the default locale.
      */
+    @Override
     public int length() {
         return length(Locale.getDefault());
     }
@@ -390,6 +395,7 @@ public final class LocalizableMessage implements CharSequence, Formattable,
      *             is greater than {@code length()}, or if {@code start} is
      *             greater than {@code end}.
      */
+    @Override
     public CharSequence subSequence(final int start, final int end) {
         return subSequence(Locale.getDefault(), start, end);
     }

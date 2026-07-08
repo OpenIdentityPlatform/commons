@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.fluent;
@@ -44,6 +45,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
         this.jsonValue = jsonValue.expect(Map.class);
     }
 
+    @Override
     public JsonValue unwrap() {
         return jsonValue;
     }
@@ -51,6 +53,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
     /**
      * Returns the number of key-value mappings in this map.
      */
+    @Override
     public int size() {
         return jsonValue.size();
     }
@@ -58,6 +61,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
     /**
      * Returns {@code true} if this map contains no key-value mappings.
      */
+    @Override
     public boolean isEmpty() {
         return (jsonValue.size() == 0);
     }
@@ -68,6 +72,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
      * @param key key whose presence in this map is to be tested.
      * @return {@code true} if this map contains a mapping for the specified key.
      */
+    @Override
     public boolean containsKey(Object key) {
         return (key != null && key instanceof String && jsonValue.isDefined((String)key));
     }
@@ -78,6 +83,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
      * @param value value whose presence in this map is to be tested.
      * @return {@code true} if this map maps one or more keys to the specified value.
      */
+    @Override
     public boolean containsValue(Object value) {
         return jsonValue.contains(value);
     }
@@ -89,6 +95,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
      * @param key the key whose associated value is to be returned.
      * @return the value to which the specified key is mapped, or {@code null}.
      */
+    @Override
     public Object get(Object key) {
         Object result = null;
         if (key != null && key instanceof String) {
@@ -104,6 +111,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
      * @param value value to be associated with the specified key.
      * @return the previous value associated with key, or {@code null} if there was no mapping for key.
      */
+    @Override
     public Object put(String key, Object value) {
         Object result = get(key);
         jsonValue.put(key, value);
@@ -116,6 +124,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
      * @param key key whose mapping is to be removed from the map.
      * @return the previous value associated with key, or {@code null} if there was no mapping for key.
      */
+    @Override
     public Object remove(Object key) {
         Object result = get(key);
         if (key instanceof String) {
@@ -129,6 +138,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
      *
      * @param m mappings to be stored in this map.
      */
+    @Override
     public void putAll(Map<? extends String, ? extends Object> m) {
         for (Map.Entry<? extends String, ? extends Object> entry : m.entrySet()) {
             jsonValue.put(entry.getKey(), entry.getValue());
@@ -138,6 +148,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
     /**
      * Removes all of the mappings from this map.
      */
+    @Override
     public void clear() {
         jsonValue.clear();
     }
@@ -145,6 +156,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
     /**
      * Returns a {@code Set} view of the keys contained in this map.
      */
+    @Override
     public Set<String> keySet() {
         return jsonValue.keys();
     }
@@ -152,6 +164,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
     /**
      * Returns a Collection view of the values contained in this map.
      */
+    @Override
     public Collection<Object> values() {
         ArrayList<Object> result = new ArrayList<Object>(size());
         for (JsonValue jv : jsonValue) {
@@ -163,6 +176,7 @@ public class JsonValueMap implements JsonValueWrapper, Map<String, Object> {
     /**
      * Returns a {@code Set} view of the mappings contained in this map.
      */
+    @Override
     public Set<Map.Entry<String, Object>> entrySet() {
         HashSet<Map.Entry<String, Object>> result = new HashSet<Map.Entry<String, Object>>(size());
         for (String key : jsonValue.keys()) {

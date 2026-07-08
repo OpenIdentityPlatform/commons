@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.commons.launcher;
@@ -88,6 +89,7 @@ public class BundleHandler {
         return actions;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("BundleHandler[");
         sb.append("url: ").append(bundleUrl);

@@ -61,6 +61,7 @@ public final class CleanMessagesMojo extends AbstractMojo {
         /**
          * {@inheritDoc}
          */
+        @Override
         public void run() {
             // Cache the keys that we want to check so that we avoid excessive
             // contention on the CHM.
@@ -138,6 +139,7 @@ public final class CleanMessagesMojo extends AbstractMojo {
      * {@inheritDoc}
      */
     // @Checkstyle:ignore
+    @Override
     public void execute() throws MojoExecutionException {
         if (!sourceDirectory.exists()) {
             throw new MojoExecutionException("Source directory "

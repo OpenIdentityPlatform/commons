@@ -165,6 +165,7 @@ public final class Main {
             validateDirectory(schemaFile);
             FileFilter filter = new FileFilter() {
 
+                @Override
                 public boolean accept(File f) {
                     return (f.isDirectory()) || (f.getName().endsWith(".json"));
                 }

@@ -81,6 +81,7 @@ public class InstallExternalDependencyMojo extends
      */
     protected boolean createChecksum = true;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         try

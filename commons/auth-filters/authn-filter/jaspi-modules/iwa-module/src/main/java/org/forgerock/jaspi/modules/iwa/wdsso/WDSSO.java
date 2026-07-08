@@ -175,6 +175,7 @@ public class WDSSO {
 
     private void authenticateToken(final byte[] kerberosToken) throws Exception {
         Subject.doAs(serviceSubject, new PrivilegedExceptionAction() {
+            @Override
             public Object run() throws Exception {
                 GSSContext context = GSSManager.getInstance().createContext((GSSCredential) null);
                 LOG.debug("IWA WDSSO: GSSContext created");

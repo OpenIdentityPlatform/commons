@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.guice.core;
@@ -64,6 +65,7 @@ public class ServiceLoaderWrapper {
          *
          * @return {@inheritDoc}
          */
+        @Override
         public Iterator<T> iterator() {
             return serviceLoader.iterator();
         }

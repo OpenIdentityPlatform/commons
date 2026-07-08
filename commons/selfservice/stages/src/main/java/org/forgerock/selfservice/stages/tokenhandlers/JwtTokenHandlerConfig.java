@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.selfservice.stages.tokenhandlers;
@@ -56,6 +57,7 @@ public final class JwtTokenHandlerConfig implements SnapshotTokenConfig {
      *
      * @return the type
      */
+    @Override
     public String getType() {
         return TYPE;
     }

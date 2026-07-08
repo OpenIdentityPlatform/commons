@@ -100,6 +100,7 @@ public final class ScriptName {
         return result;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder(name).append(':').append(type);
         if (null != revision) {

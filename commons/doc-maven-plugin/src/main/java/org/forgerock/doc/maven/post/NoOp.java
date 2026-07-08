@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.doc.maven.post;
@@ -40,6 +41,7 @@ public class NoOp extends AbstractDocbkxMojo {
     /**
      * Does no post-processing.
      */
+    @Override
     public void execute() {
         // Nothing to do.
     }

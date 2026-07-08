@@ -135,6 +135,7 @@ class StandardCsvWriter implements CsvWriter {
      * Flush the data into the CSV file.
      * @throws IOException if an I/O error occurs while flushing.
      */
+    @Override
     public void flush() throws IOException {
         csvWriter.flush();
     }

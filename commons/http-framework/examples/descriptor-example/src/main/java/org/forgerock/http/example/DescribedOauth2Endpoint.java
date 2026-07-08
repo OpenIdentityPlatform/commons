@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.example;
@@ -82,6 +83,7 @@ public class DescribedOauth2Endpoint implements DescribableHandler {
     public DescribedOauth2Endpoint() {
         this.router = new Router();
         router.addRoute(requestUriMatcher(EQUALS, "authorize"), new Handler() {
+            @Override
             public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
                 if (!"GET".equals(request.getMethod())) {
                     return newResultPromise(new Response(METHOD_NOT_ALLOWED));
@@ -127,6 +129,7 @@ public class DescribedOauth2Endpoint implements DescribableHandler {
             }
         });
         router.addRoute(requestUriMatcher(EQUALS, "login"), new Handler() {
+            @Override
             public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
                 String authValue = getAuthorizationHeader(request);
                 if (authValue != null && authValue.startsWith("Basic ")) {
@@ -144,6 +147,7 @@ public class DescribedOauth2Endpoint implements DescribableHandler {
             }
         });
         router.addRoute(requestUriMatcher(EQUALS, "token"), new Handler() {
+            @Override
             public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
                 if (!"POST".equals(request.getMethod())) {
                     return newResultPromise(new Response(METHOD_NOT_ALLOWED));
@@ -179,6 +183,7 @@ public class DescribedOauth2Endpoint implements DescribableHandler {
             }
         });
         router.addRoute(requestUriMatcher(EQUALS, "api"), new Handler() {
+            @Override
             public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
                 if (!"GET".equals(request.getMethod())) {
                     return newResultPromise(new Response(METHOD_NOT_ALLOWED));

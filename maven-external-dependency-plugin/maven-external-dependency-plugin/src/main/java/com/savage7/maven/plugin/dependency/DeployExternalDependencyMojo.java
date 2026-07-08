@@ -77,6 +77,7 @@ public class DeployExternalDependencyMojo extends
      */
     private boolean offline;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
         // update base configuration parameters

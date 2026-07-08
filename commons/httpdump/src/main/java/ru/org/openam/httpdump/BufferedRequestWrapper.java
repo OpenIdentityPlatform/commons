@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2020-2025 3A Systems LLC.
+ * Copyright 2020-2026 3A Systems LLC.
  */
 
 package ru.org.openam.httpdump;
@@ -81,10 +81,12 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
             this.is = is;
         }
 
+        @Override
         public int read() throws IOException {
             return is.read();
         }
 
+        @Override
         public synchronized void mark(int i) {
             throw new RuntimeException(new IOException("mark/reset not supported"));
         }

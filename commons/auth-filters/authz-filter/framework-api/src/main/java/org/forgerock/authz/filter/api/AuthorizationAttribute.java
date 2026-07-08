@@ -107,6 +107,7 @@ public final class AuthorizationAttribute<T> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         return "AuthorizationAttribute{key='" + key + "'}";
     }

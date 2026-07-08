@@ -1,3 +1,29 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC
+ */
+
 package org.forgerock.script.javascript.internal;
 
 import java.util.Dictionary;
@@ -29,6 +55,7 @@ public class Activator implements BundleActivator, ServiceFactory<ScriptEngineFa
     private static final ConcurrentMap<Bundle, ScriptEngineFactory> REGISTRY =
             new ConcurrentHashMap<Bundle, ScriptEngineFactory>();
 
+    @Override
     public void start(BundleContext context) throws Exception {
         Dictionary<String, Object> properties = new Hashtable<String, Object>();
 
@@ -41,6 +68,7 @@ public class Activator implements BundleActivator, ServiceFactory<ScriptEngineFa
 
     }
 
+    @Override
     public void stop(BundleContext context) throws Exception {
         if (null != serviceRegistration) {
             serviceRegistration.unregister();
@@ -48,6 +76,7 @@ public class Activator implements BundleActivator, ServiceFactory<ScriptEngineFa
         }
     }
 
+    @Override
     public ScriptEngineFactory getService(Bundle bundle,
             ServiceRegistration<ScriptEngineFactory> registration) {
         ScriptEngineFactory factory = new RhinoScriptEngineFactory();
@@ -58,6 +87,7 @@ public class Activator implements BundleActivator, ServiceFactory<ScriptEngineFa
         return result;
     }
 
+    @Override
     public void ungetService(Bundle bundle, ServiceRegistration<ScriptEngineFactory> registration,
             ScriptEngineFactory service) {
         REGISTRY.remove(bundle);

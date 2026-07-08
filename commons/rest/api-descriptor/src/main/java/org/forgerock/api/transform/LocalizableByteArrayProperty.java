@@ -102,6 +102,7 @@ class LocalizableByteArrayProperty extends ByteArrayProperty implements Localiza
      *
      * @return Default value or {@code null}
      */
+    @Override
     public String getDefault() {
         return defaultValue;
     }

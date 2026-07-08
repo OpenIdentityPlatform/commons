@@ -872,15 +872,19 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
                     }
                     return result;
                 }
+                @Override
                 public Iterator<String> iterator() {
                     return new Iterator<String>() {
                         Iterator<Integer> i = range.iterator();
+                        @Override
                         public boolean hasNext() {
                             return i.hasNext();
                         }
+                        @Override
                         public String next() {
                             return i.next().toString();
                         }
+                        @Override
                         public void remove() {
                             throw new UnsupportedOperationException();
                         }
@@ -902,18 +906,22 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
      * Note: calls to the {@code next()} method may throw the runtime {@link JsonException}
      * if any transformers fail to execute.
      */
+    @Override
     public Iterator<JsonValue> iterator() {
         if (isList()) { // optimize for list
             return new Iterator<JsonValue>() {
                 int cursor = 0;
                 Iterator<Object> i = asList().iterator();
+                @Override
                 public boolean hasNext() {
                     return i.hasNext();
                 }
+                @Override
                 public JsonValue next() {
                     Object element = i.next();
                     return new JsonValue(element, pointer.child(cursor++), transformers);
                 }
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
@@ -921,12 +929,15 @@ public class JsonValue implements Cloneable, Iterable<JsonValue> {
         } else {
             return new Iterator<JsonValue>() {
                 Iterator<String> i = keys().iterator();
+                @Override
                 public boolean hasNext() {
                     return i.hasNext();
                 }
+                @Override
                 public JsonValue next() {
                     return get(i.next());
                 }
+                @Override
                 public void remove() {
                     throw new UnsupportedOperationException();
                 }
