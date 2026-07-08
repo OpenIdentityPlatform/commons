@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -156,7 +157,7 @@ class ValueInspectorTreeNode implements TreeNode {
                 sb.append('\"');
             } else if (object instanceof Date) {
                 sb.append(" = ");
-                sb.append(Key.SDF.format((Date) object));
+                sb.append(Key.SDF.get().format((Date) object));
             } else if (type == Boolean.class || type == Byte.class || type == Short.class || type == Character.class
                     || type == Integer.class || type == Long.class || type == Float.class || type == Double.class
                     || type == BigInteger.class || type == BigDecimal.class) {

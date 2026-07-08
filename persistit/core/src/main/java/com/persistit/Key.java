@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -504,14 +505,19 @@ public final class Key implements Comparable<Object> {
     public final static EdgeValue AFTER = new EdgeValue(true);
 
     /**
-     * The <code>java.text.SimpleDateFormat</code> used in formatting
+     * A thread-local <code>java.text.SimpleDateFormat</code> used in formatting
      * <code>Date</code>- valued keys in the {@link #decodeDisplayable} methods.
      * This format also governs the conversion of dates for the
      * <code>toString</code> method. This format provides millisecond resolution
      * so that the precise stored representation of a date used as a key can be
      * represented exactly, but readably, in the displayable version.
+     * <p>
+     * <code>SimpleDateFormat</code> is not thread-safe, so the instance is held
+     * in a {@link ThreadLocal}; call {@link ThreadLocal#get()} to obtain the
+     * per-thread formatter, e.g. <code>SDF.get().format(date)</code>.
      */
-    public final static SimpleDateFormat SDF = new SimpleDateFormat("yyyyMMddHHmmss.SSSZ");
+    public final static ThreadLocal<SimpleDateFormat> SDF = ThreadLocal
+            .withInitial(() -> new SimpleDateFormat("yyyyMMddHHmmss.SSSZ"));
 
     /**
      * Displayable prefix for boolean values (optional for input, implied and
@@ -3139,7 +3145,7 @@ public final class Key implements Comparable<Object> {
 
         else if (cl == Date.class) {
             Util.append(sb, PREFIX_DATE);
-            Util.append(sb, SDF.format(decodeDate()));
+            Util.append(sb, SDF.get().format(decodeDate()));
         }
 
         else if (cl == byte[].class) {
