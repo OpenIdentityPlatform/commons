@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 import java.awt.BorderLayout;
@@ -205,7 +206,6 @@ public class FindFile extends JPanel {
         sb.append("$");
         final Pattern pattern = Pattern.compile(sb.toString());
 
-        final DefaultListModel model = (DefaultListModel) list.getModel();
         //
         // Substring that precedes the first wildcard character. For example,
         // if the input is "/opt/*java", the prefix is "/opt/".

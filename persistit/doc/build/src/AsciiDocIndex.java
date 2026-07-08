@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 import java.io.File;
@@ -172,7 +173,6 @@ public class AsciiDocIndex {
                 String category = "Class";
                 if (title.startsWith("interface"))
                     category = "Interface";
-                final int pSlash = href.lastIndexOf('/', pHtml - 1);
                 // String className = href.substring(pSlash + 1, pHtml);
                 final String className = href.substring(0, pHtml).replace('/', '.');
                 saveTerm(category, className, url);
@@ -191,7 +191,6 @@ public class AsciiDocIndex {
                     //
                     final String uCaseName = name.toUpperCase();
                     final String category = name.equals(uCaseName) ? "Constant" : "Field";
-                    final String displayText = name + " in " + className;
                     saveTerm(category, name, url);
                     return;
                 } else {
@@ -210,7 +209,6 @@ public class AsciiDocIndex {
                     // String term = name.substring(0, pLeftParen);
                     String term = (href.substring(0, pHtml) + href.substring(pHtml + 5)).replace('/', '.');
                     saveTerm("Method", term, url);
-                    final String displayText = name + " in " + className;
                     if (name.startsWith("get") && paramList.length() == 0 || name.startsWith("is")
                             && paramList.length() == 0 || name.startsWith("set") && paramList.length() > 0
                             && paramList.indexOf(',') == -1) {

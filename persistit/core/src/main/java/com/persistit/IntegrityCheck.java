@@ -248,12 +248,10 @@ public class IntegrityCheck extends Task {
         final long startTimestamp = _persistit.getTimestampAllocator().updateTimestamp();
         try {
             final ArrayList<Volume> volumes = new ArrayList<Volume>();
-            long _totalPages = 0;
 
             for (final Volume volume : _persistit.getVolumes()) {
                 if (_treeSelector.isSelected(volume)) {
                     volumes.add(volume);
-                    _totalPages += volume.getStorage().getNextAvailablePage();
                 }
             }
             Volume previousVolume = null;

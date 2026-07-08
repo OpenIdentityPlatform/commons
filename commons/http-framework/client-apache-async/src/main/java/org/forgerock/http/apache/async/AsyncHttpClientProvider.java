@@ -12,6 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.apache.async;
@@ -195,7 +196,6 @@ public class AsyncHttpClientProvider implements HttpClientProvider {
         }
 
         // Apply proxy settings if necessary
-        AuthenticationStrategy proxyStrategy = NoAuthenticationStrategy.INSTANCE;
         ProxyAuthenticationStrategy proxyAuthenticationStrategy = null;
 
         // Read the proxy info from options

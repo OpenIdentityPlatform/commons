@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.api.markup.asciidoc;
@@ -280,7 +281,6 @@ public final class AsciiDoc {
      * @return Doc builder
      */
     public AsciiDoc sectionTitle(final String title, final int level) {
-        final AsciiDocSymbols symbol;
         // @Checkstyle:off
         switch (level) {
             case 1:
