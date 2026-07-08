@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit;
 
@@ -63,25 +64,25 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The default implementation of {@link AuditService}.
- * <p/>
+ * <p>
  * Instances receive their configuration when constructed and cannot be reconfigured. Where "hot-swappable"
  * reconfiguration is required, an instance of {@link AuditServiceProxy} should be used as a proxy. The old
  * AuditService should fully shutdown before the new instance is started. Care must be taken to ensure that
  * no other threads can interact with this object while {@link #startup()} and {@link #shutdown()} methods
  * are running.
- * <p/>
+ * <p>
  * After construction, the AuditService will be in the 'STARTING' state until {@link #startup()} is called.
  * When in the 'STARTING' state, a call to any method other than {@link #startup()} will lead to
  * {@link ServiceUnavailableException}.
- * <p/>
+ * <p>
  * After {@link #startup()} is called, assuming startup succeeds, the AuditService will then be in the
  * 'RUNNING' state and further calls to {@link #startup()} will be ignored.
- * <p/>
+ * <p>
  * Calling {@link #shutdown()} will put the AuditService into the 'SHUTDOWN' state; once shutdown, the
  * AuditService will remain in this state and cannot be restarted. Further calls to {@link #shutdown()}
  * will be ignored. When in the 'SHUTDOWN' state, a call to any method other than {@link #shutdown()} will
  * lead to {@link ServiceUnavailableException}.
- * <p/>
+ * <p>
  * When instances are no longer needed, {@link #shutdown()} should be called to ensure that any buffered
  * audit events are flushed and that all open file handles or connections are closed.
  */
@@ -414,7 +415,7 @@ final class AuditServiceImpl implements AuditService {
 
     /**
      * {@inheritDoc}
-     * <p/>
+     * <p>
      * NB. This method is not synchronized with respect to {@link #handleCreate} so there is the possibility for
      * an event to be passed to a handler after that handler has been shutdown if external synchronization is not
      * applied. {@link AuditServiceProxy} is expected to be used and applies exactly this kind of synchronization.

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwt;
@@ -103,7 +104,7 @@ public abstract class JwtHeader extends JWObject {
     /**
      * Sets a header parameter with the specified key and value.
      * <p>
-     * If the key matches one of the reserved header parameter names, then the relevant <tt>set</tt> method is
+     * If the key matches one of the reserved header parameter names, then the relevant <code>set</code> method is
      * called to set that header parameter with the specified value.
      *
      * @param key The key of the header parameter.
@@ -152,7 +153,7 @@ public abstract class JwtHeader extends JWObject {
     /**
      * Gets a header parameter for the specified key.
      * <p>
-     * If the key matches one of the reserved header parameter names, then the relevant <tt>get</tt> method is
+     * If the key matches one of the reserved header parameter names, then the relevant <code>get</code> method is
      * called to get that header parameter.
      *
      * @param key The header parameter key.

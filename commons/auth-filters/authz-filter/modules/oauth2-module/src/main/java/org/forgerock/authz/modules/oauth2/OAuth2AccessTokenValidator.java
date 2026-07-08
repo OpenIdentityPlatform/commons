@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -33,7 +34,6 @@ public interface OAuth2AccessTokenValidator {
      * @param accessToken The access token to validate.
      * @return An AccessTokenValidationResponse containing the result of the validation and scope and profile
      * information.
-     * @throws OAuth2Exception If there is a problem validating the access token.
      */
     Promise<AccessTokenValidationResponse, OAuth2Exception> validate(String accessToken);
 }

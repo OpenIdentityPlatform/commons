@@ -1049,6 +1049,17 @@
 <!--                     </dependencies> -->
                     <configuration>
                     	<source>1.8</source>
+                        <!-- Legacy Maven plugin-descriptor javadoc tags (savage7/i18n/xcite mojos)
+                             are read by maven-plugin-plugin; declare them so doclint accepts them. -->
+                        <tags>
+                            <tag><name>goal</name><placement>a</placement><head>Goal:</head></tag>
+                            <tag><name>phase</name><placement>a</placement><head>Phase:</head></tag>
+                            <tag><name>parameter</name><placement>a</placement><head>Parameter:</head></tag>
+                            <tag><name>component</name><placement>a</placement><head>Component:</head></tag>
+                            <tag><name>required</name><placement>a</placement><head>Required:</head></tag>
+                            <tag><name>readonly</name><placement>a</placement><head>Read-only:</head></tag>
+                            <tag><name>threadSafe</name><placement>a</placement><head>Thread-safe:</head></tag>
+                        </tags>
                         <author>false</author>
                         <quiet>true</quiet>
                         <windowtitle>${javadocWindowTitle}</windowtitle>
@@ -1383,9 +1394,6 @@
 			      </goals>
 			    </execution>
 			  </executions>
-			  <configuration>
-			  	<doclint>none</doclint>
-			  </configuration>
 			</plugin>
             <plugin>
                 <groupId>org.sonatype.central</groupId>

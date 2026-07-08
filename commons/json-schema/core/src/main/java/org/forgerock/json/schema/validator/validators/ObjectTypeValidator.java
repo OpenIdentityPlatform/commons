@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator.validators;
@@ -39,7 +40,7 @@ import org.forgerock.json.schema.validator.exceptions.ValidationException;
 
 /**
  * ObjectTypeValidator applies all the constraints of a <code>object</code> type.
- * <p/>
+ * <p>
  * Sample JSON Schema:
  * <code>
  * {
@@ -74,15 +75,15 @@ public class ObjectTypeValidator extends Validator {
      * with the same name as a property in this attribute's object, then the
      * instance must be valid against the attribute's property value
      * (hereafter referred to as the "dependency value").
-     * <p/>
+     * <p>
      * The dependency value can take one of two forms:
-     * <p/>
+     * <p>
      * Simple Dependency  If the dependency value is a string, then the
      * instance object MUST have a property with the same name as the
      * dependency value.  If the dependency value is an array of strings,
      * then the instance object MUST have a property with the same name
      * as each string in the dependency value's array.
-     * <p/>
+     * <p>
      * Schema Dependency  If the dependency value is a schema, then the
      * instance object MUST be valid against the schema.
      */

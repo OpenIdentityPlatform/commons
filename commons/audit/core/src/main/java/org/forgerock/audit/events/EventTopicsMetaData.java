@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.events;
 
@@ -42,11 +43,11 @@ public final class EventTopicsMetaData {
     }
 
     /**
-     * Returns <tt>true</tt> if this object has meta-data for the specified topic.
+     * Returns <code>true</code> if this object has meta-data for the specified topic.
      *
      * @param topic
      *          The name of the topic to check.
-     * @return <tt>true</tt> if this object has meta-data for the specified topic; <tt>false</tt> otherwise.
+     * @return <code>true</code> if this object has meta-data for the specified topic; <code>false</code> otherwise.
      */
     public boolean containsTopic(String topic) {
         return eventTopicsMetaData.containsKey(topic);
@@ -58,7 +59,7 @@ public final class EventTopicsMetaData {
      *
      * @param topic
      *          The name of the topic to check.
-     * @return JSON schema if this object has meta-data for the specified topic; <tt>null</tt> otherwise.
+     * @return JSON schema if this object has meta-data for the specified topic; <code>null</code> otherwise.
      */
     public JsonValue getSchema(String topic) {
         return eventTopicsMetaData.get(topic);
@@ -74,15 +75,15 @@ public final class EventTopicsMetaData {
     }
 
     /**
-     * Returns a new instance of <tt>EventTopicsMetaData</tt> containing only the meta-data for topics
-     * held by this object that are named within provided <tt>topics</tt> parameter.
-     * <p/>
-     * Any entries within <tt>topics</tt> that are not known to this object will not be included in the resulting
-     * <tt>EventTopicsMetaData</tt> object.
+     * Returns a new instance of <code>EventTopicsMetaData</code> containing only the meta-data for topics
+     * held by this object that are named within provided <code>topics</code> parameter.
+     * <p>
+     * Any entries within <code>topics</code> that are not known to this object will not be included in the resulting
+     * <code>EventTopicsMetaData</code> object.
      *
      * @param topics
      *          The names of topics whose meta-data should be included.
-     * @return a new instance of <tt>EventTopicsMetaData</tt>.
+     * @return a new instance of <code>EventTopicsMetaData</code>.
      */
     public EventTopicsMetaData filter(Set<String> topics) {
         Map<String, JsonValue> filteredTopicSchemas = new HashMap<>();
