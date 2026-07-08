@@ -285,7 +285,6 @@ public class Tree extends SharedResource {
     /**
      * Save a Tree in the directory
      * 
-     * @param value
      */
     int store(final byte[] bytes, final int index) {
         final byte[] nameBytes = Util.stringToBytes(_name);
@@ -301,7 +300,6 @@ public class Tree extends SharedResource {
     /**
      * Load an existing Tree from the directory
      * 
-     * @param value
      */
     int load(final byte[] bytes, final int index, final int length) {
         final int nameLength = length < 20 ? -1 : Util.getShort(bytes, index + 18);

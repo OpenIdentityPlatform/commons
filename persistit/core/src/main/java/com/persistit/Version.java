@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -60,7 +61,6 @@ interface Version {
      * 
      * @author peter
      * 
-     * @param <T>
      * @param <V>
      */
     interface VersionCreator<V> {

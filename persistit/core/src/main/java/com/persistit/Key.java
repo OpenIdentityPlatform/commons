@@ -1820,8 +1820,6 @@ public final class Key implements Comparable<Object> {
      * Encodes an int into a supplied byte array.
      * 
      * @param v
-     * @param bytes
-     * @param offset
      * @return size of appended segment
      */
     private int appendIntInternal(final int v) {
