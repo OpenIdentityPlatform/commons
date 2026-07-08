@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.bindings;
@@ -314,7 +315,7 @@ public abstract class BindingTest {
         }
     }
 
-    private final class TestSessionHandler implements Handler {
+    private static final class TestSessionHandler implements Handler {
         @Override
         public Promise<Response, NeverThrowsException> handle(Context context, Request request) {
             final Session session = context.asContext(SessionContext.class).getSession();

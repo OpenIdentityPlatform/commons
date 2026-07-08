@@ -468,7 +468,7 @@ final class AuditServiceImpl implements AuditService {
     /**
      * Substitute {@link AuditEventHandler} to use when no query handler is available.
      */
-    private final class NullQueryHandler implements AuditEventHandler {
+    private static final class NullQueryHandler implements AuditEventHandler {
 
         private final String errorMessage;
 

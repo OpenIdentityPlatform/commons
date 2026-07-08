@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.util.thread;
 
@@ -197,7 +198,7 @@ public class ExecutorServiceFactory {
      * have its generated number appended to the end of it, in the form -X, where
      * X is incremented once for each thread created.
      */
-    private class NamedThreadFactory implements ThreadFactory {
+    private static class NamedThreadFactory implements ThreadFactory {
 
         private final AtomicInteger count = new AtomicInteger(0);
         private final String name;

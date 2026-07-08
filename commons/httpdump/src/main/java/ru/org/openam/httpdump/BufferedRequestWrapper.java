@@ -74,7 +74,7 @@ public class BufferedRequestWrapper extends HttpServletRequestWrapper {
         return new BufferedReader(new InputStreamReader(getInputStream(), enc));
     }
 
-    private class ServletInputStreamImpl extends ServletInputStream {
+    private static class ServletInputStreamImpl extends ServletInputStream {
         private ByteArrayInputStream is;
 
         public ServletInputStreamImpl(ByteArrayInputStream is) {
