@@ -1497,7 +1497,7 @@ public class Persistit {
    * @return the <code>BufferPool</code> for the specific buffer size
    */
   BufferPool getBufferPool(final int size) {
-    return _bufferPoolTable.get(new Integer(size));
+    return _bufferPoolTable.get(Integer.valueOf(size));
   }
 
   /**

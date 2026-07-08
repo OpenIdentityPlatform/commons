@@ -379,7 +379,7 @@ public class DefaultValueCoder implements ValueRenderer, HandleCache {
 
         final char ch = name.charAt(0);
         if (Character.isLetter(ch) && Character.isLowerCase(ch)) {
-            baseName = new Character(Character.toUpperCase(ch)) + name.substring(1);
+            baseName = Character.valueOf(Character.toUpperCase(ch)) + name.substring(1);
         } else {
             baseName = name;
         }

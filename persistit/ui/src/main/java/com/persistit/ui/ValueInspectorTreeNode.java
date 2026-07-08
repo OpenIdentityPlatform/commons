@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.ui;
@@ -378,19 +379,19 @@ class ValueInspectorTreeNode implements TreeNode {
             if (elementType == boolean.class) {
                 element = ((boolean[]) _object)[index] ? Boolean.TRUE : Boolean.FALSE;
             } else if (elementType == byte.class) {
-                element = new Byte(((byte[]) _object)[index]);
+                element = Byte.valueOf(((byte[]) _object)[index]);
             } else if (elementType == short.class) {
-                element = new Short(((short[]) _object)[index]);
+                element = Short.valueOf(((short[]) _object)[index]);
             } else if (elementType == char.class) {
-                element = new Character(((char[]) _object)[index]);
+                element = Character.valueOf(((char[]) _object)[index]);
             } else if (elementType == int.class) {
-                element = new Integer(((int[]) _object)[index]);
+                element = Integer.valueOf(((int[]) _object)[index]);
             } else if (elementType == long.class) {
-                element = new Long(((long[]) _object)[index]);
+                element = Long.valueOf(((long[]) _object)[index]);
             } else if (elementType == float.class) {
-                element = new Float(((float[]) _object)[index]);
+                element = Float.valueOf(((float[]) _object)[index]);
             } else if (elementType == double.class) {
-                element = new Double(((double[]) _object)[index]);
+                element = Double.valueOf(((double[]) _object)[index]);
             } else
                 throw new RuntimeException();
         } else {

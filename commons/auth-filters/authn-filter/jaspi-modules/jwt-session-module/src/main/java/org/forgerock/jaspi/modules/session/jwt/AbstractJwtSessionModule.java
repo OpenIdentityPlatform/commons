@@ -563,7 +563,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
      */
     private int getCookieMaxAge(Date now, Date exp) {
         if (!browserSessionOnly) {
-            return new Long((exp.getTime() - now.getTime()) / 1000L).intValue();
+            return Long.valueOf((exp.getTime() - now.getTime()) / 1000L).intValue();
         } else {
             return -1;
         }
