@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.resource;
@@ -250,19 +251,9 @@ public final class Responses {
                 return true;
             } else if (obj instanceof ResourceResponseImpl) {
                 final ResourceResponseImpl that = (ResourceResponseImpl) obj;
-                return isEqual(id, that.id) && isEqual(revision, that.revision);
+                return Objects.equals(id, that.id) && Objects.equals(revision, that.revision);
             } else {
                 return false;
-            }
-        }
-
-        private boolean isEqual(final String s1, final String s2) {
-            if (s1 == s2) {
-                return true;
-            } else if (s1 == null || s2 == null) {
-                return false;
-            } else {
-                return s1.equals(s2);
             }
         }
 
