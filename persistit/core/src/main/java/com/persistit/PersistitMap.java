@@ -741,7 +741,7 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
         }
 
         @Override
-        public Throwable getCause() {
+        public synchronized Throwable getCause() {
             return _exception;
         }
     }

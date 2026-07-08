@@ -5056,12 +5056,12 @@ public final class Value {
     }
 
     @Override
-    public void mark(final int readLimit) {
+    public synchronized void mark(final int readLimit) {
       _mark = _value._next;
     }
 
     @Override
-    public void reset() throws IOException {
+    public synchronized void reset() throws IOException {
       if (_mark < 0) {
         throw new IOException("No mark");
       } else {

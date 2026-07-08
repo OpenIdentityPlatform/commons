@@ -13,6 +13,7 @@
  *
  * Copyright 2010–2011 ApexIdentity Inc.
  * Portions Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.io;
@@ -102,7 +103,7 @@ final class ByteArrayBranchingStream extends BranchingInputStream {
     }
 
     @Override
-    public void mark(int readlimit) {
+    public synchronized void mark(int readlimit) {
         mark = position;
     }
 
