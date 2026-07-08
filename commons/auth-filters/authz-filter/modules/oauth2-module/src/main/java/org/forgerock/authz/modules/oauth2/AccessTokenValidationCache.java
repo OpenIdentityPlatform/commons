@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.authz.modules.oauth2;
@@ -47,7 +48,11 @@ class AccessTokenValidationCache {
 
             @Override
             protected boolean removeEldestEntry(Map.Entry<String, AccessTokenValidationResponse> eldestEntry) {
-                return size() > maxSize;
+                // size() refers to this LinkedHashMap's own size, not the enclosing
+                // AccessTokenValidationCache.size() (which would re-acquire the read lock while a
+                // put() already holds the write lock). Qualify with super to make that explicit
+                // (CodeQL java/subtle-inherited-call).
+                return super.size() > maxSize;
             }
         };
     }
