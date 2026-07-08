@@ -2,6 +2,7 @@
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -347,7 +348,7 @@ public class ScriptRegistryImpl implements ScriptRegistry, ScriptEngineFactoryOb
         }
 
         private boolean isDependOn(ScriptName dependency) {
-            if (null != dependency || null != source) {
+            if (null != dependency && null != source) {
                 ScriptName[] dep = source.getDependencies();
                 if (null != dep && dep.length > 0) {
                     for (ScriptName name : dep) {

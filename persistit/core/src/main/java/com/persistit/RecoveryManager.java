@@ -1,5 +1,6 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1371,8 +1372,10 @@ public class RecoveryManager implements RecoveryManagerMXBean, VolumeHandleLooku
                     + Buffer.MAX_BUFFER_SIZE, "PA record size %3$,d not in valid range "
                     + "[%4$,d:%5$,d] at %1$s:%2$,d");
             final long pageAddress = PA.getPageAddress(_readBuffer);
-            validate(pageAddress, file, startingAddress, lastRequiredPageNode.getPageAddress(),
-                    "Mismatched page address %3$d at %1$s:%2$d");
+            if (lastRequiredPageNode != null) {
+                validate(pageAddress, file, startingAddress, lastRequiredPageNode.getPageAddress(),
+                        "Mismatched page address %3$d at %1$s:%2$d");
+            }
             // confirm that we can read the data
             read(lastRequiredJournalAddress, recordSize);
 

@@ -1,6 +1,7 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * Copyright 2015 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -564,12 +565,12 @@ public class BufferPool {
             _hashLocks[hashIndex % HASH_LOCKS].lock();
             try {
                 for (Buffer buffer = _hashTable[hashIndex]; buffer != null; buffer = buffer.getNext()) {
-                    if ((buffer.getVolume() == volume || volume == null) && !buffer.isFixed() && buffer.isValid()) {
+                    if ((buffer.getVolume() == volume) && !buffer.isFixed() && buffer.isValid()) {
                         if (buffer.claim(true, 0)) {
                             // re-check after claim
                             boolean invalidated = false;
                             try {
-                                if ((buffer.getVolume() == volume || volume == null) && !buffer.isFixed()
+                                if ((buffer.getVolume() == volume) && !buffer.isFixed()
                                         && buffer.isValid()) {
                                     if (mustWrite && buffer.isDirty()) {
                                         buffer.writePage();

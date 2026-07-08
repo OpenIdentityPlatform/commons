@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -316,7 +317,7 @@ public class AdminUITreePanel extends AdminPanel implements AdminCommand {
                 treeInfoArray = management.getTreeInfoArray(_selectedVolumeName);
             }
             _treeInfoArrayModel.setInfoArray(treeInfoArray);
-            if (_selectedTreeName != null) {
+            if (_selectedTreeName != null && treeInfoArray != null) {
                 for (int index = 0; index < treeInfoArray.length; index++) {
                     if (_selectedTreeName.equals(treeInfoArray[index].getName())) {
                         _treeTable.getSelectionModel().setSelectionInterval(index, index);
