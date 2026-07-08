@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.ui;
@@ -202,11 +203,20 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
     public AdminUI(final String rmiHost) {
         this();
         _rmiHost = rmiHost;
-        if (rmiHost != null)
-            connect(rmiHost);
     }
 
     public AdminUI() {
+    }
+
+    /**
+     * Builds and displays the UI. Invoke this once, after construction, from a
+     * thread other than the AWT event-dispatch thread: it launches the
+     * frame-building helper thread and waits for it to finish. The thread starts
+     * are kept out of the constructor so that {@code this} does not escape to the
+     * helper threads before construction has completed (CodeQL
+     * java/thread-start-in-constructor).
+     */
+    public void launch() {
         //
         // This is a workaround for JVM bug 4030718 in JDK1.3.
         // (See http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4030718).
@@ -855,7 +865,12 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
     }
 
     public static void main(final String[] args) {
-        new AdminUI(args.length > 0 ? args[0] : null);
+        final String rmiHost = args.length > 0 ? args[0] : null;
+        final AdminUI adminUI = new AdminUI(rmiHost);
+        adminUI.launch();
+        if (rmiHost != null) {
+            adminUI.connect(rmiHost);
+        }
     }
 
     /**
