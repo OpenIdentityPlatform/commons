@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.bloomfilter.monitoring;
@@ -174,7 +175,7 @@ public final class BloomFilterMonitor<T> implements BloomFilterMXBean, BloomFilt
      * Maintains live on-going statistics on method call timing latencies. An HdrHistogram {@link Recorder} is used
      * to keep track of live performance data. A snapshot is taken periodically according to the update interval and
      * copied into an ongoing histogram.
-     * <p/>
+     * <p>
      * No attempt is currently made to compensate for coordinated omission, so the worst case latencies may be
      * over-optimistic under heavy load (i.e., when the latency exceeds the expected interval between operations).
      */

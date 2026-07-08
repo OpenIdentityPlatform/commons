@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.authz.modules.oauth2.crest;
@@ -53,7 +54,7 @@ public final class OAuth2AuthorizationConnectionFactory {
     /**
      * Creates a {@code ConnectionFactory} with a route to the "resource" endpoint, which is protected by the
      * OAuth2 authorization filter which will deem an access token valid if it matches the string "VALID" and will
-     * return a scope of "SCOPE" and user info of "UID"->"DEMO".
+     * return a scope of "SCOPE" and user info of "UID"-&gt;"DEMO".
      *
      * @return A {@code ConnectionFactory} instance.
      */

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -344,7 +345,7 @@ class VolumeStorageV2 extends VolumeStorage {
      * volume. It is equivalent to deleting the volume and creating a new one
      * using the same VolumeSpecifications; however the file is never actually
      * deleted by this operation.
-     * <p />
+     * <p>
      * This method assigns a new unique id value to the volume so that journal
      * records pertaining to its state prior to being truncated are not confused
      * with the new empty state. Caution: information in the volume is

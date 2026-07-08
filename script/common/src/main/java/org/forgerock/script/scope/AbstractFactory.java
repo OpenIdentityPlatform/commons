@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.scope;
@@ -50,7 +51,7 @@ public abstract class AbstractFactory<T> implements Factory<T> {
 
     /**
      * Gets the {@code null} object representation.
-     * <p/>
+     * <p>
      * If the {@code null} object has special representation in the script scope
      * this method returns with that object.
      *

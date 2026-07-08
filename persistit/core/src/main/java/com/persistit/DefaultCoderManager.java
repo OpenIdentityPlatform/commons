@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -381,7 +382,6 @@ public final class DefaultCoderManager implements CoderManager {
      * all the classes in the <code>java.lang</code> package (but not
      * <code>java.lang.ref</code> or <code>java.lang.reflect</code>), and all
      * classes in <code>javax.swing</code> and all its sub-packages.
-     * </p>
      * 
      * @return The serialization override pattern
      */
