@@ -454,7 +454,7 @@ public class StreamSaver extends Task {
         }
         final Key key = exchange.getKey();
         key.clear().append(Key.BEFORE);
-        while (exchange.traverse(Key.GT, filter, Integer.MAX_VALUE) & !_stop.get()) {
+        while (exchange.traverse(Key.GT, filter, Integer.MAX_VALUE) && !_stop.get()) {
             writeData(exchange);
         }
         writeRecordCount(_dataRecordCount, _otherRecordCount);
@@ -495,7 +495,7 @@ public class StreamSaver extends Task {
     public void saveTrees(final Volume volume, final String[] selectedTreeNames) throws PersistitException, IOException {
         final String[] treeNames = volume.getTreeNames();
         writeComment("Volume " + volume.getPath());
-        for (int index = 0; index < treeNames.length & !_stop.get(); index++) {
+        for (int index = 0; index < treeNames.length && !_stop.get(); index++) {
             boolean selected = true;
             if (selectedTreeNames != null) {
                 for (int index2 = 0; selected && index2 < selectedTreeNames.length; index2++) {
