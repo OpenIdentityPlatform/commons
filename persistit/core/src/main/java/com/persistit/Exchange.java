@@ -3661,7 +3661,7 @@ public class Exchange implements ReadOnlyExchange {
 
           LevelCache lc = _levelCache[0];
           if (removeOnlyAntiValue
-            & !isKeyRangeAntiValue(lc._leftBuffer, lc._leftFoundAt, lc._rightBuffer, lc._rightFoundAt)) {
+            && !isKeyRangeAntiValue(lc._leftBuffer, lc._leftFoundAt, lc._rightBuffer, lc._rightFoundAt)) {
             result = false;
             break;
           }
