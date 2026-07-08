@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.caf.authentication.framework;
@@ -19,11 +20,11 @@ package org.forgerock.caf.authentication.framework;
 import static org.forgerock.caf.authentication.framework.AuthStatusUtils.asString;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.contains;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyMapOf;
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import javax.security.auth.Subject;

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 package org.forgerock.selfservice.stages.user;
 
@@ -21,7 +22,8 @@ import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USERNAME_FIELD;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -136,7 +138,7 @@ public final class EmailUsernameStageTest {
 
         // Then
         ArgumentCaptor<ActionRequest> actionRequestArgumentCaptor =  ArgumentCaptor.forClass(ActionRequest.class);
-        verify(connection).action(any(Context.class), actionRequestArgumentCaptor.capture());
+        verify(connection).action(nullable(Context.class), actionRequestArgumentCaptor.capture());
         ActionRequest actionRequest = actionRequestArgumentCaptor.getValue();
 
         assertThat(actionRequest.getAction()).isSameAs("send");
