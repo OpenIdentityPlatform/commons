@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -59,13 +60,13 @@ import com.persistit.exception.ConversionException;
  * "http://java.sun.com/j2se/1.5.0/docs/guide/serialization/spec/serial-arch.html"
  * > Java Object Serialization Specification</a>.
  * </p>
- * </p> In particular, for Serializable classes, objects are constructed using
+ * <p> In particular, for Serializable classes, objects are constructed using
  * the no-argument constructor of the nearest non-serializable superclass, as
  * required by the specification. (This behavior can be modified with the
  * <code>constructorOverride</code> system property.) To do so, this
  * implementation invokes a platform-specific, non-public API method of
  * <code>java.io.ObjectStreamClass</code> or
- * </code>java.io.ObjectInputStream</code>. </p>
+ * <code>java.io.ObjectInputStream</code>. </p>
  * <p>
  * This implementation invokes the <code>readExternal</code> and
  * <code>writeExternal</code> methods of <code>Externalizable</code> classes,

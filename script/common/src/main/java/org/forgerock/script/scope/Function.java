@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.scope;
@@ -42,9 +43,8 @@ public interface Function<R> extends Serializable {
      * @param callback
      * @param arguments could be a single value or a List of values
      * @return computed result
-     * @throws Exception
-     *             if unable to compute a result
      * @throws ResourceException
+     *             if unable to compute a result
      * @throws NoSuchMethodException
      */
     R call(Parameter scope, Function<?> callback, Object... arguments)

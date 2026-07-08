@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.events.handlers.buffering;
 
@@ -269,7 +270,7 @@ public final class BufferedBatchPublisher implements BatchPublisher {
     public interface Builder {
 
         /**
-         * Sets the maximum queue capacity. Must be >= 10000.
+         * Sets the maximum queue capacity. Must be &gt;= 10000.
          *
          * @param capacity
          *         queue capacity
@@ -279,7 +280,7 @@ public final class BufferedBatchPublisher implements BatchPublisher {
         Builder capacity(int capacity);
 
         /**
-         * Sets the maximum number of events in a given batch. Must be >= 500.
+         * Sets the maximum number of events in a given batch. Must be &gt;= 500.
          *
          * @param maxBatchedEvents
          *         maximum number of batched events
@@ -289,7 +290,7 @@ public final class BufferedBatchPublisher implements BatchPublisher {
         Builder maxBatchEvents(int maxBatchedEvents);
 
         /**
-         * Sets the average event payload size, used to initialise string buffers. Must be >= 32.
+         * Sets the average event payload size, used to initialise string buffers. Must be &gt;= 32.
          *
          * @param averagePerEventPayloadSize
          *         average event payload size
@@ -299,7 +300,7 @@ public final class BufferedBatchPublisher implements BatchPublisher {
         Builder averagePerEventPayloadSize(int averagePerEventPayloadSize);
 
         /**
-         * The interval duration between each write. Must be > 0.
+         * The interval duration between each write. Must be &gt; 0.
          *
          * @param writeInterval
          *         write interval
