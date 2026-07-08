@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  */
 package org.forgerock.audit.events;
 
@@ -157,7 +158,7 @@ public final class EventTopicsMetaDataBuilder {
     }
 
     private InputStream getResourceAsStream(String resourcePath) {
-        return new BufferedInputStream(getClass().getResourceAsStream(resourcePath));
+        return new BufferedInputStream(EventTopicsMetaDataBuilder.class.getResourceAsStream(resourcePath));
     }
 
     private void extendCoreEventTopicsSchemas(Map<String, JsonValue> auditEventTopicSchemas) {

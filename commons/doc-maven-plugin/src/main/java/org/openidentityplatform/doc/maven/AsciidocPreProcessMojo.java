@@ -140,14 +140,14 @@ public class AsciidocPreProcessMojo extends AbstractAsciidocMojo {
 
     private void copyResourcesFolder(String resFolder, File outputDir) throws Exception {
         List<Path> files;
-        URL partials = getClass().getResource(resFolder);
+        URL partials = AsciidocPreProcessMojo.class.getResource(resFolder);
         try (FileSystem fs = FileSystems.newFileSystem(partials.toURI(), Collections.emptyMap());
              Stream<Path> walk = Files.walk(fs.getPath(resFolder))) {
             files = walk.filter(Files::isRegularFile)
                     .collect(Collectors.toList());
         }
         for(Path file : files) {
-            try(InputStream stream = getClass().getResourceAsStream(file.toString())) {
+            try(InputStream stream = AsciidocPreProcessMojo.class.getResourceAsStream(file.toString())) {
                 File dest = new File(outputDir, file.getFileName().toString());
                 Files.copy(stream, dest.toPath(), StandardCopyOption.REPLACE_EXISTING);
             }
