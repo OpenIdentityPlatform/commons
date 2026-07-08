@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -2156,6 +2157,22 @@ class JournalManager implements JournalManagerMXBean, VolumeHandleLookup {
                 return ts.isCommitted() ? -1 : ts.getStartTimestamp() < _startTimestamp ? 1
                         : ts.getStartTimestamp() > _startTimestamp ? -1 : 0;
             }
+        }
+
+        /**
+         * Equality is kept consistent with {@link #compareTo(TransactionMapItem)}:
+         * two items are equal exactly when they order equally (same commit
+         * timestamp for committed items, otherwise same start timestamp).
+         */
+        @Override
+        public boolean equals(final Object object) {
+            return this == object
+                    || (object instanceof TransactionMapItem && compareTo((TransactionMapItem) object) == 0);
+        }
+
+        @Override
+        public int hashCode() {
+            return Long.hashCode(isCommitted() ? _commitTimestamp : _startTimestamp);
         }
 
         final static Comparator<TransactionMapItem> TRANSACTION_MAP_ITEM_COMPARATOR = new Comparator<TransactionMapItem>() {
