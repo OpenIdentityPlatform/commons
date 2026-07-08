@@ -1,5 +1,6 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
+ * Portions Copyrighted 2026 3A Systems, LLC.
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1285,7 +1286,7 @@ public class AdminUI implements UtilControl, Runnable, AdminCommand {
         if (interval >= 0)
             _refreshInterval = interval;
         if (_refreshInterval > 0) {
-            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000);
+            _refreshTimer.schedule(_refreshTimerTask, 0, _refreshInterval * 1000L);
         } else {
             _refreshTimer.schedule(_refreshTimerTask, 0);
         }
