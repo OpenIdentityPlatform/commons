@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -136,9 +137,9 @@ public class StreamLoader extends Task {
             final int elisionCount = _dis.readShort();
             final int valueSize = _dis.readInt();
             _value.ensureFit(valueSize);
-            _dis.read(_key.getEncodedBytes(), elisionCount, keySize - elisionCount);
+            _dis.readFully(_key.getEncodedBytes(), elisionCount, keySize - elisionCount);
             _key.setEncodedSize(keySize);
-            _dis.read(_value.getEncodedBytes(), 0, valueSize);
+            _dis.readFully(_value.getEncodedBytes(), 0, valueSize);
             _value.setEncodedSize(valueSize);
             handler.handleDataRecord(_key, _value);
             _dataRecordCount++;

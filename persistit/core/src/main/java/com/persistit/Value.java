@@ -31,6 +31,7 @@ import com.persistit.exception.PersistitException;
 import com.persistit.util.Debug;
 import com.persistit.util.Util;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.NotActiveException;
@@ -4891,12 +4892,16 @@ public final class Value {
 
     @Override
     public void readFully(final byte[] b) throws IOException {
-      read(b, 0, b.length);
+      readFully(b, 0, b.length);
     }
 
     @Override
     public void readFully(final byte[] b, final int offset, final int length) throws IOException {
-      read(b, offset, length);
+      // read() here either transfers exactly length bytes or throws, so a
+      // short count means the end of the value was reached prematurely.
+      if (read(b, offset, length) != length) {
+        throw new EOFException();
+      }
     }
 
     @Override

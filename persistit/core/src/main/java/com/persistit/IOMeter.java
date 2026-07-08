@@ -452,7 +452,14 @@ class IOMeter implements IOMeterMXBean {
         } else {
             final IOMeter ioMeter = new IOMeter();
             final DataInputStream is = new DataInputStream(new BufferedInputStream(new FileInputStream(fileName)));
-            is.skip(skip * DUMP_RECORD_LENGTH);
+            long toSkip = skip * DUMP_RECORD_LENGTH;
+            while (toSkip > 0) {
+                final long skipped = is.skip(toSkip);
+                if (skipped <= 0) {
+                    break;
+                }
+                toSkip -= skipped;
+            }
             ioMeter.dump(is, count == 0 ? Integer.MAX_VALUE : count, ap.isFlag('a'));
             is.close();
         }

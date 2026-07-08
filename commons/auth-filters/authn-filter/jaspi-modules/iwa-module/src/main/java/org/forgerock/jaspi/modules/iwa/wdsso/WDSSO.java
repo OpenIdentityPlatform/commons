@@ -1,4 +1,4 @@
-//@Checkstyle:ignoreFor 29
+//@Checkstyle:ignoreFor 30
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
@@ -26,6 +26,7 @@
  * $Id: WindowsDesktopSSO.java,v 1.7 2009/07/28 19:40:45 beomsuk Exp $
  *
  * Portions Copyrighted 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.jaspi.modules.iwa.wdsso;
@@ -285,8 +286,8 @@ public class WDSSO {
 
         // check for SPNEGO OID
         byte[] oidArray = new byte[SPNEGO_OID.length];
-        tmpInput.read(oidArray, 0, oidArray.length);
-        if (Arrays.equals(oidArray, SPNEGO_OID)) {
+        final int oidRead = tmpInput.read(oidArray, 0, oidArray.length);
+        if (oidRead == oidArray.length && Arrays.equals(oidArray, SPNEGO_OID)) {
             tmpToken = new DerValue(tmpInput);
 
             // 0xa0 indicates an init token(NegTokenInit); 0xa1 indicates an
@@ -323,8 +324,8 @@ public class WDSSO {
             for (; i < oidArray.length; i++) {
                 krb5Oid[i] = oidArray[i];
             }
-            tmpInput.read(krb5Oid, i, krb5Oid.length - i);
-            if (!Arrays.equals(krb5Oid, KERBEROS_V5_OID)) {
+            final int krb5Read = tmpInput.read(krb5Oid, i, krb5Oid.length - i);
+            if (krb5Read != krb5Oid.length - i || !Arrays.equals(krb5Oid, KERBEROS_V5_OID)) {
                 LOG.debug("IWA WDSSO: Kerberos V5 OID not found in the Auth Token");
                 token = null;
             } else {
