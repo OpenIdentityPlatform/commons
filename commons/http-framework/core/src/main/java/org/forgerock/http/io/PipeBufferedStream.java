@@ -12,6 +12,7 @@
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
  * Portions Copyright 2014-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.http.io;
@@ -41,14 +42,14 @@ public final class PipeBufferedStream {
     private int position = 0;
 
     /**
-     * Constructs a new {@link PipeBufferedStream} with a default {@link Factory<Buffer>}.
+     * Constructs a new {@link PipeBufferedStream} with a default {@link Factory}.
      */
     public PipeBufferedStream() {
         this(IO.newTemporaryStorage());
     }
 
     /**
-     * Constructs a new {@link PipeBufferedStream} with the given {@link Factory<Buffer>}.
+     * Constructs a new {@link PipeBufferedStream} with the given {@link Factory}.
      *
      * @param bufferFactory The buffer factory to use to create the {@link BranchingInputStream}
      */

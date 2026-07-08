@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  *  Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.caf.authentication.framework;
@@ -39,17 +40,17 @@ public class HttpCallbackHandler implements CallbackHandler {
 
     /**
      * Called by Authentication modules to request more information about the request and response message.
-     * <br/>
+     * <br>
      * Callbacks currently supported are as follows:
      * <ul>
      *     <li>CallerPrincipalCallback</li>
      *     <li>GroupPrincipalCallback</li>
      * </ul>
-     * <br/>
+     * <br>
      * This method will handle a CallerPrincipalCallback by creating a Principal from the name stored in the Callback
      * and adding it to the Subject from the Callback. If the name is not populated then the Principal stored in the
      * Callback will be added to the Subject instead.
-     * <br/>
+     * <br>
      * This method will handle a GroupPrincipalCallback by create a Principal for each group stored in the Callback
      * and adding them to the Subject from the Callback.
      *
