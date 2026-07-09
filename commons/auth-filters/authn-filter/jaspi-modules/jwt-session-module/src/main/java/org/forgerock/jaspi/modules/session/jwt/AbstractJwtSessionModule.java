@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.jaspi.modules.session.jwt;
@@ -553,7 +554,7 @@ abstract class AbstractJwtSessionModule<C extends JwtSessionCookie> {
 
     /**
      * Returns the max age for the cookie, based on whether the cookie should be browser session only.
-     * <br/>
+     * <br>
      * If the cookie is only meant to last the same length the users browser is open, then the max age is set to -1.
      * Otherwise the max age is set to expiry time.
      *

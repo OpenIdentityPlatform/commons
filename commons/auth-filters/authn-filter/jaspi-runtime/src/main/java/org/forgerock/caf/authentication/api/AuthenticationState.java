@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.caf.authentication.api;
@@ -26,7 +27,7 @@ import org.forgerock.json.JsonValueException;
  * <p>Maintains state information and provides to retrieve values in a type safe manner.</p>
  *
  * State values are represented with standard Java objects: {@link String}, {@link Number},
- * {@link Boolean}, {@link Map}, {@link List}, {@link Set} and {@code null}.
+ * {@link Boolean}, {@link java.util.Map}, {@link java.util.List}, {@link java.util.Set} and {@code null}.
  *
  * @since 2.0.0
  */

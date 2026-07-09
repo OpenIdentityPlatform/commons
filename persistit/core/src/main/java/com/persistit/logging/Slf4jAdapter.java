@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.logging;
@@ -20,11 +21,11 @@ import org.slf4j.Logger;
 
 /**
  * Wraps an <code>org.slf4j.Logger</code> instance for Persistit logging. Code
- * to enable default logging through Slf4j is shown here: <code><pre>
+ * to enable default logging through Slf4j is shown here: <pre>
  *    Logger log = ... instance of org.slf4j.Logger ...
  *    Persistit.setPersistitLogger(new Slf4jAdapter(logger));
- * </pre></code>
- * 
+ * </pre>
+ *
  * @version 1.1
  */
 

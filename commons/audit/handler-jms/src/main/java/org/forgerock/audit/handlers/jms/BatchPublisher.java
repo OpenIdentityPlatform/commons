@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.jms;
 
@@ -169,11 +170,11 @@ public abstract class BatchPublisher<T> implements Publisher<T> {
 
         /**
          * While the queue isn't empty this will drain the queue into a list and process them in a single call to
-         * {@link #publishMessages(List)}. <br/>
+         * {@link #publishMessages(List)}. <br>
          * If the drain results in an empty list, then this will poll for a single item and process that item as a
-         * singleton batch. <br/>
+         * singleton batch. <br>
          * If the poll timeouts ({@link BatchPublisherConfiguration#pollTimeoutSec }), and the queue is still
-         * empty, then the run will exit.<br/>
+         * empty, then the run will exit.<br>
          */
         @Override
         public void run() {

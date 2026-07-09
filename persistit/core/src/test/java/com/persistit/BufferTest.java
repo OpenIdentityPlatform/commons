@@ -1,6 +1,8 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +25,6 @@ import com.persistit.exception.PersistitException;
 import com.persistit.exception.RebalanceException;
 import com.persistit.policy.JoinPolicy;
 import com.persistit.policy.SplitPolicy;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
@@ -110,9 +111,8 @@ public class BufferTest extends PersistitUnitTestCase {
     }
 
     /*
-     * Note: runs for about 3 minutes -- ignored for now
+     * Note: runs for about 3 minutes.
      */
-    @Ignore
     @Test
     public void manyJoins() throws Exception {
         final Exchange ex = _persistit.getExchange("persistit", "BufferTest", true);

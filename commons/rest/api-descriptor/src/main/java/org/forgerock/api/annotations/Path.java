@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.api.annotations;
@@ -39,12 +40,12 @@ import java.lang.annotation.Target;
  * </ul>
  * <p>
  * Example:
- * <code><pre>
+ * <pre>
  *     &#064;RequestHandler(variant = COLLECTION_RESOURCE)
  *     &#064;Path("things")
  *     public class ThingProducer {
  *         &#064;Read
- *         public Promise&lt;ResourceResponse, ResourceException> get(String id) {
+ *         public Promise&lt;ResourceResponse, ResourceException&gt; get(String id) {
  *             // ...
  *         }
  *
@@ -57,11 +58,11 @@ import java.lang.annotation.Target;
  *     &#064;RequestHandler(variant = SINGLETON_RESOURCE)
  *     public class SubthingProducer {
  *         &#064;Read
- *         public Promise&lt;ResourceResponse, ResourceException> get() {
+ *         public Promise&lt;ResourceResponse, ResourceException&gt; get() {
  *             // ...
  *         }
  *     }
- * </pre></code>
+ * </pre>
  * In this example, when an instance of {@code ThingProducer} would result in the following paths being created:
  * <ul>
  *     <li>{@code /things} - collection binding to {@code ThingProducer}</li>
