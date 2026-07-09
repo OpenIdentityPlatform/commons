@@ -1,6 +1,8 @@
 /**
  * Copyright 2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +18,6 @@
 
 package com.persistit;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -64,7 +65,6 @@ public class WarmupTest extends PersistitUnitTestCase {
   }
 
   @Test
-  @Ignore
   public void readOrderIsSequential() throws Exception {
 
     Exchange ex = _persistit.getExchange("persistit", "WarmupTest", true);
