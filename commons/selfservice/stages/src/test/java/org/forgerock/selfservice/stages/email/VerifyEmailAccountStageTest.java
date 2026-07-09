@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 package org.forgerock.selfservice.stages.email;
 
@@ -25,8 +26,9 @@ import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.QUERYSTRING_PARAMS_FIELD;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -201,7 +203,7 @@ public final class VerifyEmailAccountStageTest {
 
         // Then
         ArgumentCaptor<ActionRequest> actionRequestArgumentCaptor =  ArgumentCaptor.forClass(ActionRequest.class);
-        verify(connection).action(any(Context.class), actionRequestArgumentCaptor.capture());
+        verify(connection).action(nullable(Context.class), actionRequestArgumentCaptor.capture());
         ActionRequest actionRequest = actionRequestArgumentCaptor.getValue();
 
         assertThat(actionRequest.getAction()).isSameAs("send");
@@ -244,7 +246,7 @@ public final class VerifyEmailAccountStageTest {
 
         // Then
         ArgumentCaptor<ActionRequest> actionRequestArgumentCaptor =  ArgumentCaptor.forClass(ActionRequest.class);
-        verify(connection).action(any(Context.class), actionRequestArgumentCaptor.capture());
+        verify(connection).action(nullable(Context.class), actionRequestArgumentCaptor.capture());
         ActionRequest actionRequest = actionRequestArgumentCaptor.getValue();
 
         assertThat(actionRequest.getAction()).isSameAs("send");

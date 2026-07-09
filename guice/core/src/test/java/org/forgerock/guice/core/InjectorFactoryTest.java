@@ -12,6 +12,7 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2013-2015 ForgeRock AS.
+* Portions copyright 2020-2026 3A Systems, LLC
 */
 
 package org.forgerock.guice.core;
@@ -29,7 +30,7 @@ import com.google.inject.Module;
 import org.forgerock.guice.core.test.TestModule1;
 import org.forgerock.guice.core.test.TestModule2;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -72,7 +73,7 @@ public class InjectorFactoryTest {
         injectorFactory.createInjector(moduleAnnotation);
 
         //Then
-        verify(moduleCreator, times(2)).createInstance(Matchers.<Class<Module>>anyObject());
+        verify(moduleCreator, times(2)).createInstance(ArgumentMatchers.<Class<Module>>anyObject());
         ArgumentCaptor<Set> createInjectorCaptor = ArgumentCaptor.forClass(Set.class);
         verify(injectorCreator).createInjector(createInjectorCaptor.capture());
         Set<Module> modules = createInjectorCaptor.getValue();

@@ -12,6 +12,7 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2014 ForgeRock AS.
+* Portions copyright 2020-2026 3A Systems, LLC
 */
 package org.forgerock.jaspi.modules.openid.resolvers;
 
@@ -20,7 +21,7 @@ import java.net.URL;
 import org.forgerock.jaspi.modules.openid.exceptions.FailedToLoadJWKException;
 import org.forgerock.jaspi.modules.openid.helpers.SimpleHTTPClient;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertNotNull;
