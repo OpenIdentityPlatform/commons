@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.logging;
@@ -41,7 +42,6 @@ import com.persistit.logging.PersistitLogMessage.LogItem;
  * depending on the currently configured log level. An enabled
  * <code>LogItem</code> actually issues a log message, while a disabled
  * <code>LogItem</code> does nothing.
- * </p>
  */
 public class LogBase {
 

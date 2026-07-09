@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator;
@@ -23,7 +24,7 @@ import org.forgerock.json.schema.validator.exceptions.ValidationException;
 /**
  * FailFastErrorHandler implements the {@link ErrorHandler} in a way it re-throws the exception
  * at first time.
- * <p/>
+ * <p>
  * The exception prevents the validator to continue the validation of an already invalid object.
  */
 public class FailFastErrorHandler extends ErrorHandler {

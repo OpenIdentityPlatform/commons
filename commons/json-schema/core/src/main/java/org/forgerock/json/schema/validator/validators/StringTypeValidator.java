@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator.validators;
@@ -34,7 +35,7 @@ import static org.forgerock.json.schema.validator.Constants.*;
 
 /**
  * StringTypeValidator applies all the constraints of a <code>string</code> type.
- * <p/>
+ * <p>
  * Sample JSON Schema:
  * <code>
  * {

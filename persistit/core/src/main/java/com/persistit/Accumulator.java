@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -56,10 +57,11 @@ import com.persistit.exception.PersistitInterruptedException;
  * Checkpoint snapshot values are held in the directory tree of the volume
  * containing the Tree.
  * </p>
+ * <h2>Types of Accumulators</h2>
  * <p>
- * <h3>Types of Accumulators</h3>
  * The following defines intended use cases for the various types of
  * accumulators:
+ * </p>
  * <dl>
  * <dt>{@link com.persistit.Accumulator.Type#SUM}</dt>
  * <dd>Row count, total size, sums of various other characteristics</dd>
@@ -71,10 +73,8 @@ import com.persistit.exception.PersistitInterruptedException;
  * <dd>Sequence number generation, e.g., auto-increment or internal primary key
  * assignment</dd>
  * </dl>
- * </p>
+ * <h2>Snapshot and Live Values</h2>
  * <p>
- * <a name="_SnapshotValue" />
- * <h3>Snapshot and Live Values</h3>
  * Each Accumulator type supplies both a "snapshot" value and a "live" value.
  * The snapshot value is computed as described above by selectively applying
  * only those updates visible to the transaction. The live value, however, is
@@ -85,9 +85,8 @@ import com.persistit.exception.PersistitInterruptedException;
  * value is only an estimate. Its value is cheap to acquire but not
  * transactionally accurate.
  * </p>
+ * <h2>SeqAccumulator</h2>
  * <p>
- * <a name="_SeqAccumulator" />
- * <h3>SeqAccumulator</h3>
  * The <code>SeqAccumulator</code> is a combination of
  * <code>SumAccumulator</code> and <code>MaxAccumulator</code>. When the
  * {@link com.persistit.Accumulator.SeqAccumulator#allocate()} method is called,
@@ -380,12 +379,17 @@ public abstract class Accumulator {
          * The value returned is equal to the <a href="#_SnapshotValue">live
          * value</a> the instant it is updated. However, note that the following
          * code is <em>not</em> guaranteed to generate a unique value:
-         * <code><pre>
+         * </p>
+         * <pre>
          *    seqAccumulator.allocate();
          *    long id = seqAccumulator.getLiveValue();
-         * </pre></code>while the following is: <code><pre>
-         *   long id = seqAccumulator.allocate();
+         * </pre>
+         * <p>
+         * while the following is:
          * </p>
+         * <pre>
+         *   long id = seqAccumulator.allocate();
+         * </pre>
          * 
          * @return the updated live value
          */
@@ -653,7 +657,6 @@ public abstract class Accumulator {
      * href="#_SnapshotValue">Snapshot and Live Values</a>.
      * 
      * @return the computed snapshot value
-     * @throws InterruptedException
      */
     public long getSnapshotValue() throws PersistitInterruptedException {
         final Transaction txn = _tree.getPersistit().getTransaction();
@@ -669,7 +672,6 @@ public abstract class Accumulator {
      *         <code>timestamp</code>, and (b) all operations performed by the
      *         current transaction having step numbers less than
      *         <code>step</code>.
-     * @throws InterruptedException
      */
     long getSnapshotValue(final long timestamp, final int step) throws PersistitInterruptedException {
         try {

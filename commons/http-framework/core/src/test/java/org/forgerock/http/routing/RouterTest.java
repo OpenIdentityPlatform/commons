@@ -12,14 +12,16 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.http.routing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -97,7 +99,7 @@ public class RouterTest {
         request.setUri("http://example.com:8080/json/users");
 
         given(routeMatcher.evaluate(any(Context.class), any(Request.class))).willReturn(routeMatch);
-        doThrow(IncomparableRouteMatchException.class).when(routeMatch).isBetterMatchThan(any(RouteMatch.class));
+        doThrow(IncomparableRouteMatchException.class).when(routeMatch).isBetterMatchThan(nullable(RouteMatch.class));
 
         //When
         Promise<Response, NeverThrowsException> promise = router.handle(context, request);

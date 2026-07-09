@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.http;
@@ -19,7 +20,7 @@ package org.forgerock.http;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.protocol.Response.newResponsePromise;
 import static org.forgerock.util.Utils.joinAsString;
-import static org.mockito.Matchers.notNull;
+import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -31,7 +32,7 @@ import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.protocol.Status;
 import org.forgerock.util.promise.Promise;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -51,7 +52,7 @@ public final class ClientTest {
     @BeforeMethod
     public void beforeMethod() {
         initMocks(this);
-        when(handler.handle(notNull(RootContext.class), Matchers.notNull(Request.class)))
+        when(handler.handle(notNull(RootContext.class), ArgumentMatchers.notNull(Request.class)))
                 .thenReturn(newResponsePromise(new Response(Status.OK)));
         client = new Client(handler);
     }

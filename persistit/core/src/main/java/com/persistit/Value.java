@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -67,7 +68,9 @@ import java.util.Map;
  * Methods of this class encode primitive or object values into the byte array,
  * and decode bytes in the array into values equivalent to their original
  * values. For primitive-valued values, the decoded value is identical to the
- * original value. That is, after: <blockquote>
+ * original value. That is, after:
+ * </p>
+ * <blockquote>
  * 
  * <pre>
  * int a = 123;
@@ -75,10 +78,14 @@ import java.util.Map;
  * int b = value.get();
  * </pre>
  * 
- * </blockquote> <code>a == b</code> is true. For object-valued items, the
+ * </blockquote>
+ * <p>
+ * <code>a == b</code> is true. For object-valued items, the
  * result will be an object that, subject to the accuracy of serialization code,
  * is equal to the original object, but generally with different identity. That
- * is, after: <blockquote>
+ * is, after:
+ * </p>
+ * <blockquote>
  * 
  * <pre>
  * Object a = new Fricostat();
@@ -86,11 +93,14 @@ import java.util.Map;
  * int b = value.get();
  * </pre>
  * 
- * </blockquote> usually <code>a == b</code> is false, but
+ * </blockquote>
+ * <p>
+ * usually <code>a == b</code> is false, but
  * <code>a.equals(b)</code> is true.
  * </p>
  * <p>
  * <code>Value</code> uses three strategies for these conversions:
+ * </p>
  * <ul>
  * <li>For primitive types, their wrapper classes and certain other classes,
  * <code>Value</code> uses built-in logic to perform these conversions. Objects
@@ -108,6 +118,7 @@ import java.util.Map;
  * <code>java.io.ObjectInputStream</code> classes implemented by
  * <code>Value</code>.</li>
  * </ul>
+ * <p>
  * Note that <code>Value</code> can only encode an object if it has a
  * <code>ValueCoder</code> or implements either
  * <code>java.io.Serializable</code> or <code>java.io.Externalizable</code>.
@@ -135,7 +146,7 @@ import java.util.Map;
  * Object Serialization</a> for more detailed information on these these
  * subjects.
  * </p>
- * <h3>Value as the key of a HashMap or WeakHashMap</h3>
+ * <h2>Value as the key of a HashMap or WeakHashMap</h2>
  * <p>
  * It may be useful to build a WeakHashMap associating the serialized content of
  * a <code>Value</code> with an associated deserialized object to avoid object
@@ -144,7 +155,9 @@ import java.util.Map;
  * Instead, an immutable {@link ValueState} should be used to hold an immutable
  * copy of this state. <code>Value</code> and <code>ValueState</code> implement
  * <code>hashCode</code> and <code>equals</code> in a compatible fashion so that
- * code similar to the following works as expected: <blockquote>
+ * code similar to the following works as expected:
+ * </p>
+ * <blockquote>
  * 
  * <pre>
  *      ...
@@ -157,13 +170,13 @@ import java.util.Map;
  * </pre>
  * 
  * </blockquote>
- * </p>
- * <a name="_displayableFormat" /> <h3>Displayable Format</h3>
+ * <h2>Displayable Format</h2>
  * <p>
  * The {@link #toString()} method of this class attempts to construct a
  * human-readable representation of the serialized value. The Tree display panel
  * of the AdminUI utility uses this capability to summarize the contents of
  * values stored in a tree. The string representation is constructed as follows:
+ * </p>
  * <ol>
  * <li>If the state represented by this <code>Value</code> is undefined, then
  * return "undefined".</li>
@@ -222,6 +235,7 @@ import java.util.Map;
  * Person instances, each with just the other as a friend, might appear as
  * follows: (Note, space added for legibility.)
  * 
+ * </p>
  * <pre>
  * <code>
  * (Person){(Date)19490826000000.000-0400,"Mary","Jones",(long)75000,[
@@ -229,11 +243,12 @@ import java.util.Map;
  * </code>
  * </pre>
  * 
+ * <p>
  * In this example, John Smith's <code>friends</code> array contains a back
  * reference to Mary Jones in the form "@0" because Mary's displayable reference
  * starts at the beginning of the string.
  * </p>
- * <a name="_streamMode" /> <h3>Stream mode</h3>
+ * <h2>Stream mode</h2>
  * <p>
  * A <code>Value</code> normally contains just one object or primitive value. In
  * its normal mode of operation, the <code>put</code> operation overwrites any
@@ -253,7 +268,7 @@ import java.util.Map;
  * ValueCoder} implementations to aggregate the multiple fields encapsulated
  * within an encoded value.
  * </p>
- * <a name="_lowLevelAPI" /> <h3>Low-Level API</h3>
+ * <h2>Low-Level API</h2>
  * <p>
  * The low-level API allows an application to bypass the encoding and decoding
  * operations described above and instead to operate directly on the byte array
@@ -264,6 +279,7 @@ import java.util.Map;
  * </p>
  * <p>
  * The low-level API methods are: <br>
+ * </p>
  * <blockquote>
  * 
  * <pre>
@@ -273,10 +289,9 @@ import java.util.Map;
  *      void {@link #putEncodedBytes(byte[], int, int)}
  *      void {@link #copyFromEncodedBytes(byte[], int, int, int)}
  *      boolean {@link #ensureFit(int)}
- * </blockquote>
  * </pre>
+ * </blockquote>
  * 
- * </p>
  * 
  * 
  * @version 1.1
@@ -2506,7 +2521,7 @@ public final class Value {
    * reference handle. This method should be called from the
    * {@link ValueCoder#get(Value, Class, CoderContext)} method of custom
    * <code>ValueCoder</code>s. See <a
-   * href="../../../Object_Serialization_Notes.html>Persistit 1.1 Object
+   * href="../../../Object_Serialization_Notes.html">Persistit 1.1 Object
    * Serialization</a> for further details.
    * 
    * @param object
@@ -2659,7 +2674,7 @@ public final class Value {
 
   /**
    * Returns a <code>boolean</code> array representing the state of this
-   * <code>Value</code>. Equivalent to </code>(boolean)[])get()</code>.
+   * <code>Value</code>. Equivalent to <code>(boolean)[])get()</code>.
    * 
    * @return The array.
    */
@@ -2710,7 +2725,7 @@ public final class Value {
 
   /**
    * Returns a <code>byte</code> array representing the state of this
-   * <code>Value</code>. Equivalent to </code>(byte[])get()</code>.
+   * <code>Value</code>. Equivalent to <code>(byte[])get()</code>.
    * 
    * @return The array.
    */
@@ -2763,7 +2778,7 @@ public final class Value {
 
   /**
    * Returns a <code>short</code> array representing the state of this
-   * <code>Value</code>. Equivalent to </code>(short[])get()</code>.
+   * <code>Value</code>. Equivalent to <code>(short[])get()</code>.
    * 
    * @return The array.
    */
@@ -2814,7 +2829,7 @@ public final class Value {
 
   /**
    * Returns a <code>char</code> array representing the state of this
-   * <code>Value</code>. Equivalent to </code>(char[])get()</code>.
+   * <code>Value</code>. Equivalent to <code>(char[])get()</code>.
    * 
    * @return The array.
    */
@@ -2865,7 +2880,7 @@ public final class Value {
 
   /**
    * Returns a <code>int</code> array representing the state of this
-   * <code>Value</code>. Equivalent to </code>(int[])get()</code>.
+   * <code>Value</code>. Equivalent to <code>(int[])get()</code>.
    * 
    * @return The array.
    */
@@ -2916,7 +2931,7 @@ public final class Value {
 
   /**
    * Returns a <code>long</code> array representing the state of this
-   * <code>Value</code>. Equivalent to </code>(long[])get()</code>.
+   * <code>Value</code>. Equivalent to <code>(long[])get()</code>.
    * 
    * @return The array.
    */
@@ -2968,7 +2983,7 @@ public final class Value {
 
   /**
    * Returns a <code>float</code> array representing the state of this
-   * <code>Value</code>. Equivalent to </code>(float[])get()</code>.
+   * <code>Value</code>. Equivalent to <code>(float[])get()</code>.
    * 
    * @return The array.
    */
@@ -3019,7 +3034,7 @@ public final class Value {
 
   /**
    * Returns a <code>double</code> array representing the state of this
-   * <code>Value</code>. Equivalent to </code>(double[])get()</code>.
+   * <code>Value</code>. Equivalent to <code>(double[])get()</code>.
    * 
    * @return The array.
    */
@@ -3072,7 +3087,7 @@ public final class Value {
   /**
    * Returns a <code>Object</code> array representing the state of this
    * <code>Value</code>. This is equivalent to
-   * </code>(Object[])getArray()</code>.
+   * <code>(Object[])getArray()</code>.
    * 
    * @return The array.
    */
@@ -3083,7 +3098,7 @@ public final class Value {
   /**
    * Returns a <code>Object</code> array representing the state of this
    * <code>Value</code>. This is equivalent to
-   * </code>(Object[])getArray()</code>.
+   * <code>(Object[])getArray()</code>.
    * 
    * @return The array.
    */
@@ -5373,7 +5388,7 @@ public final class Value {
    * Construct a list of <code>Version</code> objects, each denoting one of
    * the multi-value versions currently held in this Value object.
    * 
-   * @return the list of <code>Version<code>s
+   * @return the list of <code>Version</code>s
    * @throws PersistitException
    */
   List<Version> unpackMvvVersions() throws PersistitException {

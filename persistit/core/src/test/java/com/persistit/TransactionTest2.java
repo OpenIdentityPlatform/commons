@@ -1,6 +1,8 @@
 /**
  * Copyright 2005-2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +25,6 @@ import com.persistit.exception.PersistitIOException;
 import com.persistit.exception.PersistitInterruptedException;
 import com.persistit.exception.RollbackException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InterruptedIOException;
@@ -244,7 +245,6 @@ public class TransactionTest2 extends PersistitUnitTestCase {
     }
 
     @Test
-   @Ignore
     public void transactionsConcurrentWithPersistitClose() throws Exception {
         new Thread(new Runnable() {
             @Override

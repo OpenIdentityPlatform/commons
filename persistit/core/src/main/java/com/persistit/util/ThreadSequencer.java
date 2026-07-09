@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.util;
@@ -74,21 +75,20 @@ import java.util.concurrent.Semaphore;
  * a list of blocked locations. It then determines whether that set covers any
  * join set, and if so, it releases all threads in the associated release set.
  * For example, suppose there are three location A, B and C. Consider two
- * sections of code executed by two different threads: <code><pre>
+ * sections of code executed by two different threads: <pre>
  *   sequence(A)
  *   // do this before B
  *   sequence(C)
- * </pre></code> and <code><pre>
+ * </pre> and <pre>
  *   sequence(B)
  *   // do this after A
- * </pre></code> A suitable schedule might include the
- * pairs (A, B)->(A) and (B, C)->(B, C). In this example one thread blocks until
+ * </pre> A suitable schedule might include the
+ * pairs (A, B)-&gt;(A) and (B, C)-&gt;(B, C). In this example one thread blocks until
  * both sequence(A) and sequence(B) have been called. Then the schedule (A,
- * B)->(A) releases the call to sequence(A) so that the first thread runs. When
- * the first thread calls sequence(C), the schedule (B,C)->(B,C) runs, releasing
+ * B)-&gt;(A) releases the call to sequence(A) so that the first thread runs. When
+ * the first thread calls sequence(C), the schedule (B,C)-&gt;(B,C) runs, releasing
  * the second thread's call to sequence(B) and allowing the first thread to
  * continue without blocking.
- * </p>
  * <p>
  * Follow existing usage in {@link SequencerConstants} for defining schedules.
  * Test classes should invoke the static method {@link #addSchedules(int[][])}
@@ -262,7 +262,6 @@ public class ThreadSequencer implements SequencerConstants {
      * </li>
      * </ul>
      * But not by any that contains IN_C before OUT_B.
-     * </p>
      * <p>
      * <b>Note:</b> Both parameters will be modified by sorting.
      * </p>

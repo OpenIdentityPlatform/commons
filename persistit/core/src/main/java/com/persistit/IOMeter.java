@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -40,7 +41,7 @@ import com.persistit.util.Util;
  * This class accumulates statistics on file system I/O operations. Each I/O
  * operation is "charged" to a bucket according to the operation being performed
  * (see {@link IOMeterMXBean#OPERATIONS}).
- * <p />
+ * <p>
  * Statistics are kept for recent time intervals so that Persistit can compute
  * I/O rates for the recent past. These are kept in "buckets" with a granularity
  * of about 1 second. Persistit examines the recent I/O history when scheduling

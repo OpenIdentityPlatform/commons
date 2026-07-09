@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -81,8 +82,6 @@ import com.persistit.util.Util;
  * <code>try/finally</code></a> or the <a href="#_pattern2">
  * <code>TransactionRunnable</code></a> pattern to ensure correctness.
  * </p>
- * <p>
- * <a name="commitPolicy"/>
  * <h2>Commit Policy</h2>
  * Persistit provides three policies that determine the durability of a
  * transaction after it has executed the <code>commit</code> method. These are:
@@ -212,7 +211,7 @@ import com.persistit.util.Util;
  * the duration of long-running transactions.
  * </p>
  * 
- * <a name="_pattern1"/> <h2>The try/finally/retry Code Pattern</h2>
+ * <h2>The try/finally/retry Code Pattern</h2>
  * <p>
  * The following code fragment illustrates a transaction executed with up to to
  * RETRY_COUNT retries. If the <code>commit</code> method succeeds, the whole
@@ -221,7 +220,7 @@ import com.persistit.util.Util;
  * application throws a <code>TransactionFailedException</code>.
  * </p>
  * 
- * <blockquote><code><pre>
+ * <blockquote><pre>
  *     Transaction txn = Persistit.getTransaction();
  *     int remainingAttempts = RETRY_COUNT;
  *     for (;;) {
@@ -244,16 +243,17 @@ import com.persistit.util.Util;
  *                              // commit completed successfully.
  *         }
  *     }
- * </pre></code></blockquote>
+ * </pre></blockquote>
  * 
- * <a name="_pattern2" /> <h2>The TransactionRunnable Pattern</h2>
+ * <h2>The TransactionRunnable Pattern</h2>
  * <p>
  * As an alternative, the application can embed the actual database operations
  * within a {@link TransactionRunnable} and invoke the {@link #run} method to
  * execute it. The retry logic detailed in the fragment shown above is handled
  * automatically by <code>run</code>; it could be rewritten as follows:
- * 
- * <blockquote><code><pre>
+ * </p>
+ *
+ * <blockquote><pre>
  *     Transaction txn = Persistit.getTransaction();
  *     txn.run(new TransactionRunnable() {
  *         public void runTransaction()
@@ -263,10 +263,9 @@ import com.persistit.util.Util;
  *             //
  *         }
  *     }, RETRY_COUNT, 0);
- * </pre></code></blockquote>
- * 
- * </p>
- * <a name="_scopedCodePattern"/> <h2>Nested Transaction Scope</h2>
+ * </pre></blockquote>
+ *
+ * <h2>Nested Transaction Scope</h2>
  * <p>
  * Persistit supports nested transactions by counting the number of nested
  * {@link #begin} and {@link #end} operations. Each invocation of
@@ -274,7 +273,9 @@ import com.persistit.util.Util;
  * <code>end</code> decrements the count. These methods are intended to be used
  * in a standard essential pattern, shown here, to ensure that the scope of of
  * the transaction is reliably determined by the lexical the structure of the
- * code rather than conditional logic: <blockquote><code><pre>
+ * code rather than conditional logic:
+ * </p>
+ * <blockquote><pre>
  *     <b>txn.begin();</b>
  *     try {
  *         //
@@ -286,8 +287,7 @@ import com.persistit.util.Util;
  *     } finally {
  *         <b>txn.end();</b>
  *     }
- * </pre></code></blockquote>
- * </p>
+ * </pre></blockquote>
  * <p>
  * This pattern ensures that the transaction scope is ended properly regardless
  * of whether the application code throws an exception or completes and commits
@@ -359,7 +359,7 @@ import com.persistit.util.Util;
  * for example, by reading data using step 0 while posting updates with a step
  * value of 1.
  * </p>
- * <a name="_threadManagement" /> <h2>Thread Management</h2>
+ * <h2>Thread Management</h2>
  * <p>
  * As noted above, a <code>Transaction</code> typically belongs to one thread
  * for its entire lifetime and is <i>not</i> threadsafe. However, to support
@@ -370,6 +370,7 @@ import com.persistit.util.Util;
  * {@link Persistit#getTransaction()} is sensitive to the thread's current
  * <code>SessionId</code>, and therefore the following style of interaction is
  * possible:
+ * </p>
  * <ul>
  * <li>Thread T1 is assigned work for session S.</li>
  * <li>Thread T1 invokes <code>begin</code>, does some work and then returns
@@ -381,6 +382,7 @@ import com.persistit.util.Util;
  * <li>Thread T2 does additional work and then calls <code>commit</code> and
  * <code>end</code> to complete the transaction.</li>
  * </ul>
+ * <p>
  * Applications that use this technique must be written carefully to ensure that
  * multiple threads never execute with the same SessionId. Concurrent access to
  * a <code>Transaction</code> or <code>Exchange</code> can cause serious errors,
@@ -659,8 +661,6 @@ public class Transaction {
      * successfully.
      * </p>
      * 
-     * @throws PersistitIOException
-     * 
      * @throws IllegalStateException
      *             if there is no current transaction scope.
      */
@@ -708,8 +708,6 @@ public class Transaction {
      * all enclosing transactions to roll back. This ensures that the outermost
      * transaction will not commit if any inner transaction has rolled back.
      * </p>
-     * 
-     * @throws PersistitIOException
      * 
      * @throws IllegalStateException
      *             if there is no transaction scope or the current scope has
