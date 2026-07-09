@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json;
@@ -175,11 +176,11 @@ public class JsonPointer implements Iterable<String> {
      * </tr>
      * <tr>
      * <td align=left>/</td>
-     * <td align=left><tt>/</tt></td>
+     * <td align=left><code>/</code></td>
      * </tr>
      * <tr>
      * <td align=left>/a</td>
-     * <td align=left><tt>/</tt></td>
+     * <td align=left><code>/</code></td>
      * </tr>
      * <tr>
      * <td align=left>/a/b</td>

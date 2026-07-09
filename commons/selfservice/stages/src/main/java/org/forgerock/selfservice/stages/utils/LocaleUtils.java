@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.selfservice.stages.utils;
@@ -65,7 +66,7 @@ public final class LocaleUtils {
      * If {@link Locale.ROOT} is specified, the default locale(s) will be included in its place. In this case, the default locale(s) will not be appended to the end of the list.
 	 * <p>The default locale is specified by:
 	 * <ol>
-	 * <li>The <tt>org.forgerock.selfservice.defaultLocale</tt> system property.</li>
+	 * <li>The <code>org.forgerock.selfservice.defaultLocale</code> system property.</li>
 	 * <li>The JVM's default locale.</li>
 	 * <ol>
 	 * </p>

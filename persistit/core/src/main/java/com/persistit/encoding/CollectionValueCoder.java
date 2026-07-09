@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.encoding;
@@ -44,7 +45,6 @@ import com.persistit.exception.ConversionException;
  * <li>java.util.LinkedHashMap (Java 1.4+)</li>
  * <li>java.util.LinkedHashSet (Java 1.4+)</li>
  * </ul>
- * </p>
  * <p>
  * The stored data consist only of items accessible through the
  * <code>Collection</code> or <code>Map</code> interfaces. For example,

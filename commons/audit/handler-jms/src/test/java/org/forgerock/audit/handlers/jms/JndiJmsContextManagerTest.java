@@ -12,13 +12,13 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.audit.handlers.jms;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import jakarta.jms.ConnectionFactory;
@@ -82,15 +82,18 @@ public class JndiJmsContextManagerTest {
         InitialContextFactoryBuilder builder = mock(InitialContextFactoryBuilder.class);
         setInitialContextFactoryBuilder(builder);
         ClassLoader contextClassLoader = mock(ClassLoader.class);
-        Thread.currentThread().setContextClassLoader(contextClassLoader);
         Context context = mock(Context.class);
         InitialContextFactory initialContextFactory = mock(InitialContextFactory.class);
-        when(initialContextFactory.getInitialContext(any(Hashtable.class))).thenReturn(context);
-        when(builder.createInitialContextFactory(any(Hashtable.class))).thenReturn(initialContextFactory);
 
         // Setup JMS specific components for this test.
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         Topic topic = mock(Topic.class);
+
+        // Swap the thread context classloader to the mock only after all mocks have been created, so that
+        // Mockito's (byte-buddy) mock generation resolves classes against the real classloader.
+        Thread.currentThread().setContextClassLoader(contextClassLoader);
+        when(initialContextFactory.getInitialContext(any(Hashtable.class))).thenReturn(context);
+        when(builder.createInitialContextFactory(any(Hashtable.class))).thenReturn(initialContextFactory);
         JndiConfiguration configuration = new JndiConfiguration();
         configuration.setJmsConnectionFactoryName("ConnectionFactory");
         configuration.setJmsTopicName("audit");

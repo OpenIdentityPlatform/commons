@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.encoding;
@@ -118,7 +119,6 @@ public class ObjectCache {
      * the value is affirmatively <code>null</code>. Alternatively, applications
      * may use the {@link #getWithNull} method and then test the result for
      * equality with <code>NULL</code> as a distinct value.
-     * </p>
      * 
      * @param key
      *            The <code>Key</code> used to identify the value. When storing
@@ -211,8 +211,7 @@ public class ObjectCache {
      * </pre>
      * 
      * </blockquote>
-     * </p>
-     * 
+     *
      * @param key
      *            The key to which the value is associated.
      * 

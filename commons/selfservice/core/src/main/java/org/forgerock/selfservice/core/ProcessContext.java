@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.selfservice.core;
@@ -87,7 +88,7 @@ public interface ProcessContext {
 
     /**
      * Puts a value into the additions referenced by the json pointer.
-     * <p/>
+     * <p>
      * Additions are included in the response of successfully completing a flow.
      *
      * @param jsonPointer
