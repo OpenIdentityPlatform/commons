@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.api.annotations;
@@ -41,7 +42,7 @@ import java.lang.annotation.Target;
  * </p>
  * <pre>
  * &#064;AdditionalProperties(String.class)
- * private static class MyMap extends HashMap<String, String> {}
+ * private static class MyMap extends HashMap&lt;String, String&gt; {}
  * </pre>
  */
 @Retention(RetentionPolicy.RUNTIME)

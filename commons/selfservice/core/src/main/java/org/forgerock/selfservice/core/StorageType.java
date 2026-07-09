@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.selfservice.core;
@@ -24,7 +25,7 @@ import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 
 /**
  * Indicates whether the service should operate in stateless or stateful mode.
- * <br />
+ * <br>
  * Stateless means that all process state will be pushed into the token that
  * is returned to the client. Whereas stateful (local) will push all state to
  * a local store and the returning token will be used to key that state.

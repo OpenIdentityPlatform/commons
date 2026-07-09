@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.elasticsearch;
 
@@ -361,7 +362,7 @@ public class ElasticsearchAuditEventHandler extends AuditEventHandlerBase implem
      * payload to Elasticsearch.
      *
      * @param payload Elasticsearch Bulk API payload
-     * @throws BatchException indicates (full or partial) failure to publish batch
+     * @return a promise that fails with a {@link BatchException} on (full or partial) failure to publish the batch
      */
     @Override
     public Promise<Void, BatchException> publishBatch(final String payload) {

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.mxbeans;
@@ -50,7 +51,7 @@ public interface IOMeterMXBean {
      * <dd>Write Transaction to Journal</dd>
      * <dt>XX</dt>
      * <dd>Other</dd>
-     * <dt>EV</dt>D
+     * <dt>EV</dt>
      * <dd>Evict page from pool</dd>
      * <dt>FJ</dt>
      * <dd>Flush journal</dd>

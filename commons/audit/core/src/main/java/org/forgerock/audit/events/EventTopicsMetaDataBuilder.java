@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.events;
 
@@ -58,7 +59,7 @@ public final class EventTopicsMetaDataBuilder {
 
     /**
      * Specifies additional fields that should be added to the schemas for core event topics.
-     * <p/>
+     * <p>
      * The extension must not redefine a property already defined in the core event topics.
      * <p>
      * Example of a valid extension:
@@ -90,9 +91,9 @@ public final class EventTopicsMetaDataBuilder {
 
     /**
      * Specifies schemas for additional topics.
-     * <p/>
+     * <p>
      * Custom schema must always include _id, timestamp, transactionId and eventName fields.
-     * <p/>
+     * <p>
      * Example of a valid schema:
      * <pre>
      * "customTopic": {

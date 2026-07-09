@@ -14,6 +14,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
+Portions Copyrighted 2026 3A Systems, LLC
 -->
 <body>
 <p>
@@ -32,8 +33,8 @@ independently of A, so in many cases B's state should not be serialized
 concurrently with A's state.
 </p>
 <p>
-For example, consider a <tt>PurchaseOrder</tt> class that identifies a 
-<tt>Supplier</tt> in one of its fields.  Assume further that the Supplier 
+For example, consider a <code>PurchaseOrder</code> class that identifies a 
+<code>Supplier</code> in one of its fields.  Assume further that the Supplier 
 refers to a large, mostly static, catalog of Products.  A naive implementation
 might be written as follows:
 <blockquote><pre>
@@ -55,12 +56,13 @@ class PurchaseOrder
 	}
 }
 </pre></blockquote>
+<p>
 In this implementation, standard Java serialization would serialize not only
-the state of a <tt>PurchaseOrder</tt>, but also the entire state of the referenced
-<tt>Supplier</tt>.
+the state of a <code>PurchaseOrder</code>, but also the entire state of the referenced
+<code>Supplier</code>.
 </p>
 <p>
-To break this connection, the <tt>PurchaseOrder</tt> class could be
+To break this connection, the <code>PurchaseOrder</code> class could be
 rewritten as follows:
 <blockquote><pre>
 class PurchaseOrder
@@ -91,7 +93,6 @@ class SupplierReference extends AbstractReference
 	}
 }
 </pre></blockquote>
-</p>
 <p>
 Two abstract implementation classes are provided: 
 {@link com.persistit.ref.AbstractReference} and 
@@ -100,11 +101,11 @@ Two abstract implementation classes are provided:
 peform the application-specific actions necessary to recover and instantiate a 
 persistent object given its persistent identifier.  The difference between the two
 classes is that once the referent object has been instantiated, the 
-<tt>AbstractReference</tt> implementation holds a strong reference 
-to it, while the <tt>AbstractWeakReference</tt> holds a weak reference.
+<code>AbstractReference</code> implementation holds a strong reference 
+to it, while the <code>AbstractWeakReference</code> holds a weak reference.
 A weak reference allows the garbage collector to remove and reclaim
 the memory occupied by the referent object.  A subsequent call to the
-<tt>AbstractWeakReference</tt>'s <tt>get</tt> method simply instantiates 
+<code>AbstractWeakReference</code>'s <code>get</code> method simply instantiates 
 a new copy of the referent object.
 </p>
 </body>

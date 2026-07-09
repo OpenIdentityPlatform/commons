@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator.exceptions;
@@ -55,7 +56,7 @@ public class SchemaException extends JsonValueException {
 
     /**
      * Create a new SchemaException wrapping an existing exception.
-     * <p/>
+     * <p>
      * <p>The existing exception will be embedded in the new
      * one, and its message will become the default message for
      * the SchemaException.</p>
@@ -71,7 +72,7 @@ public class SchemaException extends JsonValueException {
 
     /**
      * Create a new SchemaException from an existing exception.
-     * <p/>
+     * <p>
      * <p>The existing exception will be embedded in the new
      * one, but the new exception will have its own message.</p>
      *
@@ -86,7 +87,7 @@ public class SchemaException extends JsonValueException {
 
     /**
      * Return a detail message for this exception.
-     * <p/>
+     * <p>
      * <p>If there is an embedded exception, and if the SchemaException
      * has no detail message of its own, this method will return
      * the detail message from the embedded exception.</p>

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.audit;
@@ -41,9 +42,9 @@ import org.forgerock.util.promise.Promise;
 
 /**
  * AuditService proxy that allows products to implement threadsafe hot-swappable configuration updates.
- * <p/>
+ * <p>
  * The proxied AuditService can be swapped by calling {@link #setDelegate(AuditService)}.
- * <p/>
+ * <p>
  * Thread-safety is achieved by blocking proxied calls until the old AuditService has flushed all buffers
  * and closed any open file or network connections.
  */
@@ -74,7 +75,7 @@ public class AuditServiceProxy implements AuditService {
 
     /**
      * Sets the AuditService this object proxies.
-     * <p/>
+     * <p>
      * Thread-safety is achieved by blocking proxied calls until the old AuditService has flushed all buffers
      * and closed any open file or network connections.
      *
