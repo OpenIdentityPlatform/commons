@@ -12,12 +12,14 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.services.routing;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.BDDMockito.*;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -398,7 +400,7 @@ public class AbstractRouterTest {
         router.addRoute(routeOneMatcher, new TestAbstractRouter().setDefaultRoute(routeOneHandler));
         router.addRoute(routeTwoMatcher, routeTwoHandler);
         given(routeOneHandler.api(any(ApiProducer.class))).willReturn("one");
-        given(routeOneHandler.handleApiRequest(any(Context.class), eq(request))).willReturn("one");
+        given(routeOneHandler.handleApiRequest(nullable(Context.class), eq(request))).willReturn("one");
         given(routeTwoHandler.api(any(ApiProducer.class))).willReturn("two");
         router.api(new StringApiProducer());
 
