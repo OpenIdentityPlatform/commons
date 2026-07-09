@@ -14,7 +14,7 @@ on:
 # Cancel superseded runs on the same ref to avoid the long-running,
 # eventually-cancelled analyses seen with the previous default setup.
 concurrency:
-  group: codeql-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
