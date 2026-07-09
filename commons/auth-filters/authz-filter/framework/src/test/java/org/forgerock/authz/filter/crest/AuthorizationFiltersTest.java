@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2015 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.authz.filter.crest;
@@ -20,8 +21,8 @@ import static org.assertj.core.api.Assertions.failBecauseExceptionWasNotThrown;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.testng.Assert.*;
@@ -48,7 +49,7 @@ import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.testng.annotations.Test;
 
 public class AuthorizationFiltersTest {
@@ -204,7 +205,7 @@ public class AuthorizationFiltersTest {
         chain.handleAction(context, request);
 
         //Then
-        verify(target).actionInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<ActionRequest>anyObject());
+        verify(target).actionInstance(eq(context), eq("RESOURCE_NAME"), ArgumentMatchers.<ActionRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -296,7 +297,7 @@ public class AuthorizationFiltersTest {
         chain.handleCreate(context, request);
 
         //Then
-        verify(target).createInstance(eq(context), Matchers.<CreateRequest>anyObject());
+        verify(target).createInstance(eq(context), ArgumentMatchers.<CreateRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -388,7 +389,7 @@ public class AuthorizationFiltersTest {
         chain.handleDelete(context, request);
 
         //Then
-        verify(target).deleteInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<DeleteRequest>anyObject());
+        verify(target).deleteInstance(eq(context), eq("RESOURCE_NAME"), ArgumentMatchers.<DeleteRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -480,7 +481,7 @@ public class AuthorizationFiltersTest {
         chain.handlePatch(context, request);
 
         //Then
-        verify(target).patchInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<PatchRequest>anyObject());
+        verify(target).patchInstance(eq(context), eq("RESOURCE_NAME"), ArgumentMatchers.<PatchRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -664,7 +665,7 @@ public class AuthorizationFiltersTest {
         chain.handleRead(context, request);
 
         //Then
-        verify(target).readInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<ReadRequest>anyObject());
+        verify(target).readInstance(eq(context), eq("RESOURCE_NAME"), ArgumentMatchers.<ReadRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
@@ -756,7 +757,7 @@ public class AuthorizationFiltersTest {
         chain.handleUpdate(context, request);
 
         //Then
-        verify(target).updateInstance(eq(context), eq("RESOURCE_NAME"), Matchers.<UpdateRequest>anyObject());
+        verify(target).updateInstance(eq(context), eq("RESOURCE_NAME"), ArgumentMatchers.<UpdateRequest>anyObject());
     }
 
     @SuppressWarnings("unchecked")
