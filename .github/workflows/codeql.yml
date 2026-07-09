@@ -45,6 +45,14 @@ jobs:
           # this to 'manual' and uncomment the "Build with Maven" step below.
           - language: java-kotlin
             build-mode: none
+          # Interpreted languages: no compilation, extracted straight from source.
+          - language: javascript-typescript
+            build-mode: none
+          - language: python
+            build-mode: none
+          # Scans the repository's own GitHub Actions workflows.
+          - language: actions
+            build-mode: none
 
     steps:
       - name: Checkout repository
@@ -64,6 +72,12 @@ jobs:
             paths-ignore:
               - '**/src/test/**'
               - '**/src/it/**'
+              # Third-party / vendored JavaScript — analysing it only adds noise.
+              - '**/*.min.js'
+              - '**/node_modules/**'
+              - '**/webjars/**'
+              - '**/doc-maven-plugin/src/main/resources/js/**'
+              - '**/openapi-war-overlay/**/swagger-ui.js'
 
       # --- Manual build (only used when build-mode is 'manual') -------------
       # - name: Set up JDK 11
