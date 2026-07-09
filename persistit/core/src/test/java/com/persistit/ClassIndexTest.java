@@ -1,6 +1,8 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
- * 
+ *
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -125,7 +127,7 @@ public class ClassIndexTest extends PersistitUnitTestCase {
                         try {
                             transaction.begin();
                             try {
-                                test2a(_persistit.getClassIndex(), Persistit.class);
+                                stress(_persistit.getClassIndex(), Persistit.class, new HashSet<Class<?>>());
                                 if ((index % 3) == 0) {
                                     transaction.rollback();
                                 } else {
@@ -148,24 +150,54 @@ public class ClassIndexTest extends PersistitUnitTestCase {
             threads[i].join();
         }
 
-        final ClassIndex cx = _persistit.getClassIndex();
-
         /*
-         * Verify that almost all lookups were satisfied from cache. There
-         * should be one "cache miss" for every class in the map. There may be
-         * more: these are caused by concurrent execution and are explicitly
-         * permitted - they will happen only rarely and only when multiple
-         * threads are contending to register a new class. Such instances are
-         * safely discarded and the following adjusts the cache miss count by
-         * the number so discarded.
+         * After the concurrent registration above, verify that the ClassIndex is
+         * internally consistent: every class reachable from Persistit.class
+         * resolves to a handle that resolves back to the same ClassInfo. This runs
+         * single-threaded on the test thread, so a genuine inconsistency is
+         * reported reliably. (The previous check mutated shared test state from 50
+         * threads and asserted from those threads, making it racy and its failures
+         * invisible to JUnit.)
          */
-//        assertEquals("Cache misses should match map size", map.size(),
-//                cx.getCacheMisses() - cx.getDiscardedDuplicates());
+        final ClassIndex cx = _persistit.getClassIndex();
+        verifyConsistent(cx, Persistit.class, new HashSet<Class<?>>());
+    }
 
-        for (int handle = 0; handle < _maxHandle + 10; handle++) {
-            assertTrue(equals(map.get(handle), cx.lookupByHandle(handle)));
+    /**
+     * Concurrent stress helper: recursively look up (and thereby register) every
+     * class reachable from {@code clazz}. It touches no shared test state, so it
+     * is safe to run from many threads at once; a per-invocation visited set
+     * bounds the recursion over the class graph.
+     */
+    private void stress(final ClassIndex cx, final Class<?> clazz, final Set<Class<?>> visited) throws Exception {
+        if (clazz.isPrimitive() || !visited.add(clazz)) {
+            return;
         }
+        cx.lookupByClass(clazz);
+        if (cx.size() < 1000) {
+            for (final Field field : clazz.getDeclaredFields()) {
+                stress(cx, field.getType(), visited);
+            }
+        }
+    }
 
+    /**
+     * Single-threaded consistency check over the class graph: for every reachable
+     * class, lookupByClass and lookupByHandle must agree.
+     */
+    private void verifyConsistent(final ClassIndex cx, final Class<?> clazz, final Set<Class<?>> visited)
+            throws Exception {
+        if (clazz.isPrimitive() || !visited.add(clazz)) {
+            return;
+        }
+        final ClassInfo byClass = cx.lookupByClass(clazz);
+        assertNotNull(byClass);
+        assertEquals(byClass, cx.lookupByHandle(byClass.getHandle()));
+        if (cx.size() < 1000) {
+            for (final Field field : clazz.getDeclaredFields()) {
+                verifyConsistent(cx, field.getType(), visited);
+            }
+        }
     }
 
     @Test
