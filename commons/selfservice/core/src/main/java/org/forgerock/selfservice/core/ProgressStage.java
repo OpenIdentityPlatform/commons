@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.selfservice.core;
@@ -22,7 +23,7 @@ import org.forgerock.selfservice.core.config.StageConfig;
 
 /**
  * Progress stage represents a single stage within the overall advance flow.
- * <br />
+ * <br>
  * The method {@link ProgressStage#gatherInitialRequirements(ProcessContext, StageConfig)} is invoke first and provides
  * an opportunity for the stage to return some initial requirements. The method
  * {@link ProgressStage#advance(ProcessContext, StageConfig)} is repeatedly after for every
@@ -39,7 +40,7 @@ public interface ProgressStage<C extends StageConfig> {
 
     /**
      * Response for defining any initial requirements the stage may have.
-     * <br />
+     * <br>
      * An empty json object implies no initial requirements.
      *
      * @param context

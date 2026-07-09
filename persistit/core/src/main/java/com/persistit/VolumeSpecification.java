@@ -16,6 +16,7 @@
 
 /**
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package com.persistit;
 
@@ -118,9 +119,9 @@ public class VolumeSpecification {
 
     /**
      * Construct a <code>VolumeSpecification</code> from the supplied
-     * specification string. The specification has the form: <br />
-     * <i>pathname</i>[,<i>options</i>]... <br />
-     * where options include: <br />
+     * specification string. The specification has the form: <br>
+     * <i>pathname</i>[,<i>options</i>]... <br>
+     * where options include: <br>
      * <dl>
      * <dt><code>name</code></dt>
      * <dd>The Volume name used in looking up the volume within Persistit

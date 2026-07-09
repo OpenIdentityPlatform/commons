@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator.validators;
@@ -27,7 +28,7 @@ import org.forgerock.json.schema.validator.exceptions.SchemaException;
 public interface SimpleValidator<T> {
     /**
      * Validates the <code>node</code> value against the embedded schema object.
-     * <p/>
+     * <p>
      * The selected error handler defines the behaviour of the validator. The
      * {@link org.forgerock.json.schema.validator.FailFastErrorHandler} throws exception at firs violation.
      * Other customised {@link ErrorHandler} can collect all exceptions and after the validation the

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.audit.handlers.csv;
 
@@ -27,7 +28,7 @@ import org.supercsv.prefs.CsvPreference;
 
 /**
  * Responsible for formatting audit events and column headers as CSV strings.
- * <br/>
+ * <br>
  * Objects of this type are threadsafe.
  */
 class CsvFormatter {
@@ -58,9 +59,9 @@ class CsvFormatter {
 
     /**
      * Adapter that exposes {@link Writer} interface to allow supercsv output to be collected to a {@link StringBuffer}.
-     * <p/>
+     * <p>
      * This is an alternative to using {@link StringWriter} that avoids unnecessary synchronization.
-     * <p/>
+     * <p>
      * Due to the lack of synchronization, objects are not thread-safe.
      */
     private static final class StringBuilderWriter extends Writer {

@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2011-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.schema.validator;
@@ -24,7 +25,7 @@ import org.forgerock.json.schema.validator.exceptions.ValidationException;
  * <p>
  * If a Validator application needs to implementation of customized error
  * handling, it must implement this class.
- * <p/>
+ * <p>
  * Use this handler when call the
  * {@link org.forgerock.json.schema.validator.validators.SimpleValidator#validate(Object,
  * org.forgerock.json.JsonPointer, ErrorHandler)}}
@@ -36,7 +37,7 @@ public abstract class ErrorHandler {
 
     /**
      * Process the <code>exception</code> of the Validator.
-     * <p/>
+     * <p>
      * None of the implementations of {Validator#validate} method throws exception. They call
      * this method to decide what to do if an exception occurs.
      *
@@ -50,17 +51,17 @@ public abstract class ErrorHandler {
 
     /**
      * Receive notification of an error.
-     * <p/>
+     * <p>
      * <p>For example, a validator would use this callback to
      * report the violation of a validity constraint.
      * The default behaviour is to take no action.</p>
-     * <p/>
+     * <p>
      * <p>The validator must continue to provide normal validation
      * after invoking this method: it should still be possible
      * for the application to process the document through to the end.
      * If the application cannot do so, then the parser should report
      * a fatal error.</p>
-     * <p/>
+     * <p>
      * <p>Filters may use this method to report other, non-JSON errors
      * as well.</p>
      *
@@ -74,7 +75,7 @@ public abstract class ErrorHandler {
 
     /**
      * Get the final result of the validation.
-     * <p/>
+     * <p>
      * The default value is <code>false</code>. If the validator has called the {#handleError} method
      * then it return <code>true</code>.
      *
@@ -99,7 +100,7 @@ public abstract class ErrorHandler {
 
     /**
      * Throws an assembled exception after the validator finished the processing.
-     * <p/>
+     * <p>
      * Implementation of this method MUST throw an Exception if the {#error()} method
      * was called on this instance before.
      *

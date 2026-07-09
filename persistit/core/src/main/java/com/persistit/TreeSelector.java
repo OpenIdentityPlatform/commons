@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -33,15 +34,15 @@ import java.util.regex.Pattern;
  * (Alternatively, if the <code>regex</code> flag is set, these are true regular
  * expressions.) Example:
  * 
- * <code><pre>
+ * <pre>
  * v1:*index*{"a"-"f"},*data/*
- * </pre></code>
+ * </pre>
  * 
  * selects all trees in volume named "v1" having names containing the substring
  * "index", and all tress in all values having names that end with "data". For
  * trees selected in volume v1, there is a keyfilter that specifies keys
  * starting with letters 'a' through 'f'.
- * <p />
+ * <p>
  * The {@link #parseSelector(String, boolean, char)} method takes a quote
  * character, normally '\\', that may be used to quote the meta characters in
  * patterns, commas and colons.

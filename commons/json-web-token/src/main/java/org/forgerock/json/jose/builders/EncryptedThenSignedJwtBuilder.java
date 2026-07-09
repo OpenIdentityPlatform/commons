@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.builders;
@@ -62,7 +63,7 @@ public class EncryptedThenSignedJwtBuilder extends AbstractJwtBuilder implements
     }
 
     /**
-     * Builds the JWS into a <code>String</code> by calling the <tt>build</tt> method on the JWS object.
+     * Builds the JWS into a <code>String</code> by calling the <code>build</code> method on the JWS object.
      * <p>
      * @see EncryptedThenSignedJwt#build()
      *

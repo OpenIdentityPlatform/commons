@@ -1,6 +1,8 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +21,6 @@ package com.persistit;
 import com.persistit.Transaction.CommitPolicy;
 import com.persistit.exception.PersistitIOException;
 import com.persistit.exception.PersistitInterruptedException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.InterruptedIOException;
@@ -54,16 +55,15 @@ public class Bug882219Test extends PersistitUnitTestCase {
     // sudo sh -c "echo 3 > /proc/sys/vm/drop_caches"
     //
     /*
-     * Note: under Java 7 this test sometimes fails due to a bug in the JDK. The
-     * result is a deadlock that sometimes prevents this test from finishing.
-     * For this reason the test is currently Ignored, but we enable it for
-     * special occasions.
-     * 
+     * Note: under Java 7 this test sometimes failed due to a bug in the JDK. The
+     * result was a deadlock that sometimes prevented this test from finishing.
+     * For that reason the test was historically Ignored; it passes on modern
+     * JDKs and is now enabled.
+     *
      * Reported under http://bugs.sun.com/ bug #9002674
      */
 
     @Test
-    @Ignore
     public void testInterrupts() throws Exception {
         final Exchange ex = _persistit.getExchange("persistit", "bug882219", true);
         final Thread foregroundThread = Thread.currentThread();

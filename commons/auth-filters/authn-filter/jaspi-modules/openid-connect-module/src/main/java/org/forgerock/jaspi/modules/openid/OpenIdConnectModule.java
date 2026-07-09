@@ -12,6 +12,7 @@
 * information: "Portions copyright [year] [name of copyright owner]".
 *
 * Copyright 2014-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
 */
 
 package org.forgerock.jaspi.modules.openid;
@@ -246,7 +247,6 @@ public class OpenIdConnectModule implements AsyncServerAuthModule {
      * @param messageInfo {@inheritDoc}
      * @param subject {@inheritDoc}
      * @return {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
     public Promise<AuthStatus, AuthenticationException> secureResponse(MessageInfoContext messageInfo,
@@ -259,7 +259,6 @@ public class OpenIdConnectModule implements AsyncServerAuthModule {
      *
      * @param messageInfo {@inheritDoc}
      * @param subject {@inheritDoc}
-     * @throws AuthException {@inheritDoc}
      */
     @Override
     public Promise<Void, AuthenticationException> cleanSubject(MessageInfoContext messageInfo, Subject subject) {

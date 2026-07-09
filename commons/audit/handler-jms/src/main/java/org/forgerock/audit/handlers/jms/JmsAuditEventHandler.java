@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2024-2026 3A Systems LLC.
  */
 
 package org.forgerock.audit.handlers.jms;
@@ -200,7 +200,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * Returns NotSupportedException as query is not implemented for JMS.
-     * <br/>
+     * <br>
      * {@inheritDoc}
      * @return NotSupportedException as query is not implemented for JMS.
      */
@@ -215,7 +215,7 @@ public class JmsAuditEventHandler extends AuditEventHandlerBase {
 
     /**
      * Returns NotSupportedException as read is not implemented for JMS.
-     * <br/>
+     * <br>
      * {@inheritDoc}
      * @return NotSupportedException as read is not implemented for JMS.
      */
