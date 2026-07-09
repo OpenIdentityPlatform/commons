@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class WarmupTest extends PersistitUnitTestCase {
@@ -51,18 +52,34 @@ public class WarmupTest extends PersistitUnitTestCase {
      * It does not guarantee that a page returns to the same buffer slot:
      * preloadBufferInventory() sorts the recorded pages by read order and
      * reallocates buffers via the clock algorithm, so the slot index is not
-     * preserved. Compare the set of resident pages, not per-slot correspondence
-     * (the latter only happened to match and made the test flaky).
+     * preserved. The old per-slot assertion depended on the exact interleaving
+     * of the preload order and background eviction/cleanup between shutdown and
+     * the snapshot, which is why it passed on most JVMs but failed on the JDK 17
+     * runner (expected:<0> but was:<2> -- an empty slot where the page was still
+     * resident, just relocated). Compare the set of resident pages instead.
      */
     final Set<String> before = residentPages(pool);
-    assertTrue("Test setup should leave pages resident in the pool", !before.isEmpty());
+    assertFalse("Test setup should leave pages resident in the pool", before.isEmpty());
+    /*
+     * The set comparison below is only valid while the pool stays under-filled:
+     * with no eviction the live snapshot equals what recordBufferInventory
+     * persists at shutdown, and an unlocked buffer copy is stable. Fail loudly
+     * if a future dataset change fills the pool and invalidates that.
+     */
+    assertTrue("Pool must stay under-filled for this comparison to be meaningful",
+        before.size() < pool.getBufferCount());
 
-    ex = null;
     _persistit.close();
 
     _persistit = new Persistit(_config);
-    pool = _persistit.getVolume("persistit").getStructure().getPool();
+    pool = _persistit.getVolume(VOLUME_NAME).getStructure().getPool();
 
+    /*
+     * One-way invariant (before is a subset of after): warmup must reload every
+     * page that was resident at shutdown. Slot position is intentionally not
+     * asserted (it is not preserved), and after may legitimately hold extra
+     * pages, so this deliberately drops the old bidirectional per-slot check.
+     */
     final Set<String> after = residentPages(pool);
     final Set<String> missing = new HashSet<String>(before);
     missing.removeAll(after);
@@ -71,10 +88,13 @@ public class WarmupTest extends PersistitUnitTestCase {
   }
 
   /**
-   * Collects an identity ({@code volume:page:type:size}) for every valid,
-   * recordable buffer currently resident in the pool. Mirrors the filtering in
-   * {@link BufferPool#recordBufferInventory}, which skips temporary and lock
-   * volumes, so the returned set is exactly what warmup is expected to reload.
+   * Identity ({@code volume:page:type}) of every valid, recordable buffer
+   * resident in the pool, applying the same volume filter as
+   * {@link BufferPool#recordBufferInventory} (temporary and lock volumes are
+   * skipped) so the set is exactly what warmup is expected to reload. The pool
+   * is under-filled and quiescent at both call sites, so an unlocked
+   * {@link BufferPool#getBufferCopy(int)} is stable here and the torn-read spin
+   * guard that recordBufferInventory needs is unnecessary.
    */
   private static Set<String> residentPages(final BufferPool pool) {
     final Set<String> pages = new HashSet<String>();
@@ -82,8 +102,7 @@ public class WarmupTest extends PersistitUnitTestCase {
       final Buffer b = pool.getBufferCopy(i);
       final Volume volume = b.getVolume();
       if (b.isValid() && volume != null && !volume.isTemporary() && !volume.isLockVolume()) {
-        pages.add(volume.getName() + ':' + b.getPageAddress() + ':' + b.getPageType() + ':'
-            + b.getBufferSize());
+        pages.add(volume.getName() + ':' + b.getPageAddress() + ':' + b.getPageType());
       }
     }
     return pages;
