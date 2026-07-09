@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -41,9 +42,8 @@ import com.persistit.util.Util;
  * </ul>
  * These methods permit efficient traversal of a filtered subset of keys within
  * a <code>Tree</code>.
- * </p>
+ * <h2>KeyFilter Terms</h2>
  * <p>
- * <h3>KeyFilter Terms</h3>
  * A <code>KeyFilter</code> consists of an array of one or more <i>terms</i>.
  * Each term corresponds to one segment in a key value that will be selected or
  * excluded by this <code>KeyFilter</code>. The <i>K</i>th term in the list
@@ -67,7 +67,7 @@ import com.persistit.util.Util;
  * RangeTerm. To match an OrTerm, the value of the key segment in the
  * corresponding position must match one of the alternative terms associated
  * with the OrTerm.</dd>
- * </p>
+ * </dl>
  * <p>
  * The static methods {@link #simpleTerm(Object)},
  * {@link #rangeTerm(Object, Object)},
@@ -75,81 +75,79 @@ import com.persistit.util.Util;
  * {@link #rangeTerm(Object, Object, boolean, boolean)},
  * {@link #rangeTerm(Object, Object, boolean, boolean, CoderContext)}, and
  * {@link #orTerm} produce these various kinds of <code>Term</code>s
+ * </p>
  * <p>
  * For example, consider a key consisting of three segments: a last name, a
  * first name and a person ID number for a person. Such a key value might be
  * constructed with code such as this:
  * 
- * <code><pre>
+ * <pre>
  *     key.clear().append("McDonald").append("Bob").append(12345);
- * </pre></code>
+ * </pre>
  * 
  * Suppose we now want to enumerate all members of a tree having keys of this
  * form with last names falling between "M" and "Q", and first names equal to
  * either "Alice" or "Bob". The following code constructs a
  * <code>KeyFilter</code> for this purpose:
  * 
- * <code><pre>
+ * <pre>
  *     KeyFilter keyFilter = new KeyFilter();
  *     keyFilter = keyFilter.append(KeyFilter.rangeTerm("M", "Q"));
  *     keyFilter = keyFilter.append(KeyFilter.orTerm(new KeyFilter.Term[]{
  *         KeyFilter.simpleTerm("Alice"), KeyFilter.simpleTerm("Bob"))});
- * </pre></code>
+ * </pre>
  * 
  * The first term specifies a range that includes any last name that sorts
  * alphabetically between "M" and "Q" (inclusively). The second term is an
  * OrTerm that selects the first names "Alice" or "Bob".
- * </p>
  * <p>
  * A RangeTerm optionally specifies whether the end-points are inclusive. For
  * example, the term
  * 
- * <code><pre>
+ * <pre>
  *     KeyFilter.rangeTerm("Jones", "Smith", true, false)
- * </pre></code>
+ * </pre>
  * 
  * includes the name "Jones" and all names that follow up to, but not including,
  * "Smith". If unspecified, the end-points of the range are included.
- * </p>
+ * <h2>Minimum and Maximum Depth</h2>
  * <p>
- * <h3>Minimum and Maximum Depth</h3>
  * A <code>KeyFilter</code> may also specify <i>minimum depth</i>, <i>maximum
  * depth</i>, or both. These values control the number of segments that must be
  * present in key value in order for it to be selected. A <code>KeyFilter</code>
  * will select a key only if the number of segments in the key lies between the
  * minimum depth and the maximum depth, inclusive.
  * </p>
+ *
+ * <h2>String Representation</h2>
  * <p>
- * <a name="_stringRepresentation" />
- * <h3>String Representation</h3>
  * The {@link #toString()} method returns a canonical String representation of
  * the current terms for this <code>KeyFilter</code>. For example, the string
  * representation of the filter constructed in above is
  * 
- * <code><pre>
+ * <pre>
  *     {"M":"Q",{"Alice","Bob"}}
- * </pre></code>
+ * </pre>
  * 
  * You can construct a <code>KeyFilter</code> from its string representation
  * with the {@link KeyParser#parseKeyFilter} method. For example, the following
  * code generates an equivalent <code>KeyFilter</code>:
  * 
- * <code><pre>
+ * <pre>
  *     KeyParser parser = new KeyParser("{\"M\":\"Q\",{\"Alice\",\"Bob\"}};
  *     KeyFilter filter = parser.parseKeyFilter();
- * </pre></code>
+ * </pre>
  * 
  * As a convenience, the constructor {@link #KeyFilter(String)} automatically
  * creates and invokes a <code>KeyParser</code> to create a
  * <code>KeyFilter</code> from its string representation.
- * </p>
  * <p>
  * Following is an informal grammar for the string representation of a key
  * filter. See <a href="Key.html#_stringRepresentation">string
  * representation</a> in {@link Key} for information on how to specify a key
  * segment value.
  * 
- * <code><pre>
+ * <pre>
  *    keyFilter ::= '{' termElement [',' termElement]... '}'
  *    termElement ::= [ '&gt;' ] term [ '&lt;' ]
  *    term ::= segment | range | qualifiedRange | orTerm
@@ -157,7 +155,7 @@ import com.persistit.util.Util;
  *    range ::= segment ':' segment | ':' segment | segment ':'
  *    qualifiedRange = ('(' | '[') range (')' | ']')
  *    orTerm ::= '{' term [',' term ]...'}'
- * </pre></code>
+ * </pre>
  * 
  * A <i>range</i> may omit either the starting segment value or the ending
  * segment value. When the starting segment value is omitted, the range starts
@@ -165,42 +163,40 @@ import com.persistit.util.Util;
  * omitted, the range ends after the last possible key value. Thus the range
  * specification
  * 
- * <code><pre>
+ * <pre>
  *   {"Smith":}
- * </pre></code>
+ * </pre>
  * 
  * include every key with a first segment value of "Smith" or above. Similarly,
  * 
- * <code><pre>
+ * <pre>
  *   {:"Smith"}
- * </pre></code>
+ * </pre>
  * 
  * includes all keys up to and including "Smith".
- * </p>
  * <p>
  * A <i>qualifiedRange</i> allows you to specify whether the end-points of a
  * range are included or excluded from the selected subset. A square bracket
  * indicates that the end-point is included, while a parenthesis indicates that
  * it is excluded. For example
  * 
- * <code><pre>
+ * <pre>
  *   {("Jones":"Smith"]}
- * </pre></code>
+ * </pre>
  * 
  * does not include "Jones" but does include "Smith". An unqualified
  * <i>range</i> specification such as
  * 
- * <code><pre>
+ * <pre>
  *   {"Jones":"Smith"}
- * </pre></code>
+ * </pre>
  * 
  * includes both end-points. It is equivelent to
  * 
- * <code><pre>
+ * <pre>
  *   {["Jones":"Smith"]}
- * </pre></code>
+ * </pre>
  * 
- * </p>
  * <p>
  * Within the string representation of a <code>KeyFilter</code> at most one term
  * element may specify the prefix "&gt;" (greater-than sign), and at most one
@@ -211,13 +207,12 @@ import com.persistit.util.Util;
  * including the term marked with a "&gt;". For example, in the
  * <code>KeyFilter</code> represented by the string
  * 
- * <code><pre>
- *   {*,>100:200,*<}
- * </pre></code>
+ * <pre>
+ *   {*,&gt;100:200,*&lt;}
+ * </pre>
  * 
  * the minimum depth is 2 and the maximum depth is 3.
- * </p>
- * <h3>Building KeyFilters by Appending Terms</h3>
+ * <h2>Building KeyFilters by Appending Terms</h2>
  * <p>
  * A <code>KeyFilter</code> is immutable. The methods {@link #append(KeyFilter)}, {@link #append(KeyFilter.Term)}, {@link #append(KeyFilter.Term[])}, create
  * new <code>KeyFilter</code>s with additional terms supplied by the supplied
@@ -227,8 +222,7 @@ import com.persistit.util.Util;
  * <code>KeyFilter</code> which results from combining the original
  * <code>KeyFilter</code> with the supplied information.
  * </p>
- * <h3>
- * Formal Specification of the {@link #next(Key, Key.Direction)} Method</h3>
+ * <h2>Formal Specification of the {@link #next(Key, Key.Direction)} Method</h2>
  * <p>
  * A KeyFilter defines a subset of the the set of all Key values: the
  * {@link Exchange#traverse(Key.Direction, KeyFilter, int)} method returns only
@@ -263,14 +257,12 @@ import com.persistit.util.Util;
  * <code>traverse</code> excludes the supplied key. LTEQ and GTEQ are
  * <i>inclusive</i>.
  * </dl>
- * </p>
  * <p>
  * A KeyFilter defines the range R as zero or more contiguous subsets of S. The
  * <code>next</code> method is used to assist the <code>traverse</code> method
  * by skipping efficiently over keys that are not in contained in R. Given a
  * {@link Key} K and a {@link Key.Direction} D, the method behaves as follows:
  * </p>
- * <p>
  * <ol>
  * <li>
  * If K is in R (i.e., is <i>selected</i>) and either D is inclusive, or there
@@ -296,7 +288,6 @@ import com.persistit.util.Util;
  * Otherwise, if there is no key K' that satisfies the requirements of #2,
  * return <code>false</code> to indicate that the range has been exhausted.</li>
  * </ol>
- * </p>
  * 
  * @version 1.0
  */
@@ -1276,11 +1267,11 @@ public class KeyFilter {
      * SimpleTerm containing the segment.
      * 
      * @param fromKey
-     *            A <code>Key</tt? from which the low value in the range is
+     *            A <code>Key</code> from which the low value in the range is
      *            extracted
      * 
      * @param toKey
-     *            A <code>Key</tt? from which the high value in the range is
+     *            A <code>Key</code> from which the high value in the range is
      *            extracted
      * 
      * @param leftInclusive
@@ -1476,7 +1467,6 @@ public class KeyFilter {
      * </dl>
      * 
      * A KeyFilter defines a subset of S
-     * </p>
      * <p>
      * This method modifies the supplied key as needed so that only key values
      * in the range are traversed. For example suppose the KeyFilter admits key
@@ -1494,7 +1484,7 @@ public class KeyFilter {
      * <p>
      * </p>
      * Similarly, if key is {12} and then the directions LTEQ and LT result in
-     * key values {10} and {10}+, respectively. </p>
+     * key values {10} and {10}+, respectively.
      * <p>
      * The return value indicates whether there exist any remaining values in
      * the range. For example, if the value of key is {10} and the direction is

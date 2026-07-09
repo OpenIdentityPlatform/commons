@@ -13,6 +13,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -100,13 +101,12 @@ import static com.persistit.util.Util.NS_PER_S;
  * <li>calls one of the {@link #close()} methods to gracefully release all
  * memory resources and shut down the background threads.</li>
  * </ul>
- * </p>
  * Generally an application will have no more than one Persistit instance,
  * treating it as a singleton. However, the application is responsible for
  * holding a reference to that instance and calling {@link #close()} when
  * finished with it. Persistit's background threads are not daemon threads, and
  * an application that does not call <code>close</code> therefore will not exit
- * normally. </p>
+ * normally.
  * <p>
  * Persistit takes a large variety of configuration properties. These are
  * specified through the <code>initalize</code> method.
@@ -309,13 +309,13 @@ public class Persistit {
 
   /**
    * Construct a Persistit instance with the supplied
-   * <code>Configuration</code> and then initialize it. The code <code><pre>
+   * <code>Configuration</code> and then initialize it. The code <pre>
    * Persistit db = new Persistit(configuration);
-   * </pre></code> is equivalent to <code><pre>
+   * </pre> is equivalent to <pre>
    * Persistit db = new Persistit();
    * db.setConfiguration(configuration);
    * db.intialize();
-   * </pre></code>
+   * </pre>
    * 
    * @see #setConfiguration(Configuration)
    * @param configuration
@@ -328,13 +328,13 @@ public class Persistit {
 
   /**
    * Construct a Persistit instance with a <code>Configuration</code> derived
-   * from the supplied <code>Properties</code> instance. The code <code><pre>
+   * from the supplied <code>Properties</code> instance. The code <pre>
    * Persistit db = new Persistit(properties);
-   * </pre></code> is equivalent to <code><pre>
+   * </pre> is equivalent to <pre>
    * Persistit db = new Persistit();
    * db.setProperties(properties);
    * db.intialize();
-   * </pre></code>
+   * </pre>
    * 
    * @see #setProperties(Properties)
    * @param properties
@@ -420,8 +420,6 @@ public class Persistit {
    * </p>
    * 
    * @throws PersistitException
-   * @throws IOException
-   * @throws Exception
    */
   public synchronized void initialize() throws PersistitException {
     if (isInitialized()) {
@@ -484,13 +482,10 @@ public class Persistit {
    * initialize();
    * </code>
    * </pre>
-   * 
-   * </p>
-   * 
+   *
    * @param propertiesFileName
    *            The path to the properties file.
    * @throws PersistitException
-   * @throws IOException
    */
   @Deprecated
   public void initialize(final String propertiesFileName) throws PersistitException {
@@ -524,14 +519,11 @@ public class Persistit {
    * initialize();
    * </code>
    * </pre>
-   * 
-   * </p>
-   * 
+   *
    * @param properties
    *            The <code>Properties</code> instance from which to build the
    *            configuration
    * @throws PersistitException
-   * @throws IOException
    */
   @Deprecated
   public void initialize(final Properties properties) throws PersistitException {
@@ -563,14 +555,11 @@ public class Persistit {
    * initialize();
    * </code>
    * </pre>
-   * 
-   * </p>
-   * 
+   *
    * @param configuration
    *            The <code>Configuration</code> from which to initialize
    *            Persistit
    * @throws PersistitException
-   * @throws IOException
    */
   @Deprecated
   public void initialize(final Configuration configuration) throws PersistitException {
@@ -882,7 +871,7 @@ public class Persistit {
    * {@link com.persistit.exception.TreeNotFoundException}.
    * </p>
    * <p>
-   * The <code>volumeName</tt< you supply must match exactly one open 
+   * The <code>volumeName</code> you supply must match exactly one open
    * <code>Volume</code>. The name matches if either (a) the
    * <code>Volume</code> has an optional alias that is equal to the supplied
    * name, or (b) if the supplied name matches a substring of the
@@ -1082,11 +1071,11 @@ public class Persistit {
    * Create a temporary volume. A temporary volume is not durable; it should
    * be used to hold temporary data such as intermediate sort or aggregation
    * results that can be recreated in the event the system restarts.
-   * <p />
+   * <p>
    * The temporary volume page size is can be specified by the configuration
    * property <code>tmpvolpagesize</code>. The default value is determined by
    * the {@link BufferPool} having the largest page size.
-   * <p />
+   * <p>
    * The backing store file for a temporary volume is created in the directory
    * specified by the configuration property <code>tmpvoldir</code>, or if
    * unspecified, the system temporary directory..
@@ -1102,7 +1091,7 @@ public class Persistit {
    * Create a temporary volume. A temporary volume is not durable; it should
    * be used to hold temporary data such as intermediate sort or aggregation
    * results that can be recreated in the event the system restarts.
-   * <p />
+   * <p>
    * The backing store file for a temporary volume is created in the directory
    * specified by the configuration property <code>tmpvoldir</code>, or if
    * unspecified, the system temporary directory.
@@ -1241,8 +1230,7 @@ public class Persistit {
    * <li>(b) its path, by matching the absolute forms of the volume's path and
    * the supplied path.</li>
    * </ul>
-   * </p>
-   * 
+   *
    * @param name
    *            Name that identifies a volume by matching either its alias (if
    *            it has one) or a substring of its file name.
@@ -1407,7 +1395,6 @@ public class Persistit {
 
   /**
    * @return The most recently proposed Checkpoint.
-   * @throws PersistitInterruptedException
    */
   public Checkpoint getCurrentCheckpoint() {
     return _checkpointManager.getCurrentCheckpoint();
@@ -1570,11 +1557,8 @@ public class Persistit {
    * <p>
    * Close the Persistit Journal and all {@link Volume}s. This method is
    * equivalent to {@link #close(boolean) close(true)}.
-   * 
+   *
    * @throws PersistitException
-   * @throws IOException
-   * @throws PersistitException
-   * @throws IOException
    */
   public void close() throws PersistitException {
     close(true);
@@ -1608,7 +1592,8 @@ public class Persistit {
    * exiting until you close Persistit. This is to ensure that all pending
    * updates are written before the JVM exits. Therefore the recommended
    * pattern for initializing, using and then closing Persistit is:
-   * <code><pre>
+   * </p>
+   * <pre>
    *   try
    *   {
    *      Persistit.initialize();
@@ -1618,7 +1603,9 @@ public class Persistit {
    *   {
    *      Persisit.close();
    *   }
-   * </pre></code> This pattern ensures that Persistit is closed properly and
+   * </pre>
+   * <p>
+   * This pattern ensures that Persistit is closed properly and
    * all threads terminated even if the application code throws an exception
    * or error.
    * </p>
@@ -1628,11 +1615,8 @@ public class Persistit {
    *            <code>true</code> to ensure all dirty pages are written to
    *            disk before shutdown completes; <code>false</code> to enable
    *            fast (but incomplete) shutdown.
-   * 
+   *
    * @throws PersistitException
-   * @throws IOException
-   * @throws PersistitException
-   * @throws IOException
    */
   public void close(final boolean flush) throws PersistitException {
     if (_initialized.get() && !_closed.get()) {
@@ -1874,7 +1858,6 @@ public class Persistit {
    * 
    * @return <i>true</i> if any file writes were performed, else <i>false</i>.
    * @throws PersistitException
-   * @throws IOException
    */
   public boolean flush() throws PersistitException {
     if (_closed.get() || !_initialized.get()) {
@@ -1939,8 +1922,6 @@ public class Persistit {
    * Persistit. An application may call this method after {@link #flush} to
    * ensure (within the capabilities of the host operating system) that all
    * database updates have actually been written to disk.
-   * 
-   * @throws IOException
    */
   public void force() throws PersistitException {
     if (_closed.get() || !_initialized.get()) {
@@ -2259,8 +2240,6 @@ public class Persistit {
    * Replaces the current logger implementation.
    * 
    * @see com.persistit.logging.DefaultPersistitLogger
-   * @see com.persistit.logging.JDK14LoggingAdapter
-   * @see com.persistit.logging.Log4JAdapter
    * @param logger
    *            The new logger implementation
    */

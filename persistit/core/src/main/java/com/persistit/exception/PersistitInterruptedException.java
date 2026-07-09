@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.exception;
@@ -22,7 +23,7 @@ package com.persistit.exception;
  * Exception. This allows the caller of a Persistit method to catch
  * {@link PersistitException}s without also needing to catch
  * InterruptedExceptions.
- * <p />
+ * <p>
  * Before throwing a PersistitInterruptedException Persistit reasserts the
  * <code>interrupted</code> status of the current Thread so that a subsequent
  * call to sleep or wait will once again be interrupted.

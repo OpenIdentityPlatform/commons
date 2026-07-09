@@ -12,6 +12,7 @@
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
  *      Copyright 2011 ForgeRock AS
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 package org.forgerock.i18n.maven;
 
@@ -20,7 +21,6 @@ import java.io.File;
 /**
  * Goal which generates message source files from a one or more property files.
  *
- * @Checkstyle:ignoreFor 2
  * @goal generate-messages
  * @phase generate-sources
  * @threadSafe

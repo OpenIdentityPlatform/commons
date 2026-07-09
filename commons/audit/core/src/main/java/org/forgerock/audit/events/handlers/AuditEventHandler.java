@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2015-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.audit.events.handlers;
@@ -31,7 +32,7 @@ import org.forgerock.util.promise.Promise;
 
 /**
  * The interface for an AuditEventHandler.
- * <p/>
+ * <p>
  * Implementations may make use of {@link org.forgerock.audit.DependencyProvider} to obtain dependencies from
  * the product within which the audit service is deployed. Where DependencyProvider is used, the dependencies
  * that it is expected to provide should be clearly documented.
@@ -40,7 +41,7 @@ public interface AuditEventHandler {
 
     /**
      * Instruct this object that it is safe to initialize file handles and network connections.
-     * <p/>
+     * <p>
      * Reconfiguration of the {@link org.forgerock.audit.AuditService} and its handlers is achieved by replacing
      * rather than modifying the existing objects. Therefore, it's essential that the replacements do not perform
      * any I/O that would interfere with the operation of the objects they are replacing until the old objects are

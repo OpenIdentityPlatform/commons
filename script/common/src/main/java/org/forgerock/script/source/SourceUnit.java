@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.source;
@@ -57,7 +58,7 @@ public interface SourceUnit {
      * Get the parent container if there is one.
      *
      * @return the parent container where this instance belongs to, or
-     *         <tt>null</tt> if there is no parent.
+     *         <code>null</code> if there is no parent.
      */
     SourceContainer getParentContainer();
 }

@@ -20,6 +20,7 @@
  * with the fields enclosed by brackets [] replaced by
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.commons.launcher;
@@ -103,7 +104,7 @@ public interface OSGiFramework {
     /**
      * Get the system bundle
      * 
-     * @return the System Bundle or <tt>null</tt> if the service is not running
+     * @return the System Bundle or <code>null</code> if the service is not running
      *         or the {@link #stop()} has been called before.
      */
     Bundle getSystemBundle();
