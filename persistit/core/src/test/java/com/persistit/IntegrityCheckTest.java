@@ -1,6 +1,8 @@
 /**
  * Copyright 2011-2012 Akiban Technologies, Inc.
  * 
+ * Portions Copyrighted 2026 3A Systems, LLC.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +20,6 @@ package com.persistit;
 
 import com.persistit.exception.PersistitException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.PrintWriter;
@@ -99,7 +100,6 @@ public class IntegrityCheckTest extends PersistitUnitTestCase {
     }
 
     @Test
-    @Ignore
     public void testIndexFixHoles() throws Exception {
         final Exchange ex = _persistit.getExchange(_volumeName, "mvv", true);
         final CleanupManager cm = _persistit.getCleanupManager();
