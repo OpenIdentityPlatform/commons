@@ -18,6 +18,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
  * Copyright 2012-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.script.javascript;
@@ -62,7 +63,6 @@ import org.slf4j.LoggerFactory;
  * <p>
  * This implementation pre-compiles the provided script. Any syntax errors in
  * the source code will throw an exception during construction of the object.
- * <p>
  *
  * @author Paul C. Bryan
  * @author aegloff

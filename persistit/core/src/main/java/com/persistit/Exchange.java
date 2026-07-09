@@ -103,7 +103,6 @@ import static com.persistit.util.ThreadSequencer.sequence;
  * modify the database and return the former value associated with the current
  * <code>Key</code>.
  * </p>
- * <p>
  * <h2>Exchange is Not Threadsafe</h2>
  * <em>Important:</em> an <code>Exchange</code> and its associated
  * <code>Key</code> and <code>Value</code> instances are <i>not</i> thread-safe.
@@ -116,7 +115,6 @@ import static com.persistit.util.ThreadSequencer.sequence;
  * Persistit is designed to allow multiple threads, using <em>multiple</em>
  * <code>Exchange</code> instances, to access and update the underlying database
  * in a highly concurrent fashion.
- * <p>
  * <h2>Exchange Pools</h2>
  * Normally each thread should allocate its own <code>Exchange</code> instances.
  * However, depending on the garbage collection performance characteristics of a
@@ -2778,8 +2776,6 @@ public class Exchange implements ReadOnlyExchange {
    * Isolation. See, for example, http://wikipedia.org/wiki/Snapshot_isolation
    * for a concise explanation of Snapshot Isolation and the write skew
    * anomaly.
-   * <p>
-   * </p>
    * To use this facility an application specifies a key which may or may not
    * be associated with an actual storage location, but which is designed to
    * conflict with any other transaction that could participate in a write

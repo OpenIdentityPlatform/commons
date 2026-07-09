@@ -54,6 +54,15 @@ public class ResolveExternalDependencyMojo extends
     AbstractExternalDependencyMojo
 {
     /**
+     * Creates a new instance.
+     */
+    public ResolveExternalDependencyMojo()
+    {
+    }
+
+    /**
+     * The local repository used to resolve artifacts.
+     *
      * @parameter expression="${localRepository}"
      * @required
      * @readonly
@@ -78,6 +87,8 @@ public class ResolveExternalDependencyMojo extends
     protected java.util.List remoteRepositories;
 
     /**
+     * The archiver manager used to unpack resolved artifacts.
+     *
      * @component
      * @readonly
      */
@@ -492,8 +503,10 @@ public class ResolveExternalDependencyMojo extends
      * resolve the artifact in local or remote repository
      *
      * @param artifact
-     * @return
+     *            the artifact to resolve
+     * @return <code>true</code> if the artifact was resolved
      * @throws MojoFailureException
+     *             if the artifact cannot be resolved
      */
     protected boolean resolveArtifactItem(Artifact artifact)
         throws MojoFailureException

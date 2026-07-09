@@ -163,7 +163,6 @@ public class VolumeSpecification {
      * extend.</dd>
      * 
      * </dl>
-     * <p>
      * 
      * @param specification
      *            the specification String

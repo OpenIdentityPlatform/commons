@@ -1451,7 +1451,6 @@ public class KeyFilter {
      * only values in this subset. The following definitions are used in
      * describing the behavior of this method.
      * </p>
-     * <p>
      * <dl>
      * <dt>Range</dt>
      * <dd>Let S be the ordered set of all possible key values. (Though large,
@@ -1481,8 +1480,6 @@ public class KeyFilter {
      * this method returns <code>true</code> and does not modify the key. The
      * exception is that if the current key is selected, the direction is LT or
      * GT, and there is no adjacent key in the range, this method w
-     * <p>
-     * </p>
      * Similarly, if key is {12} and then the directions LTEQ and LT result in
      * key values {10} and {10}+, respectively.
      * <p>

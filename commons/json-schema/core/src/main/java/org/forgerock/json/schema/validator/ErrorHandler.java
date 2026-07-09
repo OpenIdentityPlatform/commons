@@ -51,17 +51,14 @@ public abstract class ErrorHandler {
 
     /**
      * Receive notification of an error.
-     * <p>
      * <p>For example, a validator would use this callback to
      * report the violation of a validity constraint.
      * The default behaviour is to take no action.</p>
-     * <p>
      * <p>The validator must continue to provide normal validation
      * after invoking this method: it should still be possible
      * for the application to process the document through to the end.
      * If the application cannot do so, then the parser should report
      * a fatal error.</p>
-     * <p>
      * <p>Filters may use this method to report other, non-JSON errors
      * as well.</p>
      *

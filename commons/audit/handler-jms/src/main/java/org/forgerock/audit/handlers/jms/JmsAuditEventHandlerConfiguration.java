@@ -33,7 +33,6 @@ import org.forgerock.util.Reject;
  * Configuration object for the {@link JmsAuditEventHandler}.
  * <p>
  * This configuration object can be created from JSON. Example of valid JSON configuration:
- * <p>
  * <pre>
  * {
  *     "name" : "jms",
