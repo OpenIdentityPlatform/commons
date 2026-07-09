@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.http.oauth2;
@@ -21,8 +22,8 @@ import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.util.Sets.newLinkedHashSet;
 import static org.forgerock.http.oauth2.ResourceServerFilter.WWW_AUTHENTICATE_HEADER;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
