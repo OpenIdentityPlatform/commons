@@ -12,7 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2014-2016 ForgeRock AS.
- * Portions copyright 2024 3A Systems LLC.
+ * Portions copyright 2020-2026 3A Systems, LLC
  */
 
 package org.forgerock.caf.http;
@@ -20,7 +20,7 @@ package org.forgerock.caf.http;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
+import org.mockito.ArgumentMatchers;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
@@ -70,7 +70,7 @@ public class CookieTest {
         addCookie(cookie, response);
 
         //Then
-        verify(response, never()).addCookie(Matchers.anyObject());
+        verify(response, never()).addCookie(ArgumentMatchers.anyObject());
         ArgumentCaptor<String> cookieCaptor = ArgumentCaptor.forClass(String.class);
         verify(response).addHeader(eq("Set-Cookie"), cookieCaptor.capture());
         assertThat(cookieCaptor.getValue()).contains("COOKIE_NAME=COOKIE_VALUE;",
