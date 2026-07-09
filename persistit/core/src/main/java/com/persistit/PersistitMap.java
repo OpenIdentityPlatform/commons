@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -40,6 +41,7 @@ import com.persistit.exception.PersistitException;
  * keys inserted into this map are appended to the key within the {@link Tree}
  * originally supplied by the <code>Exchange</code>. For example, the code
  * 
+ * </p>
  * <pre>
  * <code>
  * Exchange ex = new Exchange(&quot;demo&quot;, &quot;composers&quot;, true);
@@ -50,8 +52,10 @@ import com.persistit.exception.PersistitException;
  * </code>
  * </pre>
  * 
+ * <p>
  * is equivalent to
  * 
+ * </p>
  * <pre>
  * <code>
  * Exchange ex = new Exchange(&quot;demo&quot;, &quot;composers&quot;, true);
@@ -62,7 +66,6 @@ import com.persistit.exception.PersistitException;
  * </code>
  * </pre>
  * 
- * </p>
  * <p>
  * By default any <code>Iterator</code>s created by <code>PersistitMap</code>'s
  * collection views implement <i>fail-fast</i> behavior, meaning that methods of
@@ -128,6 +131,7 @@ import com.persistit.exception.PersistitException;
  * expected types. For example, the following will compile correctly but throw a
  * ClassCastException at runtime:
  * 
+ * </p>
  * <pre>
  * <code>
  * Exchange ex = new Exchange(&quot;demo&quot;, &quot;composers&quot;, true);
@@ -546,7 +550,7 @@ public class PersistitMap<K, V> extends AbstractMap<K, V> implements SortedMap<K
      * value. In order to return the previous value, <code>put</code> must
      * deserialize it, which can be costly. Applications that don't need that
      * value can benefit from calling <code>putFast</code> instead of
-     * <code>put</code>. </pp>
+     * <code>put</code>. </p>
      * 
      * @param key
      *            key with which the specified value is to be associated.

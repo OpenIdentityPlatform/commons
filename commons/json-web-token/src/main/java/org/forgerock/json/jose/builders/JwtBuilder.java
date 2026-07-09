@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.builders;
@@ -33,7 +34,7 @@ public interface JwtBuilder {
     Jwt asJwt();
 
     /**
-     * Builds the JWT into a <code>String</code> by calling the <tt>build</tt> method on the JWT object.
+     * Builds the JWT into a <code>String</code> by calling the <code>build</code> method on the JWT object.
      * <p>
      * @see org.forgerock.json.jose.jwt.Jwt#build()
      *

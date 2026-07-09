@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit.ref;
@@ -32,7 +33,6 @@ import java.lang.ref.WeakReference;
  * or <code>null</code> if there is none. The meaning of the identifier, and the
  * mechanism used to look up and deserialize the associated object (the
  * referent), are implementation-specific.
- * </p>
  * <p>
  * This implementation differs from {@link AbstractReference} in that the
  * referent object is referenced through a

@@ -12,6 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package com.persistit;
@@ -46,7 +47,7 @@ import java.util.List;
  * </pre>
  * 
  * If <code>keyDepth=2</code> the resulting histogram will have 5 buckets, each
- * with a <code>count<code> value of 1.  But if <code>keyDepth=1</code> the
+ * with a <code>count</code> value of 1.  But if <code>keyDepth=1</code> the
  * result will have two buckets, one each for "BLUE" and "RED". Specifying
  * <code>keyDepth=0</code> turns off aggregation by partial key depth.
  * <p>

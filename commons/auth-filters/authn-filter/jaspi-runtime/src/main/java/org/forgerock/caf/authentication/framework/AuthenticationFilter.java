@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2015 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.caf.authentication.framework;
@@ -139,7 +140,6 @@ public final class AuthenticationFilter implements Filter {
      *                         .withSettings(authModuleTwoSettings))
      *         .build();
      * </code></pre>
-     * </p>
      *
      * @since 2.0.0
      */
@@ -329,7 +329,6 @@ public final class AuthenticationFilter implements Filter {
      *         .callbackHandler(authModuleOneHandler)
      *         .withSettings(authModuleOneSettings);
      * </code></pre>
-     * </p>
      *
      * @since 2.0.0
      */

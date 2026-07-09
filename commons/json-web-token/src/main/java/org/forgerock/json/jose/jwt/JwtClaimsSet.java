@@ -12,6 +12,7 @@
  * information: "Portions copyright [year] [name of copyright owner]".
  *
  * Copyright 2013-2016 ForgeRock AS.
+ * Portions Copyrighted 2026 3A Systems, LLC
  */
 
 package org.forgerock.json.jose.jwt;
@@ -314,7 +315,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
     /**
      * Sets a claim with the specified name and value.
      * <p>
-     * If the key matches one of the reserved claim names, then the relevant <tt>set</tt> method is called to set that
+     * If the key matches one of the reserved claim names, then the relevant <code>set</code> method is called to set that
      * claim with the specified name and value.
      *
      * @param key The claim name.
@@ -423,7 +424,7 @@ public class JwtClaimsSet extends JWObject implements Payload {
     /**
      * Gets a claim value for the specified key.
      * <p>
-     * If the key matches one of the reserved claim names, then the relevant <tt>get</tt> method is called to get that
+     * If the key matches one of the reserved claim names, then the relevant <code>get</code> method is called to get that
      * claim value.
      *
      * @param key The claim name.
